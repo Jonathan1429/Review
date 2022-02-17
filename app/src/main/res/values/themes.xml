@@ -1,0 +1,44 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.Repasar" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/azul</item>
+        <item name="colorPrimaryVariant">@color/black</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/teal_200</item>
+        <item name="colorSecondaryVariant">@color/teal_700</item>
+        <item name="colorOnSecondary">@color/black</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimary</item>
+
+        <!-- Customize your theme here. -->
+        <!-- Forzar el tema Claro -->
+        <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
+    </style>
+
+    <!-- Botones normales -->
+    <style name="btnGenerales" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">30dp</item>
+        <item name="android:text">@string/btnNuevaGuia</item>
+        <item name="android:textColor">@color/azul_solido</item>
+        <item name="android:textAllCaps">false</item>
+
+        <item name="cornerRadius">@dimen/radioContorno</item>
+        <item name="strokeWidth">@dimen/anchoContorno</item>
+        <item name="strokeColor">@android:color/holo_blue_dark</item>
+        <item name="rippleColor">@android:color/holo_blue_bright</item>
+    </style>
+
+    <!-- Botón inhabilitado -->
+    <style name="btnInhabilitado" parent="Theme.Repasar">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">30dp</item>
+        <item name="android:text">@string/btnAbrirGuia</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:enabled">false</item>
+    </style>
+</resources>

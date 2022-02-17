@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Características del botón -->
+    <dimen name="radioContorno">16dp</dimen>
+    <dimen name="anchoContorno">2dp</dimen>
+
+    <!-- Tamaño del texto -->
+    <dimen name="texto">20sp</dimen>
+</resources>

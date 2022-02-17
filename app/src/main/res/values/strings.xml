@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">Repasar</string>
+
+    <!-- Layout principal -->
+    <string name="btnNuevaGuia">Nueva Guia</string>
+    <string name="btnAbrirGuia">Abrir Guia</string>
+
+    <!-- Pop up cuando le das Nuevo archivo (pop up) -->
+    <string name="etNombreArchivo">Nombre del archivo</string>
+    <string name="btnGuardarGuia">Guardar</string> <!-- NuevoArchivo, Cuestionario -->
+    <string name="btnLimpiarArchivo">Limpiar</string>
+
+    <!-- Cuestionario -->
+    <string name="etContenidoPregunta">Escribe aquí tu pregunta</string>
+    <string name="etContenidoRespuesta">Escribe aquí la Respuesta</string>
+    <string name="btnSiguiente">Siguiente</string> <!-- Cuestionario, Guia -->
+
+    <!-- Guia -->
+    <string name="etPregunta">Pregunta</string>
+    <string name="etRespuesta">Respuesta</string>
+    <string name="btnMostrarRespuesta">Mostrar respuesta</string>
+
+    <!-- Toolbar -->
+    <string name="tvTituloToolbar">Cuestionario</string>
+
+
+</resources>
