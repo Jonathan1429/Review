@@ -6,7 +6,7 @@ android {
     compileSdk 32
 
     defaultConfig {
-        applicationId "com.example.repasar"
+        applicationId "com.jonathanev.repasar"
         minSdk 21
         targetSdk 32
         versionCode 1
@@ -40,6 +40,9 @@ dependencies {
 
     // Pasar arreglos entre actividades.
     implementation 'org.parceler:parceler-api:1.1.12'
+
+    // Anuncios publicitarios
+    implementation 'com.google.android.gms:play-services-ads:20.5.0'
 
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

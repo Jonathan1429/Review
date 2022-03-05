@@ -6,7 +6,7 @@
     android:padding="10dp"
     android:layout_gravity="center"
     android:background="@drawable/contorno_ventana_popup"
-    tools:context=".Fragments.Fragment_DialogListarGuias_popup">
+    tools:context="com.jonathanev.repasar.Fragments.Fragment_DialogListarGuias_popup">
 
     <ImageView
         android:id="@+id/imgvGuiaEstudio"
