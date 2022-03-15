@@ -94,7 +94,8 @@ public class Activity_Cuestionario extends AppCompatActivity {
                         .setPositiveButton("Continuar", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                @SuppressLint("SdCardPath") File file = new File("/data/data/com.example.repasar/files/");
+                                // Si el archivo se creó y existe, se elimina y te informa en consola
+                                @SuppressLint("SdCardPath") File file = new File("/data/data/com.jonathanev.repasar/files/");
                                 if (file.exists()){
                                     new File(file, nombreArchivo+".xml").delete();
                                     Log.d("ArchivoEliminado", "Archivo eliminado");
@@ -133,6 +134,7 @@ public class Activity_Cuestionario extends AppCompatActivity {
                     binding.btnGuardarGuia.setVisibility(View.VISIBLE);
                     binding.etPregunta.setText("");
                     binding.etRespuesta.setText("");
+                    binding.etPregunta.requestFocus();
                 }
             }
         });
@@ -140,8 +142,6 @@ public class Activity_Cuestionario extends AppCompatActivity {
         binding.btnGuardarGuia.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-
                 // Guardamos lo que se escriba en la pregunta y respuesta.
                 String pregunta = binding.etPregunta.getText().toString();
                 String respuesta = binding.etRespuesta.getText().toString();
@@ -214,13 +214,6 @@ public class Activity_Cuestionario extends AppCompatActivity {
                 intent.putExtra("nombre_archivo", nombreArchivo);
                 startActivity(intent);
                 finish();
-
-                // Si la variable es distinto de null muestra el anuncio
-                if (mInterstitialAd != null) {
-                    mInterstitialAd.show(Activity_Cuestionario.this);
-                } else {
-                    Log.d("TAG", "The interstitial ad wasn't ready yet.");
-                }
             }
         } catch (IOException e) {
             e.printStackTrace();

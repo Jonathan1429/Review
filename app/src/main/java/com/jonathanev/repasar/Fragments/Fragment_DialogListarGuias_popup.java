@@ -9,8 +9,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.icu.text.Collator;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +22,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
+import com.jonathanev.repasar.Activities.Activity_Modificar;
 import com.jonathanev.repasar.Activities.Activity_RepasarGuia;
 import com.jonathanev.repasar.Clases.Guias;
 import com.jonathanev.repasar.Fragments.Adaptadores.AdaptadorPersonalizadoListarGuias;
@@ -65,6 +66,12 @@ public class Fragment_DialogListarGuias_popup extends DialogFragment {
         // Metemos la collection directamente en el arreglo y se ordena automáticamente.
         item.addAll(set);
 
+        if (item.isEmpty()){
+            binding.tvSinGuias.setVisibility(View.VISIBLE);
+        } else {
+            binding.tvSinGuias.setVisibility(View.INVISIBLE);
+        }
+
         // Cargamos la lista de los items
         cargarListaGuiasEstudio(item);
 
@@ -73,6 +80,62 @@ public class Fragment_DialogListarGuias_popup extends DialogFragment {
             public void onItemClick(AdapterView<?> parent, View view, int posicion, long id) {
                 Guias guias = lista.get(posicion);
 
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                builder.setIcon(R.drawable.ic_advertencia);
+                builder.setTitle("¿Qué acción deseas realizar?");
+                builder.setItems(new CharSequence[]
+                                {"Abrir Guia", "Modificar Guia", "Eliminar Guia", "Cancelar"},
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                // The 'which' argument contains the index position
+                                // of the selected item
+                                switch (which) {
+                                    case 0:
+                                        Intent intentAbrirGuia = new Intent(getActivity(), Activity_RepasarGuia.class);
+                                        intentAbrirGuia.putExtra("nombre_archivo", guias.getNombreGuia());
+                                        startActivity(intentAbrirGuia);
+                                        // Recuperamos el dialogo abierto actualmente
+                                        // (Fragment_DialogListarGuias.java) y lo cerramos.
+                                        Dialog dialogoAbrirGuia =  getDialog();
+                                        dialogoAbrirGuia.dismiss();
+                                        break;
+                                    case 1:
+                                        Intent intentModificarGuia = new Intent(getActivity(), Activity_Modificar.class);
+                                        intentModificarGuia.putExtra("nombre_archivo", guias.getNombreGuia());
+                                        startActivity(intentModificarGuia);
+                                        // Recuperamos el dialogo abierto actualmente
+                                        // (Fragment_DialogListarGuias.java) y lo cerramos.
+                                        Dialog dialogoModificarGuia =  getDialog();
+                                        dialogoModificarGuia.dismiss();
+                                        break;
+                                    case 2:
+                                        @SuppressLint("SdCardPath") File file = new File("/data/data/com.jonathanev.repasar/files/");
+                                        if (file.exists()){
+                                            new File(file, guias.getNombreGuia()+".xml").delete();
+                                            Toast.makeText(getContext(),
+                                                    "¡Archivo eliminado exitosamente!",
+                                                    Toast.LENGTH_SHORT).show();
+
+                                            // Recuperamos el dialogo abierto actualmente
+                                            // (Fragment_DialogListarGuias_popup.java)
+                                            // y lo cerramos.
+                                            Dialog dialogoEliminarGuia =  getDialog();
+                                            dialogoEliminarGuia.dismiss();
+                                        } else {
+                                            Toast.makeText(getContext(), "La ruta para eliminar el " +
+                                                            "archivo actualmente no existe.",
+                                                    Toast.LENGTH_SHORT).show();
+                                        }
+                                        break;
+                                    case 3:
+                                        dialog.dismiss();
+                                        Toast.makeText(getContext(), "Cancelaste la acción", Toast.LENGTH_SHORT).show();
+                                        break;
+                                }
+                            }
+                        });
+                builder.create().show();
+                /*
                 // Le mostramos un dialogo con multiples opciones.
                 new AlertDialog.Builder(getActivity())
                         .setIcon(R.drawable.ic_advertencia)
@@ -121,6 +184,8 @@ public class Fragment_DialogListarGuias_popup extends DialogFragment {
                                 dialog.dismiss();
                             }
                         }).create().show();
+                        */
+
             }
         });
     }

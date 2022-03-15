@@ -1,5 +1,7 @@
 package com.jonathanev.repasar.Activities;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
@@ -83,8 +85,24 @@ public class Activity_RepasarGuia extends AppCompatActivity {
                     binding.etRespuesta.setText("");
                 } else {
                     noHayMasPreguntas = true;
-                    Toast.makeText(getApplicationContext(), "Se acabaron las preguntas",
-                            Toast.LENGTH_SHORT).show();
+                    // Se ejecuta cuando se regresa sin guardar.
+                    new AlertDialog.Builder(Activity_RepasarGuia.this)
+                            .setTitle("¡Atención!")
+                            .setMessage("Se acabaron las preguntas, ¿Quieres repetir la guia?")
+                            .setPositiveButton("Si", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    contadorPregunta = 0;
+                                    // Pintamos el primer valor de la pregunta.
+                                    binding.etPregunta.setText(preguntas.get(contadorPregunta));
+                                }
+                            })
+                            .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int i) {
+                                    dialog.dismiss();
+                                }
+                            }).create().show();
                 }
             }
         });

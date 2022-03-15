@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 // Defino la ruta donde busco los ficheros.
-                @SuppressLint("SdCardPath") File file = new File("/data/data/com.example.repasar/files/");
+                @SuppressLint("SdCardPath") File file = new File("/data/data/com.jonathanev.repasar/files/");
 
                 // Limpio el item por si se borra algun archivo no se quede guardado.
                 item.clear();
