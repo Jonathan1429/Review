@@ -36,7 +36,7 @@
             android:scrollbars="vertical"
             android:hint="@string/etPregunta"
             android:textSize="18sp"
-            android:enabled="false"/>
+            android:focusable="false"/>
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
@@ -67,18 +67,27 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <Button
+        android:id="@+id/btnAtrasPregunta"
+        android:text="@string/btnAtras"
+        app:layout_constraintTop_toBottomOf="@+id/tilContenidoRespuesta"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/btnSiguientePregunta"
+        style="@style/btnGenerales"/>
+
+    <Button
         android:id="@+id/btnSiguientePregunta"
         android:text="@string/btnSiguiente"
         app:layout_constraintTop_toBottomOf="@+id/tilContenidoRespuesta"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/btnMostrarRespuesta"
+        app:layout_constraintStart_toEndOf="@+id/btnAtrasPregunta"
+        app:layout_constraintEnd_toEndOf="parent"
         style="@style/btnGenerales"/>
 
     <Button
         android:id="@+id/btnMostrarRespuesta"
+        android:layout_marginTop="15dp"
         android:text="@string/btnMostrarRespuesta"
-        app:layout_constraintTop_toBottomOf="@+id/tilContenidoRespuesta"
+        app:layout_constraintTop_toBottomOf="@+id/btnSiguientePregunta"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/btnSiguientePregunta"
         style="@style/btnGenerales"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

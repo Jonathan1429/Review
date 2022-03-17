@@ -13,7 +13,8 @@
     <!-- Cuestionario -->
     <string name="etContenidoPregunta">Escribe aquí tu pregunta</string>
     <string name="etContenidoRespuesta">Escribe aquí la Respuesta</string>
-    <string name="btnSiguiente">Siguiente</string> <!-- Cuestionario, Guia -->
+    <string name="btnSiguiente">Siguiente</string> <!-- Cuestionario, Repasar Guia -->
+    <string name="btnAtras">Atrás</string> <!-- Repasar Guia -->
 
     <!-- Guia -->
     <string name="etPregunta">Pregunta</string>

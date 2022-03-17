@@ -73,6 +73,22 @@ public class Activity_RepasarGuia extends AppCompatActivity {
             }
         });
 
+        binding.btnAtrasPregunta.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(contadorPregunta == 0){
+                    Toast.makeText(getApplicationContext(), "No tienes preguntas anteriores",
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    contadorPregunta--;
+                    binding.etPregunta.setText("");
+                    binding.etRespuesta.setText("");
+                    // Pintamos el primer valor de la pregunta.
+                    binding.etPregunta.setText(preguntas.get(contadorPregunta));
+                }
+            }
+        });
+
         binding.btnSiguientePregunta.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -93,6 +109,9 @@ public class Activity_RepasarGuia extends AppCompatActivity {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
                                     contadorPregunta = 0;
+                                    noHayMasPreguntas = false;
+                                    binding.etPregunta.setText("");
+                                    binding.etRespuesta.setText("");
                                     // Pintamos el primer valor de la pregunta.
                                     binding.etPregunta.setText(preguntas.get(contadorPregunta));
                                 }

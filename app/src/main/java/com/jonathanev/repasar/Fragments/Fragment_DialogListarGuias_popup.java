@@ -66,9 +66,11 @@ public class Fragment_DialogListarGuias_popup extends DialogFragment {
         // Metemos la collection directamente en el arreglo y se ordena automáticamente.
         item.addAll(set);
 
+        // Sino tengo ninguna guía de estudio aparece el texto que no tengo guías
         if (item.isEmpty()){
             binding.tvSinGuias.setVisibility(View.VISIBLE);
         } else {
+            // Si es lo contrario no aparece el texto
             binding.tvSinGuias.setVisibility(View.INVISIBLE);
         }
 
@@ -80,6 +82,7 @@ public class Fragment_DialogListarGuias_popup extends DialogFragment {
             public void onItemClick(AdapterView<?> parent, View view, int posicion, long id) {
                 Guias guias = lista.get(posicion);
 
+                // Creo una alerta donde me saldrán una lista de items
                 AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                 builder.setIcon(R.drawable.ic_advertencia);
                 builder.setTitle("¿Qué acción deseas realizar?");
@@ -87,10 +90,9 @@ public class Fragment_DialogListarGuias_popup extends DialogFragment {
                                 {"Abrir Guia", "Modificar Guia", "Eliminar Guia", "Cancelar"},
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
-                                // The 'which' argument contains the index position
-                                // of the selected item
                                 switch (which) {
                                     case 0:
+                                        // Si entra al primer item se abre la guía a repasar
                                         Intent intentAbrirGuia = new Intent(getActivity(), Activity_RepasarGuia.class);
                                         intentAbrirGuia.putExtra("nombre_archivo", guias.getNombreGuia());
                                         startActivity(intentAbrirGuia);
@@ -100,6 +102,7 @@ public class Fragment_DialogListarGuias_popup extends DialogFragment {
                                         dialogoAbrirGuia.dismiss();
                                         break;
                                     case 1:
+                                        // Si entra al segundo es para modificar la guía de estudio
                                         Intent intentModificarGuia = new Intent(getActivity(), Activity_Modificar.class);
                                         intentModificarGuia.putExtra("nombre_archivo", guias.getNombreGuia());
                                         startActivity(intentModificarGuia);
@@ -109,6 +112,7 @@ public class Fragment_DialogListarGuias_popup extends DialogFragment {
                                         dialogoModificarGuia.dismiss();
                                         break;
                                     case 2:
+                                        // Si entra al tercero es para eliminar la guia exitosamente
                                         @SuppressLint("SdCardPath") File file = new File("/data/data/com.jonathanev.repasar/files/");
                                         if (file.exists()){
                                             new File(file, guias.getNombreGuia()+".xml").delete();
@@ -128,6 +132,7 @@ public class Fragment_DialogListarGuias_popup extends DialogFragment {
                                         }
                                         break;
                                     case 3:
+                                        // Si entra al 5 se cancela cualquier operación
                                         dialog.dismiss();
                                         Toast.makeText(getContext(), "Cancelaste la acción", Toast.LENGTH_SHORT).show();
                                         break;
@@ -135,57 +140,6 @@ public class Fragment_DialogListarGuias_popup extends DialogFragment {
                             }
                         });
                 builder.create().show();
-                /*
-                // Le mostramos un dialogo con multiples opciones.
-                new AlertDialog.Builder(getActivity())
-                        .setIcon(R.drawable.ic_advertencia)
-                        .setTitle("¿Atención!")
-                        .setMessage("¿Cuál es la acción que deseas realizar?")
-                        // Le da la opción de abrir la guia seleccionada.
-                        .setPositiveButton("Abrir Guia", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                Intent intent = new Intent(getActivity(), Activity_RepasarGuia.class);
-                                intent.putExtra("nombre_archivo", guias.getNombreGuia());
-                                startActivity(intent);
-                                // Recuperamos el dialogo abierto actualmente
-                                // (Fragment_DialogListarGuias.java) y lo cerramos.
-                                Dialog dialogActual =  getDialog();
-                                dialogActual.dismiss();
-                            }
-                        })
-                        // Le da la opción de eliminar la guia seleccionada.
-                        .setNegativeButton("Eliminar Guia", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int i) {
-                                @SuppressLint("SdCardPath") File file = new File("/data/data/com.example.repasar/files/");
-                                if (file.exists()){
-                                    new File(file, guias.getNombreGuia()+".xml").delete();
-                                    Toast.makeText(getContext(),
-                                            "¡Archivo eliminado exitosamente!",
-                                            Toast.LENGTH_SHORT).show();
-
-                                    // Recuperamos el dialogo abierto actualmente
-                                    // (Fragment_DialogListarGuias_popup.java)
-                                    // y lo cerramos.
-                                    Dialog dialogActual =  getDialog();
-                                    dialogActual.dismiss();
-                                } else {
-                                    Toast.makeText(getContext(), "La ruta para eliminar el " +
-                                                    "archivo actualmente no existe.",
-                                            Toast.LENGTH_SHORT).show();
-                                }
-                            }
-                        })
-                        // Le da la opción de cancelar.
-                        .setNeutralButton("Cancelar", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int i) {
-                                dialog.dismiss();
-                            }
-                        }).create().show();
-                        */
-
             }
         });
     }
@@ -218,6 +172,8 @@ public class Fragment_DialogListarGuias_popup extends DialogFragment {
         AdaptadorPersonalizadoListarGuias adaptador = null;
         Guias guias;
 
+        // La imagen guardada en numeroRandom se pondrá en el objeto guias
+        // Después se irá poniendo el nombre de cada una de las guias en el objeto
         for (int i = 0; i < item.size(); i++) {
             guias = new Guias();
             guias.setImgGuia(numeroRandom);

@@ -55,6 +55,7 @@ public class Activity_Modificar extends AppCompatActivity {
         binding = ActivityModificarBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        // Se cambia el nombre del titulo del toolbar
         binding.barraSuperiorRegreso.tvTituloToolbar.setText("Modificación de guía");
 
         binding.barraSuperiorRegreso.imgvBack.setOnClickListener(new View.OnClickListener() {
@@ -83,8 +84,8 @@ public class Activity_Modificar extends AppCompatActivity {
         // Guardo el nombre del archivo enviado desde el popupFragmentListarGuias.
         nombreArchivo = getIntent().getExtras().getString("nombre_archivo");
 
-        // Aquí simplemente nos aseguramos que tenga el xml, si lo tiene no entramos, sino si.
-        // En teoría todos los archivos lo van a tener.
+        // Aquí simplemente nos aseguramos que tenga el xml, si lo tiene no entramos.
+        // En teoria ya todos los archivos no tienen el .xml porque lo recupero del ListarGuias
         if (!nombreArchivo.contains(".xml")){
             nombreArchivo = getIntent().getExtras().getString("nombre_archivo")+".xml";
         }
@@ -99,7 +100,7 @@ public class Activity_Modificar extends AppCompatActivity {
         binding.btnSiguientePregunta.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Validamos campos vacios en la pregunta o respuesta.
+                // Validamos que no haya campos vacios en la pregunta o respuesta.
                 if (!binding.etPregunta.getText().toString().isEmpty()
                         || !binding.etRespuesta.getText().toString().isEmpty()){
                     preguntasModificadas.add(binding.etPregunta.getText().toString());
@@ -110,6 +111,7 @@ public class Activity_Modificar extends AppCompatActivity {
                     binding.etPregunta.setText("");
                     binding.etRespuesta.setText("");
                 } else {
+                    // En dado caso de que haya algun espacio vacio no se tomará en cuenta
                     Toast.makeText(getApplicationContext(), "Borraste la pregunta anterior" +
                             " de tu guía de estudio", Toast.LENGTH_LONG).show();
                 }
@@ -131,6 +133,7 @@ public class Activity_Modificar extends AppCompatActivity {
                             .setPositiveButton("Si", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
+                                    // Cambiaremos el toolbar y cambiaremos de botón siguiente
                                     binding.barraSuperiorRegreso.tvTituloToolbar.setText("Agrega más preguntas a la guía");
                                     binding.btnSiguientePregunta.setVisibility(View.INVISIBLE);
                                     binding.btnMasPreguntas.setVisibility(View.VISIBLE);
@@ -156,6 +159,7 @@ public class Activity_Modificar extends AppCompatActivity {
                             "Asegurate de no dejar ningun campo vacio",
                             Toast.LENGTH_SHORT).show();
                 } else {
+                    // Si lo campos están completos se agregan a la lista y continuamos
                     preguntasModificadas.add(binding.etPregunta.getText().toString());
                     respuestasModificadas.add(binding.etPregunta.getText().toString());
                     binding.etPregunta.setText("");
@@ -168,59 +172,80 @@ public class Activity_Modificar extends AppCompatActivity {
         binding.btnGuardarGuia.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Validamos campos vacios en la pregunta o respuesta.
-                if (!binding.etPregunta.getText().toString().isEmpty()
-                        || !binding.etRespuesta.getText().toString().isEmpty()){
-                    // Guardamos lo que se escriba en la pregunta y respuesta
-                    preguntasModificadas.add(binding.etPregunta.getText().toString());
-                    respuestasModificadas.add(binding.etRespuesta.getText().toString());
-                }
+                // Si no has terminado de pasar todas tus preguntas, no aparecerán
+                new AlertDialog.Builder(Activity_Modificar.this)
+                        .setTitle("¡Atención!")
+                        .setMessage("Si aún tienes preguntas que no has visto no aparecerán en tu " +
+                                "nueva guia de estudio, asegurate de terminar con todas las preguntas, " +
+                                "¿seguro deseas guardar?")
+                        .setPositiveButton("Si", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+// Validamos campos vacios en la pregunta o respuesta.
+                                if (!binding.etPregunta.getText().toString().isEmpty()
+                                        || !binding.etRespuesta.getText().toString().isEmpty()){
+                                    // Guardamos lo que se escriba en la pregunta y respuesta
+                                    preguntasModificadas.add(binding.etPregunta.getText().toString());
+                                    respuestasModificadas.add(binding.etRespuesta.getText().toString());
+                                }
 
-                @SuppressLint("SdCardPath") File file = new File("/data/data/com.jonathanev.repasar/files/");
-                if (file.exists()){
-                    new File(file, nombreArchivo).delete();
-                    Log.d("ArchivoEliminado", "Archivo eliminado");
-                } else {
-                    Log.d("ArchivoEliminado", "Archivo no eliminado");
-                }
+                                // Eliminamos el archivo anteriormente creado
+                                @SuppressLint("SdCardPath") File file = new File("/data/data/com.jonathanev.repasar/files/");
+                                if (file.exists()){
+                                    new File(file, nombreArchivo).delete();
+                                    Log.d("ArchivoEliminado", "Archivo eliminado");
+                                } else {
+                                    Log.d("ArchivoEliminado", "Archivo no eliminado");
+                                }
 
-                //Vamos a crear el archivo aquí de manera de prueba
-                try {
-                    fos = openFileOutput(nombreArchivo, Context.MODE_PRIVATE);
-                    serializer.setOutput(fos, "UTF-8");
-                    serializer.startDocument(null, Boolean.valueOf(true));
-                    serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
-                    serializer.startTag("", "GuiaEstudio");
-                    serializer.attribute("", "version", "1.0");
+                                //Vamos a crear el archivo que acabamos de eliminar pero con el nuevo cuestionario
+                                try {
+                                    fos = openFileOutput(nombreArchivo, Context.MODE_PRIVATE);
+                                    serializer.setOutput(fos, "UTF-8");
+                                    serializer.startDocument(null, Boolean.valueOf(true));
+                                    serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
+                                    serializer.startTag("", "GuiaEstudio");
+                                    serializer.attribute("", "version", "1.0");
 
-                    serializer.startTag("", "Cuestionario");
-                    serializer.attribute("", "nombreGuia", nombreArchivo);
+                                    serializer.startTag("", "Cuestionario");
+                                    serializer.attribute("", "nombreGuia", nombreArchivo);
 
-                    // Creo la etiqueta interrogante con su respectiva pregunta
-                    for (int i = 0; i < preguntasModificadas.size(); i++) {
-                        serializer.startTag("", "Interrogante");
-                            serializer.attribute("", "pregunta", preguntasModificadas.get(i));
-                            serializer.attribute("", "respuesta", respuestasModificadas.get(i));
-                        serializer.endTag("", "Interrogante");
-                    }
+                                    // Creo la etiqueta interrogante con su respectiva pregunta
+                                    for (int j = 0; j < preguntasModificadas.size(); j++) {
+                                        serializer.startTag("", "Interrogante");
+                                        serializer.attribute("", "pregunta", preguntasModificadas.get(i));
+                                        serializer.attribute("", "respuesta", respuestasModificadas.get(i));
+                                        serializer.endTag("", "Interrogante");
+                                    }
 
-                    // Si los campos estan vacios simplemente cierro las etiquetas y directamente
-                    // guardo el documento en el teléfono.
-                    serializer.endTag("", "Cuestionario");
-                    serializer.endTag("", "GuiaEstudio");
-                    serializer.endDocument();
-                    serializer.flush();
-                    fos.close();
-                    Toast.makeText(getApplicationContext(), "Guia de estudio modificada exitosamente",
-                            Toast.LENGTH_SHORT).show();
+                                    // Si los campos estan vacios simplemente cierro las etiquetas y directamente
+                                    // guardo el documento en el teléfono.
+                                    serializer.endTag("", "Cuestionario");
+                                    serializer.endTag("", "GuiaEstudio");
+                                    serializer.endDocument();
+                                    serializer.flush();
+                                    fos.close();
+                                    Toast.makeText(getApplicationContext(), "Guia de estudio modificada exitosamente",
+                                            Toast.LENGTH_SHORT).show();
 
-                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                    intent.putExtra("nombre_archivo", nombreArchivo);
-                    startActivity(intent);
-                    finish();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                                    // Una vez actualizado regresaremos a la pantalla principal.
+                                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                                    intent.putExtra("nombre_archivo", nombreArchivo);
+                                    startActivity(intent);
+                                    finish();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        })
+                        .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int i) {
+                                dialog.dismiss();
+                            }
+                        }).create().show();
+
+
             }
         });
     }
