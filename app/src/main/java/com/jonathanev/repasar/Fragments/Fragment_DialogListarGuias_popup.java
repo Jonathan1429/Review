@@ -112,24 +112,40 @@ public class Fragment_DialogListarGuias_popup extends DialogFragment {
                                         dialogoModificarGuia.dismiss();
                                         break;
                                     case 2:
-                                        // Si entra al tercero es para eliminar la guia exitosamente
-                                        @SuppressLint("SdCardPath") File file = new File("/data/data/com.jonathanev.repasar/files/");
-                                        if (file.exists()){
-                                            new File(file, guias.getNombreGuia()+".xml").delete();
-                                            Toast.makeText(getContext(),
-                                                    "¡Archivo eliminado exitosamente!",
-                                                    Toast.LENGTH_SHORT).show();
+                                        // Se ejecuta cuando se regresa sin guardar.
+                                        new AlertDialog.Builder(getContext())
+                                                .setTitle("¡Atención!")
+                                                .setMessage("¿Estás seguro que deseas eliminar la" +
+                                                        " guia?")
+                                                .setPositiveButton("Si", new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                                        // Si entra al tercero es para eliminar la guia exitosamente
+                                                        @SuppressLint("SdCardPath") File file = new File("/data/data/com.jonathanev.repasar/files/");
+                                                        if (file.exists()){
+                                                            new File(file, guias.getNombreGuia()+".xml").delete();
+                                                            Toast.makeText(getContext(),
+                                                                    "¡Archivo eliminado exitosamente!",
+                                                                    Toast.LENGTH_SHORT).show();
 
-                                            // Recuperamos el dialogo abierto actualmente
-                                            // (Fragment_DialogListarGuias_popup.java)
-                                            // y lo cerramos.
-                                            Dialog dialogoEliminarGuia =  getDialog();
-                                            dialogoEliminarGuia.dismiss();
-                                        } else {
-                                            Toast.makeText(getContext(), "La ruta para eliminar el " +
-                                                            "archivo actualmente no existe.",
-                                                    Toast.LENGTH_SHORT).show();
-                                        }
+                                                            // Recuperamos el dialogo abierto actualmente
+                                                            // (Fragment_DialogListarGuias_popup.java)
+                                                            // y lo cerramos.
+                                                            Dialog dialogoEliminarGuia =  getDialog();
+                                                            dialogoEliminarGuia.dismiss();
+                                                        } else {
+                                                            Toast.makeText(getContext(), "La ruta para eliminar el " +
+                                                                            "archivo actualmente no existe.",
+                                                                    Toast.LENGTH_SHORT).show();
+                                                        }
+                                                    }
+                                                })
+                                                .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialog, int i) {
+                                                        dialog.dismiss();
+                                                    }
+                                                }).create().show();
                                         break;
                                     case 3:
                                         // Si entra al 5 se cancela cualquier operación

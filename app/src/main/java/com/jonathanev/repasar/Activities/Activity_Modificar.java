@@ -100,24 +100,28 @@ public class Activity_Modificar extends AppCompatActivity {
         binding.btnSiguientePregunta.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                contadorPregunta++;
+                int preguntasTotales = preguntas.size();
+
                 // Validamos que no haya campos vacios en la pregunta o respuesta.
                 if (!binding.etPregunta.getText().toString().isEmpty()
                         || !binding.etRespuesta.getText().toString().isEmpty()){
                     preguntasModificadas.add(binding.etPregunta.getText().toString());
-                    respuestasModificadas.add(binding.etPregunta.getText().toString());
+                    respuestasModificadas.add(binding.etRespuesta.getText().toString());
 
                     binding.btnGuardarGuiaInhabilitado.setVisibility(View.INVISIBLE);
                     binding.btnGuardarGuia.setVisibility(View.VISIBLE);
                     binding.etPregunta.setText("");
                     binding.etRespuesta.setText("");
-                } else {
+                } else if(binding.etPregunta.getText().toString().isEmpty()
+                        || binding.etRespuesta.getText().toString().isEmpty() &&
+                        (contadorPregunta+1)<=preguntasTotales){
                     // En dado caso de que haya algun espacio vacio no se tomará en cuenta
                     Toast.makeText(getApplicationContext(), "Borraste la pregunta anterior" +
                             " de tu guía de estudio", Toast.LENGTH_LONG).show();
                 }
 
-                contadorPregunta++;
-                int preguntasTotales = preguntas.size();
+
 
                 // Validamos que haya mas preguntas, si las hay entra al método sino al else.
                 if ((contadorPregunta+1)<=preguntasTotales){
