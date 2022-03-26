@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -65,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
                         // Guardamos el nombre del fichero en la lista item.
                         item.add(archivo.getName().replaceAll(".xml", ""));
                     }
+
 
                     // Teniendo todos los nombre de los archivos abrimos el dialogo.
                     Fragment_DialogListarGuias_popup dialogo = new Fragment_DialogListarGuias_popup();

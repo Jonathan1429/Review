@@ -114,14 +114,12 @@ public class Activity_Modificar extends AppCompatActivity {
                     binding.etPregunta.setText("");
                     binding.etRespuesta.setText("");
                 } else if(binding.etPregunta.getText().toString().isEmpty()
-                        || binding.etRespuesta.getText().toString().isEmpty() &&
-                        (contadorPregunta+1)<=preguntasTotales){
+                        && binding.etRespuesta.getText().toString().isEmpty() &&
+                        contadorPregunta<=preguntasTotales){
                     // En dado caso de que haya algun espacio vacio no se tomará en cuenta
                     Toast.makeText(getApplicationContext(), "Borraste la pregunta anterior" +
                             " de tu guía de estudio", Toast.LENGTH_LONG).show();
                 }
-
-
 
                 // Validamos que haya mas preguntas, si las hay entra al método sino al else.
                 if ((contadorPregunta+1)<=preguntasTotales){
@@ -129,6 +127,7 @@ public class Activity_Modificar extends AppCompatActivity {
                     binding.etRespuesta.setText(respuestas.get(contadorPregunta));
                 } else {
                     noHayMasPreguntas = true;
+                    binding.btnEliminar.setVisibility(View.INVISIBLE);
 
                     // ¿Quieres agregar más preguntas?
                     new AlertDialog.Builder(Activity_Modificar.this)
@@ -141,6 +140,9 @@ public class Activity_Modificar extends AppCompatActivity {
                                     binding.barraSuperiorRegreso.tvTituloToolbar.setText("Agrega más preguntas a la guía");
                                     binding.btnSiguientePregunta.setVisibility(View.INVISIBLE);
                                     binding.btnMasPreguntas.setVisibility(View.VISIBLE);
+                                    binding.btnEliminar.setVisibility(View.INVISIBLE);
+                                    Toast.makeText(getApplicationContext(), "Ya puedes agregar " +
+                                            "mas preguntas", Toast.LENGTH_LONG).show();
                                 }
                             })
                             .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
@@ -150,6 +152,62 @@ public class Activity_Modificar extends AppCompatActivity {
                                 }
                             }).create().show();
                 }
+            }
+        });
+
+        binding.btnEliminar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int preguntasTotales = preguntas.size();
+
+                // ¿Quieres agregar más preguntas?
+                new AlertDialog.Builder(Activity_Modificar.this)
+                        .setTitle("¡Atención!")
+                        .setMessage("¿Quieres eliminar la pregunta?")
+                        .setPositiveButton("Si", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                // Cambiaremos el toolbar y cambiaremos de botón siguiente
+                                binding.etPregunta.setText("");
+                                binding.etRespuesta.setText("");
+                                contadorPregunta++;
+
+                                // Validamos que haya mas preguntas, si las hay entra al método sino al else.
+                                if ((contadorPregunta+1)<=preguntasTotales){
+                                    binding.etPregunta.setText(preguntas.get(contadorPregunta));
+                                    binding.etRespuesta.setText(respuestas.get(contadorPregunta));
+                                } else {
+                                    noHayMasPreguntas = true;
+                                    binding.btnEliminar.setVisibility(View.INVISIBLE);
+
+                                    // ¿Quieres agregar más preguntas?
+                                    new AlertDialog.Builder(Activity_Modificar.this)
+                                            .setTitle("¡Atención!")
+                                            .setMessage("Se acabaron las preguntas, ¿Quieres agregar mas preguntas?")
+                                            .setPositiveButton("Si", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialogInterface, int i) {
+                                                    // Cambiaremos el toolbar y cambiaremos de botón siguiente
+                                                    binding.barraSuperiorRegreso.tvTituloToolbar.setText("Agrega más preguntas a la guía");
+                                                    binding.btnSiguientePregunta.setVisibility(View.INVISIBLE);
+                                                    binding.btnMasPreguntas.setVisibility(View.VISIBLE);
+                                                }
+                                            })
+                                            .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int i) {
+                                                    dialog.dismiss();
+                                                }
+                                            }).create().show();
+                                }
+                            }
+                        })
+                        .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int i) {
+                                dialog.dismiss();
+                            }
+                        }).create().show();
             }
         });
 

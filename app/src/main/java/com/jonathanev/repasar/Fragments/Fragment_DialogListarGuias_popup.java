@@ -9,8 +9,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.DialogFragment;
 
 import com.jonathanev.repasar.Activities.Activity_Modificar;
@@ -31,6 +32,7 @@ import com.jonathanev.repasar.databinding.FragmentListarGuiasBinding;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Set;
 
 public class Fragment_DialogListarGuias_popup extends DialogFragment {
@@ -55,6 +57,7 @@ public class Fragment_DialogListarGuias_popup extends DialogFragment {
         return binding.getRoot();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -65,6 +68,14 @@ public class Fragment_DialogListarGuias_popup extends DialogFragment {
 
         // Metemos la collection directamente en el arreglo y se ordena automáticamente.
         item.addAll(set);
+
+        // Ordena las guías con el método sort
+        item.sort(new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+                return o1.compareTo(o2);
+            }
+        });
 
         // Sino tengo ninguna guía de estudio aparece el texto que no tengo guías
         if (item.isEmpty()){
