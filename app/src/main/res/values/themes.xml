@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Theme.Repasar" parent="Theme.MaterialComponents.Light.NoActionBar">
+    <!-- Base application theme.  Theme.AppCompat.Light.NoActionBar Theme.MaterialComponents.Light.NoActionBar-->
+    <style name="Theme.Repasar" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/azul</item>
         <item name="colorPrimaryVariant">@color/black</item>
@@ -17,7 +17,7 @@
         <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
     </style>
 
-    <!-- Botones normales -->
+    <!-- Botones normales Widget.MaterialComponents.Button.OutlinedButton-->
     <style name="btnGenerales" parent="Widget.MaterialComponents.Button.OutlinedButton">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>

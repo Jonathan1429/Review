@@ -12,6 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
+    <!-- style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"-->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tilContenidoPregunta"
         android:labelFor="@+id/tvContenidoPregunta"
@@ -23,8 +24,7 @@
         app:endIconMode="clear_text"
         app:layout_constraintTop_toBottomOf="@+id/barra_superior_regreso"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        app:layout_constraintEnd_toEndOf="parent">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etPregunta"
@@ -38,6 +38,7 @@
             android:textSize="18sp"/>
     </com.google.android.material.textfield.TextInputLayout>
 
+    <!-- style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"-->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tilContenidoRespuesta"
         android:labelFor="@+id/tvContenidoPregunta"
@@ -49,8 +50,7 @@
         app:endIconMode="clear_text"
         app:layout_constraintTop_toBottomOf="@+id/tilContenidoPregunta"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        app:layout_constraintEnd_toEndOf="parent">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etRespuesta"
@@ -64,46 +64,56 @@
             android:textSize="18sp"/>
     </com.google.android.material.textfield.TextInputLayout>
 
+    <!-- style="@style/btnGenerales"-->
     <Button
         android:id="@+id/btnSiguientePregunta"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
         android:text="@string/btnSiguiente"
         app:layout_constraintTop_toBottomOf="@+id/tilContenidoRespuesta"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/btnGuardarGuia"
-        style="@style/btnGenerales"/>
+        app:layout_constraintEnd_toStartOf="@+id/btnGuardarGuia" />
 
+    <!-- style="@style/btnGenerales"-->
     <Button
         android:id="@+id/btnMasPreguntas"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="@string/btnSiguiente"
         android:visibility="invisible"
         app:layout_constraintTop_toBottomOf="@+id/tilContenidoRespuesta"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/btnGuardarGuia"
-        style="@style/btnGenerales"/>
+        app:layout_constraintEnd_toStartOf="@+id/btnGuardarGuia" />
 
+    <!--style="@style/btnGenerales"-->
     <Button
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
         android:id="@+id/btnEliminar"
         android:text="Eliminar"
         app:layout_constraintTop_toBottomOf="@+id/btnSiguientePregunta"
         app:layout_constraintStart_toStartOf="@+id/btnSiguientePregunta"
-        app:layout_constraintEnd_toEndOf="@+id/btnSiguientePregunta"
-        style="@style/btnGenerales"/>
+        app:layout_constraintEnd_toEndOf="@+id/btnSiguientePregunta" />
 
+    <!--style="@style/btnGenerales"-->
     <Button
         android:id="@+id/btnGuardarGuia"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="@string/btnGuardarGuia"
         android:visibility="invisible"
         app:layout_constraintTop_toBottomOf="@+id/tilContenidoRespuesta"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/btnEliminar"
-        style="@style/btnGenerales"/>
+        app:layout_constraintStart_toEndOf="@+id/btnEliminar" />
 
+    <!--style="@style/btnInhabilitado"-->
     <Button
         android:id="@+id/btnGuardarGuiaInhabilitado"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
         android:text="@string/btnGuardarGuia"
         app:layout_constraintTop_toBottomOf="@+id/tilContenidoRespuesta"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/btnEliminar"
-        style="@style/btnInhabilitado"/>
+        app:layout_constraintStart_toEndOf="@+id/btnEliminar"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

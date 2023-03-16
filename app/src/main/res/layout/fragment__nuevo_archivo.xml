@@ -6,6 +6,7 @@
     android:layout_gravity="center"
     android:background="@drawable/contorno_ventana_popup">
 
+    <!--         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox" -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tilNombreArchivo"
         android:labelFor="@+id/etNombreArchivo"
@@ -18,8 +19,7 @@
         app:endIconMode="clear_text"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        app:layout_constraintEnd_toEndOf="parent">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etNombreArchivo"
@@ -32,12 +32,14 @@
             android:textSize="@dimen/texto"/>
     </com.google.android.material.textfield.TextInputLayout>
 
+    <!-- style="@style/btnGenerales" -->
     <Button
+        android:layout_height="wrap_content"
         android:id="@+id/btnGuardarGuiaEstudio"
         android:layout_width="200dp"
         android:text="@string/btnGuardarGuia"
         app:layout_constraintTop_toBottomOf="@+id/tilNombreArchivo"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        style="@style/btnGenerales"/>
+/>
 </androidx.constraintlayout.widget.ConstraintLayout>

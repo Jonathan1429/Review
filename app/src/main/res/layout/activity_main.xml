@@ -30,26 +30,39 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/guiaImagenPrincipal" />
 
+    <!--style="@style/btnGenerales"-->
     <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:id="@+id/btnNuevaGuiaEstudio"
+        android:text="@string/btnNuevaGuia"
         app:layout_constraintTop_toBottomOf="@+id/imgPrincipal"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/btnAbrirGuiaEstudioInhabilitado"
-        style="@style/btnGenerales"/>
+/>
 
     <!-- Por el momento no se usa -->
+    <!--style="@style/btnInhabilitado"-->
     <Button
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
         android:id="@+id/btnAbrirGuiaEstudioInhabilitado"
+        android:text="@string/btnAbrirGuia"
         android:visibility="invisible"
         app:layout_constraintTop_toBottomOf="@+id/imgPrincipal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/btnNuevaGuiaEstudio"
-        style="@style/btnInhabilitado"/>
+/>
 
+    <!--style="@style/btnGenerales"-->
     <Button
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
         android:id="@+id/btnAbrirGuiaEstudioHabilitado"
+        android:text="@string/btnAbrirGuia"
+        android:enabled="true"
         app:layout_constraintTop_toBottomOf="@+id/imgPrincipal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/btnNuevaGuiaEstudio"
-        style="@style/btnGenerales"/>
+/>
 </androidx.constraintlayout.widget.ConstraintLayout>
