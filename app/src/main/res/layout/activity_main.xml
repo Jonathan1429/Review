@@ -21,38 +21,39 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_percent=".20" />
 
+    <!--style="@style/btnGenerales"-->
     <ImageView
         android:id="@+id/imgPrincipal"
         android:layout_width="250dp"
         android:layout_height="250dp"
         android:src="@drawable/estudiantes"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.496"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/guiaImagenPrincipal" />
 
-    <!--style="@style/btnGenerales"-->
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/btnNuevaGuiaEstudio"
         android:text="@string/btnNuevaGuia"
+        android:background="@drawable/ic_filter_state"
+        style="@style/btnGeneral"
         app:layout_constraintTop_toBottomOf="@+id/imgPrincipal"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/btnAbrirGuiaEstudioInhabilitado"
-/>
+        app:layout_constraintEnd_toStartOf="@+id/btnAbrirGuiaEstudioInhabilitado" />
 
-    <!-- Por el momento no se usa -->
-    <!--style="@style/btnInhabilitado"-->
     <Button
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         android:id="@+id/btnAbrirGuiaEstudioInhabilitado"
         android:text="@string/btnAbrirGuia"
         android:visibility="invisible"
+        android:background="@drawable/ic_filter_state"
+        style="@style/btnGeneral"
         app:layout_constraintTop_toBottomOf="@+id/imgPrincipal"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/btnNuevaGuiaEstudio"
-/>
+        app:layout_constraintStart_toEndOf="@+id/btnNuevaGuiaEstudio" />
 
     <!--style="@style/btnGenerales"-->
     <Button
@@ -61,8 +62,9 @@
         android:id="@+id/btnAbrirGuiaEstudioHabilitado"
         android:text="@string/btnAbrirGuia"
         android:enabled="true"
+        android:background="@drawable/ic_filter_state"
+        style="@style/btnGeneral"
         app:layout_constraintTop_toBottomOf="@+id/imgPrincipal"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/btnNuevaGuiaEstudio"
-/>
+        app:layout_constraintStart_toEndOf="@+id/btnNuevaGuiaEstudio" />
 </androidx.constraintlayout.widget.ConstraintLayout>

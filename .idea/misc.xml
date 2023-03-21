@@ -20,14 +20,22 @@
         <entry key="..\:/Users/Usuario/AndroidStudioProjects/Repasar/app/src/main/res/layout/listar_guias_personalizado.xml" value="0.33" />
         <entry key="..\:/Users/Usuario/AndroidStudioProjects/Repasar/app/src/main/res/layout/toolbar.xml" value="0.19429347826086957" />
         <entry key="..\:/Users/Usuario/AndroidStudioProjects/Repasar/app/src/main/res/layout/ventana_popup_nombre_archivo.xml" value="0.25" />
+        <entry key="..\:/Users/jose_/AndroidStudioProjects/alainAndroid/Google Play 160322_6_47pm/Repasar/app/src/main/res/drawable/boton_personalizado.xml" value="0.5435185185185185" />
+        <entry key="..\:/Users/jose_/AndroidStudioProjects/alainAndroid/Google Play 160322_6_47pm/Repasar/app/src/main/res/drawable/boton_redondo.xml" value="0.37962962962962965" />
+        <entry key="..\:/Users/jose_/AndroidStudioProjects/alainAndroid/Google Play 160322_6_47pm/Repasar/app/src/main/res/drawable/btn_redondo_azul.xml" value="0.37962962962962965" />
+        <entry key="..\:/Users/jose_/AndroidStudioProjects/alainAndroid/Google Play 160322_6_47pm/Repasar/app/src/main/res/drawable/btn_redondo_rojo.xml" value="0.37962962962962965" />
+        <entry key="..\:/Users/jose_/AndroidStudioProjects/alainAndroid/Google Play 160322_6_47pm/Repasar/app/src/main/res/drawable/btn_redondo_verde.xml" value="0.37962962962962965" />
         <entry key="..\:/Users/jose_/AndroidStudioProjects/alainAndroid/Google Play 160322_6_47pm/Repasar/app/src/main/res/drawable/contorno_ventana_popup.xml" value="0.19722222222222222" />
+        <entry key="..\:/Users/jose_/AndroidStudioProjects/alainAndroid/Google Play 160322_6_47pm/Repasar/app/src/main/res/drawable/cursor_azul.xml" value="0.37962962962962965" />
         <entry key="..\:/Users/jose_/AndroidStudioProjects/alainAndroid/Google Play 160322_6_47pm/Repasar/app/src/main/res/drawable/ic_advertencia.xml" value="0.19722222222222222" />
         <entry key="..\:/Users/jose_/AndroidStudioProjects/alainAndroid/Google Play 160322_6_47pm/Repasar/app/src/main/res/drawable/ic_archivo.xml" value="0.19722222222222222" />
         <entry key="..\:/Users/jose_/AndroidStudioProjects/alainAndroid/Google Play 160322_6_47pm/Repasar/app/src/main/res/drawable/ic_back.xml" value="0.19722222222222222" />
+        <entry key="..\:/Users/jose_/AndroidStudioProjects/alainAndroid/Google Play 160322_6_47pm/Repasar/app/src/main/res/drawable/ic_filter_state.xml" value="0.37962962962962965" />
+        <entry key="..\:/Users/jose_/AndroidStudioProjects/alainAndroid/Google Play 160322_6_47pm/Repasar/app/src/main/res/drawable/state_pressed_ripple.xml" value="0.37962962962962965" />
         <entry key="..\:/Users/jose_/AndroidStudioProjects/alainAndroid/Google Play 160322_6_47pm/Repasar/app/src/main/res/layout/activity_cuestionario.xml" value="0.209375" />
         <entry key="..\:/Users/jose_/AndroidStudioProjects/alainAndroid/Google Play 160322_6_47pm/Repasar/app/src/main/res/layout/activity_main.xml" value="0.25" />
         <entry key="..\:/Users/jose_/AndroidStudioProjects/alainAndroid/Google Play 160322_6_47pm/Repasar/app/src/main/res/layout/activity_modificar.xml" value="0.209375" />
-        <entry key="..\:/Users/jose_/AndroidStudioProjects/alainAndroid/Google Play 160322_6_47pm/Repasar/app/src/main/res/layout/activity_repasar_guia.xml" value="0.14444444444444443" />
+        <entry key="..\:/Users/jose_/AndroidStudioProjects/alainAndroid/Google Play 160322_6_47pm/Repasar/app/src/main/res/layout/activity_repasar_guia.xml" value="0.33" />
         <entry key="..\:/Users/jose_/AndroidStudioProjects/alainAndroid/Google Play 160322_6_47pm/Repasar/app/src/main/res/layout/barra_superior.xml" value="0.209375" />
         <entry key="..\:/Users/jose_/AndroidStudioProjects/alainAndroid/Google Play 160322_6_47pm/Repasar/app/src/main/res/layout/barra_superior_back.xml" value="0.209375" />
         <entry key="..\:/Users/jose_/AndroidStudioProjects/alainAndroid/Google Play 160322_6_47pm/Repasar/app/src/main/res/layout/fragment__nuevo_archivo.xml" value="0.25" />

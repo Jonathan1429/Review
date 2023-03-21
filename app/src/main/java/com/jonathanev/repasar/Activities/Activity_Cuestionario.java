@@ -7,7 +7,10 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.text.SpannableStringBuilder;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.util.Xml;
 import android.view.View;
@@ -46,7 +49,16 @@ public class Activity_Cuestionario extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityCuestionarioBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        final boolean[] isUpdating = {false};
+        final String[] colorLetra = {""};
+        final int[] color = {Color.RED};
 
+        // Crear un SpannableStringBuilder vacío y una referencia a un objeto ForegroundColorSpan
+        SpannableStringBuilder builder = new SpannableStringBuilder();
+        final ForegroundColorSpan[] lastColorSpan = {null};
+        // Definir la oración y los colores para cada carácter
+        String sentence = "Hola mundo feliz";
+        final int[][] colors = {new int[]{Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW, Color.MAGENTA, Color.CYAN, Color.GRAY, Color.DKGRAY, Color.LTGRAY, Color.BLACK}};
 
         // Sección de anuncios
         MobileAds.initialize(this, new OnInitializationCompleteListener() {

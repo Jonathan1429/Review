@@ -2,7 +2,12 @@ package com.jonathanev.repasar.Activities;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.TextUtils;
+import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.widget.Toast;
 
@@ -18,6 +23,10 @@ import org.xml.sax.SAXException;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -29,8 +38,16 @@ public class Activity_RepasarGuia extends AppCompatActivity {
     private String nombreArchivo;
     private ArrayList<String> preguntas = new ArrayList<>();
     private ArrayList<String> respuestas = new ArrayList<>();
+    private List<String> palabras =
+            Arrays.asList("REPLACE", "WITH", "INTO", "TO", "ADD", "SUBTRACT","TYPE", "DATA", "WRITE",
+                    "FROM", "MULTIPLY", "BY", "CLEAR", "RESPECTING BLANKS", "INTO", "SPACE", "TRANSLATE",
+                    "CASE", "UPPER", "LOWER", "IF", "ELSEIF", "ENDIF", "CONCATENATE", "SEPARATED", "BY",
+                    "SPACE", "SPLIT", "TABLE", "SELECT", "WHERE", "EQ", "NE", "FORM", "ENDFORM", "CLASS",
+                    "ENDCLASS", "INSERT", "SINGLE", "ELSE");
+
     private int contadorPregunta = 0;
     private boolean noHayMasPreguntas = false;
+    SpannableStringBuilder builder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,7 +85,9 @@ public class Activity_RepasarGuia extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (!noHayMasPreguntas){
-                    binding.etRespuesta.setText(respuestas.get(contadorPregunta));
+                    //binding.etRespuesta.setText(respuestas.get(contadorPregunta));
+                    pintarPalabras();
+                    binding.etRespuesta.setText(builder);
                 }
             }
         });
@@ -125,6 +144,51 @@ public class Activity_RepasarGuia extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void pintarPalabras() {
+         builder = new SpannableStringBuilder(respuestas.get(contadorPregunta).toUpperCase());
+
+        /*for (String palabra : palabras) {
+            palabra = palabra.toUpperCase();
+            String text = builder.toString();
+            int startIndex = text.indexOf(palabra);
+
+            while (startIndex != -1) {
+                int endIndex = startIndex + palabra.length();
+
+                ForegroundColorSpan colorSpan = new ForegroundColorSpan(Color.parseColor("#1E61E8"));
+                builder.setSpan(colorSpan, startIndex, endIndex, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+                startIndex = text.indexOf(palabra, endIndex);
+            }
+        }*/
+
+        String textoCompletoAzul = builder.toString();
+        String regex = "\\b(" + TextUtils.join("|", palabras) + ")\\b";
+
+        Pattern patternAzul = Pattern.compile(regex);
+        Matcher matcherAzul = patternAzul.matcher(textoCompletoAzul );
+        while (matcherAzul.find()) {
+            int startIndex = matcherAzul.start();
+            int endIndex = matcherAzul.end();
+
+            ForegroundColorSpan colorSpan = new ForegroundColorSpan(Color.parseColor("#1E61E8"));
+            builder.setSpan(colorSpan, startIndex, endIndex, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        binding.etRespuesta.setText(builder);
+
+        String textoCompletoVerde = builder.toString();
+        Pattern patternVerde = Pattern.compile("'([^']+)'");
+        Matcher matcherVerde = patternVerde.matcher(textoCompletoVerde);
+        while (matcherVerde.find()) {
+            int startIndex = matcherVerde.start();
+            int endIndex = matcherVerde.end();
+
+            ForegroundColorSpan colorSpan = new ForegroundColorSpan(Color.parseColor("#3FEA2D"));
+            builder.setSpan(colorSpan, startIndex, endIndex, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        binding.etRespuesta.setText(builder);
     }
 
     private void obtenerDatosXML() {

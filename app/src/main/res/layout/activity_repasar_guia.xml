@@ -72,6 +72,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/btnAtras"
+        android:background="@drawable/ic_filter_state"
+        style="@style/btnGeneral"
         app:layout_constraintTop_toBottomOf="@+id/tilContenidoRespuesta"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/btnSiguientePregunta" />
@@ -82,6 +84,8 @@
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         android:text="@string/btnSiguiente"
+        android:background="@drawable/ic_filter_state"
+        style="@style/btnGeneral"
         app:layout_constraintTop_toBottomOf="@+id/tilContenidoRespuesta"
         app:layout_constraintStart_toEndOf="@+id/btnAtrasPregunta"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -93,6 +97,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
         android:text="@string/btnMostrarRespuesta"
+        android:background="@drawable/ic_filter_state"
+        style="@style/btnGeneral"
         app:layout_constraintTop_toBottomOf="@+id/btnSiguientePregunta"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
