@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Xml;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Toast;
 
@@ -44,6 +45,8 @@ public class Activity_Modificar extends AppCompatActivity {
     private ArrayList<String> respuestasModificadas = new ArrayList<>();
     private int contadorPregunta = 0;
     private boolean noHayMasPreguntas = false;
+    private boolean sinModificadas = true;
+    private boolean agregarPreguntas = false;
 
     // Creamos la serialización y la clase para crear archivos de manera global.
     XmlSerializer serializer = Xml.newSerializer();
@@ -61,23 +64,11 @@ public class Activity_Modificar extends AppCompatActivity {
         binding.barraSuperiorRegreso.imgvBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Se ejecuta cuando se regresa sin guardar.
-                new AlertDialog.Builder(Activity_Modificar.this)
-                        .setTitle("¡Atención!")
-                        .setMessage("Aún no terminas de modificar la guia, no se hará ningún" +
-                                " cambio en el archivo, ¿seguro deseas continuar?")
-                        .setPositiveButton("Continuar", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                onBackPressed();
-                            }
-                        })
-                        .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int i) {
-                                dialog.dismiss();
-                            }
-                        }).create().show();
+                Toast.makeText(getApplicationContext(),
+                        "No se hicieron cambios en el archivo",
+                        Toast.LENGTH_SHORT).show();
+
+                onBackPressed();
             }
         });
 
@@ -97,22 +88,94 @@ public class Activity_Modificar extends AppCompatActivity {
         binding.etPregunta.setText(preguntas.get(contadorPregunta));
         binding.etRespuesta.setText(respuestas.get(contadorPregunta));
 
+        binding.btnAtrasPregunta.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (contadorPregunta > 0){
+                    contadorPregunta--;
+                    binding.etPregunta.setText("");
+                    binding.etRespuesta.setText("");
+                    binding.etPregunta.setText(preguntasModificadas.get(contadorPregunta));
+                    binding.etRespuesta.setText(respuestasModificadas.get(contadorPregunta));
+                    sinModificadas = false;
+                } else {
+                    // Si el contador
+                    Toast.makeText(getApplicationContext(), "Ya no tienes preguntas anteriores"
+                            , Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+
         binding.btnSiguientePregunta.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 contadorPregunta++;
                 int preguntasTotales = preguntas.size();
-
                 // Validamos que no haya campos vacios en la pregunta o respuesta.
                 if (!binding.etPregunta.getText().toString().isEmpty()
-                        || !binding.etRespuesta.getText().toString().isEmpty()){
-                    preguntasModificadas.add(binding.etPregunta.getText().toString());
-                    respuestasModificadas.add(binding.etRespuesta.getText().toString());
+                        && !binding.etRespuesta.getText().toString().isEmpty()){
+                    // Si siempre se le da siguiente no entrará al if, unicamente entra si se le
+                    // da click al botón de atras.
+                    if (contadorPregunta <= preguntasModificadas.size()){
+                        preguntasModificadas.set((contadorPregunta-1), binding.etPregunta.getText().toString());
+                        respuestasModificadas.set((contadorPregunta-1), binding.etRespuesta.getText().toString());
+                        sinModificadas = false;
+
+                        if (contadorPregunta == preguntasModificadas.size()){
+                            sinModificadas = true;
+                        }
+                    } else {
+                        // Cuando el contador supera las preguntas que ya están modificadas
+                        // entra aquí y agrega las nuevas a las modificadas.
+                        preguntasModificadas.add((contadorPregunta-1), binding.etPregunta.getText().toString());
+                        respuestasModificadas.add((contadorPregunta-1), binding.etRespuesta.getText().toString());
+                        sinModificadas = true;
+                    }
 
                     binding.btnGuardarGuiaInhabilitado.setVisibility(View.INVISIBLE);
                     binding.btnGuardarGuia.setVisibility(View.VISIBLE);
                     binding.etPregunta.setText("");
                     binding.etRespuesta.setText("");
+                    binding.etPregunta.requestFocus();
+
+                    // Mostrar pregunta siguiente.
+                    // Validamos que haya mas preguntas, si las hay unicamente las pintas en el et.
+                    if ((contadorPregunta+1)<=preguntasTotales){
+                        binding.etPregunta.setText(preguntas.get(contadorPregunta));
+                        binding.etRespuesta.setText(respuestas.get(contadorPregunta));
+                    } else if (!noHayMasPreguntas){
+                        // noHayMasPreguntas = false; esta tendría que ponerla en el boton de atras.
+                        noHayMasPreguntas = true;
+
+                        // ¿Quieres agregar más preguntas?
+                        new AlertDialog.Builder(Activity_Modificar.this)
+                                .setTitle("¡Atención!")
+                                .setMessage("Se acabaron las preguntas, ¿Quieres agregar mas preguntas?")
+                                .setPositiveButton("Si", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        // Cambiaremos el toolbar y cambiaremos de botón siguiente
+                                        binding.barraSuperiorRegreso.tvTituloToolbar.setText("Agrega más preguntas a la guía");
+                                        //binding.btnSiguientePregunta.setVisibility(View.INVISIBLE);
+                                        //binding.btnMasPreguntas.setVisibility(View.VISIBLE);
+                                        binding.btnEliminar.setVisibility(View.INVISIBLE);
+                                        contadorPregunta++;
+                                        Toast.makeText(getApplicationContext(), "Ya puedes agregar " +
+                                                "mas preguntas", Toast.LENGTH_LONG).show();
+
+                                        agregarPreguntas = true;
+                                        binding.btnAtrasPregunta.setVisibility(View.INVISIBLE);
+                                    }
+                                })
+                                .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int i) {
+                                        // binding.btnAtrasPregunta.performClick();
+                                        // noHayMasPreguntas = false;
+                                        dialog.dismiss();
+                                    }
+                                }).create().show();
+                    }
                 } else if(binding.etPregunta.getText().toString().isEmpty()
                         && binding.etRespuesta.getText().toString().isEmpty() &&
                         contadorPregunta<=preguntasTotales){
@@ -120,37 +183,25 @@ public class Activity_Modificar extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "Borraste la pregunta anterior" +
                             " de tu guía de estudio", Toast.LENGTH_LONG).show();
                 }
+            }
+        });
 
-                // Validamos que haya mas preguntas, si las hay entra al método sino al else.
-                if ((contadorPregunta+1)<=preguntasTotales){
-                    binding.etPregunta.setText(preguntas.get(contadorPregunta));
-                    binding.etRespuesta.setText(respuestas.get(contadorPregunta));
+        binding.btnMasPreguntas.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Validamos campos vacios en la pregunta o respuesta.
+                if (binding.etPregunta.getText().toString().isEmpty()
+                        || binding.etRespuesta.getText().toString().isEmpty()){
+                    Toast.makeText(getApplicationContext(),
+                            "Asegurate de no dejar ningun campo vacio",
+                            Toast.LENGTH_SHORT).show();
                 } else {
-                    noHayMasPreguntas = true;
-                    binding.btnEliminar.setVisibility(View.INVISIBLE);
-
-                    // ¿Quieres agregar más preguntas?
-                    new AlertDialog.Builder(Activity_Modificar.this)
-                            .setTitle("¡Atención!")
-                            .setMessage("Se acabaron las preguntas, ¿Quieres agregar mas preguntas?")
-                            .setPositiveButton("Si", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    // Cambiaremos el toolbar y cambiaremos de botón siguiente
-                                    binding.barraSuperiorRegreso.tvTituloToolbar.setText("Agrega más preguntas a la guía");
-                                    binding.btnSiguientePregunta.setVisibility(View.INVISIBLE);
-                                    binding.btnMasPreguntas.setVisibility(View.VISIBLE);
-                                    binding.btnEliminar.setVisibility(View.INVISIBLE);
-                                    Toast.makeText(getApplicationContext(), "Ya puedes agregar " +
-                                            "mas preguntas", Toast.LENGTH_LONG).show();
-                                }
-                            })
-                            .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int i) {
-                                    dialog.dismiss();
-                                }
-                            }).create().show();
+                    // Si lo campos están completos se agregan a la lista y continuamos
+                    preguntasModificadas.add(binding.etPregunta.getText().toString());
+                    respuestasModificadas.add(binding.etRespuesta.getText().toString());
+                    binding.etPregunta.setText("");
+                    binding.etRespuesta.setText("");
+                    binding.etPregunta.requestFocus();
                 }
             }
         });
@@ -211,63 +262,81 @@ public class Activity_Modificar extends AppCompatActivity {
             }
         });
 
-        binding.btnMasPreguntas.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Validamos campos vacios en la pregunta o respuesta.
-                if (binding.etPregunta.getText().toString().isEmpty()
-                        || binding.etRespuesta.getText().toString().isEmpty()){
-                    Toast.makeText(getApplicationContext(),
-                            "Asegurate de no dejar ningun campo vacio",
-                            Toast.LENGTH_SHORT).show();
-                } else {
-                    // Si lo campos están completos se agregan a la lista y continuamos
-                    preguntasModificadas.add(binding.etPregunta.getText().toString());
-                    respuestasModificadas.add(binding.etPregunta.getText().toString());
-                    binding.etPregunta.setText("");
-                    binding.etRespuesta.setText("");
-                    binding.etPregunta.requestFocus();
-                }
-            }
-        });
-
         binding.btnGuardarGuia.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 int preguntasTotales = preguntas.size();
-                if ((contadorPregunta+1)<=preguntasTotales){
-                    // Si no has terminado de pasar todas tus preguntas, no aparecerán
-                    new AlertDialog.Builder(Activity_Modificar.this)
-                            .setTitle("¡Atención!")
-                            .setMessage("Aún no terminas de recorrer todas las preguntas, ¿" +
-                                    "seguro deseas continuar?")
-                            .setPositiveButton("Si", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialogInterface, int i) {
-                                    borrarCrearXML();
-                                }
-                            })
-                            .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int i) {
-                                    dialog.dismiss();
-                                }
-                            }).create().show();
+
+                // Valido que ambos campos esten vacios o llenos sino envío un mensaje.
+                if (!binding.etPregunta.getText().toString().isEmpty() &&
+                    binding.etRespuesta.getText().toString().isEmpty() ||
+                    binding.etPregunta.getText().toString().isEmpty() &&
+                    !binding.etRespuesta.getText().toString().isEmpty()) {
+                    Toast.makeText(getApplicationContext(),
+                            "Asegurate de no dejar ningún campo vacio",
+                            Toast.LENGTH_SHORT).show();
                 } else {
-                    borrarCrearXML();
+                    binding.btnGuardarGuiaInhabilitado.setVisibility(View.INVISIBLE);
+                    binding.btnGuardarGuia.setVisibility(View.VISIBLE);
+                    // Si modificadas es falso entonces si hay en el arreglo de preguntasModificadas
+                    // Por lo cual entraría al if
+                    // Si aun no son nuevas preguntas entonces agregarPreguntas es falso.
+                        if (!sinModificadas){
+                            preguntasModificadas.set((contadorPregunta), binding.etPregunta.getText().toString());
+                            respuestasModificadas.set((contadorPregunta), binding.etRespuesta.getText().toString());
+
+                            binding.etPregunta.setText("");
+                            binding.etRespuesta.setText("");
+                            contadorPregunta = (preguntasModificadas.size()+1);
+                        } else if (!agregarPreguntas){
+                            preguntasModificadas.add((contadorPregunta), binding.etPregunta.getText().toString());
+                            respuestasModificadas.add((contadorPregunta), binding.etRespuesta.getText().toString());
+                            contadorPregunta = contadorPregunta + 2;
+                            binding.etPregunta.setText("");
+                            binding.etRespuesta.setText("");
+                        }
+
+                    int contMasPreg = 0;
+                    // Validamos que haya mas preguntas, si las hay entra al método sino al else.
+                    if ((contadorPregunta)<=preguntasTotales){
+                        for (int i = contadorPregunta; i <= preguntasTotales; i++) {
+                            // preguntasModificadas.add((i-1), preguntas.get(i-1));
+                            preguntasModificadas.add((i-1), preguntas.get(i-1));
+                            respuestasModificadas.add((i-1), respuestas.get(i-1));
+                        }
+                        borrarCrearXML();
+                    } else {
+                        contMasPreg = preguntasModificadas.size();
+                        preguntasModificadas.add((contMasPreg), binding.etPregunta.getText().toString());
+                        respuestasModificadas.add((contMasPreg), binding.etRespuesta.getText().toString());
+                        borrarCrearXML();
+                    }
                 }
             }
         });
     }
 
+    // Método que se ejecuta cuando el back del telefono es presionado.
+    public boolean onKeyDown(int keyCode, KeyEvent event){
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN){
+            Toast.makeText(getApplicationContext(),
+                    "No se hicieron cambios en el archivo",
+                    Toast.LENGTH_SHORT).show();
+
+            onBackPressed();
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
     private void borrarCrearXML(){
         // Validamos campos vacios en la pregunta o respuesta.
-        if (!binding.etPregunta.getText().toString().isEmpty()
+        /*if (!binding.etPregunta.getText().toString().isEmpty()
                 || !binding.etRespuesta.getText().toString().isEmpty()){
             // Guardamos lo que se escriba en la pregunta y respuesta
             preguntasModificadas.add(binding.etPregunta.getText().toString());
             respuestasModificadas.add(binding.etRespuesta.getText().toString());
-        }
+        }*/
 
         // Eliminamos el archivo anteriormente creado
         @SuppressLint("SdCardPath") File file = new File("/data/data/com.jonathanev.repasar/files/");

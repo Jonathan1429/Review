@@ -5,6 +5,27 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
+    <!-- BUGS
+         1.- No funciona correctamente cuando usamos el botón de atrás en modificar, después
+             de eso le damos en siguiente y finalmente guardar.
+
+         2.- No funciona correctamente cuando usamos el botón de atrás en modificar, después
+             de eso le damos en Guardar teniendo por ejemplo 20 preguntas por delante y truena.
+
+         3.- Hay que verificar que el botón de eliminar funcione correctamente.
+
+         4.- Después de pasar todas las preguntas y al agregar una mas le das guardar truena la app.
+
+         NOTA: El botón atras funciona pero unicamente antes de agregar mas preguntas,
+         cuando llegas a esa opción no puedes usar el botón de atrás sino no jala.
+
+         MEJORAS
+         9.- Al momento de estar modificando una guía no tenemos botón de atras y estaría bueno
+             implementarlo
+             (IMPLEMENTADO PERO NO FUNCIONAL).
+
+         10.- Cambiar los botónes de siguiente y atras por iconos con flecha de siguiente y atras.
+    -->
     <application
         android:allowBackup="true"
         android:icon="@drawable/estudiantes"

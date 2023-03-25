@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.jonathanev.repasar.Activities.Activity_Cuestionario">
+    tools:context="com.jonathanev.repasar.Activities.Activity_Modificar">
 
     <include
         android:id="@+id/barra_superior_regreso"
@@ -66,6 +66,17 @@
 
     <!-- style="@style/btnGenerales"-->
     <Button
+        android:id="@+id/btnAtrasPregunta"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/btnAtras"
+        android:background="@drawable/ic_filter_state"
+        style="@style/btnGeneral"
+        app:layout_constraintTop_toBottomOf="@+id/tilContenidoRespuesta"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/btnSiguientePregunta" />
+
+    <Button
         android:id="@+id/btnSiguientePregunta"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
@@ -73,8 +84,8 @@
         android:background="@drawable/ic_filter_state"
         style="@style/btnGeneral"
         app:layout_constraintTop_toBottomOf="@+id/tilContenidoRespuesta"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/btnGuardarGuia" />
+        app:layout_constraintStart_toEndOf="@+id/btnAtrasPregunta"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <!-- style="@style/btnGenerales"-->
     <Button
@@ -86,8 +97,8 @@
         android:background="@drawable/ic_filter_state"
         style="@style/btnGeneral"
         app:layout_constraintTop_toBottomOf="@+id/tilContenidoRespuesta"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/btnGuardarGuia" />
+        app:layout_constraintStart_toEndOf="@+id/btnAtrasPregunta"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <!--style="@style/btnGenerales"-->
     <Button
@@ -97,9 +108,9 @@
         android:text="Eliminar"
         android:background="@drawable/ic_filter_state"
         style="@style/btnGeneral"
-        app:layout_constraintTop_toBottomOf="@+id/btnSiguientePregunta"
+        app:layout_constraintTop_toBottomOf="@+id/btnAtrasPregunta"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toStartOf="@+id/btnGuardarGuia" />
 
     <!--style="@style/btnGenerales"-->
     <Button
@@ -110,9 +121,9 @@
         android:visibility="invisible"
         android:background="@drawable/ic_filter_state"
         style="@style/btnGeneral"
-        app:layout_constraintTop_toBottomOf="@+id/tilContenidoRespuesta"
+        app:layout_constraintTop_toBottomOf="@+id/btnSiguientePregunta"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/btnSiguientePregunta" />
+        app:layout_constraintStart_toEndOf="@+id/btnEliminar" />
 
     <!--style="@style/btnInhabilitado"-->
     <Button
@@ -122,8 +133,8 @@
         android:text="@string/btnGuardarGuia"
         android:background="@drawable/ic_filter_state"
         style="@style/btnGeneral"
-        app:layout_constraintTop_toBottomOf="@+id/tilContenidoRespuesta"
+        app:layout_constraintTop_toBottomOf="@+id/btnSiguientePregunta"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/btnSiguientePregunta"/>
+        app:layout_constraintStart_toEndOf="@+id/btnEliminar"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

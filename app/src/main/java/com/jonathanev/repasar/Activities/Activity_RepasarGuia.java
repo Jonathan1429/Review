@@ -46,7 +46,6 @@ public class Activity_RepasarGuia extends AppCompatActivity {
                     "ENDCLASS", "INSERT", "SINGLE", "ELSE");
 
     private int contadorPregunta = 0;
-    private boolean noHayMasPreguntas = false;
     SpannableStringBuilder builder;
 
     @Override
@@ -84,11 +83,8 @@ public class Activity_RepasarGuia extends AppCompatActivity {
         binding.btnMostrarRespuesta.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!noHayMasPreguntas){
-                    //binding.etRespuesta.setText(respuestas.get(contadorPregunta));
-                    pintarPalabras();
-                    binding.etRespuesta.setText(builder);
-                }
+                pintarPalabras();
+                binding.etRespuesta.setText(builder);
             }
         });
 
@@ -119,7 +115,8 @@ public class Activity_RepasarGuia extends AppCompatActivity {
                     binding.etPregunta.setText(preguntas.get(contadorPregunta));
                     binding.etRespuesta.setText("");
                 } else {
-                    noHayMasPreguntas = true;
+                    contadorPregunta--;
+                    // noHayMasPreguntas = true;
                     // Se ejecuta cuando se regresa sin guardar.
                     new AlertDialog.Builder(Activity_RepasarGuia.this)
                             .setTitle("¡Atención!")
@@ -128,7 +125,6 @@ public class Activity_RepasarGuia extends AppCompatActivity {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
                                     contadorPregunta = 0;
-                                    noHayMasPreguntas = false;
                                     binding.etPregunta.setText("");
                                     binding.etRespuesta.setText("");
                                     // Pintamos el primer valor de la pregunta.

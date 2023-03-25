@@ -13,6 +13,7 @@ import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.util.Xml;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Toast;
 
@@ -98,31 +99,7 @@ public class Activity_Cuestionario extends AppCompatActivity {
         binding.barraSuperiorRegreso.imgvBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Se ejecuta cuando se regresa sin guardar.
-                new AlertDialog.Builder(Activity_Cuestionario.this)
-                        .setTitle("¡Atención!")
-                        .setMessage("Aún no terminas de crear la guia, se borrará el " +
-                                "archivo creado, ¿seguro deseas continuar?")
-                        .setPositiveButton("Continuar", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                // Si el archivo se creó y existe, se elimina y te informa en consola
-                                @SuppressLint("SdCardPath") File file = new File("/data/data/com.jonathanev.repasar/files/");
-                                if (file.exists()){
-                                    new File(file, nombreArchivo+".xml").delete();
-                                    Log.d("ArchivoEliminado", "Archivo eliminado");
-                                } else {
-                                    Log.d("ArchivoEliminado", "Archivo no eliminado");
-                                }
-                                onBackPressed();
-                            }
-                        })
-                        .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int i) {
-                                dialog.dismiss();
-                            }
-                        }).create().show();
+                cancelarArchivo();
             }
         });
 
@@ -162,6 +139,44 @@ public class Activity_Cuestionario extends AppCompatActivity {
                 guardarXml(pregunta, respuesta);
             }
         });
+    }
+
+    // Método que se ejecuta cuando el back del telefono es presionado.
+    public boolean onKeyDown(int keyCode, KeyEvent event){
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN){
+            cancelarArchivo();
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    // Mostrará un mensaje diciendo que el archivo se eliminará ya que no se terminó de crear.
+    private void cancelarArchivo(){
+        // Se ejecuta cuando se regresa sin guardar.
+        new AlertDialog.Builder(Activity_Cuestionario.this)
+                .setTitle("¡Atención!")
+                .setMessage("Aún no terminas de crear la guia, se borrará el " +
+                        "archivo creado, ¿seguro deseas continuar?")
+                .setPositiveButton("Continuar", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        // Si el archivo se creó y existe, se elimina y te informa en consola
+                        @SuppressLint("SdCardPath") File file = new File("/data/data/com.jonathanev.repasar/files/");
+                        if (file.exists()){
+                            new File(file, nombreArchivo+".xml").delete();
+                            Log.d("ArchivoEliminado", "Archivo eliminado");
+                        } else {
+                            Log.d("ArchivoEliminado", "Archivo no eliminado");
+                        }
+                        onBackPressed();
+                    }
+                })
+                .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int i) {
+                        dialog.dismiss();
+                    }
+                }).create().show();
     }
 
     // Creamos el archivo en el dispositivo e inicializamos algunas etiquetas.

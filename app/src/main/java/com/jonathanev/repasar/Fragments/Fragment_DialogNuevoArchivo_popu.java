@@ -1,10 +1,15 @@
 package com.jonathanev.repasar.Fragments;
 
+import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +22,11 @@ import androidx.fragment.app.DialogFragment;
 
 import com.jonathanev.repasar.Activities.Activity_Cuestionario;
 import com.jonathanev.repasar.databinding.FragmentNuevoArchivoBinding;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Fragment_DialogNuevoArchivo_popu extends DialogFragment{
 
@@ -39,22 +49,77 @@ public class Fragment_DialogNuevoArchivo_popu extends DialogFragment{
         super.onViewCreated(view, savedInstanceState);
 
         binding.btnGuardarGuiaEstudio.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("SdCardPath")
             @Override
             public void onClick(View view) {
-                // Verificamos que el campo no se encuentre vacio.
-                if (binding.etNombreArchivo.getText().toString().isEmpty()){
-                    Toast.makeText(getContext(), "El campo no puede estar vacio",
-                            Toast.LENGTH_SHORT).show();
-                } else { // Si hay un valor dentro del campo enviamos el nombre del archivo a
-                         // Activity_Cuestionario.
-                    Intent intent = new Intent(getActivity(), Activity_Cuestionario.class);
-                    intent.putExtra("nombre_archivo", binding.etNombreArchivo.getText().toString());
-                    // Recuperamos el dialogo abierto actualmente
-                    // (Fragment_DialogNuevoArchivo.java) y lo cerramos.
-                    Dialog dialogActual =  getDialog();
-                    dialogActual.dismiss();
-                    binding.etNombreArchivo.setText("");
-                    startActivity(intent);
+                String item = "";
+                // Defino la ruta donde busco los ficheros.
+                @SuppressLint("SdCardPath") File file = new File("/data/data/com.jonathanev.repasar/files/");
+
+                boolean archivoExiste = false;
+                if (file.exists()){
+                    // Creo el array de tipo File con el contenido de la carpeta.
+                    File[] files = file.listFiles();
+                    File archivo = null;
+                    // Hacemos un ciclo por cada fichero para extraer el nombre uno a uno.
+                    for (int i = 0; i < files.length; i++){
+                        // Sacamos del array files el nombre recuperandolo por posición.
+                        archivo = files[i];
+                        item = archivo.getName().replaceAll(".xml", "");
+                        // Comparamos el texto ingresado en la App con el recuperado.
+                        if (binding.etNombreArchivo.getText().toString().equals(item)){
+                            archivoExiste = true;
+                            break;
+                        }
+                    }
+
+                    // Si hay un archivo existente entra
+                    if (archivoExiste){
+                        // Se ejecuta cuando se regresa sin guardar.
+                        new AlertDialog.Builder(getContext())
+                                .setTitle("¡Atención!")
+                                .setMessage("Ya tienes una guía con el mismo nombre, " +
+                                        "si continuas se va a sobreescribir el archivo, " +
+                                        "¿seguro deseas continuar?")
+                                .setPositiveButton("Continuar", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        // Si hay un valor dentro del campo enviamos el nombre del archivo a
+                                        // Activity_Cuestionario.
+                                        Intent intent = new Intent(getActivity(), Activity_Cuestionario.class);
+                                        intent.putExtra("nombre_archivo", binding.etNombreArchivo.getText().toString());
+                                        // Recuperamos el dialogo abierto actualmente
+                                        // (Fragment_DialogNuevoArchivo.java) y lo cerramos.
+                                        Dialog dialogActual =  getDialog();
+                                        dialogActual.dismiss();
+                                        binding.etNombreArchivo.setText("");
+                                        startActivity(intent);
+                                    }
+                                })
+                                .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int i) {
+                                        dialog.dismiss();
+                                    }
+                                }).create().show();
+                    } else { // Sino hay un archivo existente entra aquí
+                        // Si hay un valor dentro del campo enviamos el nombre del archivo a
+                        // Activity_Cuestionario.
+                        if (binding.etNombreArchivo.getText().toString().isEmpty()){
+                            Toast.makeText(getContext(),
+                                    "Tienes que colocar un nombre para el archivo",
+                                    Toast.LENGTH_SHORT).show();
+                        } else {
+                            Intent intent = new Intent(getActivity(), Activity_Cuestionario.class);
+                            intent.putExtra("nombre_archivo", binding.etNombreArchivo.getText().toString());
+                            // Recuperamos el dialogo abierto actualmente
+                            // (Fragment_DialogNuevoArchivo.java) y lo cerramos.
+                            Dialog dialogActual =  getDialog();
+                            dialogActual.dismiss();
+                            binding.etNombreArchivo.setText("");
+                            startActivity(intent);
+                        }
+                    }
                 }
 
             }
