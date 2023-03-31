@@ -87,25 +87,12 @@
         app:layout_constraintStart_toEndOf="@+id/btnAtrasPregunta"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- style="@style/btnGenerales"-->
-    <Button
-        android:id="@+id/btnMasPreguntas"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/btnSiguiente"
-        android:visibility="invisible"
-        android:background="@drawable/ic_filter_state"
-        style="@style/btnGeneral"
-        app:layout_constraintTop_toBottomOf="@+id/tilContenidoRespuesta"
-        app:layout_constraintStart_toEndOf="@+id/btnAtrasPregunta"
-        app:layout_constraintEnd_toEndOf="parent" />
-
     <!--style="@style/btnGenerales"-->
     <Button
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         android:id="@+id/btnEliminar"
-        android:text="Eliminar"
+        android:text="@string/lblEliminar"
         android:background="@drawable/ic_filter_state"
         style="@style/btnGeneral"
         app:layout_constraintTop_toBottomOf="@+id/btnAtrasPregunta"

@@ -16,15 +16,22 @@
 
          4.- Después de pasar todas las preguntas y al agregar una mas le das guardar truena la app.
 
+         5.- Si nosotros le damos click en el botón de guardar al final se guarda una pregunta en
+             blanco.
+
          NOTA: El botón atras funciona pero unicamente antes de agregar mas preguntas,
          cuando llegas a esa opción no puedes usar el botón de atrás sino no jala.
 
          MEJORAS
-         9.- Al momento de estar modificando una guía no tenemos botón de atras y estaría bueno
+         1.- Hay que quitar un botón de btnGuardarGuia, que el código quede en uno solo.
+
+         5.- Al momento de estar modificando una guía no tenemos botón de atras y estaría bueno
              implementarlo
              (IMPLEMENTADO PERO NO FUNCIONAL).
 
-         10.- Cambiar los botónes de siguiente y atras por iconos con flecha de siguiente y atras.
+         6.- Cambiar los botónes de siguiente y atras por iconos con flecha de siguiente y atras.
+
+         7.- Que puedas guardar las guías directamente desde la primer pregunta.
     -->
     <application
         android:allowBackup="true"

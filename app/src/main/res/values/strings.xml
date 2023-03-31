@@ -23,6 +23,7 @@
 
     <!-- Toolbar -->
     <string name="tvTituloToolbar">Cuestionario</string>
+    <string name="lblEliminar">Eliminar</string>
 
 
 </resources>
