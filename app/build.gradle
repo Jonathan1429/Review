@@ -6,11 +6,11 @@ android {
     compileSdk 32
 
     defaultConfig {
-        applicationId "com.jonathanev.repasar"
+        applicationId "com.jonathanev.review"
         minSdk 21
         targetSdk 32
-        versionCode 5
-        versionName "1.4"
+        versionCode 1
+        versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

@@ -1,37 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.jonathanev.repasar">
+    package="com.jonathanev.review">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <!-- BUGS
-         1.- No funciona correctamente cuando usamos el botón de atrás en modificar, después
-             de eso le damos en siguiente y finalmente guardar.
-
-         2.- No funciona correctamente cuando usamos el botón de atrás en modificar, después
-             de eso le damos en Guardar teniendo por ejemplo 20 preguntas por delante y truena.
-
-         3.- Hay que verificar que el botón de eliminar funcione correctamente.
-
-         4.- Después de pasar todas las preguntas y al agregar una mas le das guardar truena la app.
-
-         5.- Si nosotros le damos click en el botón de guardar al final se guarda una pregunta en
-             blanco.
+         1.- Hay que verificar que el botón de eliminar funcione correctamente.
 
          NOTA: El botón atras funciona pero unicamente antes de agregar mas preguntas,
          cuando llegas a esa opción no puedes usar el botón de atrás sino no jala.
 
          MEJORAS
-         1.- Hay que quitar un botón de btnGuardarGuia, que el código quede en uno solo.
+         2.- Hay que quitar un botón de btnGuardarGuia, que el código quede en uno solo.
 
-         5.- Al momento de estar modificando una guía no tenemos botón de atras y estaría bueno
-             implementarlo
-             (IMPLEMENTADO PERO NO FUNCIONAL).
+         3.- Al momento de estar modificando una guía no tenemos botón de atras y estaría bueno
+             implementarlo.
+         (IMPLEMENTADO PERO FALTA CUANDO AGREGAS MÁS PREGUNTAS)
 
-         6.- Cambiar los botónes de siguiente y atras por iconos con flecha de siguiente y atras.
+         4.- Cambiar los botónes de siguiente y atras por iconos con flecha de siguiente y atras.
 
-         7.- Que puedas guardar las guías directamente desde la primer pregunta.
+         5.- Que puedas guardar las guías directamente desde la primer pregunta.
+
+         6.- Optimización del código, exactamente la optimización es en las preguntas modificadas,
+             hay unas bifurcaciones que jamás entran y algunas cosas que no se utilizan.
+
+         7.- Cuando recien instalas la aplicación no tienes la carpeta de files, hay que hacer que
+             en cuanto la abras te cree la carpeta.
     -->
     <application
         android:allowBackup="true"
@@ -41,7 +36,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Repasar">
         <activity
-            android:name=".Activities.Activity_Modificar"
+            android:name="com.jonathanev.review.Activities.Activity_Modificar"
             android:exported="false" />
         <!-- Sample AdMob app ID: ca-app-pub-3940256099942544~3347511713 -->
         <meta-data
@@ -49,11 +44,11 @@
             android:value="ca-app-pub-5116088101296740~3054801927" />
 
         <activity
-            android:name=".Activities.Activity_RepasarGuia"
+            android:name="com.jonathanev.review.Activities.Activity_RepasarGuia"
             android:exported="false"
             android:screenOrientation="userPortrait" />
         <activity
-            android:name=".Activities.Activity_Cuestionario"
+            android:name="com.jonathanev.review.Activities.Activity_Cuestionario"
             android:exported="true"
             android:screenOrientation="userPortrait">
             <intent-filter>
@@ -63,7 +58,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MainActivity"
+            android:name="com.jonathanev.review.MainActivity"
             android:exported="true"
             android:screenOrientation="userPortrait">
             <intent-filter>
