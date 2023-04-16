@@ -53,7 +53,17 @@ public class MainActivity extends AppCompatActivity {
 
                 // Limpio el item por si se borra algun archivo no se quede guardado.
                 item.clear();
-                if (file.exists()){
+                if (!file.exists()){
+                    if (file.mkdir()) {
+                        Toast.makeText(getApplicationContext(),
+                                "Ficheros creados correctamente",
+                                Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(getApplicationContext(),
+                                "Hubo un error al momento de crear los ficheros necesarios",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                } else {
                     // Creo el array de tipo File con el contenido de la carpeta.
                     File[] files = file.listFiles();
 
@@ -79,10 +89,6 @@ public class MainActivity extends AppCompatActivity {
                     set.addAll(item);
                     editor.putStringSet("guias_estudio", set);
                     editor.commit();
-                } else { // Si la carpeta no existe significa que aún no crea ninguna guia
-                    Toast.makeText(getApplicationContext(),
-                            "No tienes todos los archivos requeridos, crea una nueva guia para " +
-                                    "comenzar a crear los paquetes.", Toast.LENGTH_SHORT).show();
                 }
             }
         });

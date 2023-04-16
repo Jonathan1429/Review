@@ -7,26 +7,32 @@
 
     <!-- BUGS
          1.- Hay que verificar que el botón de eliminar funcione correctamente.
+         (SOLUCIONADO)
 
          NOTA: El botón atras funciona pero unicamente antes de agregar mas preguntas,
          cuando llegas a esa opción no puedes usar el botón de atrás sino no jala.
+         (SOLUCIONADO)
 
          MEJORAS
          2.- Hay que quitar un botón de btnGuardarGuia, que el código quede en uno solo.
+         (SOLUCIONADO)
 
          3.- Al momento de estar modificando una guía no tenemos botón de atras y estaría bueno
              implementarlo.
-         (IMPLEMENTADO PERO FALTA CUANDO AGREGAS MÁS PREGUNTAS)
+         (SOLUCIONADO)
 
          4.- Cambiar los botónes de siguiente y atras por iconos con flecha de siguiente y atras.
 
          5.- Que puedas guardar las guías directamente desde la primer pregunta.
+         (SOLUCIONADO)
 
          6.- Optimización del código, exactamente la optimización es en las preguntas modificadas,
              hay unas bifurcaciones que jamás entran y algunas cosas que no se utilizan.
+         (SOLUCIONADO)
 
          7.- Cuando recien instalas la aplicación no tienes la carpeta de files, hay que hacer que
              en cuanto la abras te cree la carpeta.
+         (SOLUCIONADO)
     -->
     <application
         android:allowBackup="true"
@@ -34,7 +40,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Repasar">
+        android:theme="@style/Theme.Review">
         <activity
             android:name="com.jonathanev.review.Activities.Activity_Modificar"
             android:exported="false" />

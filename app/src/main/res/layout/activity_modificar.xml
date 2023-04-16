@@ -105,23 +105,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/btnGuardarGuia"
-        android:visibility="invisible"
         android:background="@drawable/ic_filter_state"
         style="@style/btnGeneral"
         app:layout_constraintTop_toBottomOf="@+id/btnSiguientePregunta"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/btnEliminar" />
-
-    <!--style="@style/btnInhabilitado"-->
-    <Button
-        android:id="@+id/btnGuardarGuiaInhabilitado"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:text="@string/btnGuardarGuia"
-        android:background="@drawable/ic_filter_state"
-        style="@style/btnGeneral"
-        app:layout_constraintTop_toBottomOf="@+id/btnSiguientePregunta"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/btnEliminar"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

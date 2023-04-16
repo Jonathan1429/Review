@@ -41,19 +41,7 @@
         style="@style/btnGeneral"
         app:layout_constraintTop_toBottomOf="@+id/imgPrincipal"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/btnAbrirGuiaEstudioInhabilitado" />
-
-    <Button
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:id="@+id/btnAbrirGuiaEstudioInhabilitado"
-        android:text="@string/btnAbrirGuia"
-        android:visibility="invisible"
-        android:background="@drawable/ic_filter_state"
-        style="@style/btnGeneral"
-        app:layout_constraintTop_toBottomOf="@+id/imgPrincipal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/btnNuevaGuiaEstudio" />
+        app:layout_constraintEnd_toStartOf="@+id/btnAbrirGuiaEstudioHabilitado" />
 
     <!--style="@style/btnGenerales"-->
     <Button

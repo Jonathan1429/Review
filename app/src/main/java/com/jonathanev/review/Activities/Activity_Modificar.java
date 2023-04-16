@@ -16,7 +16,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.jonathanev.review.MainActivity;
 import com.jonathanev.review.databinding.ActivityModificarBinding;
-import com.jonathanev.review.databinding.ActivityRepasarGuiaBinding;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -40,12 +39,10 @@ public class Activity_Modificar extends AppCompatActivity {
     private String nombreArchivo;
     private ArrayList<String> preguntas = new ArrayList<>();
     private ArrayList<String> respuestas = new ArrayList<>();
-    private ArrayList<String> preguntasModificadas = new ArrayList<>();
-    private ArrayList<String> respuestasModificadas = new ArrayList<>();
-    private int contadorPregunta = 0;
+    private int contador= 0;
     private boolean noHayMasPreguntas = false;
     private boolean sinModificadas = true;
-    private boolean agregarPreguntas = false;
+    private boolean dialMasPreg = false;
 
     // Creamos la serialización y la clase para crear archivos de manera global.
     XmlSerializer serializer = Xml.newSerializer();
@@ -84,23 +81,42 @@ public class Activity_Modificar extends AppCompatActivity {
         obtenerDatosXML();
 
         // Pintamos el primer valor de la pregunta.
-        binding.etPregunta.setText(preguntas.get(contadorPregunta));
-        binding.etRespuesta.setText(respuestas.get(contadorPregunta));
+        binding.etPregunta.setText(preguntas.get(contador));
+        binding.etRespuesta.setText(respuestas.get(contador));
 
         binding.btnAtrasPregunta.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (contadorPregunta > 0){
-                    contadorPregunta--;
-                    binding.etPregunta.setText("");
-                    binding.etRespuesta.setText("");
-                    binding.etPregunta.setText(preguntasModificadas.get(contadorPregunta));
-                    binding.etRespuesta.setText(respuestasModificadas.get(contadorPregunta));
-                    preguntasModificadas.remove(contadorPregunta);
-                    respuestasModificadas.remove(contadorPregunta);
-                    sinModificadas = false;
+                if (contador > 0){
+                    // Se le quita 1 para hacer referencia al arreglo
+                    // tamaño 3-1 = 2 [0,1,2].
+                    int longi = preguntas.size()-1;
+
+                    // Contador tendrá acceso a modificar lo que esté en el rango a excepción
+                    // de lo que esté en la posición 0.
+                    if (contador <= longi){
+                        // Validamos campos vacios en la pregunta y respuesta.
+                        if (binding.etPregunta.getText().toString().isEmpty()
+                                || binding.etRespuesta.getText().toString().isEmpty()){
+                            Toast.makeText(getApplicationContext(),
+                                    "Asegurate de no dejar ningun campo vacio",
+                                    Toast.LENGTH_SHORT).show();
+                        } else {
+                            // Si los campos están bien se sobre escribe.
+                            preguntas.set(contador, binding.etPregunta.getText().toString());
+                            respuestas.set(contador, binding.etRespuesta.getText().toString());
+
+                            binding.etPregunta.setText(preguntas.get(contador-1));
+                            binding.etRespuesta.setText(respuestas.get(contador-1));
+                        }
+                    } else {
+                        // Si el contador es mayor a lo que hay guardado entonces únicamente
+                        // escribirá en los textos.
+                        binding.etPregunta.setText(preguntas.get(contador-1));
+                        binding.etRespuesta.setText(respuestas.get(contador-1));
+                    }
+                    contador--;
                 } else {
-                    // Si el contador
                     Toast.makeText(getApplicationContext(), "Ya no tienes preguntas anteriores"
                             , Toast.LENGTH_LONG).show();
                 }
@@ -110,99 +126,72 @@ public class Activity_Modificar extends AppCompatActivity {
         binding.btnSiguientePregunta.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                contadorPregunta++;
-                int preguntasTotales = preguntas.size();
-                // Entra sino hay campos vacios.
-                if (!binding.etPregunta.getText().toString().isEmpty()
-                        && !binding.etRespuesta.getText().toString().isEmpty()){
-                    // Si hay preguntas que ya estén guardadas en el otro arreglo entra aquí,
-                    // se guarda cada pregunta cuando se le da click en el botón siguiente.
-                    if (contadorPregunta <= preguntasModificadas.size()){
-                        preguntasModificadas.set((contadorPregunta-1), binding.etPregunta.getText().toString());
-                        respuestasModificadas.set((contadorPregunta-1), binding.etRespuesta.getText().toString());
-                        sinModificadas = false;
+                // Validamos campos vacios en la pregunta o respuesta.
+                if (binding.etPregunta.getText().toString().isEmpty()
+                        || binding.etRespuesta.getText().toString().isEmpty()){
+                    Toast.makeText(getApplicationContext(),
+                            "Asegurate de no dejar ningun campo vacio",
+                            Toast.LENGTH_SHORT).show();
+                } else {
+                    // Se le quita 1 para hacer referencia al arreglo
+                    // tamaño 3-1 = 2 [0,1,2].
+                    int longi = preguntas.size()-1;
 
-                        // Cuando ya pasaron todas las preguntas ponemos en verdadero que ya no
-                        // hay mas preguntas que guardar.
-                        if (contadorPregunta == preguntasModificadas.size()){
-                            sinModificadas = true;
-                        }
-                    // Si hay preguntas que aun no se guardan en modificadas entonces entra aquí.
-                    } else if ((contadorPregunta)<=preguntasTotales){
-                        binding.btnGuardarGuiaInhabilitado.setVisibility(View.INVISIBLE);
-                        binding.btnGuardarGuia.setVisibility(View.VISIBLE);
-                        preguntasModificadas.add((contadorPregunta-1), binding.etPregunta.getText().toString());
-                        respuestasModificadas.add((contadorPregunta-1), binding.etRespuesta.getText().toString());
+                    // Contador tendrá acceso a modificar lo que esté en el rango a excepción
+                    // de lo que esté en la posición 0.
+                    if (contador <= longi){
+                        preguntas.set(contador, binding.etPregunta.getText().toString());
+                        respuestas.set(contador, binding.etRespuesta.getText().toString());
 
-                        // Si aún queda otra pregunta entra aquí.
-                        if (contadorPregunta != preguntasTotales){
-                            binding.etPregunta.setText(preguntas.get(contadorPregunta));
-                            binding.etRespuesta.setText(respuestas.get(contadorPregunta));
-                        // Si el contador iguala a las preguntas totales significa que ya no hay
-                        // mas pregutnas y entra aquí.
-                        } else {
-                            noHayMasPreguntas = true;
-                            contadorPregunta--;
-
-                            ArrayList<String> pregModificadasTemporal = new ArrayList<>();
-                            ArrayList<String> respModificadasTemporal = new ArrayList<>();
-                            pregModificadasTemporal.add(preguntasModificadas.get(contadorPregunta));
-                            respModificadasTemporal.add(respuestasModificadas.get(contadorPregunta));
-
-                            preguntasModificadas.remove(contadorPregunta);
-                            respuestasModificadas.remove(contadorPregunta);
-
+                        // Mientras el contador sea menor escribiremos la siguiente pregunta
+                        // en los et.
+                        if (contador < longi){
+                            binding.etPregunta.setText(preguntas.get(contador+1));
+                            binding.etRespuesta.setText(respuestas.get(contador+1));
+                        } else if (!dialMasPreg){
                             // ¿Quieres agregar más preguntas?
                             new AlertDialog.Builder(Activity_Modificar.this)
                                     .setTitle("¡Atención!")
-                                    .setMessage("Se acabaron las preguntas, ¿Quieres agregar mas preguntas?")
+                                    .setMessage("Se acabaron las preguntas, ¿Quieres agregar más?")
                                     .setPositiveButton("Si", new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialogInterface, int i) {
-                                            // Cambiaremos el toolbar y cambiaremos de botón siguiente
+                                            // Cambiaremos el texto del toolbar.
                                             binding.barraSuperiorRegreso.tvTituloToolbar.setText("Agrega más preguntas a la guía");
-                                            binding.btnEliminar.setVisibility(View.INVISIBLE);
                                             binding.etPregunta.setText("");
                                             binding.etRespuesta.setText("");
-                                            contadorPregunta++;
-                                            preguntasModificadas.add(pregModificadasTemporal.get(0));
-                                            respuestasModificadas.add(respModificadasTemporal.get(0));
-                                            pregModificadasTemporal.clear();
-                                            respuestasModificadas.clear();
+                                            binding.etPregunta.requestFocus();
+                                            contador++;
+
+                                            dialMasPreg = true;
+
                                             Toast.makeText(getApplicationContext(), "Ya puedes agregar " +
                                                     "mas preguntas", Toast.LENGTH_LONG).show();
-
-                                            agregarPreguntas = true;
-                                            binding.btnAtrasPregunta.setVisibility(View.INVISIBLE);
                                         }
                                     })
                                     .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int i) {
-                                            // binding.btnAtrasPregunta.performClick();
-
                                             dialog.dismiss();
                                         }
                                     }).create().show();
-                        }
-                        binding.etPregunta.requestFocus();
-                    // Si ya no hay mas preguntas entra aquí y significa que ya de aquí se agregará
-                    // a modificables.
-                    } else if (noHayMasPreguntas){
-                        // Cuando el contador supera las preguntas que ya están modificadas
-                        // entra aquí y agrega las nuevas a las modificadas.
-                        preguntasModificadas.add((contadorPregunta-1), binding.etPregunta.getText().toString());
-                        respuestasModificadas.add((contadorPregunta-1), binding.etRespuesta.getText().toString());
+                            contador--;
+                        } else {
+                            // Si el contador es igual entonces solo escribiremos los campos vacios.
+                            binding.etPregunta.setText("");
+                            binding.etRespuesta.setText("");
+                            binding.etPregunta.requestFocus();                        }
+                    } else {
+                        // Si el contador es mayor entonces agregaremos la pregunta actual a los
+                        // arreglos.
+                        preguntas.add(contador, binding.etPregunta.getText().toString());
+                        respuestas.add(contador, binding.etRespuesta.getText().toString());
+
                         binding.etPregunta.setText("");
                         binding.etRespuesta.setText("");
                         binding.etPregunta.requestFocus();
                     }
-                } else if(binding.etPregunta.getText().toString().isEmpty()
-                        && binding.etRespuesta.getText().toString().isEmpty() &&
-                        contadorPregunta<=preguntasTotales){
-                    // En dado caso de que haya algun espacio vacio no se tomará en cuenta
-                    Toast.makeText(getApplicationContext(), "Borraste la pregunta anterior" +
-                            " de tu guía de estudio", Toast.LENGTH_LONG).show();
+                    contador++;
                 }
             }
         });
@@ -210,45 +199,38 @@ public class Activity_Modificar extends AppCompatActivity {
         binding.btnEliminar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                int preguntasTotales = preguntas.size();
-
-                // ¿Quieres agregar más preguntas?
                 new AlertDialog.Builder(Activity_Modificar.this)
                         .setTitle("¡Atención!")
                         .setMessage("¿Quieres eliminar la pregunta?")
                         .setPositiveButton("Si", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                // Cambiaremos el toolbar y cambiaremos de botón siguiente
-                                binding.etPregunta.setText("");
-                                binding.etRespuesta.setText("");
-                                contadorPregunta++;
+                                // Se le quita 1 para hacer referencia al arreglo
+                                // tamaño 3-1 = 2 [0,1,2].
+                                int longi = preguntas.size()-1;
 
-                                // Validamos que haya mas preguntas, si las hay entra al método sino al else.
-                                if ((contadorPregunta+1)<=preguntasTotales){
-                                    binding.etPregunta.setText(preguntas.get(contadorPregunta));
-                                    binding.etRespuesta.setText(respuestas.get(contadorPregunta));
+                                // Contador tendrá acceso a modificar lo que esté en el rango a excepción
+                                // de lo que esté en la posición 0.
+                                if (contador <= longi){
+                                    preguntas.remove(contador);
+                                    respuestas.remove(contador);
+
+                                    // Mientras el contador sea menor escribiremos la siguiente pregunta
+                                    // en los et.
+                                    if (contador < longi){
+                                        binding.etPregunta.setText(preguntas.get(contador));
+                                        binding.etRespuesta.setText(respuestas.get(contador));
+                                    } else {
+                                        // Si el contador es igual entonces solo escribiremos los campos vacios.
+                                        binding.etPregunta.setText("");
+                                        binding.etRespuesta.setText("");
+                                        binding.etPregunta.requestFocus();
+                                    }
                                 } else {
-                                    noHayMasPreguntas = true;
-                                    binding.btnEliminar.setVisibility(View.INVISIBLE);
-
-                                    // ¿Quieres agregar más preguntas?
-                                    new AlertDialog.Builder(Activity_Modificar.this)
-                                            .setTitle("¡Atención!")
-                                            .setMessage("Se acabaron las preguntas, ¿Quieres agregar mas preguntas?")
-                                            .setPositiveButton("Si", new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(DialogInterface dialogInterface, int i) {
-                                                    // Cambiaremos el toolbar y cambiaremos de botón siguiente
-                                                    binding.barraSuperiorRegreso.tvTituloToolbar.setText("Agrega más preguntas a la guía");
-                                                }
-                                            })
-                                            .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(DialogInterface dialog, int i) {
-                                                    dialog.dismiss();
-                                                }
-                                            }).create().show();
+                                    // Si el contador es mayor entonces únicamente limpiamos los campos.
+                                    binding.etPregunta.setText("");
+                                    binding.etRespuesta.setText("");
+                                    binding.etPregunta.requestFocus();
                                 }
                             }
                         })
@@ -264,74 +246,45 @@ public class Activity_Modificar extends AppCompatActivity {
         binding.btnGuardarGuia.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                int preguntasTotales = preguntas.size();
+                // Se le quita 1 para hacer referencia al arreglo
+                // tamaño 3-1 = 2 [0,1,2].
+                int longi = preguntas.size()-1;
 
-                // Valido que ambos campos esten vacios o llenos sino envío un mensaje.
+                // Si alguno de los dos campos está vacio entra aquí.
                 if (!binding.etPregunta.getText().toString().isEmpty() &&
-                    binding.etRespuesta.getText().toString().isEmpty() ||
-                    binding.etPregunta.getText().toString().isEmpty() &&
-                    !binding.etRespuesta.getText().toString().isEmpty()) {
+                        binding.etRespuesta.getText().toString().isEmpty() ||
+                        binding.etPregunta.getText().toString().isEmpty() &&
+                                !binding.etRespuesta.getText().toString().isEmpty()){
                     Toast.makeText(getApplicationContext(),
                             "Asegurate de no dejar ningún campo vacio",
                             Toast.LENGTH_SHORT).show();
                 } else if (binding.etPregunta.getText().toString().isEmpty()
                         && binding.etRespuesta.getText().toString().isEmpty()){
-                    borrarCrearXML();
+                    // Si los dos campos están vacios entra aquí.
+
+                    // Si queremos guardar con campos vacios y no hay preguntas anteriores guardadas
+                    // entra aquí.
+                    if (contador == 0){
+                        Toast.makeText(getApplicationContext(),
+                                "¡No puedes guardar una guía sin datos!",
+                                Toast.LENGTH_SHORT).show();
+                    } else {
+                        // Si queremos guardar con campos vacios y hay preguntas anteriores
+                        // guardadas entra aquí.
+                        borrarCrearXML(nombreArchivo);
+                    }
+                } else if (contador > longi){
+                    // Si el contador es mayor a lo guardado entonces agregamos la pregunta
+                    // anteriormente ya validamos campos vacios.
+                    preguntas.add(contador, binding.etPregunta.getText().toString());
+                    respuestas.add(contador, binding.etRespuesta.getText().toString());
+                    borrarCrearXML(nombreArchivo);
                 } else {
-                    binding.btnGuardarGuiaInhabilitado.setVisibility(View.INVISIBLE);
-                    binding.btnGuardarGuia.setVisibility(View.VISIBLE);
-                    // Si modificadas es falso entonces si hay en el arreglo de preguntasModificadas
-                    // Por lo cual entraría al if (darle en el botón atras y guardar ahí)
-                    // Si aun no son nuevas preguntas entonces agregarPreguntas es falso.
-                        if (!sinModificadas){
-                            preguntasModificadas.set((contadorPregunta), binding.etPregunta.getText().toString());
-                            respuestasModificadas.set((contadorPregunta), binding.etRespuesta.getText().toString());
-                            binding.etPregunta.setText("");
-                            binding.etRespuesta.setText("");
-
-                            // Se suman 2 porque la posición +1 ya la guardamos en las dos líneas de
-                            // arriba, así que para comenzar en la siguiente pregunta se le suma otro 1.
-                            contadorPregunta += 2;
-                            for (int i = contadorPregunta; i <= preguntasModificadas.size(); i++) {
-                                preguntasModificadas.add((i-1), preguntasModificadas.get(i-1));
-                                respuestasModificadas.add((i-1), respuestasModificadas.get(i-1));
-                                contadorPregunta += i;
-                            }
-
-                            // Pasando las preguntas modificadas las siguientes se mantienen igual.
-                            for (int i = contadorPregunta; i <= preguntasTotales; i++) {
-                                preguntasModificadas.add((i-1), preguntas.get(i-1));
-                                respuestasModificadas.add((i-1), respuestas.get(i-1));
-                            }
-
-                            borrarCrearXML();
-
-                        // Sino hay preguntas modificadas ya guardadas y le damos click a guardar
-                        // pasamos directamente por las preguntas que ya estaban guardadas y las
-                        // mantenemos.
-                        } else if ((contadorPregunta)<=preguntasTotales){
-                            preguntasModificadas.add(contadorPregunta, binding.etPregunta.getText().toString());
-                            respuestasModificadas.add(contadorPregunta, binding.etRespuesta.getText().toString());
-                            binding.etPregunta.setText("");
-                            binding.etRespuesta.setText("");
-
-                            // Se suman 2 porque la posición +1 ya la guardamos en las dos líneas de
-                            // arriba, así que para comenzar en la siguiente pregunta se le suma otro 1.
-                            for (int i = contadorPregunta+2; i <= preguntasTotales; i++) {
-                                preguntasModificadas.add((i-1), preguntas.get(i-1));
-                                respuestasModificadas.add((i-1), respuestas.get(i-1));
-                            }
-                            borrarCrearXML();
-
-                        // Si ya estamos agregando mas preguntas se guardará unicamente la última,
-                        // ya que las anteriores se guardaron en modificadas.
-                        } else if (agregarPreguntas){
-                            preguntasModificadas.add((contadorPregunta-1), binding.etPregunta.getText().toString());
-                            respuestasModificadas.add((contadorPregunta-1), binding.etRespuesta.getText().toString());
-                            binding.etPregunta.setText("");
-                            binding.etRespuesta.setText("");
-                            borrarCrearXML();
-                        }
+                    // Si el contador no es mayor a lo guardado entonces modificamos lo actual en
+                    // el arreglo, además anteriormente ya validamos campos vacios.
+                    preguntas.set(contador, binding.etPregunta.getText().toString());
+                    respuestas.set(contador, binding.etRespuesta.getText().toString());
+                    borrarCrearXML(nombreArchivo);
                 }
             }
         });
@@ -350,7 +303,7 @@ public class Activity_Modificar extends AppCompatActivity {
         return super.onKeyDown(keyCode, event);
     }
 
-    private void borrarCrearXML(){
+    private void borrarCrearXML(String nombreArchivo){
         // Eliminamos el archivo anteriormente creado
         @SuppressLint("SdCardPath") File file = new File("/data/data/com.jonathanev.repasar/files/");
         if (file.exists()){
@@ -373,10 +326,10 @@ public class Activity_Modificar extends AppCompatActivity {
             serializer.attribute("", "nombreGuia", nombreArchivo);
 
             // Creo la etiqueta interrogante con su respectiva pregunta
-            for (int j = 0; j < preguntasModificadas.size(); j++) {
+            for (int i = 0; i < preguntas.size(); i++) {
                 serializer.startTag("", "Interrogante");
-                serializer.attribute("", "pregunta", preguntasModificadas.get(j));
-                serializer.attribute("", "respuesta", respuestasModificadas.get(j));
+                serializer.attribute("", "pregunta", preguntas.get(i));
+                serializer.attribute("", "respuesta", respuestas.get(i));
                 serializer.endTag("", "Interrogante");
             }
 
@@ -399,6 +352,7 @@ public class Activity_Modificar extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
     private void obtenerDatosXML() {
         Document doc = null;
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();

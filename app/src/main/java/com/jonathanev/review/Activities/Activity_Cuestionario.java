@@ -1,32 +1,20 @@
 package com.jonathanev.review.Activities;
 
-import static android.content.ContentValues.TAG;
-
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.text.SpannableStringBuilder;
-import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.util.Xml;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.LoadAdError;
-import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.initialization.InitializationStatus;
-import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
-import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.jonathanev.review.databinding.ActivityCuestionarioBinding;
 
 import org.xmlpull.v1.XmlSerializer;
@@ -246,11 +234,15 @@ public class Activity_Cuestionario extends AppCompatActivity {
                         && binding.etRespuesta.getText().toString().isEmpty()){
                     // Si los dos campos están vacios entra aquí.
 
+                    // Si queremos guardar con campos vacios y no hay preguntas anteriores guardadas
+                    // entra aquí.
                     if (contador == 0){
                         Toast.makeText(getApplicationContext(),
                                 "¡No puedes guardar una guía sin datos!",
                                 Toast.LENGTH_SHORT).show();
                     } else {
+                        // Si queremos guardar con campos vacios y hay preguntas anteriores
+                        // guardadas entra aquí.
                         crearArchivo(nombreArchivo);
                     }
                 } else if (contador > longi){
