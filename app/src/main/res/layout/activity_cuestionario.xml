@@ -66,40 +66,49 @@
 
    <!-- style="@style/btnGenerales" -->
     <Button
-        android:layout_height="wrap_content"
+        android:id="@+id/btnAtrasPregunta"
         android:layout_width="wrap_content"
-        android:id="@+id/btnSiguientePregunta"
-        android:text="@string/btnSiguiente"
+        android:layout_height="wrap_content"
+        android:text="@string/btnAtras"
         android:background="@drawable/ic_filter_state"
         style="@style/btnGeneral"
         app:layout_constraintTop_toBottomOf="@+id/tilContenidoRespuesta"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/btnSiguientePregunta" />
+
+    <Button
+        android:id="@+id/btnSiguientePregunta"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="@string/btnSiguiente"
+        android:background="@drawable/ic_filter_state"
+        style="@style/btnGeneral"
+        app:layout_constraintTop_toBottomOf="@+id/tilContenidoRespuesta"
+        app:layout_constraintStart_toEndOf="@+id/btnAtrasPregunta"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!--style="@style/btnGenerales"-->
+    <Button
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:id="@+id/btnEliminar"
+        android:text="@string/lblEliminar"
+        android:background="@drawable/ic_filter_state"
+        style="@style/btnGeneral"
+        app:layout_constraintTop_toBottomOf="@+id/btnAtrasPregunta"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/btnGuardarGuia" />
 
-    <!-- style="@style/btnGenerales" -->
+    <!--style="@style/btnGenerales"-->
     <Button
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
         android:id="@+id/btnGuardarGuia"
-        android:text="@string/btnGuardarGuia"
-        android:visibility="invisible"
-        android:background="@drawable/ic_filter_state"
-        style="@style/btnGeneral"
-        app:layout_constraintTop_toBottomOf="@+id/tilContenidoRespuesta"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/btnSiguientePregunta" />
-
-    <!--style="@style/btnInhabilitado"-->
-    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/btnGuardarGuiaInhabilitado"
         android:text="@string/btnGuardarGuia"
         android:background="@drawable/ic_filter_state"
         style="@style/btnGeneral"
-        app:layout_constraintTop_toBottomOf="@+id/tilContenidoRespuesta"
+        app:layout_constraintTop_toBottomOf="@+id/btnSiguientePregunta"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/btnSiguientePregunta"
-/>
+        app:layout_constraintStart_toEndOf="@+id/btnEliminar" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
