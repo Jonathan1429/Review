@@ -103,7 +103,7 @@ public class Fragment_DialogListarGuias_popup extends DialogFragment {
                             public void onClick(DialogInterface dialog, int which) {
                                 switch (which) {
                                     case 0:
-                                        // Si entra al primer item se abre la guía a repasar
+                                        // Si entra al primer item se abre la guía a review
                                         Intent intentAbrirGuia = new Intent(getActivity(), Activity_RepasarGuia.class);
                                         intentAbrirGuia.putExtra("nombre_archivo", guias.getNombreGuia());
                                         startActivity(intentAbrirGuia);
@@ -132,7 +132,7 @@ public class Fragment_DialogListarGuias_popup extends DialogFragment {
                                                     @Override
                                                     public void onClick(DialogInterface dialogInterface, int i) {
                                                         // Si entra al tercero es para eliminar la guia exitosamente
-                                                        @SuppressLint("SdCardPath") File file = new File("/data/data/com.jonathanev.repasar/files/");
+                                                        @SuppressLint("SdCardPath") File file = new File("/data/data/com.jonathanev.review/files/");
                                                         if (file.exists()){
                                                             new File(file, guias.getNombreGuia()+".xml").delete();
                                                             Toast.makeText(getContext(),
