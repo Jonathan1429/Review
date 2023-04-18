@@ -5,16 +5,30 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.util.Xml;
+import android.view.ActionMode;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.ads.interstitial.InterstitialAd;
+import com.jonathanev.review.Fragments.Fragment_DialogColores_popup;
+import com.jonathanev.review.R;
 import com.jonathanev.review.databinding.ActivityCuestionarioBinding;
 
 import org.xmlpull.v1.XmlSerializer;
@@ -28,6 +42,7 @@ public class Activity_Cuestionario extends AppCompatActivity {
 
     private ActivityCuestionarioBinding binding;
     private String nombreArchivo;
+    private int colorActual = 0;
     private ArrayList<String> preguntas = new ArrayList<>();
     private ArrayList<String> respuestas = new ArrayList<>();
     int contador = 0;
@@ -75,10 +90,22 @@ public class Activity_Cuestionario extends AppCompatActivity {
         // Recibimos el nombre del archivo del popupFragment Nueva Guia.
         nombreArchivo = getIntent().getExtras().getString("nombre_archivo");
 
+        colorActual = Color.BLACK;
+        colorActual(colorActual);
+
         binding.barraSuperiorRegreso.imgvBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 cancelarArchivo();
+            }
+        });
+
+        binding.imgvColor.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Unicamente abrimos el dialogo y lo mostramos en la pantalla.
+                Fragment_DialogColores_popup dialogo = new Fragment_DialogColores_popup();
+                dialogo.show(getSupportFragmentManager(), "FragmentColor");
             }
         });
 
@@ -260,6 +287,88 @@ public class Activity_Cuestionario extends AppCompatActivity {
                 }
             }
         });
+
+        binding.etPregunta.setCustomSelectionActionModeCallback(new ActionMode.Callback() {
+            @RequiresApi(api = Build.VERSION_CODES.M)
+            @Override
+            public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
+                // Inflar el menú personalizado
+                actionMode.getMenuInflater().inflate(R.menu.menu_personalizado, menu);
+
+                return true;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
+                switch (menuItem.getItemId()) {
+                    case R.id.color:
+                        // Acción para traducir la palabra seleccionada
+                        int start = binding.etPregunta.getSelectionStart();
+                        int end = binding.etPregunta.getSelectionEnd();
+                        Editable text = binding.etPregunta.getText();
+
+                        SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(text);
+                        spannableStringBuilder.setSpan(new ForegroundColorSpan(colorActual), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+                        binding.etPregunta.setText(spannableStringBuilder);
+
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode actionMode) {
+
+            }
+        });
+
+        binding.etRespuesta.setCustomSelectionActionModeCallback(new ActionMode.Callback() {
+            @RequiresApi(api = Build.VERSION_CODES.M)
+            @Override
+            public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
+                // Inflar el menú personalizado
+                actionMode.getMenuInflater().inflate(R.menu.menu_personalizado, menu);
+
+                return true;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
+                switch (menuItem.getItemId()) {
+                    case R.id.color:
+                        // Acción para traducir la palabra seleccionada
+                        int start = binding.etRespuesta.getSelectionStart();
+                        int end = binding.etRespuesta.getSelectionEnd();
+                        Editable text = binding.etRespuesta.getText();
+
+                        SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(text);
+                        spannableStringBuilder.setSpan(new ForegroundColorSpan(colorActual), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+                        binding.etRespuesta.setText(spannableStringBuilder);
+
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode actionMode) {
+
+            }
+        });
     }
 
     // Método que se ejecuta cuando el back del telefono es presionado.
@@ -336,5 +445,15 @@ public class Activity_Cuestionario extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void colorActual(int colorActual){
+        @SuppressLint("UseCompatLoadingForDrawables") Drawable drawable = getResources().getDrawable(R.drawable.boton_redondo);
+        drawable.setColorFilter(colorActual, PorterDuff.Mode.SRC_ATOP);
+
+        binding.btnColorActual.setBackground(drawable);
+
+        // Recibimos el nombre del archivo del popupFragment Nueva Guia.
+        this.colorActual = colorActual;
     }
 }

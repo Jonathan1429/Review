@@ -41,6 +41,9 @@ dependencies {
     // Libreria de colores
     implementation 'com.github.yukuku:ambilwarna:2.0.1'
 
+    // Librería de rueda de colores
+    implementation "com.github.skydoves:colorpickerview:2.2.4"
+
     // Pasar arreglos entre actividades.
     implementation 'org.parceler:parceler-api:1.1.12'
 
@@ -51,3 +54,4 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 }
+
