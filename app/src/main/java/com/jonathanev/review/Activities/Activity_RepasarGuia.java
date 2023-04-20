@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
-import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.widget.Toast;
@@ -25,8 +24,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -83,7 +80,7 @@ public class Activity_RepasarGuia extends AppCompatActivity {
         binding.btnMostrarRespuesta.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                pintarPalabras();
+                //pintarPalabras();
                 binding.etRespuesta.setText(builder);
             }
         });
@@ -142,8 +139,7 @@ public class Activity_RepasarGuia extends AppCompatActivity {
         });
     }
 
-    private void pintarPalabras() {
-         builder = new SpannableStringBuilder(respuestas.get(contadorPregunta).toUpperCase());
+    private String pintarTexto(String texto, int inicio, int fin) {
 
         /*for (String palabra : palabras) {
             palabra = palabra.toUpperCase();
@@ -160,31 +156,35 @@ public class Activity_RepasarGuia extends AppCompatActivity {
             }
         }*/
 
-        String textoCompletoAzul = builder.toString();
-        String regex = "\\b(" + TextUtils.join("|", palabras) + ")\\b";
+        // String textoSinMarcas = builder.toString().replaceAll("«.+?»", "");
 
-        Pattern patternAzul = Pattern.compile(regex);
-        Matcher matcherAzul = patternAzul.matcher(textoCompletoAzul );
-        while (matcherAzul.find()) {
-            int startIndex = matcherAzul.start();
-            int endIndex = matcherAzul.end();
 
-            ForegroundColorSpan colorSpan = new ForegroundColorSpan(Color.parseColor("#1E61E8"));
-            builder.setSpan(colorSpan, startIndex, endIndex, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        }
-        binding.etRespuesta.setText(builder);
+        /*while (matcher.find()) {
+            // int startIndex = matcherAzul.start();
+            // int endIndex = matcherAzul.end();
 
-        String textoCompletoVerde = builder.toString();
-        Pattern patternVerde = Pattern.compile("'([^']+)'");
-        Matcher matcherVerde = patternVerde.matcher(textoCompletoVerde);
-        while (matcherVerde.find()) {
-            int startIndex = matcherVerde.start();
-            int endIndex = matcherVerde.end();
+            ForegroundColorSpan colorSpan = new ForegroundColorSpan(-9916161);
+            builder.setSpan(colorSpan, inicio, fin, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }*/
 
-            ForegroundColorSpan colorSpan = new ForegroundColorSpan(Color.parseColor("#3FEA2D"));
-            builder.setSpan(colorSpan, startIndex, endIndex, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        }
-        binding.etRespuesta.setText(builder);
+        // fhjf «-44720»jhg«/-44720» jfb «-9916161»kgjf«/-9916161»
+
+        // Eliminar la primera etiqueta y su contenido
+        texto = texto.replaceFirst("«.*?»", "");
+
+        // Eliminar la segunda etiqueta y su contenido
+        texto = texto.replaceFirst("«.*?»", "");
+
+        builder = new SpannableStringBuilder(texto);
+        ForegroundColorSpan colorSpan = new ForegroundColorSpan(Color.parseColor("#FF0000"));
+        builder.setSpan(colorSpan, 0, 3, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        texto = builder.toString();
+
+
+
+        return texto;
+        // binding.etRespuesta.setText(builder);
     }
 
     private void obtenerDatosXML() {
@@ -205,11 +205,40 @@ public class Activity_RepasarGuia extends AppCompatActivity {
                 // Este no lo utilizamos ya que arriba ya accedimos al ultimo Nodo
                 // Node info = cuestionario.item(i);
 
-                // Accedes a los elmentos de dicho nodo
+                // Accedes a los elementos de dicho nodo
                 Element e = (Element) cuestionario.item(i);
 
                 // Guardo cada uno de los valores en su respectivo arreglo.
-                preguntas.add(e.getAttribute("pregunta"));
+                String texto = e.getAttribute("pregunta");
+                // String textoSinMarcas = e.getAttribute("pregunta").replaceAll("«.+?»", "");
+
+                //while (texto.contains("«")) {
+                    int inicio = texto.indexOf("«") + 1;
+                    int fin = texto.indexOf("»");
+                    String numero = texto.substring(inicio, fin);
+                    inicio = fin +1;
+                    fin = texto.indexOf("«", inicio);
+                    //String palabra = texto.substring(inicio, fin);
+
+                    texto = pintarTexto(texto, inicio, fin);
+                //}
+
+
+
+                /*if (matcher.find()) {
+                    String color = matcher.group(1);
+                    int longColor = color.length();
+                    int etiqAbertura = 2;
+                    // Solo se le quitan las marcas al primero que se encuentra
+                    String textoSinMarcas = texto.replace(matcher.group(), "");
+
+                    preguntas.add(i, pintarTexto(textoSinMarcas, inicio, fin));
+
+                    // System.out.println("Palabra: " + palabra + ", Inicio: " + inicio + ", Fin: " + fin);
+                }*/
+
+
+                preguntas.add(i, texto);
                 respuestas.add(e.getAttribute("respuesta"));
             }
         } catch (ParserConfigurationException | SAXException | IOException e) {

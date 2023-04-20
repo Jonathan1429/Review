@@ -13,6 +13,9 @@
          cuando llegas a esa opción no puedes usar el botón de atrás sino no jala.
          (SOLUCIONADO)
 
+         2.- Si cambias de color 2 veces en la misma palabra se guardan colores antiguos y se hace
+             una revoltura.
+
          MEJORAS
          2.- Hay que quitar un botón de btnGuardarGuia, que el código quede en uno solo.
          (SOLUCIONADO)

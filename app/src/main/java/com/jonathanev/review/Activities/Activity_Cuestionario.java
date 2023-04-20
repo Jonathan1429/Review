@@ -27,6 +27,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.ads.interstitial.InterstitialAd;
+import com.jonathanev.review.Clases.ColoresPregunta;
 import com.jonathanev.review.Fragments.Fragment_DialogColores_popup;
 import com.jonathanev.review.R;
 import com.jonathanev.review.databinding.ActivityCuestionarioBinding;
@@ -43,8 +44,11 @@ public class Activity_Cuestionario extends AppCompatActivity {
     private ActivityCuestionarioBinding binding;
     private String nombreArchivo;
     private int colorActual = 0;
+    private int contColorPreg = 0;
+    private int contColorResp = 0;
     private ArrayList<String> preguntas = new ArrayList<>();
     private ArrayList<String> respuestas = new ArrayList<>();
+    private ArrayList<ColoresPregunta> preguntasColor = new ArrayList<>();
     int contador = 0;
     private InterstitialAd mInterstitialAd;
 
@@ -182,9 +186,32 @@ public class Activity_Cuestionario extends AppCompatActivity {
                         }
                     } else {
                         // Si el contador es mayor entonces agregaremos la pregunta actual a los
-                        // arreglos.
-                        preguntas.add(contador, binding.etPregunta.getText().toString());
-                        respuestas.add(contador, binding.etRespuesta.getText().toString());
+                        // arreglos.«»
+                        if (contColorPreg>0) {
+                            String cadOriginal = binding.etPregunta.getText().toString();
+                            StringBuilder sb = new StringBuilder(cadOriginal);
+                            int desplazamiento = 0; // variable sumar el desplazamiento de palabras
+
+                            for (ColoresPregunta coloresPregunta: preguntasColor) {
+                                String palabra = cadOriginal.substring(coloresPregunta.getInicioColor(), coloresPregunta.getFinColor());
+                                int inicio = coloresPregunta.getInicioColor() + desplazamiento;
+                                int fin = coloresPregunta.getFinColor() + desplazamiento;
+                                int color = coloresPregunta.getColor();
+
+                                sb.replace(inicio, fin, "«"+color+"»"+palabra+"«/"+color+"»");
+                                String longColor = String.valueOf(color);
+                                int caractFijos = 5; // «»«/»  "«"+color+"»"+palabra+"«/"+color+"»"
+                                desplazamiento +=  (longColor.length()*2) + caractFijos;
+                            }
+
+                            preguntas.add(contador, sb.toString());
+                            respuestas.add(contador, binding.etRespuesta.getText().toString());
+                        } else if(contColorResp>0){
+
+                        }else {
+                            preguntas.add(contador, binding.etPregunta.getText().toString());
+                            respuestas.add(contador, binding.etRespuesta.getText().toString());
+                        }
 
                         binding.etPregunta.setText("");
                         binding.etRespuesta.setText("");
@@ -316,6 +343,10 @@ public class Activity_Cuestionario extends AppCompatActivity {
                         spannableStringBuilder.setSpan(new ForegroundColorSpan(colorActual), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
                         binding.etPregunta.setText(spannableStringBuilder);
+
+                        ColoresPregunta coloresPregunta = new ColoresPregunta(start, end, colorActual);
+                        preguntasColor.add(contColorPreg, coloresPregunta);
+                        contColorPreg++;
 
                         return true;
                     default:
