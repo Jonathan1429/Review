@@ -9,31 +9,34 @@
          1.- Hay que verificar que el botón de eliminar funcione correctamente.
          (SOLUCIONADO)
 
+         2.- Si agregamos los colores  sin orden el archivo no se crea o modifica correctamente,
+             ya sea en el apartado de crear una nueva guia o en modificar.
+
          NOTA: El botón atras funciona pero unicamente antes de agregar mas preguntas,
          cuando llegas a esa opción no puedes usar el botón de atrás sino no jala.
          (SOLUCIONADO)
 
-         2.- Si cambias de color 2 veces en la misma palabra se guardan colores antiguos y se hace
-             una revoltura.
+         3.- Si cambias de color 2 veces en la misma palabra se guardan colores antiguos y se hace
+             una revoltura (Este aún no lo verifico exactamente).
 
          MEJORAS
-         2.- Hay que quitar un botón de btnGuardarGuia, que el código quede en uno solo.
+         4.- Hay que quitar un botón de btnGuardarGuia, que el código quede en uno solo.
          (SOLUCIONADO)
 
-         3.- Al momento de estar modificando una guía no tenemos botón de atras y estaría bueno
+         5.- Al momento de estar modificando una guía no tenemos botón de atras y estaría bueno
              implementarlo.
          (SOLUCIONADO)
 
-         4.- Cambiar los botónes de siguiente y atras por iconos con flecha de siguiente y atras.
+         6.- Cambiar los botónes de siguiente y atras por iconos con flecha de siguiente y atras.
 
-         5.- Que puedas guardar las guías directamente desde la primer pregunta.
+         7.- Que puedas guardar las guías directamente desde la primer pregunta.
          (SOLUCIONADO)
 
-         6.- Optimización del código, exactamente la optimización es en las preguntas modificadas,
+         8.- Optimización del código, exactamente la optimización es en las preguntas modificadas,
              hay unas bifurcaciones que jamás entran y algunas cosas que no se utilizan.
          (SOLUCIONADO)
 
-         7.- Cuando recien instalas la aplicación no tienes la carpeta de files, hay que hacer que
+         10.- Cuando recien instalas la aplicación no tienes la carpeta de files, hay que hacer que
              en cuanto la abras te cree la carpeta.
          (SOLUCIONADO)
     -->

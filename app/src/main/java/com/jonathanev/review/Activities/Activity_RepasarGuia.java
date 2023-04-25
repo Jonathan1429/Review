@@ -2,7 +2,6 @@ package com.jonathanev.review.Activities;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -12,6 +11,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.jonathanev.review.Clases.ColoresPregunta;
 import com.jonathanev.review.databinding.ActivityRepasarGuiaBinding;
 
 import org.w3c.dom.Document;
@@ -22,8 +22,6 @@ import org.xml.sax.SAXException;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -33,14 +31,11 @@ public class Activity_RepasarGuia extends AppCompatActivity {
 
     private ActivityRepasarGuiaBinding binding;
     private String nombreArchivo;
+
     private ArrayList<String> preguntas = new ArrayList<>();
     private ArrayList<String> respuestas = new ArrayList<>();
-    private List<String> palabras =
-            Arrays.asList("REPLACE", "WITH", "INTO", "TO", "ADD", "SUBTRACT","TYPE", "DATA", "WRITE",
-                    "FROM", "MULTIPLY", "BY", "CLEAR", "RESPECTING BLANKS", "INTO", "SPACE", "TRANSLATE",
-                    "CASE", "UPPER", "LOWER", "IF", "ELSEIF", "ENDIF", "CONCATENATE", "SEPARATED", "BY",
-                    "SPACE", "SPLIT", "TABLE", "SELECT", "WHERE", "EQ", "NE", "FORM", "ENDFORM", "CLASS",
-                    "ENDCLASS", "INSERT", "SINGLE", "ELSE");
+    private ArrayList<ColoresPregunta> preguntasColor = new ArrayList<>();
+    private ArrayList<ColoresPregunta> respuestasColor = new ArrayList<>();
 
     private int contadorPregunta = 0;
     SpannableStringBuilder builder;
@@ -73,15 +68,14 @@ public class Activity_RepasarGuia extends AppCompatActivity {
         // Obtenemos los datos del XML y los guardamos en su respectivo ArrayList.
         obtenerDatosXML();
 
-        // Pintamos el primer valor de la pregunta.
-        binding.etPregunta.setText(preguntas.get(contadorPregunta));
+        // Pintamos el texto del contador actual.
+        pintarTexto();
 
         // Mientras noHayMasPreguntas sea falso entrará al método.
         binding.btnMostrarRespuesta.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //pintarPalabras();
-                binding.etRespuesta.setText(builder);
+                mostrarRespuesta(builder);
             }
         });
 
@@ -95,8 +89,9 @@ public class Activity_RepasarGuia extends AppCompatActivity {
                     contadorPregunta--;
                     binding.etPregunta.setText("");
                     binding.etRespuesta.setText("");
-                    // Pintamos el primer valor de la pregunta.
-                    binding.etPregunta.setText(preguntas.get(contadorPregunta));
+
+                    // Pintamos el valor anterior de colores.
+                    pintarTexto();
                 }
             }
         });
@@ -109,7 +104,8 @@ public class Activity_RepasarGuia extends AppCompatActivity {
 
                 // Validamos que haya mas preguntas, si las hay entra al método sino al else.
                 if ((contadorPregunta+1)<=preguntasTotales){
-                    binding.etPregunta.setText(preguntas.get(contadorPregunta));
+                    // Pintamos el valor siguiente con colores.
+                    pintarTexto();
                     binding.etRespuesta.setText("");
                 } else {
                     contadorPregunta--;
@@ -124,8 +120,10 @@ public class Activity_RepasarGuia extends AppCompatActivity {
                                     contadorPregunta = 0;
                                     binding.etPregunta.setText("");
                                     binding.etRespuesta.setText("");
-                                    // Pintamos el primer valor de la pregunta.
-                                    binding.etPregunta.setText(preguntas.get(contadorPregunta));
+
+                                    // Mostramos el primer valor de la pregunta pintado.
+                                    pintarTexto();
+                                    //binding.etPregunta.setText(preguntas.get(contadorPregunta));
                                 }
                             })
                             .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
@@ -139,52 +137,75 @@ public class Activity_RepasarGuia extends AppCompatActivity {
         });
     }
 
-    private String pintarTexto(String texto, int inicio, int fin) {
+    private void pintarTexto() {
+        int contColorPreg = 0;
+        int contColorResp = 0;
+        int inicio = 0;
+        int fin = 0;
+        ColoresPregunta coloresPregunta = null;
 
-        /*for (String palabra : palabras) {
-            palabra = palabra.toUpperCase();
-            String text = builder.toString();
-            int startIndex = text.indexOf(palabra);
+        String texto = preguntas.get(contadorPregunta);
 
-            while (startIndex != -1) {
-                int endIndex = startIndex + palabra.length();
+        while (texto.contains("«")) {
+            inicio = texto.indexOf("«") + 1;
+            fin = texto.indexOf("»");
+            String color = texto.substring(inicio, fin);
+            int longColor = color.length();
+            int colEntero = Integer.parseInt(color);
+            inicio = fin + 1;
+            fin = texto.indexOf("«", inicio);
 
-                ForegroundColorSpan colorSpan = new ForegroundColorSpan(Color.parseColor("#1E61E8"));
-                builder.setSpan(colorSpan, startIndex, endIndex, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            coloresPregunta = new ColoresPregunta((inicio-longColor-2), (fin-longColor-2), colEntero);
+            preguntasColor.add(contColorPreg, coloresPregunta);
+            // Eliminar la primera etiqueta y su contenido
+            texto = texto.replaceFirst("«.*?»", "");
 
-                startIndex = text.indexOf(palabra, endIndex);
-            }
-        }*/
+            // Eliminar la segunda etiqueta y su contenido
+            texto = texto.replaceFirst("«.*?»", "");
 
-        // String textoSinMarcas = builder.toString().replaceAll("«.+?»", "");
-
-
-        /*while (matcher.find()) {
-            // int startIndex = matcherAzul.start();
-            // int endIndex = matcherAzul.end();
-
-            ForegroundColorSpan colorSpan = new ForegroundColorSpan(-9916161);
-            builder.setSpan(colorSpan, inicio, fin, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        }*/
-
-        // fhjf «-44720»jhg«/-44720» jfb «-9916161»kgjf«/-9916161»
-
-        // Eliminar la primera etiqueta y su contenido
-        texto = texto.replaceFirst("«.*?»", "");
-
-        // Eliminar la segunda etiqueta y su contenido
-        texto = texto.replaceFirst("«.*?»", "");
+            contColorPreg++;
+        }
 
         builder = new SpannableStringBuilder(texto);
-        ForegroundColorSpan colorSpan = new ForegroundColorSpan(Color.parseColor("#FF0000"));
-        builder.setSpan(colorSpan, 0, 3, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        for (ColoresPregunta coloresPreguntas : preguntasColor) {
+            ForegroundColorSpan colorSpan = new ForegroundColorSpan(coloresPreguntas.getColor());
+            builder.setSpan(colorSpan, coloresPreguntas.getInicioColor(), coloresPreguntas.getFinColor(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        binding.etPregunta.setText(builder);
 
-        texto = builder.toString();
+        texto = respuestas.get(contadorPregunta);
 
+        while (texto.contains("«")) {
+            inicio = texto.indexOf("«") + 1;
+            fin = texto.indexOf("»");
+            String color = texto.substring(inicio, fin);
+            int longColor = color.length();
+            int colEntero = Integer.parseInt(color);
+            inicio = fin + 1;
+            fin = texto.indexOf("«", inicio);
 
+            coloresPregunta = new ColoresPregunta((inicio-longColor-2), (fin-longColor-2), colEntero);
+            respuestasColor.add(contColorResp, coloresPregunta);
+            // Eliminar la primera etiqueta y su contenido
+            texto = texto.replaceFirst("«.*?»", "");
 
-        return texto;
-        // binding.etRespuesta.setText(builder);
+            // Eliminar la segunda etiqueta y su contenido
+            texto = texto.replaceFirst("«.*?»", "");
+
+            contColorResp++;
+        }
+
+        builder = new SpannableStringBuilder(texto);
+        for (ColoresPregunta coloresPreguntas : respuestasColor) {
+            ForegroundColorSpan colorSpan = new ForegroundColorSpan(coloresPreguntas.getColor());
+            builder.setSpan(colorSpan, coloresPreguntas.getInicioColor(), coloresPreguntas.getFinColor(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        preguntasColor.clear();
+        respuestasColor.clear();
+    }
+
+    private void mostrarRespuesta(SpannableStringBuilder builder){
+        binding.etRespuesta.setText(builder);
     }
 
     private void obtenerDatosXML() {
@@ -201,45 +222,11 @@ public class Activity_RepasarGuia extends AppCompatActivity {
             NodeList cuestionario = doc.getElementsByTagName("Interrogante");
 
             for (int i = 0; i < cuestionario.getLength(); i++) {
-                // Obtienes el nodo actual y lo guardamos en info.
-                // Este no lo utilizamos ya que arriba ya accedimos al ultimo Nodo
-                // Node info = cuestionario.item(i);
-
                 // Accedes a los elementos de dicho nodo
                 Element e = (Element) cuestionario.item(i);
 
-                // Guardo cada uno de los valores en su respectivo arreglo.
-                String texto = e.getAttribute("pregunta");
-                // String textoSinMarcas = e.getAttribute("pregunta").replaceAll("«.+?»", "");
-
-                //while (texto.contains("«")) {
-                    int inicio = texto.indexOf("«") + 1;
-                    int fin = texto.indexOf("»");
-                    String numero = texto.substring(inicio, fin);
-                    inicio = fin +1;
-                    fin = texto.indexOf("«", inicio);
-                    //String palabra = texto.substring(inicio, fin);
-
-                    texto = pintarTexto(texto, inicio, fin);
-                //}
-
-
-
-                /*if (matcher.find()) {
-                    String color = matcher.group(1);
-                    int longColor = color.length();
-                    int etiqAbertura = 2;
-                    // Solo se le quitan las marcas al primero que se encuentra
-                    String textoSinMarcas = texto.replace(matcher.group(), "");
-
-                    preguntas.add(i, pintarTexto(textoSinMarcas, inicio, fin));
-
-                    // System.out.println("Palabra: " + palabra + ", Inicio: " + inicio + ", Fin: " + fin);
-                }*/
-
-
-                preguntas.add(i, texto);
-                respuestas.add(e.getAttribute("respuesta"));
+                preguntas.add(i, e.getAttribute("pregunta"));
+                respuestas.add(i, e.getAttribute("respuesta"));
             }
         } catch (ParserConfigurationException | SAXException | IOException e) {
             e.printStackTrace();

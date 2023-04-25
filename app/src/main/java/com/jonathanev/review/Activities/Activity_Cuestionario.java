@@ -11,6 +11,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
@@ -49,6 +50,8 @@ public class Activity_Cuestionario extends AppCompatActivity {
     private ArrayList<String> preguntas = new ArrayList<>();
     private ArrayList<String> respuestas = new ArrayList<>();
     private ArrayList<ColoresPregunta> preguntasColor = new ArrayList<>();
+    private ArrayList<ColoresPregunta> respuestasColor = new ArrayList<>();
+    SpannableStringBuilder builder;
     int contador = 0;
     private InterstitialAd mInterstitialAd;
 
@@ -133,17 +136,64 @@ public class Activity_Cuestionario extends AppCompatActivity {
                                     Toast.LENGTH_SHORT).show();
                         } else {
                             // Si los campos están bien se sobre escribe.
-                            preguntas.set(contador, binding.etPregunta.getText().toString());
-                            respuestas.set(contador, binding.etRespuesta.getText().toString());
+                            String cadOriginal = binding.etPregunta.getText().toString();
+                            StringBuilder sb = new StringBuilder(cadOriginal);
+                            int desplazamiento = 0; // variable sumar el desplazamiento de palabras
 
-                            binding.etPregunta.setText(preguntas.get(contador-1));
-                            binding.etRespuesta.setText(respuestas.get(contador-1));
+                            // Si hay colores anteriormente asignados en las palabras entra aquí.
+                            // Preguntas.
+                            for (ColoresPregunta coloresPregunta: preguntasColor) {
+                                String palabra = cadOriginal.substring(coloresPregunta.getInicioColor(), coloresPregunta.getFinColor());
+                                int inicio = coloresPregunta.getInicioColor() + desplazamiento;
+                                int fin = coloresPregunta.getFinColor() + desplazamiento;
+                                int color = coloresPregunta.getColor();
+
+                                sb.replace(inicio, fin, "«"+color+"»"+palabra+"«/"+color+"»");
+                                String longColor = String.valueOf(color);
+                                int caractFijos = 5; // «»«/»  "«"+color+"»"+palabra+"«/"+color+"»"
+                                desplazamiento +=  (longColor.length()*2) + caractFijos;
+                            }
+
+                            preguntas.set(contador, sb.toString());
+
+                            cadOriginal = binding.etRespuesta.getText().toString();
+                            sb = new StringBuilder(cadOriginal);
+                            desplazamiento = 0; // variable sumar el desplazamiento de palabras
+
+                            // Si hay colores anteriormente asignados en las palabras entra aquí.
+                            // Respuestas.
+                            for (ColoresPregunta coloresRespuesta: respuestasColor) {
+                                String palabra = cadOriginal.substring(coloresRespuesta.getInicioColor(), coloresRespuesta.getFinColor());
+                                int inicio = coloresRespuesta.getInicioColor() + desplazamiento;
+                                int fin = coloresRespuesta.getFinColor() + desplazamiento;
+                                int color = coloresRespuesta.getColor();
+
+                                sb.replace(inicio, fin, "«"+color+"»"+palabra+"«/"+color+"»");
+                                String longColor = String.valueOf(color);
+                                int caractFijos = 5; // «»«/»  "«"+color+"»"+palabra+"«/"+color+"»"
+                                desplazamiento +=  (longColor.length()*2) + caractFijos;
+                            }
+                            respuestas.set(contador, sb.toString());
+                            preguntasColor.clear();
+                            respuestasColor.clear();
+                            contColorPreg = 0;
+                            contColorResp = 0;
+
+                            // Se borran las etiquetas de colores.
+                            String texto = "";
+                            texto = preguntas.get(contador-1).replaceAll("«.*?»", "");
+                            binding.etPregunta.setText(texto);
+                            texto = respuestas.get(contador-1).replaceAll("«.*?»", "");
+                            binding.etRespuesta.setText(texto);
                         }
                     } else {
                         // Si el contador es mayor a lo que hay guardado entonces únicamente
-                        // escribirá en los textos.
-                        binding.etPregunta.setText(preguntas.get(contador-1));
-                        binding.etRespuesta.setText(respuestas.get(contador-1));
+                        // escribirá en los textos y se borran las etiquetas de colores.
+                        String texto = "";
+                        texto = preguntas.get(contador-1).replaceAll("«.*?»", "");
+                        binding.etPregunta.setText(texto);
+                        texto = respuestas.get(contador-1).replaceAll("«.*?»", "");
+                        binding.etRespuesta.setText(texto);
                     }
                     contador--;
                 } else {
@@ -170,14 +220,58 @@ public class Activity_Cuestionario extends AppCompatActivity {
                     // Contador tendrá acceso a modificar lo que esté en el rango a excepción
                     // de lo que esté en la posición 0.
                     if (contador <= longi){
-                        preguntas.set(contador, binding.etPregunta.getText().toString());
-                        respuestas.set(contador, binding.etRespuesta.getText().toString());
+                        String cadOriginal = binding.etPregunta.getText().toString();
+                        StringBuilder sb = new StringBuilder(cadOriginal);
+                        int desplazamiento = 0; // variable sumar el desplazamiento de palabras
+
+                        // Si hay colores anteriormente asignados en las palabras entra aquí.
+                        // Preguntas.
+                        for (ColoresPregunta coloresPregunta: preguntasColor) {
+                            String palabra = cadOriginal.substring(coloresPregunta.getInicioColor(), coloresPregunta.getFinColor());
+                            int inicio = coloresPregunta.getInicioColor() + desplazamiento;
+                            int fin = coloresPregunta.getFinColor() + desplazamiento;
+                            int color = coloresPregunta.getColor();
+
+                            sb.replace(inicio, fin, "«"+color+"»"+palabra+"«/"+color+"»");
+                            String longColor = String.valueOf(color);
+                            int caractFijos = 5; // «»«/»  "«"+color+"»"+palabra+"«/"+color+"»"
+                            desplazamiento +=  (longColor.length()*2) + caractFijos;
+                        }
+
+                        preguntas.set(contador, sb.toString());
+
+                        cadOriginal = binding.etRespuesta.getText().toString();
+                        sb = new StringBuilder(cadOriginal);
+                        desplazamiento = 0; // variable sumar el desplazamiento de palabras
+
+                        // Si hay colores anteriormente asignados en las palabras entra aquí.
+                        // Respuestas.
+                        for (ColoresPregunta coloresRespuesta: respuestasColor) {
+                            String palabra = cadOriginal.substring(coloresRespuesta.getInicioColor(), coloresRespuesta.getFinColor());
+                            int inicio = coloresRespuesta.getInicioColor() + desplazamiento;
+                            int fin = coloresRespuesta.getFinColor() + desplazamiento;
+                            int color = coloresRespuesta.getColor();
+
+                            sb.replace(inicio, fin, "«"+color+"»"+palabra+"«/"+color+"»");
+                            String longColor = String.valueOf(color);
+                            int caractFijos = 5; // «»«/»  "«"+color+"»"+palabra+"«/"+color+"»"
+                            desplazamiento +=  (longColor.length()*2) + caractFijos;
+                        }
+                        respuestas.set(contador, sb.toString());
+                        preguntasColor.clear();
+                        respuestasColor.clear();
+                        contColorPreg = 0;
+                        contColorResp = 0;
 
                         // Mientras el contador sea menor escribiremos la siguiente pregunta
-                        // en los et.
+                        // en los et y se borran las etiquetas de colores.
                         if (contador < longi){
-                            binding.etPregunta.setText(preguntas.get(contador+1));
-                            binding.etRespuesta.setText(respuestas.get(contador+1));
+                            // Borramos las etiquetas que se pondrán en los et.
+                            String texto = "";
+                            texto = preguntas.get(contador+1).replaceAll("«.*?»", "");
+                            binding.etPregunta.setText(texto);
+                            texto = respuestas.get(contador+1).replaceAll("«.*?»", "");
+                            binding.etRespuesta.setText(texto);
                         } else {
                             // Si el contador es igual entonces solo escribiremos los campos vacios.
                             binding.etPregunta.setText("");
@@ -187,31 +281,48 @@ public class Activity_Cuestionario extends AppCompatActivity {
                     } else {
                         // Si el contador es mayor entonces agregaremos la pregunta actual a los
                         // arreglos.«»
-                        if (contColorPreg>0) {
-                            String cadOriginal = binding.etPregunta.getText().toString();
-                            StringBuilder sb = new StringBuilder(cadOriginal);
-                            int desplazamiento = 0; // variable sumar el desplazamiento de palabras
+                        String cadOriginal = binding.etPregunta.getText().toString();
+                        StringBuilder sb = new StringBuilder(cadOriginal);
+                        int desplazamiento = 0; // variable sumar el desplazamiento de palabras
 
-                            for (ColoresPregunta coloresPregunta: preguntasColor) {
-                                String palabra = cadOriginal.substring(coloresPregunta.getInicioColor(), coloresPregunta.getFinColor());
-                                int inicio = coloresPregunta.getInicioColor() + desplazamiento;
-                                int fin = coloresPregunta.getFinColor() + desplazamiento;
-                                int color = coloresPregunta.getColor();
+                        // Si hay colores anteriormente asignados en las palabras entra aquí.
+                        // Preguntas.
+                        for (ColoresPregunta coloresPregunta: preguntasColor) {
+                            String palabra = cadOriginal.substring(coloresPregunta.getInicioColor(), coloresPregunta.getFinColor());
+                            int inicio = coloresPregunta.getInicioColor() + desplazamiento;
+                            int fin = coloresPregunta.getFinColor() + desplazamiento;
+                            int color = coloresPregunta.getColor();
 
-                                sb.replace(inicio, fin, "«"+color+"»"+palabra+"«/"+color+"»");
-                                String longColor = String.valueOf(color);
-                                int caractFijos = 5; // «»«/»  "«"+color+"»"+palabra+"«/"+color+"»"
-                                desplazamiento +=  (longColor.length()*2) + caractFijos;
-                            }
-
-                            preguntas.add(contador, sb.toString());
-                            respuestas.add(contador, binding.etRespuesta.getText().toString());
-                        } else if(contColorResp>0){
-
-                        }else {
-                            preguntas.add(contador, binding.etPregunta.getText().toString());
-                            respuestas.add(contador, binding.etRespuesta.getText().toString());
+                            sb.replace(inicio, fin, "«"+color+"»"+palabra+"«/"+color+"»");
+                            String longColor = String.valueOf(color);
+                            int caractFijos = 5; // «»«/»  "«"+color+"»"+palabra+"«/"+color+"»"
+                            desplazamiento +=  (longColor.length()*2) + caractFijos;
                         }
+
+                        preguntas.add(contador, sb.toString());
+
+                        cadOriginal = binding.etRespuesta.getText().toString();
+                        sb = new StringBuilder(cadOriginal);
+                        desplazamiento = 0; // variable sumar el desplazamiento de palabras
+
+                        // Si hay colores anteriormente asignados en las palabras entra aquí.
+                        // Respuestas.
+                        for (ColoresPregunta coloresRespuesta: respuestasColor) {
+                            String palabra = cadOriginal.substring(coloresRespuesta.getInicioColor(), coloresRespuesta.getFinColor());
+                            int inicio = coloresRespuesta.getInicioColor() + desplazamiento;
+                            int fin = coloresRespuesta.getFinColor() + desplazamiento;
+                            int color = coloresRespuesta.getColor();
+
+                            sb.replace(inicio, fin, "«"+color+"»"+palabra+"«/"+color+"»");
+                            String longColor = String.valueOf(color);
+                            int caractFijos = 5; // «»«/»  "«"+color+"»"+palabra+"«/"+color+"»"
+                            desplazamiento +=  (longColor.length()*2) + caractFijos;
+                        }
+                        respuestas.add(contador, sb.toString());
+                        preguntasColor.clear();
+                        respuestasColor.clear();
+                        contColorPreg = 0;
+                        contColorResp = 0;
 
                         binding.etPregunta.setText("");
                         binding.etRespuesta.setText("");
@@ -302,14 +413,94 @@ public class Activity_Cuestionario extends AppCompatActivity {
                 } else if (contador > longi){
                     // Si el contador es mayor a lo guardado entonces agregamos la pregunta
                     // anteriormente ya validamos campos vacios.
-                    preguntas.add(contador, binding.etPregunta.getText().toString());
-                    respuestas.add(contador, binding.etRespuesta.getText().toString());
+                    String cadOriginal = binding.etPregunta.getText().toString();
+                    StringBuilder sb = new StringBuilder(cadOriginal);
+                    int desplazamiento = 0; // variable sumar el desplazamiento de palabras
+
+                    // Si hay colores anteriormente asignados en las palabras entra aquí.
+                    // Preguntas.
+                    for (ColoresPregunta coloresPregunta: preguntasColor) {
+                        String palabra = cadOriginal.substring(coloresPregunta.getInicioColor(), coloresPregunta.getFinColor());
+                        int inicio = coloresPregunta.getInicioColor() + desplazamiento;
+                        int fin = coloresPregunta.getFinColor() + desplazamiento;
+                        int color = coloresPregunta.getColor();
+
+                        sb.replace(inicio, fin, "«"+color+"»"+palabra+"«/"+color+"»");
+                        String longColor = String.valueOf(color);
+                        int caractFijos = 5; // «»«/»  "«"+color+"»"+palabra+"«/"+color+"»"
+                        desplazamiento +=  (longColor.length()*2) + caractFijos;
+                    }
+
+                    preguntas.add(contador, sb.toString());
+
+                    cadOriginal = binding.etRespuesta.getText().toString();
+                    sb = new StringBuilder(cadOriginal);
+                    desplazamiento = 0; // variable sumar el desplazamiento de palabras
+
+                    // Si hay colores anteriormente asignados en las palabras entra aquí.
+                    // Respuestas.
+                    for (ColoresPregunta coloresRespuesta: respuestasColor) {
+                        String palabra = cadOriginal.substring(coloresRespuesta.getInicioColor(), coloresRespuesta.getFinColor());
+                        int inicio = coloresRespuesta.getInicioColor() + desplazamiento;
+                        int fin = coloresRespuesta.getFinColor() + desplazamiento;
+                        int color = coloresRespuesta.getColor();
+
+                        sb.replace(inicio, fin, "«"+color+"»"+palabra+"«/"+color+"»");
+                        String longColor = String.valueOf(color);
+                        int caractFijos = 5; // «»«/»  "«"+color+"»"+palabra+"«/"+color+"»"
+                        desplazamiento +=  (longColor.length()*2) + caractFijos;
+                    }
+                    respuestas.add(contador, sb.toString());
+                    preguntasColor.clear();
+                    respuestasColor.clear();
+                    contColorPreg = 0;
+                    contColorResp = 0;
                     crearArchivo(nombreArchivo);
                 } else {
                     // Si el contador no es mayor a lo guardado entonces modificamos lo actual en
                     // el arreglo, además anteriormente ya validamos campos vacios.
-                    preguntas.set(contador, binding.etPregunta.getText().toString());
-                    respuestas.set(contador, binding.etRespuesta.getText().toString());
+                    String cadOriginal = binding.etPregunta.getText().toString();
+                    StringBuilder sb = new StringBuilder(cadOriginal);
+                    int desplazamiento = 0; // variable sumar el desplazamiento de palabras
+
+                    // Si hay colores anteriormente asignados en las palabras entra aquí.
+                    // Preguntas.
+                    for (ColoresPregunta coloresPregunta: preguntasColor) {
+                        String palabra = cadOriginal.substring(coloresPregunta.getInicioColor(), coloresPregunta.getFinColor());
+                        int inicio = coloresPregunta.getInicioColor() + desplazamiento;
+                        int fin = coloresPregunta.getFinColor() + desplazamiento;
+                        int color = coloresPregunta.getColor();
+
+                        sb.replace(inicio, fin, "«"+color+"»"+palabra+"«/"+color+"»");
+                        String longColor = String.valueOf(color);
+                        int caractFijos = 5; // «»«/»  "«"+color+"»"+palabra+"«/"+color+"»"
+                        desplazamiento +=  (longColor.length()*2) + caractFijos;
+                    }
+
+                    preguntas.set(contador, sb.toString());
+
+                    cadOriginal = binding.etRespuesta.getText().toString();
+                    sb = new StringBuilder(cadOriginal);
+                    desplazamiento = 0; // variable sumar el desplazamiento de palabras
+
+                    // Si hay colores anteriormente asignados en las palabras entra aquí.
+                    // Respuestas.
+                    for (ColoresPregunta coloresRespuesta: respuestasColor) {
+                        String palabra = cadOriginal.substring(coloresRespuesta.getInicioColor(), coloresRespuesta.getFinColor());
+                        int inicio = coloresRespuesta.getInicioColor() + desplazamiento;
+                        int fin = coloresRespuesta.getFinColor() + desplazamiento;
+                        int color = coloresRespuesta.getColor();
+
+                        sb.replace(inicio, fin, "«"+color+"»"+palabra+"«/"+color+"»");
+                        String longColor = String.valueOf(color);
+                        int caractFijos = 5; // «»«/»  "«"+color+"»"+palabra+"«/"+color+"»"
+                        desplazamiento +=  (longColor.length()*2) + caractFijos;
+                    }
+                    respuestas.set(contador, sb.toString());
+                    preguntasColor.clear();
+                    respuestasColor.clear();
+                    contColorPreg = 0;
+                    contColorResp = 0;
                     crearArchivo(nombreArchivo);
                 }
             }
@@ -334,7 +525,7 @@ public class Activity_Cuestionario extends AppCompatActivity {
             public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
                     case R.id.color:
-                        // Acción para traducir la palabra seleccionada
+                        // Poner un color al rango marcado
                         int start = binding.etPregunta.getSelectionStart();
                         int end = binding.etPregunta.getSelectionEnd();
                         Editable text = binding.etPregunta.getText();
@@ -379,7 +570,7 @@ public class Activity_Cuestionario extends AppCompatActivity {
             public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
                     case R.id.color:
-                        // Acción para traducir la palabra seleccionada
+                        // Poner un color al rango marcado
                         int start = binding.etRespuesta.getSelectionStart();
                         int end = binding.etRespuesta.getSelectionEnd();
                         Editable text = binding.etRespuesta.getText();
@@ -388,6 +579,10 @@ public class Activity_Cuestionario extends AppCompatActivity {
                         spannableStringBuilder.setSpan(new ForegroundColorSpan(colorActual), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
                         binding.etRespuesta.setText(spannableStringBuilder);
+
+                        ColoresPregunta coloresPregunta = new ColoresPregunta(start, end, colorActual);
+                        respuestasColor.add(contColorResp, coloresPregunta);
+                        contColorResp++;
 
                         return true;
                     default:
