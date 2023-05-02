@@ -36,9 +36,11 @@
              hay unas bifurcaciones que jamás entran y algunas cosas que no se utilizan.
          (SOLUCIONADO)
 
-         10.- Cuando recien instalas la aplicación no tienes la carpeta de files, hay que hacer que
+         9.- Cuando recien instalas la aplicación no tienes la carpeta de files, hay que hacer que
              en cuanto la abras te cree la carpeta.
          (SOLUCIONADO)
+
+         10.- No se puede cambiar colores a letras que ya tenía un color anteriormente.
     -->
     <application
         android:allowBackup="true"
