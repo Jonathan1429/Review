@@ -361,9 +361,11 @@ public class Activity_Cuestionario extends AppCompatActivity {
             @RequiresApi(api = Build.VERSION_CODES.M)
             @Override
             public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
-                // Inflar el menú personalizado
-                actionMode.getMenuInflater().inflate(R.menu.menu_personalizado, menu);
+                // Inflar el menú personalizado de color.
+                actionMode.getMenuInflater().inflate(R.menu.menu_color, menu);
 
+                // Inflar el menú personalizado sin color.
+                actionMode.getMenuInflater().inflate(R.menu.munu_sin_color, menu);
                 return true;
             }
 
@@ -374,22 +376,44 @@ public class Activity_Cuestionario extends AppCompatActivity {
 
             @Override
             public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
+                int start;
+                int end;
+                Editable text;
+                SpannableStringBuilder spannableStringBuilder;
+
                 switch (menuItem.getItemId()) {
                     case R.id.color:
                         // Poner un color al rango marcado
-                        int start = binding.etPregunta.getSelectionStart();
-                        int end = binding.etPregunta.getSelectionEnd();
-                        Editable text = binding.etPregunta.getText();
+                        start = binding.etPregunta.getSelectionStart();
+                        end = binding.etPregunta.getSelectionEnd();
+                        text = binding.etPregunta.getText();
 
-                        SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(text);
+                        spannableStringBuilder = new SpannableStringBuilder(text);
                         spannableStringBuilder.setSpan(new ForegroundColorSpan(colorActual), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
                         binding.etPregunta.setText(spannableStringBuilder);
 
-                        //ColoresPregunta coloresPregunta = new ColoresPregunta(start, end, colorActual);
-                        //preguntasColor.add(contColorPreg, coloresPregunta);
-                        //contColorPreg++;
+                        binding.etPregunta.setSelection(end);
+                        return true;
+                    case R.id.sin_color:
+                        // Poner un color al rango marcado
+                        start = binding.etPregunta.getSelectionStart();
+                        end = binding.etPregunta.getSelectionEnd();
+                        text = binding.etPregunta.getText();
 
+                        spannableStringBuilder = new SpannableStringBuilder(text);
+
+                        // Obtener los spans de color que se superponen con la selección
+                        ForegroundColorSpan[] colorSpans = spannableStringBuilder.getSpans(start, end, ForegroundColorSpan.class);
+
+                        // Eliminar cada span de color que se superponga con la selección
+                        for (ForegroundColorSpan colorSpan : colorSpans) {
+                            spannableStringBuilder.removeSpan(colorSpan);
+                        }
+
+                        binding.etPregunta.setText(spannableStringBuilder);
+
+                        binding.etPregunta.setSelection(end);
                         return true;
                     default:
                         return false;
@@ -406,9 +430,11 @@ public class Activity_Cuestionario extends AppCompatActivity {
             @RequiresApi(api = Build.VERSION_CODES.M)
             @Override
             public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
-                // Inflar el menú personalizado
-                actionMode.getMenuInflater().inflate(R.menu.menu_personalizado, menu);
+                // Inflar el menú personalizado de color.
+                actionMode.getMenuInflater().inflate(R.menu.menu_color, menu);
 
+                // Inflar el menú personalizado sin color.
+                actionMode.getMenuInflater().inflate(R.menu.munu_sin_color, menu);
                 return true;
             }
 
@@ -430,11 +456,27 @@ public class Activity_Cuestionario extends AppCompatActivity {
                         spannableStringBuilder.setSpan(new ForegroundColorSpan(colorActual), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
                         binding.etRespuesta.setText(spannableStringBuilder);
+                        binding.etPregunta.setSelection(end);
+                        return true;
+                    case R.id.sin_color:
+                        // Poner un color al rango marcado
+                        start = binding.etPregunta.getSelectionStart();
+                        end = binding.etPregunta.getSelectionEnd();
+                        text = binding.etPregunta.getText();
 
-                        //ColoresPregunta coloresPregunta = new ColoresPregunta(start, end, colorActual);
-                        //respuestasColor.add(contColorResp, coloresPregunta);
-                        //contColorResp++;
+                        spannableStringBuilder = new SpannableStringBuilder(text);
 
+                        // Obtener los spans de color que se superponen con la selección
+                        ForegroundColorSpan[] colorSpans = spannableStringBuilder.getSpans(start, end, ForegroundColorSpan.class);
+
+                        // Eliminar cada span de color que se superponga con la selección
+                        for (ForegroundColorSpan colorSpan : colorSpans) {
+                            spannableStringBuilder.removeSpan(colorSpan);
+                        }
+
+                        binding.etPregunta.setText(spannableStringBuilder);
+
+                        binding.etPregunta.setSelection(end);
                         return true;
                     default:
                         return false;
