@@ -390,7 +390,7 @@ public class Activity_Modificar extends AppCompatActivity {
                 actionMode.getMenuInflater().inflate(R.menu.menu_color, menu);
 
                 // Inflar el menú personalizado sin color.
-                actionMode.getMenuInflater().inflate(R.menu.munu_sin_color, menu);
+                // actionMode.getMenuInflater().inflate(R.menu.munu_sin_color, menu);
                 return true;
             }
 
@@ -409,12 +409,30 @@ public class Activity_Modificar extends AppCompatActivity {
                         Editable text = binding.etPregunta.getText();
 
                         SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(text);
+
+                        // Obtén los spans aplicados
+                        ForegroundColorSpan[] spans = spannableStringBuilder.getSpans(0, spannableStringBuilder.length(), ForegroundColorSpan.class);
+
+                        // Eliminar spans existentes que se superpongan con el nuevo rango
+                        for (ForegroundColorSpan span : spans) {
+                            int spanInicio = spannableStringBuilder.getSpanStart(span);
+                            int spanFin = spannableStringBuilder.getSpanEnd(span);
+
+                            if ((spanInicio < end && spanFin > start) || (spanInicio >= start && spanFin <= end)) {
+                                spannableStringBuilder.removeSpan(span);
+
+                                Toast.makeText(getApplicationContext(),
+                                        "Una letra, una tinta; palabras sin colores.",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
                         spannableStringBuilder.setSpan(new ForegroundColorSpan(colorActual), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
                         binding.etPregunta.setText(spannableStringBuilder);
                         binding.etPregunta.setSelection(end);
                         return true;
-                    case R.id.sin_color:
+                    /*case R.id.sin_color:
                         // Poner un color al rango marcado
                         start = binding.etPregunta.getSelectionStart();
                         end = binding.etPregunta.getSelectionEnd();
@@ -433,7 +451,7 @@ public class Activity_Modificar extends AppCompatActivity {
                         binding.etPregunta.setText(spannableStringBuilder);
 
                         binding.etPregunta.setSelection(end);
-                        return true;
+                        return true;*/
                     default:
                         return false;
                 }
@@ -453,7 +471,7 @@ public class Activity_Modificar extends AppCompatActivity {
                 actionMode.getMenuInflater().inflate(R.menu.menu_color, menu);
 
                 // Inflar el menú personalizado sin color.
-                actionMode.getMenuInflater().inflate(R.menu.munu_sin_color, menu);
+                // actionMode.getMenuInflater().inflate(R.menu.munu_sin_color, menu);
                 return true;
             }
 
@@ -477,7 +495,7 @@ public class Activity_Modificar extends AppCompatActivity {
                         binding.etRespuesta.setText(spannableStringBuilder);
                         binding.etPregunta.setSelection(end);
                         return true;
-                    case R.id.sin_color:
+                    /*case R.id.sin_color:
                         // Poner un color al rango marcado
                         start = binding.etPregunta.getSelectionStart();
                         end = binding.etPregunta.getSelectionEnd();
@@ -496,7 +514,7 @@ public class Activity_Modificar extends AppCompatActivity {
                         binding.etPregunta.setText(spannableStringBuilder);
 
                         binding.etPregunta.setSelection(end);
-                        return true;
+                        return true;*/
                     default:
                         return false;
                 }

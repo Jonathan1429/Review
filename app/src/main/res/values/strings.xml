@@ -5,16 +5,19 @@
     <string name="btnNuevaGuia">Nueva Guia</string>
     <string name="btnAbrirGuia">Abrir Guia</string>
 
-    <!-- Pop up cuando le das Nuevo archivo (pop up) -->
+    <!-- Pop up cuando le das Nuevo archivo -->
     <string name="etNombreArchivo">Nombre del archivo</string>
-    <string name="btnGuardarGuia">Guardar</string> <!-- NuevoArchivo, Cuestionario -->
+    <string name="btnGuardarGuia">Guardar</string>
     <string name="btnLimpiarArchivo">Limpiar</string>
 
-    <!-- Cuestionario -->
+    <!-- Cuestionario (Repasar y Modificar) -->
     <string name="etContenidoPregunta">Escribe aquí tu pregunta</string>
     <string name="etContenidoRespuesta">Escribe aquí la Respuesta</string>
-    <string name="btnSiguiente">Siguiente</string> <!-- Cuestionario, Repasar Guia -->
-    <string name="btnAtras">Atrás</string> <!-- Repasar Guia -->
+    <string name="btnSiguiente">Siguiente</string>
+    <string name="btnAtras">Atrás</string>
+    <string name="btnEliminar">Eliminar</string>
+    <string name="btnSinColor">Sin colores</string>
+    <string name="btnColorAct">Color actual:</string>
 
     <!-- Guia -->
     <string name="etPregunta">Pregunta</string>
@@ -23,7 +26,11 @@
 
     <!-- Toolbar -->
     <string name="tvTituloToolbar">Cuestionario</string>
-    <string name="lblEliminar">Eliminar</string>
 
+    <!-- Picker de colores -->
+    <string name="btnContinuar">Continuar</string>
+    <string name="btnDefault">Default</string>
 
+    <!-- Pop up cuando le das Abrir guias -->
+    <string name="lblSinGuias">¡No tienes guias actualmente!</string>
 </resources>

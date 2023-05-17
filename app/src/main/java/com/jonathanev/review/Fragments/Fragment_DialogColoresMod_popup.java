@@ -16,7 +16,6 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 
-import com.jonathanev.review.Activities.Activity_Cuestionario;
 import com.jonathanev.review.Activities.Activity_Modificar;
 import com.jonathanev.review.databinding.FragmentColoresBinding;
 import com.skydoves.colorpickerview.flag.BubbleFlag;
@@ -82,6 +81,13 @@ public class Fragment_DialogColoresMod_popup extends DialogFragment {
     @SuppressLint("SetTextI18n")
     private void setLayoutColor(int color) {
         binding.colorHexadecimal.setText("#"+ binding.colorPickerView.getColorEnvelope().getHexCode());
+
+        if (binding.colorHexadecimal.getText().toString().equals("#FF000000")){
+            binding.btnContinuar.setTextColor(Color.WHITE);
+        } else {
+            binding.btnContinuar.setTextColor(Color.BLACK);
+        }
+
         binding.btnContinuar.setBackgroundColor(color);
     }
 

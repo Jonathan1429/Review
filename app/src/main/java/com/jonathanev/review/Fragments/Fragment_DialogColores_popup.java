@@ -4,9 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,12 +15,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 
 import com.jonathanev.review.Activities.Activity_Cuestionario;
-import com.jonathanev.review.R;
 import com.jonathanev.review.databinding.FragmentColoresBinding;
-import com.jonathanev.review.databinding.FragmentNuevoArchivoBinding;
 import com.skydoves.colorpickerview.flag.BubbleFlag;
 import com.skydoves.colorpickerview.flag.FlagMode;
 import com.skydoves.colorpickerview.listeners.ColorListener;
@@ -47,6 +42,7 @@ public class Fragment_DialogColores_popup extends DialogFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        // Animación cuando se esté seleccionando un color.
         BubbleFlag bubbleFlag = new BubbleFlag(getContext());
         bubbleFlag.setFlagMode(FlagMode.FADE);
         binding.colorPickerView.setFlagView(bubbleFlag);
@@ -86,6 +82,13 @@ public class Fragment_DialogColores_popup extends DialogFragment {
     @SuppressLint("SetTextI18n")
     private void setLayoutColor(int color) {
         binding.colorHexadecimal.setText("#"+ binding.colorPickerView.getColorEnvelope().getHexCode());
+
+        if (binding.colorHexadecimal.getText().toString().equals("#FF000000")){
+            binding.btnContinuar.setTextColor(Color.WHITE);
+        } else {
+            binding.btnContinuar.setTextColor(Color.BLACK);
+        }
+
         binding.btnContinuar.setBackgroundColor(color);
     }
 

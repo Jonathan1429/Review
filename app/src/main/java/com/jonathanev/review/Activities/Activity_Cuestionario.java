@@ -365,7 +365,7 @@ public class Activity_Cuestionario extends AppCompatActivity {
                 actionMode.getMenuInflater().inflate(R.menu.menu_color, menu);
 
                 // Inflar el menú personalizado sin color.
-                actionMode.getMenuInflater().inflate(R.menu.munu_sin_color, menu);
+                // actionMode.getMenuInflater().inflate(R.menu.munu_sin_color, menu);
                 return true;
             }
 
@@ -389,13 +389,31 @@ public class Activity_Cuestionario extends AppCompatActivity {
                         text = binding.etPregunta.getText();
 
                         spannableStringBuilder = new SpannableStringBuilder(text);
+
+                        // Obtén los spans aplicados
+                        ForegroundColorSpan[] spans = spannableStringBuilder.getSpans(0, spannableStringBuilder.length(), ForegroundColorSpan.class);
+
+                        // Eliminar spans existentes que se superpongan con el nuevo rango
+                        for (ForegroundColorSpan span : spans) {
+                            int spanInicio = spannableStringBuilder.getSpanStart(span);
+                            int spanFin = spannableStringBuilder.getSpanEnd(span);
+
+                            if ((spanInicio < end && spanFin > start) || (spanInicio >= start && spanFin <= end)) {
+                                spannableStringBuilder.removeSpan(span);
+
+                                Toast.makeText(getApplicationContext(),
+                                        "Una letra, una tinta; palabras sin colores.",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
                         spannableStringBuilder.setSpan(new ForegroundColorSpan(colorActual), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
                         binding.etPregunta.setText(spannableStringBuilder);
 
                         binding.etPregunta.setSelection(end);
                         return true;
-                    case R.id.sin_color:
+                    /*case R.id.sin_color:
                         // Poner un color al rango marcado
                         start = binding.etPregunta.getSelectionStart();
                         end = binding.etPregunta.getSelectionEnd();
@@ -414,7 +432,7 @@ public class Activity_Cuestionario extends AppCompatActivity {
                         binding.etPregunta.setText(spannableStringBuilder);
 
                         binding.etPregunta.setSelection(end);
-                        return true;
+                        return true;*/
                     default:
                         return false;
                 }
@@ -434,7 +452,7 @@ public class Activity_Cuestionario extends AppCompatActivity {
                 actionMode.getMenuInflater().inflate(R.menu.menu_color, menu);
 
                 // Inflar el menú personalizado sin color.
-                actionMode.getMenuInflater().inflate(R.menu.munu_sin_color, menu);
+                // actionMode.getMenuInflater().inflate(R.menu.munu_sin_color, menu);
                 return true;
             }
 
@@ -453,12 +471,30 @@ public class Activity_Cuestionario extends AppCompatActivity {
                         Editable text = binding.etRespuesta.getText();
 
                         SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(text);
+
+                        // Obtén los spans aplicados
+                        ForegroundColorSpan[] spans = spannableStringBuilder.getSpans(0, spannableStringBuilder.length(), ForegroundColorSpan.class);
+
+                        // Eliminar spans existentes que se superpongan con el nuevo rango
+                        for (ForegroundColorSpan span : spans) {
+                            int spanInicio = spannableStringBuilder.getSpanStart(span);
+                            int spanFin = spannableStringBuilder.getSpanEnd(span);
+
+                            if ((spanInicio < end && spanFin > start) || (spanInicio >= start && spanFin <= end)) {
+                                spannableStringBuilder.removeSpan(span);
+
+                                Toast.makeText(getApplicationContext(),
+                                        "Una letra, una tinta; palabras sin colores.",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
                         spannableStringBuilder.setSpan(new ForegroundColorSpan(colorActual), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
                         binding.etRespuesta.setText(spannableStringBuilder);
                         binding.etPregunta.setSelection(end);
                         return true;
-                    case R.id.sin_color:
+                    /*case R.id.sin_color:
                         // Poner un color al rango marcado
                         start = binding.etPregunta.getSelectionStart();
                         end = binding.etPregunta.getSelectionEnd();
@@ -477,7 +513,7 @@ public class Activity_Cuestionario extends AppCompatActivity {
                         binding.etPregunta.setText(spannableStringBuilder);
 
                         binding.etPregunta.setSelection(end);
-                        return true;
+                        return true;*/
                     default:
                         return false;
                 }
@@ -486,6 +522,14 @@ public class Activity_Cuestionario extends AppCompatActivity {
             @Override
             public void onDestroyActionMode(ActionMode actionMode) {
 
+            }
+        });
+
+        binding.btnQuitarColores.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                binding.etPregunta.setText(binding.etPregunta.getText().toString());
+                binding.etRespuesta.setText(binding.etRespuesta.getText().toString());
             }
         });
     }
@@ -576,14 +620,9 @@ public class Activity_Cuestionario extends AppCompatActivity {
             String etiqIni = "«"+color+"»";
             String etiqFin = "«/"+color+"»";
             editable.replace(start, start, etiqIni);
-            // Actualizar la posición de inicio del span
-            // colorSpan = new ForegroundColorSpan(colorSpan.getForegroundColor());
-            // editable.setSpan(colorSpan, start + etiqIni.length(), end + etiqIni.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
             // Agregar la etiqueta de cierre al texto
             editable.replace(end + etiqIni.length(), end + etiqIni.length(), etiqFin);
-            // Actualizar la posición de finalización del span
-            // editable.setSpan(colorSpan, start + etiqIni.length(), end + etiqIni.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
     }
 

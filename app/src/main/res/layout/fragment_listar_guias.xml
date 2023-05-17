@@ -16,7 +16,8 @@
         android:src="@drawable/estudiantes"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="ContentDescription" />
 
     <TextView
         android:id="@+id/tvSinGuias"
@@ -26,7 +27,7 @@
         android:layout_marginTop="20dp"
         android:textSize="22sp"
         android:textStyle="bold"
-        android:text="¡No tienes guias actualmente!"
+        android:text="@string/lblSinGuias"
         android:visibility="invisible"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

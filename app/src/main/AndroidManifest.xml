@@ -11,36 +11,21 @@
 
          2.- Si agregamos los colores  sin orden el archivo no se crea o modifica correctamente,
              ya sea en el apartado de crear una nueva guia o en modificar.
-
-         NOTA: El botón atras funciona pero unicamente antes de agregar mas preguntas,
-         cuando llegas a esa opción no puedes usar el botón de atrás sino no jala.
          (SOLUCIONADO)
 
          3.- Si cambias de color 2 veces en la misma palabra se guardan colores antiguos y se hace
-             una revoltura (Este aún no lo verifico exactamente).
+             una revoltura.
+         (SOLUCIONADO)
+
+         4.- Si vamos agregar una nueva pregunta y le doy para atrás no se guardará esa pregunta
+             si no hay campos vacios.
 
          MEJORAS
-         4.- Hay que quitar un botón de btnGuardarGuia, que el código quede en uno solo.
+
+         5.- Cambiar los botónes de siguiente y atras por iconos con flecha de siguiente y atras.
+
+         6.- No se puede cambiar colores a letras que ya tenía un color anteriormente.
          (SOLUCIONADO)
-
-         5.- Al momento de estar modificando una guía no tenemos botón de atras y estaría bueno
-             implementarlo.
-         (SOLUCIONADO)
-
-         6.- Cambiar los botónes de siguiente y atras por iconos con flecha de siguiente y atras.
-
-         7.- Que puedas guardar las guías directamente desde la primer pregunta.
-         (SOLUCIONADO)
-
-         8.- Optimización del código, exactamente la optimización es en las preguntas modificadas,
-             hay unas bifurcaciones que jamás entran y algunas cosas que no se utilizan.
-         (SOLUCIONADO)
-
-         9.- Cuando recien instalas la aplicación no tienes la carpeta de files, hay que hacer que
-             en cuanto la abras te cree la carpeta.
-         (SOLUCIONADO)
-
-         10.- No se puede cambiar colores a letras que ya tenía un color anteriormente.
     -->
     <application
         android:allowBackup="true"
