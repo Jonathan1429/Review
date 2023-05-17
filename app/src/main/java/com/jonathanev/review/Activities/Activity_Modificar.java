@@ -401,14 +401,19 @@ public class Activity_Modificar extends AppCompatActivity {
 
             @Override
             public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
+                int start;
+                int end;
+                Editable text;
+                SpannableStringBuilder spannableStringBuilder;
+
                 switch (menuItem.getItemId()) {
                     case R.id.color:
                         // Acción para traducir la palabra seleccionada
-                        int start = binding.etPregunta.getSelectionStart();
-                        int end = binding.etPregunta.getSelectionEnd();
-                        Editable text = binding.etPregunta.getText();
+                        start = binding.etPregunta.getSelectionStart();
+                        end = binding.etPregunta.getSelectionEnd();
+                        text = binding.etPregunta.getText();
 
-                        SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(text);
+                        spannableStringBuilder = new SpannableStringBuilder(text);
 
                         // Obtén los spans aplicados
                         ForegroundColorSpan[] spans = spannableStringBuilder.getSpans(0, spannableStringBuilder.length(), ForegroundColorSpan.class);
@@ -482,18 +487,41 @@ public class Activity_Modificar extends AppCompatActivity {
 
             @Override
             public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
+                int start;
+                int end;
+                Editable text;
+                SpannableStringBuilder spannableStringBuilder;
+
                 switch (menuItem.getItemId()) {
                     case R.id.color:
                         // Acción para traducir la palabra seleccionada
-                        int start = binding.etRespuesta.getSelectionStart();
-                        int end = binding.etRespuesta.getSelectionEnd();
-                        Editable text = binding.etRespuesta.getText();
+                        start = binding.etRespuesta.getSelectionStart();
+                        end = binding.etRespuesta.getSelectionEnd();
+                        text = binding.etRespuesta.getText();
 
-                        SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(text);
+                        spannableStringBuilder = new SpannableStringBuilder(text);
+
+                        // Obtén los spans aplicados
+                        ForegroundColorSpan[] spans = spannableStringBuilder.getSpans(0, spannableStringBuilder.length(), ForegroundColorSpan.class);
+
+                        // Eliminar spans existentes que se superpongan con el nuevo rango
+                        for (ForegroundColorSpan span : spans) {
+                            int spanInicio = spannableStringBuilder.getSpanStart(span);
+                            int spanFin = spannableStringBuilder.getSpanEnd(span);
+
+                            if ((spanInicio < end && spanFin > start) || (spanInicio >= start && spanFin <= end)) {
+                                spannableStringBuilder.removeSpan(span);
+
+                                Toast.makeText(getApplicationContext(),
+                                        "Una letra, una tinta; palabras sin colores.",
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
                         spannableStringBuilder.setSpan(new ForegroundColorSpan(colorActual), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
                         binding.etRespuesta.setText(spannableStringBuilder);
-                        binding.etPregunta.setSelection(end);
+                        binding.etRespuesta.setSelection(end);
                         return true;
                     /*case R.id.sin_color:
                         // Poner un color al rango marcado

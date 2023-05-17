@@ -410,7 +410,6 @@ public class Activity_Cuestionario extends AppCompatActivity {
                         spannableStringBuilder.setSpan(new ForegroundColorSpan(colorActual), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
                         binding.etPregunta.setText(spannableStringBuilder);
-
                         binding.etPregunta.setSelection(end);
                         return true;
                     /*case R.id.sin_color:
@@ -463,14 +462,19 @@ public class Activity_Cuestionario extends AppCompatActivity {
 
             @Override
             public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
+                int start;
+                int end;
+                Editable text;
+                SpannableStringBuilder spannableStringBuilder;
+
                 switch (menuItem.getItemId()) {
                     case R.id.color:
                         // Poner un color al rango marcado
-                        int start = binding.etRespuesta.getSelectionStart();
-                        int end = binding.etRespuesta.getSelectionEnd();
-                        Editable text = binding.etRespuesta.getText();
+                        start = binding.etRespuesta.getSelectionStart();
+                        end = binding.etRespuesta.getSelectionEnd();
+                        text = binding.etRespuesta.getText();
 
-                        SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(text);
+                        spannableStringBuilder = new SpannableStringBuilder(text);
 
                         // Obtén los spans aplicados
                         ForegroundColorSpan[] spans = spannableStringBuilder.getSpans(0, spannableStringBuilder.length(), ForegroundColorSpan.class);
@@ -492,7 +496,7 @@ public class Activity_Cuestionario extends AppCompatActivity {
                         spannableStringBuilder.setSpan(new ForegroundColorSpan(colorActual), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
                         binding.etRespuesta.setText(spannableStringBuilder);
-                        binding.etPregunta.setSelection(end);
+                        binding.etRespuesta.setSelection(end);
                         return true;
                     /*case R.id.sin_color:
                         // Poner un color al rango marcado
