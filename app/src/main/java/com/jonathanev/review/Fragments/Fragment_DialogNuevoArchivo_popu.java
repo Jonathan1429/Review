@@ -120,39 +120,52 @@ public class Fragment_DialogNuevoArchivo_popu extends DialogFragment{
 
                             // Si hay un archivo existente entra
                             if (archivoExiste){
+                                // Se ejecuta cuando se regresa sin guardar.
+                                new AlertDialog.Builder(getContext())
+                                        .setTitle("¡Atención!")
+                                        .setMessage("Ya tienes una guía con el mismo nombre, " +
+                                                "si continuas se va a sobreescribir el archivo, " +
+                                                "¿seguro deseas continuar?")
+                                        .setPositiveButton("Continuar", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
+                                                // Si el usuario quiere continuar reemplazamos el archivo.
+                                                File nuevoArchivo = new File(archivo.getParentFile(), binding.etNombreArchivo.getText().toString() + ".xml"); // Creamos el nuevo objeto File
 
-                            // Se ejecuta cuando se regresa sin guardar.
-                            new AlertDialog.Builder(getContext())
-                                    .setTitle("¡Atención!")
-                                    .setMessage("Ya tienes una guía con el mismo nombre, " +
-                                            "si continuas se va a sobreescribir el archivo, " +
-                                            "¿seguro deseas continuar?")
-                                    .setPositiveButton("Continuar", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialogInterface, int i) {
-                                            // Si hay un valor dentro del campo enviamos el nombre del archivo a
-                                            // Activity_Cuestionario.
-                                            File nuevoArchivo = new File(archivo.getParentFile(), binding.etNombreArchivo.getText().toString() + ".xml"); // Creamos el nuevo objeto File
+                                                if (archivo.renameTo(nuevoArchivo)){
+                                                    Toast.makeText(getContext(),"Archivo renombrado exitosamente",
+                                                        Toast.LENGTH_SHORT).show();
 
-                                            if (archivo.renameTo(nuevoArchivo)){
-                                                Toast.makeText(getContext(),"Archivo renombrado exitosamente",
-                                                    Toast.LENGTH_SHORT).show();
+                                                    cerrarDialogo();
+                                                } else {
+                                                    Toast.makeText(getContext(),"No se pudo renombrar el archivo",
+                                                        Toast.LENGTH_SHORT).show();
 
-                                                cerrarDialogo();
-                                            } else {
-                                                Toast.makeText(getContext(),"No se pudo renombrar el archivo",
-                                                    Toast.LENGTH_SHORT).show();
-
-                                                cerrarDialogo();
+                                                    cerrarDialogo();
+                                                }
                                             }
-                                        }
-                                    })
-                                    .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int i) {
-                                            dialog.dismiss();
-                                        }
-                                    }).create().show();
+                                        })
+                                        .setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int i) {
+                                                dialog.dismiss();
+                                            }
+                                        }).create().show();
+                            } else {
+                                // Si el archivo no existe directamente pasamos a cambiar el nombre.
+                                File nuevoArchivo = new File(archivo.getParentFile(), binding.etNombreArchivo.getText().toString() + ".xml"); // Creamos el nuevo objeto File
+
+                                if (archivo.renameTo(nuevoArchivo)){
+                                    Toast.makeText(getContext(),"Archivo renombrado exitosamente",
+                                        Toast.LENGTH_SHORT).show();
+
+                                    cerrarDialogo();
+                                } else {
+                                    Toast.makeText(getContext(),"No se pudo renombrar el archivo",
+                                        Toast.LENGTH_SHORT).show();
+
+                                    cerrarDialogo();
+                                }
                             }
                         }
                     } else {
