@@ -1,5 +1,7 @@
 package com.jonathanev.review.Activities;
 
+import static com.google.android.gms.ads.AdRequest.*;
+
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -11,6 +13,12 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 import com.jonathanev.review.Clases.ColoresPregunta;
 import com.jonathanev.review.databinding.ActivityRepasarGuiaBinding;
 
@@ -46,6 +54,50 @@ public class Activity_RepasarGuia extends AppCompatActivity {
         binding = ActivityRepasarGuiaBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        // Anuncios publicitarios Banners.
+        /*MobileAds.initialize(this, new OnInitializationCompleteListener() {
+            @Override
+            public void onInitializationComplete(InitializationStatus initializationStatus) {
+            }
+        });
+
+        AdRequest adRequest = new Builder().build();
+        binding.adView.loadAd(adRequest);
+        binding.adView.setAdListener(new AdListener() {
+            @Override
+            public void onAdClicked() {
+                // Code to be executed when the user clicks on an ad.
+            }
+
+            @Override
+            public void onAdClosed() {
+                // Code to be executed when the user is about to return
+                // to the app after tapping on an ad.
+            }
+
+            @Override
+            public void onAdFailedToLoad(LoadAdError adError) {
+                // Code to be executed when an ad request fails.
+            }
+
+            @Override
+            public void onAdImpression() {
+                // Code to be executed when an impression is recorded
+                // for an ad.
+            }
+
+            @Override
+            public void onAdLoaded() {
+                // Code to be executed when an ad finishes loading.
+            }
+
+            @Override
+            public void onAdOpened() {
+                // Code to be executed when an ad opens an overlay that
+                // covers the screen.
+            }
+        });*/
+
         // Reutilizo el layout anteriormente creado y le asigno un texto el tvTituloToolbar
         binding.barraSuperiorRegreso.tvTituloToolbar.setText("Guia");
 
@@ -75,13 +127,20 @@ public class Activity_RepasarGuia extends AppCompatActivity {
         binding.btnMostrarRespuesta.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mostrarRespuesta(builder);
+                if (binding.btnMostrarRespuesta.getText().toString().equals("Mostrar respuesta")){
+                    binding.btnMostrarRespuesta.setText("Ocultar respuesta");
+                    mostrarRespuesta(builder);
+                } else {
+                     binding.btnMostrarRespuesta.setText("Mostrar respuesta");
+                     binding.etRespuesta.setText("");
+                }
             }
         });
 
         binding.btnAtrasPregunta.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                binding.btnMostrarRespuesta.setText("Mostrar respuesta");
                 if(contadorPregunta == 0){
                     Toast.makeText(getApplicationContext(), "No tienes preguntas anteriores",
                             Toast.LENGTH_SHORT).show();
@@ -100,6 +159,7 @@ public class Activity_RepasarGuia extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 contadorPregunta++;
+                binding.btnMostrarRespuesta.setText("Mostrar respuesta");
                 int preguntasTotales = preguntas.size();
 
                 // Validamos que haya mas preguntas, si las hay entra al método sino al else.

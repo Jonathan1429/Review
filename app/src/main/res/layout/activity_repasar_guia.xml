@@ -17,14 +17,15 @@
         android:id="@+id/tilContenidoPregunta"
         android:labelFor="@+id/tvContenidoPregunta"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_marginTop="20dp"
+        android:layout_height="230dp"
+        android:layout_marginTop="10dp"
         android:layout_marginStart="6dp"
         android:layout_marginEnd="6dp"
         app:endIconMode="clear_text"
         app:layout_constraintTop_toBottomOf="@+id/barra_superior_regreso"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.4">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etPregunta"
@@ -44,14 +45,14 @@
         android:id="@+id/tilContenidoRespuesta"
         android:labelFor="@+id/tvContenidoPregunta"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_marginTop="20dp"
+        android:layout_height="230dp"
         android:layout_marginStart="6dp"
         android:layout_marginEnd="6dp"
         app:endIconMode="clear_text"
         app:layout_constraintTop_toBottomOf="@+id/tilContenidoPregunta"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.4">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etRespuesta"
@@ -71,6 +72,7 @@
         android:id="@+id/btnAtrasPregunta"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
         android:text="@string/btnAtras"
         android:background="@drawable/ic_filter_state"
         style="@style/btnGeneral"
@@ -83,6 +85,7 @@
         android:id="@+id/btnSiguientePregunta"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
+        android:layout_marginTop="15dp"
         android:text="@string/btnSiguiente"
         android:background="@drawable/ic_filter_state"
         style="@style/btnGeneral"
@@ -99,7 +102,22 @@
         android:text="@string/btnMostrarRespuesta"
         android:background="@drawable/ic_filter_state"
         style="@style/btnGeneral"
-        app:layout_constraintTop_toBottomOf="@+id/btnSiguientePregunta"
+        app:layout_constraintTop_toBottomOf="@+id/btnAtrasPregunta"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+
+    <com.google.android.gms.ads.AdView
+        xmlns:ads="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/adView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginTop="10dp"
+        ads:adSize="BANNER"
+        ads:adUnitId="ca-app-pub-3940256099942544/6300978111"
+        ads:layout_constraintStart_toStartOf="parent"
+        ads:layout_constraintEnd_toEndOf="parent"
+        ads:layout_constraintTop_toBottomOf="@+id/btnMostrarRespuesta">
+    </com.google.android.gms.ads.AdView>
 </androidx.constraintlayout.widget.ConstraintLayout>

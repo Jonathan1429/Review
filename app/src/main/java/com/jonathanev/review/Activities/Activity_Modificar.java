@@ -116,6 +116,7 @@ public class Activity_Modificar extends AppCompatActivity {
         binding.btnAtrasPregunta.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                // El contadorPregunta tiene que ser mayor a 0 sino significa que no hay preguntas anteriores.
                 if (contadorPregunta > 0){
                     // Se le quita 1 para hacer referencia al arreglo
                     // tamaño 3-1 = 2 [0,1,2].
@@ -130,6 +131,9 @@ public class Activity_Modificar extends AppCompatActivity {
                             Toast.makeText(getApplicationContext(),
                                     "Asegurate de no dejar ningun campo vacio",
                                     Toast.LENGTH_SHORT).show();
+
+                            // Se resta uno al final y así se queda neutral.
+                            contadorPregunta++;
                         } else {
                             // Si los campos están bien se sobre escribe.
                             Editable editable = Editable.Factory.getInstance().newEditable(binding.etPregunta.getText());
@@ -152,9 +156,37 @@ public class Activity_Modificar extends AppCompatActivity {
                             pintarTexto(contadorPregunta-1);
                         }
                     } else {
-                        // Si el contadorPregunta es mayor a lo que hay guardado entonces
-                        // Pintamos el texto
-                        pintarTexto(contadorPregunta-1);
+                        if (binding.etPregunta.getText().toString().isEmpty()
+                            || binding.etRespuesta.getText().toString().isEmpty()){
+                            Toast.makeText(getApplicationContext(),
+                                    "Asegurate de no dejar ningun campo vacio",
+                                    Toast.LENGTH_SHORT).show();
+
+                            // Se resta uno al final y así se queda neutral.
+                            contadorPregunta++;
+                        } else {
+                            // Si el contadorPregunta es mayor entonces agregaremos la pregunta actual a los
+                            // arreglos.«»
+                            Editable editable = Editable.Factory.getInstance().newEditable(binding.etPregunta.getText());
+                            ForegroundColorSpan[] colorSpans = editable.getSpans(0, editable.length(), ForegroundColorSpan.class);
+
+                            // Se colocan las etiquetas en cada palabra con color
+                            colocarEtiquetas(colorSpans, editable);
+
+                            preguntas.add(contadorPregunta, editable.toString());
+
+                            editable = Editable.Factory.getInstance().newEditable(binding.etRespuesta.getText());
+                            colorSpans = editable.getSpans(0, editable.length(), ForegroundColorSpan.class);
+
+                            // Se colocan las etiquetas en cada palabra con color
+                            colocarEtiquetas(colorSpans, editable);
+
+                            respuestas.add(contadorPregunta, editable.toString());
+
+                            // Si el contadorPregunta es mayor a lo que hay guardado entonces
+                            // pintamos el texto anterior.
+                            pintarTexto(contadorPregunta-1);
+                        }
                     }
                     contadorPregunta--;
                 } else {
@@ -340,26 +372,7 @@ public class Activity_Modificar extends AppCompatActivity {
                         // guardadas entra aquí.
                         borrarCrearXML(nombreArchivo);
                     }
-                } else if (contadorPregunta > longi){
-                    // Si el contadorPregunta es mayor a lo guardado entonces agregamos la pregunta
-                    // anteriormente ya validamos campos vacios.
-                    Editable editable = Editable.Factory.getInstance().newEditable(binding.etPregunta.getText());
-                    ForegroundColorSpan[] colorSpans = editable.getSpans(0, editable.length(), ForegroundColorSpan.class);
-
-                    // Se colocan las etiquetas en cada palabra con color
-                    colocarEtiquetas(colorSpans, editable);
-
-                    preguntas.add(contadorPregunta, editable.toString());
-
-                    editable = Editable.Factory.getInstance().newEditable(binding.etRespuesta.getText());
-                    colorSpans = editable.getSpans(0, editable.length(), ForegroundColorSpan.class);
-
-                    // Se colocan las etiquetas en cada palabra con color
-                    colocarEtiquetas(colorSpans, editable);
-
-                    respuestas.add(contadorPregunta, editable.toString());
-                    borrarCrearXML(nombreArchivo);
-                } else {
+                } else if (contadorPregunta <= longi){
                     // Si el contadorPregunta no es mayor a lo guardado entonces modificamos lo actual en
                     // el arreglo, además anteriormente ya validamos campos vacios.
                     Editable editable = Editable.Factory.getInstance().newEditable(binding.etPregunta.getText());
@@ -377,6 +390,25 @@ public class Activity_Modificar extends AppCompatActivity {
                     colocarEtiquetas(colorSpans, editable);
 
                     respuestas.set(contadorPregunta, editable.toString());
+                    borrarCrearXML(nombreArchivo);
+                } else {
+                    // Si el contadorPregunta es igual a lo guardado entonces agregamos la pregunta,
+                    // anteriormente ya validamos campos vacios.
+                    Editable editable = Editable.Factory.getInstance().newEditable(binding.etPregunta.getText());
+                    ForegroundColorSpan[] colorSpans = editable.getSpans(0, editable.length(), ForegroundColorSpan.class);
+
+                    // Se colocan las etiquetas en cada palabra con color
+                    colocarEtiquetas(colorSpans, editable);
+
+                    preguntas.add(contadorPregunta, editable.toString());
+
+                    editable = Editable.Factory.getInstance().newEditable(binding.etRespuesta.getText());
+                    colorSpans = editable.getSpans(0, editable.length(), ForegroundColorSpan.class);
+
+                    // Se colocan las etiquetas en cada palabra con color
+                    colocarEtiquetas(colorSpans, editable);
+
+                    respuestas.add(contadorPregunta, editable.toString());
                     borrarCrearXML(nombreArchivo);
                 }
             }
@@ -616,8 +648,7 @@ public class Activity_Modificar extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Guia de estudio modificada exitosamente",
                     Toast.LENGTH_SHORT).show();
 
-            // Una vez actualizado regresaremos a la pantalla principal.
-            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            Intent intent = new Intent(getApplicationContext(), Activity_RepasarGuia.class);
             intent.putExtra("nombre_archivo", nombreArchivo);
             startActivity(intent);
             finish();

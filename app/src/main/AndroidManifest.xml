@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.jonathanev.review">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -19,13 +18,38 @@
 
          4.- Si vamos agregar una nueva pregunta y le doy para atrás no se guardará esa pregunta
              si no hay campos vacios.
+         (SOLUCIONADO)
+
+         5.- Mientras mas actividades vaya abriendo se van quedando las anteriores, ya teniendo eso
+             seguimos dandole para atrás y sigue en el Main activity dependiendo de cuantas veces
+             abrimos el modificar guia.
+         (SOLUCIONADO)
+
+         6.- Cuando modificas únicamente la última pregunta y le das guardar se guarda como estaba
+             anteriormente y se guarda la nueva, en el resto de modificaciones lo hace bien.
+         (SOLUCIONADO)
+
+         7.- Solucionar en Crear guía y al momento de modificar cuando le das click al botón
+             de atrás.
+
 
          MEJORAS
 
-         5.- Cambiar los botónes de siguiente y atras por iconos con flecha de siguiente y atras.
+         8.- Cambiar los botónes de siguiente y atras por iconos con flecha de siguiente y atras.
 
-         6.- No se puede cambiar colores a letras que ya tenía un color anteriormente.
+         9.- No se puede cambiar colores a letras que ya tenía un color anteriormente.
          (SOLUCIONADO)
+
+         PARA SUBIR LA APLICACIÓN
+         10.- Agregar anuncios dependiendo donde los quiero y que funcionen.
+         (SOLUCIONADO PERO EN PLAYSTORE ESTÁN DESHABILITADOS)
+
+         11.- Ver lo que necesito para subir la App en la Play Store.
+         (Solucionado)
+
+         PLAY STORE
+         Corrección de bug en el botón de atrás.
+         Implementación de opción sobre cambiar el nombre de archivos existentes
     -->
     <application
         android:allowBackup="true"
@@ -34,20 +58,27 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Review">
-        <activity
-            android:name="com.jonathanev.review.Activities.Activity_Modificar"
-            android:exported="false" />
         <!-- Sample AdMob app ID: ca-app-pub-3940256099942544~3347511713 -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-5116088101296740~3054801927" />
+            android:value="ca-app-pub-3940256099942544~3347511713" />
+
+        <!-- El WindowSoft... es para que no se muevan los componentes cuando se habra el teclado -->
+        <activity
+            android:name="com.jonathanev.review.Activities.Activity_Modificar"
+            android:windowSoftInputMode="adjustPan"
+            android:exported="false"
+            android:screenOrientation="userPortrait" />
 
         <activity
             android:name="com.jonathanev.review.Activities.Activity_RepasarGuia"
             android:exported="false"
             android:screenOrientation="userPortrait" />
+
+        <!-- El WindowSoft... es para que no se muevan los componentes cuando se habra el teclado -->
         <activity
             android:name="com.jonathanev.review.Activities.Activity_Cuestionario"
+            android:windowSoftInputMode="adjustPan"
             android:exported="true"
             android:screenOrientation="userPortrait">
             <intent-filter>

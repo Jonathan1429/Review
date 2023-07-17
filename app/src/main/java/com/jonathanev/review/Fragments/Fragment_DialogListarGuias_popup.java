@@ -1,5 +1,7 @@
 package com.jonathanev.review.Fragments;
 
+import static android.content.Context.MODE_PRIVATE;
+
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -22,6 +24,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.jonathanev.review.Activities.Activity_Modificar;
 import com.jonathanev.review.Activities.Activity_RepasarGuia;
@@ -35,7 +38,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Set;
 
-public class Fragment_DialogListarGuias_popup extends DialogFragment {
+public class Fragment_DialogListarGuias_popup extends DialogFragment implements Fragment_DialogNuevoArchivo_popu.DialogListener {
 
     private FragmentListarGuiasBinding binding;
 
@@ -57,13 +60,19 @@ public class Fragment_DialogListarGuias_popup extends DialogFragment {
         return binding.getRoot();
     }
 
+    public void onDialogClosed() {
+        // Realizar las acciones necesarias después de cerrar el diálogo
+        Dialog dialogActual =  getDialog();
+        dialogActual.dismiss();
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         // Recibimos las preferencias y las guardamos nuevamente en un set.
-        SharedPreferences preferences = getActivity().getSharedPreferences("nombres_guias", Context.MODE_PRIVATE);
+        SharedPreferences preferences = getActivity().getSharedPreferences("nombres_guias", MODE_PRIVATE);
         Set<String> set = preferences.getStringSet("guias_estudio", null);
 
         // Metemos la collection directamente en el arreglo y se ordena automáticamente.
@@ -98,7 +107,7 @@ public class Fragment_DialogListarGuias_popup extends DialogFragment {
                 builder.setIcon(R.drawable.ic_advertencia);
                 builder.setTitle("¿Qué acción deseas realizar?");
                 builder.setItems(new CharSequence[]
-                                {"Abrir Guia", "Modificar Guia", "Eliminar Guia", "Cancelar"},
+                                {"Abrir", "Modificar", "Eliminar", "Cambiar nombre", "Cancelar"},
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
                                 switch (which) {
@@ -123,7 +132,7 @@ public class Fragment_DialogListarGuias_popup extends DialogFragment {
                                         dialogoModificarGuia.dismiss();
                                         break;
                                     case 2:
-                                        // Se ejecuta cuando se regresa sin guardar.
+                                        // Se ejecuta cuando quiere eliminar la guía.
                                         new AlertDialog.Builder(getContext())
                                                 .setTitle("¡Atención!")
                                                 .setMessage("¿Estás seguro que deseas eliminar la" +
@@ -159,7 +168,31 @@ public class Fragment_DialogListarGuias_popup extends DialogFragment {
                                                 }).create().show();
                                         break;
                                     case 3:
-                                        // Si entra al 5 se cancela cualquier operación
+                                        // Se ejecuta cuando quiere cambiar el nombre de la guía
+                                        @SuppressLint("SdCardPath") File file = new File("/data/data/com.jonathanev.review/files/");
+                                        if (file.exists()){
+                                            // Unicamente abrimos el dialogo y lo mostramos en la pantalla.
+                                            Fragment_DialogNuevoArchivo_popu dialogo = new Fragment_DialogNuevoArchivo_popu();
+                                            dialogo.show(getChildFragmentManager(), "Fragment");
+
+                                            // Creamos las preferencias y dentro de ellas guardamos el arreglo item
+                                            SharedPreferences preferencias = getContext().getSharedPreferences("cambiar_nombre", MODE_PRIVATE);
+                                            SharedPreferences.Editor editor = preferencias.edit();
+                                            editor.putString("cambiar_nombre", "sin nombre");
+                                            editor.commit();
+
+                                            preferencias = getContext().getSharedPreferences("nombre_archivo", MODE_PRIVATE);
+                                            editor = preferencias.edit();
+                                            editor.putString("nombre_archivo", guias.getNombreGuia());
+                                            editor.commit();
+                                        } else {
+                                            Toast.makeText(getContext(), "La ruta para cambiar " +
+                                                "el nombre del archivo actualmente no existe.",
+                                                Toast.LENGTH_SHORT).show();
+                                        }
+                                        break;
+                                    case 4:
+                                        // Cuando cancela se ejecuta esta acción
                                         dialog.dismiss();
                                         Toast.makeText(getContext(), "Cancelaste la acción", Toast.LENGTH_SHORT).show();
                                         break;

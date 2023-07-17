@@ -128,10 +128,13 @@ public class Activity_Cuestionario extends AppCompatActivity {
                     if (contadorPregunta <= longi){
                         // Validamos campos vacios en la pregunta y respuesta.
                         if (binding.etPregunta.getText().toString().isEmpty()
-                                || binding.etRespuesta.getText().toString().isEmpty()){
+                            || binding.etRespuesta.getText().toString().isEmpty()){
                             Toast.makeText(getApplicationContext(),
                                     "Asegurate de no dejar ningun campo vacio",
                                     Toast.LENGTH_SHORT).show();
+
+                            // Se resta uno al final y así se queda neutral.
+                            contadorPregunta++;
                         } else {
                             // Si los campos están bien se sobre escribe.
                             Editable editable = Editable.Factory.getInstance().newEditable(binding.etPregunta.getText());
@@ -154,9 +157,37 @@ public class Activity_Cuestionario extends AppCompatActivity {
                             pintarTexto(contadorPregunta-1);
                         }
                     } else {
-                        // Si el contadorPregunta es mayor a lo que hay guardado entonces
-                        // Pintamos el texto
-                        pintarTexto(contadorPregunta-1);
+                        if (binding.etPregunta.getText().toString().isEmpty()
+                                || binding.etRespuesta.getText().toString().isEmpty()){
+                            Toast.makeText(getApplicationContext(),
+                                    "Asegurate de no dejar ningun campo vacio",
+                                    Toast.LENGTH_SHORT).show();
+
+                            // Se resta uno al final y así se queda neutral.
+                            contadorPregunta++;
+                        } else {
+                            // Si el contadorPregunta es mayor entonces agregaremos la pregunta actual a los
+                            // arreglos.«»
+                            Editable editable = Editable.Factory.getInstance().newEditable(binding.etPregunta.getText());
+                            ForegroundColorSpan[] colorSpans = editable.getSpans(0, editable.length(), ForegroundColorSpan.class);
+
+                            // Se colocan las etiquetas en cada palabra con color
+                            colocarEtiquetas(colorSpans, editable);
+
+                            preguntas.add(contadorPregunta, editable.toString());
+
+                            editable = Editable.Factory.getInstance().newEditable(binding.etRespuesta.getText());
+                            colorSpans = editable.getSpans(0, editable.length(), ForegroundColorSpan.class);
+
+                            // Se colocan las etiquetas en cada palabra con color
+                            colocarEtiquetas(colorSpans, editable);
+
+                            respuestas.add(contadorPregunta, editable.toString());
+
+                            // Si el contadorPregunta es mayor a lo que hay guardado entonces
+                            // pintamos el texto anterior.
+                            pintarTexto(contadorPregunta-1);
+                        }
                     }
                     contadorPregunta--;
                 } else {
@@ -315,16 +346,16 @@ public class Activity_Cuestionario extends AppCompatActivity {
                         // guardadas entra aquí.
                         crearArchivo(nombreArchivo);
                     }
-                } else if (contadorPregunta > longi){
-                    // Si el contadorPregunta es mayor a lo guardado entonces agregamos la pregunta
-                    // anteriormente ya validamos campos vacios.
+                }  else if (contadorPregunta < longi){
+                    // Si el contadorPregunta no es mayor a lo guardado entonces modificamos lo actual en
+                    // el arreglo, además anteriormente ya validamos campos vacios.
                     Editable editable = Editable.Factory.getInstance().newEditable(binding.etPregunta.getText());
                     ForegroundColorSpan[] colorSpans = editable.getSpans(0, editable.length(), ForegroundColorSpan.class);
 
                     // Se colocan las etiquetas en cada palabra con color
                     colocarEtiquetas(colorSpans, editable);
 
-                    preguntas.add(contadorPregunta, editable.toString());
+                    preguntas.set(contadorPregunta, editable.toString());
 
                     editable = Editable.Factory.getInstance().newEditable(binding.etRespuesta.getText());
                     colorSpans = editable.getSpans(0, editable.length(), ForegroundColorSpan.class);
@@ -332,11 +363,11 @@ public class Activity_Cuestionario extends AppCompatActivity {
                     // Se colocan las etiquetas en cada palabra con color
                     colocarEtiquetas(colorSpans, editable);
 
-                    respuestas.add(contadorPregunta, editable.toString());
+                    respuestas.set(contadorPregunta, editable.toString());
                     crearArchivo(nombreArchivo);
                 } else {
-                    // Si el contadorPregunta no es mayor a lo guardado entonces modificamos lo actual en
-                    // el arreglo, además anteriormente ya validamos campos vacios.
+                    // Si el contadorPregunta es igual a lo guardado entonces agregamos la pregunta,
+                    // anteriormente ya validamos campos vacios.
                     Editable editable = Editable.Factory.getInstance().newEditable(binding.etPregunta.getText());
                     ForegroundColorSpan[] colorSpans = editable.getSpans(0, editable.length(), ForegroundColorSpan.class);
 

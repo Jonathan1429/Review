@@ -41,7 +41,13 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 // Unicamente abrimos el dialogo y lo mostramos en la pantalla.
                 Fragment_DialogNuevoArchivo_popu dialogo = new Fragment_DialogNuevoArchivo_popu();
-                dialogo.show(getSupportFragmentManager(), "Fragment");
+                dialogo.show(getSupportFragmentManager(), "Fragment_nuevo");
+
+                // Creamos las preferencias y dentro de ellas guardamos el arreglo item
+                SharedPreferences preferencias = getApplicationContext().getSharedPreferences("cambiar_nombre", MODE_PRIVATE);
+                SharedPreferences.Editor editor = preferencias.edit();
+                editor.putString("cambiar_nombre", "no existe");
+                editor.commit();
             }
         });
 

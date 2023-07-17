@@ -16,25 +16,31 @@
         android:id="@+id/tvLabelColor"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:layout_marginStart="6dp"
         android:text="@string/btnColorAct"
         app:layout_constraintTop_toBottomOf="@+id/barra_superior_regreso"
         app:layout_constraintBottom_toTopOf="@+id/tilContenidoPregunta"
         app:layout_constraintStart_toStartOf="parent"/>
 
-    <Button
+    <ImageButton
         android:id="@+id/btnColorActual"
         android:layout_width="15dp"
         android:layout_height="15dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="6dp"
+        android:src="@drawable/ic_filter_state"
         android:background="@drawable/boton_redondo"
+        android:contentDescription="Color actual"
         app:layout_constraintTop_toBottomOf="@+id/barra_superior_regreso"
         app:layout_constraintBottom_toTopOf="@+id/tilContenidoPregunta"
-        app:layout_constraintStart_toEndOf="@+id/tvLabelColor"/>
+        app:layout_constraintStart_toEndOf="@+id/tvLabelColor" />
 
     <ImageView
         android:id="@+id/imgvColor"
         android:layout_width="30dp"
         android:layout_height="30dp"
+        android:layout_marginTop="10dp"
         android:src="@drawable/ic_action_goright"
         android:background="?android:attr/selectableItemBackgroundBorderless"
         app:layout_constraintTop_toBottomOf="@+id/barra_superior_regreso"
@@ -47,14 +53,14 @@
         android:id="@+id/tilContenidoPregunta"
         android:labelFor="@+id/tvContenidoPregunta"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_marginTop="20dp"
+        android:layout_height="0dp"
         android:layout_marginStart="6dp"
         android:layout_marginEnd="6dp"
         app:endIconMode="clear_text"
-        app:layout_constraintTop_toBottomOf="@+id/barra_superior_regreso"
+        app:layout_constraintTop_toBottomOf="@+id/imgvColor"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.3">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etPregunta"
@@ -73,14 +79,14 @@
         android:id="@+id/tilContenidoRespuesta"
         android:labelFor="@+id/tvContenidoPregunta"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_marginTop="20dp"
+        android:layout_height="0dp"
         android:layout_marginStart="6dp"
         android:layout_marginEnd="6dp"
         app:endIconMode="clear_text"
         app:layout_constraintTop_toBottomOf="@+id/tilContenidoPregunta"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.3">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etRespuesta"
