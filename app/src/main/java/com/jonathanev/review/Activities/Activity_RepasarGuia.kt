@@ -1,0 +1,272 @@
+package com.jonathanev.review.Activities
+
+import android.app.AlertDialog
+import android.content.DialogInterface
+import android.os.Bundle
+import android.text.Spannable
+import android.text.SpannableStringBuilder
+import android.text.style.ForegroundColorSpan
+import android.view.View
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import com.jonathanev.review.Clases.ColoresPregunta
+import com.jonathanev.review.databinding.ActivityRepasarGuiaBinding
+import org.w3c.dom.Document
+import org.w3c.dom.Element
+import org.w3c.dom.NodeList
+import org.xml.sax.SAXException
+import java.io.FileInputStream
+import java.io.IOException
+import javax.xml.parsers.DocumentBuilder
+import javax.xml.parsers.DocumentBuilderFactory
+import javax.xml.parsers.ParserConfigurationException
+
+class Activity_RepasarGuia constructor() : AppCompatActivity() {
+    private var binding: ActivityRepasarGuiaBinding? = null
+    private var nombreArchivo: String? = null
+    private val preguntas: ArrayList<String> = ArrayList()
+    private val respuestas: ArrayList<String> = ArrayList()
+    private val preguntasColor: ArrayList<ColoresPregunta> = ArrayList()
+    private val respuestasColor: ArrayList<ColoresPregunta> = ArrayList()
+    private var contadorPregunta: Int = 0
+    var builder: SpannableStringBuilder? = null
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityRepasarGuiaBinding.inflate(getLayoutInflater())
+        setContentView(binding!!.getRoot())
+
+        // Anuncios publicitarios Banners.
+        /*MobileAds.initialize(this, new OnInitializationCompleteListener() {
+            @Override
+            public void onInitializationComplete(InitializationStatus initializationStatus) {
+            }
+        });
+
+        AdRequest adRequest = new Builder().build();
+        binding.adView.loadAd(adRequest);
+        binding.adView.setAdListener(new AdListener() {
+            @Override
+            public void onAdClicked() {
+                // Code to be executed when the user clicks on an ad.
+            }
+
+            @Override
+            public void onAdClosed() {
+                // Code to be executed when the user is about to return
+                // to the app after tapping on an ad.
+            }
+
+            @Override
+            public void onAdFailedToLoad(LoadAdError adError) {
+                // Code to be executed when an ad request fails.
+            }
+
+            @Override
+            public void onAdImpression() {
+                // Code to be executed when an impression is recorded
+                // for an ad.
+            }
+
+            @Override
+            public void onAdLoaded() {
+                // Code to be executed when an ad finishes loading.
+            }
+
+            @Override
+            public void onAdOpened() {
+                // Code to be executed when an ad opens an overlay that
+                // covers the screen.
+            }
+        });*/
+
+        // Reutilizo el layout anteriormente creado y le asigno un texto el tvTituloToolbar
+        binding!!.barraSuperiorRegreso.tvTituloToolbar.setText("Guia")
+        binding!!.barraSuperiorRegreso.imgvBack.setOnClickListener(object : View.OnClickListener {
+            public override fun onClick(view: View) {
+                onBackPressed()
+            }
+        })
+
+        // Guardo el nombre del archivo enviado desde el popupFragmentListarGuias.
+        nombreArchivo = getIntent().getExtras()!!.getString("nombre_archivo")
+
+        // Aquí simplemente nos aseguramos que tenga el xml, si lo tiene no entramos, sino si.
+        // En teoría todos los archivos lo van a tener.
+        if (!nombreArchivo!!.contains(".xml")) {
+            nombreArchivo = getIntent().getExtras()!!.getString("nombre_archivo") + ".xml"
+        }
+
+        // Obtenemos los datos del XML y los guardamos en su respectivo ArrayList.
+        obtenerDatosXML()
+
+        // Pintamos el texto del contador actual.
+        pintarTexto()
+
+        // Mientras noHayMasPreguntas sea falso entrará al método.
+        binding!!.btnMostrarRespuesta.setOnClickListener(object : View.OnClickListener {
+            public override fun onClick(view: View) {
+                if ((binding!!.btnMostrarRespuesta.getText().toString() == "Mostrar respuesta")) {
+                    binding!!.btnMostrarRespuesta.setText("Ocultar respuesta")
+                    mostrarRespuesta(builder)
+                } else {
+                    binding!!.btnMostrarRespuesta.setText("Mostrar respuesta")
+                    binding!!.etRespuesta.setText("")
+                }
+            }
+        })
+        binding!!.btnAtrasPregunta.setOnClickListener(object : View.OnClickListener {
+            public override fun onClick(view: View) {
+                binding!!.btnMostrarRespuesta.setText("Mostrar respuesta")
+                if (contadorPregunta == 0) {
+                    Toast.makeText(
+                        getApplicationContext(), "No tienes preguntas anteriores",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else {
+                    contadorPregunta--
+                    binding!!.etPregunta.setText("")
+                    binding!!.etRespuesta.setText("")
+
+                    // Pintamos el valor anterior de colores.
+                    pintarTexto()
+                }
+            }
+        })
+        binding!!.btnSiguientePregunta.setOnClickListener(object : View.OnClickListener {
+            public override fun onClick(view: View) {
+                contadorPregunta++
+                binding!!.btnMostrarRespuesta.setText("Mostrar respuesta")
+                val preguntasTotales: Int = preguntas.size
+
+                // Validamos que haya mas preguntas, si las hay entra al método sino al else.
+                if ((contadorPregunta + 1) <= preguntasTotales) {
+                    // Pintamos el valor siguiente con colores.
+                    pintarTexto()
+                    binding!!.etRespuesta.setText("")
+                } else {
+                    contadorPregunta--
+                    // noHayMasPreguntas = true;
+                    // Se ejecuta cuando se regresa sin guardar.
+                    AlertDialog.Builder(this@Activity_RepasarGuia)
+                        .setTitle("¡Atención!")
+                        .setMessage("Se acabaron las preguntas, ¿Quieres repetir la guia?")
+                        .setPositiveButton("Si", object : DialogInterface.OnClickListener {
+                            public override fun onClick(dialogInterface: DialogInterface, i: Int) {
+                                contadorPregunta = 0
+                                binding!!.etPregunta.setText("")
+                                binding!!.etRespuesta.setText("")
+
+                                // Mostramos el primer valor de la pregunta pintado.
+                                pintarTexto()
+                                //binding.etPregunta.setText(preguntas.get(contadorPregunta));
+                            }
+                        })
+                        .setNegativeButton("Cancelar", object : DialogInterface.OnClickListener {
+                            public override fun onClick(dialog: DialogInterface, i: Int) {
+                                dialog.dismiss()
+                            }
+                        }).create().show()
+                }
+            }
+        })
+    }
+
+    private fun pintarTexto() {
+        var contColorPreg: Int = 0
+        var contColorResp: Int = 0
+        var inicio: Int = 0
+        var fin: Int = 0
+        var coloresPregunta: ColoresPregunta? = null
+        var texto: String = preguntas.get(contadorPregunta)
+        while (texto.contains("«")) {
+            inicio = texto.indexOf("«") + 1
+            fin = texto.indexOf("»")
+            val color: String = texto.substring(inicio, fin)
+            val longColor: Int = color.length
+            val colEntero: Int = color.toInt()
+            inicio = fin + 1
+            fin = texto.indexOf("«", inicio)
+            coloresPregunta =
+                ColoresPregunta((inicio - longColor - 2), (fin - longColor - 2), colEntero)
+            preguntasColor.add(contColorPreg, coloresPregunta)
+            // Eliminar la primera etiqueta y su contenido
+            texto = texto.replaceFirst("«.*?»".toRegex(), "")
+
+            // Eliminar la segunda etiqueta y su contenido
+            texto = texto.replaceFirst("«.*?»".toRegex(), "")
+            contColorPreg++
+        }
+        builder = SpannableStringBuilder(texto)
+        for (coloresPreguntas: ColoresPregunta in preguntasColor) {
+            val colorSpan: ForegroundColorSpan = ForegroundColorSpan(coloresPreguntas.color)
+            builder!!.setSpan(
+                colorSpan,
+                coloresPreguntas.inicioColor,
+                coloresPreguntas.finColor,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+        }
+        binding!!.etPregunta.setText(builder)
+        texto = respuestas.get(contadorPregunta)
+        while (texto.contains("«")) {
+            inicio = texto.indexOf("«") + 1
+            fin = texto.indexOf("»")
+            val color: String = texto.substring(inicio, fin)
+            val longColor: Int = color.length
+            val colEntero: Int = color.toInt()
+            inicio = fin + 1
+            fin = texto.indexOf("«", inicio)
+            coloresPregunta =
+                ColoresPregunta((inicio - longColor - 2), (fin - longColor - 2), colEntero)
+            respuestasColor.add(contColorResp, coloresPregunta)
+            // Eliminar la primera etiqueta y su contenido
+            texto = texto.replaceFirst("«.*?»".toRegex(), "")
+
+            // Eliminar la segunda etiqueta y su contenido
+            texto = texto.replaceFirst("«.*?»".toRegex(), "")
+            contColorResp++
+        }
+        builder = SpannableStringBuilder(texto)
+        for (coloresPreguntas: ColoresPregunta in respuestasColor) {
+            val colorSpan: ForegroundColorSpan = ForegroundColorSpan(coloresPreguntas.color)
+            builder!!.setSpan(
+                colorSpan,
+                coloresPreguntas.inicioColor,
+                coloresPreguntas.finColor,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+        }
+        preguntasColor.clear()
+        respuestasColor.clear()
+    }
+
+    private fun mostrarRespuesta(builder: SpannableStringBuilder?) {
+        binding!!.etRespuesta.setText(builder)
+    }
+
+    private fun obtenerDatosXML() {
+        var doc: Document? = null
+        val dbf: DocumentBuilderFactory = DocumentBuilderFactory.newInstance()
+        val db: DocumentBuilder
+        try {
+            db = dbf.newDocumentBuilder()
+            val fis: FileInputStream = openFileInput(nombreArchivo)
+            doc = db.parse(fis)
+
+            // Buscamos los Nodos Interrogante y accedemos a lo que se encuentre dentro.
+            val cuestionario: NodeList = doc.getElementsByTagName("Interrogante")
+            for (i in 0 until cuestionario.getLength()) {
+                // Accedes a los elementos de dicho nodo
+                val e: Element = cuestionario.item(i) as Element
+                preguntas.add(i, e.getAttribute("pregunta"))
+                respuestas.add(i, e.getAttribute("respuesta"))
+            }
+        } catch (e: ParserConfigurationException) {
+            e.printStackTrace()
+        } catch (e: SAXException) {
+            e.printStackTrace()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+}
