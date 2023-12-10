@@ -2,7 +2,7 @@ package com.jonathanev.review.Clases
 
 import java.util.Objects
 
-class Guias {
+class Guia {
     var nombreGuia: String? = null
     var imgGuia = 0
 
@@ -15,7 +15,7 @@ class Guias {
     override fun equals(o: Any?): Boolean {
         if (this === o) return true
         if (o == null || javaClass != o.javaClass) return false
-        val guias = o as Guias
+        val guias = o as Guia
         return nombreGuia == guias.nombreGuia
     }
 

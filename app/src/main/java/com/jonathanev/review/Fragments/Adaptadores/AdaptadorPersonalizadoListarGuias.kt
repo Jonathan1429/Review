@@ -7,12 +7,12 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
-import com.jonathanev.review.Clases.Guias
+import com.jonathanev.review.Clases.Guia
 import com.jonathanev.review.R
 
 class AdaptadorPersonalizadoListarGuias(
     private val context: Context?,
-    private val listaGuias: List<Guias>
+    private val listaGuias: List<Guia>
 ) : BaseAdapter() {
     override fun getCount(): Int {
         return listaGuias.size

@@ -75,23 +75,30 @@ class MainActivity constructor() : AppCompatActivity() {
                         item.add(archivo.getName().replace(".xml".toRegex(), ""))
                     }
 
-
-                    // Teniendo todos los nombre de los archivos abrimos el dialogo.
-                    val dialogo: Fragment_DialogListarGuias_popup =
-                        Fragment_DialogListarGuias_popup()
-                    dialogo.show(getSupportFragmentManager(), "Fragment")
-
                     // Creamos las preferencias y dentro de ellas guardamos el arreglo item
                     val preferencias: SharedPreferences =
                         getSharedPreferences("nombres_guias", MODE_PRIVATE)
-                    val editor: SharedPreferences.Editor
-                    editor = preferencias.edit()
+                    val editor: SharedPreferences.Editor = preferencias.edit()
                     val set: MutableSet<String> = HashSet()
                     set.addAll(item)
                     editor.putStringSet("guias_estudio", set)
                     editor.commit()
+
+                    // Teniendo todos los nombre de los archivos abrimos el dialogo.
+                    //replaceFragment(Fragment_DialogListarGuias_popup())
+
+                    val dialogo: Fragment_DialogListarGuias_popup =
+                        Fragment_DialogListarGuias_popup()
+                    dialogo.show(supportFragmentManager, "Fragment")
                 }
             }
         })
+    }
+
+    private fun replaceFragment(guiasFragment: Fragment_DialogListarGuias_popup) {
+        val fragmentManager = supportFragmentManager
+        val fragmentTransaction = fragmentManager.beginTransaction()
+        fragmentTransaction.replace(R.id.frame_layout, guiasFragment)
+        fragmentTransaction.commit()
     }
 }

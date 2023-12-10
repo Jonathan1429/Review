@@ -13,26 +13,30 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
-import android.widget.AdapterView.OnItemClickListener
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.DialogFragment
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.jonathanev.review.Activities.Activity_Modificar
 import com.jonathanev.review.Activities.Activity_RepasarGuia
-import com.jonathanev.review.Clases.Guias
+import com.jonathanev.review.Clases.Guia
 import com.jonathanev.review.Fragments.Adaptadores.AdaptadorPersonalizadoListarGuias
+import com.jonathanev.review.Fragments.Adaptadores.ListarGuiasAdapter
 import com.jonathanev.review.Fragments.Fragment_DialogNuevoArchivo_popu.DialogListener
 import com.jonathanev.review.R
 import com.jonathanev.review.databinding.FragmentListarGuiasBinding
 import java.io.File
+
 class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
     private var binding: FragmentListarGuiasBinding? = null
+    private lateinit var adaptadorListarGuias: ListarGuiasAdapter
 
     // Guardar la collection del set en este Arreglo
     private val item = ArrayList<String>()
 
     // Cargar el ListView
-    private val lista = ArrayList<Guias>()
+    private val guias = ArrayList<Guia>()
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -53,18 +57,16 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
         super.onViewCreated(view, savedInstanceState)
 
         // Recibimos las preferencias y las guardamos nuevamente en un set.
-        val preferences = requireActivity().getSharedPreferences("nombres_guias", Context.MODE_PRIVATE)
-        val set = preferences.getStringSet("guias_estudio", null)
+        val preferences =
+            requireActivity().getSharedPreferences("nombres_guias", Context.MODE_PRIVATE)
+        //val set = preferences.getStringSet("guias_estudio", null)
+        val set = preferences.getStringSet("guias_estudio", null) ?: emptySet()
 
         // Metemos la collection directamente en el arreglo y se ordena automáticamente.
         item.addAll(set!!)
 
         // Ordena las guías con el método sort FALTA ESTA PARTE
-        /*item.sort(object : Comparator<String?> {
-            override fun compare(o1: String, o2: String): Int {
-                return o1.compareTo(o2)
-            }
-        })*/
+        item.sort()
 
         // Sino tengo ninguna guía de estudio aparece el texto que no tengo guías
         if (item.isEmpty()) {
@@ -76,125 +78,6 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
 
         // Cargamos la lista de los items
         cargarListaGuiasEstudio(item)
-        binding!!.lvGuiasEstudio.onItemClickListener =
-            OnItemClickListener { parent, view, posicion, id ->
-                val guias = lista[posicion]
-
-                // Creo una alerta donde me saldrán una lista de items
-                val builder = AlertDialog.Builder(context)
-                builder.setIcon(R.drawable.ic_advertencia)
-                builder.setTitle("¿Qué acción deseas realizar?")
-                builder.setItems(
-                    arrayOf<CharSequence>(
-                        "Abrir",
-                        "Modificar",
-                        "Eliminar",
-                        "Cambiar nombre",
-                        "Cancelar"
-                    )
-                ) { dialog, which ->
-                    when (which) {
-                        0 -> {
-                            // Si entra al primer item se abre la guía a review
-                            val intentAbrirGuia = Intent(activity, Activity_RepasarGuia::class.java)
-                            intentAbrirGuia.putExtra("nombre_archivo", guias.nombreGuia)
-                            startActivity(intentAbrirGuia)
-                            // Recuperamos el dialogo abierto actualmente
-                            // (Fragment_DialogListarGuias.java) y lo cerramos.
-                            val dialogoAbrirGuia = getDialog()
-                            dialogoAbrirGuia!!.dismiss()
-                        }
-
-                        1 -> {
-                            // Si entra al segundo es para modificar la guía de estudio
-                            val intentModificarGuia =
-                                Intent(activity, Activity_Modificar::class.java)
-                            intentModificarGuia.putExtra("nombre_archivo", guias.nombreGuia)
-                            startActivity(intentModificarGuia)
-                            // Recuperamos el dialogo abierto actualmente
-                            // (Fragment_DialogListarGuias.java) y lo cerramos.
-                            val dialogoModificarGuia = getDialog()
-                            dialogoModificarGuia!!.dismiss()
-                        }
-
-                        2 ->                                         // Se ejecuta cuando quiere eliminar la guía.
-                            AlertDialog.Builder(context)
-                                .setTitle("¡Atención!")
-                                .setMessage(
-                                    "¿Estás seguro que deseas eliminar la" +
-                                            " guia?"
-                                )
-                                .setPositiveButton("Si") { dialogInterface, i ->
-                                    // Si entra al tercero es para eliminar la guia exitosamente
-                                    @SuppressLint("SdCardPath") val file =
-                                        File("/data/data/com.jonathanev.review/files/")
-                                    if (file.exists()) {
-                                        File(file, guias.nombreGuia + ".xml").delete()
-                                        Toast.makeText(
-                                            context,
-                                            "¡Archivo eliminado exitosamente!",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-
-                                        // Recuperamos el dialogo abierto actualmente
-                                        // (Fragment_DialogListarGuias_popup.java)
-                                        // y lo cerramos.
-                                        val dialogoEliminarGuia = getDialog()
-                                        dialogoEliminarGuia!!.dismiss()
-                                    } else {
-                                        Toast.makeText(
-                                            context, "La ruta para eliminar el " +
-                                                    "archivo actualmente no existe.",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
-                                }
-                                .setNegativeButton("Cancelar") { dialog, i -> dialog.dismiss() }
-                                .create().show()
-
-                        3 -> {
-                            // Se ejecuta cuando quiere cambiar el nombre de la guía
-                            @SuppressLint("SdCardPath") val file =
-                                File("/data/data/com.jonathanev.review/files/")
-                            if (file.exists()) {
-                                // Unicamente abrimos el dialogo y lo mostramos en la pantalla.
-                                val dialogo = Fragment_DialogNuevoArchivo_popu()
-                                //dialogo.show(childFragmentManager, "Fragment")
-
-                                // Creamos las preferencias y dentro de ellas guardamos el arreglo item
-                                var preferencias = requireContext().getSharedPreferences(
-                                    "cambiar_nombre",
-                                    Context.MODE_PRIVATE
-                                )
-                                var editor = preferencias.edit()
-                                editor.putString("cambiar_nombre", "sin nombre")
-                                editor.commit()
-                                preferencias = requireContext().getSharedPreferences(
-                                    "nombre_archivo",
-                                    Context.MODE_PRIVATE
-                                )
-                                editor = preferencias.edit()
-                                editor.putString("nombre_archivo", guias.nombreGuia)
-                                editor.commit()
-                            } else {
-                                Toast.makeText(
-                                    context, "La ruta para cambiar " +
-                                            "el nombre del archivo actualmente no existe.",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        }
-
-                        4 -> {
-                            // Cuando cancela se ejecuta esta acción
-                            dialog.dismiss()
-                            Toast.makeText(context, "Cancelaste la acción", Toast.LENGTH_SHORT)
-                                .show()
-                        }
-                    }
-                }
-                builder.create().show()
-            }
     }
 
     private fun cargarListaGuiasEstudio(item: ArrayList<String>) {
@@ -208,19 +91,145 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
             5 -> numeroRandom = R.drawable.libro_triple
             6 -> numeroRandom = R.drawable.libros
         }
-        var adaptador: AdaptadorPersonalizadoListarGuias? = null
-        var guias: Guias
+
+        //var adaptador: AdaptadorPersonalizadoListarGuias? = null
+        var guia: Guia
 
         // La imagen guardada en numeroRandom se pondrá en el objeto guias
         // Después se irá poniendo el nombre de cada una de las guias en el objeto
         for (i in item.indices) {
-            guias = Guias()
-            guias.imgGuia = numeroRandom
-            guias.nombreGuia = item[i]
-            lista.add(guias)
+            guia = Guia()
+            guia.imgGuia = numeroRandom
+            guia.nombreGuia = item[i]
+            //lista.add(guias)
+            guias.add(guia)
         }
-        adaptador = AdaptadorPersonalizadoListarGuias(context, lista)
-        binding!!.lvGuiasEstudio.adapter = adaptador
+        adaptadorListarGuias = ListarGuiasAdapter(guias) {position -> optionsGuide(position)}
+        binding!!.lvGuiasEstudio.layoutManager = LinearLayoutManager(context)
+        binding!!.lvGuiasEstudio.setHasFixedSize(true)
+        binding!!.lvGuiasEstudio.adapter = adaptadorListarGuias
+        //adaptador = ListarGuiasAdapter(guias) //AdaptadorPersonalizadoListarGuias(context, lista)
+        //binding!!.lvGuiasEstudio.adapter = adaptador
+    }
+
+    private fun optionsGuide(position: Int) {
+        val guias = guias[position]
+
+        // Creo una alerta donde me saldrán una lista de items
+        val builder = AlertDialog.Builder(context)
+        builder.setIcon(R.drawable.ic_advertencia)
+        builder.setTitle("¿Qué acción deseas realizar?")
+        builder.setItems(
+            arrayOf<CharSequence>(
+                "Abrir",
+                "Modificar",
+                "Eliminar",
+                "Cambiar nombre",
+                "Cancelar"
+            )
+        ) { dialog, which ->
+            when (which) {
+                0 -> {
+                    // Si entra al primer item se abre la guía a review
+                    val intentAbrirGuia = Intent(activity, Activity_RepasarGuia::class.java)
+                    intentAbrirGuia.putExtra("nombre_archivo", guias.nombreGuia)
+                    startActivity(intentAbrirGuia)
+                    // Recuperamos el dialogo abierto actualmente
+                    // (Fragment_DialogListarGuias.java) y lo cerramos.
+                    val dialogoAbrirGuia = getDialog()
+                    dialogoAbrirGuia!!.dismiss()
+                }
+
+                1 -> {
+                    // Si entra al segundo es para modificar la guía de estudio
+                    val intentModificarGuia =
+                        Intent(activity, Activity_Modificar::class.java)
+                    intentModificarGuia.putExtra("nombre_archivo", guias.nombreGuia)
+                    startActivity(intentModificarGuia)
+                    // Recuperamos el dialogo abierto actualmente
+                    // (Fragment_DialogListarGuias.java) y lo cerramos.
+                    val dialogoModificarGuia = getDialog()
+                    dialogoModificarGuia!!.dismiss()
+                }
+
+                2 ->
+                    // Se ejecuta cuando quiere eliminar la guía.
+                    AlertDialog.Builder(context)
+                        .setTitle("¡Atención!")
+                        .setMessage(
+                            "¿Estás seguro que deseas eliminar la" +
+                                    " guia?"
+                        )
+                        .setPositiveButton("Si") { dialogInterface, i ->
+                            // Si entra al tercero es para eliminar la guia exitosamente
+                            @SuppressLint("SdCardPath") val file =
+                                File("/data/data/com.jonathanev.review/files/")
+                            if (file.exists()) {
+                                File(file, guias.nombreGuia + ".xml").delete()
+                                Toast.makeText(
+                                    context,
+                                    "¡Archivo eliminado exitosamente!",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+
+                                // Recuperamos el dialogo abierto actualmente
+                                // (Fragment_DialogListarGuias_popup.java)
+                                // y lo cerramos.
+                                val dialogoEliminarGuia = getDialog()
+                                dialogoEliminarGuia!!.dismiss()
+                            } else {
+                                Toast.makeText(
+                                    context, "La ruta para eliminar el " +
+                                            "archivo actualmente no existe.",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                        .setNegativeButton("Cancelar") { dialog, i -> dialog.dismiss() }
+                        .create().show()
+
+                3 -> {
+                    // Se ejecuta cuando quiere cambiar el nombre de la guía
+                    @SuppressLint("SdCardPath") val file =
+                        File("/data/data/com.jonathanev.review/files/")
+                    if (file.exists()) {
+                        // Unicamente abrimos el dialogo y lo mostramos en la pantalla.
+                        val dialogo = Fragment_DialogNuevoArchivo_popu()
+                        dialogo.show(childFragmentManager, "Fragment")
+
+                        // Creamos las preferencias y dentro de ellas guardamos el arreglo item
+                        var preferencias = requireContext().getSharedPreferences(
+                            "cambiar_nombre",
+                            Context.MODE_PRIVATE
+                        )
+                        var editor = preferencias.edit()
+                        editor.putString("cambiar_nombre", "sin nombre")
+                        editor.commit()
+                        preferencias = requireContext().getSharedPreferences(
+                            "nombre_archivo",
+                            Context.MODE_PRIVATE
+                        )
+                        editor = preferencias.edit()
+                        editor.putString("nombre_archivo", guias.nombreGuia)
+                        editor.commit()
+                    } else {
+                        Toast.makeText(
+                            context, "La ruta para cambiar " +
+                                    "el nombre del archivo actualmente no existe.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+
+                4 -> {
+                    // Cuando cancela se ejecuta esta acción
+                    dialog.dismiss()
+                    Toast.makeText(context, "Cancelaste la acción", Toast.LENGTH_SHORT)
+                        .show()
+                }
+            }
+        }
+        builder.create().show()
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
