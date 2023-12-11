@@ -81,7 +81,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
 
     private fun cargarListaGuiasEstudio(item: ArrayList<String>) {
         // Se crea un número random para saber cual imagen aparecerá en el listado.
-        var numeroRandom = (Math.random() * 6).toInt() + 1
+        var numeroRandom = (1..6).random()
         when (numeroRandom) {
             1 -> numeroRandom = R.drawable.cerebro
             2 -> numeroRandom = R.drawable.cuaderno

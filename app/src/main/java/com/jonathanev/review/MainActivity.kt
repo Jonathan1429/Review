@@ -85,7 +85,7 @@ class MainActivity constructor() : AppCompatActivity() {
                     val set: MutableSet<String> = HashSet()
                     set.addAll(item)
                     editor.putStringSet("guias_estudio", set)
-                    editor.commit()
+                    editor.apply()
 
                     // Teniendo todos los nombre de los archivos abrimos el dialogo.
                     //replaceFragment(Fragment_DialogListarGuias_popup())

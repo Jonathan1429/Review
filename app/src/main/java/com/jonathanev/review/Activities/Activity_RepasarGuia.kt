@@ -79,11 +79,22 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
             }
         });*/
 
+
         binding!!.barraSuperiorRegreso.imgvBack.setOnClickListener(object : View.OnClickListener {
             public override fun onClick(view: View) {
                 onBackPressed()
             }
         })
+
+        binding!!.imgvPregResp.setOnClickListener {
+            if (binding!!.tilContenidoPregResp.hint == "Pregunta"){
+                mostrarRespuesta(builder)
+                binding!!.tilContenidoPregResp.hint = "Respuesta"
+            } else {
+                pintarTexto()
+                binding!!.tilContenidoPregResp.hint = "Pregunta"
+            }
+        }
 
         // Guardo el nombre del archivo enviado desde el popupFragmentListarGuias.
         nombreArchivo = intent.extras!!.getString("nombre_archivo")
@@ -104,7 +115,7 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
         pintarTexto()
 
         // Mientras noHayMasPreguntas sea falso entrará al método.
-        binding!!.btnMostrarRespuesta.setOnClickListener(object : View.OnClickListener {
+        /*binding!!.btnMostrarRespuesta.setOnClickListener(object : View.OnClickListener {
             public override fun onClick(view: View) {
                 if ((binding!!.btnMostrarRespuesta.text.toString() == "Mostrar respuesta")) {
                     binding!!.btnMostrarRespuesta.text = "Ocultar respuesta"
@@ -114,10 +125,12 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
                     binding!!.etRespuesta.setText("")
                 }
             }
-        })
+        })*/
+
         binding!!.btnAtrasPregunta.setOnClickListener(object : View.OnClickListener {
             public override fun onClick(view: View) {
-                binding!!.btnMostrarRespuesta.text = "Mostrar respuesta"
+                //binding!!.btnMostrarRespuesta.text = "Mostrar respuesta"
+                binding!!.tilContenidoPregResp.hint = "Pregunta"
                 if (contadorPregunta == 0) {
                     Toast.makeText(
                         applicationContext, "No tienes preguntas anteriores",
@@ -125,25 +138,27 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
                     ).show()
                 } else {
                     contadorPregunta--
-                    binding!!.etPregunta.setText("")
-                    binding!!.etRespuesta.setText("")
+                    binding!!.etPregResp.setText("")
 
                     // Pintamos el valor anterior de colores.
                     pintarTexto()
                 }
             }
         })
+
         binding!!.btnSiguientePregunta.setOnClickListener(object : View.OnClickListener {
             public override fun onClick(view: View) {
                 contadorPregunta++
-                binding!!.btnMostrarRespuesta.text = "Mostrar respuesta"
+                //binding!!.btnMostrarRespuesta.text = "Mostrar respuesta"
+                binding!!.tilContenidoPregResp.hint = "Pregunta"
+
                 val preguntasTotales: Int = preguntas.size
 
                 // Validamos que haya mas preguntas, si las hay entra al método sino al else.
                 if ((contadorPregunta + 1) <= preguntasTotales) {
                     // Pintamos el valor siguiente con colores.
+                    binding!!.etPregResp.setText("")
                     pintarTexto()
-                    binding!!.etRespuesta.setText("")
                 } else {
                     contadorPregunta--
                     // noHayMasPreguntas = true;
@@ -154,8 +169,7 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
                         .setPositiveButton("Si", object : DialogInterface.OnClickListener {
                             public override fun onClick(dialogInterface: DialogInterface, i: Int) {
                                 contadorPregunta = 0
-                                binding!!.etPregunta.setText("")
-                                binding!!.etRespuesta.setText("")
+                                binding!!.etPregResp.setText("")
 
                                 // Mostramos el primer valor de la pregunta pintado.
                                 pintarTexto()
@@ -197,6 +211,7 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
             texto = texto.replaceFirst("«.*?»".toRegex(), "")
             contColorPreg++
         }
+
         builder = SpannableStringBuilder(texto)
         for (coloresPreguntas: ColoresPregunta in preguntasColor) {
             val colorSpan: ForegroundColorSpan = ForegroundColorSpan(coloresPreguntas.color)
@@ -207,7 +222,8 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
             )
         }
-        binding!!.etPregunta.text = builder
+
+        binding!!.etPregResp.text = builder
         texto = respuestas.get(contadorPregunta)
         while (texto.contains("«")) {
             inicio = texto.indexOf("«") + 1
@@ -242,7 +258,7 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
     }
 
     private fun mostrarRespuesta(builder: SpannableStringBuilder?) {
-        binding!!.etRespuesta.text = builder
+        binding!!.etPregResp.text = builder
     }
 
     private fun obtenerDatosXML() {
