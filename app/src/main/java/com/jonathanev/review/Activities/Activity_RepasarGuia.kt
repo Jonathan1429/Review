@@ -32,8 +32,8 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
     var builder: SpannableStringBuilder? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityRepasarGuiaBinding.inflate(getLayoutInflater())
-        setContentView(binding!!.getRoot())
+        binding = ActivityRepasarGuiaBinding.inflate(layoutInflater)
+        setContentView(binding!!.root)
 
         // Anuncios publicitarios Banners.
         /*MobileAds.initialize(this, new OnInitializationCompleteListener() {
@@ -79,8 +79,6 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
             }
         });*/
 
-        // Reutilizo el layout anteriormente creado y le asigno un texto el tvTituloToolbar
-        binding!!.barraSuperiorRegreso.tvTituloToolbar.setText("Guia")
         binding!!.barraSuperiorRegreso.imgvBack.setOnClickListener(object : View.OnClickListener {
             public override fun onClick(view: View) {
                 onBackPressed()
@@ -88,12 +86,15 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
         })
 
         // Guardo el nombre del archivo enviado desde el popupFragmentListarGuias.
-        nombreArchivo = getIntent().getExtras()!!.getString("nombre_archivo")
+        nombreArchivo = intent.extras!!.getString("nombre_archivo")
+
+        // Reutilizo el layout anteriormente creado y le asigno un texto el tvTituloToolbar
+        binding!!.barraSuperiorRegreso.tvTituloToolbar.text = "Guia: $nombreArchivo"
 
         // Aquí simplemente nos aseguramos que tenga el xml, si lo tiene no entramos, sino si.
         // En teoría todos los archivos lo van a tener.
         if (!nombreArchivo!!.contains(".xml")) {
-            nombreArchivo = getIntent().getExtras()!!.getString("nombre_archivo") + ".xml"
+            nombreArchivo = intent.extras!!.getString("nombre_archivo") + ".xml"
         }
 
         // Obtenemos los datos del XML y los guardamos en su respectivo ArrayList.
@@ -105,21 +106,21 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
         // Mientras noHayMasPreguntas sea falso entrará al método.
         binding!!.btnMostrarRespuesta.setOnClickListener(object : View.OnClickListener {
             public override fun onClick(view: View) {
-                if ((binding!!.btnMostrarRespuesta.getText().toString() == "Mostrar respuesta")) {
-                    binding!!.btnMostrarRespuesta.setText("Ocultar respuesta")
+                if ((binding!!.btnMostrarRespuesta.text.toString() == "Mostrar respuesta")) {
+                    binding!!.btnMostrarRespuesta.text = "Ocultar respuesta"
                     mostrarRespuesta(builder)
                 } else {
-                    binding!!.btnMostrarRespuesta.setText("Mostrar respuesta")
+                    binding!!.btnMostrarRespuesta.text = "Mostrar respuesta"
                     binding!!.etRespuesta.setText("")
                 }
             }
         })
         binding!!.btnAtrasPregunta.setOnClickListener(object : View.OnClickListener {
             public override fun onClick(view: View) {
-                binding!!.btnMostrarRespuesta.setText("Mostrar respuesta")
+                binding!!.btnMostrarRespuesta.text = "Mostrar respuesta"
                 if (contadorPregunta == 0) {
                     Toast.makeText(
-                        getApplicationContext(), "No tienes preguntas anteriores",
+                        applicationContext, "No tienes preguntas anteriores",
                         Toast.LENGTH_SHORT
                     ).show()
                 } else {
@@ -135,7 +136,7 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
         binding!!.btnSiguientePregunta.setOnClickListener(object : View.OnClickListener {
             public override fun onClick(view: View) {
                 contadorPregunta++
-                binding!!.btnMostrarRespuesta.setText("Mostrar respuesta")
+                binding!!.btnMostrarRespuesta.text = "Mostrar respuesta"
                 val preguntasTotales: Int = preguntas.size
 
                 // Validamos que haya mas preguntas, si las hay entra al método sino al else.
@@ -177,7 +178,7 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
         var inicio: Int = 0
         var fin: Int = 0
         var coloresPregunta: ColoresPregunta? = null
-        var texto: String = preguntas.get(contadorPregunta)
+        var texto: String = preguntas[contadorPregunta]
         while (texto.contains("«")) {
             inicio = texto.indexOf("«") + 1
             fin = texto.indexOf("»")
@@ -206,7 +207,7 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
             )
         }
-        binding!!.etPregunta.setText(builder)
+        binding!!.etPregunta.text = builder
         texto = respuestas.get(contadorPregunta)
         while (texto.contains("«")) {
             inicio = texto.indexOf("«") + 1
@@ -241,7 +242,7 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
     }
 
     private fun mostrarRespuesta(builder: SpannableStringBuilder?) {
-        binding!!.etRespuesta.setText(builder)
+        binding!!.etRespuesta.text = builder
     }
 
     private fun obtenerDatosXML() {
@@ -255,7 +256,7 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
 
             // Buscamos los Nodos Interrogante y accedemos a lo que se encuentre dentro.
             val cuestionario: NodeList = doc.getElementsByTagName("Interrogante")
-            for (i in 0 until cuestionario.getLength()) {
+            for (i in 0 until cuestionario.length) {
                 // Accedes a los elementos de dicho nodo
                 val e: Element = cuestionario.item(i) as Element
                 preguntas.add(i, e.getAttribute("pregunta"))

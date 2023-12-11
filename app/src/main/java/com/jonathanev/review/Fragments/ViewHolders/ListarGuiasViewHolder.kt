@@ -10,7 +10,6 @@ class ListarGuiasViewHolder(view: View): RecyclerView.ViewHolder(view) {
     private var binding: ListarGuiasPersonalizadoBinding = ListarGuiasPersonalizadoBinding.bind(view)
 
     fun render(guias: Guia, positionClicked: (Int) -> Unit) {
-        Log.d("ListarGuiasViewHolder", "Render llamado para ${guias.nombreGuia}")
         binding.ivGuiaEstudio.setImageResource(guias.imgGuia)
         binding.tvTituloGuia.text = guias.nombreGuia
 

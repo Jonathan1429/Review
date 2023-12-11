@@ -106,7 +106,7 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
                                     )
                                     .setPositiveButton(
                                         "Continuar",
-                                        DialogInterface.OnClickListener { dialogInterface, i -> // Si el usuario quiere continuar reemplazamos el archivo.
+                                        DialogInterface.OnClickListener { _, _ -> // Si el usuario quiere continuar reemplazamos el archivo.
                                             val nuevoArchivo = File(
                                                 archivo.parentFile,
                                                 binding!!.etNombreArchivo.text.toString() + ".xml"
@@ -179,7 +179,7 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
                         for (i in files.indices) {
                             // Sacamos del array files el nombre recuperandolo por posición.
                             archivo = files[i]
-                            item = archivo.getName().replace(".xml".toRegex(), "")
+                            item = archivo.name.replace(".xml".toRegex(), "")
                             // Comparamos el texto ingresado en la App con el recuperado.
                             if ((binding!!.etNombreArchivo.text.toString() == item)) {
                                 archivoExiste = true

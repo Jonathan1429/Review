@@ -21,11 +21,11 @@ class MainActivity constructor() : AppCompatActivity() {
     @RequiresApi(api = Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(getLayoutInflater())
-        setContentView(binding!!.getRoot())
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding!!.root)
 
         // Utilizamos un botón que es reutilizado, unicamente le cambiamos el texto.
-        binding!!.btnAbrirGuiaEstudioHabilitado.setText("Abrir Guia")
+        binding!!.btnAbrirGuiaEstudioHabilitado.text = "Abrir Guia"
         binding!!.btnNuevaGuiaEstudio.setOnClickListener(object : View.OnClickListener {
             public override fun onClick(view: View) {
                 // Unicamente abrimos el dialogo y lo mostramos en la pantalla.
@@ -34,12 +34,13 @@ class MainActivity constructor() : AppCompatActivity() {
 
                 // Creamos las preferencias y dentro de ellas guardamos el arreglo item
                 val preferencias: SharedPreferences =
-                    getApplicationContext().getSharedPreferences("cambiar_nombre", MODE_PRIVATE)
+                    applicationContext.getSharedPreferences("cambiar_nombre", MODE_PRIVATE)
                 val editor: SharedPreferences.Editor = preferencias.edit()
                 editor.putString("cambiar_nombre", "no existe")
                 editor.commit()
             }
         })
+
         binding!!.btnAbrirGuiaEstudioHabilitado.setOnClickListener(object : View.OnClickListener {
             public override fun onClick(view: View) {
                 // Defino la ruta donde busco los ficheros.
@@ -51,13 +52,13 @@ class MainActivity constructor() : AppCompatActivity() {
                 if (!file.exists()) {
                     if (file.mkdir()) {
                         Toast.makeText(
-                            getApplicationContext(),
+                            applicationContext,
                             "Ficheros creados correctamente",
                             Toast.LENGTH_SHORT
                         ).show()
                     } else {
                         Toast.makeText(
-                            getApplicationContext(),
+                            applicationContext,
                             "Hubo un error al momento de crear los ficheros necesarios",
                             Toast.LENGTH_SHORT
                         ).show()
@@ -69,10 +70,12 @@ class MainActivity constructor() : AppCompatActivity() {
                     // Hacemos un ciclo por cada fichero para extraer el nombre de cada uno.
                     for (i in files.indices) {
                         // Sacamos del array files el primer fichero.
-                        val archivo: File = files.get(i)
+                        val archivo: File = files[i]
 
-                        // Guardamos el nombre del fichero en la lista item.
-                        item.add(archivo.getName().replace(".xml".toRegex(), ""))
+                        if(archivo.name.contains(".xml")){
+                            // Guardamos el nombre del fichero en la lista item.
+                            item.add(archivo.name.replace(".xml".toRegex(), ""))
+                        }
                     }
 
                     // Creamos las preferencias y dentro de ellas guardamos el arreglo item
@@ -95,10 +98,10 @@ class MainActivity constructor() : AppCompatActivity() {
         })
     }
 
-    private fun replaceFragment(guiasFragment: Fragment_DialogListarGuias_popup) {
+    /*private fun replaceFragment(guiasFragment: Fragment_DialogListarGuias_popup) {
         val fragmentManager = supportFragmentManager
         val fragmentTransaction = fragmentManager.beginTransaction()
         fragmentTransaction.replace(R.id.frame_layout, guiasFragment)
         fragmentTransaction.commit()
-    }
+    }*/
 }

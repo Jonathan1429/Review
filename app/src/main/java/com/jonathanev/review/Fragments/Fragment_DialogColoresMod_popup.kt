@@ -35,7 +35,7 @@ class Fragment_DialogColoresMod_popup : DialogFragment() {
         val bubbleFlag = BubbleFlag(context)
         bubbleFlag.flagMode = FlagMode.FADE
         binding!!.colorPickerView.flagView = bubbleFlag
-        binding!!.colorPickerView.setColorListener(ColorListener { color, fromUser ->
+        binding!!.colorPickerView.setColorListener(ColorListener { color, _ ->
             setLayoutColor(color)
             colorActual = color
             val activityModificar = activity as Activity_Modificar?

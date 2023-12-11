@@ -51,8 +51,8 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
     var fos: FileOutputStream? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityCuestionarioBinding.inflate(getLayoutInflater())
-        setContentView(binding!!.getRoot())
+        binding = ActivityCuestionarioBinding.inflate(layoutInflater)
+        setContentView(binding!!.root)
 
         // Sección de anuncios
         /*MobileAds.initialize(this, new OnInitializationCompleteListener() {
@@ -84,7 +84,9 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
                 });*/
 
         // Recibimos el nombre del archivo del popupFragment Nueva Guia.
-        nombreArchivo = getIntent().getExtras()!!.getString("nombre_archivo")
+        nombreArchivo = intent.extras!!.getString("nombre_archivo")
+        binding!!.barraSuperiorRegreso.tvTituloToolbar.text = nombreArchivo
+
         colorActual = Color.BLACK
         colorActual(colorActual)
         binding!!.barraSuperiorRegreso.imgvBack.setOnClickListener(object : View.OnClickListener {
@@ -97,7 +99,7 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
                 // Unicamente abrimos el dialogo y lo mostramos en la pantalla.
                 val dialogo: Fragment_DialogColores_popup = Fragment_DialogColores_popup()
                 //=====================================================================================================================
-                //dialogo.show(getSupportFragmentManager(), "FragmentColor")
+                dialogo.show(supportFragmentManager, "FragmentColor")
             }
         })
         binding!!.btnAtrasPregunta.setOnClickListener(object : View.OnClickListener {
@@ -112,11 +114,11 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
                     // de lo que esté en la posición 0.
                     if (contadorPregunta <= longi) {
                         // Validamos campos vacios en la pregunta y respuesta.
-                        if ((binding!!.etPregunta.getText().toString().isEmpty()
-                                    || binding!!.etRespuesta.getText().toString().isEmpty())
+                        if ((binding!!.etPregunta.text.toString().isEmpty()
+                                    || binding!!.etRespuesta.text.toString().isEmpty())
                         ) {
                             Toast.makeText(
-                                getApplicationContext(),
+                                applicationContext,
                                 "Asegurate de no dejar ningun campo vacio",
                                 Toast.LENGTH_SHORT
                             ).show()
@@ -126,7 +128,7 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
                         } else {
                             // Si los campos están bien se sobre escribe.
                             var editable: Editable = Editable.Factory.getInstance().newEditable(
-                                binding!!.etPregunta.getText()
+                                binding!!.etPregunta.text
                             )
                             var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
                                 0,
@@ -136,9 +138,9 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
 
                             // Se colocan las etiquetas en cada palabra con color
                             colocarEtiquetas(colorSpans, editable)
-                            preguntas.set(contadorPregunta, editable.toString())
+                            preguntas[contadorPregunta] = editable.toString()
                             editable = Editable.Factory.getInstance()
-                                .newEditable(binding!!.etRespuesta.getText())
+                                .newEditable(binding!!.etRespuesta.text)
                             colorSpans = editable.getSpans(
                                 0,
                                 editable.length,
@@ -147,17 +149,17 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
 
                             // Se colocan las etiquetas en cada palabra con color
                             colocarEtiquetas(colorSpans, editable)
-                            respuestas.set(contadorPregunta, editable.toString())
+                            respuestas[contadorPregunta] = editable.toString()
 
                             // Pintamos el texto en la pregunta actual
                             pintarTexto(contadorPregunta - 1)
                         }
                     } else {
-                        if ((binding!!.etPregunta.getText().toString().isEmpty()
-                                    || binding!!.etRespuesta.getText().toString().isEmpty())
+                        if ((binding!!.etPregunta.text.toString().isEmpty()
+                                    || binding!!.etRespuesta.text.toString().isEmpty())
                         ) {
                             Toast.makeText(
-                                getApplicationContext(),
+                                applicationContext,
                                 "Asegurate de no dejar ningun campo vacio",
                                 Toast.LENGTH_SHORT
                             ).show()
@@ -168,7 +170,7 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
                             // Si el contadorPregunta es mayor entonces agregaremos la pregunta actual a los
                             // arreglos.«»
                             var editable: Editable = Editable.Factory.getInstance().newEditable(
-                                binding!!.etPregunta.getText()
+                                binding!!.etPregunta.text
                             )
                             var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
                                 0,
@@ -180,7 +182,7 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
                             colocarEtiquetas(colorSpans, editable)
                             preguntas.add(contadorPregunta, editable.toString())
                             editable = Editable.Factory.getInstance()
-                                .newEditable(binding!!.etRespuesta.getText())
+                                .newEditable(binding!!.etRespuesta.text)
                             colorSpans = editable.getSpans(
                                 0,
                                 editable.length,
@@ -199,7 +201,7 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
                     contadorPregunta--
                 } else {
                     Toast.makeText(
-                        getApplicationContext(),
+                        applicationContext,
                         "Ya no tienes preguntas anteriores",
                         Toast.LENGTH_LONG
                     ).show()
@@ -209,11 +211,11 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
         binding!!.btnSiguientePregunta.setOnClickListener(object : View.OnClickListener {
             public override fun onClick(view: View) {
                 // Validamos campos vacios en la pregunta o respuesta.
-                if ((binding!!.etPregunta.getText().toString().isEmpty()
-                            || binding!!.etRespuesta.getText().toString().isEmpty())
+                if ((binding!!.etPregunta.text.toString().isEmpty()
+                            || binding!!.etRespuesta.text.toString().isEmpty())
                 ) {
                     Toast.makeText(
-                        getApplicationContext(),
+                        applicationContext,
                         "Asegurate de no dejar ningun campo vacio",
                         Toast.LENGTH_SHORT
                     ).show()
@@ -226,22 +228,22 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
                     // de lo que esté en la posición 0.
                     if (contadorPregunta <= longi) {
                         var editable: Editable = Editable.Factory.getInstance().newEditable(
-                            binding!!.etPregunta.getText()
+                            binding!!.etPregunta.text
                         )
                         var colorSpans: Array<ForegroundColorSpan> =
                             editable.getSpans(0, editable.length, ForegroundColorSpan::class.java)
 
                         // Se colocan las etiquetas en cada palabra con color
                         colocarEtiquetas(colorSpans, editable)
-                        preguntas.set(contadorPregunta, editable.toString())
+                        preguntas[contadorPregunta] = editable.toString()
                         editable = Editable.Factory.getInstance()
-                            .newEditable(binding!!.etRespuesta.getText())
+                            .newEditable(binding!!.etRespuesta.text)
                         colorSpans =
                             editable.getSpans(0, editable.length, ForegroundColorSpan::class.java)
 
                         // Se colocan las etiquetas en cada palabra con color
                         colocarEtiquetas(colorSpans, editable)
-                        respuestas.set(contadorPregunta, editable.toString())
+                        respuestas[contadorPregunta] = editable.toString()
 
                         // Mientras el contadorPregunta sea menor escribiremos la siguiente pregunta
                         // en los et y se borran las etiquetas de colores.
@@ -258,7 +260,7 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
                         // Si el contadorPregunta es mayor entonces agregaremos la pregunta actual a los
                         // arreglos.«»
                         var editable: Editable = Editable.Factory.getInstance()
-                            .newEditable(binding!!.etPregunta.getText())
+                            .newEditable(binding!!.etPregunta.text)
                         var colorSpans: Array<ForegroundColorSpan> =
                             editable.getSpans(0, editable.length, ForegroundColorSpan::class.java)
 
@@ -266,7 +268,7 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
                         colocarEtiquetas(colorSpans, editable)
                         preguntas.add(contadorPregunta, editable.toString())
                         editable = Editable.Factory.getInstance()
-                            .newEditable(binding!!.etRespuesta.getText())
+                            .newEditable(binding!!.etRespuesta.text)
                         colorSpans =
                             editable.getSpans(0, editable.length, ForegroundColorSpan::class.java)
 
@@ -281,6 +283,7 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
                 }
             }
         })
+
         binding!!.btnEliminar.setOnClickListener(object : View.OnClickListener {
             public override fun onClick(v: View) {
                 AlertDialog.Builder(this@Activity_Cuestionario)
@@ -324,6 +327,7 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
                     }).create().show()
             }
         })
+
         binding!!.btnGuardarGuia.setOnClickListener(object : View.OnClickListener {
             public override fun onClick(view: View) {
                 // Se le quita 1 para hacer referencia al arreglo
@@ -331,18 +335,18 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
                 val longi: Int = preguntas.size - 1
 
                 // Si alguno de los dos campos está vacio entra aquí.
-                if (!binding!!.etPregunta.getText().toString().isEmpty() &&
-                    binding!!.etRespuesta.getText().toString().isEmpty() ||
-                    binding!!.etPregunta.getText().toString().isEmpty() &&
-                    !binding!!.etRespuesta.getText().toString().isEmpty()
+                if (binding!!.etPregunta.text.toString().isNotEmpty() &&
+                    binding!!.etRespuesta.text.toString().isEmpty() ||
+                    binding!!.etPregunta.text.toString().isEmpty() &&
+                    binding!!.etRespuesta.text.toString().isNotEmpty()
                 ) {
                     Toast.makeText(
-                        getApplicationContext(),
+                        applicationContext,
                         "Asegurate de no dejar ningún campo vacio",
                         Toast.LENGTH_SHORT
                     ).show()
-                } else if ((binding!!.etPregunta.getText().toString().isEmpty()
-                            && binding!!.etRespuesta.getText().toString().isEmpty())
+                } else if ((binding!!.etPregunta.text.toString().isEmpty()
+                            && binding!!.etRespuesta.text.toString().isEmpty())
                 ) {
                     // Si los dos campos están vacios entra aquí.
 
@@ -350,7 +354,7 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
                     // entra aquí.
                     if (contadorPregunta == 0) {
                         Toast.makeText(
-                            getApplicationContext(),
+                            applicationContext,
                             "¡No puedes guardar una guía sin datos!",
                             Toast.LENGTH_SHORT
                         ).show()
@@ -363,27 +367,27 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
                     // Si el contadorPregunta no es mayor a lo guardado entonces modificamos lo actual en
                     // el arreglo, además anteriormente ya validamos campos vacios.
                     var editable: Editable =
-                        Editable.Factory.getInstance().newEditable(binding!!.etPregunta.getText())
+                        Editable.Factory.getInstance().newEditable(binding!!.etPregunta.text)
                     var colorSpans: Array<ForegroundColorSpan> =
                         editable.getSpans(0, editable.length, ForegroundColorSpan::class.java)
 
                     // Se colocan las etiquetas en cada palabra con color
                     colocarEtiquetas(colorSpans, editable)
-                    preguntas.set(contadorPregunta, editable.toString())
+                    preguntas[contadorPregunta] = editable.toString()
                     editable =
-                        Editable.Factory.getInstance().newEditable(binding!!.etRespuesta.getText())
+                        Editable.Factory.getInstance().newEditable(binding!!.etRespuesta.text)
                     colorSpans =
                         editable.getSpans(0, editable.length, ForegroundColorSpan::class.java)
 
                     // Se colocan las etiquetas en cada palabra con color
                     colocarEtiquetas(colorSpans, editable)
-                    respuestas.set(contadorPregunta, editable.toString())
+                    respuestas[contadorPregunta] = editable.toString()
                     crearArchivo(nombreArchivo)
                 } else {
                     // Si el contadorPregunta es igual a lo guardado entonces agregamos la pregunta,
                     // anteriormente ya validamos campos vacios.
                     var editable: Editable =
-                        Editable.Factory.getInstance().newEditable(binding!!.etPregunta.getText())
+                        Editable.Factory.getInstance().newEditable(binding!!.etPregunta.text)
                     var colorSpans: Array<ForegroundColorSpan> =
                         editable.getSpans(0, editable.length, ForegroundColorSpan::class.java)
 
@@ -391,7 +395,7 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
                     colocarEtiquetas(colorSpans, editable)
                     preguntas.add(contadorPregunta, editable.toString())
                     editable =
-                        Editable.Factory.getInstance().newEditable(binding!!.etRespuesta.getText())
+                        Editable.Factory.getInstance().newEditable(binding!!.etRespuesta.text)
                     colorSpans =
                         editable.getSpans(0, editable.length, ForegroundColorSpan::class.java)
 
@@ -402,11 +406,12 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
                 }
             }
         })
+
         binding!!.etPregunta.setCustomSelectionActionModeCallback(object : ActionMode.Callback {
             @RequiresApi(api = Build.VERSION_CODES.M)
             public override fun onCreateActionMode(actionMode: ActionMode, menu: Menu): Boolean {
                 // Inflar el menú personalizado de color.
-                actionMode.getMenuInflater().inflate(R.menu.menu_color, menu)
+                actionMode.menuInflater.inflate(R.menu.menu_color, menu)
 
                 // Inflar el menú personalizado sin color.
                 // actionMode.getMenuInflater().inflate(R.menu.munu_sin_color, menu);
@@ -425,12 +430,12 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
                 val end: Int
                 val text: Editable?
                 val spannableStringBuilder: SpannableStringBuilder
-                when (menuItem.getItemId()) {
+                when (menuItem.itemId) {
                     R.id.color -> {
                         // Poner un color al rango marcado
-                        start = binding!!.etPregunta.getSelectionStart()
-                        end = binding!!.etPregunta.getSelectionEnd()
-                        text = binding!!.etPregunta.getText()
+                        start = binding!!.etPregunta.selectionStart
+                        end = binding!!.etPregunta.selectionEnd
+                        text = binding!!.etPregunta.text
                         spannableStringBuilder = SpannableStringBuilder(text)
 
                         // Obtén los spans aplicados
@@ -447,7 +452,7 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
                             if ((spanInicio < end && spanFin > start) || (spanInicio >= start && spanFin <= end)) {
                                 spannableStringBuilder.removeSpan(span)
                                 Toast.makeText(
-                                    getApplicationContext(),
+                                    applicationContext,
                                     "Una letra, una tinta; palabras sin colores.",
                                     Toast.LENGTH_SHORT
                                 ).show()
@@ -459,7 +464,7 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
                             end,
                             Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
                         )
-                        binding!!.etPregunta.setText(spannableStringBuilder)
+                        binding!!.etPregunta.text = spannableStringBuilder
                         binding!!.etPregunta.setSelection(end)
                         return true
                     }
@@ -470,11 +475,12 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
 
             public override fun onDestroyActionMode(actionMode: ActionMode) {}
         })
+
         binding!!.etRespuesta.setCustomSelectionActionModeCallback(object : ActionMode.Callback {
             @RequiresApi(api = Build.VERSION_CODES.M)
             public override fun onCreateActionMode(actionMode: ActionMode, menu: Menu): Boolean {
                 // Inflar el menú personalizado de color.
-                actionMode.getMenuInflater().inflate(R.menu.menu_color, menu)
+                actionMode.menuInflater.inflate(R.menu.menu_color, menu)
 
                 // Inflar el menú personalizado sin color.
                 // actionMode.getMenuInflater().inflate(R.menu.munu_sin_color, menu);
@@ -493,12 +499,12 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
                 val end: Int
                 val text: Editable?
                 val spannableStringBuilder: SpannableStringBuilder
-                when (menuItem.getItemId()) {
+                when (menuItem.itemId) {
                     R.id.color -> {
                         // Poner un color al rango marcado
-                        start = binding!!.etRespuesta.getSelectionStart()
-                        end = binding!!.etRespuesta.getSelectionEnd()
-                        text = binding!!.etRespuesta.getText()
+                        start = binding!!.etRespuesta.selectionStart
+                        end = binding!!.etRespuesta.selectionEnd
+                        text = binding!!.etRespuesta.text
                         spannableStringBuilder = SpannableStringBuilder(text)
 
                         // Obtén los spans aplicados
@@ -515,7 +521,7 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
                             if ((spanInicio < end && spanFin > start) || (spanInicio >= start && spanFin <= end)) {
                                 spannableStringBuilder.removeSpan(span)
                                 Toast.makeText(
-                                    getApplicationContext(),
+                                    applicationContext,
                                     "Una letra, una tinta; palabras sin colores.",
                                     Toast.LENGTH_SHORT
                                 ).show()
@@ -527,7 +533,7 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
                             end,
                             Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
                         )
-                        binding!!.etRespuesta.setText(spannableStringBuilder)
+                        binding!!.etRespuesta.text = spannableStringBuilder
                         binding!!.etRespuesta.setSelection(end)
                         return true
                     }
@@ -540,15 +546,15 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
         })
         binding!!.btnQuitarColores.setOnClickListener(object : View.OnClickListener {
             public override fun onClick(v: View) {
-                binding!!.etPregunta.setText(binding!!.etPregunta.getText().toString())
-                binding!!.etRespuesta.setText(binding!!.etRespuesta.getText().toString())
+                binding!!.etPregunta.setText(binding!!.etPregunta.text.toString())
+                binding!!.etRespuesta.setText(binding!!.etRespuesta.text.toString())
             }
         })
     }
 
     // Método que se ejecuta cuando el back del telefono es presionado.
     public override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.action == KeyEvent.ACTION_DOWN) {
             cancelarArchivo()
             return true
         }
@@ -570,7 +576,7 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
                     @SuppressLint("SdCardPath") val file: File =
                         File("/data/data/com.jonathanev.repasar/files/")
                     if (file.exists()) {
-                        File(file, nombreArchivo + ".xml").delete()
+                        File(file, "$nombreArchivo.xml").delete()
                         Log.d("ArchivoEliminado", "Archivo eliminado")
                     } else {
                         Log.d("ArchivoEliminado", "Archivo no eliminado")
@@ -588,7 +594,7 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
     // Creamos el archivo en el dispositivo e inicializamos algunas etiquetas.
     private fun crearArchivo(nombreArchivo: String?) {
         try {
-            fos = openFileOutput(nombreArchivo + ".xml", MODE_PRIVATE)
+            fos = openFileOutput("$nombreArchivo.xml", MODE_PRIVATE)
             serializer.setOutput(fos, "UTF-8")
             serializer.startDocument(null, java.lang.Boolean.valueOf(true))
             serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true)
@@ -611,10 +617,10 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
             serializer.flush()
             fos?.close()
             Toast.makeText(
-                getApplicationContext(), "Guia de estudio creada exitosamente",
+                applicationContext, "Guia de estudio creada exitosamente",
                 Toast.LENGTH_SHORT
             ).show()
-            val intent: Intent = Intent(getApplicationContext(), Activity_RepasarGuia::class.java)
+            val intent: Intent = Intent(applicationContext, Activity_RepasarGuia::class.java)
             intent.putExtra("nombre_archivo", nombreArchivo)
             startActivity(intent)
             finish()
@@ -627,11 +633,11 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
         for (colorSpan: ForegroundColorSpan in colorSpans) {
             val start: Int = editable.getSpanStart(colorSpan)
             val end: Int = editable.getSpanEnd(colorSpan)
-            val color: Int = colorSpan.getForegroundColor()
+            val color: Int = colorSpan.foregroundColor
 
             // Agregar la etiqueta de inicio al texto
-            val etiqIni: String = "«" + color + "»"
-            val etiqFin: String = "«/" + color + "»"
+            val etiqIni: String = "«$color»"
+            val etiqFin: String = "«/$color»"
             editable.replace(start, start, etiqIni)
 
             // Agregar la etiqueta de cierre al texto
@@ -645,7 +651,7 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
         var inicio: Int = 0
         var fin: Int = 0
         var coloresPregunta: ColoresPregunta? = null
-        var texto: String = preguntas.get(contadorPregunta)
+        var texto: String = preguntas[contadorPregunta]
         while (texto.contains("«")) {
             inicio = texto.indexOf("«") + 1
             fin = texto.indexOf("»")
@@ -674,8 +680,8 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
             )
         }
-        binding!!.etPregunta.setText(builder)
-        texto = respuestas.get(contadorPregunta)
+        binding!!.etPregunta.text = builder
+        texto = respuestas[contadorPregunta]
         while (texto.contains("«")) {
             inicio = texto.indexOf("«") + 1
             fin = texto.indexOf("»")
@@ -704,16 +710,16 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
             )
         }
-        binding!!.etRespuesta.setText(builder)
+        binding!!.etRespuesta.text = builder
         preguntasColor.clear()
         respuestasColor.clear()
     }
 
     fun colorActual(colorActual: Int) {
         @SuppressLint("UseCompatLoadingForDrawables") val drawable: Drawable =
-            getResources().getDrawable(R.drawable.boton_redondo)
+            resources.getDrawable(R.drawable.boton_redondo)
         drawable.setColorFilter(colorActual, PorterDuff.Mode.SRC_ATOP)
-        binding!!.btnColorActual.setBackground(drawable)
+        binding!!.btnColorActual.background = drawable
 
         // Recibimos el nombre del archivo del popupFragment Nueva Guia.
         this.colorActual = colorActual

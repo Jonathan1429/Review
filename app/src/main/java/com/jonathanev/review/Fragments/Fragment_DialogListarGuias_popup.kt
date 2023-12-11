@@ -20,7 +20,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.jonathanev.review.Activities.Activity_Modificar
 import com.jonathanev.review.Activities.Activity_RepasarGuia
 import com.jonathanev.review.Clases.Guia
-import com.jonathanev.review.Fragments.Adaptadores.AdaptadorPersonalizadoListarGuias
 import com.jonathanev.review.Fragments.Adaptadores.ListarGuiasAdapter
 import com.jonathanev.review.Fragments.Fragment_DialogNuevoArchivo_popu.DialogListener
 import com.jonathanev.review.R
@@ -63,7 +62,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
         val set = preferences.getStringSet("guias_estudio", null) ?: emptySet()
 
         // Metemos la collection directamente en el arreglo y se ordena automáticamente.
-        item.addAll(set!!)
+        item.addAll(set)
 
         // Ordena las guías con el método sort FALTA ESTA PARTE
         item.sort()
@@ -101,15 +100,12 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
             guia = Guia()
             guia.imgGuia = numeroRandom
             guia.nombreGuia = item[i]
-            //lista.add(guias)
             guias.add(guia)
         }
         adaptadorListarGuias = ListarGuiasAdapter(guias) {position -> optionsGuide(position)}
         binding!!.lvGuiasEstudio.layoutManager = LinearLayoutManager(context)
         binding!!.lvGuiasEstudio.setHasFixedSize(true)
         binding!!.lvGuiasEstudio.adapter = adaptadorListarGuias
-        //adaptador = ListarGuiasAdapter(guias) //AdaptadorPersonalizadoListarGuias(context, lista)
-        //binding!!.lvGuiasEstudio.adapter = adaptador
     }
 
     private fun optionsGuide(position: Int) {
@@ -160,7 +156,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                             "¿Estás seguro que deseas eliminar la" +
                                     " guia?"
                         )
-                        .setPositiveButton("Si") { dialogInterface, i ->
+                        .setPositiveButton("Si") { _, _ ->
                             // Si entra al tercero es para eliminar la guia exitosamente
                             @SuppressLint("SdCardPath") val file =
                                 File("/data/data/com.jonathanev.review/files/")
@@ -185,7 +181,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                                 ).show()
                             }
                         }
-                        .setNegativeButton("Cancelar") { dialog, i -> dialog.dismiss() }
+                        .setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
                         .create().show()
 
                 3 -> {
