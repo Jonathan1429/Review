@@ -20,6 +20,7 @@ import android.view.ActionMode
 import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
+import android.view.MotionEvent
 import android.view.View
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -502,6 +503,7 @@ class Activity_Modificar constructor() : AppCompatActivity() {
 
             public override fun onDestroyActionMode(actionMode: ActionMode) {}
         })
+
         binding!!.etRespuesta.setCustomSelectionActionModeCallback(object : ActionMode.Callback {
             @RequiresApi(api = Build.VERSION_CODES.M)
             public override fun onCreateActionMode(actionMode: ActionMode, menu: Menu): Boolean {
@@ -570,6 +572,7 @@ class Activity_Modificar constructor() : AppCompatActivity() {
 
             public override fun onDestroyActionMode(actionMode: ActionMode) {}
         })
+
         binding!!.btnQuitarColores.setOnClickListener(object : View.OnClickListener {
             public override fun onClick(v: View) {
                 binding!!.etPregunta.setText(binding!!.etPregunta.text.toString())

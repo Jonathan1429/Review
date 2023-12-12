@@ -10,18 +10,18 @@
         android:id="@+id/barra_superior_regreso"
         layout="@layout/barra_superior_back"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content" />
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cvPregResp"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:cardCornerRadius="42dp"
         android:elevation="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/barra_superior_regreso"
-        app:layout_constraintStart_toStartOf="parent"
+        app:cardCornerRadius="42dp"
+        app:layout_constraintBottom_toTopOf="@+id/adView"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/btnAtrasPregunta">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/barra_superior_regreso">
 
         <LinearLayout
             android:id="@+id/layoutContent"
@@ -33,30 +33,61 @@
                 android:id="@+id/layoutBtnsCuestionario"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="10dp"
                 android:gravity="end"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:padding="10dp">
+
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1">
+
+                    <ImageView
+                        android:id="@+id/imgvPrevious"
+                        android:layout_width="54dp"
+                        android:layout_height="54dp"
+                        android:layout_gravity="left"
+                        android:layout_marginTop="10dp"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:padding="10dp"
+                        android:src="@drawable/ic_circle_left_right"
+                        tools:ignore="ContentDescription" />
+
+                    <ImageView
+                        android:id="@+id/imgvNext"
+                        android:layout_width="54dp"
+                        android:layout_height="54dp"
+                        android:layout_gravity="right"
+                        android:layout_marginTop="10dp"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:padding="10dp"
+                        android:rotationY="180"
+                        android:src="@drawable/ic_circle_left_right"
+                        tools:ignore="ContentDescription" />
+                </FrameLayout>
 
                 <ImageView
                     android:id="@+id/imgvPregResp"
-                    android:layout_width="34dp"
-                    android:layout_height="34dp"
+                    android:layout_width="54dp"
+                    android:layout_height="54dp"
+                    android:layout_marginStart="25dp"
                     android:layout_marginTop="10dp"
                     android:layout_marginEnd="6dp"
-                    android:src="@drawable/ic_preg_resp"
                     android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:padding="10dp"
+                    android:src="@drawable/ic_preg_resp"
                     tools:ignore="ContentDescription" />
             </LinearLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/tilContenidoPregResp"
-                android:labelFor="@+id/tvContenidoPregResp"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginTop="10dp"
                 android:layout_marginStart="6dp"
+                android:layout_marginTop="10dp"
                 android:layout_marginEnd="6dp"
                 android:hint="@string/etPregunta"
+                android:labelFor="@+id/tvContenidoPregResp"
                 app:endIconMode="clear_text">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -64,18 +95,19 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:autofillHints="testHint"
-                    android:inputType="text|textMultiLine"
+                    android:focusable="false"
                     android:gravity="top"
+                    android:inputType="text|textMultiLine"
                     android:scrollbars="vertical"
                     android:textSize="18sp"
-                    android:focusable="false"/>
+                    android:background="@android:color/transparent" />
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
     <!--style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"-->
     <!--style="@style/btnGenerales"-->
-    <Button
+    <!--<Button
         android:id="@+id/btnAtrasPregunta"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -86,10 +118,10 @@
         app:layout_constraintTop_toBottomOf="@+id/cvPregResp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/btnSiguientePregunta"
-        app:layout_constraintBottom_toTopOf="@+id/adView"/>
+        app:layout_constraintBottom_toTopOf="@+id/adView"/>-->
 
     <!--style="@style/btnGenerales"-->
-    <Button
+    <!--<Button
         android:id="@+id/btnSiguientePregunta"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
@@ -100,7 +132,7 @@
         app:layout_constraintTop_toBottomOf="@+id/cvPregResp"
         app:layout_constraintStart_toEndOf="@+id/btnAtrasPregunta"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/adView"/>
+        app:layout_constraintBottom_toTopOf="@+id/adView"/>-->
 
     <!--style="@style/btnGenerales"-->
     <!-- <Button
@@ -115,18 +147,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" /> -->
 
-    <com.google.android.gms.ads.AdView
-        xmlns:ads="http://schemas.android.com/apk/res-auto"
+    <com.google.android.gms.ads.AdView xmlns:ads="http://schemas.android.com/apk/res-auto"
         android:id="@+id/adView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
         android:layout_marginTop="10dp"
         ads:adSize="BANNER"
         ads:adUnitId="ca-app-pub-3940256099942544/6300978111"
-        ads:layout_constraintStart_toStartOf="parent"
+        ads:layout_constraintBottom_toBottomOf="parent"
         ads:layout_constraintEnd_toEndOf="parent"
-        ads:layout_constraintBottom_toBottomOf="parent">
-    </com.google.android.gms.ads.AdView>
+        ads:layout_constraintStart_toStartOf="parent"></com.google.android.gms.ads.AdView>
 </androidx.constraintlayout.widget.ConstraintLayout>
