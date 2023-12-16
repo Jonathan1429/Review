@@ -555,10 +555,6 @@ class Activity_Modificar constructor() : AppCompatActivity() {
         }*/
     }
 
-    private fun mostrarRespuesta(builder: SpannableStringBuilder?) {
-        binding!!.etPregResp.text = builder
-    }
-
     private fun girarCardView() {
         val flipAnimator =
             ObjectAnimator.ofFloat(binding!!.tilContenidoPregResp, "rotationY", 0f, 360f)

@@ -3,6 +3,7 @@ package com.jonathanev.review.Activities
 import android.animation.ObjectAnimator
 import android.app.AlertDialog
 import android.content.DialogInterface
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.text.Spannable
@@ -120,38 +121,6 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
         // Pintamos el texto del contador actual.
         pintarTexto()
 
-        // Mientras noHayMasPreguntas sea falso entrará al método.
-        /*binding!!.btnMostrarRespuesta.setOnClickListener(object : View.OnClickListener {
-            public override fun onClick(view: View) {
-                if ((binding!!.btnMostrarRespuesta.text.toString() == "Mostrar respuesta")) {
-                    binding!!.btnMostrarRespuesta.text = "Ocultar respuesta"
-                    mostrarRespuesta(builder)
-                } else {
-                    binding!!.btnMostrarRespuesta.text = "Mostrar respuesta"
-                    binding!!.etRespuesta.setText("")
-                }
-            }
-        })*/
-
-        /*binding!!.btnAtrasPregunta.setOnClickListener(object : View.OnClickListener {
-            public override fun onClick(view: View) {
-                //binding!!.btnMostrarRespuesta.text = "Mostrar respuesta"
-                binding!!.tilContenidoPregResp.hint = "Pregunta"
-                if (contadorPregunta == 0) {
-                    Toast.makeText(
-                        applicationContext, "No tienes preguntas anteriores",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                } else {
-                    contadorPregunta--
-                    binding!!.etPregResp.setText("")
-
-                    // Pintamos el valor anterior de colores.
-                    pintarTexto()
-                }
-            }
-        })*/
-
         binding!!.imgvPrevious.setOnClickListener {
             //binding!!.btnMostrarRespuesta.text = "Mostrar respuesta"
             binding!!.tilContenidoPregResp.hint = "Pregunta"
@@ -171,8 +140,6 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
 
         binding!!.imgvNext.setOnClickListener {
             contadorPregunta++
-            //binding!!.btnMostrarRespuesta.text = "Mostrar respuesta"
-
             val preguntasTotales: Int = preguntas.size
 
             // Validamos que haya mas preguntas, si las hay entra al método sino al else.
@@ -204,44 +171,12 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
             }
         }
 
-        /*binding!!.btnSiguientePregunta.setOnClickListener(object : View.OnClickListener {
-            public override fun onClick(view: View) {
-                contadorPregunta++
-                //binding!!.btnMostrarRespuesta.text = "Mostrar respuesta"
-                binding!!.tilContenidoPregResp.hint = "Pregunta"
-
-                val preguntasTotales: Int = preguntas.size
-
-                // Validamos que haya mas preguntas, si las hay entra al método sino al else.
-                if ((contadorPregunta + 1) <= preguntasTotales) {
-                    // Pintamos el valor siguiente con colores.
-                    binding!!.etPregResp.setText("")
-                    pintarTexto()
-                } else {
-                    contadorPregunta--
-                    // noHayMasPreguntas = true;
-                    // Se ejecuta cuando se regresa sin guardar.
-                    AlertDialog.Builder(this@Activity_RepasarGuia)
-                        .setTitle("¡Atención!")
-                        .setMessage("Se acabaron las preguntas, ¿Quieres repetir la guia?")
-                        .setPositiveButton("Si", object : DialogInterface.OnClickListener {
-                            public override fun onClick(dialogInterface: DialogInterface, i: Int) {
-                                contadorPregunta = 0
-                                binding!!.etPregResp.setText("")
-
-                                // Mostramos el primer valor de la pregunta pintado.
-                                pintarTexto()
-                                //binding.etPregunta.setText(preguntas.get(contadorPregunta));
-                            }
-                        })
-                        .setNegativeButton("Cancelar", object : DialogInterface.OnClickListener {
-                            public override fun onClick(dialog: DialogInterface, i: Int) {
-                                dialog.dismiss()
-                            }
-                        }).create().show()
-                }
-            }
-        })*/
+        binding!!.imgvEdit.setOnClickListener {
+            val intent: Intent = Intent(applicationContext, Activity_Modificar::class.java)
+            intent.putExtra("nombre_archivo", nombreArchivo)
+            startActivity(intent)
+            finish()
+        }
     }
 
     private fun girarCardView() {
