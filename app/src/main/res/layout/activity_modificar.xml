@@ -10,9 +10,186 @@
         android:id="@+id/barra_superior_regreso"
         layout="@layout/barra_superior_back"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content" />
 
-    <TextView
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cvPregResp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:elevation="8dp"
+        app:cardCornerRadius="42dp"
+        app:layout_constraintBottom_toTopOf="@+id/adView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/barra_superior_regreso">
+
+        <LinearLayout
+            android:id="@+id/layoutContent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/layoutBtnsCuestionario"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:orientation="horizontal"
+                android:padding="10dp">
+
+                <FrameLayout
+                    android:id="@+id/flPrevNext"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1">
+
+                    <ImageView
+                        android:id="@+id/imgvPrevious"
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
+                        android:layout_gravity="left"
+                        android:layout_marginStart="5dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginEnd="5dp"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/ic_circle_left_right"
+                        tools:ignore="ContentDescription" />
+
+                    <ImageView
+                        android:id="@+id/imgvNext"
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
+                        android:layout_gravity="right"
+                        android:layout_marginStart="5dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginEnd="5dp"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:rotationY="180"
+                        android:src="@drawable/ic_circle_left_right"
+                        tools:ignore="ContentDescription" />
+                </FrameLayout>
+
+                <ImageView
+                    android:id="@+id/imgvCheck"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="5dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_check"
+                    android:visibility="gone"
+                    tools:ignore="ContentDescription" />
+
+                <ImageView
+                    android:id="@+id/imgvCancelar"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="5dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_cancel"
+                    android:visibility="gone"
+                    tools:ignore="ContentDescription" />
+
+                <ImageView
+                    android:id="@+id/imgvQuitColor"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="5dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_eraser"
+                    android:visibility="gone"
+                    tools:ignore="ContentDescription" />
+
+                <ImageView
+                    android:id="@+id/imgvEliminar"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="5dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_trash"
+                    tools:ignore="ContentDescription" />
+
+                <ImageView
+                    android:id="@+id/imgvSelColor"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="5dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_paint_roller"
+                    tools:ignore="ContentDescription" />
+
+                <ImageView
+                    android:id="@+id/imgvPregResp"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="5dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_preg_resp"
+                    tools:ignore="ContentDescription" />
+
+                <ImageView
+                    android:id="@+id/imgvSave"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="5dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_save"
+                    tools:ignore="ContentDescription" />
+            </LinearLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilContenidoPregResp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginStart="6dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="6dp"
+                android:padding="15dp"
+                android:hint="@string/etPregunta"
+                android:labelFor="@+id/tvContenidoPregResp"
+                app:endIconMode="clear_text">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etPregResp"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:autofillHints="testHint"
+                    android:background="@android:color/transparent"
+                    android:gravity="top"
+                    android:inputType="text|textMultiLine"
+                    android:scrollbars="vertical"
+                    android:textSize="18sp" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <com.google.android.gms.ads.AdView xmlns:ads="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/adView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        ads:adSize="BANNER"
+        ads:adUnitId="ca-app-pub-3940256099942544/6300978111"
+        ads:layout_constraintBottom_toBottomOf="parent"
+        ads:layout_constraintEnd_toEndOf="parent"
+        ads:layout_constraintStart_toStartOf="parent" />
+
+    <!-- <TextView
         android:id="@+id/tvLabelColor"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -46,10 +223,10 @@
         app:layout_constraintTop_toBottomOf="@+id/barra_superior_regreso"
         app:layout_constraintBottom_toTopOf="@+id/tilContenidoPregunta"
         app:layout_constraintStart_toEndOf="@+id/btnColorActual"
-        tools:ignore="ContentDescription" />
+        tools:ignore="ContentDescription" />-->
 
     <!-- style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"-->
-    <com.google.android.material.textfield.TextInputLayout
+    <!-- <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tilContenidoPregunta"
         android:labelFor="@+id/tvContenidoPregunta"
         android:layout_width="match_parent"
@@ -72,10 +249,10 @@
             android:scrollbars="vertical"
             android:hint="@string/etContenidoPregunta"
             android:textSize="18sp"/>
-    </com.google.android.material.textfield.TextInputLayout>
+    </com.google.android.material.textfield.TextInputLayout> -->
 
     <!-- style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"-->
-    <com.google.android.material.textfield.TextInputLayout
+    <!-- <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tilContenidoRespuesta"
         android:labelFor="@+id/tvContenidoPregunta"
         android:layout_width="match_parent"
@@ -98,10 +275,10 @@
             android:scrollbars="vertical"
             android:hint="@string/etContenidoRespuesta"
             android:textSize="18sp"/>
-    </com.google.android.material.textfield.TextInputLayout>
+    </com.google.android.material.textfield.TextInputLayout> -->
 
     <!-- style="@style/btnGenerales"-->
-    <Button
+    <!-- <Button
         android:id="@+id/btnAtrasPregunta"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -123,10 +300,10 @@
         style="@style/btnGeneral"
         app:layout_constraintTop_toBottomOf="@+id/tilContenidoRespuesta"
         app:layout_constraintStart_toEndOf="@+id/btnAtrasPregunta"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent" /> -->
 
     <!--style="@style/btnGenerales"-->
-    <Button
+    <!-- <Button
         android:id="@+id/btnEliminar"
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
@@ -136,10 +313,10 @@
         style="@style/btnGeneral"
         app:layout_constraintTop_toBottomOf="@+id/btnAtrasPregunta"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/btnGuardarGuia" />
+        app:layout_constraintEnd_toStartOf="@+id/btnGuardarGuia" /> -->
 
     <!--style="@style/btnGenerales"-->
-    <Button
+    <!-- <Button
         android:id="@+id/btnGuardarGuia"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -161,6 +338,6 @@
         style="@style/btnGeneral"
         app:layout_constraintTop_toBottomOf="@+id/btnGuardarGuia"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent"/> -->
 
 </androidx.constraintlayout.widget.ConstraintLayout>

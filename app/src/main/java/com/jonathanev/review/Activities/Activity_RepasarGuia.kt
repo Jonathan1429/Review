@@ -172,13 +172,14 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
         binding!!.imgvNext.setOnClickListener {
             contadorPregunta++
             //binding!!.btnMostrarRespuesta.text = "Mostrar respuesta"
-            binding!!.tilContenidoPregResp.hint = "Pregunta"
 
             val preguntasTotales: Int = preguntas.size
 
             // Validamos que haya mas preguntas, si las hay entra al método sino al else.
             if ((contadorPregunta + 1) <= preguntasTotales) {
                 // Pintamos el valor siguiente con colores.
+
+                binding!!.tilContenidoPregResp.hint = "Pregunta"
                 binding!!.etPregResp.setText("")
                 pintarTexto()
             } else {
@@ -188,21 +189,18 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
                 AlertDialog.Builder(this@Activity_RepasarGuia)
                     .setTitle("¡Atención!")
                     .setMessage("Se acabaron las preguntas, ¿Quieres repetir la guia?")
-                    .setPositiveButton("Si", object : DialogInterface.OnClickListener {
-                        public override fun onClick(dialogInterface: DialogInterface, i: Int) {
-                            contadorPregunta = 0
-                            binding!!.etPregResp.setText("")
+                    .setPositiveButton("Si"
+                    ) { dialogInterface, i ->
+                        contadorPregunta = 0
 
-                            // Mostramos el primer valor de la pregunta pintado.
-                            pintarTexto()
-                            //binding.etPregunta.setText(preguntas.get(contadorPregunta));
-                        }
-                    })
-                    .setNegativeButton("Cancelar", object : DialogInterface.OnClickListener {
-                        public override fun onClick(dialog: DialogInterface, i: Int) {
-                            dialog.dismiss()
-                        }
-                    }).create().show()
+                        binding!!.tilContenidoPregResp.hint = "Pregunta"
+                        binding!!.etPregResp.setText("")
+
+                        // Mostramos el primer valor de la pregunta pintado.
+                        pintarTexto()
+                    }
+                    .setNegativeButton("Cancelar"
+                    ) { dialog, i -> dialog.dismiss() }.create().show()
             }
         }
 

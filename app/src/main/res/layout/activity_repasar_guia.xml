@@ -86,6 +86,7 @@
                 android:layout_marginStart="6dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="6dp"
+                android:padding="15dp"
                 android:hint="@string/etPregunta"
                 android:labelFor="@+id/tvContenidoPregResp"
                 app:endIconMode="clear_text">
@@ -95,57 +96,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:autofillHints="testHint"
+                    android:background="@android:color/transparent"
                     android:focusable="false"
                     android:gravity="top"
                     android:inputType="text|textMultiLine"
                     android:scrollbars="vertical"
-                    android:textSize="18sp"
-                    android:background="@android:color/transparent" />
+                    android:textSize="18sp" />
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
-
-    <!--style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"-->
-    <!--style="@style/btnGenerales"-->
-    <!--<Button
-        android:id="@+id/btnAtrasPregunta"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:text="@string/btnAtras"
-        android:background="@drawable/ic_filter_state"
-        style="@style/btnGeneral"
-        app:layout_constraintTop_toBottomOf="@+id/cvPregResp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/btnSiguientePregunta"
-        app:layout_constraintBottom_toTopOf="@+id/adView"/>-->
-
-    <!--style="@style/btnGenerales"-->
-    <!--<Button
-        android:id="@+id/btnSiguientePregunta"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:layout_marginTop="15dp"
-        android:text="@string/btnSiguiente"
-        android:background="@drawable/ic_filter_state"
-        style="@style/btnGeneral"
-        app:layout_constraintTop_toBottomOf="@+id/cvPregResp"
-        app:layout_constraintStart_toEndOf="@+id/btnAtrasPregunta"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/adView"/>-->
-
-    <!--style="@style/btnGenerales"-->
-    <!-- <Button
-        android:id="@+id/btnMostrarRespuesta"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:text="@string/btnMostrarRespuesta"
-        android:background="@drawable/ic_filter_state"
-        style="@style/btnGeneral"
-        app:layout_constraintTop_toBottomOf="@+id/btnAtrasPregunta"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" /> -->
 
     <com.google.android.gms.ads.AdView xmlns:ads="http://schemas.android.com/apk/res-auto"
         android:id="@+id/adView"
@@ -158,5 +117,5 @@
         ads:adUnitId="ca-app-pub-3940256099942544/6300978111"
         ads:layout_constraintBottom_toBottomOf="parent"
         ads:layout_constraintEnd_toEndOf="parent"
-        ads:layout_constraintStart_toStartOf="parent"></com.google.android.gms.ads.AdView>
+        ads:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

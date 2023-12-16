@@ -39,7 +39,7 @@ class Fragment_DialogColoresMod_popup : DialogFragment() {
             setLayoutColor(color)
             colorActual = color
             val activityModificar = activity as Activity_Modificar?
-            activityModificar!!.colorActual(colorActual)
+            //activityModificar!!.colorActual(colorActual)
         })
         val fragment: Fragment = this
         binding!!.btnContinuar.setOnClickListener {
@@ -50,7 +50,7 @@ class Fragment_DialogColoresMod_popup : DialogFragment() {
             val intent = Intent(activity, Activity_Modificar::class.java)
             colorActual = Color.BLACK
             val activityModificar = activity as Activity_Modificar?
-            activityModificar!!.colorActual(colorActual)
+            //activityModificar!!.colorActual(colorActual)
         }
     }
 
