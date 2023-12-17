@@ -1,5 +1,6 @@
 package com.jonathanev.review.Activities
 
+import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.DialogInterface
@@ -85,24 +86,320 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
 
         // Recibimos el nombre del archivo del popupFragment Nueva Guia.
         nombreArchivo = intent.extras!!.getString("nombre_archivo")
-        binding!!.barraSuperiorRegreso.tvTituloToolbar.text = nombreArchivo
+
+        // Se cambia el nombre del titulo del toolbar
+        binding!!.barraSuperiorRegreso.tvTituloToolbar.text = "Creando: $nombreArchivo"
 
         colorActual = Color.BLACK
-        colorActual(colorActual)
+        //colorActual(colorActual)
         binding!!.barraSuperiorRegreso.imgvBack.setOnClickListener(object : View.OnClickListener {
             public override fun onClick(view: View) {
                 cancelarArchivo()
             }
         })
-        binding!!.imgvColor.setOnClickListener(object : View.OnClickListener {
+
+        /*binding!!.imgvColor.setOnClickListener(object : View.OnClickListener {
             public override fun onClick(v: View) {
                 // Unicamente abrimos el dialogo y lo mostramos en la pantalla.
                 val dialogo: Fragment_DialogColores_popup = Fragment_DialogColores_popup()
                 //=====================================================================================================================
                 dialogo.show(supportFragmentManager, "FragmentColor")
             }
-        })
-        binding!!.btnAtrasPregunta.setOnClickListener(object : View.OnClickListener {
+        })*/
+
+        //===================================================================================================================== VERIFICAR ESTE MÉTODO.
+        binding!!.imgvPregResp.setOnClickListener {
+            if (binding!!.etPregResp.text.toString().isNotEmpty()) {
+                var editable: Editable =
+                    Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
+                var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
+                    0,
+                    editable.length,
+                    ForegroundColorSpan::class.java
+                )
+
+                // Se colocan las etiquetas en cada palabra con color
+                colocarEtiquetas(colorSpans, editable)
+
+
+                if (binding!!.tilContenidoPregResp.hint == "Pregunta") {
+                    if (contadorPregunta > (respuestas.size - 1)) {
+                        binding!!.tilContenidoPregResp.hint = "Respuesta"
+                        preguntas.add(contadorPregunta, editable.toString())
+                        binding!!.etPregResp.setText("")
+                    } else {
+                        binding!!.tilContenidoPregResp.hint = "Respuesta"
+                        preguntas[contadorPregunta] = editable.toString()
+                        pintarTexto(contadorPregunta)
+                    }
+                    girarCardView()
+                } else {
+                    if (contadorPregunta > (respuestas.size - 1)) {
+                        binding!!.tilContenidoPregResp.hint = "Pregunta"
+                        respuestas.add(contadorPregunta, editable.toString())
+                    } else {
+                        binding!!.tilContenidoPregResp.hint = "Pregunta"
+                        respuestas[contadorPregunta] = editable.toString()
+                        pintarTexto(contadorPregunta)
+                    }
+                    girarCardView()
+                }
+            } else {
+                Toast.makeText(
+                    applicationContext,
+                    "Asegurate de no dejar ningun campo vacio",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+
+        binding!!.imgvNext.setOnClickListener {
+            // Validamos campos vacios en la pregunta o respuesta.
+            if (binding!!.etPregResp.text.toString().isEmpty()) {
+                Toast.makeText(
+                    applicationContext,
+                    "Asegurate de no dejar ningun campo vacio",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                // Se le quita 1 para hacer referencia al arreglo
+                // tamaño 3-1 = 2 [0,1,2].
+                //val longi: Int = preguntas.size - 1 HAY QUE VALIDAR SI AQUÍ TAMBIÉN FUNCIONA COMENTANDO ESTE
+                val longi: Int = respuestas.size - 1
+
+                if (contadorPregunta <= longi) {
+
+                    var editable: Editable =
+                        Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
+                    var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
+                        0,
+                        editable.length,
+                        ForegroundColorSpan::class.java
+                    )
+
+                    // Se colocan las etiquetas en cada palabra con color
+                    colocarEtiquetas(colorSpans, editable)
+
+                    if (binding!!.tilContenidoPregResp.hint == "Pregunta") {
+                        preguntas[contadorPregunta] = editable.toString()
+                    } else {
+                        respuestas[contadorPregunta] = editable.toString()
+                    }
+
+                    // Mientras el contadorPregunta sea menor escribiremos la siguiente pregunta
+                    // en los et.
+                    if (contadorPregunta < longi) {
+                        // Pintamos el texto en la pregunta actual
+
+                        binding!!.tilContenidoPregResp.hint = "Pregunta"
+                        pintarTexto(contadorPregunta + 1)
+                    } else {
+                        // Si le das click a que si, ya no te preguntará nuevamente
+                        // aunque te regreses a componer otras preg.
+                        // Si el contadorPregunta es igual entonces solo escribiremos los campos vacios.
+                        binding!!.tilContenidoPregResp.hint = "Pregunta"
+                        binding!!.etPregResp.setText("")
+                    }
+                } else { // Si contadorPregunta es mayor a lo que hay en el arreglo.
+                    if (binding!!.etPregResp.text.toString().isEmpty()) {
+                        Toast.makeText(
+                            applicationContext,
+                            "Asegurate de llenar una pregunta y una respuesta",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        contadorPregunta--
+                    } else {
+                        // Cuando no hay guardadas las mismas preguntas que respuestas.
+                        if (binding!!.tilContenidoPregResp.hint == "Pregunta") {
+                            Toast.makeText(
+                                applicationContext,
+                                "Asegurate de llenar una pregunta y una respuesta",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            contadorPregunta--
+                        } else {
+                            var editable: Editable =
+                                Editable.Factory.getInstance()
+                                    .newEditable(binding!!.etPregResp.text)
+                            var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
+                                0,
+                                editable.length,
+                                ForegroundColorSpan::class.java
+                            )
+
+                            // Se colocan las etiquetas en cada palabra con color
+                            colocarEtiquetas(colorSpans, editable)
+                            respuestas.add(contadorPregunta, editable.toString())
+                            binding!!.tilContenidoPregResp.hint = "Pregunta"
+                            binding!!.etPregResp.setText("")
+                        }
+                    }
+                }
+                contadorPregunta++
+            }
+
+            /*// contadorPregunta++
+
+            // Validamos campos vacios en la pregunta o respuesta.
+            if (binding!!.etPregResp.text.toString().isEmpty()) {
+                Toast.makeText(
+                    applicationContext,
+                    "Asegurate de no dejar ningun campo vacio",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                // Se le quita 1 para hacer referencia al arreglo
+                // tamaño 3-1 = 2 [0,1,2].
+                val longi: Int = preguntas.size - 1
+
+                // contadorPregunta tendrá acceso a modificar lo que esté en el rango a excepción
+                // de lo que esté en la posición 0.
+                if (contadorPregunta < longi) {
+                    var editable: Editable = Editable.Factory.getInstance().newEditable(
+                        binding!!.etPregResp.text
+                    )
+                    var colorSpans: Array<ForegroundColorSpan> =
+                        editable.getSpans(0, editable.length, ForegroundColorSpan::class.java)
+
+                    // Se colocan las etiquetas en cada palabra con color
+                    colocarEtiquetas(colorSpans, editable)
+
+                    respuestas[contadorPregunta] = editable.toString()
+                    pintarTexto(contadorPregunta + 1)
+
+                    // Mientras el contadorPregunta sea menor escribiremos la siguiente pregunta
+                    // en los et y se borran las etiquetas de colores.
+                    /*if (contadorPregunta < longi) {
+                        // Pintamos el texto
+
+                    } else {
+                        // Si el contadorPregunta es igual entonces solo escribiremos los campos vacios.
+                        respuestas.add(contadorPregunta, editable.toString())
+                        binding!!.etPregResp.setText("")
+                    }*/
+                } else {
+                    // Si el contadorPregunta es mayor entonces agregaremos la pregunta actual a los
+                    // arreglos.«»
+                    var editable: Editable = Editable.Factory.getInstance()
+                        .newEditable(binding!!.etPregResp.text)
+                    var colorSpans: Array<ForegroundColorSpan> =
+                        editable.getSpans(0, editable.length, ForegroundColorSpan::class.java)
+
+                    // Se colocan las etiquetas en cada palabra con color
+                    colocarEtiquetas(colorSpans, editable)
+                    respuestas.add(contadorPregunta, editable.toString())
+                }
+
+                binding!!.tilContenidoPregResp.hint = "Pregunta"
+                binding!!.etPregResp.setText("")
+                contadorPregunta++
+
+
+                if(binding!!.tilContenidoPregResp.hint == "Pregunta"){
+                    Toast.makeText(
+                        applicationContext,
+                        "Asegurate de llenar una pregunta y una respuesta",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else {
+
+                }
+            }*/
+        }
+
+        // Validar que cuando este lleno y se regrese te diga que no está todo lleno.
+        binding!!.imgvPrevious.setOnClickListener {
+            // El contadorPregunta tiene que ser mayor a 0 sino significa que no hay preguntas anteriores.
+            if (contadorPregunta > 0) {
+                // Se le quita 1 para hacer referencia al arreglo
+                // tamaño 3-1 = 2 [0,1,2].
+                //val longi: Int = preguntas.size - 1 HAY QUE VALIDAR SI AQUÍ TAMBIÉN FUNCIONA COMENTANDO ESTE
+                val longi: Int = respuestas.size - 1
+
+                // contadorPregunta tendrá acceso a modificar lo que esté en el rango a excepción
+                // de lo que esté en la posición 0.
+                if (contadorPregunta <= longi) {
+                    // Validamos campos vacios en la pregunta y respuesta.
+                    if (binding!!.etPregResp.text.toString().isEmpty()) {
+                        Toast.makeText(
+                            applicationContext,
+                            "Asegurate de no dejar ningun campo vacio",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                        // Se resta uno al final y así se queda neutral.
+                        contadorPregunta++
+                    } else {
+                        // Si los campos están bien se sobre escribe.
+                        var editable: Editable =
+                            Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
+                        var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
+                            0,
+                            editable.length,
+                            ForegroundColorSpan::class.java
+                        )
+
+                        // Se colocan las etiquetas en cada palabra con color
+                        colocarEtiquetas(colorSpans, editable)
+
+                        if (binding!!.tilContenidoPregResp.hint == "Pregunta") {
+                            preguntas[contadorPregunta] = editable.toString()
+                        } else {
+                            respuestas[contadorPregunta] = editable.toString()
+                        }
+
+                        binding!!.tilContenidoPregResp.hint = "Pregunta"
+                        // Pintamos el texto en la pregunta actual
+                        pintarTexto(contadorPregunta - 1)
+                    }
+                } else {
+                    if (binding!!.tilContenidoPregResp.hint == "Pregunta" && binding!!.etPregResp.text.toString()
+                            .isNotEmpty() ||
+                        binding!!.tilContenidoPregResp.hint == "Respuesta" && binding!!.etPregResp.text.toString()
+                            .isEmpty()
+                    ) {
+                        Toast.makeText(
+                            applicationContext,
+                            "Asegurate de llenar pregunta y respuesta",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                        contadorPregunta++
+                    } else {
+                        if (binding!!.tilContenidoPregResp.hint == "Pregunta") {
+                            pintarTexto(contadorPregunta - 1)
+                        } else {
+                            // Si los campos están bien se sobre escribe.
+                            var editable: Editable =
+                                Editable.Factory.getInstance()
+                                    .newEditable(binding!!.etPregResp.text)
+                            var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
+                                0,
+                                editable.length,
+                                ForegroundColorSpan::class.java
+                            )
+
+                            // Se colocan las etiquetas en cada palabra con color
+                            colocarEtiquetas(colorSpans, editable)
+
+                            binding!!.tilContenidoPregResp.hint = "Pregunta"
+                            respuestas.add(contadorPregunta, editable.toString())
+                            pintarTexto(contadorPregunta - 1)
+                        }
+                    }
+                }
+
+                contadorPregunta--
+            } else {
+                Toast.makeText(
+                    applicationContext,
+                    "Ya no tienes preguntas anteriores",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+
+        /*binding!!.btnAtrasPregunta.setOnClickListener(object : View.OnClickListener {
             public override fun onClick(v: View) {
                 // El contadorPregunta tiene que ser mayor a 0 sino significa que no hay preguntas anteriores.
                 if (contadorPregunta > 0) {
@@ -207,8 +504,9 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
                     ).show()
                 }
             }
-        })
-        binding!!.btnSiguientePregunta.setOnClickListener(object : View.OnClickListener {
+        })*/
+
+        /*binding!!.btnSiguientePregunta.setOnClickListener(object : View.OnClickListener {
             public override fun onClick(view: View) {
                 // Validamos campos vacios en la pregunta o respuesta.
                 if ((binding!!.etPregunta.text.toString().isEmpty()
@@ -282,9 +580,81 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
                     contadorPregunta++
                 }
             }
-        })
+        })*/
 
-        binding!!.btnEliminar.setOnClickListener(object : View.OnClickListener {
+        // Hay que probar que elimine bien tanto en pregunta como en respuesta.
+        // No funciona eliminando entre preguntas
+        binding!!.imgvEliminar.setOnClickListener {
+            AlertDialog.Builder(this@Activity_Cuestionario)
+                .setTitle("¡Atención!")
+                .setMessage("¿Quieres eliminar la pregunta?")
+                .setPositiveButton("Si") { dialogInterface, i ->
+                    // Se le quita 1 para hacer referencia al arreglo
+                    // tamaño 3-1 = 2 [0,1,2].
+                    val longi: Int = respuestas.size - 1
+
+                    // contadorPregunta tendrá acceso a modificar lo que esté en el rango a excepción
+                    // de lo que esté en la posición 0.
+                    if (contadorPregunta <= longi) {
+                        preguntas.removeAt(contadorPregunta)
+                        respuestas.removeAt(contadorPregunta)
+
+                        // Solo si es mayor a 0 se resta, cuando se elimina una pregunta se acomoda
+                        // el arreglo desde la posición 0 a la n
+                        if (contadorPregunta != 0){
+                            contadorPregunta--
+                        }
+
+                        pintarTexto(contadorPregunta)
+                        binding!!.tilContenidoPregResp.hint = "Pregunta"
+                    } else {
+                        if (binding!!.tilContenidoPregResp.hint == "Pregunta") {
+                            binding!!.etPregResp.setText("")
+                        } else {
+                            preguntas.removeAt(contadorPregunta)
+                            binding!!.tilContenidoPregResp.hint = "Pregunta"
+                            binding!!.etPregResp.setText("")
+                        }
+
+                        contadorPregunta--
+                        pintarTexto(contadorPregunta)
+                        binding!!.tilContenidoPregResp.hint = "Pregunta"
+                    }
+
+                    // Se le quita 1 para hacer referencia al arreglo
+                    // tamaño 3-1 = 2 [0,1,2].
+                    /*val longi: Int = respuestas.size - 1
+
+                    // contadorPregunta tendrá acceso a modificar lo que esté en el rango a excepción
+                    // de lo que esté en la posición 0.
+                    if (contadorPregunta <= longi) {
+                        preguntas.removeAt(contadorPregunta)
+                        respuestas.removeAt(contadorPregunta)
+
+                        contadorPregunta--
+                        pintarTexto(contadorPregunta)
+                        binding!!.tilContenidoPregResp.hint = "Pregunta"
+                    } else {
+                        // Si el contadorPregunta es mayor entonces únicamente limpiamos los campos.
+                        if (contadorPregunta == preguntas.size-1){
+                            preguntas.removeAt(contadorPregunta)
+
+                            if(contadorPregunta == respuestas.size-1){
+                                respuestas.removeAt(contadorPregunta)
+                            }
+                            contadorPregunta--
+                        }
+
+                        pintarTexto(contadorPregunta)
+                        binding!!.tilContenidoPregResp.hint = "Pregunta"
+                    }*/
+                }
+                .setNegativeButton("Cancelar") { dialog, i ->
+                    dialog.dismiss()
+                }.create().show()
+        }
+
+        /*binding!!.btnEliminar.setOnClickListener(object : View.OnClickListener {
             public override fun onClick(v: View) {
                 AlertDialog.Builder(this@Activity_Cuestionario)
                     .setTitle("¡Atención!")
@@ -326,9 +696,97 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
                         }
                     }).create().show()
             }
-        })
+        })*/
 
-        binding!!.btnGuardarGuia.setOnClickListener(object : View.OnClickListener {
+        binding!!.imgvSave.setOnClickListener {
+            if (respuestas.size != 0) {
+                // Se le quita 1 para hacer referencia al arreglo
+                // tamaño 3-1 = 2 [0,1,2].
+                val longi: Int = respuestas.size - 1
+
+                if (contadorPregunta <= longi) {
+                    if (binding!!.etPregResp.text.toString().isEmpty()) {
+                        Toast.makeText(
+                            applicationContext,
+                            "Asegurate de llenar una pregunta y una respuesta",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    } else {
+                        var editable: Editable =
+                            Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
+                        var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
+                            0,
+                            editable.length,
+                            ForegroundColorSpan::class.java
+                        )
+
+                        // Se colocan las etiquetas en cada palabra con color
+                        colocarEtiquetas(colorSpans, editable)
+
+                        if (binding!!.tilContenidoPregResp.hint == "Pregunta") {
+                            preguntas[contadorPregunta] = editable.toString()
+                        } else {
+                            respuestas[contadorPregunta] = editable.toString()
+                        }
+
+                        crearArchivo(nombreArchivo)
+                    }
+                } else { // Si contadorPregunta es mayor a lo que hay en el arreglo.
+                    if (binding!!.etPregResp.text.toString()
+                            .isEmpty() && binding!!.tilContenidoPregResp.hint == "Pregunta"
+                    ) {
+                        crearArchivo(nombreArchivo)
+                    } else if (binding!!.etPregResp.text.toString()
+                            .isNotEmpty() && binding!!.tilContenidoPregResp.hint == "Pregunta" || binding!!.etPregResp.text.toString()
+                            .isEmpty() && binding!!.tilContenidoPregResp.hint == "Respuesta"
+                    ) {
+                        Toast.makeText(
+                            applicationContext,
+                            "Asegurate de llenar una pregunta y una respuesta",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    } else {
+                        // Cuando no hay guardadas las mismas preguntas que respuestas.
+                        var editable: Editable =
+                            Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
+                        var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
+                            0,
+                            editable.length,
+                            ForegroundColorSpan::class.java
+                        )
+
+                        // Se colocan las etiquetas en cada palabra con color
+                        colocarEtiquetas(colorSpans, editable)
+                        respuestas.add(contadorPregunta, editable.toString())
+
+                        crearArchivo(nombreArchivo)
+                    }
+                }
+            } else if (binding!!.tilContenidoPregResp.hint == "Respuesta") {
+                // Cuando no hay guardadas las mismas preguntas que respuestas.
+                var editable: Editable =
+                    Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
+                var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
+                    0,
+                    editable.length,
+                    ForegroundColorSpan::class.java
+                )
+
+                // Se colocan las etiquetas en cada palabra con color
+                colocarEtiquetas(colorSpans, editable)
+                respuestas.add(contadorPregunta, editable.toString())
+
+                crearArchivo(nombreArchivo)
+            } else {
+                Toast.makeText(
+                    applicationContext,
+                    "Ocupas como minimo crear una pregunta",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+
+        /*binding!!.btnGuardarGuia.setOnClickListener(object : View.OnClickListener {
             public override fun onClick(view: View) {
                 // Se le quita 1 para hacer referencia al arreglo
                 // tamaño 3-1 = 2 [0,1,2].
@@ -405,9 +863,9 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
                     crearArchivo(nombreArchivo)
                 }
             }
-        })
+        })*/
 
-        binding!!.etPregunta.setCustomSelectionActionModeCallback(object : ActionMode.Callback {
+        /*binding!!.etPregunta.setCustomSelectionActionModeCallback(object : ActionMode.Callback {
             @RequiresApi(api = Build.VERSION_CODES.M)
             public override fun onCreateActionMode(actionMode: ActionMode, menu: Menu): Boolean {
                 // Inflar el menú personalizado de color.
@@ -474,9 +932,9 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
             }
 
             public override fun onDestroyActionMode(actionMode: ActionMode) {}
-        })
+        })*/
 
-        binding!!.etRespuesta.setCustomSelectionActionModeCallback(object : ActionMode.Callback {
+        /*binding!!.etRespuesta.setCustomSelectionActionModeCallback(object : ActionMode.Callback {
             @RequiresApi(api = Build.VERSION_CODES.M)
             public override fun onCreateActionMode(actionMode: ActionMode, menu: Menu): Boolean {
                 // Inflar el menú personalizado de color.
@@ -543,13 +1001,21 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
             }
 
             public override fun onDestroyActionMode(actionMode: ActionMode) {}
-        })
-        binding!!.btnQuitarColores.setOnClickListener(object : View.OnClickListener {
+        })*/
+
+        /*binding!!.btnQuitarColores.setOnClickListener(object : View.OnClickListener {
             public override fun onClick(v: View) {
                 binding!!.etPregunta.setText(binding!!.etPregunta.text.toString())
                 binding!!.etRespuesta.setText(binding!!.etRespuesta.text.toString())
             }
-        })
+        })*/
+    }
+
+    private fun girarCardView() {
+        val flipAnimator =
+            ObjectAnimator.ofFloat(binding!!.tilContenidoPregResp, "rotationY", 0f, 360f)
+        flipAnimator.duration = 1000 // Duración de la animación en milisegundos
+        flipAnimator.start()
     }
 
     // Método que se ejecuta cuando el back del telefono es presionado.
@@ -570,25 +1036,22 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
                 "Aún no terminas de crear la guia, se borrará el " +
                         "archivo creado, ¿seguro deseas continuar?"
             )
-            .setPositiveButton("Continuar", object : DialogInterface.OnClickListener {
-                public override fun onClick(dialogInterface: DialogInterface, i: Int) {
-                    // Si el archivo se creó y existe, se elimina y te informa en consola
-                    @SuppressLint("SdCardPath") val file: File =
-                        File("/data/data/com.jonathanev.repasar/files/")
-                    if (file.exists()) {
-                        File(file, "$nombreArchivo.xml").delete()
-                        Log.d("ArchivoEliminado", "Archivo eliminado")
-                    } else {
-                        Log.d("ArchivoEliminado", "Archivo no eliminado")
-                    }
-                    onBackPressed()
+            .setPositiveButton(
+                "Continuar"
+            ) { dialogInterface, i -> // Si el archivo se creó y existe, se elimina y te informa en consola
+                @SuppressLint("SdCardPath") val file: File =
+                    File("/data/data/com.jonathanev.repasar/files/")
+                if (file.exists()) {
+                    File(file, "$nombreArchivo.xml").delete()
+                    Log.d("ArchivoEliminado", "Archivo eliminado")
+                } else {
+                    Log.d("ArchivoEliminado", "Archivo no eliminado")
                 }
-            })
-            .setNegativeButton("Cancelar", object : DialogInterface.OnClickListener {
-                public override fun onClick(dialog: DialogInterface, i: Int) {
-                    dialog.dismiss()
-                }
-            }).create().show()
+                onBackPressed()
+            }
+            .setNegativeButton(
+                "Cancelar"
+            ) { dialog, i -> dialog.dismiss() }.create().show()
     }
 
     // Creamos el archivo en el dispositivo e inicializamos algunas etiquetas.
@@ -629,7 +1092,28 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
         }
     }
 
-    fun colocarEtiquetas(colorSpans: Array<ForegroundColorSpan>, editable: Editable) {
+    private fun colocarEtiquetas(colorSpans: Array<ForegroundColorSpan>, editable: Editable) {
+        for (colorSpan: ForegroundColorSpan in colorSpans) {
+            val start: Int = editable.getSpanStart(colorSpan)
+            val end: Int = editable.getSpanEnd(colorSpan)
+            val color: Int = colorSpan.foregroundColor
+
+            // Agregar la etiqueta de inicio al texto
+            val etiqIni: String = "«$color»"
+            val etiqFin: String = "«/$color»"
+            editable.replace(start, start, etiqIni)
+            // Actualizar la posición de inicio del span
+            // colorSpan = new ForegroundColorSpan(colorSpan.getForegroundColor());
+            // editable.setSpan(colorSpan, start + etiqIni.length(), end + etiqIni.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+            // Agregar la etiqueta de cierre al texto
+            editable.replace(end + etiqIni.length, end + etiqIni.length, etiqFin)
+            // Actualizar la posición de finalización del span
+            // editable.setSpan(colorSpan, start + etiqIni.length(), end + etiqIni.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+    }
+
+    /*fun colocarEtiquetas(colorSpans: Array<ForegroundColorSpan>, editable: Editable) {
         for (colorSpan: ForegroundColorSpan in colorSpans) {
             val start: Int = editable.getSpanStart(colorSpan)
             val end: Int = editable.getSpanEnd(colorSpan)
@@ -643,15 +1127,19 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
             // Agregar la etiqueta de cierre al texto
             editable.replace(end + etiqIni.length, end + etiqIni.length, etiqFin)
         }
-    }
+    }*/
 
     private fun pintarTexto(contadorPregunta: Int) {
         var contColorPreg: Int = 0
-        var contColorResp: Int = 0
         var inicio: Int = 0
         var fin: Int = 0
         var coloresPregunta: ColoresPregunta? = null
-        var texto: String = preguntas[contadorPregunta]
+        var texto: String = ""
+        if (binding!!.tilContenidoPregResp.hint == "Pregunta") {
+            texto = preguntas[contadorPregunta]
+        } else {
+            texto = respuestas[contadorPregunta]
+        }
         while (texto.contains("«")) {
             inicio = texto.indexOf("«") + 1
             fin = texto.indexOf("»")
@@ -662,7 +1150,13 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
             fin = texto.indexOf("«", inicio)
             coloresPregunta =
                 ColoresPregunta((inicio - longColor - 2), (fin - longColor - 2), colEntero)
-            preguntasColor.add(contColorPreg, coloresPregunta)
+
+            if (binding!!.tilContenidoPregResp.hint == "Pregunta") {
+                preguntasColor.add(contColorPreg, coloresPregunta)
+            } else {
+                respuestasColor.add(contColorPreg, coloresPregunta)
+            }
+
             // Eliminar la primera etiqueta y su contenido
             texto = texto.replaceFirst("«.*?»".toRegex(), "")
 
@@ -670,38 +1164,9 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
             texto = texto.replaceFirst("«.*?»".toRegex(), "")
             contColorPreg++
         }
-        builder = SpannableStringBuilder(texto)
-        for (coloresPreguntas: ColoresPregunta in preguntasColor) {
-            val colorSpan: ForegroundColorSpan = ForegroundColorSpan(coloresPreguntas.color)
-            builder!!.setSpan(
-                colorSpan,
-                coloresPreguntas.inicioColor,
-                coloresPreguntas.finColor,
-                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-            )
-        }
-        binding!!.etPregunta.text = builder
-        texto = respuestas[contadorPregunta]
-        while (texto.contains("«")) {
-            inicio = texto.indexOf("«") + 1
-            fin = texto.indexOf("»")
-            val color: String = texto.substring(inicio, fin)
-            val longColor: Int = color.length
-            val colEntero: Int = color.toInt()
-            inicio = fin + 1
-            fin = texto.indexOf("«", inicio)
-            coloresPregunta =
-                ColoresPregunta((inicio - longColor - 2), (fin - longColor - 2), colEntero)
-            respuestasColor.add(contColorResp, coloresPregunta)
-            // Eliminar la primera etiqueta y su contenido
-            texto = texto.replaceFirst("«.*?»".toRegex(), "")
 
-            // Eliminar la segunda etiqueta y su contenido
-            texto = texto.replaceFirst("«.*?»".toRegex(), "")
-            contColorResp++
-        }
         builder = SpannableStringBuilder(texto)
-        for (coloresPreguntas: ColoresPregunta in respuestasColor) {
+        for (coloresPreguntas: ColoresPregunta in if (binding!!.tilContenidoPregResp.hint == "Pregunta") preguntasColor else respuestasColor) {
             val colorSpan: ForegroundColorSpan = ForegroundColorSpan(coloresPreguntas.color)
             builder!!.setSpan(
                 colorSpan,
@@ -710,12 +1175,12 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
             )
         }
-        binding!!.etRespuesta.text = builder
         preguntasColor.clear()
         respuestasColor.clear()
+        binding!!.etPregResp.text = builder
     }
 
-    fun colorActual(colorActual: Int) {
+    /*fun colorActual(colorActual: Int) {
         @SuppressLint("UseCompatLoadingForDrawables") val drawable: Drawable =
             resources.getDrawable(R.drawable.boton_redondo)
         drawable.setColorFilter(colorActual, PorterDuff.Mode.SRC_ATOP)
@@ -723,5 +1188,5 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
 
         // Recibimos el nombre del archivo del popupFragment Nueva Guia.
         this.colorActual = colorActual
-    }
+    }*/
 }

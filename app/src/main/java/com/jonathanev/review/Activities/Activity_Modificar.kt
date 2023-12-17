@@ -182,10 +182,11 @@ class Activity_Modificar constructor() : AppCompatActivity() {
                         pintarTexto(contadorPregunta - 1)
                     }
                 } else {
-                    if (binding!!.etPregResp.text.toString().isNotEmpty()) {
+                    if (binding!!.tilContenidoPregResp.hint == "Pregunta" && binding!!.etPregResp.text.toString().isNotEmpty() ||
+                        binding!!.tilContenidoPregResp.hint == "Respuesta" && binding!!.etPregResp.text.toString().isEmpty()) {
                         Toast.makeText(
                             applicationContext,
-                            "Asegurate de llenar pregunta y una respuesta",
+                            "Asegurate de llenar pregunta y respuesta",
                             Toast.LENGTH_SHORT
                         ).show()
 
@@ -244,6 +245,7 @@ class Activity_Modificar constructor() : AppCompatActivity() {
                             "Asegurate de llenar una pregunta y una respuesta",
                             Toast.LENGTH_SHORT
                         ).show()
+                        contadorPregunta--
                     } else {
                         var editable: Editable =
                             Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
@@ -313,6 +315,7 @@ class Activity_Modificar constructor() : AppCompatActivity() {
                             "Asegurate de llenar una pregunta y una respuesta",
                             Toast.LENGTH_SHORT
                         ).show()
+                        contadorPregunta--
                     } else {
                         // Cuando no hay guardadas las mismas preguntas que respuestas.
                         if (binding!!.tilContenidoPregResp.hint == "Pregunta") {
@@ -321,6 +324,7 @@ class Activity_Modificar constructor() : AppCompatActivity() {
                                 "Asegurate de llenar una pregunta y una respuesta",
                                 Toast.LENGTH_SHORT
                             ).show()
+                            contadorPregunta--
                         } else {
                             var editable: Editable =
                                 Editable.Factory.getInstance()
@@ -339,13 +343,12 @@ class Activity_Modificar constructor() : AppCompatActivity() {
                         }
                     }
                 }
-                Log.i("Contador", contadorPregunta.toString())
                 contadorPregunta++
-                Log.i("Contador", contadorPregunta.toString())
             }
         }
 
         // Hay que probar que elimine bien tanto en pregunta como en respuesta.
+        // Estuvo fallando, siguiente te pones en respuesta y eliminas
         binding!!.imgvEliminar.setOnClickListener {
             AlertDialog.Builder(this@Activity_Modificar)
                 .setTitle("¡Atención!")
@@ -361,22 +364,26 @@ class Activity_Modificar constructor() : AppCompatActivity() {
                         preguntas.removeAt(contadorPregunta)
                         respuestas.removeAt(contadorPregunta)
 
-                        // Mientras el contadorPregunta sea menor escribiremos la siguiente pregunta
-                        // en los et.
-                        /*if (contadorPregunta < longi) {
-                            // Pintamos el texto en la pregunta actual
-                        } else {
-                            // Si el contadorPregunta es igual entonces solo escribiremos los campos vacios.
-                            binding!!.etPregResp.setText("")
-                            binding!!.etPregResp.requestFocus()
-                            pintarTexto(contadorPregunta)
-                        }*/
+                        // Solo si es mayor a 0 se resta, cuando se elimina una pregunta se acomoda
+                        // el arreglo desde la posición 0 a la n
+                        if (contadorPregunta != 0){
+                            contadorPregunta--
+                        }
 
-                        contadorPregunta--
                         pintarTexto(contadorPregunta)
                         binding!!.tilContenidoPregResp.hint = "Pregunta"
-                    } else {
-                        // Si el contadorPregunta es mayor entonces únicamente limpiamos los campos.
+                    } /*else if (binding!!.tilContenidoPregResp.hint == "Respuesta") {
+                        preguntas.removeAt(contadorPregunta)
+                }*/ else {
+                        if (binding!!.tilContenidoPregResp.hint == "Pregunta"){
+                            binding!!.etPregResp.setText("")
+                        } else {
+                            preguntas.removeAt(contadorPregunta)
+                            binding!!.tilContenidoPregResp.hint = "Pregunta"
+                            binding!!.etPregResp.setText("")
+                        }
+
+                        /*// Si el contadorPregunta es mayor entonces únicamente limpiamos los campos.
                         if (contadorPregunta == preguntas.size-1){
                             preguntas.removeAt(contadorPregunta)
 
@@ -384,8 +391,9 @@ class Activity_Modificar constructor() : AppCompatActivity() {
                                 respuestas.removeAt(contadorPregunta)
                             }
                             contadorPregunta--
-                        }
+                        }*/
 
+                        contadorPregunta--
                         pintarTexto(contadorPregunta)
                         binding!!.tilContenidoPregResp.hint = "Pregunta"
                     }

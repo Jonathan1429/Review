@@ -40,7 +40,7 @@ class Fragment_DialogColores_popup : DialogFragment() {
             setLayoutColor(color)
             colorActual = color
             val actividCuestionario = activity as Activity_Cuestionario?
-            actividCuestionario!!.colorActual(colorActual)
+            //actividCuestionario!!.colorActual(colorActual)
         })
         val fragment: Fragment = this
         binding!!.btnContinuar.setOnClickListener {
@@ -51,7 +51,7 @@ class Fragment_DialogColores_popup : DialogFragment() {
             val intent = Intent(activity, Activity_Cuestionario::class.java)
             colorActual = Color.BLACK
             val actividCuestionario = activity as Activity_Cuestionario?
-            actividCuestionario!!.colorActual(colorActual)
+            //actividCuestionario!!.colorActual(colorActual)
         }
     }
 

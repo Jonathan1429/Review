@@ -10,152 +10,181 @@
         android:id="@+id/barra_superior_regreso"
         layout="@layout/barra_superior_back"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content" />
 
-    <TextView
-        android:id="@+id/tvLabelColor"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginStart="6dp"
-        android:text="@string/btnColorAct"
-        app:layout_constraintTop_toBottomOf="@+id/barra_superior_regreso"
-        app:layout_constraintBottom_toTopOf="@+id/tilContenidoPregunta"
-        app:layout_constraintStart_toStartOf="parent"/>
-
-    <ImageButton
-        android:id="@+id/btnColorActual"
-        android:layout_width="15dp"
-        android:layout_height="15dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginStart="6dp"
-        android:src="@drawable/ic_filter_state"
-        android:background="@drawable/boton_redondo"
-        android:contentDescription="Color actual"
-        app:layout_constraintTop_toBottomOf="@+id/barra_superior_regreso"
-        app:layout_constraintBottom_toTopOf="@+id/tilContenidoPregunta"
-        app:layout_constraintStart_toEndOf="@+id/tvLabelColor" />
-
-    <ImageView
-        android:id="@+id/imgvColor"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginTop="10dp"
-        android:src="@drawable/ic_action_goright"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
-        app:layout_constraintTop_toBottomOf="@+id/barra_superior_regreso"
-        app:layout_constraintBottom_toTopOf="@+id/tilContenidoPregunta"
-        app:layout_constraintStart_toEndOf="@+id/btnColorActual"
-        tools:ignore="ContentDescription" />
-
-    <!--style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"-->
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/tilContenidoPregunta"
-        android:labelFor="@+id/tvContenidoPregunta"
-        android:layout_width="match_parent"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cvPregResp"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="6dp"
-        android:layout_marginEnd="6dp"
-        app:endIconMode="clear_text"
-        app:layout_constraintTop_toBottomOf="@+id/imgvColor"
-        app:layout_constraintStart_toStartOf="parent"
+        android:elevation="8dp"
+        app:cardCornerRadius="42dp"
+        app:layout_constraintBottom_toTopOf="@+id/adView"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHeight_percent="0.3">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/barra_superior_regreso">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etPregunta"
+        <LinearLayout
+            android:id="@+id/layoutContent"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:autofillHints="testHint"
-            android:inputType="text|textMultiLine"
-            android:gravity="top"
-            android:scrollbars="vertical"
-            android:hint="@string/etContenidoPregunta"
-            android:textSize="18sp"/>
-    </com.google.android.material.textfield.TextInputLayout>
+            android:orientation="vertical">
 
-    <!--style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"-->
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/tilContenidoRespuesta"
-        android:labelFor="@+id/tvContenidoPregunta"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginStart="6dp"
-        android:layout_marginEnd="6dp"
-        app:endIconMode="clear_text"
-        app:layout_constraintTop_toBottomOf="@+id/tilContenidoPregunta"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHeight_percent="0.3">
+            <LinearLayout
+                android:id="@+id/layoutBtnsCuestionario"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:orientation="horizontal"
+                android:padding="10dp">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etRespuesta"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:autofillHints="testHint"
-            android:inputType="text|textMultiLine"
-            android:gravity="top"
-            android:scrollbars="vertical"
-            android:hint="@string/etContenidoRespuesta"
-            android:textSize="18sp"/>
-    </com.google.android.material.textfield.TextInputLayout>
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1">
 
-   <!-- style="@style/btnGenerales" -->
-    <Button
-        android:id="@+id/btnAtrasPregunta"
+                    <ImageView
+                        android:id="@+id/imgvPrevious"
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
+                        android:layout_gravity="left"
+                        android:layout_marginStart="5dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginEnd="5dp"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/ic_circle_left_right"
+                        tools:ignore="ContentDescription" />
+
+                    <ImageView
+                        android:id="@+id/imgvNext"
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
+                        android:layout_gravity="right"
+                        android:layout_marginStart="5dp"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginEnd="5dp"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:rotationY="180"
+                        android:src="@drawable/ic_circle_left_right"
+                        tools:ignore="ContentDescription" />
+                </FrameLayout>
+
+                <ImageView
+                    android:id="@+id/imgvCheck"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="5dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_check"
+                    android:visibility="gone"
+                    tools:ignore="ContentDescription" />
+
+                <ImageView
+                    android:id="@+id/imgvCancelar"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="5dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_cancel"
+                    android:visibility="gone"
+                    tools:ignore="ContentDescription" />
+
+                <ImageView
+                    android:id="@+id/imgvQuitColor"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="5dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_eraser"
+                    android:visibility="gone"
+                    tools:ignore="ContentDescription" />
+
+                <ImageView
+                    android:id="@+id/imgvEliminar"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="5dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_trash"
+                    tools:ignore="ContentDescription" />
+
+                <ImageView
+                    android:id="@+id/imgvSelColor"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="5dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_paint_roller"
+                    tools:ignore="ContentDescription" />
+
+                <ImageView
+                    android:id="@+id/imgvPregResp"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="5dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_preg_resp"
+                    tools:ignore="ContentDescription" />
+
+                <ImageView
+                    android:id="@+id/imgvSave"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="5dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_save"
+                    tools:ignore="ContentDescription" />
+            </LinearLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilContenidoPregResp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginStart="6dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="6dp"
+                android:padding="15dp"
+                android:hint="@string/etPregunta"
+                android:labelFor="@+id/tvContenidoPregResp"
+                app:endIconMode="clear_text">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etPregResp"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:autofillHints="testHint"
+                    android:background="@android:color/transparent"
+                    android:gravity="top"
+                    android:inputType="text|textMultiLine"
+                    android:scrollbars="vertical"
+                    android:textSize="18sp" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <com.google.android.gms.ads.AdView xmlns:ads="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/adView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/btnAtras"
-        android:background="@drawable/ic_filter_state"
-        style="@style/btnGeneral"
-        app:layout_constraintTop_toBottomOf="@+id/tilContenidoRespuesta"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/btnSiguientePregunta" />
-
-    <Button
-        android:id="@+id/btnSiguientePregunta"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:text="@string/btnSiguiente"
-        android:background="@drawable/ic_filter_state"
-        style="@style/btnGeneral"
-        app:layout_constraintTop_toBottomOf="@+id/tilContenidoRespuesta"
-        app:layout_constraintStart_toEndOf="@+id/btnAtrasPregunta"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <!--style="@style/btnGenerales"-->
-    <Button
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:id="@+id/btnEliminar"
-        android:text="@string/btnEliminar"
-        android:background="@drawable/ic_filter_state"
-        style="@style/btnGeneral"
-        app:layout_constraintTop_toBottomOf="@+id/btnAtrasPregunta"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/btnGuardarGuia" />
-
-    <!--style="@style/btnGenerales"-->
-    <Button
-        android:id="@+id/btnGuardarGuia"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/btnGuardarGuia"
-        android:background="@drawable/ic_filter_state"
-        style="@style/btnGeneral"
-        app:layout_constraintTop_toBottomOf="@+id/btnSiguientePregunta"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/btnEliminar" />
-
-    <Button
-        android:id="@+id/btnQuitarColores"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/btnSinColor"
-        android:background="@drawable/ic_filter_state"
-        style="@style/btnGeneral"
-        app:layout_constraintTop_toBottomOf="@+id/btnGuardarGuia"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
-
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        ads:adSize="BANNER"
+        ads:adUnitId="ca-app-pub-3940256099942544/6300978111"
+        ads:layout_constraintBottom_toBottomOf="parent"
+        ads:layout_constraintEnd_toEndOf="parent"
+        ads:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
