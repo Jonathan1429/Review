@@ -593,22 +593,47 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
                     // tamaño 3-1 = 2 [0,1,2].
                     val longi: Int = respuestas.size - 1
 
-                    // contadorPregunta tendrá acceso a modificar lo que esté en el rango a excepción
-                    // de lo que esté en la posición 0.
-                    if (contadorPregunta <= longi) {
-                        preguntas.removeAt(contadorPregunta)
-                        respuestas.removeAt(contadorPregunta)
+                    if (longi == -1 || longi == 0 && contadorPregunta == 0) {
+                        preguntas.removeFirst()
+                        respuestas.removeFirst()
 
+                       if (binding!!.tilContenidoPregResp.hint == "Pregunta"){
+                           binding!!.etPregResp.setText("")
+                       } else {
+                           binding!!.tilContenidoPregResp.hint = "Pregunta"
+                           binding!!.etPregResp.setText("")
+                       }
+                    } else if (contadorPregunta <= longi) {
                         // Solo si es mayor a 0 se resta, cuando se elimina una pregunta se acomoda
                         // el arreglo desde la posición 0 a la n
-                        if (contadorPregunta != 0){
+                        if(contadorPregunta < longi){
+                            if (contadorPregunta > 0){
+                                // contadorPregunta tendrá acceso a modificar lo que esté en el rango a excepción
+                                // de lo que esté en la posición 0.
+                                preguntas.removeAt(contadorPregunta)
+                                respuestas.removeAt(contadorPregunta)
+                                contadorPregunta--
+                                pintarTexto(contadorPregunta)
+                                binding!!.tilContenidoPregResp.hint = "Pregunta"
+                            } else {
+                                // contadorPregunta tendrá acceso a modificar lo que esté en el rango a excepción
+                                // de lo que esté en la posición 0.
+                                preguntas.removeAt(contadorPregunta)
+                                respuestas.removeAt(contadorPregunta)
+                                pintarTexto(contadorPregunta)
+                                binding!!.tilContenidoPregResp.hint = "Pregunta"
+                            }
+                        } else {
+                            // contadorPregunta tendrá acceso a modificar lo que esté en el rango a excepción
+                            // de lo que esté en la posición 0.
+                            preguntas.removeAt(contadorPregunta)
+                            respuestas.removeAt(contadorPregunta)
                             contadorPregunta--
+                            pintarTexto(contadorPregunta)
+                            binding!!.tilContenidoPregResp.hint = "Pregunta"
                         }
-
-                        pintarTexto(contadorPregunta)
-                        binding!!.tilContenidoPregResp.hint = "Pregunta"
                     } else {
-                        if (binding!!.tilContenidoPregResp.hint == "Pregunta") {
+                        if (binding!!.tilContenidoPregResp.hint == "Pregunta"){
                             binding!!.etPregResp.setText("")
                         } else {
                             preguntas.removeAt(contadorPregunta)
@@ -620,34 +645,6 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
                         pintarTexto(contadorPregunta)
                         binding!!.tilContenidoPregResp.hint = "Pregunta"
                     }
-
-                    // Se le quita 1 para hacer referencia al arreglo
-                    // tamaño 3-1 = 2 [0,1,2].
-                    /*val longi: Int = respuestas.size - 1
-
-                    // contadorPregunta tendrá acceso a modificar lo que esté en el rango a excepción
-                    // de lo que esté en la posición 0.
-                    if (contadorPregunta <= longi) {
-                        preguntas.removeAt(contadorPregunta)
-                        respuestas.removeAt(contadorPregunta)
-
-                        contadorPregunta--
-                        pintarTexto(contadorPregunta)
-                        binding!!.tilContenidoPregResp.hint = "Pregunta"
-                    } else {
-                        // Si el contadorPregunta es mayor entonces únicamente limpiamos los campos.
-                        if (contadorPregunta == preguntas.size-1){
-                            preguntas.removeAt(contadorPregunta)
-
-                            if(contadorPregunta == respuestas.size-1){
-                                respuestas.removeAt(contadorPregunta)
-                            }
-                            contadorPregunta--
-                        }
-
-                        pintarTexto(contadorPregunta)
-                        binding!!.tilContenidoPregResp.hint = "Pregunta"
-                    }*/
                 }
                 .setNegativeButton("Cancelar") { dialog, i ->
                     dialog.dismiss()
@@ -699,6 +696,75 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
         })*/
 
         binding!!.imgvSave.setOnClickListener {
+            // Se le quita 1 para hacer referencia al arreglo
+            // tamaño 3-1 = 2 [0,1,2].
+            val longi: Int = respuestas.size
+
+            if(binding!!.etPregResp.text.toString().isEmpty()){
+                if (respuestas.isEmpty() && binding!!.tilContenidoPregResp.hint == "Pregunta"){
+                    Toast.makeText(
+                        applicationContext,
+                        "Debes tener como minimo una pregunta",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else if((contadorPregunta+1) > longi && binding!!.tilContenidoPregResp.hint == "Respuesta"){
+                    Toast.makeText(
+                        applicationContext,
+                        "Asegurate de llenar una pregunta y una respuesta",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else if((contadorPregunta+1) > longi && binding!!.tilContenidoPregResp.hint == "Pregunta"){
+                    crearArchivo(nombreArchivo)
+                } else {
+                    Toast.makeText(
+                        applicationContext,
+                        "Asegurate de llenar una pregunta y una respuesta",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            } else {
+                if (binding!!.tilContenidoPregResp.hint == "Pregunta") {
+                    if ((contadorPregunta + 1) <= longi && longi > 0) {
+                        var editable: Editable =
+                            Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
+                        var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
+                            0,
+                            editable.length,
+                            ForegroundColorSpan::class.java
+                        )
+
+                        // Se colocan las etiquetas en cada palabra con color
+                        colocarEtiquetas(colorSpans, editable)
+                        preguntas[contadorPregunta] = editable.toString()
+                        respuestas[contadorPregunta] = editable.toString()
+
+                        crearArchivo(nombreArchivo)
+                    } else {
+                        Toast.makeText(
+                            applicationContext,
+                            "Asegurate de llenar una pregunta y una respuesta",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                } else {
+                    var editable: Editable =
+                        Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
+                    var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
+                        0,
+                        editable.length,
+                        ForegroundColorSpan::class.java
+                    )
+
+                    // Se colocan las etiquetas en cada palabra con color
+                    colocarEtiquetas(colorSpans, editable)
+                    respuestas.add(editable.toString()) //[contadorPregunta] = editable.toString()
+
+                    crearArchivo(nombreArchivo)
+                }
+            }
+        }
+
+        /*binding!!.imgvSave.setOnClickListener {
             if (respuestas.size != 0) {
                 // Se le quita 1 para hacer referencia al arreglo
                 // tamaño 3-1 = 2 [0,1,2].
@@ -784,7 +850,7 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
                     Toast.LENGTH_SHORT
                 ).show()
             }
-        }
+        } */
 
         /*binding!!.btnGuardarGuia.setOnClickListener(object : View.OnClickListener {
             public override fun onClick(view: View) {
