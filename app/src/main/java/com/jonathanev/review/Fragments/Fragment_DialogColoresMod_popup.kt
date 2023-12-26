@@ -20,7 +20,7 @@ import com.skydoves.colorpickerview.listeners.ColorListener
 
 class Fragment_DialogColoresMod_popup : DialogFragment() {
     private var binding: FragmentColoresBinding? = null
-    private var colorActual = 0
+    //private var colorActual = 0
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -37,9 +37,9 @@ class Fragment_DialogColoresMod_popup : DialogFragment() {
         binding!!.colorPickerView.flagView = bubbleFlag
         binding!!.colorPickerView.setColorListener(ColorListener { color, _ ->
             setLayoutColor(color)
-            colorActual = color
+            //colorActual = color
             val activityModificar = activity as Activity_Modificar?
-            //activityModificar!!.colorActual(colorActual)
+            activityModificar!!.setColor(color)
         })
         val fragment: Fragment = this
         binding!!.btnContinuar.setOnClickListener {
@@ -47,9 +47,10 @@ class Fragment_DialogColoresMod_popup : DialogFragment() {
         }
         binding!!.btnDefault.setOnClickListener {
             requireActivity().supportFragmentManager.beginTransaction().remove(fragment).commit()
-            val intent = Intent(activity, Activity_Modificar::class.java)
-            colorActual = Color.BLACK
-            val activityModificar = activity as Activity_Modificar?
+            (activity as? Activity_Modificar)?.setColor(Color.BLACK)
+            //val intent = Intent(activity, Activity_Modificar::class.java)
+            //colorActual = Color.BLACK
+            //val activityModificar = activity as Activity_Modificar?
             //activityModificar!!.colorActual(colorActual)
         }
     }

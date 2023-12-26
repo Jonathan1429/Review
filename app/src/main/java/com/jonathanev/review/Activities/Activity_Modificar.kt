@@ -4,19 +4,25 @@ import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.Color
+import android.graphics.PorterDuff
 import android.os.Bundle
 import android.text.Editable
 import android.text.Spannable
 import android.text.SpannableStringBuilder
+import android.text.Spanned
 import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.util.Xml
 import android.view.KeyEvent
 import android.view.View
 import android.widget.Toast
+import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.ImageViewCompat
 import com.jonathanev.review.Clases.ColoresPregunta
+import com.jonathanev.review.Fragments.Fragment_DialogColoresMod_popup
 import com.jonathanev.review.databinding.ActivityModificarBinding
 import org.w3c.dom.Document
 import org.w3c.dom.Element
@@ -42,6 +48,9 @@ class Activity_Modificar constructor() : AppCompatActivity() {
     var builder: SpannableStringBuilder? = null
     private var contadorPregunta: Int = 0
     private var dialMasPreg: Boolean = false
+
+    private var start = -1
+    private var end = -1
 
     // Creamos la serialización y la clase para crear archivos de manera global.
     private var serializer: XmlSerializer = Xml.newSerializer()
@@ -69,6 +78,7 @@ class Activity_Modificar constructor() : AppCompatActivity() {
             }
         })
         colorActual = Color.BLACK
+        setColor(colorActual)
         //colorActual(colorActual)
         /*binding!!.imgvColor.setOnClickListener(object : View.OnClickListener {
             public override fun onClick(v: View) {
@@ -552,26 +562,102 @@ class Activity_Modificar constructor() : AppCompatActivity() {
             binding!!.etPregResp.text = binding!!.etPregResp.text
         }
 
-        /*binding!!.btnQuitarColores.setOnClickListener(object : View.OnClickListener {
-            public override fun onClick(v: View) {
-
-            }
-        })*/
-
-        // Cuando se seleccione desde donde se comenzará a pintar las cosas
-        /*binding!!.etRespuesta.setOnFocusChangeListener { view, b ->
-            val cursorPos = binding!!.etRespuesta.selectionStart
-
-            // Haz algo con las coordenadas y la posición del cursor (por ejemplo, muestra en el registro)
-            Log.i("Posicion", "Cursor Position: $cursorPos")
+        binding!!.imgvColors.setOnClickListener {
+            // Unicamente abrimos el dialogo y lo mostramos en la pantalla.
+            val dialogo: Fragment_DialogColoresMod_popup = Fragment_DialogColoresMod_popup()
+            //=====================================================================================================================
+            dialogo.show(supportFragmentManager, "FragmentColor")
         }
 
-        binding!!.etRespuesta.setOnClickListener {
-            val cursorPos = binding!!.etRespuesta.selectionStart
+        binding!!.imgvSelColor.setOnClickListener {
+            binding!!.imgvEliminar.visibility = View.GONE
+            binding!!.imgvSelColor.visibility = View.GONE
+            binding!!.imgvPregResp.visibility = View.GONE
+            binding!!.imgvSave.visibility = View.GONE
 
-            // Haz algo con las coordenadas y la posición del cursor (por ejemplo, muestra en el registro)
-            Log.i("Posicion", "Cursor Position: $cursorPos")
-        }*/
+            binding!!.imgvColors.visibility = View.VISIBLE
+            binding!!.imgvCheck.visibility = View.VISIBLE
+            binding!!.imgvCancelar.visibility = View.VISIBLE
+            binding!!.imgvQuitColor.visibility = View.VISIBLE
+        }
+
+        // Cambio de botones visibles
+        binding!!.imgvCancelar.setOnClickListener {
+            binding!!.imgvEliminar.visibility = View.VISIBLE
+            binding!!.imgvSelColor.visibility = View.VISIBLE
+            binding!!.imgvPregResp.visibility = View.VISIBLE
+            binding!!.imgvSave.visibility = View.VISIBLE
+
+            binding!!.imgvColors.visibility = View.GONE
+            binding!!.imgvCheck.visibility = View.GONE
+            binding!!.imgvCancelar.visibility = View.GONE
+            binding!!.imgvQuitColor.visibility = View.GONE
+
+            start = -1
+            end = -1
+        }
+
+        binding!!.imgvCheck.setOnClickListener {
+            val text: Editable?
+            val spannableStringBuilder: SpannableStringBuilder
+
+            // La posición en el ET comienza en el 0 por eso vale -1.
+            if (start == -1){
+                start = binding!!.etPregResp.selectionStart
+
+                Toast.makeText(
+                    applicationContext,
+                    "Pon el cursor hasta donde quieres pintar",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                end = binding!!.etPregResp.selectionStart
+                text = binding!!.etPregResp.text
+                spannableStringBuilder = SpannableStringBuilder(text)
+
+                // Obtén los spans aplicados
+                val spans: Array<ForegroundColorSpan> = spannableStringBuilder.getSpans(
+                    0,
+                    spannableStringBuilder.length,
+                    ForegroundColorSpan::class.java
+                )
+
+                // Eliminar spans existentes que se superpongan con el nuevo rango
+                for (span: ForegroundColorSpan? in spans) {
+                    val spanInicio: Int = spannableStringBuilder.getSpanStart(span)
+                    val spanFin: Int = spannableStringBuilder.getSpanEnd(span)
+                    if ((spanInicio < end && spanFin > start) || (spanInicio >= start && spanFin <= end)) {
+                        spannableStringBuilder.removeSpan(span)
+                        Toast.makeText(
+                            applicationContext,
+                            "Una letra, una tinta; palabras sin colores.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+
+                spannableStringBuilder.setSpan(
+                    ForegroundColorSpan(colorActual),
+                    start,
+                    end,
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+
+                binding!!.etPregResp.text = spannableStringBuilder
+                binding!!.etPregResp.setSelection(end)
+                start = -1
+                end = -1
+            }
+        }
+
+        // Eliminar textos con colores
+        binding!!.imgvQuitColor.setOnClickListener {
+            val text = binding!!.etPregResp.text
+            val spannableStringBuilder: SpannableStringBuilder = SpannableStringBuilder(text)
+            spannableStringBuilder.clearSpans()
+
+            binding!!.etPregResp.text = spannableStringBuilder
+        }
     }
 
     private fun girarCardView() {
@@ -749,13 +835,14 @@ class Activity_Modificar constructor() : AppCompatActivity() {
         }
     }
 
-    /*fun colorActual(colorActual: Int) {
-        @SuppressLint("UseCompatLoadingForDrawables") val drawable: Drawable =
-            resources.getDrawable(R.drawable.boton_redondo)
-        drawable.setColorFilter(colorActual, PorterDuff.Mode.SRC_ATOP)
-        binding!!.btnColorActual.background = drawable
-
-        // Recibimos el nombre del archivo del popupFragment Nueva Guia.
-        this.colorActual = colorActual
-    }*/
+    // Cambiar color del icono (ImageView)
+    fun setColor(@ColorInt color: Int?) {
+        if (color == null) {
+            ImageViewCompat.setImageTintList(binding!!.imgvColors, null)
+            return
+        }
+        ImageViewCompat.setImageTintMode(binding!!.imgvColors, PorterDuff.Mode.SRC_ATOP)
+        ImageViewCompat.setImageTintList(binding!!.imgvColors, ColorStateList.valueOf(color))
+        colorActual = color
+    }
 }
