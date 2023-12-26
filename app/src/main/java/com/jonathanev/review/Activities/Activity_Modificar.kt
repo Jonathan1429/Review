@@ -21,6 +21,10 @@ import android.widget.Toast
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.ImageViewCompat
+import com.google.android.gms.ads.AdListener
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.MobileAds
 import com.jonathanev.review.Clases.ColoresPregunta
 import com.jonathanev.review.Fragments.Fragment_DialogColoresMod_popup
 import com.jonathanev.review.databinding.ActivityModificarBinding
@@ -61,6 +65,9 @@ class Activity_Modificar constructor() : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityModificarBinding.inflate(layoutInflater)
         setContentView(binding!!.root)
+
+        // Sección de anuncios
+        initLoadAds()
 
         // Guardo el nombre del archivo enviado desde el popupFragmentListarGuias.
         nombreArchivo = intent.extras!!.getString("nombre_archivo")
@@ -359,11 +366,11 @@ class Activity_Modificar constructor() : AppCompatActivity() {
                 .setPositiveButton("Si") { dialogInterface, i ->
                     // Se le quita 1 para hacer referencia al arreglo
                     // tamaño 3-1 = 2 [0,1,2].
-                    val longi: Int = respuestas.size - 1
+                    val longi: Int = respuestas.size
 
-                    if (longi == -1 || longi == 0 && contadorPregunta == 0) {
-                        preguntas.removeFirst()
-                        respuestas.removeFirst()
+                    if (longi == 0) {
+                        //preguntas.removeFirst()
+                        //respuestas.removeFirst()
 
                         if (binding!!.tilContenidoPregResp.hint == "Pregunta") {
                             binding!!.etPregResp.setText("")
@@ -414,6 +421,7 @@ class Activity_Modificar constructor() : AppCompatActivity() {
                         binding!!.tilContenidoPregResp.hint = "Pregunta"
                     }
                 }
+
                 .setNegativeButton("Cancelar") { dialog, i ->
                     dialog.dismiss()
                 }.create().show()
@@ -511,114 +519,9 @@ class Activity_Modificar constructor() : AppCompatActivity() {
                             borrarCrearXML(nombreArchivo)
                         }
                     }
-
-                    /*if ((contadorPregunta + 1) <= longi && longi > 0) {
-                        var editable: Editable =
-                            Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
-                        var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
-                            0,
-                            editable.length,
-                            ForegroundColorSpan::class.java
-                        )
-
-                        // Se colocan las etiquetas en cada palabra con color
-                        colocarEtiquetas(colorSpans, editable)
-                        respuestas[contadorPregunta] = editable.toString()
-
-                        borrarCrearXML(nombreArchivo)
-                    } else {
-                        Toast.makeText(
-                            applicationContext,
-                            "Asegurate de llenar una pregunta y una respuesta",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-
-                    var editable: Editable =
-                        Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
-                    var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
-                        0,
-                        editable.length,
-                        ForegroundColorSpan::class.java
-                    )
-
-                    // Se colocan las etiquetas en cada palabra con color
-                    colocarEtiquetas(colorSpans, editable)
-                    respuestas.add(editable.toString()) //[contadorPregunta] = editable.toString()
-
-                    borrarCrearXML(nombreArchivo)*/
                 }
             }
         }
-
-        /*binding!!.etRespuesta.setCustomSelectionActionModeCallback(object : ActionMode.Callback {
-            @RequiresApi(api = Build.VERSION_CODES.M)
-            public override fun onCreateActionMode(actionMode: ActionMode, menu: Menu): Boolean {
-                // Inflar el menú personalizado de color.
-                actionMode.menuInflater.inflate(R.menu.menu_color, menu)
-
-                // Inflar el menú personalizado sin color.
-                // actionMode.getMenuInflater().inflate(R.menu.munu_sin_color, menu);
-                return true
-            }
-
-            public override fun onPrepareActionMode(actionMode: ActionMode, menu: Menu): Boolean {
-                return false
-            }
-
-            public override fun onActionItemClicked(
-                actionMode: ActionMode,
-                menuItem: MenuItem
-            ): Boolean {
-                val start: Int
-                val end: Int
-                val text: Editable?
-                val spannableStringBuilder: SpannableStringBuilder
-                when (menuItem.itemId) {
-                    R.id.color -> {
-                        // Acción para traducir la palabra seleccionada
-                        start = binding!!.etRespuesta.selectionStart
-                        end = binding!!.etRespuesta.selectionEnd
-                        text = binding!!.etRespuesta.text
-                        spannableStringBuilder = SpannableStringBuilder(text)
-
-                        // Obtén los spans aplicados
-                        val spans: Array<ForegroundColorSpan> = spannableStringBuilder.getSpans(
-                            0,
-                            spannableStringBuilder.length,
-                            ForegroundColorSpan::class.java
-                        )
-
-                        // Eliminar spans existentes que se superpongan con el nuevo rango
-                        for (span: ForegroundColorSpan? in spans) {
-                            val spanInicio: Int = spannableStringBuilder.getSpanStart(span)
-                            val spanFin: Int = spannableStringBuilder.getSpanEnd(span)
-                            if ((spanInicio < end && spanFin > start) || (spanInicio >= start && spanFin <= end)) {
-                                spannableStringBuilder.removeSpan(span)
-                                Toast.makeText(
-                                    applicationContext,
-                                    "Una letra, una tinta; palabras sin colores.",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        }
-                        spannableStringBuilder.setSpan(
-                            ForegroundColorSpan(colorActual),
-                            start,
-                            end,
-                            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-                        )
-                        binding!!.etRespuesta.text = spannableStringBuilder
-                        binding!!.etRespuesta.setSelection(end)
-                        return true
-                    }
-
-                    else -> return false
-                }
-            }
-
-            public override fun onDestroyActionMode(actionMode: ActionMode) {}
-        })*/
 
         // Visualización del DialogFragment de selección de colores.
         binding!!.imgvColors.setOnClickListener {
@@ -719,6 +622,32 @@ class Activity_Modificar constructor() : AppCompatActivity() {
 
             binding!!.etPregResp.text = spannableStringBuilder
         }
+    }
+
+    private fun initLoadAds() {
+        MobileAds.initialize(this) { }
+
+        val adRequest = AdRequest.Builder().build()
+        binding!!.adView.loadAd(adRequest)
+
+        binding!!.adView.adListener = object : AdListener(){
+            override fun onAdLoaded() {
+            }
+            override fun onAdFailedToLoad(adError : LoadAdError) {
+            }
+            override fun onAdOpened() {
+            }
+            override fun onAdClicked() {
+            }
+            override fun onAdClosed() {
+            }
+        }
+        /*onAdLoaded: Se llamará cuando el anuncio haya cargado.
+        onAdFailedToLoad: Si el anuncio falla al intentar cargar la publicidad se llamará a este método para que podamos volver a intentarlo u ocultar el anuncio.
+        onAdOpened: Cuando la publicidad ha sido abierta.
+        onAdClicked: Se ejecutará este método cuando se haga clic en el banner.
+        onAdLeftApplication: Cuando el usuario abandone la aplicación.
+        onAdClosed: Se llama al cerrar la publicidad.*/
     }
 
     private fun girarCardView() {

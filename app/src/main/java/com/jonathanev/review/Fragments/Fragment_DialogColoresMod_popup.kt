@@ -37,7 +37,6 @@ class Fragment_DialogColoresMod_popup : DialogFragment() {
         binding!!.colorPickerView.flagView = bubbleFlag
         binding!!.colorPickerView.setColorListener(ColorListener { color, _ ->
             setLayoutColor(color)
-            //colorActual = color
             val activityModificar = activity as Activity_Modificar?
             activityModificar!!.setColor(color)
         })
@@ -48,10 +47,6 @@ class Fragment_DialogColoresMod_popup : DialogFragment() {
         binding!!.btnDefault.setOnClickListener {
             requireActivity().supportFragmentManager.beginTransaction().remove(fragment).commit()
             (activity as? Activity_Modificar)?.setColor(Color.BLACK)
-            //val intent = Intent(activity, Activity_Modificar::class.java)
-            //colorActual = Color.BLACK
-            //val activityModificar = activity as Activity_Modificar?
-            //activityModificar!!.colorActual(colorActual)
         }
     }
 

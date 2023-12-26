@@ -38,20 +38,17 @@ class Fragment_DialogColores_popup : DialogFragment() {
         binding!!.colorPickerView.flagView = bubbleFlag
         binding!!.colorPickerView.setColorListener(ColorListener { color, fromUser ->
             setLayoutColor(color)
-            colorActual = color
-            val actividCuestionario = activity as Activity_Cuestionario?
-            //actividCuestionario!!.colorActual(colorActual)
+            val activityCuestionario = activity as Activity_Cuestionario?
+            activityCuestionario!!.setColor(color)
         })
+
         val fragment: Fragment = this
         binding!!.btnContinuar.setOnClickListener {
             requireActivity().supportFragmentManager.beginTransaction().remove(fragment).commit()
         }
         binding!!.btnDefault.setOnClickListener {
             requireActivity().supportFragmentManager.beginTransaction().remove(fragment).commit()
-            val intent = Intent(activity, Activity_Cuestionario::class.java)
-            colorActual = Color.BLACK
-            val actividCuestionario = activity as Activity_Cuestionario?
-            //actividCuestionario!!.colorActual(colorActual)
+            (activity as? Activity_Cuestionario)?.setColor(Color.BLACK)
         }
     }
 

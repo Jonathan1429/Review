@@ -8,48 +8,9 @@
          1.- Hay que verificar que el botón de eliminar funcione correctamente.
          (SOLUCIONADO)
 
-         2.- Si agregamos los colores  sin orden el archivo no se crea o modifica correctamente,
-             ya sea en el apartado de crear una nueva guia o en modificar.
-         (SOLUCIONADO)
-
-         3.- Si cambias de color 2 veces en la misma palabra se guardan colores antiguos y se hace
-             una revoltura.
-         (SOLUCIONADO)
-
-         4.- Si vamos agregar una nueva pregunta y le doy para atrás no se guardará esa pregunta
-             si no hay campos vacios.
-         (SOLUCIONADO)
-
-         5.- Mientras mas actividades vaya abriendo se van quedando las anteriores, ya teniendo eso
-             seguimos dandole para atrás y sigue en el Main activity dependiendo de cuantas veces
-             abrimos el modificar guia.
-         (SOLUCIONADO)
-
-         6.- Cuando modificas únicamente la última pregunta y le das guardar se guarda como estaba
-             anteriormente y se guarda la nueva, en el resto de modificaciones lo hace bien.
-         (SOLUCIONADO)
-
-         7.- Solucionar en Crear guía y al momento de modificar cuando le das click al botón
-             de atrás.
-
-
          MEJORAS
 
-         8.- Cambiar los botónes de siguiente y atras por iconos con flecha de siguiente y atras.
 
-         9.- No se puede cambiar colores a letras que ya tenía un color anteriormente.
-         (SOLUCIONADO)
-
-         PARA SUBIR LA APLICACIÓN
-         10.- Agregar anuncios dependiendo donde los quiero y que funcionen.
-         (SOLUCIONADO PERO EN PLAYSTORE ESTÁN DESHABILITADOS)
-
-         11.- Ver lo que necesito para subir la App en la Play Store.
-         (Solucionado)
-
-         PLAY STORE
-         Corrección de bug en el botón de atrás.
-         Implementación de opción sobre cambiar el nombre de archivos existentes
     -->
     <application
         android:allowBackup="true"
@@ -59,6 +20,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Review">
         <!-- Sample AdMob app ID: ca-app-pub-3940256099942544~3347511713 -->
+        <!-- AdMob app ID: ca-app-pub-5116088101296740~9876600140 -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-3940256099942544~3347511713" />

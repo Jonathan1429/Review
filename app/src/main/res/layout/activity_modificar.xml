@@ -168,9 +168,9 @@
                 android:layout_marginStart="6dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="6dp"
-                android:padding="15dp"
                 android:hint="@string/etPregunta"
                 android:labelFor="@+id/tvContenidoPregResp"
+                android:padding="15dp"
                 app:endIconMode="clear_text">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -187,6 +187,8 @@
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
+    <!-- AdMob app ID: ca-app-pub-5116088101296740/3112731307 -->
+    <!-- Sample AdMob app ID: ca-app-pub-3940256099942544/6300978111 -->
     <com.google.android.gms.ads.AdView xmlns:ads="http://schemas.android.com/apk/res-auto"
         android:id="@+id/adView"
         android:layout_width="wrap_content"
@@ -199,68 +201,6 @@
         ads:layout_constraintBottom_toBottomOf="parent"
         ads:layout_constraintEnd_toEndOf="parent"
         ads:layout_constraintStart_toStartOf="parent" />
-
-    <!-- <TextView
-        android:id="@+id/tvLabelColor"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginStart="6dp"
-        android:text="@string/btnColorAct"
-        app:layout_constraintTop_toBottomOf="@+id/barra_superior_regreso"
-        app:layout_constraintBottom_toTopOf="@+id/tilContenidoPregunta"
-        app:layout_constraintStart_toStartOf="parent"/>
-
-    <ImageButton
-        android:id="@+id/btnColorActual"
-        android:layout_width="15dp"
-        android:layout_height="15dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginStart="6dp"
-        android:src="@drawable/ic_filter_state"
-        android:background="@drawable/boton_redondo"
-        android:contentDescription="Color actual"
-        app:layout_constraintTop_toBottomOf="@+id/barra_superior_regreso"
-        app:layout_constraintBottom_toTopOf="@+id/tilContenidoPregunta"
-        app:layout_constraintStart_toEndOf="@+id/tvLabelColor" />
-
-    <ImageView
-        android:id="@+id/imgvColor"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginTop="10dp"
-        android:src="@drawable/ic_action_goright"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
-        app:layout_constraintTop_toBottomOf="@+id/barra_superior_regreso"
-        app:layout_constraintBottom_toTopOf="@+id/tilContenidoPregunta"
-        app:layout_constraintStart_toEndOf="@+id/btnColorActual"
-        tools:ignore="ContentDescription" />-->
-
-    <!-- style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"-->
-    <!-- <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/tilContenidoPregunta"
-        android:labelFor="@+id/tvContenidoPregunta"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginStart="6dp"
-        android:layout_marginEnd="6dp"
-        app:endIconMode="clear_text"
-        app:layout_constraintTop_toBottomOf="@id/imgvColor"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHeight_percent="0.3">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etPregunta"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:autofillHints="testHint"
-            android:inputType="text|textMultiLine"
-            android:gravity="top"
-            android:scrollbars="vertical"
-            android:hint="@string/etContenidoPregunta"
-            android:textSize="18sp"/>
-    </com.google.android.material.textfield.TextInputLayout> -->
 
     <!-- style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"-->
     <!-- <com.google.android.material.textfield.TextInputLayout
@@ -287,68 +227,4 @@
             android:hint="@string/etContenidoRespuesta"
             android:textSize="18sp"/>
     </com.google.android.material.textfield.TextInputLayout> -->
-
-    <!-- style="@style/btnGenerales"-->
-    <!-- <Button
-        android:id="@+id/btnAtrasPregunta"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="@string/btnAtras"
-        android:background="@drawable/ic_filter_state"
-        style="@style/btnGeneral"
-        app:layout_constraintTop_toBottomOf="@+id/tilContenidoRespuesta"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/btnSiguientePregunta" />
-
-    <Button
-        android:id="@+id/btnSiguientePregunta"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="@string/btnSiguiente"
-        android:background="@drawable/ic_filter_state"
-        style="@style/btnGeneral"
-        app:layout_constraintTop_toBottomOf="@+id/tilContenidoRespuesta"
-        app:layout_constraintStart_toEndOf="@+id/btnAtrasPregunta"
-        app:layout_constraintEnd_toEndOf="parent" /> -->
-
-    <!--style="@style/btnGenerales"-->
-    <!-- <Button
-        android:id="@+id/btnEliminar"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="@string/btnEliminar"
-        android:background="@drawable/ic_filter_state"
-        style="@style/btnGeneral"
-        app:layout_constraintTop_toBottomOf="@+id/btnAtrasPregunta"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/btnGuardarGuia" /> -->
-
-    <!--style="@style/btnGenerales"-->
-    <!-- <Button
-        android:id="@+id/btnGuardarGuia"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="@string/btnGuardarGuia"
-        android:background="@drawable/ic_filter_state"
-        style="@style/btnGeneral"
-        app:layout_constraintTop_toBottomOf="@+id/btnSiguientePregunta"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/btnEliminar" />
-
-    <Button
-        android:id="@+id/btnQuitarColores"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="@string/btnSinColor"
-        android:background="@drawable/ic_filter_state"
-        style="@style/btnGeneral"
-        app:layout_constraintTop_toBottomOf="@+id/btnGuardarGuia"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/> -->
-
 </androidx.constraintlayout.widget.ConstraintLayout>
