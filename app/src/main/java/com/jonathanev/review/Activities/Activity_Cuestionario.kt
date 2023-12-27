@@ -4,6 +4,7 @@ import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Intent
+import android.content.pm.LauncherActivityInfo
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.PorterDuff
@@ -17,11 +18,15 @@ import android.util.Log
 import android.util.Xml
 import android.view.KeyEvent
 import android.view.View
+import android.view.animation.AlphaAnimation
+import android.view.animation.Animation
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts.*
+import androidx.activity.result.registerForActivityResult
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.animation.doOnEnd
 import androidx.core.view.isVisible
 import androidx.core.widget.ImageViewCompat
 import com.davemorrissey.labs.subscaleview.ImageSource
@@ -53,17 +58,30 @@ class Activity_Cuestionario : AppCompatActivity() {
 
     // Seleccionar imagen
     private val pickMedia = registerForActivityResult(PickVisualMedia()) { uri ->
+        if (uri != null){
+            val name = applicationContext.packageName
+            applicationContext.grantUriPermission(name, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            binding!!.ivImagen.setImage(ImageSource.uri(uri)) //setImageURI(uri)
+            binding!!.tilContenidoPregResp.visibility = View.GONE
+            binding!!.ivImagen.visibility = View.VISIBLE
+            binding!!.etPregResp.setText(uri.toString())
+            Log.i("Uri: ", uri.toString())
+        }
+    }
+
+    /*private val pickMedia = registerForActivityResult(PickVisualMedia()) { uri ->
         if (uri != null) {
             //Glide.with(this).load(uri).into(binding!!.ivImagen)
             binding!!.ivImagen.setImage(ImageSource.uri(uri)) //setImageURI(uri)
             binding!!.tilContenidoPregResp.visibility = View.GONE
             binding!!.ivImagen.visibility = View.VISIBLE
-            binding!!.etPregResp.setText("s")
+            binding!!.etPregResp.setText(uri.toString())
+            Log.i("Uri: ", uri.toString())
         } else {
             binding!!.tilContenidoPregResp.visibility = View.VISIBLE
             binding!!.ivImagen.visibility = View.GONE
         }
-    }
+    }*/
 
     // Creamos la serialización y la clase para crear archivos de manera global.
     var serializer: XmlSerializer = Xml.newSerializer()
@@ -676,17 +694,47 @@ class Activity_Cuestionario : AppCompatActivity() {
     }
 
     private fun girarCardView() {
-        //if (binding!!.tilContenidoPregResp.isVisible){
+        if (binding!!.tilContenidoPregResp.isVisible){
             val flipAnimator =
                 ObjectAnimator.ofFloat(binding!!.tilContenidoPregResp, "rotationY", 0f, 360f)
             flipAnimator.duration = 1000 // Duración de la animación en milisegundos
             flipAnimator.start()
-        /*} else {
+        } else {
             val flipAnimator =
                 ObjectAnimator.ofFloat(binding!!.ivImagen, "rotationY", 0f, 360f)
             flipAnimator.duration = 1000 // Duración de la animación en milisegundos
             flipAnimator.start()
-        }*/
+            flipAnimator.doOnEnd {
+                showImageOrText()
+                //growCard()
+                //binding!!.ivImagen.visibility = View.GONE
+                //binding!!.tilContenidoPregResp.visibility = View.VISIBLE
+            }
+        }
+    }
+
+    private fun showImageOrText() {
+        val disappearAnimation = AlphaAnimation(1.0f, 0.0f)
+        disappearAnimation.duration = 200
+
+        val appearAnimation = AlphaAnimation(0.0f, 1.0f)
+        appearAnimation.duration = 1000
+
+        disappearAnimation.setAnimationListener(object : Animation.AnimationListener{
+            override fun onAnimationStart(p0: Animation?) {
+            }
+
+            override fun onAnimationEnd(p0: Animation?) {
+                binding!!.ivImagen.visibility = View.GONE
+                binding!!.tilContenidoPregResp.visibility = View.VISIBLE
+            }
+
+            override fun onAnimationRepeat(p0: Animation?) {
+            }
+        })
+
+        binding!!.ivImagen.startAnimation(disappearAnimation)
+        binding!!.tilContenidoPregResp.startAnimation(appearAnimation)
     }
 
     // Método que se ejecuta cuando el back del telefono es presionado.

@@ -2,8 +2,8 @@ package com.jonathanev.review.Activities
 
 import android.animation.ObjectAnimator
 import android.app.AlertDialog
-import android.content.DialogInterface
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.text.Spannable
@@ -13,8 +13,9 @@ import android.view.View
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toUri
+import com.davemorrissey.labs.subscaleview.ImageSource
 import com.jonathanev.review.Clases.ColoresPregunta
-import com.jonathanev.review.R
 import com.jonathanev.review.databinding.ActivityRepasarGuiaBinding
 import org.w3c.dom.Document
 import org.w3c.dom.Element
@@ -26,6 +27,7 @@ import javax.xml.parsers.DocumentBuilder
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.parsers.ParserConfigurationException
 
+
 class Activity_RepasarGuia constructor() : AppCompatActivity() {
     private var binding: ActivityRepasarGuiaBinding? = null
     private var nombreArchivo: String? = null
@@ -34,7 +36,9 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
     private val preguntasColor: ArrayList<ColoresPregunta> = ArrayList()
     private val respuestasColor: ArrayList<ColoresPregunta> = ArrayList()
     private var contadorPregunta: Int = 0
-    var builder: SpannableStringBuilder? = null
+    private var builder: SpannableStringBuilder? = null
+    private var uri: Uri? = null
+
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -86,11 +90,7 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
         });*/
 
 
-        binding!!.barraSuperiorRegreso.imgvBack.setOnClickListener(object : View.OnClickListener {
-            public override fun onClick(view: View) {
-                onBackPressed()
-            }
-        })
+        binding!!.barraSuperiorRegreso.imgvBack.setOnClickListener { onBackPressed() }
 
         binding!!.imgvPregResp.setOnClickListener {
             if (binding!!.tilContenidoPregResp.hint == "Pregunta"){
@@ -184,8 +184,68 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
         flipAnimator.duration = 1000 // Duración de la animación en milisegundos
         flipAnimator.start()
     }
-
     private fun pintarTexto() {
+        var contColorPreg: Int = 0
+        var inicio: Int = 0
+        var fin: Int = 0
+        var coloresPregunta: ColoresPregunta? = null
+        var texto: String = ""
+        if (binding!!.tilContenidoPregResp.hint == "Pregunta") {
+            texto = preguntas[contadorPregunta]
+            uri = texto.toUri()
+        } else {
+            texto = respuestas[contadorPregunta]
+            uri = texto.toUri()
+        }
+
+        if (texto.contains("content://media/picker")) {
+            binding!!.ivImagen.setImage(ImageSource.uri(uri!!)) //setImageURI(uri)
+            binding!!.tilContenidoPregResp.visibility = View.GONE
+            binding!!.ivImagen.visibility = View.VISIBLE
+        } else {
+            while (texto.contains("«")) {
+                inicio = texto.indexOf("«") + 1
+                fin = texto.indexOf("»")
+                val color: String = texto.substring(inicio, fin)
+                val longColor: Int = color.length
+                val colEntero: Int = color.toInt()
+                inicio = fin + 1
+                fin = texto.indexOf("«", inicio)
+                coloresPregunta =
+                    ColoresPregunta((inicio - longColor - 2), (fin - longColor - 2), colEntero)
+
+                if (binding!!.tilContenidoPregResp.hint == "Pregunta") {
+                    preguntasColor.add(contColorPreg, coloresPregunta)
+                } else {
+                    respuestasColor.add(contColorPreg, coloresPregunta)
+                }
+
+                // Eliminar la primera etiqueta y su contenido
+                texto = texto.replaceFirst("«.*?»".toRegex(), "")
+
+                // Eliminar la segunda etiqueta y su contenido
+                texto = texto.replaceFirst("«.*?»".toRegex(), "")
+                contColorPreg++
+            }
+
+            builder = SpannableStringBuilder(texto)
+            for (coloresPreguntas: ColoresPregunta in if (binding!!.tilContenidoPregResp.hint == "Pregunta") preguntasColor else respuestasColor) {
+                val colorSpan: ForegroundColorSpan = ForegroundColorSpan(coloresPreguntas.color)
+                builder!!.setSpan(
+                    colorSpan,
+                    coloresPreguntas.inicioColor,
+                    coloresPreguntas.finColor,
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+            }
+        }
+
+        //preguntasColor.clear()
+        //respuestasColor.clear()
+        //binding!!.etPregResp.text = builder
+    }
+
+    /*private fun pintarTexto() {
         var contColorPreg: Int = 0
         var contColorResp: Int = 0
         var inicio: Int = 0
@@ -207,6 +267,7 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
             texto = texto.replaceFirst("«.*?»".toRegex(), "")
 
             // Eliminar la segunda etiqueta y su contenido
+
             texto = texto.replaceFirst("«.*?»".toRegex(), "")
             contColorPreg++
         }
@@ -254,7 +315,7 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
         }
         preguntasColor.clear()
         respuestasColor.clear()
-    }
+    }*/
 
     private fun mostrarRespuesta(builder: SpannableStringBuilder?) {
         binding!!.etPregResp.text = builder

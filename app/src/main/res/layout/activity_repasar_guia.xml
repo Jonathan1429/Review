@@ -101,6 +101,7 @@
                 android:padding="15dp"
                 android:hint="@string/etPregunta"
                 android:labelFor="@+id/tvContenidoPregResp"
+                android:visibility="gone"
                 app:endIconMode="clear_text">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -115,6 +116,13 @@
                     android:scrollbars="vertical"
                     android:textSize="18sp" />
             </com.google.android.material.textfield.TextInputLayout>
+
+            <com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
+                android:id="@+id/ivImagen"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="20dp"
+                android:visibility="visible"/>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
