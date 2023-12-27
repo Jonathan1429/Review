@@ -117,6 +117,17 @@
                     tools:ignore="ContentDescription" />
 
                 <ImageView
+                    android:id="@+id/imgvImage"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="5dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_file_image"
+                    tools:ignore="ContentDescription" />
+
+                <ImageView
                     android:id="@+id/imgvEliminar"
                     android:layout_width="34dp"
                     android:layout_height="34dp"
@@ -171,6 +182,7 @@
                 android:hint="@string/etPregunta"
                 android:labelFor="@+id/tvContenidoPregResp"
                 android:padding="15dp"
+                android:visibility="visible"
                 app:endIconMode="clear_text">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -184,6 +196,28 @@
                     android:scrollbars="vertical"
                     android:textSize="18sp" />
             </com.google.android.material.textfield.TextInputLayout>
+
+            <com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
+                android:id="@+id/ivImagen"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="20dp"
+                android:visibility="gone"/>
+
+            <!-- <com.ortiz.touchview.TouchImageView
+                android:id="@+id/ivImagen"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="20dp"
+                android:visibility="gone"/>
+
+            <ImageView
+                android:id="@+id/ivImagen"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="20dp"
+                android:adjustViewBounds="true"
+                android:visibility="gone" /> -->
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 

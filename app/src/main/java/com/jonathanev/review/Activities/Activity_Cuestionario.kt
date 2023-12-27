@@ -3,13 +3,10 @@ package com.jonathanev.review.Activities
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.PorterDuff
-import android.graphics.drawable.Drawable
-import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.Spannable
@@ -18,33 +15,29 @@ import android.text.Spanned
 import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.util.Xml
-import android.view.ActionMode
 import android.view.KeyEvent
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts.*
 import androidx.annotation.ColorInt
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.core.widget.ImageViewCompat
+import com.davemorrissey.labs.subscaleview.ImageSource
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
-import com.google.android.gms.ads.initialization.InitializationStatus
-import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.jonathanev.review.Clases.ColoresPregunta
-import com.jonathanev.review.Fragments.Fragment_DialogColoresMod_popup
 import com.jonathanev.review.Fragments.Fragment_DialogColores_popup
-import com.jonathanev.review.R
 import com.jonathanev.review.databinding.ActivityCuestionarioBinding
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 
-class Activity_Cuestionario constructor() : AppCompatActivity() {
+class Activity_Cuestionario : AppCompatActivity() {
     private var binding: ActivityCuestionarioBinding? = null
     private var nombreArchivo: String? = null
     private var colorActual: Int = 0
@@ -57,6 +50,20 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
 
     private var start = -1
     private var end = -1
+
+    // Seleccionar imagen
+    private val pickMedia = registerForActivityResult(PickVisualMedia()) { uri ->
+        if (uri != null) {
+            //Glide.with(this).load(uri).into(binding!!.ivImagen)
+            binding!!.ivImagen.setImage(ImageSource.uri(uri)) //setImageURI(uri)
+            binding!!.tilContenidoPregResp.visibility = View.GONE
+            binding!!.ivImagen.visibility = View.VISIBLE
+            binding!!.etPregResp.setText("s")
+        } else {
+            binding!!.tilContenidoPregResp.visibility = View.VISIBLE
+            binding!!.ivImagen.visibility = View.GONE
+        }
+    }
 
     // Creamos la serialización y la clase para crear archivos de manera global.
     var serializer: XmlSerializer = Xml.newSerializer()
@@ -632,6 +639,10 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
 
             binding!!.etPregResp.text = spannableStringBuilder
         }
+
+        binding!!.imgvImage.setOnClickListener {
+            pickMedia.launch(PickVisualMediaRequest(PickVisualMedia.ImageOnly))
+        }
     }
 
     private fun initLoadAds() {
@@ -640,15 +651,19 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
         val adRequest = AdRequest.Builder().build()
         binding!!.adView.loadAd(adRequest)
 
-        binding!!.adView.adListener = object : AdListener(){
+        binding!!.adView.adListener = object : AdListener() {
             override fun onAdLoaded() {
             }
-            override fun onAdFailedToLoad(adError : LoadAdError) {
+
+            override fun onAdFailedToLoad(adError: LoadAdError) {
             }
+
             override fun onAdOpened() {
             }
+
             override fun onAdClicked() {
             }
+
             override fun onAdClosed() {
             }
         }
@@ -659,11 +674,19 @@ class Activity_Cuestionario constructor() : AppCompatActivity() {
         onAdLeftApplication: Cuando el usuario abandone la aplicación.
         onAdClosed: Se llama al cerrar la publicidad.*/
     }
+
     private fun girarCardView() {
-        val flipAnimator =
-            ObjectAnimator.ofFloat(binding!!.tilContenidoPregResp, "rotationY", 0f, 360f)
-        flipAnimator.duration = 1000 // Duración de la animación en milisegundos
-        flipAnimator.start()
+        //if (binding!!.tilContenidoPregResp.isVisible){
+            val flipAnimator =
+                ObjectAnimator.ofFloat(binding!!.tilContenidoPregResp, "rotationY", 0f, 360f)
+            flipAnimator.duration = 1000 // Duración de la animación en milisegundos
+            flipAnimator.start()
+        /*} else {
+            val flipAnimator =
+                ObjectAnimator.ofFloat(binding!!.ivImagen, "rotationY", 0f, 360f)
+            flipAnimator.duration = 1000 // Duración de la animación en milisegundos
+            flipAnimator.start()
+        }*/
     }
 
     // Método que se ejecuta cuando el back del telefono es presionado.
