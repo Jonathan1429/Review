@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
+import android.util.Log
 import android.view.View
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
@@ -37,9 +38,7 @@ import javax.xml.parsers.ParserConfigurationException
 
 class Activity_RepasarGuia constructor() : AppCompatActivity() {
 
-    companion object {
-        private const val REQUEST_PERMISSION_CODE = 123
-    }
+
 
     private var binding: ActivityRepasarGuiaBinding? = null
     private var nombreArchivo: String? = null
@@ -128,10 +127,6 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
             nombreArchivo = intent.extras!!.getString("nombre_archivo") + ".xml"
         }
 
-
-        // Revisar permisos
-        checkAndRequestPermissions()
-
         // Obtenemos los datos del XML y los guardamos en su respectivo ArrayList.
         obtenerDatosXML()
 
@@ -142,10 +137,12 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
             //binding!!.btnMostrarRespuesta.text = "Mostrar respuesta"
             binding!!.tilContenidoPregResp.hint = "Pregunta"
             if (contadorPregunta == 0) {
-                Toast.makeText(
+                /*Toast.makeText(
                     applicationContext, "No tienes preguntas anteriores",
                     Toast.LENGTH_SHORT
-                ).show()
+                ).show()*/
+
+                Log.i("Crear pregunta: ", "No tienes preguntas anteriores")
             } else {
                 contadorPregunta--
                 binding!!.etPregResp.setText("")
@@ -302,24 +299,6 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
         preguntasColor.clear()
         respuestasColor.clear()
         binding!!.etPregResp.text = builder
-    }
-
-    private fun checkAndRequestPermissions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val permissionReadExternalStorage = ContextCompat.checkSelfPermission(
-                this,
-                android.Manifest.permission.READ_EXTERNAL_STORAGE
-            )
-
-            if (permissionReadExternalStorage != PackageManager.PERMISSION_GRANTED) {
-                // Si no tienes permisos, solicítalos
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),
-                    REQUEST_PERMISSION_CODE
-                )
-            }
-        }
     }
 
     /*private fun pintarTexto() {

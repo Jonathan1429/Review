@@ -2,18 +2,27 @@ package com.jonathanev.review
 
 import android.annotation.SuppressLint
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import com.jonathanev.review.Activities.Activity_Cuestionario
+import com.jonathanev.review.Activities.Activity_RepasarGuia
 import com.jonathanev.review.Fragments.Fragment_DialogListarGuias_popup
 import com.jonathanev.review.Fragments.Fragment_DialogNuevoArchivo_popu
 import com.jonathanev.review.databinding.ActivityMainBinding
 import java.io.File
 
 class MainActivity constructor() : AppCompatActivity() {
+    companion object {
+        private const val REQUEST_PERMISSION_CODE = 123
+    }
+
     private var binding: ActivityMainBinding? = null
 
     // Array TEXTO donde guardaremos los nombres de los ficheros.
@@ -23,6 +32,9 @@ class MainActivity constructor() : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding!!.root)
+
+        // Revisar permisos
+        checkAndRequestPermissions()
 
         // Utilizamos un botón que es reutilizado, unicamente le cambiamos el texto.
         binding!!.btnAbrirGuiaEstudioHabilitado.text = "Abrir Guia"
@@ -96,6 +108,24 @@ class MainActivity constructor() : AppCompatActivity() {
                 }
             }
         })
+    }
+
+    private fun checkAndRequestPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val permissionReadExternalStorage = ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.READ_EXTERNAL_STORAGE
+            )
+
+            if (permissionReadExternalStorage != PackageManager.PERMISSION_GRANTED) {
+                // Si no tienes permisos, solicítalos
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),
+                    REQUEST_PERMISSION_CODE
+                )
+            }
+        }
     }
 
     /*private fun replaceFragment(guiasFragment: Fragment_DialogListarGuias_popup) {

@@ -6,9 +6,9 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <!-- BUGS
-         1.- Hay que verificar que el botón de eliminar funcione correctamente.
-         (SOLUCIONADO)
+         1.- Al momento de pintar un texto si el fin es menor que el inicio de selección truena.
 
+         2.- Los toast tiran error, de hecho ya ni el icono aparece.
          MEJORAS
 
 
@@ -19,7 +19,8 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Review">
+        android:theme="@style/Theme.Review"
+        android:requestLegacyExternalStorage="true">
         <!-- Sample AdMob app ID: ca-app-pub-3940256099942544~3347511713 -->
         <!-- AdMob app ID: ca-app-pub-5116088101296740~9876600140 -->
         <meta-data

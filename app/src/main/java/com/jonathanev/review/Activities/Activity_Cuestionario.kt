@@ -74,7 +74,7 @@ class Activity_Cuestionario : AppCompatActivity() {
             //applicationContext.grantUriPermission(name, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             binding!!.ivImagen.setImage(ImageSource.uri(uri)) //setImageURI(uri)
             //binding!!.tilContenidoPregResp.visibility = View.GONE
-            //binding!!.ivImagen.visibility = View.VISIBLE
+            binding!!.ivImagen.visibility = View.VISIBLE
             binding!!.etPregResp.setText(uri.toString())
             Log.i("Uri: ", uri.toString())
         }
@@ -134,7 +134,8 @@ class Activity_Cuestionario : AppCompatActivity() {
                         binding!!.lblPregResp.text = "Respuesta"
                         preguntas.add(contadorPregunta, editable.toString())
                         binding!!.etPregResp.setText("")
-                        binding!!.ivImagen.setImage(ImageSource.uri(""))
+                        binding!!.ivImagen.visibility = View.GONE
+                        //binding!!.ivImagen.setImage(ImageSource.uri(""))
                     } else {
                         binding!!.lblPregResp.text = "Respuesta"
                         preguntas[contadorPregunta] = editable.toString()
@@ -154,22 +155,25 @@ class Activity_Cuestionario : AppCompatActivity() {
                     girarCardView()
                 }
             } else {
-                Toast.makeText(
+                /*Toast.makeText(
                     applicationContext,
                     "Asegurate de no dejar ningun campo vacio",
                     Toast.LENGTH_SHORT
-                ).show()
+                ).show()*/
+                Log.i("Crear pregunta: ", "Asegurate de no dejar ningun campo vacio")
             }
         }
 
         binding!!.imgvNext.setOnClickListener {
             // Validamos campos vacios en la pregunta o respuesta.
             if (binding!!.etPregResp.text.toString().isEmpty()) {
-                Toast.makeText(
+                /*Toast.makeText(
                     applicationContext,
                     "Asegurate de no dejar ningun campo vacio",
                     Toast.LENGTH_SHORT
-                ).show()
+                ).show()*/
+
+                Log.i("Crear pregunta: ", "Asegurate de no dejar ningun campo vacio")
             } else {
                 // Se le quita 1 para hacer referencia al arreglo
                 // tamaño 3-1 = 2 [0,1,2].
@@ -208,23 +212,28 @@ class Activity_Cuestionario : AppCompatActivity() {
                         // Si el contadorPregunta es igual entonces solo escribiremos los campos vacios.
                         binding!!.lblPregResp.text = "Pregunta"
                         binding!!.etPregResp.setText("")
+                        //binding!!.ivImagen.setImage(ImageSource.uri(""))
+                        binding!!.ivImagen.visibility = View.GONE
                     }
                 } else { // Si contadorPregunta es mayor a lo que hay en el arreglo.
                     if (binding!!.etPregResp.text.toString().isEmpty()) {
-                        Toast.makeText(
+                        /*Toast.makeText(
                             applicationContext,
                             "Asegurate de llenar una pregunta y una respuesta",
                             Toast.LENGTH_SHORT
-                        ).show()
+                        ).show()*/
+                        Log.i("Crear pregunta: ", "Asegurate de llenar una pregunta y una respuesta")
                         contadorPregunta--
                     } else {
                         // Cuando no hay guardadas las mismas preguntas que respuestas.
                         if (binding!!.lblPregResp.text.toString() == "Pregunta") {
-                            Toast.makeText(
+                            /*Toast.makeText(
                                 applicationContext,
                                 "Asegurate de llenar una pregunta y una respuesta",
                                 Toast.LENGTH_SHORT
-                            ).show()
+                            ).show()*/
+
+                            Log.i("Crear pregunta: ", "Asegurate de llenar una pregunta y una respuesta")
                             contadorPregunta--
                         } else {
                             var editable: Editable =
@@ -241,6 +250,7 @@ class Activity_Cuestionario : AppCompatActivity() {
                             respuestas.add(contadorPregunta, editable.toString())
                             binding!!.lblPregResp.text = "Pregunta"
                             binding!!.etPregResp.setText("")
+                            binding!!.ivImagen.visibility = View.GONE
                         }
                     }
                 }
@@ -329,12 +339,13 @@ class Activity_Cuestionario : AppCompatActivity() {
                 if (contadorPregunta <= longi) {
                     // Validamos campos vacios en la pregunta y respuesta.
                     if (binding!!.etPregResp.text.toString().isEmpty()) {
-                        Toast.makeText(
+                        /*Toast.makeText(
                             applicationContext,
                             "Asegurate de no dejar ningun campo vacio",
                             Toast.LENGTH_SHORT
-                        ).show()
+                        ).show()*/
 
+                        Log.i("Crear pregunta: ", "Asegurate de no dejar ningun campo vacio")
                         // Se resta uno al final y así se queda neutral.
                         contadorPregunta++
                     } else {
@@ -366,12 +377,13 @@ class Activity_Cuestionario : AppCompatActivity() {
                         binding!!.lblPregResp.text.toString() == "Respuesta" && binding!!.etPregResp.text.toString()
                             .isEmpty()
                     ) {
-                        Toast.makeText(
+                        /*Toast.makeText(
                             applicationContext,
                             "Asegurate de llenar pregunta y respuesta",
                             Toast.LENGTH_SHORT
-                        ).show()
+                        ).show()*/
 
+                        Log.i("Crear pregunta: ", "Asegurate de llenar pregunta y respuesta")
                         contadorPregunta++
                     } else {
                         if (binding!!.lblPregResp.text.toString() == "Pregunta") {
@@ -399,11 +411,13 @@ class Activity_Cuestionario : AppCompatActivity() {
 
                 contadorPregunta--
             } else {
-                Toast.makeText(
+                /*Toast.makeText(
                     applicationContext,
                     "Ya no tienes preguntas anteriores",
                     Toast.LENGTH_LONG
-                ).show()
+                ).show()*/
+
+                Log.i("Crear pregunta: ", "Ya no tienes preguntas anteriores")
             }
         }
 
@@ -482,19 +496,24 @@ class Activity_Cuestionario : AppCompatActivity() {
 
             if (binding!!.etPregResp.text.toString().isEmpty()) {
                 if (respuestas.isEmpty() && binding!!.lblPregResp.text.toString() == "Pregunta") {
-                    Toast.makeText(
+                    /*Toast.makeText(
                         applicationContext,
                         "Debes tener como minimo una pregunta",
                         Toast.LENGTH_SHORT
-                    ).show()
+                    ).show()*/
+
+                    Log.i("Crear pregunta: ", "Debes tener como minimo una pregunta")
                 } else if ((contadorPregunta + 1) > longi && binding!!.lblPregResp.text.toString() == "Pregunta") {
                     crearArchivo(nombreArchivo)
+                    binding!!.ivImagen.visibility = View.GONE
                 } else {
-                    Toast.makeText(
+                    /*Toast.makeText(
                         applicationContext,
                         "Asegurate de llenar una pregunta y una respuesta",
                         Toast.LENGTH_SHORT
-                    ).show()
+                    ).show()*/
+
+                    Log.i("Crear pregunta: ", "Asegurate de llenar una pregunta y una respuesta")
                 }
             } else {
                 if (binding!!.lblPregResp.text.toString() == "Pregunta") {
@@ -513,11 +532,13 @@ class Activity_Cuestionario : AppCompatActivity() {
 
                         crearArchivo(nombreArchivo)
                     } else {
-                        Toast.makeText(
+                        /*Toast.makeText(
                             applicationContext,
                             "Asegurate de llenar una pregunta y una respuesta",
                             Toast.LENGTH_SHORT
-                        ).show()
+                        ).show()*/
+
+                        Log.i("Crear pregunta: ", "Asegurate de llenar una pregunta y una respuesta")
                     }
                 } else {
                     if (longi == 0) {
@@ -617,11 +638,13 @@ class Activity_Cuestionario : AppCompatActivity() {
             if (start == -1) {
                 start = binding!!.etPregResp.selectionStart
 
-                Toast.makeText(
+                /*Toast.makeText(
                     applicationContext,
                     "Pon el cursor hasta donde quieres pintar",
                     Toast.LENGTH_SHORT
-                ).show()
+                ).show()*/
+
+                Log.i("Crear pregunta: ", "Pon el cursor hasta donde quieres pintar")
             } else {
                 end = binding!!.etPregResp.selectionStart
                 text = binding!!.etPregResp.text
@@ -640,11 +663,13 @@ class Activity_Cuestionario : AppCompatActivity() {
                     val spanFin: Int = spannableStringBuilder.getSpanEnd(span)
                     if ((spanInicio < end && spanFin > start) || (spanInicio >= start && spanFin <= end)) {
                         spannableStringBuilder.removeSpan(span)
-                        Toast.makeText(
+                        /*Toast.makeText(
                             applicationContext,
                             "Una letra, una tinta; palabras sin colores.",
                             Toast.LENGTH_SHORT
-                        ).show()
+                        ).show()*/
+
+                        Log.i("Crear pregunta: ", "Pon el cursor hasta donde quieres pintar")
                     }
                 }
 
@@ -756,6 +781,7 @@ class Activity_Cuestionario : AppCompatActivity() {
             contentResolver.takePersistableUriPermission(
                 uri,
                 Intent.FLAG_GRANT_READ_URI_PERMISSION
+                //Intent.FLAG_GRANT_WRITE_URI_PERMISSION
             )
         }
     }
@@ -821,10 +847,12 @@ class Activity_Cuestionario : AppCompatActivity() {
             serializer.endDocument()
             serializer.flush()
             fos?.close()
-            Toast.makeText(
-                applicationContext, "Guia de estudio creada exitosamente",
+            /*Toast.makeText(
+                this, "Guia de estudio creada exitosamente",
                 Toast.LENGTH_SHORT
-            ).show()
+            ).show()*/
+            Log.i("Creación: ", "Guia de estudio creada exitosamente")
+
             val intent: Intent = Intent(applicationContext, Activity_RepasarGuia::class.java)
             intent.putExtra("nombre_archivo", nombreArchivo)
             startActivity(intent)
