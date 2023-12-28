@@ -135,7 +135,7 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
 
         binding!!.imgvPrevious.setOnClickListener {
             //binding!!.btnMostrarRespuesta.text = "Mostrar respuesta"
-            binding!!.tilContenidoPregResp.hint = "Pregunta"
+            binding!!.lblPregResp.text = "Pregunta"
             if (contadorPregunta == 0) {
                 /*Toast.makeText(
                     applicationContext, "No tienes preguntas anteriores",
@@ -160,7 +160,7 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
             if ((contadorPregunta + 1) <= preguntasTotales) {
                 // Pintamos el valor siguiente con colores.
 
-                binding!!.tilContenidoPregResp.hint = "Pregunta"
+                binding!!.lblPregResp.text = "Pregunta"
                 binding!!.etPregResp.setText("")
                 pintarTexto()
             } else {
@@ -174,7 +174,7 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
                     ) { dialogInterface, i ->
                         contadorPregunta = 0
 
-                        binding!!.tilContenidoPregResp.hint = "Pregunta"
+                        binding!!.lblPregResp.text = "Pregunta"
                         binding!!.etPregResp.setText("")
 
                         // Mostramos el primer valor de la pregunta pintado.
@@ -199,17 +199,23 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
                 ObjectAnimator.ofFloat(binding!!.tilContenidoPregResp, "rotationY", 0f, 360f)
             flipAnimator.duration = 1000 // Duración de la animación en milisegundos
             flipAnimator.start()
+            /*flipAnimator.doOnEnd {
+                showImageOrText()
+                //growCard()
+                //binding!!.ivImagen.visibility = View.GONE
+                //binding!!.tilContenidoPregResp.visibility = View.VISIBLE
+            }*/
         } else {
             val flipAnimator =
                 ObjectAnimator.ofFloat(binding!!.ivImagen, "rotationY", 0f, 360f)
             flipAnimator.duration = 1000 // Duración de la animación en milisegundos
             flipAnimator.start()
-            flipAnimator.doOnEnd {
+            /*flipAnimator.doOnEnd {
                 showImageOrText()
                 //growCard()
                 //binding!!.ivImagen.visibility = View.GONE
                 //binding!!.tilContenidoPregResp.visibility = View.VISIBLE
-            }
+            }*/
         }
     }
 
@@ -225,8 +231,13 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
             }
 
             override fun onAnimationEnd(p0: Animation?) {
-                //binding!!.ivImagen.visibility = View.GONE
-                //binding!!.tilContenidoPregResp.visibility = View.VISIBLE
+                if (binding!!.ivImagen.isGone) {
+                    binding!!.ivImagen.visibility = View.VISIBLE
+                    binding!!.tilContenidoPregResp.visibility = View.GONE
+                } else {
+                    binding!!.ivImagen.visibility = View.GONE
+                    binding!!.tilContenidoPregResp.visibility = View.VISIBLE
+                }
             }
 
             override fun onAnimationRepeat(p0: Animation?) {
@@ -255,9 +266,12 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
             //val name = applicationContext.packageName
             //applicationContext.grantUriPermission(name, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             binding!!.ivImagen.setImage(ImageSource.uri(uri!!)) //setImageURI(uri)
-            //binding!!.tilContenidoPregResp.visibility = View.GONE
+            binding!!.tilContenidoPregResp.visibility = View.GONE
             //binding!!.etPregResp.visibility = View.GONE
-            //binding!!.ivImagen.visibility = View.VISIBLE
+            binding!!.ivImagen.visibility = View.VISIBLE
+        } else {
+            binding!!.tilContenidoPregResp.visibility = View.VISIBLE
+            binding!!.ivImagen.visibility = View.GONE
         }
 
         while (texto.contains("«")) {

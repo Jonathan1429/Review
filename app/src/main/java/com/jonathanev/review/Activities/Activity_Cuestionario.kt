@@ -73,10 +73,13 @@ class Activity_Cuestionario : AppCompatActivity() {
             //val name = applicationContext.packageName
             //applicationContext.grantUriPermission(name, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             binding!!.ivImagen.setImage(ImageSource.uri(uri)) //setImageURI(uri)
-            //binding!!.tilContenidoPregResp.visibility = View.GONE
+            binding!!.tilContenidoPregResp.visibility = View.GONE
             binding!!.ivImagen.visibility = View.VISIBLE
             binding!!.etPregResp.setText(uri.toString())
             Log.i("Uri: ", uri.toString())
+        } else {
+            binding!!.imgvCancelarImg.visibility = View.GONE
+            binding!!.imgvSelColor.visibility = View.VISIBLE
         }
     }
 
@@ -440,7 +443,39 @@ class Activity_Cuestionario : AppCompatActivity() {
                             binding!!.lblPregResp.text = "Pregunta"
                             binding!!.etPregResp.setText("")
                         }
-                    } else if (contadorPregunta <= longi) {
+                    } else if((contadorPregunta + 1) == longi && (contadorPregunta + 1) == 1){
+                        preguntas.removeAt(contadorPregunta)
+                        respuestas.removeAt(contadorPregunta)
+                        binding!!.lblPregResp.text = "Pregunta"
+                        binding!!.imgvCancelarImg.visibility = View.VISIBLE
+                        binding!!.imgvSelColor.visibility = View.GONE
+                        binding!!.ivImagen.visibility = View.GONE
+                        binding!!.tilContenidoPregResp.visibility = View.VISIBLE
+                        binding!!.etPregResp.setText("")
+                    } else if((contadorPregunta + 1) == longi){
+                        preguntas.removeAt(contadorPregunta)
+                        respuestas.removeAt(contadorPregunta)
+                        contadorPregunta--
+                        binding!!.lblPregResp.text = "Pregunta"
+                        pintarTexto(contadorPregunta)
+                    } else if (contadorPregunta < longi){
+                        preguntas.removeAt(contadorPregunta)
+                        respuestas.removeAt(contadorPregunta)
+                        binding!!.lblPregResp.text = "Pregunta"
+                        pintarTexto(contadorPregunta)
+                    } else { // Cuando el contador es mayor a longi
+                        if(binding!!.lblPregResp.text.toString() == "Pregunta"){
+                            contadorPregunta--
+                            pintarTexto(contadorPregunta)
+                        } else {
+                            preguntas.removeAt(contadorPregunta)
+                            contadorPregunta--
+                            pintarTexto(contadorPregunta)
+                        }
+                    }
+
+
+                    /*else if (contadorPregunta <= longi) {
                         // Solo si es mayor a 0 se resta, cuando se elimina una pregunta se acomoda
                         // el arreglo desde la posición 0 a la n
                         if (contadorPregunta < longi) {
@@ -481,7 +516,7 @@ class Activity_Cuestionario : AppCompatActivity() {
                         contadorPregunta--
                         pintarTexto(contadorPregunta)
                         binding!!.lblPregResp.text = "Pregunta"
-                    }
+                    }*/
                 }
 
                 .setNegativeButton("Cancelar") { dialog, i ->
@@ -697,7 +732,24 @@ class Activity_Cuestionario : AppCompatActivity() {
         }
 
         binding!!.imgvImage.setOnClickListener {
+            binding!!.imgvCancelarImg.visibility = View.VISIBLE
+            //binding!!.imgvEliminar.visibility = View.GONE
+            binding!!.imgvSelColor.visibility = View.GONE
+            //binding!!.imgvPregResp.visibility = View.GONE
+            //binding!!.imgvSave.visibility = View.GONE
+
             pickMedia.launch(PickVisualMediaRequest(PickVisualMedia.ImageOnly))
+        }
+
+        binding!!.imgvCancelarImg.setOnClickListener {
+            binding!!.imgvCancelarImg.visibility = View.GONE
+            //binding!!.imgvEliminar.visibility = View.VISIBLE
+            binding!!.imgvSelColor.visibility = View.VISIBLE
+            binding!!.ivImagen.visibility = View.GONE
+            binding!!.tilContenidoPregResp.visibility = View.VISIBLE
+            binding!!.etPregResp.setText("")
+            //binding!!.imgvPregResp.visibility = View.VISIBLE
+            //binding!!.imgvSave.visibility = View.VISIBLE
         }
     }
 
@@ -742,12 +794,12 @@ class Activity_Cuestionario : AppCompatActivity() {
                 ObjectAnimator.ofFloat(binding!!.ivImagen, "rotationY", 0f, 360f)
             flipAnimator.duration = 1000 // Duración de la animación en milisegundos
             flipAnimator.start()
-            flipAnimator.doOnEnd {
+            /*flipAnimator.doOnEnd {
                 showImageOrText()
                 //growCard()
                 //binding!!.ivImagen.visibility = View.GONE
                 //binding!!.tilContenidoPregResp.visibility = View.VISIBLE
-            }
+            }*/
         }
     }
 
@@ -914,10 +966,21 @@ class Activity_Cuestionario : AppCompatActivity() {
         }
 
         if (texto.contains("content://media/picker")) {
+            //val name = applicationContext.packageName
+            //applicationContext.grantUriPermission(name, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             binding!!.ivImagen.setImage(ImageSource.uri(uri!!)) //setImageURI(uri)
-            //binding!!.tilContenidoPregResp.visibility = View.GONE
+            binding!!.tilContenidoPregResp.visibility = View.GONE
             //binding!!.etPregResp.visibility = View.GONE
-            //binding!!.ivImagen.visibility = View.VISIBLE
+            binding!!.ivImagen.visibility = View.VISIBLE
+
+            binding!!.imgvCancelarImg.visibility = View.VISIBLE
+            binding!!.imgvSelColor.visibility = View.GONE
+        } else {
+            binding!!.imgvCancelarImg.visibility = View.GONE
+            binding!!.imgvSelColor.visibility = View.VISIBLE
+
+            binding!!.tilContenidoPregResp.visibility = View.VISIBLE
+            binding!!.ivImagen.visibility = View.GONE
         }
 
         while (texto.contains("«")) {

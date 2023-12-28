@@ -128,6 +128,18 @@
                     tools:ignore="ContentDescription" />
 
                 <ImageView
+                    android:id="@+id/imgvCancelarImg"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="5dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_cancel"
+                    android:visibility="gone"
+                    tools:ignore="ContentDescription" />
+
+                <ImageView
                     android:id="@+id/imgvEliminar"
                     android:layout_width="34dp"
                     android:layout_height="34dp"
@@ -191,7 +203,7 @@
                 android:layout_marginEnd="6dp"
                 android:labelFor="@+id/tvContenidoPregResp"
                 android:padding="15dp"
-                android:visibility="gone"
+                android:visibility="visible"
                 app:endIconMode="clear_text">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -203,7 +215,8 @@
                     android:gravity="top"
                     android:inputType="text|textMultiLine"
                     android:scrollbars="vertical"
-                    android:textSize="18sp" />
+                    android:textSize="18sp"
+                    android:hint="Escribe aquí"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
@@ -211,7 +224,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_margin="20dp"
-                android:visibility="visible"/>
+                android:visibility="gone"/>
 
             <!-- <com.ortiz.touchview.TouchImageView
                 android:id="@+id/ivImagen"
