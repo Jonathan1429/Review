@@ -204,6 +204,7 @@
                 android:labelFor="@+id/tvContenidoPregResp"
                 android:padding="15dp"
                 android:visibility="visible"
+                android:hint="@string/lblCuestionario"
                 app:endIconMode="clear_text">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -215,8 +216,7 @@
                     android:gravity="top"
                     android:inputType="text|textMultiLine"
                     android:scrollbars="vertical"
-                    android:textSize="18sp"
-                    android:hint="Escribe aquí"/>
+                    android:textSize="18sp" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView

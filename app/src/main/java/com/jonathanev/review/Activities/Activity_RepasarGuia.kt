@@ -23,6 +23,10 @@ import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.view.isGone
 import com.davemorrissey.labs.subscaleview.ImageSource
+import com.google.android.gms.ads.AdListener
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.MobileAds
 import com.jonathanev.review.Clases.ColoresPregunta
 import com.jonathanev.review.databinding.ActivityRepasarGuiaBinding
 import org.w3c.dom.Document
@@ -56,50 +60,8 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
         binding = ActivityRepasarGuiaBinding.inflate(layoutInflater)
         setContentView(binding!!.root)
 
-        // Anuncios publicitarios Banners.
-        /*MobileAds.initialize(this, new OnInitializationCompleteListener() {
-            @Override
-            public void onInitializationComplete(InitializationStatus initializationStatus) {
-            }
-        });
-
-        AdRequest adRequest = new Builder().build();
-        binding.adView.loadAd(adRequest);
-        binding.adView.setAdListener(new AdListener() {
-            @Override
-            public void onAdClicked() {
-                // Code to be executed when the user clicks on an ad.
-            }
-
-            @Override
-            public void onAdClosed() {
-                // Code to be executed when the user is about to return
-                // to the app after tapping on an ad.
-            }
-
-            @Override
-            public void onAdFailedToLoad(LoadAdError adError) {
-                // Code to be executed when an ad request fails.
-            }
-
-            @Override
-            public void onAdImpression() {
-                // Code to be executed when an impression is recorded
-                // for an ad.
-            }
-
-            @Override
-            public void onAdLoaded() {
-                // Code to be executed when an ad finishes loading.
-            }
-
-            @Override
-            public void onAdOpened() {
-                // Code to be executed when an ad opens an overlay that
-                // covers the screen.
-            }
-        });*/
-
+        // Sección de anuncios
+        initLoadAds()
 
         binding!!.barraSuperiorRegreso.imgvBack.setOnClickListener { onBackPressed() }
 
@@ -193,6 +155,31 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
         }
     }
 
+    private fun initLoadAds() {
+        MobileAds.initialize(this) { }
+
+        val adRequest = AdRequest.Builder().build()
+        binding!!.adView.loadAd(adRequest)
+
+        binding!!.adView.adListener = object : AdListener(){
+            override fun onAdLoaded() {
+            }
+            override fun onAdFailedToLoad(adError : LoadAdError) {
+            }
+            override fun onAdOpened() {
+            }
+            override fun onAdClicked() {
+            }
+            override fun onAdClosed() {
+            }
+        }
+        /*onAdLoaded: Se llamará cuando el anuncio haya cargado.
+        onAdFailedToLoad: Si el anuncio falla al intentar cargar la publicidad se llamará a este método para que podamos volver a intentarlo u ocultar el anuncio.
+        onAdOpened: Cuando la publicidad ha sido abierta.
+        onAdClicked: Se ejecutará este método cuando se haga clic en el banner.
+        onAdLeftApplication: Cuando el usuario abandone la aplicación.
+        onAdClosed: Se llama al cerrar la publicidad.*/
+    }
     private fun girarCardView() {
         if (!binding!!.tilContenidoPregResp.isGone) {
             val flipAnimator =

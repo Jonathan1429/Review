@@ -109,7 +109,7 @@
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="6dp"
                 android:padding="15dp"
-                android:hint="@string/etPregunta"
+                android:hint="@string/lblCuestionario"
                 android:labelFor="@+id/tvContenidoPregResp"
                 android:visibility="visible"
                 app:endIconMode="clear_text">

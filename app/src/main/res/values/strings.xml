@@ -33,4 +33,7 @@
 
     <!-- Pop up cuando le das Abrir guias -->
     <string name="lblSinGuias">¡No tienes guias actualmente!</string>
+
+    <!-- Crear guias y modficarla -->
+    <string name="lblCuestionario">Escribe aquí</string>
 </resources>

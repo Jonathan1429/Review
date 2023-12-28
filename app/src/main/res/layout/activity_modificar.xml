@@ -117,6 +117,29 @@
                     tools:ignore="ContentDescription" />
 
                 <ImageView
+                    android:id="@+id/imgvImage"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="5dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_file_image"
+                    tools:ignore="ContentDescription" />
+
+                <ImageView
+                    android:id="@+id/imgvCancelarImg"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="5dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_cancel"
+                    android:visibility="gone"
+                    tools:ignore="ContentDescription" />
+
+                <ImageView
                     android:id="@+id/imgvEliminar"
                     android:layout_width="34dp"
                     android:layout_height="34dp"
@@ -161,6 +184,16 @@
                     tools:ignore="ContentDescription" />
             </LinearLayout>
 
+            <TextView
+                android:id="@+id/lblPregResp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:textColor="@color/black"
+                android:gravity="center_horizontal"
+                android:textStyle="bold"
+                android:text="Pregunta"/>
+
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/tilContenidoPregResp"
                 android:layout_width="match_parent"
@@ -168,9 +201,10 @@
                 android:layout_marginStart="6dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="6dp"
-                android:hint="@string/etPregunta"
                 android:labelFor="@+id/tvContenidoPregResp"
                 android:padding="15dp"
+                android:visibility="visible"
+                android:hint="@string/lblCuestionario"
                 app:endIconMode="clear_text">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -184,6 +218,13 @@
                     android:scrollbars="vertical"
                     android:textSize="18sp" />
             </com.google.android.material.textfield.TextInputLayout>
+
+            <com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
+                android:id="@+id/ivImagen"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="20dp"
+                android:visibility="gone"/>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
