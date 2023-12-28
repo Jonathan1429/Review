@@ -8,6 +8,8 @@ import android.content.pm.LauncherActivityInfo
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.PorterDuff
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.Spannable
@@ -27,6 +29,8 @@ import androidx.activity.result.registerForActivityResult
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.animation.doOnEnd
+import androidx.core.net.toUri
+import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.core.widget.ImageViewCompat
 import com.davemorrissey.labs.subscaleview.ImageSource
@@ -52,18 +56,25 @@ class Activity_Cuestionario : AppCompatActivity() {
     private val respuestasColor: ArrayList<ColoresPregunta> = ArrayList()
     var builder: SpannableStringBuilder? = null
     private var contadorPregunta: Int = 0
+    private var uri: Uri? = null
 
     private var start = -1
     private var end = -1
 
+    // lblPregResp
+    // tilContenidoPregResp
+
     // Seleccionar imagen
     private val pickMedia = registerForActivityResult(PickVisualMedia()) { uri ->
-        if (uri != null){
-            val name = applicationContext.packageName
-            applicationContext.grantUriPermission(name, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        if (uri != null) {
+            // Toma permisos de persistencia para la URI
+            takePersistableUriPermission(uri)
+
+            //val name = applicationContext.packageName
+            //applicationContext.grantUriPermission(name, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             binding!!.ivImagen.setImage(ImageSource.uri(uri)) //setImageURI(uri)
-            binding!!.tilContenidoPregResp.visibility = View.GONE
-            binding!!.ivImagen.visibility = View.VISIBLE
+            //binding!!.tilContenidoPregResp.visibility = View.GONE
+            //binding!!.ivImagen.visibility = View.VISIBLE
             binding!!.etPregResp.setText(uri.toString())
             Log.i("Uri: ", uri.toString())
         }
@@ -118,23 +129,25 @@ class Activity_Cuestionario : AppCompatActivity() {
                 colocarEtiquetas(colorSpans, editable)
 
 
-                if (binding!!.tilContenidoPregResp.hint == "Pregunta") {
-                    if (contadorPregunta > (respuestas.size - 1)) {
-                        binding!!.tilContenidoPregResp.hint = "Respuesta"
+                if (binding!!.lblPregResp.text.toString() == "Pregunta") {
+                    if ((contadorPregunta + 1) > respuestas.size) {
+                        binding!!.lblPregResp.text = "Respuesta"
                         preguntas.add(contadorPregunta, editable.toString())
                         binding!!.etPregResp.setText("")
+                        binding!!.ivImagen.setImage(ImageSource.uri(""))
                     } else {
-                        binding!!.tilContenidoPregResp.hint = "Respuesta"
+                        binding!!.lblPregResp.text = "Respuesta"
                         preguntas[contadorPregunta] = editable.toString()
                         pintarTexto(contadorPregunta)
                     }
                     girarCardView()
                 } else {
-                    if (contadorPregunta > (respuestas.size - 1)) {
-                        binding!!.tilContenidoPregResp.hint = "Pregunta"
+                    if ((contadorPregunta + 1) > respuestas.size) {
+                        binding!!.lblPregResp.text = "Pregunta"
                         respuestas.add(contadorPregunta, editable.toString())
+                        pintarTexto(contadorPregunta)
                     } else {
-                        binding!!.tilContenidoPregResp.hint = "Pregunta"
+                        binding!!.lblPregResp.text = "Pregunta"
                         respuestas[contadorPregunta] = editable.toString()
                         pintarTexto(contadorPregunta)
                     }
@@ -176,7 +189,7 @@ class Activity_Cuestionario : AppCompatActivity() {
                     // Se colocan las etiquetas en cada palabra con color
                     colocarEtiquetas(colorSpans, editable)
 
-                    if (binding!!.tilContenidoPregResp.hint == "Pregunta") {
+                    if (binding!!.lblPregResp.text.toString() == "Pregunta") {
                         preguntas[contadorPregunta] = editable.toString()
                     } else {
                         respuestas[contadorPregunta] = editable.toString()
@@ -187,13 +200,13 @@ class Activity_Cuestionario : AppCompatActivity() {
                     if (contadorPregunta < longi) {
                         // Pintamos el texto en la pregunta actual
 
-                        binding!!.tilContenidoPregResp.hint = "Pregunta"
+                        binding!!.lblPregResp.text = "Pregunta"
                         pintarTexto(contadorPregunta + 1)
                     } else {
                         // Si le das click a que si, ya no te preguntará nuevamente
                         // aunque te regreses a componer otras preg.
                         // Si el contadorPregunta es igual entonces solo escribiremos los campos vacios.
-                        binding!!.tilContenidoPregResp.hint = "Pregunta"
+                        binding!!.lblPregResp.text = "Pregunta"
                         binding!!.etPregResp.setText("")
                     }
                 } else { // Si contadorPregunta es mayor a lo que hay en el arreglo.
@@ -206,7 +219,7 @@ class Activity_Cuestionario : AppCompatActivity() {
                         contadorPregunta--
                     } else {
                         // Cuando no hay guardadas las mismas preguntas que respuestas.
-                        if (binding!!.tilContenidoPregResp.hint == "Pregunta") {
+                        if (binding!!.lblPregResp.text.toString() == "Pregunta") {
                             Toast.makeText(
                                 applicationContext,
                                 "Asegurate de llenar una pregunta y una respuesta",
@@ -226,7 +239,7 @@ class Activity_Cuestionario : AppCompatActivity() {
                             // Se colocan las etiquetas en cada palabra con color
                             colocarEtiquetas(colorSpans, editable)
                             respuestas.add(contadorPregunta, editable.toString())
-                            binding!!.tilContenidoPregResp.hint = "Pregunta"
+                            binding!!.lblPregResp.text = "Pregunta"
                             binding!!.etPregResp.setText("")
                         }
                     }
@@ -337,20 +350,20 @@ class Activity_Cuestionario : AppCompatActivity() {
                         // Se colocan las etiquetas en cada palabra con color
                         colocarEtiquetas(colorSpans, editable)
 
-                        if (binding!!.tilContenidoPregResp.hint == "Pregunta") {
+                        if (binding!!.lblPregResp.text.toString() == "Pregunta") {
                             preguntas[contadorPregunta] = editable.toString()
                         } else {
                             respuestas[contadorPregunta] = editable.toString()
                         }
 
-                        binding!!.tilContenidoPregResp.hint = "Pregunta"
+                        binding!!.lblPregResp.text = "Pregunta"
                         // Pintamos el texto en la pregunta actual
                         pintarTexto(contadorPregunta - 1)
                     }
                 } else {
-                    if (binding!!.tilContenidoPregResp.hint == "Pregunta" && binding!!.etPregResp.text.toString()
+                    if (binding!!.lblPregResp.text.toString() == "Pregunta" && binding!!.etPregResp.text.toString()
                             .isNotEmpty() ||
-                        binding!!.tilContenidoPregResp.hint == "Respuesta" && binding!!.etPregResp.text.toString()
+                        binding!!.lblPregResp.text.toString() == "Respuesta" && binding!!.etPregResp.text.toString()
                             .isEmpty()
                     ) {
                         Toast.makeText(
@@ -361,7 +374,7 @@ class Activity_Cuestionario : AppCompatActivity() {
 
                         contadorPregunta++
                     } else {
-                        if (binding!!.tilContenidoPregResp.hint == "Pregunta") {
+                        if (binding!!.lblPregResp.text.toString() == "Pregunta") {
                             pintarTexto(contadorPregunta - 1)
                         } else {
                             // Si los campos están bien se sobre escribe.
@@ -377,7 +390,7 @@ class Activity_Cuestionario : AppCompatActivity() {
                             // Se colocan las etiquetas en cada palabra con color
                             colocarEtiquetas(colorSpans, editable)
 
-                            binding!!.tilContenidoPregResp.hint = "Pregunta"
+                            binding!!.lblPregResp.text = "Pregunta"
                             respuestas.add(contadorPregunta, editable.toString())
                             pintarTexto(contadorPregunta - 1)
                         }
@@ -407,10 +420,10 @@ class Activity_Cuestionario : AppCompatActivity() {
                         //preguntas.removeFirst()
                         //respuestas.removeFirst()
 
-                        if (binding!!.tilContenidoPregResp.hint == "Pregunta") {
+                        if (binding!!.lblPregResp.text.toString() == "Pregunta") {
                             binding!!.etPregResp.setText("")
                         } else {
-                            binding!!.tilContenidoPregResp.hint = "Pregunta"
+                            binding!!.lblPregResp.text = "Pregunta"
                             binding!!.etPregResp.setText("")
                         }
                     } else if (contadorPregunta <= longi) {
@@ -424,14 +437,14 @@ class Activity_Cuestionario : AppCompatActivity() {
                                 respuestas.removeAt(contadorPregunta)
                                 contadorPregunta--
                                 pintarTexto(contadorPregunta)
-                                binding!!.tilContenidoPregResp.hint = "Pregunta"
+                                binding!!.lblPregResp.text = "Pregunta"
                             } else {
                                 // contadorPregunta tendrá acceso a modificar lo que esté en el rango a excepción
                                 // de lo que esté en la posición 0.
                                 preguntas.removeAt(contadorPregunta)
                                 respuestas.removeAt(contadorPregunta)
                                 pintarTexto(contadorPregunta)
-                                binding!!.tilContenidoPregResp.hint = "Pregunta"
+                                binding!!.lblPregResp.text = "Pregunta"
                             }
                         } else {
                             // contadorPregunta tendrá acceso a modificar lo que esté en el rango a excepción
@@ -440,20 +453,20 @@ class Activity_Cuestionario : AppCompatActivity() {
                             respuestas.removeAt(contadorPregunta)
                             contadorPregunta--
                             pintarTexto(contadorPregunta)
-                            binding!!.tilContenidoPregResp.hint = "Pregunta"
+                            binding!!.lblPregResp.text = "Pregunta"
                         }
                     } else {
-                        if (binding!!.tilContenidoPregResp.hint == "Pregunta") {
+                        if (binding!!.lblPregResp.text.toString() == "Pregunta") {
                             binding!!.etPregResp.setText("")
                         } else {
                             preguntas.removeAt(contadorPregunta)
-                            binding!!.tilContenidoPregResp.hint = "Pregunta"
+                            binding!!.lblPregResp.text = "Pregunta"
                             binding!!.etPregResp.setText("")
                         }
 
                         contadorPregunta--
                         pintarTexto(contadorPregunta)
-                        binding!!.tilContenidoPregResp.hint = "Pregunta"
+                        binding!!.lblPregResp.text = "Pregunta"
                     }
                 }
 
@@ -468,13 +481,13 @@ class Activity_Cuestionario : AppCompatActivity() {
             val longi: Int = respuestas.size
 
             if (binding!!.etPregResp.text.toString().isEmpty()) {
-                if (respuestas.isEmpty() && binding!!.tilContenidoPregResp.hint == "Pregunta") {
+                if (respuestas.isEmpty() && binding!!.lblPregResp.text.toString() == "Pregunta") {
                     Toast.makeText(
                         applicationContext,
                         "Debes tener como minimo una pregunta",
                         Toast.LENGTH_SHORT
                     ).show()
-                } else if ((contadorPregunta + 1) > longi && binding!!.tilContenidoPregResp.hint == "Pregunta") {
+                } else if ((contadorPregunta + 1) > longi && binding!!.lblPregResp.text.toString() == "Pregunta") {
                     crearArchivo(nombreArchivo)
                 } else {
                     Toast.makeText(
@@ -484,7 +497,7 @@ class Activity_Cuestionario : AppCompatActivity() {
                     ).show()
                 }
             } else {
-                if (binding!!.tilContenidoPregResp.hint == "Pregunta") {
+                if (binding!!.lblPregResp.text.toString() == "Pregunta") {
                     if ((contadorPregunta + 1) <= longi && longi > 0) {
                         var editable: Editable =
                             Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
@@ -694,7 +707,7 @@ class Activity_Cuestionario : AppCompatActivity() {
     }
 
     private fun girarCardView() {
-        if (binding!!.tilContenidoPregResp.isVisible){
+        if (!binding!!.tilContenidoPregResp.isGone) {
             val flipAnimator =
                 ObjectAnimator.ofFloat(binding!!.tilContenidoPregResp, "rotationY", 0f, 360f)
             flipAnimator.duration = 1000 // Duración de la animación en milisegundos
@@ -720,13 +733,13 @@ class Activity_Cuestionario : AppCompatActivity() {
         val appearAnimation = AlphaAnimation(0.0f, 1.0f)
         appearAnimation.duration = 1000
 
-        disappearAnimation.setAnimationListener(object : Animation.AnimationListener{
+        disappearAnimation.setAnimationListener(object : Animation.AnimationListener {
             override fun onAnimationStart(p0: Animation?) {
             }
 
             override fun onAnimationEnd(p0: Animation?) {
-                binding!!.ivImagen.visibility = View.GONE
-                binding!!.tilContenidoPregResp.visibility = View.VISIBLE
+                //binding!!.ivImagen.visibility = View.GONE
+                //binding!!.tilContenidoPregResp.visibility = View.VISIBLE
             }
 
             override fun onAnimationRepeat(p0: Animation?) {
@@ -734,7 +747,17 @@ class Activity_Cuestionario : AppCompatActivity() {
         })
 
         binding!!.ivImagen.startAnimation(disappearAnimation)
-        binding!!.tilContenidoPregResp.startAnimation(appearAnimation)
+        //binding!!.tilContenidoPregResp.startAnimation(appearAnimation)
+    }
+
+    // Toma permisos de persistencia para la URI
+    private fun takePersistableUriPermission(uri: Uri) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            contentResolver.takePersistableUriPermission(
+                uri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
+        }
     }
 
     // Método que se ejecuta cuando el back del telefono es presionado.
@@ -854,11 +877,21 @@ class Activity_Cuestionario : AppCompatActivity() {
         var fin: Int = 0
         var coloresPregunta: ColoresPregunta? = null
         var texto: String = ""
-        if (binding!!.tilContenidoPregResp.hint == "Pregunta") {
+        if (binding!!.lblPregResp.text.toString() == "Pregunta") {
             texto = preguntas[contadorPregunta]
+            uri = texto.toUri()
         } else {
             texto = respuestas[contadorPregunta]
+            uri = texto.toUri()
         }
+
+        if (texto.contains("content://media/picker")) {
+            binding!!.ivImagen.setImage(ImageSource.uri(uri!!)) //setImageURI(uri)
+            //binding!!.tilContenidoPregResp.visibility = View.GONE
+            //binding!!.etPregResp.visibility = View.GONE
+            //binding!!.ivImagen.visibility = View.VISIBLE
+        }
+
         while (texto.contains("«")) {
             inicio = texto.indexOf("«") + 1
             fin = texto.indexOf("»")
@@ -870,7 +903,7 @@ class Activity_Cuestionario : AppCompatActivity() {
             coloresPregunta =
                 ColoresPregunta((inicio - longColor - 2), (fin - longColor - 2), colEntero)
 
-            if (binding!!.tilContenidoPregResp.hint == "Pregunta") {
+            if (binding!!.lblPregResp.text.toString() == "Pregunta") {
                 preguntasColor.add(contColorPreg, coloresPregunta)
             } else {
                 respuestasColor.add(contColorPreg, coloresPregunta)
@@ -885,7 +918,7 @@ class Activity_Cuestionario : AppCompatActivity() {
         }
 
         builder = SpannableStringBuilder(texto)
-        for (coloresPreguntas: ColoresPregunta in if (binding!!.tilContenidoPregResp.hint == "Pregunta") preguntasColor else respuestasColor) {
+        for (coloresPreguntas: ColoresPregunta in if (binding!!.lblPregResp.text.toString() == "Pregunta") preguntasColor else respuestasColor) {
             val colorSpan: ForegroundColorSpan = ForegroundColorSpan(coloresPreguntas.color)
             builder!!.setSpan(
                 colorSpan,
@@ -894,6 +927,7 @@ class Activity_Cuestionario : AppCompatActivity() {
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
             )
         }
+
         preguntasColor.clear()
         respuestasColor.clear()
         binding!!.etPregResp.text = builder

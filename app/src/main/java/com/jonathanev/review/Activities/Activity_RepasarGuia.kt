@@ -3,6 +3,7 @@ package com.jonathanev.review.Activities
 import android.animation.ObjectAnimator
 import android.app.AlertDialog
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -10,10 +11,16 @@ import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
 import android.view.View
+import android.view.animation.AlphaAnimation
+import android.view.animation.Animation
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.animation.doOnEnd
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
+import androidx.core.view.isGone
 import com.davemorrissey.labs.subscaleview.ImageSource
 import com.jonathanev.review.Clases.ColoresPregunta
 import com.jonathanev.review.databinding.ActivityRepasarGuiaBinding
@@ -29,6 +36,11 @@ import javax.xml.parsers.ParserConfigurationException
 
 
 class Activity_RepasarGuia constructor() : AppCompatActivity() {
+
+    companion object {
+        private const val REQUEST_PERMISSION_CODE = 123
+    }
+
     private var binding: ActivityRepasarGuiaBinding? = null
     private var nombreArchivo: String? = null
     private val preguntas: ArrayList<String> = ArrayList()
@@ -93,12 +105,13 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
         binding!!.barraSuperiorRegreso.imgvBack.setOnClickListener { onBackPressed() }
 
         binding!!.imgvPregResp.setOnClickListener {
-            if (binding!!.tilContenidoPregResp.hint == "Pregunta"){
-                mostrarRespuesta(builder)
-                binding!!.tilContenidoPregResp.hint = "Respuesta"
-            } else {
+            if (binding!!.lblPregResp.text.toString() == "Pregunta"){
+                //mostrarRespuesta(builder)
+                binding!!.lblPregResp.text = "Respuesta"
                 pintarTexto()
-                binding!!.tilContenidoPregResp.hint = "Pregunta"
+            } else {
+                binding!!.lblPregResp.text = "Pregunta"
+                pintarTexto()
             }
             girarCardView()
         }
@@ -114,6 +127,10 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
         if (!nombreArchivo!!.contains(".xml")) {
             nombreArchivo = intent.extras!!.getString("nombre_archivo") + ".xml"
         }
+
+
+        // Revisar permisos
+        checkAndRequestPermissions()
 
         // Obtenemos los datos del XML y los guardamos en su respectivo ArrayList.
         obtenerDatosXML()
@@ -180,17 +197,56 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
     }
 
     private fun girarCardView() {
-        val flipAnimator = ObjectAnimator.ofFloat(binding!!.tilContenidoPregResp, "rotationY", 0f, 360f)
-        flipAnimator.duration = 1000 // Duración de la animación en milisegundos
-        flipAnimator.start()
+        if (!binding!!.tilContenidoPregResp.isGone) {
+            val flipAnimator =
+                ObjectAnimator.ofFloat(binding!!.tilContenidoPregResp, "rotationY", 0f, 360f)
+            flipAnimator.duration = 1000 // Duración de la animación en milisegundos
+            flipAnimator.start()
+        } else {
+            val flipAnimator =
+                ObjectAnimator.ofFloat(binding!!.ivImagen, "rotationY", 0f, 360f)
+            flipAnimator.duration = 1000 // Duración de la animación en milisegundos
+            flipAnimator.start()
+            flipAnimator.doOnEnd {
+                showImageOrText()
+                //growCard()
+                //binding!!.ivImagen.visibility = View.GONE
+                //binding!!.tilContenidoPregResp.visibility = View.VISIBLE
+            }
+        }
     }
+
+    private fun showImageOrText() {
+        val disappearAnimation = AlphaAnimation(1.0f, 0.0f)
+        disappearAnimation.duration = 200
+
+        val appearAnimation = AlphaAnimation(0.0f, 1.0f)
+        appearAnimation.duration = 1000
+
+        disappearAnimation.setAnimationListener(object : Animation.AnimationListener {
+            override fun onAnimationStart(p0: Animation?) {
+            }
+
+            override fun onAnimationEnd(p0: Animation?) {
+                //binding!!.ivImagen.visibility = View.GONE
+                //binding!!.tilContenidoPregResp.visibility = View.VISIBLE
+            }
+
+            override fun onAnimationRepeat(p0: Animation?) {
+            }
+        })
+
+        binding!!.ivImagen.startAnimation(disappearAnimation)
+        //binding!!.tilContenidoPregResp.startAnimation(appearAnimation)
+    }
+
     private fun pintarTexto() {
         var contColorPreg: Int = 0
         var inicio: Int = 0
         var fin: Int = 0
         var coloresPregunta: ColoresPregunta? = null
         var texto: String = ""
-        if (binding!!.tilContenidoPregResp.hint == "Pregunta") {
+        if (binding!!.lblPregResp.text.toString() == "Pregunta") {
             texto = preguntas[contadorPregunta]
             uri = texto.toUri()
         } else {
@@ -199,50 +255,71 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
         }
 
         if (texto.contains("content://media/picker")) {
+            //val name = applicationContext.packageName
+            //applicationContext.grantUriPermission(name, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             binding!!.ivImagen.setImage(ImageSource.uri(uri!!)) //setImageURI(uri)
-            binding!!.tilContenidoPregResp.visibility = View.GONE
-            binding!!.ivImagen.visibility = View.VISIBLE
-        } else {
-            while (texto.contains("«")) {
-                inicio = texto.indexOf("«") + 1
-                fin = texto.indexOf("»")
-                val color: String = texto.substring(inicio, fin)
-                val longColor: Int = color.length
-                val colEntero: Int = color.toInt()
-                inicio = fin + 1
-                fin = texto.indexOf("«", inicio)
-                coloresPregunta =
-                    ColoresPregunta((inicio - longColor - 2), (fin - longColor - 2), colEntero)
+            //binding!!.tilContenidoPregResp.visibility = View.GONE
+            //binding!!.etPregResp.visibility = View.GONE
+            //binding!!.ivImagen.visibility = View.VISIBLE
+        }
 
-                if (binding!!.tilContenidoPregResp.hint == "Pregunta") {
-                    preguntasColor.add(contColorPreg, coloresPregunta)
-                } else {
-                    respuestasColor.add(contColorPreg, coloresPregunta)
-                }
+        while (texto.contains("«")) {
+            inicio = texto.indexOf("«") + 1
+            fin = texto.indexOf("»")
+            val color: String = texto.substring(inicio, fin)
+            val longColor: Int = color.length
+            val colEntero: Int = color.toInt()
+            inicio = fin + 1
+            fin = texto.indexOf("«", inicio)
+            coloresPregunta =
+                ColoresPregunta((inicio - longColor - 2), (fin - longColor - 2), colEntero)
 
-                // Eliminar la primera etiqueta y su contenido
-                texto = texto.replaceFirst("«.*?»".toRegex(), "")
-
-                // Eliminar la segunda etiqueta y su contenido
-                texto = texto.replaceFirst("«.*?»".toRegex(), "")
-                contColorPreg++
+            if (binding!!.lblPregResp.text.toString() == "Pregunta") {
+                preguntasColor.add(contColorPreg, coloresPregunta)
+            } else {
+                respuestasColor.add(contColorPreg, coloresPregunta)
             }
 
-            builder = SpannableStringBuilder(texto)
-            for (coloresPreguntas: ColoresPregunta in if (binding!!.tilContenidoPregResp.hint == "Pregunta") preguntasColor else respuestasColor) {
-                val colorSpan: ForegroundColorSpan = ForegroundColorSpan(coloresPreguntas.color)
-                builder!!.setSpan(
-                    colorSpan,
-                    coloresPreguntas.inicioColor,
-                    coloresPreguntas.finColor,
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            // Eliminar la primera etiqueta y su contenido
+            texto = texto.replaceFirst("«.*?»".toRegex(), "")
+
+            // Eliminar la segunda etiqueta y su contenido
+            texto = texto.replaceFirst("«.*?»".toRegex(), "")
+            contColorPreg++
+        }
+
+        builder = SpannableStringBuilder(texto)
+        for (coloresPreguntas: ColoresPregunta in if (binding!!.lblPregResp.text.toString() == "Pregunta") preguntasColor else respuestasColor) {
+            val colorSpan: ForegroundColorSpan = ForegroundColorSpan(coloresPreguntas.color)
+            builder!!.setSpan(
+                colorSpan,
+                coloresPreguntas.inicioColor,
+                coloresPreguntas.finColor,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+        }
+
+        preguntasColor.clear()
+        respuestasColor.clear()
+        binding!!.etPregResp.text = builder
+    }
+
+    private fun checkAndRequestPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val permissionReadExternalStorage = ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.READ_EXTERNAL_STORAGE
+            )
+
+            if (permissionReadExternalStorage != PackageManager.PERMISSION_GRANTED) {
+                // Si no tienes permisos, solicítalos
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),
+                    REQUEST_PERMISSION_CODE
                 )
             }
         }
-
-        //preguntasColor.clear()
-        //respuestasColor.clear()
-        //binding!!.etPregResp.text = builder
     }
 
     /*private fun pintarTexto() {

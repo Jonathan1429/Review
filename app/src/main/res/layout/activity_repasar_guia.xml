@@ -91,6 +91,16 @@
                     tools:ignore="ContentDescription" />
             </LinearLayout>
 
+            <TextView
+                android:id="@+id/lblPregResp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:textColor="@color/black"
+                android:gravity="center_horizontal"
+                android:textStyle="bold"
+                android:text="Pregunta"/>
+
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/tilContenidoPregResp"
                 android:layout_width="match_parent"
