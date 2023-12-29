@@ -103,6 +103,10 @@ class Activity_Modificar constructor() : AppCompatActivity() {
         // Guardo el nombre del archivo enviado desde el popupFragmentListarGuias.
         nombreArchivo = intent.extras!!.getString("nombre_archivo")
 
+        if (nombreArchivo!!.contains(".xml")){
+            nombreArchivo = nombreArchivo!!.replace(".xml".toRegex(), "")
+        }
+
         // Se cambia el nombre del titulo del toolbar
         binding!!.barraSuperiorRegreso.tvTituloToolbar.text = "Modificando: $nombreArchivo"
         binding!!.barraSuperiorRegreso.imgvBack.setOnClickListener(object : View.OnClickListener {
@@ -123,7 +127,7 @@ class Activity_Modificar constructor() : AppCompatActivity() {
         // Aquí simplemente nos aseguramos que tenga el xml, si lo tiene no entramos.
         // En teoria ya todos los archivos no tienen el .xml porque lo recupero del ListarGuias
         if (!nombreArchivo!!.contains(".xml")) {
-            nombreArchivo = intent.extras!!.getString("nombre_archivo") + ".xml"
+            nombreArchivo = "$nombreArchivo.xml"
         }
 
         // Obtenemos los datos del XML y los guardamos en su respectivo ArrayList.
