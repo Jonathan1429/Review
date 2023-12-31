@@ -80,13 +80,17 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
         // Guardo el nombre del archivo enviado desde el popupFragmentListarGuias.
         nombreArchivo = intent.extras!!.getString("nombre_archivo")
 
+        if (nombreArchivo!!.contains(".xml")){
+            nombreArchivo = nombreArchivo!!.replace(".xml".toRegex(), "")
+        }
+
         // Reutilizo el layout anteriormente creado y le asigno un texto el tvTituloToolbar
         binding!!.barraSuperiorRegreso.tvTituloToolbar.text = "Guia: $nombreArchivo"
 
-        // Aquí simplemente nos aseguramos que tenga el xml, si lo tiene no entramos, sino si.
-        // En teoría todos los archivos lo van a tener.
+        // Aquí simplemente nos aseguramos que tenga el xml, si lo tiene no entramos.
+        // En teoria ya todos los archivos no tienen el .xml porque lo recupero del ListarGuias
         if (!nombreArchivo!!.contains(".xml")) {
-            nombreArchivo = intent.extras!!.getString("nombre_archivo") + ".xml"
+            nombreArchivo = "$nombreArchivo.xml"
         }
 
         // Obtenemos los datos del XML y los guardamos en su respectivo ArrayList.
