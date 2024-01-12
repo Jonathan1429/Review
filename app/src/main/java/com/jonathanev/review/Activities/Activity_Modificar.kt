@@ -111,11 +111,11 @@ class Activity_Modificar constructor() : AppCompatActivity() {
         binding!!.barraSuperiorRegreso.tvTituloToolbar.text = "Modificando: $nombreArchivo"
         binding!!.barraSuperiorRegreso.imgvBack.setOnClickListener(object : View.OnClickListener {
             public override fun onClick(view: View) {
-                /*Toast.makeText(
+                Toast.makeText(
                     applicationContext,
                     "No se hicieron cambios en el archivo",
                     Toast.LENGTH_SHORT
-                ).show()*/
+                ).show()
 
                 Log.i("Modificar archivo: ", "No se hicieron cambios en el archivo")
                 onBackPressed()
@@ -176,11 +176,11 @@ class Activity_Modificar constructor() : AppCompatActivity() {
                     girarCardView()
                 }
             } else {
-                /*Toast.makeText(
+                Toast.makeText(
                     applicationContext,
                     "Asegurate de no dejar ningun campo vacio",
                     Toast.LENGTH_SHORT
-                ).show()*/
+                ).show()
                 Log.i("Crear pregunta: ", "Asegurate de no dejar ningun campo vacio")
             }
         }
@@ -243,11 +243,11 @@ class Activity_Modificar constructor() : AppCompatActivity() {
                 if (contadorPregunta <= longi) {
                     // Validamos campos vacios en la pregunta y respuesta.
                     if (binding!!.etPregResp.text.toString().isEmpty()) {
-                        /*Toast.makeText(
+                        Toast.makeText(
                             applicationContext,
                             "Asegurate de no dejar ningun campo vacio",
                             Toast.LENGTH_SHORT
-                        ).show()*/
+                        ).show()
 
                         Log.i("Crear pregunta: ", "Asegurate de no dejar ningun campo vacio")
 
@@ -282,11 +282,11 @@ class Activity_Modificar constructor() : AppCompatActivity() {
                         binding!!.lblPregResp.text.toString() == "Respuesta" && binding!!.etPregResp.text.toString()
                             .isEmpty()
                     ) {
-                        /*Toast.makeText(
+                        Toast.makeText(
                             applicationContext,
                             "Asegurate de llenar pregunta y respuesta",
                             Toast.LENGTH_SHORT
-                        ).show()*/
+                        ).show()
 
                         Log.i("Crear pregunta: ", "Asegurate de llenar pregunta y respuesta")
                         contadorPregunta++
@@ -316,11 +316,11 @@ class Activity_Modificar constructor() : AppCompatActivity() {
 
                 contadorPregunta--
             } else {
-                /*Toast.makeText(
+                Toast.makeText(
                     applicationContext,
                     "Ya no tienes preguntas anteriores",
                     Toast.LENGTH_LONG
-                ).show()*/
+                ).show()
 
                 Log.i("Crear pregunta: ", "Ya no tienes preguntas anteriores")
             }
@@ -329,11 +329,11 @@ class Activity_Modificar constructor() : AppCompatActivity() {
         binding!!.imgvNext.setOnClickListener {
             // Validamos campos vacios en la pregunta o respuesta.
             if (binding!!.etPregResp.text.toString().isEmpty()) {
-                /*Toast.makeText(
+                Toast.makeText(
                     applicationContext,
                     "Asegurate de no dejar ningun campo vacio",
                     Toast.LENGTH_SHORT
-                ).show()*/
+                ).show()
 
                 Log.i("Crear pregunta: ", "Asegurate de no dejar ningun campo vacio")
             } else {
@@ -344,11 +344,11 @@ class Activity_Modificar constructor() : AppCompatActivity() {
 
                 if (contadorPregunta <= longi) {
                     if (binding!!.etPregResp.text.toString().isEmpty()) {
-                        /*Toast.makeText(
+                        Toast.makeText(
                             applicationContext,
                             "Asegurate de llenar una pregunta y una respuesta",
                             Toast.LENGTH_SHORT
-                        ).show()*/
+                        ).show()
 
                         Log.i(
                             "Crear pregunta: ",
@@ -397,10 +397,10 @@ class Activity_Modificar constructor() : AppCompatActivity() {
                                     // binding!!.etPregunta.requestFocus()
                                     // contadorPregunta++
                                     dialMasPreg = true
-                                    /*Toast.makeText(
+                                    Toast.makeText(
                                         applicationContext, "Ya puedes agregar " +
                                                 "mas preguntas", Toast.LENGTH_LONG
-                                    ).show()*/
+                                    ).show()
 
                                     Log.i(
                                         "Crear pregunta: ", "Ya puedes agregar " +
@@ -426,11 +426,11 @@ class Activity_Modificar constructor() : AppCompatActivity() {
                     }
                 } else { // Si contadorPregunta es mayor a lo que hay en el arreglo.
                     if (binding!!.etPregResp.text.toString().isEmpty()) {
-                        /*Toast.makeText(
+                        Toast.makeText(
                             applicationContext,
                             "Asegurate de llenar una pregunta y una respuesta",
                             Toast.LENGTH_SHORT
-                        ).show()*/
+                        ).show()
 
                         Log.i(
                             "Crear pregunta: ",
@@ -440,11 +440,11 @@ class Activity_Modificar constructor() : AppCompatActivity() {
                     } else {
                         // Cuando no hay guardadas las mismas preguntas que respuestas.
                         if (binding!!.lblPregResp.text.toString() == "Pregunta") {
-                            /*Toast.makeText(
+                            Toast.makeText(
                                 applicationContext,
                                 "Asegurate de llenar una pregunta y una respuesta",
                                 Toast.LENGTH_SHORT
-                            ).show()*/
+                            ).show()
 
                             Log.i(
                                 "Crear pregunta: ",
@@ -602,22 +602,22 @@ class Activity_Modificar constructor() : AppCompatActivity() {
 
             if (binding!!.etPregResp.text.toString().isEmpty()) {
                 if (respuestas.isEmpty() && binding!!.lblPregResp.text.toString() == "Pregunta") {
-                    /*Toast.makeText(
+                    Toast.makeText(
                         applicationContext,
                         "Debes tener como minimo una pregunta",
                         Toast.LENGTH_SHORT
-                    ).show()*/
+                    ).show()
 
                     Log.i("Crear pregunta: ", "Debes tener como minimo una pregunta")
                 } else if ((contadorPregunta + 1) > longi && binding!!.lblPregResp.text.toString() == "Pregunta") {
                     borrarCrearXML(nombreArchivo)
                     binding!!.ivImagen.visibility = View.GONE
                 } else {
-                    /*Toast.makeText(
+                    Toast.makeText(
                         applicationContext,
                         "Asegurate de llenar una pregunta y una respuesta",
                         Toast.LENGTH_SHORT
-                    ).show()*/
+                    ).show()
 
                     Log.i("Crear pregunta: ", "Asegurate de llenar una pregunta y una respuesta")
                 }
@@ -638,11 +638,11 @@ class Activity_Modificar constructor() : AppCompatActivity() {
 
                         borrarCrearXML(nombreArchivo)
                     } else {
-                        /*Toast.makeText(
+                        Toast.makeText(
                             applicationContext,
                             "Asegurate de llenar una pregunta y una respuesta",
                             Toast.LENGTH_SHORT
-                        ).show()*/
+                        ).show()
 
                         Log.i(
                             "Crear pregunta: ",
@@ -843,11 +843,11 @@ class Activity_Modificar constructor() : AppCompatActivity() {
             if (start == -1) {
                 start = binding!!.etPregResp.selectionStart
 
-                /*Toast.makeText(
+                Toast.makeText(
                     applicationContext,
                     "Pon el cursor hasta donde quieres pintar",
                     Toast.LENGTH_SHORT
-                ).show()*/
+                ).show()
 
                 Log.i("Pintar: ", "Pon el cursor hasta donde quieres pintar")
             } else {
@@ -868,11 +868,11 @@ class Activity_Modificar constructor() : AppCompatActivity() {
                     val spanFin: Int = spannableStringBuilder.getSpanEnd(span)
                     if ((spanInicio < end && spanFin > start) || (spanInicio >= start && spanFin <= end)) {
                         spannableStringBuilder.removeSpan(span)
-                        /*Toast.makeText(
+                        Toast.makeText(
                             applicationContext,
                             "Una letra, una tinta; palabras sin colores.",
                             Toast.LENGTH_SHORT
-                        ).show()*/
+                        ).show()
 
                         Log.i("Pintar: ", "Una letra, una tinta; palabras sin colores.")
                     }
@@ -981,11 +981,11 @@ class Activity_Modificar constructor() : AppCompatActivity() {
     // Método que se ejecuta cuando el back del telefono es presionado.
     public override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.action == KeyEvent.ACTION_DOWN) {
-            /*Toast.makeText(
+            Toast.makeText(
                 applicationContext,
                 "No se hicieron cambios en el archivo",
                 Toast.LENGTH_SHORT
-            ).show()*/
+            ).show()
 
             Log.i("Crear archivo: ", "No se hicieron cambios en el archivo")
             onBackPressed()
@@ -1031,10 +1031,10 @@ class Activity_Modificar constructor() : AppCompatActivity() {
             serializer.endDocument()
             serializer.flush()
             fos?.close()
-            /*Toast.makeText(
+            Toast.makeText(
                 applicationContext, "Guia de estudio modificada exitosamente",
                 Toast.LENGTH_SHORT
-            ).show()*/
+            ).show()
 
             Log.i("Crear archivo: ", "Guia de estudio modificada exitosamente")
             val intent: Intent = Intent(applicationContext, Activity_RepasarGuia::class.java)

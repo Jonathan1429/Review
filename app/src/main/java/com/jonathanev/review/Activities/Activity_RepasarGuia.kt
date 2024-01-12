@@ -103,10 +103,10 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
             //binding!!.btnMostrarRespuesta.text = "Mostrar respuesta"
             binding!!.lblPregResp.text = "Pregunta"
             if (contadorPregunta == 0) {
-                /*Toast.makeText(
+                Toast.makeText(
                     applicationContext, "No tienes preguntas anteriores",
                     Toast.LENGTH_SHORT
-                ).show()*/
+                ).show()
 
                 Log.i("Crear pregunta: ", "No tienes preguntas anteriores")
             } else {
