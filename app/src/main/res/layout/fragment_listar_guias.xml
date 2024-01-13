@@ -9,15 +9,15 @@
     android:background="@drawable/contorno_ventana_popup"
     tools:context="com.jonathanev.review.Fragments.Fragment_DialogListarGuias_popup">
 
-    <ImageView
+    <!--<ImageView
         android:id="@+id/imgvGuiaEstudio"
         android:layout_width="150dp"
         android:layout_height="150dp"
-        android:src="@drawable/estudiantes"
+        android:src="@drawable/img_inicio"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="ContentDescription" />
+        tools:ignore="ContentDescription" />-->
 
     <TextView
         android:id="@+id/tvSinGuias"
@@ -31,17 +31,17 @@
         android:visibility="invisible"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imgvGuiaEstudio"/>
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/lvGuiasEstudio"
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:paddingBottom="30dp"
+        android:layout_height="match_parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/imgvGuiaEstudio"/>
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
     <!--<ListView
         android:id="@+id/lvGuiasEstudio"

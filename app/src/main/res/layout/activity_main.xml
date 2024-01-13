@@ -5,14 +5,27 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/fondopantallas"
     tools:context="com.jonathanev.review.MainActivity">
 
     <include
         android:id="@+id/barra_superior"
         layout="@layout/barra_superior"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/fondo"/>
+
+    <FrameLayout
+        android:id="@+id/fondo"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@drawable/img_fondo"
+        app:layout_constraintTop_toBottomOf="@+id/barra_superior"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
 
     <androidx.constraintlayout.widget.Guideline
@@ -20,19 +33,14 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent=".20" />
+        app:layout_constraintGuide_percent=".45" />
 
-    <!--style="@style/btnGenerales"-->
-    <ImageView
-        android:id="@+id/imgPrincipal"
-        android:layout_width="250dp"
-        android:layout_height="250dp"
-        android:src="@drawable/estudiantes"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.496"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/guiaImagenPrincipal"
-        tools:ignore="ContentDescription" />
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guiaImagenPrincipal2"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent=".35" />
 
     <Button
         android:layout_width="wrap_content"
@@ -40,9 +48,10 @@
         android:id="@+id/btnNuevaGuiaEstudio"
         android:text="@string/btnNuevaGuia"
         android:background="@drawable/ic_filter_state"
+        android:layout_marginBottom="50dp"
         style="@style/btnGeneral"
-        app:layout_constraintTop_toBottomOf="@+id/imgPrincipal"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/guiaImagenPrincipal"
+        app:layout_constraintStart_toEndOf="@+id/guiaImagenPrincipal2"
         app:layout_constraintEnd_toStartOf="@+id/btnAbrirGuiaEstudioHabilitado" />
 
     <!--style="@style/btnGenerales"-->
@@ -53,8 +62,9 @@
         android:text="@string/btnAbrirGuia"
         android:enabled="true"
         android:background="@drawable/ic_filter_state"
+        android:layout_marginBottom="50dp"
         style="@style/btnGeneral"
-        app:layout_constraintTop_toBottomOf="@+id/imgPrincipal"
+        app:layout_constraintTop_toBottomOf="@+id/guiaImagenPrincipal"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/btnNuevaGuiaEstudio" />
 </androidx.constraintlayout.widget.ConstraintLayout>

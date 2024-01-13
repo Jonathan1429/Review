@@ -83,12 +83,12 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
         // Se crea un número random para saber cual imagen aparecerá en el listado.
         var numeroRandom = (1..6).random()
         when (numeroRandom) {
-            1 -> numeroRandom = R.drawable.cerebro
-            2 -> numeroRandom = R.drawable.cuaderno
-            3 -> numeroRandom = R.drawable.estudiar
-            4 -> numeroRandom = R.drawable.libro_dual
-            5 -> numeroRandom = R.drawable.libro_triple
-            6 -> numeroRandom = R.drawable.libros
+            1 -> numeroRandom = R.drawable.img_estudiante1 //numeroRandom = R.drawable.cerebro
+            2 -> numeroRandom = R.drawable.img_estudiante2
+            3 -> numeroRandom = R.drawable.img_estudiante3
+            4 -> numeroRandom = R.drawable.img_estudiante4
+            5 -> numeroRandom = R.drawable.img_estudiante5
+            6 -> numeroRandom = R.drawable.img_estudiante6
         }
 
         //var adaptador: AdaptadorPersonalizadoListarGuias? = null
