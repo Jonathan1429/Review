@@ -16,9 +16,11 @@ import com.jonathanev.review.Activities.Activity_RepasarGuia
 import com.jonathanev.review.Fragments.Fragment_DialogListarGuias_popup
 import com.jonathanev.review.Fragments.Fragment_DialogNuevoArchivo_popu
 import com.jonathanev.review.databinding.ActivityMainBinding
+import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 
-class MainActivity constructor() : AppCompatActivity() {
+@AndroidEntryPoint
+class MainActivity : AppCompatActivity() {
     companion object {
         private const val REQUEST_PERMISSION_CODE = 123
     }

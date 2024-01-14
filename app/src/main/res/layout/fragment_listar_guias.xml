@@ -9,16 +9,6 @@
     android:background="@drawable/contorno_ventana_popup"
     tools:context="com.jonathanev.review.Fragments.Fragment_DialogListarGuias_popup">
 
-    <!--<ImageView
-        android:id="@+id/imgvGuiaEstudio"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
-        android:src="@drawable/img_inicio"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="ContentDescription" />-->
-
     <TextView
         android:id="@+id/tvSinGuias"
         android:layout_width="match_parent"
@@ -42,14 +32,4 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
-
-    <!--<ListView
-        android:id="@+id/lvGuiasEstudio"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_below="@+id/imgvGuiaEstudio"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imgvGuiaEstudio"
-        app:layout_constraintBottom_toBottomOf="parent"/>-->
 </androidx.constraintlayout.widget.ConstraintLayout>
