@@ -1,4 +1,4 @@
-package com.jonathanev.review.Fragments
+package com.jonathanev.review.UI.View
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
@@ -16,33 +16,35 @@ import android.view.Window
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jonathanev.review.Activities.Activity_Modificar
 import com.jonathanev.review.Activities.Activity_RepasarGuia
-import com.jonathanev.review.Clases.Guia
+import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Fragments.Adaptadores.ListarGuiasAdapter
+import com.jonathanev.review.Fragments.Fragment_DialogNuevoArchivo_popu
 import com.jonathanev.review.Fragments.Fragment_DialogNuevoArchivo_popu.DialogListener
 import com.jonathanev.review.R
+import com.jonathanev.review.UI.ViewModel.FragDialListarGuiasViewModel
 import com.jonathanev.review.databinding.FragmentListarGuiasBinding
+import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 
+@AndroidEntryPoint
 class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
-    private var binding: FragmentListarGuiasBinding? = null
+    private var _binding: FragmentListarGuiasBinding? = null
+    private val binding get() = _binding!!
+
+    private val guiasViewModel by viewModels<FragDialListarGuiasViewModel>()
     private lateinit var adaptadorListarGuias: ListarGuiasAdapter
-
-    // Guardar la collection del set en este Arreglo
-    private val item = ArrayList<String>()
-
-    // Cargar el ListView
-    private val guias = ArrayList<Guia>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
-        binding = FragmentListarGuiasBinding.inflate(layoutInflater)
-        return binding!!.root
+        _binding = FragmentListarGuiasBinding.inflate(layoutInflater, container, false)
+        return binding.root
     }
 
     override fun onDialogClosed() {
@@ -55,62 +57,29 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Recibimos las preferencias y las guardamos nuevamente en un set.
-        val preferences =
-            requireActivity().getSharedPreferences("nombres_guias", Context.MODE_PRIVATE)
-        //val set = preferences.getStringSet("guias_estudio", null)
-        val set = preferences.getStringSet("guias_estudio", null) ?: emptySet()
+        initUI()
 
-        // Metemos la collection directamente en el arreglo y se ordena automáticamente.
-        item.addAll(set)
-
-        // Ordena las guías con el método sort FALTA ESTA PARTE
-        item.sort()
-
-        // Sino tengo ninguna guía de estudio aparece el texto que no tengo guías
-        if (item.isEmpty()) {
-            binding!!.tvSinGuias.visibility = View.VISIBLE
-        } else {
-            // Si es lo contrario no aparece el texto
-            binding!!.tvSinGuias.visibility = View.INVISIBLE
+        guiasViewModel.guias.observe(this){
+            showGuias(it)
         }
 
-        // Cargamos la lista de los items
-        cargarListaGuiasEstudio(item)
+        guiasViewModel.guia.observe(this){
+            showGuiaOptions(it)
+        }
     }
 
-    private fun cargarListaGuiasEstudio(item: ArrayList<String>) {
-        // Se crea un número random para saber cual imagen aparecerá en el listado.
-        var numeroRandom = (1..6).random()
-        when (numeroRandom) {
-            1 -> numeroRandom = R.drawable.img_estudiante1 //numeroRandom = R.drawable.cerebro
-            2 -> numeroRandom = R.drawable.img_estudiante2
-            3 -> numeroRandom = R.drawable.img_estudiante3
-            4 -> numeroRandom = R.drawable.img_estudiante4
-            5 -> numeroRandom = R.drawable.img_estudiante5
-            6 -> numeroRandom = R.drawable.img_estudiante6
-        }
-
-        //var adaptador: AdaptadorPersonalizadoListarGuias? = null
-        var guia: Guia
-
-        // La imagen guardada en numeroRandom se pondrá en el objeto guias
-        // Después se irá poniendo el nombre de cada una de las guias en el objeto
-        for (i in item.indices) {
-            guia = Guia()
-            guia.imgGuia = numeroRandom
-            guia.nombreGuia = item[i]
-            guias.add(guia)
-        }
-        adaptadorListarGuias = ListarGuiasAdapter(guias) {position -> optionsGuide(position)}
-        binding!!.lvGuiasEstudio.layoutManager = LinearLayoutManager(context)
-        binding!!.lvGuiasEstudio.setHasFixedSize(true)
-        binding!!.lvGuiasEstudio.adapter = adaptadorListarGuias
+    private fun initUI() {
+        guiasViewModel.getAllGuias()
     }
 
-    private fun optionsGuide(position: Int) {
-        val guias = guias[position]
+    private fun showGuias(guiaModels: List<GuiaModel>) {
+        adaptadorListarGuias = ListarGuiasAdapter(guiaModels) {position -> getGuia(position)}
+        binding.lvGuiasEstudio.layoutManager = LinearLayoutManager(context)
+        binding.lvGuiasEstudio.setHasFixedSize(true)
+        binding.lvGuiasEstudio.adapter = adaptadorListarGuias
+    }
 
+    private fun showGuiaOptions(guia: GuiaModel) {
         // Creo una alerta donde me saldrán una lista de items
         val builder = AlertDialog.Builder(context)
         builder.setIcon(R.drawable.ic_advertencia)
@@ -128,7 +97,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                 0 -> {
                     // Si entra al primer item se abre la guía a review
                     val intentAbrirGuia = Intent(activity, Activity_RepasarGuia::class.java)
-                    intentAbrirGuia.putExtra("nombre_archivo", guias.nombreGuia)
+                    intentAbrirGuia.putExtra("nombre_archivo", guia.nombreGuia)
                     startActivity(intentAbrirGuia)
                     // Recuperamos el dialogo abierto actualmente
                     // (Fragment_DialogListarGuias.java) y lo cerramos.
@@ -140,7 +109,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                     // Si entra al segundo es para modificar la guía de estudio
                     val intentModificarGuia =
                         Intent(activity, Activity_Modificar::class.java)
-                    intentModificarGuia.putExtra("nombre_archivo", guias.nombreGuia)
+                    intentModificarGuia.putExtra("nombre_archivo", guia.nombreGuia)
                     startActivity(intentModificarGuia)
                     // Recuperamos el dialogo abierto actualmente
                     // (Fragment_DialogListarGuias.java) y lo cerramos.
@@ -161,7 +130,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                             @SuppressLint("SdCardPath") val file =
                                 File("/data/data/com.jonathanev.review/files/")
                             if (file.exists()) {
-                                File(file, guias.nombreGuia + ".xml").delete()
+                                File(file, guia.nombreGuia + ".xml").delete()
                                 Toast.makeText(
                                     context,
                                     "¡Archivo eliminado exitosamente!",
@@ -206,7 +175,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                             Context.MODE_PRIVATE
                         )
                         editor = preferencias.edit()
-                        editor.putString("nombre_archivo", guias.nombreGuia)
+                        editor.putString("nombre_archivo", guia.nombreGuia)
                         editor.commit()
                     } else {
                         Toast.makeText(
@@ -226,6 +195,10 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
             }
         }
         builder.create().show()
+    }
+
+    private fun getGuia(position: Int) {
+        guiasViewModel.getGuia(position)
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {

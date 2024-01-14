@@ -53,7 +53,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.jonathanev.review.MainActivity"
+            android:name="com.jonathanev.review.UI.View.MainActivity"
             android:exported="true"
             android:screenOrientation="userPortrait">
             <intent-filter>

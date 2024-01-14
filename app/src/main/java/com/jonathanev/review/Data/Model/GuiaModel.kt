@@ -1,8 +1,8 @@
-package com.jonathanev.review.Clases
+package com.jonathanev.review.Data.Model
 
 import java.util.Objects
 
-class Guia {
+/*class Guia {
     var nombreGuia: String? = null
     var imgGuia = 0
 
@@ -22,4 +22,5 @@ class Guia {
     override fun hashCode(): Int {
         return Objects.hash(nombreGuia)
     }
-}
+}*/
+data class GuiaModel(val nombreGuia: String, val imgGuia: Int)

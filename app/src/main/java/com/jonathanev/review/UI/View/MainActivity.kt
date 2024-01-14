@@ -1,6 +1,5 @@
-package com.jonathanev.review
+package com.jonathanev.review.UI.View
 
-import android.annotation.SuppressLint
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
@@ -11,13 +10,10 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.jonathanev.review.Activities.Activity_Cuestionario
-import com.jonathanev.review.Activities.Activity_RepasarGuia
-import com.jonathanev.review.Fragments.Fragment_DialogListarGuias_popup
+import com.jonathanev.review.Core.Constants.file
 import com.jonathanev.review.Fragments.Fragment_DialogNuevoArchivo_popu
 import com.jonathanev.review.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
-import java.io.File
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -55,14 +51,45 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        binding!!.btnAbrirGuiaEstudioHabilitado.setOnClickListener(object : View.OnClickListener {
-            public override fun onClick(view: View) {
-                // Defino la ruta donde busco los ficheros.
-                @SuppressLint("SdCardPath") val file: File =
-                    File("/data/data/com.jonathanev.review/files/")
+        binding!!.btnAbrirGuiaEstudioHabilitado.setOnClickListener {
+            if (!file.exists()) {
+                if (file.mkdir()) {
+                    Toast.makeText(
+                        applicationContext,
+                        "Ficheros creados correctamente",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else {
+                    Toast.makeText(
+                        applicationContext,
+                        "Hubo un error al momento de crear los ficheros necesarios",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            } else {
+                // Creamos las preferencias y dentro de ellas guardamos el arreglo item
+                /*val preferencias: SharedPreferences =
+                    getSharedPreferences("nombres_guias", MODE_PRIVATE)
+                val editor: SharedPreferences.Editor = preferencias.edit()
+                val set: MutableSet<String> = HashSet()
+                set.addAll(item)
+                editor.putStringSet("guias_estudio", set)
+                editor.apply()*/
 
-                // Limpio el item por si se borra algun archivo no se quede guardado.
-                item.clear()
+                // Teniendo todos los nombre de los archivos abrimos el dialogo.
+                //replaceFragment(Fragment_DialogListarGuias_popup())
+
+                val dialogo = Fragment_DialogListarGuias_popup()
+                dialogo.show(supportFragmentManager, "Fragment")
+            }
+        }
+
+        /*binding!!.btnAbrirGuiaEstudioHabilitado.setOnClickListener(object : View.OnClickListener {
+            public override fun onClick(view: View) = // Defino la ruta donde busco los ficheros.
+
+            // Limpio el item por si se borra algun archivo no se quede guardado.
+                //item.clear()
+
                 if (!file.exists()) {
                     if (file.mkdir()) {
                         Toast.makeText(
@@ -78,8 +105,8 @@ class MainActivity : AppCompatActivity() {
                         ).show()
                     }
                 } else {
-                    // Creo el array de tipo File con el contenido de la carpeta.
-                    val files: Array<File> = file.listFiles()
+                    /*// Creo el array de tipo File con el contenido de la carpeta.
+                    val files: Array<File> = arrayOf(file)
 
                     // Hacemos un ciclo por cada fichero para extraer el nombre de cada uno.
                     for (i in files.indices) {
@@ -90,7 +117,7 @@ class MainActivity : AppCompatActivity() {
                             // Guardamos el nombre del fichero en la lista item.
                             item.add(archivo.name.replace(".xml".toRegex(), ""))
                         }
-                    }
+                    }*/
 
                     // Creamos las preferencias y dentro de ellas guardamos el arreglo item
                     val preferencias: SharedPreferences =
@@ -108,8 +135,7 @@ class MainActivity : AppCompatActivity() {
                         Fragment_DialogListarGuias_popup()
                     dialogo.show(supportFragmentManager, "Fragment")
                 }
-            }
-        })
+        })*/
     }
 
     private fun checkAndRequestPermissions() {

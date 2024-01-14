@@ -57,8 +57,11 @@ dependencies {
     // ViewModel
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0"
 
-    // Activity
+    // Activity ViewModel
     implementation "androidx.activity:activity-ktx:1.8.2"
+
+    // Fragments ViewModel
+    implementation "androidx.fragment:fragment-ktx:1.6.2"
 
     // Dagger Hilt
     implementation "com.google.dagger:hilt-android:$daggerHilt"
