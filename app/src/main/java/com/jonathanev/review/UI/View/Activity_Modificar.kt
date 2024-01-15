@@ -37,6 +37,7 @@ import com.jonathanev.review.Data.Model.ColorPregModel
 import com.jonathanev.review.Fragments.Fragment_DialogColoresMod_popup
 import com.jonathanev.review.UI.ViewModel.ModificarViewModel
 import com.jonathanev.review.databinding.ActivityModificarBinding
+import dagger.hilt.EntryPoint
 import dagger.hilt.android.AndroidEntryPoint
 import org.w3c.dom.Document
 import org.w3c.dom.Element

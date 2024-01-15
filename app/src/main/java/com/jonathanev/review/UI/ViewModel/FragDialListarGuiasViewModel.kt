@@ -14,8 +14,11 @@ class FragDialListarGuiasViewModel @Inject constructor(
     val getGuiaUseCase: getGuiaUseCase
 ): ViewModel() {
     var guias = MutableLiveData<List<GuiaModel>>()
+    private var guiaModel = MutableLiveData<GuiaModel>()
 
     fun getAllGuias(){
         guias.postValue(guiaRepository.getGuias())
     }
+
+    fun getGuia(position: Int):GuiaModel = getGuiaUseCase(position)
 }

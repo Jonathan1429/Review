@@ -117,7 +117,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                     dialogoModificarGuia!!.dismiss()
                 }
 
-                /*2 ->
+                2 ->
                     // Se ejecuta cuando quiere eliminar la guía.
                     AlertDialog.Builder(context)
                         .setTitle("¡Atención!")
@@ -130,6 +130,8 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                             @SuppressLint("SdCardPath") val file =
                                 File("/data/data/com.jonathanev.review/files/")
                             if (file.exists()) {
+                                val guia = guiasViewModel.getGuia(position)
+
                                 File(file, guia.nombreGuia + ".xml").delete()
                                 Toast.makeText(
                                     context,
@@ -174,6 +176,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                             "nombre_archivo",
                             Context.MODE_PRIVATE
                         )
+                        val guia = guiasViewModel.getGuia(position)
                         editor = preferencias.edit()
                         editor.putString("nombre_archivo", guia.nombreGuia)
                         editor.commit()
@@ -185,13 +188,12 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                         ).show()
                     }
                 }
-
                 4 -> {
                     // Cuando cancela se ejecuta esta acción
                     dialog.dismiss()
                     Toast.makeText(context, "Cancelaste la acción", Toast.LENGTH_SHORT)
                         .show()
-                }*/
+                }
             }
         }
         builder.create().show()

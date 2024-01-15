@@ -37,6 +37,7 @@ import com.google.android.gms.ads.MobileAds
 import com.jonathanev.review.Data.Model.ColorPregModel
 import com.jonathanev.review.Fragments.Fragment_DialogColores_popup
 import com.jonathanev.review.databinding.ActivityCuestionarioBinding
+import dagger.hilt.android.AndroidEntryPoint
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
 import java.io.FileOutputStream
