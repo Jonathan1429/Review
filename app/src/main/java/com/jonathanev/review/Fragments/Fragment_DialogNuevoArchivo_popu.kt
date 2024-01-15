@@ -15,9 +15,11 @@ import android.view.ViewGroup
 import android.view.Window
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
+import com.jonathanev.review.Core.Constants.file
 import com.jonathanev.review.UI.View.Activity_Cuestionario
 import com.jonathanev.review.databinding.FragmentNuevoArchivoBinding
 import java.io.File
+
 class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
     private var binding: FragmentNuevoArchivoBinding? = null
 
@@ -59,7 +61,8 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val preferencias = requireActivity().getSharedPreferences("cambiar_nombre", Context.MODE_PRIVATE)
+        val preferencias =
+            requireActivity().getSharedPreferences("cambiar_nombre", Context.MODE_PRIVATE)
         if ((preferencias.getString("cambiar_nombre", "no existe") == "sin nombre")) {
             binding!!.btnGuardarGuiaEstudio.text = "Cambiar nombre"
             binding!!.btnGuardarGuiaEstudio.setOnClickListener(object : View.OnClickListener {
@@ -68,16 +71,15 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
                         // Ruta + nombre del archivo.
                         val preferencias =
                             activity!!.getSharedPreferences("nombre_archivo", Context.MODE_PRIVATE)
-                        @SuppressLint("SdCardPath") val archivo = File(
-                            ("/data/data/com.jonathanev.review/files/"
-                                    + preferencias.getString("nombre_archivo", "no existe")
-                                    + ".xml")
+
+                        val archivo = File(
+                            "" + file +
+                                    preferencias.getString("nombre_archivo", "no existe")
+                                    + ".xml"
                         )
                         if (archivo.exists()) {
                             var item = ""
                             // Defino la ruta donde busco los ficheros.
-                            @SuppressLint("SdCardPath") val file =
-                                File("/data/data/com.jonathanev.review/files/")
                             var archivoExiste = false
                             // Creo el array de tipo File con el contenido de la carpeta.
                             val files = file.listFiles()
@@ -168,8 +170,6 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
                 override fun onClick(view: View) {
                     var item = ""
                     // Defino la ruta donde busco los ficheros.
-                    @SuppressLint("SdCardPath") val file =
-                        File("/data/data/com.jonathanev.review/files/")
                     var archivoExiste = false
                     if (file.exists()) {
                         // Creo el array de tipo File con el contenido de la carpeta.

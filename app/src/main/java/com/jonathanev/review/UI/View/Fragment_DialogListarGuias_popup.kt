@@ -18,6 +18,7 @@ import androidx.annotation.RequiresApi
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.jonathanev.review.Core.Constants.file
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Fragments.Adaptadores.ListarGuiasAdapter
 import com.jonathanev.review.Fragments.Fragment_DialogNuevoArchivo_popu
@@ -60,10 +61,6 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
         guiasViewModel.guias.observe(this){
             showGuias(it)
         }
-
-        /*guiasViewModel.guia.observe(this){guia ->
-            showGuiaOptions(guia)
-        }*/
     }
 
     private fun initUI() {
@@ -127,8 +124,6 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                         )
                         .setPositiveButton("Si") { _, _ ->
                             // Si entra al tercero es para eliminar la guia exitosamente
-                            @SuppressLint("SdCardPath") val file =
-                                File("/data/data/com.jonathanev.review/files/")
                             if (file.exists()) {
                                 val guia = guiasViewModel.getGuia(position)
 
@@ -157,8 +152,6 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
 
                 3 -> {
                     // Se ejecuta cuando quiere cambiar el nombre de la guía
-                    @SuppressLint("SdCardPath") val file =
-                        File("/data/data/com.jonathanev.review/files/")
                     if (file.exists()) {
                         // Unicamente abrimos el dialogo y lo mostramos en la pantalla.
                         val dialogo = Fragment_DialogNuevoArchivo_popu()
@@ -198,10 +191,6 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
         }
         builder.create().show()
     }
-
-    /*private fun getGuia(position: Int) {
-        guiasViewModel.getGuia(position)
-    }*/
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = super.onCreateDialog(savedInstanceState)

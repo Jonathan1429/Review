@@ -33,6 +33,7 @@ import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
+import com.jonathanev.review.Core.Constants.file
 import com.jonathanev.review.Data.Model.ColorPregModel
 import com.jonathanev.review.Fragments.Fragment_DialogColoresMod_popup
 import com.jonathanev.review.UI.ViewModel.ModificarViewModel
@@ -69,9 +70,6 @@ class Activity_Modificar : AppCompatActivity() {
 
     private var start = -1
     private var end = -1
-
-    // binding!!.lblPregResp.text.toString()
-    // binding!!.tilContenidoPregResp.hint
 
     // Seleccionar imagen
     private val pickMedia =
@@ -802,8 +800,6 @@ class Activity_Modificar : AppCompatActivity() {
 
     private fun borrarCrearXML(nombreArchivo: String?) {
         // Eliminamos el archivo anteriormente creado
-        @SuppressLint("SdCardPath") val file: File =
-            File("/data/data/com.jonathanev.repasar/files/")
         if (file.exists()) {
             File(file, nombreArchivo).delete()
             Log.d("ArchivoEliminado", "Archivo eliminado")

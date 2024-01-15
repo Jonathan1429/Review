@@ -34,6 +34,7 @@ import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
+import com.jonathanev.review.Core.Constants.file
 import com.jonathanev.review.Data.Model.ColorPregModel
 import com.jonathanev.review.Fragments.Fragment_DialogColores_popup
 import com.jonathanev.review.databinding.ActivityCuestionarioBinding
@@ -80,6 +81,7 @@ class Activity_Cuestionario : AppCompatActivity() {
     // Creamos la serialización y la clase para crear archivos de manera global.
     var serializer: XmlSerializer = Xml.newSerializer()
     var fos: FileOutputStream? = null
+    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityCuestionarioBinding.inflate(layoutInflater)
@@ -241,74 +243,6 @@ class Activity_Cuestionario : AppCompatActivity() {
                 }
                 contadorPregunta++
             }
-
-            /*// contadorPregunta++
-
-            // Validamos campos vacios en la pregunta o respuesta.
-            if (binding!!.etPregResp.text.toString().isEmpty()) {
-                Toast.makeText(
-                    applicationContext,
-                    "Asegurate de no dejar ningun campo vacio",
-                    Toast.LENGTH_SHORT
-                ).show()
-            } else {
-                // Se le quita 1 para hacer referencia al arreglo
-                // tamaño 3-1 = 2 [0,1,2].
-                val longi: Int = preguntas.size - 1
-
-                // contadorPregunta tendrá acceso a modificar lo que esté en el rango a excepción
-                // de lo que esté en la posición 0.
-                if (contadorPregunta < longi) {
-                    var editable: Editable = Editable.Factory.getInstance().newEditable(
-                        binding!!.etPregResp.text
-                    )
-                    var colorSpans: Array<ForegroundColorSpan> =
-                        editable.getSpans(0, editable.length, ForegroundColorSpan::class.java)
-
-                    // Se colocan las etiquetas en cada palabra con color
-                    colocarEtiquetas(colorSpans, editable)
-
-                    respuestas[contadorPregunta] = editable.toString()
-                    pintarTexto(contadorPregunta + 1)
-
-                    // Mientras el contadorPregunta sea menor escribiremos la siguiente pregunta
-                    // en los et y se borran las etiquetas de colores.
-                    /*if (contadorPregunta < longi) {
-                        // Pintamos el texto
-
-                    } else {
-                        // Si el contadorPregunta es igual entonces solo escribiremos los campos vacios.
-                        respuestas.add(contadorPregunta, editable.toString())
-                        binding!!.etPregResp.setText("")
-                    }*/
-                } else {
-                    // Si el contadorPregunta es mayor entonces agregaremos la pregunta actual a los
-                    // arreglos.«»
-                    var editable: Editable = Editable.Factory.getInstance()
-                        .newEditable(binding!!.etPregResp.text)
-                    var colorSpans: Array<ForegroundColorSpan> =
-                        editable.getSpans(0, editable.length, ForegroundColorSpan::class.java)
-
-                    // Se colocan las etiquetas en cada palabra con color
-                    colocarEtiquetas(colorSpans, editable)
-                    respuestas.add(contadorPregunta, editable.toString())
-                }
-
-                binding!!.tilContenidoPregResp.hint = "Pregunta"
-                binding!!.etPregResp.setText("")
-                contadorPregunta++
-
-
-                if(binding!!.tilContenidoPregResp.hint == "Pregunta"){
-                    Toast.makeText(
-                        applicationContext,
-                        "Asegurate de llenar una pregunta y una respuesta",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                } else {
-
-                }
-            }*/
         }
 
         binding!!.imgvPrevious.setOnClickListener {
@@ -455,50 +389,6 @@ class Activity_Cuestionario : AppCompatActivity() {
                             pintarTexto(contadorPregunta)
                         }
                     }
-
-
-                    /*else if (contadorPregunta <= longi) {
-                        // Solo si es mayor a 0 se resta, cuando se elimina una pregunta se acomoda
-                        // el arreglo desde la posición 0 a la n
-                        if (contadorPregunta < longi) {
-                            if (contadorPregunta > 0) {
-                                // contadorPregunta tendrá acceso a modificar lo que esté en el rango a excepción
-                                // de lo que esté en la posición 0.
-                                preguntas.removeAt(contadorPregunta)
-                                respuestas.removeAt(contadorPregunta)
-                                contadorPregunta--
-                                pintarTexto(contadorPregunta)
-                                binding!!.lblPregResp.text = "Pregunta"
-                            } else {
-                                // contadorPregunta tendrá acceso a modificar lo que esté en el rango a excepción
-                                // de lo que esté en la posición 0.
-                                preguntas.removeAt(contadorPregunta)
-                                respuestas.removeAt(contadorPregunta)
-                                pintarTexto(contadorPregunta)
-                                binding!!.lblPregResp.text = "Pregunta"
-                            }
-                        } else {
-                            // contadorPregunta tendrá acceso a modificar lo que esté en el rango a excepción
-                            // de lo que esté en la posición 0.
-                            preguntas.removeAt(contadorPregunta)
-                            respuestas.removeAt(contadorPregunta)
-                            contadorPregunta--
-                            pintarTexto(contadorPregunta)
-                            binding!!.lblPregResp.text = "Pregunta"
-                        }
-                    } else {
-                        if (binding!!.lblPregResp.text.toString() == "Pregunta") {
-                            binding!!.etPregResp.setText("")
-                        } else {
-                            preguntas.removeAt(contadorPregunta)
-                            binding!!.lblPregResp.text = "Pregunta"
-                            binding!!.etPregResp.setText("")
-                        }
-
-                        contadorPregunta--
-                        pintarTexto(contadorPregunta)
-                        binding!!.lblPregResp.text = "Pregunta"
-                    }*/
                 }
 
                 .setNegativeButton("Cancelar") { dialog, i ->
@@ -806,7 +696,6 @@ class Activity_Cuestionario : AppCompatActivity() {
         })
 
         binding!!.ivImagen.startAnimation(disappearAnimation)
-        //binding!!.tilContenidoPregResp.startAnimation(appearAnimation)
     }
 
     // Toma permisos de persistencia para la URI
@@ -841,8 +730,6 @@ class Activity_Cuestionario : AppCompatActivity() {
             .setPositiveButton(
                 "Continuar"
             ) { dialogInterface, i -> // Si el archivo se creó y existe, se elimina y te informa en consola
-                @SuppressLint("SdCardPath") val file: File =
-                    File("/data/data/com.jonathanev.repasar/files/")
                 if (file.exists()) {
                     File(file, "$nombreArchivo.xml").delete()
                     Log.d("ArchivoEliminado", "Archivo eliminado")

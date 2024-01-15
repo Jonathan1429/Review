@@ -10,9 +10,7 @@
 
          MEJORAS
 
-         2.- Al momento de crear una guia y darle guardar no te envía a la guia correcta.
-
-         3.- Hacer MVVM tanto al crear una guia como en las opciones de las guías.
+         2.- Hacer MVVM tanto al crear una guia como en las opciones de las guías.
 
     -->
     <application
