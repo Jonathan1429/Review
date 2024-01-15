@@ -106,6 +106,7 @@ class Activity_Modificar : AppCompatActivity() {
 
         // Sección de anuncios
         initLoadAds()
+
         position = intent.extras!!.getInt("file_position")
         initUI(position)
 

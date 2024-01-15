@@ -63,8 +63,22 @@ class Activity_RepasarGuia : AppCompatActivity() {
         // Sección de anuncios
         initLoadAds()
 
-        position = intent.extras!!.getInt("file_position")
-        initUI(position)
+        nombreArchivo = intent.extras!!.getString("nombre_archivo").toString()
+
+        if (nombreArchivo == "null"){
+            position = intent.extras!!.getInt("file_position")
+            initUI(position)
+        } else {
+            if (!nombreArchivo.contains(".xml")) {
+                nombreArchivo = "$nombreArchivo.xml"
+            }
+            // Obtenemos los datos del XML y los guardamos en su respectivo ArrayList.
+            obtenerDatosXML()
+
+            // Pintamos el texto del contador actual.
+            pintarTexto()
+        }
+
 
         repasarGuiaViewModel.guiaModel.observe(this){
             nombreArchivo = it.nombreGuia

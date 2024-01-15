@@ -58,9 +58,6 @@ class Activity_Cuestionario : AppCompatActivity() {
     private var start = -1
     private var end = -1
 
-    // lblPregResp
-    // tilContenidoPregResp
-
     // Seleccionar imagen
     private val pickMedia = registerForActivityResult(PickVisualMedia()) { uri ->
         if (uri != null) {
@@ -79,20 +76,6 @@ class Activity_Cuestionario : AppCompatActivity() {
             binding!!.imgvSelColor.visibility = View.VISIBLE
         }
     }
-
-    /*private val pickMedia = registerForActivityResult(PickVisualMedia()) { uri ->
-        if (uri != null) {
-            //Glide.with(this).load(uri).into(binding!!.ivImagen)
-            binding!!.ivImagen.setImage(ImageSource.uri(uri)) //setImageURI(uri)
-            binding!!.tilContenidoPregResp.visibility = View.GONE
-            binding!!.ivImagen.visibility = View.VISIBLE
-            binding!!.etPregResp.setText(uri.toString())
-            Log.i("Uri: ", uri.toString())
-        } else {
-            binding!!.tilContenidoPregResp.visibility = View.VISIBLE
-            binding!!.ivImagen.visibility = View.GONE
-        }
-    }*/
 
     // Creamos la serialización y la clase para crear archivos de manera global.
     var serializer: XmlSerializer = Xml.newSerializer()
@@ -934,22 +917,6 @@ class Activity_Cuestionario : AppCompatActivity() {
         }
     }
 
-    /*fun colocarEtiquetas(colorSpans: Array<ForegroundColorSpan>, editable: Editable) {
-        for (colorSpan: ForegroundColorSpan in colorSpans) {
-            val start: Int = editable.getSpanStart(colorSpan)
-            val end: Int = editable.getSpanEnd(colorSpan)
-            val color: Int = colorSpan.foregroundColor
-
-            // Agregar la etiqueta de inicio al texto
-            val etiqIni: String = "«$color»"
-            val etiqFin: String = "«/$color»"
-            editable.replace(start, start, etiqIni)
-
-            // Agregar la etiqueta de cierre al texto
-            editable.replace(end + etiqIni.length, end + etiqIni.length, etiqFin)
-        }
-    }*/
-
     private fun pintarTexto(contadorPregunta: Int) {
         var contColorPreg: Int = 0
         var inicio: Int = 0
@@ -1032,14 +999,4 @@ class Activity_Cuestionario : AppCompatActivity() {
         ImageViewCompat.setImageTintList(binding!!.imgvColors, ColorStateList.valueOf(color))
         colorActual = color
     }
-
-    /*fun colorActual(colorActual: Int) {
-        @SuppressLint("UseCompatLoadingForDrawables") val drawable: Drawable =
-            resources.getDrawable(R.drawable.boton_redondo)
-        drawable.setColorFilter(colorActual, PorterDuff.Mode.SRC_ATOP)
-        binding!!.btnColorActual.background = drawable
-
-        // Recibimos el nombre del archivo del popupFragment Nueva Guia.
-        this.colorActual = colorActual
-    }*/
 }
