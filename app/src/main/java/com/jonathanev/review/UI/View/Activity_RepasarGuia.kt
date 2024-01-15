@@ -25,7 +25,7 @@ import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
-import com.jonathanev.review.Clases.ColoresPregunta
+import com.jonathanev.review.Data.Model.ColorPregModel
 import com.jonathanev.review.UI.ViewModel.RepasarGuiaViewModel
 import com.jonathanev.review.databinding.ActivityRepasarGuiaBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -40,14 +40,14 @@ import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.parsers.ParserConfigurationException
 
 @AndroidEntryPoint
-class Activity_RepasarGuia constructor() : AppCompatActivity() {
+class Activity_RepasarGuia : AppCompatActivity() {
     private var binding: ActivityRepasarGuiaBinding? = null
     private lateinit var nombreArchivo: String
     private var position: Int = 0
     private val preguntas: ArrayList<String> = ArrayList()
     private val respuestas: ArrayList<String> = ArrayList()
-    private val preguntasColor: ArrayList<ColoresPregunta> = ArrayList()
-    private val respuestasColor: ArrayList<ColoresPregunta> = ArrayList()
+    private val preguntasColor: ArrayList<ColorPregModel> = ArrayList()
+    private val respuestasColor: ArrayList<ColorPregModel> = ArrayList()
     private var contadorPregunta: Int = 0
     private var builder: SpannableStringBuilder? = null
     private var uri: Uri? = null
@@ -75,7 +75,6 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
                 // Reutilizo el layout anteriormente creado y le asigno un texto el tvTituloToolbar
                 binding!!.barraSuperiorRegreso.tvTituloToolbar.text = "Guia: $nombreArchivo"
             }
-
             // Aquí simplemente nos aseguramos que tenga el xml, si lo tiene no entramos.
             // En teoria ya todos los archivos no tienen el .xml porque lo recupero del ListarGuias
             if (!nombreArchivo.contains(".xml")) {
@@ -251,7 +250,7 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
         var contColorPreg: Int = 0
         var inicio: Int = 0
         var fin: Int = 0
-        var coloresPregunta: ColoresPregunta? = null
+        var colorPregModel: ColorPregModel? = null
         var texto: String = ""
         if (binding!!.lblPregResp.text.toString() == "Pregunta") {
             texto = preguntas[contadorPregunta]
@@ -281,13 +280,13 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
             val colEntero: Int = color.toInt()
             inicio = fin + 1
             fin = texto.indexOf("«", inicio)
-            coloresPregunta =
-                ColoresPregunta((inicio - longColor - 2), (fin - longColor - 2), colEntero)
+            colorPregModel =
+                ColorPregModel((inicio - longColor - 2), (fin - longColor - 2), colEntero)
 
             if (binding!!.lblPregResp.text.toString() == "Pregunta") {
-                preguntasColor.add(contColorPreg, coloresPregunta)
+                preguntasColor.add(contColorPreg, colorPregModel)
             } else {
-                respuestasColor.add(contColorPreg, coloresPregunta)
+                respuestasColor.add(contColorPreg, colorPregModel)
             }
 
             // Eliminar la primera etiqueta y su contenido
@@ -299,7 +298,7 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
         }
 
         builder = SpannableStringBuilder(texto)
-        for (coloresPreguntas: ColoresPregunta in if (binding!!.lblPregResp.text.toString() == "Pregunta") preguntasColor else respuestasColor) {
+        for (coloresPreguntas: ColorPregModel in if (binding!!.lblPregResp.text.toString() == "Pregunta") preguntasColor else respuestasColor) {
             val colorSpan: ForegroundColorSpan = ForegroundColorSpan(coloresPreguntas.color)
             builder!!.setSpan(
                 colorSpan,
@@ -311,82 +310,6 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
 
         preguntasColor.clear()
         respuestasColor.clear()
-        binding!!.etPregResp.text = builder
-    }
-
-    /*private fun pintarTexto() {
-        var contColorPreg: Int = 0
-        var contColorResp: Int = 0
-        var inicio: Int = 0
-        var fin: Int = 0
-        var coloresPregunta: ColoresPregunta? = null
-        var texto: String = preguntas[contadorPregunta]
-        while (texto.contains("«")) {
-            inicio = texto.indexOf("«") + 1
-            fin = texto.indexOf("»")
-            val color: String = texto.substring(inicio, fin)
-            val longColor: Int = color.length
-            val colEntero: Int = color.toInt()
-            inicio = fin + 1
-            fin = texto.indexOf("«", inicio)
-            coloresPregunta =
-                ColoresPregunta((inicio - longColor - 2), (fin - longColor - 2), colEntero)
-            preguntasColor.add(contColorPreg, coloresPregunta)
-            // Eliminar la primera etiqueta y su contenido
-            texto = texto.replaceFirst("«.*?»".toRegex(), "")
-
-            // Eliminar la segunda etiqueta y su contenido
-
-            texto = texto.replaceFirst("«.*?»".toRegex(), "")
-            contColorPreg++
-        }
-
-        builder = SpannableStringBuilder(texto)
-        for (coloresPreguntas: ColoresPregunta in preguntasColor) {
-            val colorSpan: ForegroundColorSpan = ForegroundColorSpan(coloresPreguntas.color)
-            builder!!.setSpan(
-                colorSpan,
-                coloresPreguntas.inicioColor,
-                coloresPreguntas.finColor,
-                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-            )
-        }
-
-        binding!!.etPregResp.text = builder
-        texto = respuestas.get(contadorPregunta)
-        while (texto.contains("«")) {
-            inicio = texto.indexOf("«") + 1
-            fin = texto.indexOf("»")
-            val color: String = texto.substring(inicio, fin)
-            val longColor: Int = color.length
-            val colEntero: Int = color.toInt()
-            inicio = fin + 1
-            fin = texto.indexOf("«", inicio)
-            coloresPregunta =
-                ColoresPregunta((inicio - longColor - 2), (fin - longColor - 2), colEntero)
-            respuestasColor.add(contColorResp, coloresPregunta)
-            // Eliminar la primera etiqueta y su contenido
-            texto = texto.replaceFirst("«.*?»".toRegex(), "")
-
-            // Eliminar la segunda etiqueta y su contenido
-            texto = texto.replaceFirst("«.*?»".toRegex(), "")
-            contColorResp++
-        }
-        builder = SpannableStringBuilder(texto)
-        for (coloresPreguntas: ColoresPregunta in respuestasColor) {
-            val colorSpan: ForegroundColorSpan = ForegroundColorSpan(coloresPreguntas.color)
-            builder!!.setSpan(
-                colorSpan,
-                coloresPreguntas.inicioColor,
-                coloresPreguntas.finColor,
-                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-            )
-        }
-        preguntasColor.clear()
-        respuestasColor.clear()
-    }*/
-
-    private fun mostrarRespuesta(builder: SpannableStringBuilder?) {
         binding!!.etPregResp.text = builder
     }
 

@@ -34,7 +34,7 @@ import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
-import com.jonathanev.review.Clases.ColoresPregunta
+import com.jonathanev.review.Data.Model.ColorPregModel
 import com.jonathanev.review.Fragments.Fragment_DialogColores_popup
 import com.jonathanev.review.databinding.ActivityCuestionarioBinding
 import org.xmlpull.v1.XmlSerializer
@@ -48,8 +48,8 @@ class Activity_Cuestionario : AppCompatActivity() {
     private var colorActual: Int = 0
     private val preguntas: ArrayList<String> = ArrayList()
     private val respuestas: ArrayList<String> = ArrayList()
-    private val preguntasColor: ArrayList<ColoresPregunta> = ArrayList()
-    private val respuestasColor: ArrayList<ColoresPregunta> = ArrayList()
+    private val preguntasColor: ArrayList<ColorPregModel> = ArrayList()
+    private val respuestasColor: ArrayList<ColorPregModel> = ArrayList()
     var builder: SpannableStringBuilder? = null
     private var contadorPregunta: Int = 0
     private var uri: Uri? = null
@@ -953,7 +953,7 @@ class Activity_Cuestionario : AppCompatActivity() {
         var contColorPreg: Int = 0
         var inicio: Int = 0
         var fin: Int = 0
-        var coloresPregunta: ColoresPregunta? = null
+        var colorPregModel: ColorPregModel? = null
         var texto: String = ""
         if (binding!!.lblPregResp.text.toString() == "Pregunta") {
             texto = preguntas[contadorPregunta]
@@ -989,13 +989,13 @@ class Activity_Cuestionario : AppCompatActivity() {
             val colEntero: Int = color.toInt()
             inicio = fin + 1
             fin = texto.indexOf("«", inicio)
-            coloresPregunta =
-                ColoresPregunta((inicio - longColor - 2), (fin - longColor - 2), colEntero)
+            colorPregModel =
+                ColorPregModel((inicio - longColor - 2), (fin - longColor - 2), colEntero)
 
             if (binding!!.lblPregResp.text.toString() == "Pregunta") {
-                preguntasColor.add(contColorPreg, coloresPregunta)
+                preguntasColor.add(contColorPreg, colorPregModel)
             } else {
-                respuestasColor.add(contColorPreg, coloresPregunta)
+                respuestasColor.add(contColorPreg, colorPregModel)
             }
 
             // Eliminar la primera etiqueta y su contenido
@@ -1007,7 +1007,7 @@ class Activity_Cuestionario : AppCompatActivity() {
         }
 
         builder = SpannableStringBuilder(texto)
-        for (coloresPreguntas: ColoresPregunta in if (binding!!.lblPregResp.text.toString() == "Pregunta") preguntasColor else respuestasColor) {
+        for (coloresPreguntas: ColorPregModel in if (binding!!.lblPregResp.text.toString() == "Pregunta") preguntasColor else respuestasColor) {
             val colorSpan: ForegroundColorSpan = ForegroundColorSpan(coloresPreguntas.color)
             builder!!.setSpan(
                 colorSpan,

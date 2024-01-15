@@ -104,11 +104,12 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                     dialogoAbrirGuia!!.dismiss()
                 }
 
-                /*1 -> {
+                1 -> {
                     // Si entra al segundo es para modificar la guía de estudio
                     val intentModificarGuia =
                         Intent(activity, Activity_Modificar::class.java)
-                    intentModificarGuia.putExtra("nombre_archivo", guia.nombreGuia)
+                    //intentModificarGuia.putExtra("nombre_archivo", guia.nombreGuia)
+                    intentModificarGuia.putExtra("file_position", position)
                     startActivity(intentModificarGuia)
                     // Recuperamos el dialogo abierto actualmente
                     // (Fragment_DialogListarGuias.java) y lo cerramos.
@@ -116,7 +117,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                     dialogoModificarGuia!!.dismiss()
                 }
 
-                2 ->
+                /*2 ->
                     // Se ejecuta cuando quiere eliminar la guía.
                     AlertDialog.Builder(context)
                         .setTitle("¡Atención!")
