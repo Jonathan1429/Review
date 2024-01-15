@@ -1,4 +1,4 @@
-package com.jonathanev.review.Activities
+package com.jonathanev.review.UI.View
 
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint

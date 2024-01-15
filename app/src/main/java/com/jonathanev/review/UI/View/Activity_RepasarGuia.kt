@@ -1,9 +1,9 @@
-package com.jonathanev.review.Activities
+package com.jonathanev.review.UI.View
 
 import android.animation.ObjectAnimator
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -15,11 +15,9 @@ import android.view.View
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.animation.doOnEnd
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.view.isGone
 import com.davemorrissey.labs.subscaleview.ImageSource
@@ -28,7 +26,9 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
 import com.jonathanev.review.Clases.ColoresPregunta
+import com.jonathanev.review.UI.ViewModel.RepasarGuiaViewModel
 import com.jonathanev.review.databinding.ActivityRepasarGuiaBinding
+import dagger.hilt.android.AndroidEntryPoint
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.NodeList
@@ -39,13 +39,11 @@ import javax.xml.parsers.DocumentBuilder
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.parsers.ParserConfigurationException
 
-
+@AndroidEntryPoint
 class Activity_RepasarGuia constructor() : AppCompatActivity() {
-
-
-
     private var binding: ActivityRepasarGuiaBinding? = null
-    private var nombreArchivo: String? = null
+    private lateinit var nombreArchivo: String
+    private var position: Int = 0
     private val preguntas: ArrayList<String> = ArrayList()
     private val respuestas: ArrayList<String> = ArrayList()
     private val preguntasColor: ArrayList<ColoresPregunta> = ArrayList()
@@ -53,7 +51,9 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
     private var contadorPregunta: Int = 0
     private var builder: SpannableStringBuilder? = null
     private var uri: Uri? = null
+    private val repasarGuiaViewModel: RepasarGuiaViewModel by viewModels()
 
+    @SuppressLint("SetTextI18n")
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,6 +62,32 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
 
         // Sección de anuncios
         initLoadAds()
+
+        position = intent.extras!!.getInt("file_position")
+        initUI(position)
+
+        repasarGuiaViewModel.guiaModel.observe(this){
+            nombreArchivo = it.nombreGuia
+            // Guardo el nombre del archivo enviado desde el popupFragmentListarGuias.
+            if (nombreArchivo.contains(".xml")){
+                nombreArchivo = nombreArchivo!!.replace(".xml".toRegex(), "")
+
+                // Reutilizo el layout anteriormente creado y le asigno un texto el tvTituloToolbar
+                binding!!.barraSuperiorRegreso.tvTituloToolbar.text = "Guia: $nombreArchivo"
+            }
+
+            // Aquí simplemente nos aseguramos que tenga el xml, si lo tiene no entramos.
+            // En teoria ya todos los archivos no tienen el .xml porque lo recupero del ListarGuias
+            if (!nombreArchivo.contains(".xml")) {
+                nombreArchivo = "$nombreArchivo.xml"
+            }
+
+            // Obtenemos los datos del XML y los guardamos en su respectivo ArrayList.
+            obtenerDatosXML()
+
+            // Pintamos el texto del contador actual.
+            pintarTexto()
+        }
 
         binding!!.barraSuperiorRegreso.imgvBack.setOnClickListener { onBackPressed() }
 
@@ -76,28 +102,6 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
             }
             girarCardView()
         }
-
-        // Guardo el nombre del archivo enviado desde el popupFragmentListarGuias.
-        nombreArchivo = intent.extras!!.getString("nombre_archivo")
-
-        if (nombreArchivo!!.contains(".xml")){
-            nombreArchivo = nombreArchivo!!.replace(".xml".toRegex(), "")
-        }
-
-        // Reutilizo el layout anteriormente creado y le asigno un texto el tvTituloToolbar
-        binding!!.barraSuperiorRegreso.tvTituloToolbar.text = "Guia: $nombreArchivo"
-
-        // Aquí simplemente nos aseguramos que tenga el xml, si lo tiene no entramos.
-        // En teoria ya todos los archivos no tienen el .xml porque lo recupero del ListarGuias
-        if (!nombreArchivo!!.contains(".xml")) {
-            nombreArchivo = "$nombreArchivo.xml"
-        }
-
-        // Obtenemos los datos del XML y los guardamos en su respectivo ArrayList.
-        obtenerDatosXML()
-
-        // Pintamos el texto del contador actual.
-        pintarTexto()
 
         binding!!.imgvPrevious.setOnClickListener {
             //binding!!.btnMostrarRespuesta.text = "Mostrar respuesta"
@@ -157,6 +161,10 @@ class Activity_RepasarGuia constructor() : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
+    }
+
+    private fun initUI(position: Int) {
+        repasarGuiaViewModel.getGuia(position)
     }
 
     private fun initLoadAds() {

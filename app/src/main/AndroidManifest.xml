@@ -30,19 +30,19 @@
 
         <!-- El WindowSoft... es para que no se muevan los componentes cuando se habra el teclado -->
         <activity
-            android:name="com.jonathanev.review.Activities.Activity_Modificar"
+            android:name="com.jonathanev.review.UI.View.Activity_Modificar"
             android:windowSoftInputMode="adjustPan"
             android:exported="false"
             android:screenOrientation="userPortrait" />
 
         <activity
-            android:name="com.jonathanev.review.Activities.Activity_RepasarGuia"
+            android:name="com.jonathanev.review.UI.View.Activity_RepasarGuia"
             android:exported="false"
             android:screenOrientation="userPortrait" />
 
         <!-- El WindowSoft... es para que no se muevan los componentes cuando se habra el teclado -->
         <activity
-            android:name="com.jonathanev.review.Activities.Activity_Cuestionario"
+            android:name="com.jonathanev.review.UI.View.Activity_Cuestionario"
             android:windowSoftInputMode="adjustPan"
             android:exported="true"
             android:screenOrientation="userPortrait">

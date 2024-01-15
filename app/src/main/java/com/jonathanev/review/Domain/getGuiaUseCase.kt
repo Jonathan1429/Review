@@ -5,7 +5,7 @@ import com.jonathanev.review.Data.Model.GuiaProvider
 import javax.inject.Inject
 
 class getGuiaUseCase @Inject constructor(
-    val guiaProvider: GuiaProvider
+    private val guiaProvider: GuiaProvider
 ){
     operator fun invoke(position: Int): GuiaModel {
         return guiaProvider.guias[position]

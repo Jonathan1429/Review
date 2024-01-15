@@ -1,10 +1,9 @@
-package com.jonathanev.review.Activities
+package com.jonathanev.review.UI.View
 
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Intent
-import android.content.pm.LauncherActivityInfo
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.PorterDuff
@@ -25,13 +24,10 @@ import android.view.animation.Animation
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts.*
-import androidx.activity.result.registerForActivityResult
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.animation.doOnEnd
 import androidx.core.net.toUri
 import androidx.core.view.isGone
-import androidx.core.view.isVisible
 import androidx.core.widget.ImageViewCompat
 import com.davemorrissey.labs.subscaleview.ImageSource
 import com.google.android.gms.ads.AdListener

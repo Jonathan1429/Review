@@ -15,7 +15,7 @@ import android.view.ViewGroup
 import android.view.Window
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
-import com.jonathanev.review.Activities.Activity_Cuestionario
+import com.jonathanev.review.UI.View.Activity_Cuestionario
 import com.jonathanev.review.databinding.FragmentNuevoArchivoBinding
 import java.io.File
 class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {

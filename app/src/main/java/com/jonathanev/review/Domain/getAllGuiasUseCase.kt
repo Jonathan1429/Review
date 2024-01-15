@@ -14,9 +14,10 @@ class getAllGuiasUseCase @Inject constructor(
         // Creo el array de tipo File con el contenido de la carpeta.
         // val files = arrayOf(file)
         val files = file.listFiles()
-
         // Hacemos un ciclo por cada fichero para extraer el nombre de cada uno.
         if (files!!.isNotEmpty()) {
+            val image = getRandomGuiaImage()
+
             for (i in files.indices) {
                 // Sacamos del array files el primer fichero.
                 val archivo: File = files[i]
@@ -25,7 +26,7 @@ class getAllGuiasUseCase @Inject constructor(
                     // Guardamos el nombre del fichero en la lista item.
                     val name = archivo.name.replace(".xml".toRegex(), "")
 
-                    guias.add(GuiaModel(name, getRandomGuiaImage()))
+                    guias.add(GuiaModel(name, image))
                 }
             }
         }

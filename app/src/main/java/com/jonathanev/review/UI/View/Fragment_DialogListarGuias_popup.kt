@@ -18,8 +18,6 @@ import androidx.annotation.RequiresApi
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.jonathanev.review.Activities.Activity_Modificar
-import com.jonathanev.review.Activities.Activity_RepasarGuia
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Fragments.Adaptadores.ListarGuiasAdapter
 import com.jonathanev.review.Fragments.Fragment_DialogNuevoArchivo_popu
@@ -63,9 +61,9 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
             showGuias(it)
         }
 
-        guiasViewModel.guia.observe(this){
-            showGuiaOptions(it)
-        }
+        /*guiasViewModel.guia.observe(this){guia ->
+            showGuiaOptions(guia)
+        }*/
     }
 
     private fun initUI() {
@@ -73,13 +71,13 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
     }
 
     private fun showGuias(guiaModels: List<GuiaModel>) {
-        adaptadorListarGuias = ListarGuiasAdapter(guiaModels) {position -> getGuia(position)}
+        adaptadorListarGuias = ListarGuiasAdapter(guiaModels) {position -> showGuiaOptions(position)}
         binding.lvGuiasEstudio.layoutManager = LinearLayoutManager(context)
         binding.lvGuiasEstudio.setHasFixedSize(true)
         binding.lvGuiasEstudio.adapter = adaptadorListarGuias
     }
 
-    private fun showGuiaOptions(guia: GuiaModel) {
+    private fun showGuiaOptions(position: Int) {
         // Creo una alerta donde me saldrán una lista de items
         val builder = AlertDialog.Builder(context)
         builder.setIcon(R.drawable.ic_advertencia)
@@ -97,7 +95,8 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                 0 -> {
                     // Si entra al primer item se abre la guía a review
                     val intentAbrirGuia = Intent(activity, Activity_RepasarGuia::class.java)
-                    intentAbrirGuia.putExtra("nombre_archivo", guia.nombreGuia)
+                    //intentAbrirGuia.putExtra("nombre_archivo", guia.nombreGuia)
+                    intentAbrirGuia.putExtra("file_position", position)
                     startActivity(intentAbrirGuia)
                     // Recuperamos el dialogo abierto actualmente
                     // (Fragment_DialogListarGuias.java) y lo cerramos.
@@ -105,7 +104,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                     dialogoAbrirGuia!!.dismiss()
                 }
 
-                1 -> {
+                /*1 -> {
                     // Si entra al segundo es para modificar la guía de estudio
                     val intentModificarGuia =
                         Intent(activity, Activity_Modificar::class.java)
@@ -191,15 +190,15 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                     dialog.dismiss()
                     Toast.makeText(context, "Cancelaste la acción", Toast.LENGTH_SHORT)
                         .show()
-                }
+                }*/
             }
         }
         builder.create().show()
     }
 
-    private fun getGuia(position: Int) {
+    /*private fun getGuia(position: Int) {
         guiasViewModel.getGuia(position)
-    }
+    }*/
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = super.onCreateDialog(savedInstanceState)
