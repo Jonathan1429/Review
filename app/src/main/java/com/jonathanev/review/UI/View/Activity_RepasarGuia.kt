@@ -39,6 +39,7 @@ import javax.xml.parsers.DocumentBuilder
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.parsers.ParserConfigurationException
 
+
 @AndroidEntryPoint
 class Activity_RepasarGuia : AppCompatActivity() {
     private var binding: ActivityRepasarGuiaBinding? = null
@@ -65,10 +66,17 @@ class Activity_RepasarGuia : AppCompatActivity() {
 
         nombreArchivo = intent.extras!!.getString("nombre_archivo").toString()
 
+        val preferences = getSharedPreferences("MiPref", MODE_PRIVATE)
+        val editor = preferences.edit()
+        editor.putString("nombre_archivo", nombreArchivo)
+        editor.apply()
+
         if (nombreArchivo == "null"){
             position = intent.extras!!.getInt("file_position")
             initUI(position)
         } else {
+            binding!!.barraSuperiorRegreso.tvTituloToolbar.text = nombreArchivo
+
             if (!nombreArchivo.contains(".xml")) {
                 nombreArchivo = "$nombreArchivo.xml"
             }
@@ -169,6 +177,10 @@ class Activity_RepasarGuia : AppCompatActivity() {
         }
 
         binding!!.imgvEdit.setOnClickListener {
+            // Recuperar el valor de SharedPreferences
+            val preferences = getSharedPreferences("MiPref", MODE_PRIVATE)
+            val nombreArchivo = preferences.getString("nombre_archivo", "")
+
             val intent: Intent = Intent(applicationContext, Activity_Modificar::class.java)
             intent.putExtra("nombre_archivo", nombreArchivo)
             startActivity(intent)

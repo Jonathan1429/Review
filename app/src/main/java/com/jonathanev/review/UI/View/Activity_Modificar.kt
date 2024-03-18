@@ -105,18 +105,34 @@ class Activity_Modificar : AppCompatActivity() {
         // Sección de anuncios
         initLoadAds()
 
-        position = intent.extras!!.getInt("file_position")
-        initUI(position)
+        nombreArchivo = intent.extras!!.getString("nombre_archivo").toString()
+
+        if (nombreArchivo != "null"){
+            binding!!.barraSuperiorRegreso.tvTituloToolbar.text = "Modificando: $nombreArchivo"
+
+            if (!nombreArchivo.contains(".xml")) {
+                nombreArchivo = "$nombreArchivo.xml"
+            }
+
+            // Obtenemos los datos del XML y los guardamos en su respectivo ArrayList.
+            obtenerDatosXML()
+
+            // Pintamos el texto del contador actual.
+            pintarTexto(contadorPregunta)
+        } else {
+            position = intent.extras!!.getInt("file_position")
+            initUI(position)
+        }
 
         modificarViewModel.guiaModel.observe(this){
             nombreArchivo = it.nombreGuia
             // Guardo el nombre del archivo enviado desde el popupFragmentListarGuias.
             if (nombreArchivo.contains(".xml")){
                 nombreArchivo = nombreArchivo!!.replace(".xml".toRegex(), "")
-
-                // Reutilizo el layout anteriormente creado y le asigno un texto el tvTituloToolbar
-                binding!!.barraSuperiorRegreso.tvTituloToolbar.text = "Modificando: $nombreArchivo"
             }
+
+            binding!!.barraSuperiorRegreso.tvTituloToolbar.text = "Modificando: $nombreArchivo"
+
             colorActual = Color.BLACK
             setColor(colorActual)
             // Aquí simplemente nos aseguramos que tenga el xml, si lo tiene no entramos.
