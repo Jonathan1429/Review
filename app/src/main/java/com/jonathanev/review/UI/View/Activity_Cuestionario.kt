@@ -14,6 +14,7 @@ import android.text.Editable
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.Spanned
+import android.text.TextWatcher
 import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.util.Xml
@@ -23,6 +24,7 @@ import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.*
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
@@ -38,7 +40,6 @@ import com.jonathanev.review.Core.Constants.file
 import com.jonathanev.review.Data.Model.ColorPregModel
 import com.jonathanev.review.Fragments.Fragment_DialogColores_popup
 import com.jonathanev.review.databinding.ActivityCuestionarioBinding
-import dagger.hilt.android.AndroidEntryPoint
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
 import java.io.FileOutputStream
@@ -55,11 +56,12 @@ class Activity_Cuestionario : AppCompatActivity() {
     var builder: SpannableStringBuilder? = null
     private var contadorPregunta: Int = 0
     private var uri: Uri? = null
+    private var longCaracteres = 0
 
     private var start = -1
     private var end = -1
 
-    // Seleccionar imagen
+    /*// Seleccionar imagen
     private val pickMedia = registerForActivityResult(PickVisualMedia()) { uri ->
         if (uri != null) {
             // Toma permisos de persistencia para la URI
@@ -68,19 +70,38 @@ class Activity_Cuestionario : AppCompatActivity() {
             //val name = applicationContext.packageName
             //applicationContext.grantUriPermission(name, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             binding!!.ivImagen.setImage(ImageSource.uri(uri)) //setImageURI(uri)
-            binding!!.tilContenidoPregResp.visibility = View.GONE
-            binding!!.ivImagen.visibility = View.VISIBLE
+            // binding!!.tilContenidoPregResp.visibility = View.GONE
+            // binding!!.ivImagen.visibility = View.VISIBLE
             binding!!.etPregResp.setText(uri.toString())
-            Log.i("Uri: ", uri.toString())
         } else {
-            binding!!.imgvCancelarImg.visibility = View.GONE
             binding!!.imgvSelColor.visibility = View.VISIBLE
         }
-    }
+    }*/
+
+    // Seleccionar imagen
+    private val pickMedia =
+        registerForActivityResult(PickVisualMedia()) { uri ->
+            if (uri != null) {
+                // Toma permisos de persistencia para la URI
+                takePersistableUriPermission(uri)
+
+                binding!!.ivImagen.setImage(ImageSource.uri(uri)) //setImageURI(uri)
+                binding!!.tilContenidoPregResp.visibility = View.GONE
+
+                binding!!.ivImagen.visibility = View.VISIBLE
+                binding!!.etPregResp.setText(uri.toString())
+            } else {
+                binding!!.imgvCancelar.visibility = View.GONE
+
+                binding!!.imgvQuitColor.visibility = View.VISIBLE
+                binding!!.imgvSelColor.visibility = View.VISIBLE
+            }
+        }
 
     // Creamos la serialización y la clase para crear archivos de manera global.
     var serializer: XmlSerializer = Xml.newSerializer()
     var fos: FileOutputStream? = null
+
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -96,7 +117,6 @@ class Activity_Cuestionario : AppCompatActivity() {
         // Se cambia el nombre del titulo del toolbar
         binding!!.barraSuperiorRegreso.tvTituloToolbar.text = "Creando: $nombreArchivo"
         colorActual = Color.BLACK
-        setColor(colorActual)
 
         binding!!.barraSuperiorRegreso.imgvBack.setOnClickListener { cancelarArchivo() }
 
@@ -209,7 +229,10 @@ class Activity_Cuestionario : AppCompatActivity() {
                             Toast.LENGTH_SHORT
                         ).show()
 
-                        Log.i("Crear pregunta: ", "Asegurate de llenar una pregunta y una respuesta")
+                        Log.i(
+                            "Crear pregunta: ",
+                            "Asegurate de llenar una pregunta y una respuesta"
+                        )
                         contadorPregunta--
                     } else {
                         // Cuando no hay guardadas las mismas preguntas que respuestas.
@@ -220,7 +243,10 @@ class Activity_Cuestionario : AppCompatActivity() {
                                 Toast.LENGTH_SHORT
                             ).show()
 
-                            Log.i("Crear pregunta: ", "Asegurate de llenar una pregunta y una respuesta")
+                            Log.i(
+                                "Crear pregunta: ",
+                                "Asegurate de llenar una pregunta y una respuesta"
+                            )
                             contadorPregunta--
                         } else {
                             var editable: Editable =
@@ -359,28 +385,27 @@ class Activity_Cuestionario : AppCompatActivity() {
                             binding!!.lblPregResp.text = "Pregunta"
                             binding!!.etPregResp.setText("")
                         }
-                    } else if((contadorPregunta + 1) == longi && (contadorPregunta + 1) == 1){
+                    } else if ((contadorPregunta + 1) == longi && (contadorPregunta + 1) == 1) {
                         preguntas.removeAt(contadorPregunta)
                         respuestas.removeAt(contadorPregunta)
                         binding!!.lblPregResp.text = "Pregunta"
-                        binding!!.imgvCancelarImg.visibility = View.VISIBLE
                         binding!!.imgvSelColor.visibility = View.GONE
                         binding!!.ivImagen.visibility = View.GONE
                         binding!!.tilContenidoPregResp.visibility = View.VISIBLE
                         binding!!.etPregResp.setText("")
-                    } else if((contadorPregunta + 1) == longi){
+                    } else if ((contadorPregunta + 1) == longi) {
                         preguntas.removeAt(contadorPregunta)
                         respuestas.removeAt(contadorPregunta)
                         contadorPregunta--
                         binding!!.lblPregResp.text = "Pregunta"
                         pintarTexto(contadorPregunta)
-                    } else if (contadorPregunta < longi){
+                    } else if (contadorPregunta < longi) {
                         preguntas.removeAt(contadorPregunta)
                         respuestas.removeAt(contadorPregunta)
                         binding!!.lblPregResp.text = "Pregunta"
                         pintarTexto(contadorPregunta)
                     } else { // Cuando el contador es mayor a longi
-                        if(binding!!.lblPregResp.text.toString() == "Pregunta"){
+                        if (binding!!.lblPregResp.text.toString() == "Pregunta") {
                             contadorPregunta--
                             pintarTexto(contadorPregunta)
                         } else {
@@ -396,7 +421,7 @@ class Activity_Cuestionario : AppCompatActivity() {
                 }.create().show()
         }
 
-        binding!!.imgvSave.setOnClickListener {
+        binding!!.barraSuperiorRegreso.imgvSave.setOnClickListener {
             // Se le quita 1 para hacer referencia al arreglo
             // tamaño 3-1 = 2 [0,1,2].
             val longi: Int = respuestas.size
@@ -445,7 +470,10 @@ class Activity_Cuestionario : AppCompatActivity() {
                             Toast.LENGTH_SHORT
                         ).show()
 
-                        Log.i("Crear pregunta: ", "Asegurate de llenar una pregunta y una respuesta")
+                        Log.i(
+                            "Crear pregunta: ",
+                            "Asegurate de llenar una pregunta y una respuesta"
+                        )
                     }
                 } else {
                     if (longi == 0) {
@@ -500,98 +528,11 @@ class Activity_Cuestionario : AppCompatActivity() {
         }
 
         // Visualización del DialogFragment de selección de colores.
-        binding!!.imgvColors.setOnClickListener {
+        binding!!.imgvSelColor.setOnClickListener {
             // Unicamente abrimos el dialogo y lo mostramos en la pantalla.
             val dialogo: Fragment_DialogColores_popup = Fragment_DialogColores_popup()
             //=====================================================================================================================
             dialogo.show(supportFragmentManager, "FragmentColor")
-        }
-
-        // Cambio de botones visibles
-        binding!!.imgvSelColor.setOnClickListener {
-            binding!!.imgvEliminar.visibility = View.GONE
-            binding!!.imgvSelColor.visibility = View.GONE
-            binding!!.imgvPregResp.visibility = View.GONE
-            binding!!.imgvSave.visibility = View.GONE
-
-            binding!!.imgvColors.visibility = View.VISIBLE
-            binding!!.imgvCheck.visibility = View.VISIBLE
-            binding!!.imgvCancelar.visibility = View.VISIBLE
-            binding!!.imgvQuitColor.visibility = View.VISIBLE
-        }
-
-        // Cambio de botones visibles
-        binding!!.imgvCancelar.setOnClickListener {
-            binding!!.imgvEliminar.visibility = View.VISIBLE
-            binding!!.imgvSelColor.visibility = View.VISIBLE
-            binding!!.imgvPregResp.visibility = View.VISIBLE
-            binding!!.imgvSave.visibility = View.VISIBLE
-
-            binding!!.imgvColors.visibility = View.GONE
-            binding!!.imgvCheck.visibility = View.GONE
-            binding!!.imgvCancelar.visibility = View.GONE
-            binding!!.imgvQuitColor.visibility = View.GONE
-
-            start = -1
-            end = -1
-        }
-
-        // Pintar el texto en el ET
-        binding!!.imgvCheck.setOnClickListener {
-            val text: Editable?
-            val spannableStringBuilder: SpannableStringBuilder
-
-            // La posición en el ET comienza en el 0 por eso vale -1.
-            if (start == -1) {
-                start = binding!!.etPregResp.selectionStart
-
-                Toast.makeText(
-                    applicationContext,
-                    "Pon el cursor hasta donde quieres pintar",
-                    Toast.LENGTH_SHORT
-                ).show()
-
-                Log.i("Crear pregunta: ", "Pon el cursor hasta donde quieres pintar")
-            } else {
-                end = binding!!.etPregResp.selectionStart
-                text = binding!!.etPregResp.text
-                spannableStringBuilder = SpannableStringBuilder(text)
-
-                // Obtén los spans aplicados
-                val spans: Array<ForegroundColorSpan> = spannableStringBuilder.getSpans(
-                    0,
-                    spannableStringBuilder.length,
-                    ForegroundColorSpan::class.java
-                )
-
-                // Eliminar spans existentes que se superpongan con el nuevo rango
-                for (span: ForegroundColorSpan? in spans) {
-                    val spanInicio: Int = spannableStringBuilder.getSpanStart(span)
-                    val spanFin: Int = spannableStringBuilder.getSpanEnd(span)
-                    if ((spanInicio < end && spanFin > start) || (spanInicio >= start && spanFin <= end)) {
-                        spannableStringBuilder.removeSpan(span)
-                        Toast.makeText(
-                            applicationContext,
-                            "Una letra, una tinta; palabras sin colores.",
-                            Toast.LENGTH_SHORT
-                        ).show()
-
-                        Log.i("Crear pregunta: ", "Pon el cursor hasta donde quieres pintar")
-                    }
-                }
-
-                spannableStringBuilder.setSpan(
-                    ForegroundColorSpan(colorActual),
-                    start,
-                    end,
-                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
-
-                binding!!.etPregResp.text = spannableStringBuilder
-                binding!!.etPregResp.setSelection(end)
-                start = -1
-                end = -1
-            }
         }
 
         // Eliminar textos con colores
@@ -601,28 +542,48 @@ class Activity_Cuestionario : AppCompatActivity() {
             spannableStringBuilder.clearSpans()
 
             binding!!.etPregResp.text = spannableStringBuilder
+
+            colorActual = Color.BLACK
+            setColor(colorActual)
         }
 
         binding!!.imgvImage.setOnClickListener {
-            binding!!.imgvCancelarImg.visibility = View.VISIBLE
-            //binding!!.imgvEliminar.visibility = View.GONE
             binding!!.imgvSelColor.visibility = View.GONE
-            //binding!!.imgvPregResp.visibility = View.GONE
-            //binding!!.imgvSave.visibility = View.GONE
+            binding!!.imgvQuitColor.visibility = View.GONE
+
+            binding!!.imgvCancelar.visibility = View.VISIBLE
 
             pickMedia.launch(PickVisualMediaRequest(PickVisualMedia.ImageOnly))
         }
 
-        binding!!.imgvCancelarImg.setOnClickListener {
-            binding!!.imgvCancelarImg.visibility = View.GONE
-            //binding!!.imgvEliminar.visibility = View.VISIBLE
+        // Cambio de botones visibles
+        binding!!.imgvCancelar.setOnClickListener {
             binding!!.imgvSelColor.visibility = View.VISIBLE
-            binding!!.ivImagen.visibility = View.GONE
+            binding!!.imgvQuitColor.visibility = View.VISIBLE
             binding!!.tilContenidoPregResp.visibility = View.VISIBLE
+
+            binding!!.ivImagen.visibility = View.GONE
+            binding!!.imgvCancelar.visibility = View.GONE
+
             binding!!.etPregResp.setText("")
-            //binding!!.imgvPregResp.visibility = View.VISIBLE
-            //binding!!.imgvSave.visibility = View.VISIBLE
+            start = -1
+            end = -1
         }
+
+        binding!!.etPregResp.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                longCaracteres = binding!!.etPregResp.length()
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            }
+
+            override fun afterTextChanged(texto: Editable?) {
+                if (!texto.toString().contains("content://media/picker")) {
+                    pintarLetra(texto)
+                }
+            }
+        })
     }
 
     private fun initLoadAds() {
@@ -819,17 +780,12 @@ class Activity_Cuestionario : AppCompatActivity() {
         }
 
         if (texto.contains("content://media/picker")) {
-            //val name = applicationContext.packageName
-            //applicationContext.grantUriPermission(name, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             binding!!.ivImagen.setImage(ImageSource.uri(uri!!)) //setImageURI(uri)
             binding!!.tilContenidoPregResp.visibility = View.GONE
-            //binding!!.etPregResp.visibility = View.GONE
             binding!!.ivImagen.visibility = View.VISIBLE
 
-            binding!!.imgvCancelarImg.visibility = View.VISIBLE
             binding!!.imgvSelColor.visibility = View.GONE
         } else {
-            binding!!.imgvCancelarImg.visibility = View.GONE
             binding!!.imgvSelColor.visibility = View.VISIBLE
 
             binding!!.tilContenidoPregResp.visibility = View.VISIBLE
@@ -861,6 +817,7 @@ class Activity_Cuestionario : AppCompatActivity() {
             contColorPreg++
         }
 
+
         builder = SpannableStringBuilder(texto)
         for (coloresPreguntas: ColorPregModel in if (binding!!.lblPregResp.text.toString() == "Pregunta") preguntasColor else respuestasColor) {
             val colorSpan: ForegroundColorSpan = ForegroundColorSpan(coloresPreguntas.color)
@@ -877,13 +834,35 @@ class Activity_Cuestionario : AppCompatActivity() {
         binding!!.etPregResp.text = builder
     }
 
+    private fun pintarLetra(texto: Editable?) {
+        texto?.let {
+            if (it.isNotEmpty()) {
+                val cursorPosition = binding!!.etPregResp.selectionStart
+
+                val currentLength = texto.length
+                if (currentLength > longCaracteres) {
+                    val lastCharIndex = cursorPosition - 1
+
+                    it.setSpan(
+                        ForegroundColorSpan(colorActual),
+                        lastCharIndex,
+                        lastCharIndex + 1,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+
+                    binding!!.etPregResp.setSelection(lastCharIndex + 1)
+                }
+            }
+        }
+    }
+
     fun setColor(@ColorInt color: Int?) {
         if (color == null) {
-            ImageViewCompat.setImageTintList(binding!!.imgvColors, null)
+            ImageViewCompat.setImageTintList(binding!!.imgvSelColor, null)
             return
         }
-        ImageViewCompat.setImageTintMode(binding!!.imgvColors, PorterDuff.Mode.SRC_ATOP)
-        ImageViewCompat.setImageTintList(binding!!.imgvColors, ColorStateList.valueOf(color))
+        ImageViewCompat.setImageTintMode(binding!!.imgvSelColor, PorterDuff.Mode.SRC_ATOP)
+        ImageViewCompat.setImageTintList(binding!!.imgvSelColor, ColorStateList.valueOf(color))
         colorActual = color
     }
 }
