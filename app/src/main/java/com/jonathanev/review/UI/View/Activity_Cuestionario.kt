@@ -91,7 +91,7 @@ class Activity_Cuestionario : AppCompatActivity() {
 
         // Sección de anuncios
         initLoadAds()
-        initUI()
+        //initUI()
 
         // Recibimos el nombre del archivo del popupFragment Nueva Guia.
         nombreArchivo = intent.extras!!.getString("nombre_archivo")
@@ -149,84 +149,6 @@ class Activity_Cuestionario : AppCompatActivity() {
                 ).show()
 
                 Log.i("Crear pregunta: ", "Asegurate de no dejar ningun campo vacio")
-            }
-        }
-
-        binding!!.imgvNext.setOnClickListener {
-            // Validamos campos vacios en la pregunta o respuesta.
-            val longi: Int = respuestas.size - 1
-
-            if ((contadorPregunta <= longi && binding!!.etPregResp.text.toString()
-                    .isEmpty()) || (binding!!.lblPregResp.text == "Pregunta" && contadorPregunta > longi) || binding!!.etPregResp.text.toString()
-                    .isEmpty()
-            ) {
-                Toast.makeText(
-                    applicationContext,
-                    "Asegurate de no dejar ningun campo vacio",
-                    Toast.LENGTH_SHORT
-                ).show()
-
-                Log.i("Crear pregunta: ", "Asegurate de no dejar ningun campo vacio")
-            } else {
-                // Se le quita 1 para hacer referencia al arreglo
-                // tamaño 3-1 = 2 [0,1,2].
-                //val longi: Int = preguntas.size - 1 HAY QUE VALIDAR SI AQUÍ TAMBIÉN FUNCIONA COMENTANDO ESTE
-
-                binding!!.tilContenidoPregResp.visibility = View.VISIBLE
-                binding!!.ivImagen.visibility = View.GONE
-
-                if (contadorPregunta <= longi) {
-
-                    var editable: Editable =
-                        Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
-                    var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
-                        0,
-                        editable.length,
-                        ForegroundColorSpan::class.java
-                    )
-
-                    // Se colocan las etiquetas en cada palabra con color
-                    colocarEtiquetas(colorSpans, editable)
-
-                    if (binding!!.lblPregResp.text.toString() == "Pregunta") {
-                        preguntas[contadorPregunta] = editable.toString()
-                    } else {
-                        respuestas[contadorPregunta] = editable.toString()
-                    }
-
-                    // Mientras el contadorPregunta sea menor escribiremos la siguiente pregunta
-                    // en los et.
-                    if (contadorPregunta < longi) {
-                        // Pintamos el texto en la pregunta actual
-                        pintarTexto(contadorPregunta + 1)
-                        pregResBandera = true
-                    } else {
-                        binding!!.lblPregResp.text = "Pregunta"
-                        binding!!.etPregResp.setText("")
-                    }
-                } else { // Si contadorPregunta es mayor a lo que hay en el arreglo.
-                    var editable: Editable =
-                        Editable.Factory.getInstance()
-                            .newEditable(binding!!.etPregResp.text)
-                    var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
-                        0,
-                        editable.length,
-                        ForegroundColorSpan::class.java
-                    )
-
-                    // Se colocan las etiquetas en cada palabra con color
-                    colocarEtiquetas(colorSpans, editable)
-                    respuestas.add(contadorPregunta, editable.toString())
-
-                    binding!!.imgvCancelar.visibility = View.GONE
-                    binding!!.imgvQuitColor.visibility = View.VISIBLE
-                    binding!!.imgvSelColor.visibility = View.VISIBLE
-                    
-                    binding!!.lblPregResp.text = "Pregunta"
-                    binding!!.etPregResp.setText("")
-                }
-
-                contadorPregunta++
             }
         }
 
@@ -323,6 +245,84 @@ class Activity_Cuestionario : AppCompatActivity() {
                 ).show()
 
                 Log.i("Crear pregunta: ", "Ya no tienes preguntas anteriores")
+            }
+        }
+
+        binding!!.imgvNext.setOnClickListener {
+            // Validamos campos vacios en la pregunta o respuesta.
+            val longi: Int = respuestas.size - 1
+
+            if ((contadorPregunta <= longi && binding!!.etPregResp.text.toString()
+                    .isEmpty()) || (binding!!.lblPregResp.text == "Pregunta" && contadorPregunta > longi) || binding!!.etPregResp.text.toString()
+                    .isEmpty()
+            ) {
+                Toast.makeText(
+                    applicationContext,
+                    "Asegurate de no dejar ningun campo vacio",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                Log.i("Crear pregunta: ", "Asegurate de no dejar ningun campo vacio")
+            } else {
+                // Se le quita 1 para hacer referencia al arreglo
+                // tamaño 3-1 = 2 [0,1,2].
+                //val longi: Int = preguntas.size - 1 HAY QUE VALIDAR SI AQUÍ TAMBIÉN FUNCIONA COMENTANDO ESTE
+
+                if (contadorPregunta <= longi) {
+                    var editable: Editable =
+                        Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
+                    var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
+                        0,
+                        editable.length,
+                        ForegroundColorSpan::class.java
+                    )
+
+                    // Se colocan las etiquetas en cada palabra con color
+                    colocarEtiquetas(colorSpans, editable)
+
+                    if (binding!!.lblPregResp.text.toString() == "Pregunta") {
+                        preguntas[contadorPregunta] = editable.toString()
+                    } else {
+                        respuestas[contadorPregunta] = editable.toString()
+                    }
+
+                    // Mientras el contadorPregunta sea menor escribiremos la siguiente pregunta
+                    // en los et.
+                    if (contadorPregunta < longi) {
+                        // Pintamos el texto en la pregunta actual
+
+                        pregResBandera = true
+                        pintarTexto(contadorPregunta + 1)
+                    } else {
+                        binding!!.lblPregResp.text = "Pregunta"
+                        binding!!.etPregResp.setText("")
+                    }
+                } else { // Si contadorPregunta es mayor a lo que hay en el arreglo.
+                    binding!!.tilContenidoPregResp.visibility = View.VISIBLE
+                    binding!!.ivImagen.visibility = View.GONE
+
+                    var editable: Editable =
+                        Editable.Factory.getInstance()
+                            .newEditable(binding!!.etPregResp.text)
+                    var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
+                        0,
+                        editable.length,
+                        ForegroundColorSpan::class.java
+                    )
+
+                    // Se colocan las etiquetas en cada palabra con color
+                    colocarEtiquetas(colorSpans, editable)
+                    respuestas.add(contadorPregunta, editable.toString())
+
+                    binding!!.imgvCancelar.visibility = View.GONE
+                    binding!!.imgvQuitColor.visibility = View.VISIBLE
+                    binding!!.imgvSelColor.visibility = View.VISIBLE
+
+                    binding!!.lblPregResp.text = "Pregunta"
+                    binding!!.etPregResp.setText("")
+                }
+
+                contadorPregunta++
             }
         }
 

@@ -14,6 +14,7 @@ import android.text.Editable
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.Spanned
+import android.text.TextWatcher
 import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.util.Xml
@@ -67,6 +68,8 @@ class Activity_Modificar : AppCompatActivity() {
     private var contadorPregunta: Int = 0
     private var dialMasPreg: Boolean = false
     private var uri: Uri? = null
+    private var longCaracteres = 0
+    private var pregResBandera = true // Bandera para cuando se le de click atras o delante.
 
     // Seleccionar imagen
     private val pickMedia =
@@ -104,7 +107,7 @@ class Activity_Modificar : AppCompatActivity() {
 
         nombreArchivo = intent.extras!!.getString("nombre_archivo").toString()
 
-        if (nombreArchivo != "null"){
+        if (nombreArchivo != "null") {
             binding!!.barraSuperiorRegreso.tvTituloToolbar.text = "Modificando: $nombreArchivo"
 
             if (!nombreArchivo.contains(".xml")) {
@@ -121,17 +124,16 @@ class Activity_Modificar : AppCompatActivity() {
             initUI(position)
         }
 
-        modificarViewModel.guiaModel.observe(this){
+        modificarViewModel.guiaModel.observe(this) {
             nombreArchivo = it.nombreGuia
             // Guardo el nombre del archivo enviado desde el popupFragmentListarGuias.
-            if (nombreArchivo.contains(".xml")){
+            if (nombreArchivo.contains(".xml")) {
                 nombreArchivo = nombreArchivo!!.replace(".xml".toRegex(), "")
             }
 
             binding!!.barraSuperiorRegreso.tvTituloToolbar.text = "Modificando: $nombreArchivo"
-
             colorActual = Color.BLACK
-            setColor(colorActual)
+
             // Aquí simplemente nos aseguramos que tenga el xml, si lo tiene no entramos.
             // En teoria ya todos los archivos no tienen el .xml porque lo recupero del ListarGuias
             if (!nombreArchivo.contains(".xml")) {
@@ -251,6 +253,7 @@ class Activity_Modificar : AppCompatActivity() {
 
                         binding!!.lblPregResp.text = "Pregunta"
                         // Pintamos el texto en la pregunta actual
+                        pregResBandera = true
                         pintarTexto(contadorPregunta - 1)
                     }
                 } else {
@@ -268,9 +271,7 @@ class Activity_Modificar : AppCompatActivity() {
                         Log.i("Crear pregunta: ", "Asegurate de llenar pregunta y respuesta")
                         contadorPregunta++
                     } else {
-                        if (binding!!.lblPregResp.text.toString() == "Pregunta") {
-                            pintarTexto(contadorPregunta - 1)
-                        } else {
+                        if (binding!!.lblPregResp.text.toString() == "Respuesta") {
                             // Si los campos están bien se sobre escribe.
                             var editable: Editable =
                                 Editable.Factory.getInstance()
@@ -284,10 +285,12 @@ class Activity_Modificar : AppCompatActivity() {
                             // Se colocan las etiquetas en cada palabra con color
                             colocarEtiquetas(colorSpans, editable)
 
-                            binding!!.lblPregResp.text = "Pregunta"
                             respuestas.add(contadorPregunta, editable.toString())
-                            pintarTexto(contadorPregunta - 1)
+                            binding!!.lblPregResp.text = "Pregunta"
                         }
+
+                        pregResBandera = true
+                        pintarTexto(contadorPregunta - 1)
                     }
                 }
 
@@ -305,7 +308,12 @@ class Activity_Modificar : AppCompatActivity() {
 
         binding!!.imgvNext.setOnClickListener {
             // Validamos campos vacios en la pregunta o respuesta.
-            if (binding!!.etPregResp.text.toString().isEmpty()) {
+            val longi: Int = respuestas.size - 1
+
+            if ((contadorPregunta <= longi && binding!!.etPregResp.text.toString()
+                    .isEmpty()) || (binding!!.lblPregResp.text == "Pregunta" && contadorPregunta > longi) || binding!!.etPregResp.text.toString()
+                    .isEmpty()
+            ) {
                 Toast.makeText(
                     applicationContext,
                     "Asegurate de no dejar ningun campo vacio",
@@ -317,134 +325,99 @@ class Activity_Modificar : AppCompatActivity() {
                 // Se le quita 1 para hacer referencia al arreglo
                 // tamaño 3-1 = 2 [0,1,2].
                 //val longi: Int = preguntas.size - 1 HAY QUE VALIDAR SI AQUÍ TAMBIÉN FUNCIONA COMENTANDO ESTE
-                val longi: Int = respuestas.size - 1
 
                 if (contadorPregunta <= longi) {
-                    if (binding!!.etPregResp.text.toString().isEmpty()) {
-                        Toast.makeText(
-                            applicationContext,
-                            "Asegurate de llenar una pregunta y una respuesta",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                    var editable: Editable =
+                        Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
+                    var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
+                        0,
+                        editable.length,
+                        ForegroundColorSpan::class.java
+                    )
 
-                        Log.i(
-                            "Crear pregunta: ",
-                            "Asegurate de llenar una pregunta y una respuesta"
-                        )
-                        contadorPregunta--
+                    // Se colocan las etiquetas en cada palabra con color
+                    colocarEtiquetas(colorSpans, editable)
+
+                    if (binding!!.lblPregResp.text.toString() == "Pregunta") {
+                        preguntas[contadorPregunta] = editable.toString()
                     } else {
-                        var editable: Editable =
-                            Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
-                        var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
-                            0,
-                            editable.length,
-                            ForegroundColorSpan::class.java
-                        )
+                        respuestas[contadorPregunta] = editable.toString()
+                    }
 
-                        // Se colocan las etiquetas en cada palabra con color
-                        colocarEtiquetas(colorSpans, editable)
+                    // Mientras el contadorPregunta sea menor escribiremos la siguiente pregunta
+                    // en los et.
+                    if (contadorPregunta < longi) {
+                        // Pintamos el texto en la pregunta actual
 
-                        if (binding!!.lblPregResp.text.toString() == "Pregunta") {
-                            preguntas[contadorPregunta] = editable.toString()
-                        } else {
-                            respuestas[contadorPregunta] = editable.toString()
-                        }
+                        pregResBandera = true
+                        pintarTexto(contadorPregunta + 1)
+                    } else if (!dialMasPreg) {
+                        // ¿Quieres agregar más preguntas?
+                        AlertDialog.Builder(this@Activity_Modificar)
+                            .setTitle("¡Atención!")
+                            .setMessage("Se acabaron las preguntas, ¿Quieres agregar más?")
+                            .setPositiveButton(
+                                "Si"
+                            ) { dialogInterface, i -> // Cambiaremos el texto del toolbar.
+                                //binding!!.barraSuperiorRegreso.tvTituloToolbar.text =
+                                //    "Agrega más preguntas a la guía"
+                                binding!!.lblPregResp.text = "Pregunta"
+                                binding!!.etPregResp.setText("")
+                                binding!!.ivImagen.visibility = View.GONE
+                                // binding!!.etRespuesta.setText("")
+                                // binding!!.etPregunta.requestFocus()
+                                // contadorPregunta++
+                                dialMasPreg = true
+                                Toast.makeText(
+                                    applicationContext, "Ya puedes agregar " +
+                                            "mas preguntas", Toast.LENGTH_LONG
+                                ).show()
 
-                        // Mientras el contadorPregunta sea menor escribiremos la siguiente pregunta
-                        // en los et.
-                        if (contadorPregunta < longi) {
-                            // Pintamos el texto en la pregunta actual
-
-                            binding!!.lblPregResp.text = "Pregunta"
-                            pintarTexto(contadorPregunta + 1)
-                        } else if (!dialMasPreg) {
-                            // ¿Quieres agregar más preguntas?
-                            AlertDialog.Builder(this@Activity_Modificar)
-                                .setTitle("¡Atención!")
-                                .setMessage("Se acabaron las preguntas, ¿Quieres agregar más?")
-                                .setPositiveButton(
-                                    "Si"
-                                ) { dialogInterface, i -> // Cambiaremos el texto del toolbar.
-                                    //binding!!.barraSuperiorRegreso.tvTituloToolbar.text =
-                                    //    "Agrega más preguntas a la guía"
-                                    binding!!.lblPregResp.text = "Pregunta"
-                                    binding!!.etPregResp.setText("")
-                                    binding!!.ivImagen.visibility = View.GONE
-                                    // binding!!.etRespuesta.setText("")
-                                    // binding!!.etPregunta.requestFocus()
-                                    // contadorPregunta++
-                                    dialMasPreg = true
-                                    Toast.makeText(
-                                        applicationContext, "Ya puedes agregar " +
-                                                "mas preguntas", Toast.LENGTH_LONG
-                                    ).show()
-
-                                    Log.i(
-                                        "Crear pregunta: ", "Ya puedes agregar " +
-                                                "mas preguntas"
-                                    )
-                                }
-                                .setNegativeButton(
-                                    "Cancelar"
-                                ) { dialog, i ->
-                                    dialog.dismiss()
-                                    contadorPregunta--
-                                }.setOnCancelListener {
-                                    contadorPregunta--
-                                }.create().show()
-                        } else {
-                            // Si le das click a que si, ya no te preguntará nuevamente
-                            // aunque te regreses a componer otras preg.
-                            // Si el contadorPregunta es igual entonces solo escribiremos los campos vacios.
-                            binding!!.lblPregResp.text = "Pregunta"
-                            binding!!.etPregResp.setText("")
-                            binding!!.etPregResp.requestFocus()
-                        }
+                                Log.i(
+                                    "Crear pregunta: ", "Ya puedes agregar " +
+                                            "mas preguntas"
+                                )
+                            }
+                            .setNegativeButton(
+                                "Cancelar"
+                            ) { dialog, i ->
+                                dialog.dismiss()
+                                contadorPregunta--
+                            }.setOnCancelListener {
+                                contadorPregunta--
+                            }.create().show()
+                    } else {
+                        // Si le das click a que si, ya no te preguntará nuevamente
+                        // aunque te regreses a componer otras preg.
+                        // Si el contadorPregunta es igual entonces solo escribiremos los campos vacios.
+                        binding!!.lblPregResp.text = "Pregunta"
+                        binding!!.etPregResp.setText("")
+                        binding!!.etPregResp.requestFocus()
                     }
                 } else { // Si contadorPregunta es mayor a lo que hay en el arreglo.
-                    if (binding!!.etPregResp.text.toString().isEmpty()) {
-                        Toast.makeText(
-                            applicationContext,
-                            "Asegurate de llenar una pregunta y una respuesta",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                    binding!!.tilContenidoPregResp.visibility = View.VISIBLE
+                    binding!!.ivImagen.visibility = View.GONE
 
-                        Log.i(
-                            "Crear pregunta: ",
-                            "Asegurate de llenar una pregunta y una respuesta"
-                        )
-                        contadorPregunta--
-                    } else {
-                        // Cuando no hay guardadas las mismas preguntas que respuestas.
-                        if (binding!!.lblPregResp.text.toString() == "Pregunta") {
-                            Toast.makeText(
-                                applicationContext,
-                                "Asegurate de llenar una pregunta y una respuesta",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                    var editable: Editable =
+                        Editable.Factory.getInstance()
+                            .newEditable(binding!!.etPregResp.text)
+                    var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
+                        0,
+                        editable.length,
+                        ForegroundColorSpan::class.java
+                    )
 
-                            Log.i(
-                                "Crear pregunta: ",
-                                "Asegurate de llenar una pregunta y una respuesta"
-                            )
-                            contadorPregunta--
-                        } else {
-                            var editable: Editable =
-                                Editable.Factory.getInstance()
-                                    .newEditable(binding!!.etPregResp.text)
-                            var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
-                                0,
-                                editable.length,
-                                ForegroundColorSpan::class.java
-                            )
+                    // Se colocan las etiquetas en cada palabra con color
+                    colocarEtiquetas(colorSpans, editable)
+                    respuestas.add(contadorPregunta, editable.toString())
 
-                            // Se colocan las etiquetas en cada palabra con color
-                            colocarEtiquetas(colorSpans, editable)
-                            respuestas.add(contadorPregunta, editable.toString())
-                            binding!!.lblPregResp.text = "Pregunta"
-                            binding!!.etPregResp.setText("")
-                        }
-                    }
+                    binding!!.imgvCancelar.visibility = View.GONE
+                    binding!!.imgvQuitColor.visibility = View.VISIBLE
+                    binding!!.imgvSelColor.visibility = View.VISIBLE
+
+                    binding!!.lblPregResp.text = "Pregunta"
+                    binding!!.etPregResp.setText("")
+
                 }
                 contadorPregunta++
             }
@@ -647,17 +620,20 @@ class Activity_Modificar : AppCompatActivity() {
             pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
         }
 
-        // Cambio de botones visibles
-        binding!!.imgvCancelar.setOnClickListener {
-            binding!!.imgvSelColor.visibility = View.VISIBLE
-            binding!!.imgvQuitColor.visibility = View.VISIBLE
-            binding!!.tilContenidoPregResp.visibility = View.VISIBLE
+        binding!!.etPregResp.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                longCaracteres = binding!!.etPregResp.length()
+            }
 
-            binding!!.ivImagen.visibility = View.GONE
-            binding!!.imgvCancelar.visibility = View.GONE
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            }
 
-            binding!!.etPregResp.setText("")
-        }
+            override fun afterTextChanged(texto: Editable?) {
+                if (!texto.toString().contains("content://media/picker")) {
+                    pintarLetra(texto)
+                }
+            }
+        })
     }
 
     private fun initUI(position: Int) {
@@ -726,7 +702,7 @@ class Activity_Modificar : AppCompatActivity() {
     }
 
     // Método que se ejecuta cuando el back del telefono es presionado.
-    public override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.action == KeyEvent.ACTION_DOWN) {
             Toast.makeText(
                 applicationContext,
@@ -827,11 +803,8 @@ class Activity_Modificar : AppCompatActivity() {
         }
 
         if (texto.contains("content://media/picker")) {
-            //val name = applicationContext.packageName
-            //applicationContext.grantUriPermission(name, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             binding!!.ivImagen.setImage(ImageSource.uri(uri!!)) //setImageURI(uri)
             binding!!.tilContenidoPregResp.visibility = View.GONE
-            //binding!!.etPregResp.visibility = View.GONE
             binding!!.ivImagen.visibility = View.VISIBLE
 
             binding!!.imgvSelColor.visibility = View.GONE
@@ -912,6 +885,29 @@ class Activity_Modificar : AppCompatActivity() {
             e.printStackTrace()
         } catch (e: IOException) {
             e.printStackTrace()
+        }
+    }
+
+    private fun pintarLetra(texto: Editable?) {
+        texto?.let {
+            if (it.isNotEmpty() && !pregResBandera) {
+                val cursorPosition = binding!!.etPregResp.selectionStart
+
+                val currentLength = texto.length
+                if (currentLength > longCaracteres) {
+                    val lastCharIndex = cursorPosition - 1
+
+                    it.setSpan(
+                        ForegroundColorSpan(colorActual),
+                        lastCharIndex,
+                        lastCharIndex + 1,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+
+                    binding!!.etPregResp.setSelection(lastCharIndex + 1)
+                    pregResBandera = false
+                }
+            }
         }
     }
 

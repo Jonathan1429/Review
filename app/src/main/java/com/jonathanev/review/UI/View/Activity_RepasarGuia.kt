@@ -64,6 +64,7 @@ class Activity_RepasarGuia : AppCompatActivity() {
         // Sección de anuncios
         initLoadAds()
 
+        binding!!.barraSuperiorRegreso.imgvSave.visibility = View.GONE
         nombreArchivo = intent.extras!!.getString("nombre_archivo").toString()
 
         val preferences = getSharedPreferences("MiPref", MODE_PRIVATE)
@@ -89,19 +90,16 @@ class Activity_RepasarGuia : AppCompatActivity() {
 
 
         repasarGuiaViewModel.guiaModel.observe(this){
-            nombreArchivo = it.nombreGuia
-            // Guardo el nombre del archivo enviado desde el popupFragmentListarGuias.
-            if (nombreArchivo.contains(".xml")){
-                nombreArchivo = nombreArchivo!!.replace(".xml".toRegex(), "")
+            //binding!!.barraSuperiorRegreso.tvTituloToolbar.text = "Guia: $it.nombreGuia"
+            //nombreArchivo = it.nombreGuia
 
-                // Reutilizo el layout anteriormente creado y le asigno un texto el tvTituloToolbar
-                binding!!.barraSuperiorRegreso.tvTituloToolbar.text = "Guia: $nombreArchivo"
+            // Guardo el nombre del archivo enviado desde el popupFragmentListarGuias.
+            if (it.nombreGuia.contains(".xml")){
+                nombreArchivo = nombreArchivo!!.replace(".xml".toRegex(), "")
             }
-            // Aquí simplemente nos aseguramos que tenga el xml, si lo tiene no entramos.
-            // En teoria ya todos los archivos no tienen el .xml porque lo recupero del ListarGuias
-            if (!nombreArchivo.contains(".xml")) {
-                nombreArchivo = "$nombreArchivo.xml"
-            }
+
+            binding!!.barraSuperiorRegreso.tvTituloToolbar.text = "Guia: ${it.nombreGuia}"
+            nombreArchivo = "${it.nombreGuia}.xml"
 
             // Obtenemos los datos del XML y los guardamos en su respectivo ArrayList.
             obtenerDatosXML()
@@ -287,11 +285,8 @@ class Activity_RepasarGuia : AppCompatActivity() {
         }
 
         if (texto.contains("content://media/picker")) {
-            //val name = applicationContext.packageName
-            //applicationContext.grantUriPermission(name, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             binding!!.ivImagen.setImage(ImageSource.uri(uri!!)) //setImageURI(uri)
             binding!!.tilContenidoPregResp.visibility = View.GONE
-            //binding!!.etPregResp.visibility = View.GONE
             binding!!.ivImagen.visibility = View.VISIBLE
         } else {
             binding!!.tilContenidoPregResp.visibility = View.VISIBLE
