@@ -104,6 +104,8 @@ class Activity_Cuestionario : AppCompatActivity() {
 
         binding!!.imgvPregResp.setOnClickListener {
             if (binding!!.etPregResp.text.toString().isNotEmpty()) {
+                pregResBandera = true
+
                 var editable: Editable =
                     Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
                 var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
@@ -122,7 +124,11 @@ class Activity_Cuestionario : AppCompatActivity() {
                         preguntas.add(contadorPregunta, editable.toString())
                         binding!!.etPregResp.setText("")
                         binding!!.ivImagen.visibility = View.GONE
-                        //binding!!.ivImagen.setImage(ImageSource.uri(""))
+                        binding!!.tilContenidoPregResp.visibility = View.VISIBLE
+
+                        binding!!.imgvCancelar.visibility = View.GONE
+                        binding!!.imgvQuitColor.visibility = View.VISIBLE
+                        binding!!.imgvSelColor.visibility = View.VISIBLE
                     } else {
                         binding!!.lblPregResp.text = "Respuesta"
                         preguntas[contadorPregunta] = editable.toString()
@@ -141,6 +147,8 @@ class Activity_Cuestionario : AppCompatActivity() {
                     }
                     girarCardView()
                 }
+
+                pregResBandera = false
             } else {
                 Toast.makeText(
                     applicationContext,
@@ -295,6 +303,8 @@ class Activity_Cuestionario : AppCompatActivity() {
                         pintarTexto(contadorPregunta + 1)
                     } else {
                         binding!!.lblPregResp.text = "Pregunta"
+                        binding!!.tilContenidoPregResp.visibility = View.VISIBLE
+                        binding!!.ivImagen.visibility = View.GONE
                         binding!!.etPregResp.setText("")
                     }
                 } else { // Si contadorPregunta es mayor a lo que hay en el arreglo.
@@ -746,12 +756,16 @@ class Activity_Cuestionario : AppCompatActivity() {
             binding!!.tilContenidoPregResp.visibility = View.GONE
             binding!!.ivImagen.visibility = View.VISIBLE
 
+            binding!!.imgvCancelar.visibility = View.VISIBLE
+            binding!!.imgvQuitColor.visibility = View.GONE
             binding!!.imgvSelColor.visibility = View.GONE
         } else {
-            binding!!.imgvSelColor.visibility = View.VISIBLE
-
             binding!!.tilContenidoPregResp.visibility = View.VISIBLE
             binding!!.ivImagen.visibility = View.GONE
+
+            binding!!.imgvCancelar.visibility = View.GONE
+            binding!!.imgvQuitColor.visibility = View.VISIBLE
+            binding!!.imgvSelColor.visibility = View.VISIBLE
         }
 
         while (texto.contains("«")) {

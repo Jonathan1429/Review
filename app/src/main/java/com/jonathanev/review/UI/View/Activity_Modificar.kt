@@ -145,6 +145,7 @@ class Activity_Modificar : AppCompatActivity() {
 
             // Pintamos el texto del contador actual.
             pintarTexto(contadorPregunta)
+            pregResBandera = false
         }
 
         binding!!.barraSuperiorRegreso.imgvBack.setOnClickListener(object : View.OnClickListener {
@@ -162,6 +163,8 @@ class Activity_Modificar : AppCompatActivity() {
 
         binding!!.imgvPregResp.setOnClickListener {
             if (binding!!.etPregResp.text.toString().isNotEmpty()) {
+                pregResBandera = true
+
                 var editable: Editable =
                     Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
                 var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
@@ -180,7 +183,11 @@ class Activity_Modificar : AppCompatActivity() {
                         preguntas.add(contadorPregunta, editable.toString())
                         binding!!.etPregResp.setText("")
                         binding!!.ivImagen.visibility = View.GONE
-                        //binding!!.ivImagen.setImage(ImageSource.uri(""))
+                        binding!!.tilContenidoPregResp.visibility = View.VISIBLE
+
+                        binding!!.imgvCancelar.visibility = View.GONE
+                        binding!!.imgvQuitColor.visibility = View.VISIBLE
+                        binding!!.imgvSelColor.visibility = View.VISIBLE
                     } else {
                         binding!!.lblPregResp.text = "Respuesta"
                         preguntas[contadorPregunta] = editable.toString()
@@ -199,12 +206,15 @@ class Activity_Modificar : AppCompatActivity() {
                     }
                     girarCardView()
                 }
+
+                pregResBandera = false
             } else {
                 Toast.makeText(
                     applicationContext,
                     "Asegurate de no dejar ningun campo vacio",
                     Toast.LENGTH_SHORT
                 ).show()
+
                 Log.i("Crear pregunta: ", "Asegurate de no dejar ningun campo vacio")
             }
         }
@@ -363,10 +373,11 @@ class Activity_Modificar : AppCompatActivity() {
                                 //    "Agrega más preguntas a la guía"
                                 binding!!.lblPregResp.text = "Pregunta"
                                 binding!!.etPregResp.setText("")
+                                binding!!.tilContenidoPregResp.visibility = View.VISIBLE
                                 binding!!.ivImagen.visibility = View.GONE
-                                // binding!!.etRespuesta.setText("")
-                                // binding!!.etPregunta.requestFocus()
-                                // contadorPregunta++
+                    binding!!.imgvCancelar.visibility = View.GONE
+                    binding!!.imgvQuitColor.visibility = View.VISIBLE
+                    binding!!.imgvSelColor.visibility = View.VISIBLE
                                 dialMasPreg = true
                                 Toast.makeText(
                                     applicationContext, "Ya puedes agregar " +
@@ -391,8 +402,14 @@ class Activity_Modificar : AppCompatActivity() {
                         // aunque te regreses a componer otras preg.
                         // Si el contadorPregunta es igual entonces solo escribiremos los campos vacios.
                         binding!!.lblPregResp.text = "Pregunta"
+                        binding!!.tilContenidoPregResp.visibility = View.VISIBLE
+                        binding!!.ivImagen.visibility = View.GONE
+
+                        binding!!.imgvCancelar.visibility = View.GONE
+                        binding!!.imgvQuitColor.visibility = View.VISIBLE
+                        binding!!.imgvSelColor.visibility = View.VISIBLE
+
                         binding!!.etPregResp.setText("")
-                        binding!!.etPregResp.requestFocus()
                     }
                 } else { // Si contadorPregunta es mayor a lo que hay en el arreglo.
                     binding!!.tilContenidoPregResp.visibility = View.VISIBLE
@@ -807,12 +824,16 @@ class Activity_Modificar : AppCompatActivity() {
             binding!!.tilContenidoPregResp.visibility = View.GONE
             binding!!.ivImagen.visibility = View.VISIBLE
 
+            binding!!.imgvCancelar.visibility = View.VISIBLE
+            binding!!.imgvQuitColor.visibility = View.GONE
             binding!!.imgvSelColor.visibility = View.GONE
         } else {
-            binding!!.imgvSelColor.visibility = View.VISIBLE
-
             binding!!.tilContenidoPregResp.visibility = View.VISIBLE
             binding!!.ivImagen.visibility = View.GONE
+
+            binding!!.imgvCancelar.visibility = View.GONE
+            binding!!.imgvQuitColor.visibility = View.VISIBLE
+            binding!!.imgvSelColor.visibility = View.VISIBLE
         }
 
         while (texto.contains("«")) {
@@ -839,6 +860,7 @@ class Activity_Modificar : AppCompatActivity() {
             texto = texto.replaceFirst("«.*?»".toRegex(), "")
             contColorPreg++
         }
+
 
         builder = SpannableStringBuilder(texto)
         for (coloresPreguntas: ColorPregModel in if (binding!!.lblPregResp.text.toString() == "Pregunta") preguntasColor else respuestasColor) {
