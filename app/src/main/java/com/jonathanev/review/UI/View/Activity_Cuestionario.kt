@@ -57,26 +57,7 @@ class Activity_Cuestionario : AppCompatActivity() {
     private var contadorPregunta: Int = 0
     private var uri: Uri? = null
     private var longCaracteres = 0
-
-    private var start = -1
-    private var end = -1
-
-    /*// Seleccionar imagen
-    private val pickMedia = registerForActivityResult(PickVisualMedia()) { uri ->
-        if (uri != null) {
-            // Toma permisos de persistencia para la URI
-            takePersistableUriPermission(uri)
-
-            //val name = applicationContext.packageName
-            //applicationContext.grantUriPermission(name, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            binding!!.ivImagen.setImage(ImageSource.uri(uri)) //setImageURI(uri)
-            // binding!!.tilContenidoPregResp.visibility = View.GONE
-            // binding!!.ivImagen.visibility = View.VISIBLE
-            binding!!.etPregResp.setText(uri.toString())
-        } else {
-            binding!!.imgvSelColor.visibility = View.VISIBLE
-        }
-    }*/
+    private var pregResBandera = false // Bandera para cuando se le de click atras o delante.
 
     // Seleccionar imagen
     private val pickMedia =
@@ -110,6 +91,7 @@ class Activity_Cuestionario : AppCompatActivity() {
 
         // Sección de anuncios
         initLoadAds()
+        initUI()
 
         // Recibimos el nombre del archivo del popupFragment Nueva Guia.
         nombreArchivo = intent.extras!!.getString("nombre_archivo")
@@ -172,7 +154,12 @@ class Activity_Cuestionario : AppCompatActivity() {
 
         binding!!.imgvNext.setOnClickListener {
             // Validamos campos vacios en la pregunta o respuesta.
-            if (binding!!.etPregResp.text.toString().isEmpty()) {
+            val longi: Int = respuestas.size - 1
+
+            if ((contadorPregunta <= longi && binding!!.etPregResp.text.toString()
+                    .isEmpty()) || (binding!!.lblPregResp.text == "Pregunta" && contadorPregunta > longi) || binding!!.etPregResp.text.toString()
+                    .isEmpty()
+            ) {
                 Toast.makeText(
                     applicationContext,
                     "Asegurate de no dejar ningun campo vacio",
@@ -184,7 +171,9 @@ class Activity_Cuestionario : AppCompatActivity() {
                 // Se le quita 1 para hacer referencia al arreglo
                 // tamaño 3-1 = 2 [0,1,2].
                 //val longi: Int = preguntas.size - 1 HAY QUE VALIDAR SI AQUÍ TAMBIÉN FUNCIONA COMENTANDO ESTE
-                val longi: Int = respuestas.size - 1
+
+                binding!!.tilContenidoPregResp.visibility = View.VISIBLE
+                binding!!.ivImagen.visibility = View.GONE
 
                 if (contadorPregunta <= longi) {
 
@@ -209,64 +198,34 @@ class Activity_Cuestionario : AppCompatActivity() {
                     // en los et.
                     if (contadorPregunta < longi) {
                         // Pintamos el texto en la pregunta actual
-
-                        binding!!.lblPregResp.text = "Pregunta"
                         pintarTexto(contadorPregunta + 1)
+                        pregResBandera = true
                     } else {
-                        // Si le das click a que si, ya no te preguntará nuevamente
-                        // aunque te regreses a componer otras preg.
-                        // Si el contadorPregunta es igual entonces solo escribiremos los campos vacios.
                         binding!!.lblPregResp.text = "Pregunta"
                         binding!!.etPregResp.setText("")
-                        //binding!!.ivImagen.setImage(ImageSource.uri(""))
-                        binding!!.ivImagen.visibility = View.GONE
                     }
                 } else { // Si contadorPregunta es mayor a lo que hay en el arreglo.
-                    if (binding!!.etPregResp.text.toString().isEmpty()) {
-                        Toast.makeText(
-                            applicationContext,
-                            "Asegurate de llenar una pregunta y una respuesta",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                    var editable: Editable =
+                        Editable.Factory.getInstance()
+                            .newEditable(binding!!.etPregResp.text)
+                    var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
+                        0,
+                        editable.length,
+                        ForegroundColorSpan::class.java
+                    )
 
-                        Log.i(
-                            "Crear pregunta: ",
-                            "Asegurate de llenar una pregunta y una respuesta"
-                        )
-                        contadorPregunta--
-                    } else {
-                        // Cuando no hay guardadas las mismas preguntas que respuestas.
-                        if (binding!!.lblPregResp.text.toString() == "Pregunta") {
-                            Toast.makeText(
-                                applicationContext,
-                                "Asegurate de llenar una pregunta y una respuesta",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                    // Se colocan las etiquetas en cada palabra con color
+                    colocarEtiquetas(colorSpans, editable)
+                    respuestas.add(contadorPregunta, editable.toString())
 
-                            Log.i(
-                                "Crear pregunta: ",
-                                "Asegurate de llenar una pregunta y una respuesta"
-                            )
-                            contadorPregunta--
-                        } else {
-                            var editable: Editable =
-                                Editable.Factory.getInstance()
-                                    .newEditable(binding!!.etPregResp.text)
-                            var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
-                                0,
-                                editable.length,
-                                ForegroundColorSpan::class.java
-                            )
-
-                            // Se colocan las etiquetas en cada palabra con color
-                            colocarEtiquetas(colorSpans, editable)
-                            respuestas.add(contadorPregunta, editable.toString())
-                            binding!!.lblPregResp.text = "Pregunta"
-                            binding!!.etPregResp.setText("")
-                            binding!!.ivImagen.visibility = View.GONE
-                        }
-                    }
+                    binding!!.imgvCancelar.visibility = View.GONE
+                    binding!!.imgvQuitColor.visibility = View.VISIBLE
+                    binding!!.imgvSelColor.visibility = View.VISIBLE
+                    
+                    binding!!.lblPregResp.text = "Pregunta"
+                    binding!!.etPregResp.setText("")
                 }
+
                 contadorPregunta++
             }
         }
@@ -314,6 +273,7 @@ class Activity_Cuestionario : AppCompatActivity() {
 
                         binding!!.lblPregResp.text = "Pregunta"
                         // Pintamos el texto en la pregunta actual
+                        pregResBandera = true
                         pintarTexto(contadorPregunta - 1)
                     }
                 } else {
@@ -331,9 +291,7 @@ class Activity_Cuestionario : AppCompatActivity() {
                         Log.i("Crear pregunta: ", "Asegurate de llenar pregunta y respuesta")
                         contadorPregunta++
                     } else {
-                        if (binding!!.lblPregResp.text.toString() == "Pregunta") {
-                            pintarTexto(contadorPregunta - 1)
-                        } else {
+                        if (binding!!.lblPregResp.text.toString() == "Respuesta") {
                             // Si los campos están bien se sobre escribe.
                             var editable: Editable =
                                 Editable.Factory.getInstance()
@@ -347,10 +305,12 @@ class Activity_Cuestionario : AppCompatActivity() {
                             // Se colocan las etiquetas en cada palabra con color
                             colocarEtiquetas(colorSpans, editable)
 
-                            binding!!.lblPregResp.text = "Pregunta"
                             respuestas.add(contadorPregunta, editable.toString())
-                            pintarTexto(contadorPregunta - 1)
+                            binding!!.lblPregResp.text = "Pregunta"
                         }
+
+                        pregResBandera = true
+                        pintarTexto(contadorPregunta - 1)
                     }
                 }
 
@@ -389,9 +349,9 @@ class Activity_Cuestionario : AppCompatActivity() {
                         preguntas.removeAt(contadorPregunta)
                         respuestas.removeAt(contadorPregunta)
                         binding!!.lblPregResp.text = "Pregunta"
-                        binding!!.imgvSelColor.visibility = View.GONE
-                        binding!!.ivImagen.visibility = View.GONE
+                        binding!!.imgvSelColor.visibility = View.VISIBLE
                         binding!!.tilContenidoPregResp.visibility = View.VISIBLE
+                        binding!!.ivImagen.visibility = View.GONE
                         binding!!.etPregResp.setText("")
                     } else if ((contadorPregunta + 1) == longi) {
                         preguntas.removeAt(contadorPregunta)
@@ -566,8 +526,6 @@ class Activity_Cuestionario : AppCompatActivity() {
             binding!!.imgvCancelar.visibility = View.GONE
 
             binding!!.etPregResp.setText("")
-            start = -1
-            end = -1
         }
 
         binding!!.etPregResp.addTextChangedListener(object : TextWatcher {
@@ -584,6 +542,10 @@ class Activity_Cuestionario : AppCompatActivity() {
                 }
             }
         })
+    }
+
+    private fun initUI() {
+        contadorPregunta = 0
     }
 
     private fun initLoadAds() {
@@ -836,7 +798,7 @@ class Activity_Cuestionario : AppCompatActivity() {
 
     private fun pintarLetra(texto: Editable?) {
         texto?.let {
-            if (it.isNotEmpty()) {
+            if (it.isNotEmpty() && !pregResBandera) {
                 val cursorPosition = binding!!.etPregResp.selectionStart
 
                 val currentLength = texto.length
@@ -851,6 +813,7 @@ class Activity_Cuestionario : AppCompatActivity() {
                     )
 
                     binding!!.etPregResp.setSelection(lastCharIndex + 1)
+                    pregResBandera = false
                 }
             }
         }
