@@ -4,7 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:padding="10dp">
+
 
     <ImageView
         android:id="@+id/ivGuiaEstudio"
@@ -17,10 +19,21 @@
 
     <TextView
         android:id="@+id/tvTituloGuia"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
+        android:layout_weight="1"
         android:layout_height="80dp"
         android:layout_marginStart="5dp"
         android:gravity="left|center_vertical"
         android:textStyle="bold"
         android:textSize="15sp"/>
+
+    <ImageView
+        android:id="@+id/imgvBack"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:src="@drawable/ic_back"
+        android:rotation="180"
+        android:layout_gravity="center_vertical"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
+        tools:ignore="ContentDescription" />
 </LinearLayout>

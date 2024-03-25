@@ -20,5 +20,9 @@ class FragDialListarGuiasViewModel @Inject constructor(
         guias.postValue(guiaRepository.getGuias())
     }
 
+    fun getAllGuiasCarpetaSeleccionada(carpetaSeleccionada: String){
+        guias.postValue(guiaRepository.getGuiasCarpetaSeleccionada(carpetaSeleccionada))
+    }
+
     fun getGuia(position: Int):GuiaModel = getGuiaUseCase(position)
 }

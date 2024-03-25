@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="350dp"
     android:layout_height="350dp"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_gravity="center"
     android:background="@drawable/contorno_ventana_popup">
 
     <!--         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox" -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tilNombreArchivo"
-        android:labelFor="@+id/etNombreArchivo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="@string/etNombreArchivo"
         android:layout_margin="5dp"
+        android:hint="@string/etNombreArchivo"
+        android:labelFor="@+id/etNombreArchivo"
+        app:endIconMode="clear_text"
         app:helperText="*Requerido"
         app:helperTextTextColor="@color/red"
-        app:endIconMode="clear_text"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etNombreArchivo"
@@ -29,18 +29,18 @@
             android:drawableStart="@drawable/ic_archivo"
             android:drawablePadding="15dp"
             android:inputType="textPersonName"
-            android:textSize="@dimen/texto"/>
+            android:textSize="@dimen/texto" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- style="@style/btnGenerales" -->
     <Button
-        android:layout_height="wrap_content"
         android:id="@+id/btnGuardarGuiaEstudio"
-        android:layout_width="200dp"
-        android:text="@string/btnGuardarGuia"
-        android:background="@drawable/ic_filter_state"
         style="@style/btnGeneral"
-        app:layout_constraintTop_toBottomOf="@+id/tilNombreArchivo"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/ic_filter_state"
+        android:text="@string/btnGuardarGuia"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/tilNombreArchivo" />
 </androidx.constraintlayout.widget.ConstraintLayout>

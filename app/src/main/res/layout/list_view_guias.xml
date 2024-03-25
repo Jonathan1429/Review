@@ -28,13 +28,15 @@
 
         <TextView
             android:id="@+id/tvNombreArchivo"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:textSize="27sp"
             android:fontFamily="sans-serif-black"
             android:layout_margin="20dp"
             app:layout_constraintStart_toEndOf="@+id/imgvIconoGuia"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
+
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

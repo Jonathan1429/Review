@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
 import com.jonathanev.review.Core.Constants.file
 import com.jonathanev.review.Fragments.Fragment_DialogNuevoArchivo_popu
@@ -36,20 +37,28 @@ class MainActivity : AppCompatActivity() {
 
         // Utilizamos un botón que es reutilizado, unicamente le cambiamos el texto.
         binding!!.btnAbrirGuiaEstudioHabilitado.text = "Abrir Guia"
-        binding!!.btnNuevaGuiaEstudio.setOnClickListener(object : View.OnClickListener {
-            public override fun onClick(view: View) {
-                // Unicamente abrimos el dialogo y lo mostramos en la pantalla.
-                val dialogo: Fragment_DialogNuevoArchivo_popu = Fragment_DialogNuevoArchivo_popu()
-                dialogo.show(getSupportFragmentManager(), "Fragment_nuevo")
+        binding!!.btnNuevaGuiaEstudio.setOnClickListener { // Unicamente abrimos el dialogo y lo mostramos en la pantalla.
+            val dialogo: Fragment_DialogNuevoArchivo_popu = Fragment_DialogNuevoArchivo_popu()
+            dialogo.show(getSupportFragmentManager(), "Fragment_nuevo")
 
-                // Creamos las preferencias y dentro de ellas guardamos el arreglo item
-                val preferencias: SharedPreferences =
-                    applicationContext.getSharedPreferences("cambiar_nombre", MODE_PRIVATE)
-                val editor: SharedPreferences.Editor = preferencias.edit()
-                editor.putString("cambiar_nombre", "no existe")
-                editor.commit()
-            }
-        })
+            // Creamos las preferencias y dentro de ellas guardamos el arreglo item
+            var preferencias =
+                applicationContext.getSharedPreferences("cambiar_nombre", MODE_PRIVATE)
+            var editor = preferencias.edit()
+            editor.putString("cambiar_nombre", "no existe")
+            editor.commit()
+
+            // Creamos las preferencias y dentro de ellas guardamos el arreglo item
+            preferencias =
+                applicationContext.getSharedPreferences(
+                    "crear_folder",
+                    AppCompatActivity.MODE_PRIVATE
+                )
+
+            editor = preferencias.edit()
+            editor.putString("crear_folder", "no existe")
+            editor.commit()
+        }
 
         binding!!.btnAbrirGuiaEstudioHabilitado.setOnClickListener {
             if (!file.exists()) {

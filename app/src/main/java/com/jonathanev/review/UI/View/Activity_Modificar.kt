@@ -69,7 +69,7 @@ class Activity_Modificar : AppCompatActivity() {
     private var dialMasPreg: Boolean = false
     private var uri: Uri? = null
     private var longCaracteres = 0
-    private var pregResBandera = true // Bandera para cuando se le de click atras o delante.
+    private var pregResBandera = false // Bandera para cuando se le de click atras o delante.
 
     // Seleccionar imagen
     private val pickMedia =
@@ -145,7 +145,6 @@ class Activity_Modificar : AppCompatActivity() {
 
             // Pintamos el texto del contador actual.
             pintarTexto(contadorPregunta)
-            pregResBandera = false
         }
 
         binding!!.barraSuperiorRegreso.imgvBack.setOnClickListener(object : View.OnClickListener {
@@ -163,8 +162,6 @@ class Activity_Modificar : AppCompatActivity() {
 
         binding!!.imgvPregResp.setOnClickListener {
             if (binding!!.etPregResp.text.toString().isNotEmpty()) {
-                pregResBandera = true
-
                 var editable: Editable =
                     Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
                 var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
@@ -206,8 +203,6 @@ class Activity_Modificar : AppCompatActivity() {
                     }
                     girarCardView()
                 }
-
-                pregResBandera = false
             } else {
                 Toast.makeText(
                     applicationContext,
@@ -263,7 +258,6 @@ class Activity_Modificar : AppCompatActivity() {
 
                         binding!!.lblPregResp.text = "Pregunta"
                         // Pintamos el texto en la pregunta actual
-                        pregResBandera = true
                         pintarTexto(contadorPregunta - 1)
                     }
                 } else {
@@ -299,7 +293,6 @@ class Activity_Modificar : AppCompatActivity() {
                             binding!!.lblPregResp.text = "Pregunta"
                         }
 
-                        pregResBandera = true
                         pintarTexto(contadorPregunta - 1)
                     }
                 }
@@ -359,7 +352,6 @@ class Activity_Modificar : AppCompatActivity() {
                     if (contadorPregunta < longi) {
                         // Pintamos el texto en la pregunta actual
 
-                        pregResBandera = true
                         pintarTexto(contadorPregunta + 1)
                     } else if (!dialMasPreg) {
                         // ¿Quieres agregar más preguntas?
@@ -875,7 +867,11 @@ class Activity_Modificar : AppCompatActivity() {
 
         preguntasColor.clear()
         respuestasColor.clear()
+
+        // Bandera ingresada para que no haga cambios de color cuando se detecte un cambio en ET.
+        pregResBandera = true
         binding!!.etPregResp.text = builder
+        pregResBandera = false
     }
 
     private fun obtenerDatosXML() {

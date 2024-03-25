@@ -104,8 +104,6 @@ class Activity_Cuestionario : AppCompatActivity() {
 
         binding!!.imgvPregResp.setOnClickListener {
             if (binding!!.etPregResp.text.toString().isNotEmpty()) {
-                pregResBandera = true
-
                 var editable: Editable =
                     Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
                 var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
@@ -147,8 +145,6 @@ class Activity_Cuestionario : AppCompatActivity() {
                     }
                     girarCardView()
                 }
-
-                pregResBandera = false
             } else {
                 Toast.makeText(
                     applicationContext,
@@ -203,7 +199,6 @@ class Activity_Cuestionario : AppCompatActivity() {
 
                         binding!!.lblPregResp.text = "Pregunta"
                         // Pintamos el texto en la pregunta actual
-                        pregResBandera = true
                         pintarTexto(contadorPregunta - 1)
                     }
                 } else {
@@ -238,8 +233,6 @@ class Activity_Cuestionario : AppCompatActivity() {
                             respuestas.add(contadorPregunta, editable.toString())
                             binding!!.lblPregResp.text = "Pregunta"
                         }
-
-                        pregResBandera = true
                         pintarTexto(contadorPregunta - 1)
                     }
                 }
@@ -298,8 +291,6 @@ class Activity_Cuestionario : AppCompatActivity() {
                     // en los et.
                     if (contadorPregunta < longi) {
                         // Pintamos el texto en la pregunta actual
-
-                        pregResBandera = true
                         pintarTexto(contadorPregunta + 1)
                     } else {
                         binding!!.lblPregResp.text = "Pregunta"
@@ -807,7 +798,11 @@ class Activity_Cuestionario : AppCompatActivity() {
 
         preguntasColor.clear()
         respuestasColor.clear()
+
+        // Bandera ingresada para que no haga cambios de color cuando se detecte un cambio en ET.
+        pregResBandera = true
         binding!!.etPregResp.text = builder
+        pregResBandera = false
     }
 
     private fun pintarLetra(texto: Editable?) {
