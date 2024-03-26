@@ -66,13 +66,13 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val preferencias =
-            requireActivity().getSharedPreferences("cambiar_nombre", Context.MODE_PRIVATE)
+        /*val preferencias =
+            requireActivity().getSharedPreferences("cambiar_nombre", Context.MODE_PRIVATE)*/
         val preferenciasFolder =
             requireActivity().getSharedPreferences("crear_folder", Context.MODE_PRIVATE)
 
-        val a = preferencias.getString("cambiar_nombre", "no existe")
-        val b = preferenciasFolder.getString("crear_folder", "no existe")
+        /*val lv_archivo = preferencias.getString("cambiar_nombre", "no existe")*/
+        val lv_folder = preferenciasFolder.getString("crear_folder", "no existe")
 
         /*if (a.equals("sin nombre")) {
             binding!!.btnGuardarGuiaEstudio.text = "Cambiar nombre"
@@ -264,31 +264,27 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
             })
         }*/
 
-        if (b.equals("creando_folder")) {
+        if (lv_folder.equals("creando_folder")) {
             binding!!.tilNombreArchivo.hint = "Nombre de la carpeta"
 
             binding!!.btnGuardarGuiaEstudio.text = "Crear carpeta"
-        } else if (a.equals("sin nombre")) {
+        } else if (lv_folder.equals("cambiando_nombre")) {
             binding!!.btnGuardarGuiaEstudio.text = "Cambiar nombre"
         } else {
             binding!!.btnGuardarGuiaEstudio.text = "Guardar guía"
         }
 
         binding!!.btnGuardarGuiaEstudio.setOnClickListener {
-            if (a.equals("sin nombre")) {
+            if (lv_folder.equals("cambiando_nombre")) {
                 if (!binding!!.etNombreArchivo.text.toString().isEmpty()) {
                     // Ruta + nombre del archivo.
-                    val preferencias =
+                    /*val preferencias =
                         requireActivity().getSharedPreferences(
                             "nombre_archivo",
                             Context.MODE_PRIVATE
-                        )
+                        )*/
 
-                    val archivo = File(
-                        "" + file +
-                                preferencias.getString("nombre_archivo", "no existe")
-                                + ".xml"
-                    )
+                    var archivo = File("" + file)
                     if (archivo.exists()) {
                         var item = ""
                         // Defino la ruta donde busco los ficheros.
@@ -296,15 +292,18 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
                         // Creo el array de tipo File con el contenido de la carpeta.
                         val files = file.listFiles()
                         var archivos: File? = null
+
                         // Hacemos un ciclo por cada fichero para extraer el nombre uno a uno.
-                        for (i in files.indices) {
-                            // Sacamos del array files el nombre recuperandolo por posición.
-                            archivos = files[i]
-                            item = archivos.getName().replace(".xml".toRegex(), "")
-                            // Comparamos el texto ingresado en la App con el recuperado.
-                            if ((binding!!.etNombreArchivo.text.toString() == item)) {
-                                archivoExiste = true
-                                break
+                        if (!files.isNullOrEmpty()) {
+                            for (i in files.indices) {
+                                // Sacamos del array files el nombre recuperandolo por posición.
+                                archivos = files[i]
+                                item = archivos.getName().replace(".xml".toRegex(), "")
+                                // Comparamos el texto ingresado en la App con el recuperado.
+                                if ((binding!!.etNombreArchivo.text.toString() == item)) {
+                                    archivoExiste = true
+                                    break
+                                }
                             }
                         }
 
@@ -321,15 +320,14 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
                                 .setPositiveButton(
                                     "Continuar",
                                     DialogInterface.OnClickListener { _, _ -> // Si el usuario quiere continuar reemplazamos el archivo.
-                                        val nuevoArchivo = File(
-                                            archivo.parentFile,
-                                            binding!!.etNombreArchivo.text.toString() + ".xml"
-                                        ) // Creamos el nuevo objeto File
-                                        if (archivo.renameTo(nuevoArchivo)) {
+                                        val nuevoArchivo =
+                                            File("$file/${binding!!.etNombreArchivo.text.toString()}.xml")
+                                        if (archivos?.renameTo(nuevoArchivo) == true) {
                                             Toast.makeText(
                                                 context, "Archivo renombrado exitosamente",
                                                 Toast.LENGTH_SHORT
                                             ).show()
+                                            cerrarDialogo()
                                             cerrarDialogo()
                                         } else {
                                             Toast.makeText(
@@ -340,19 +338,13 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
                                         }
                                     })
                                 .setNegativeButton(
-                                    "Cancelar",
-                                    object : DialogInterface.OnClickListener {
-                                        override fun onClick(dialog: DialogInterface, i: Int) {
-                                            dialog.dismiss()
-                                        }
-                                    }).create().show()
+                                    "Cancelar"
+                                ) { dialog, _ -> dialog.dismiss() }.create().show()
                         } else {
                             // Si el archivo no existe directamente pasamos a cambiar el nombre.
-                            val nuevoArchivo = File(
-                                archivo.parentFile,
-                                binding!!.etNombreArchivo.text.toString() + ".xml"
-                            ) // Creamos el nuevo objeto File
-                            if (archivo.renameTo(nuevoArchivo)) {
+                            val nuevoArchivo =
+                                File("$file/${binding!!.etNombreArchivo.text.toString()}.xml")
+                            if (archivos?.renameTo(nuevoArchivo) == true) {
                                 Toast.makeText(
                                     context, "Archivo renombrado exitosamente",
                                     Toast.LENGTH_SHORT
@@ -373,7 +365,7 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
                         Toast.LENGTH_SHORT
                     ).show()
                 }
-            } else if (b.equals("creando_folder")) {
+            } else if (lv_folder.equals("creando_folder")) {
                 if (binding!!.etNombreArchivo.text.toString().isEmpty()) {
                     Toast.makeText(
                         context, "Ingresa un nombre",

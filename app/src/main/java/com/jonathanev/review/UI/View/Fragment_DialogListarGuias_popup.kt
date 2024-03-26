@@ -58,7 +58,6 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
         dialogActual!!.dismiss()
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -93,29 +92,29 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
         }
 
         binding.imgvFolder.setOnClickListener {
-            // Unicamente abrimos el dialogo y lo mostramos en la pantalla.
-            val dialogo: Fragment_DialogNuevoArchivo_popu = Fragment_DialogNuevoArchivo_popu()
-            dialogo.show(parentFragmentManager, "Fragment_nuevo")
-
             // Creamos las preferencias y dentro de ellas guardamos el arreglo item
-            var preferencias: SharedPreferences =
+            val preferencias: SharedPreferences =
                 requireContext().getSharedPreferences(
                     "crear_folder",
                     AppCompatActivity.MODE_PRIVATE
                 )
 
-            var editor = preferencias.edit()
+            val editor = preferencias.edit()
             editor.putString("crear_folder", "creando_folder")
-            editor.commit()
+            editor.apply()
 
-            preferencias = requireContext().getSharedPreferences(
+            // Unicamente abrimos el dialogo y lo mostramos en la pantalla.
+            val dialogo: Fragment_DialogNuevoArchivo_popu = Fragment_DialogNuevoArchivo_popu()
+            dialogo.show(parentFragmentManager, "Fragment_nuevo")
+
+            /*preferencias = requireContext().getSharedPreferences(
                 "cambiar_nombre",
                 AppCompatActivity.MODE_PRIVATE
             )
 
             editor = preferencias.edit()
-            editor.putString("cambiar_nombre", "sin_nombre")
-            editor.commit()
+            editor.putString("cambiar_nombre", "")
+            editor.commit()*/
         }
     }
 
@@ -127,7 +126,6 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
         guiasViewModel.getAllGuiasCarpetaSeleccionada(carpetaSeleccionada)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     private fun showGuias(guiaModels: List<GuiaModel>) {
         adaptadorListarGuias =
             ListarGuiasAdapter(guiaModels) { position -> showGuiaOptions(position) }
@@ -137,7 +135,6 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
     }
 
 
-    @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("SdCardPath")
     private fun showGuiaOptions(position: Int) {
         // Creo una alerta donde me saldrán una lista de items
@@ -219,26 +216,20 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                 3 -> {
                     // Se ejecuta cuando quiere cambiar el nombre de la guía
                     if (file.exists()) {
+                        // Creamos las preferencias y dentro de ellas guardamos el arreglo item
+                        val preferencias: SharedPreferences =
+                            requireContext().getSharedPreferences(
+                                "crear_folder",
+                                AppCompatActivity.MODE_PRIVATE
+                            )
+
+                        val editor = preferencias.edit()
+                        editor.putString("crear_folder", "cambiando_nombre")
+                        editor.apply()
+
                         // Unicamente abrimos el dialogo y lo mostramos en la pantalla.
                         val dialogo = Fragment_DialogNuevoArchivo_popu()
                         dialogo.show(childFragmentManager, "Fragment")
-
-                        // Creamos las preferencias y dentro de ellas guardamos el arreglo item
-                        var preferencias = requireContext().getSharedPreferences(
-                            "cambiar_nombre",
-                            Context.MODE_PRIVATE
-                        )
-                        var editor = preferencias.edit()
-                        editor.putString("cambiar_nombre", "sin nombre")
-                        editor.commit()
-                        preferencias = requireContext().getSharedPreferences(
-                            "nombre_archivo",
-                            Context.MODE_PRIVATE
-                        )
-                        val guia = guiasViewModel.getGuia(position)
-                        editor = preferencias.edit()
-                        editor.putString("nombre_archivo", guia.nombreGuia)
-                        editor.commit()
                     } else {
                         Toast.makeText(
                             context, "La ruta para cambiar " +
