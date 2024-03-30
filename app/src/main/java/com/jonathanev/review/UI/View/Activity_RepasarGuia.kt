@@ -25,6 +25,7 @@ import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
+import com.jonathanev.review.Core.Constants.file
 import com.jonathanev.review.Data.Model.ColorPregModel
 import com.jonathanev.review.UI.ViewModel.RepasarGuiaViewModel
 import com.jonathanev.review.databinding.ActivityRepasarGuiaBinding
@@ -33,6 +34,7 @@ import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.NodeList
 import org.xml.sax.SAXException
+import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
 import javax.xml.parsers.DocumentBuilder
@@ -53,9 +55,9 @@ class Activity_RepasarGuia : AppCompatActivity() {
     private var builder: SpannableStringBuilder? = null
     private var uri: Uri? = null
     private val repasarGuiaViewModel: RepasarGuiaViewModel by viewModels()
+    private var ruta: String = ""
 
     @SuppressLint("SetTextI18n")
-    @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRepasarGuiaBinding.inflate(layoutInflater)
@@ -74,6 +76,7 @@ class Activity_RepasarGuia : AppCompatActivity() {
 
         if (nombreArchivo == "null"){
             position = intent.extras!!.getInt("file_position")
+            ruta = intent.extras!!.getString("ruta").toString()
             initUI(position)
         } else {
             binding!!.barraSuperiorRegreso.tvTituloToolbar.text = nombreArchivo
@@ -340,7 +343,15 @@ class Activity_RepasarGuia : AppCompatActivity() {
         val db: DocumentBuilder
         try {
             db = dbf.newDocumentBuilder()
-            val fis: FileInputStream = openFileInput(nombreArchivo)
+            var filePath: File
+            if (ruta == "null"){
+                filePath = File(file, nombreArchivo)
+            } else {
+                filePath = File(ruta)
+            }
+
+            val fis = FileInputStream(filePath)
+
             doc = db.parse(fis)
 
             // Buscamos los Nodos Interrogante y accedemos a lo que se encuentre dentro.

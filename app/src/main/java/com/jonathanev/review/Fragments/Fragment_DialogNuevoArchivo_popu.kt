@@ -313,7 +313,7 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
                             AlertDialog.Builder(context)
                                 .setTitle("¡Atención!")
                                 .setMessage(
-                                    ("Ya tienes una guía con el mismo nombre, " +
+                                    ("Ya tienes un archivo con el mismo nombre, " +
                                             "si continuas se va a sobreescribir el archivo, " +
                                             "¿seguro deseas continuar?")
                                 )
