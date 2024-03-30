@@ -62,7 +62,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        restoreMainFilePath()
+        // restoreMainFilePath()
         initUI(file)
 
         guiasViewModel.guias.observe(this) {
@@ -166,6 +166,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                         binding.tvRegresar.visibility = View.VISIBLE
                         initUI(file)
                     }
+
                     1 -> {
                         // Se ejecuta cuando quiere eliminar la guía.
                         AlertDialog.Builder(context)
@@ -353,43 +354,83 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                             ).show()
                         }
                     }
+
                     4 -> {
                         val subMenuBuilder = AlertDialog.Builder(context)
                         subMenuBuilder.setTitle("Mover a...")
 
-                        // val ruta = File("/data/data/com.jonathanev.review/files/")
-                        val listaCarpetas = file.listFiles { file -> file.isDirectory }
+                        val rutaArchivo = "/data/data/com.jonathanev.review/files/zy/z.xml"
+                        var rutaSinArchivo = rutaArchivo.substringBeforeLast("/")
+                        rutaSinArchivo = rutaSinArchivo.replace("/data/data/com.jonathanev.review/files/".toRegex(), "")
+                        if (rutaSinArchivo.equals("files")) {
+                            val listaCarpetas = file.listFiles { file -> file.isDirectory }
 
-                        //val nombresCarpetas = arrayOf<CharSequence>()
+                            //val nombresCarpetas = arrayOf<CharSequence>()
 
-                        if (listaCarpetas != null) {
-                            // Método 1: Usando copyOf()
-                            val nombresCarpetas = listaCarpetas.map { it.name }.toTypedArray()
+                            if (listaCarpetas != null) {
+                                // Método 1: Usando copyOf()
+                                val nombresCarpetas = listaCarpetas.map { it.name }.toTypedArray()
 
-                            subMenuBuilder.setItems(nombresCarpetas) { _, subWhich ->
+                                subMenuBuilder.setItems(nombresCarpetas) { _, subWhich ->
+                                    // Manejar la selección de la carpeta dentro del submenú
+                                    val selectedFolder = nombresCarpetas[subWhich]
+
+                                    // Mover a la carpeta seleccionada
+                                    try {
+                                        // Copiar el archivo
+                                        val guia = guiasViewModel.getGuia(position)
+
+                                        Files.copy(
+                                            Paths.get("" + file + "/" + guia.nombreGuia + ".xml"),
+                                            Paths.get("" + file + "/" + selectedFolder + "/" + guia.nombreGuia + ".xml"),
+                                            StandardCopyOption.REPLACE_EXISTING
+                                        )
+
+                                        // Borrar archivo
+                                        File(file, guia.nombreGuia + ".xml").delete()
+
+                                        Toast.makeText(
+                                            context, "El archivo se movió correctamente",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    } catch (e: Exception) {
+                                        println("Error al copiar el archivo: ${e.message}")
+                                    }
+                                }
+                            }
+                        } else {
+                            subMenuBuilder.setItems(
+                                arrayOf<CharSequence>(
+                                    "Principal",
+                                )
+                            ) { _, subWhich ->
                                 // Manejar la selección de la carpeta dentro del submenú
-                                val selectedFolder = nombresCarpetas[subWhich]
+                                when (subWhich) {
+                                    0 -> {
+                                        // Mover a la carpeta seleccionada
+                                        try {
+                                            // Copiar el archivo
+                                            val guia = guiasViewModel.getGuia(position)
 
-                                // Mover a la carpeta seleccionada
-                                try {
-                                    // Copiar el archivo
-                                    val guia = guiasViewModel.getGuia(position)
+                                            Files.copy(
+                                                Paths.get("$fileClickeado.xml"),
+                                                Paths.get("/data/data/com.jonathanev.review/files/" + guia.nombreGuia + ".xml"),
+                                                StandardCopyOption.REPLACE_EXISTING
+                                            )
 
-                                    Files.copy(
-                                        Paths.get("" + file + "/" + guia.nombreGuia + ".xml"),
-                                        Paths.get("" + file + "/" + selectedFolder + "/" + guia.nombreGuia + ".xml"),
-                                        StandardCopyOption.REPLACE_EXISTING
-                                    )
+                                            // Borrar archivo
+                                            val ruta = "$fileClickeado.xml"
+                                            File(ruta).delete()
+                                            initUI(file)
 
-                                    // Borrar archivo
-                                    File(file, guia.nombreGuia + ".xml").delete()
-
-                                    Toast.makeText(
-                                        context, "El archivo se copió correctamente",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                } catch (e: Exception) {
-                                    println("Error al copiar el archivo: ${e.message}")
+                                            Toast.makeText(
+                                                context, "El archivo se movió correctamente",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        } catch (e: Exception) {
+                                            println("Error al copiar el archivo: ${e.message}")
+                                        }
+                                    }
                                 }
                             }
                         }

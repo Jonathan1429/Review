@@ -142,8 +142,7 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
                                                 context, "Archivo renombrado exitosamente",
                                                 Toast.LENGTH_SHORT
                                             ).show()
-                                            cerrarDialogo()
-                                            cerrarDialogo()
+                                            cerrarTodosDialogos()
                                         } else {
                                             Toast.makeText(
                                                 context, "No se pudo renombrar el archivo",
