@@ -17,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.jonathanev.review.Core.Constants.changeFilePath
 import com.jonathanev.review.Core.Constants.file
 import com.jonathanev.review.Core.Constants.restoreMainFilePath
@@ -40,6 +41,8 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
 
     private val guiasViewModel by viewModels<FragDialListarGuiasViewModel>()
     private lateinit var adaptadorListarGuias: ListarGuiasAdapter
+    private val elementosPorCarga = 10 // Cantidad de elementos a cargar por cada carga adicional
+    private var numeroElementosCargados = 0 // Número actual de elementos cargados
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -66,29 +69,20 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
             showGuias(it)
         }
 
-        /*binding.imgvNextFolder.setOnClickListener {
-            val subMenuBuilder = AlertDialog.Builder(context)
-            subMenuBuilder.setTitle("Selecciona la carpeta")
+        // Agregar un OnScrollListener al RecyclerView para detectar cuando el usuario se desplaza.
+        /*binding.lvGuiasEstudio.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                val totalItems = layoutManager.itemCount
+                val ultimoVisible = layoutManager.findLastVisibleItemPosition()
 
-            // val ruta = File("/data/data/com.jonathanev.review/files/")
-            val listaCarpetas = file.listFiles { file -> file.isDirectory }
-
-            //val nombresCarpetas = arrayOf<CharSequence>()
-
-            if (listaCarpetas != null) {
-                // Método 1: Usando copyOf()
-                val nombresCarpetas = listaCarpetas.map { it.name }.toTypedArray()
-
-                subMenuBuilder.setItems(nombresCarpetas) { _, subWhich ->
-                    // Manejar la selección de la carpeta dentro del submenú
-                    val selectedFolder = nombresCarpetas[subWhich]
-
-                    getGuiasCarpetaSeleccionada(selectedFolder)
+                // Si el último elemento visible es igual al total de elementos menos uno (es decir, estamos cerca del final de la lista).
+                if (ultimoVisible == totalItems - 1) {
+                    cargarElementos(guiaModels)
                 }
             }
-
-            subMenuBuilder.show()
-        }*/
+        })*/
 
         binding.LlFolders.setOnClickListener {
             if (binding.imgvBack.visibility == View.VISIBLE) {
@@ -112,7 +106,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                 editor.apply()
 
                 // Unicamente abrimos el dialogo y lo mostramos en la pantalla.
-                val dialogo: Fragment_DialogNuevoArchivo_popu = Fragment_DialogNuevoArchivo_popu()
+                val dialogo = Fragment_DialogNuevoArchivo_popu()
                 dialogo.show(parentFragmentManager, "Fragment_nuevo")
             }
         }
@@ -128,7 +122,20 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
         binding.lvGuiasEstudio.layoutManager = LinearLayoutManager(context)
         binding.lvGuiasEstudio.setHasFixedSize(true)
         binding.lvGuiasEstudio.adapter = adaptadorListarGuias
+
+        /*cargarElementos(guiaModels)*/
     }
+
+    /*private fun cargarElementos(guiaModels: List<GuiaModel>) {
+        // Calcula la próxima sección de elementos a cargar
+        val nuevosDatos = guiaModels.subList(numeroElementosCargados, minOf(numeroElementosCargados + elementosPorCarga, guiaModels.size))
+
+        // Agrega los nuevos datos al adaptador
+        adaptadorListarGuias.agregarGuias(nuevosDatos)
+
+        // Incrementa el contador de elementos cargados
+        numeroElementosCargados += nuevosDatos.size
+    }*/
 
 
     @SuppressLint("SdCardPath")
@@ -137,12 +144,102 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
 
         val fileClickeado = File("" + file + "/" + guia.nombreGuia)
         if (fileClickeado.isDirectory) {
-            changeFilePath(guia.nombreGuia)
-            binding.imgvFolder.visibility = View.GONE
-            binding.tvNuevaCarpeta.visibility = View.GONE
-            binding.imgvBack.visibility = View.VISIBLE
-            binding.tvRegresar.visibility = View.VISIBLE
-            initUI(file)
+            val builder = AlertDialog.Builder(context)
+            builder.setIcon(R.drawable.ic_advertencia)
+            builder.setTitle("¿Qué acción deseas realizar?")
+            builder.setItems(
+                arrayOf<CharSequence>(
+                    "Abrir",
+                    "Eliminar",
+                    // "Cambiar nombre",
+                    "Cancelar"
+                )
+            ) { dialog, which ->
+                restoreMainFilePath()
+                val ruta = "$fileClickeado"
+                when (which) {
+                    0 -> {
+                        changeFilePath(guia.nombreGuia)
+                        binding.imgvFolder.visibility = View.GONE
+                        binding.tvNuevaCarpeta.visibility = View.GONE
+                        binding.imgvBack.visibility = View.VISIBLE
+                        binding.tvRegresar.visibility = View.VISIBLE
+                        initUI(file)
+                    }
+                    1 -> {
+                        // Se ejecuta cuando quiere eliminar la guía.
+                        AlertDialog.Builder(context)
+                            .setTitle("¡Atención!")
+                            .setMessage(
+                                "¿Estás seguro que deseas eliminar la carpeta y su contenido?"
+                            )
+                            .setPositiveButton("Si") { _, _ ->
+                                // Si entra al tercero es para eliminar la guia exitosamente
+                                if (fileClickeado.exists()) {
+                                    val exito = deleteFolder(fileClickeado)
+                                    if (exito) {
+                                        Toast.makeText(
+                                            context,
+                                            "¡Carpeta eliminada exitosamente!",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    } else {
+                                        Toast.makeText(
+                                            context,
+                                            "Error al eliminar la carpeta",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+
+                                    // Recuperamos el dialogo abierto actualmente
+                                    // (Fragment_DialogListarGuias_popup.java)
+                                    // y lo cerramos.
+                                    val dialogoEliminarGuia = getDialog()
+                                    dialogoEliminarGuia?.dismiss()
+                                } else {
+                                    Toast.makeText(
+                                        context, "La ruta para eliminar el " +
+                                                "archivo actualmente no existe.",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+                            .setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
+                            .create().show()
+                    }
+                    /*2 ->
+                        // Se ejecuta cuando quiere cambiar el nombre de la guía
+                        if (fileClickeado.exists()) {
+                            // Creamos las preferencias y dentro de ellas guardamos el arreglo item
+                            val preferencias: SharedPreferences =
+                                requireContext().getSharedPreferences(
+                                    "crear_folder",
+                                    AppCompatActivity.MODE_PRIVATE
+                                )
+
+                            val editor = preferencias.edit()
+                            editor.putString("crear_folder", "cambiar_nom_folder")
+                            editor.apply()
+
+                            // Unicamente abrimos el dialogo y lo mostramos en la pantalla.
+                            val dialogo = Fragment_DialogNuevoArchivo_popu()
+                            dialogo.show(childFragmentManager, "Fragment")
+                        } else {
+                            Toast.makeText(
+                                context, "La ruta para cambiar " +
+                                        "el nombre del archivo actualmente no existe.",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }*/
+                    2 -> {
+                        // Cuando cancela se ejecuta esta acción
+                        dialog.dismiss()
+                        Toast.makeText(context, "Cancelaste la acción", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                }
+            }
+            builder.create().show()
         } else {
             // restoreMainFilePath()
             // Creo una alerta donde me saldrán una lista de items
@@ -165,12 +262,12 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
 
                 }*/
                 restoreMainFilePath()
+                val ruta = "$fileClickeado.xml"
                 when (which) {
                     0 -> {
                         // Si entra al primer item se abre la guía a review
                         val intentAbrirGuia = Intent(activity, Activity_RepasarGuia::class.java)
                         //intentAbrirGuia.putExtra("nombre_archivo", guia.nombreGuia)
-                        val ruta = "$fileClickeado.xml"
                         intentAbrirGuia.putExtra("ruta", ruta)
                         intentAbrirGuia.putExtra("file_position", position)
                         startActivity(intentAbrirGuia)
@@ -186,6 +283,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                         val intentModificarGuia =
                             Intent(activity, Activity_Modificar::class.java)
                         //intentModificarGuia.putExtra("nombre_archivo", guia.nombreGuia)
+                        intentModificarGuia.putExtra("ruta", ruta)
                         intentModificarGuia.putExtra("file_position", position)
                         startActivity(intentModificarGuia)
                         // Recuperamos el dialogo abierto actualmente
@@ -255,10 +353,9 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                             ).show()
                         }
                     }
-
                     4 -> {
                         val subMenuBuilder = AlertDialog.Builder(context)
-                        subMenuBuilder.setTitle("Selecciona la carpeta")
+                        subMenuBuilder.setTitle("Mover a...")
 
                         // val ruta = File("/data/data/com.jonathanev.review/files/")
                         val listaCarpetas = file.listFiles { file -> file.isDirectory }
@@ -310,6 +407,21 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
             }
             builder.create().show()
         }
+    }
+
+    private fun deleteFolder(fileClickeado: File): Boolean {
+        if (fileClickeado.isDirectory) {
+            val children = fileClickeado.listFiles()
+            if (children != null) {
+                for (child in children) {
+                    val success = deleteFolder(child)
+                    if (!success) {
+                        return false
+                    }
+                }
+            }
+        }
+        return fileClickeado.delete()
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {

@@ -18,4 +18,11 @@ class ListarGuiasAdapter(private var guiasEstudio: List<GuiaModel>, private val 
     override fun onBindViewHolder(holder: ListarGuiasViewHolder, position: Int) {
         holder.render(guiasEstudio[position], positionClicked)
     }
+
+    /*fun agregarGuias(nuevasGuias: List<GuiaModel>) {
+        val listaMutable = guiasEstudio.toMutableList() // Copiar la lista existente a una lista mutable
+        listaMutable.addAll(nuevasGuias) // Agregar las nuevas guías a la lista mutable
+        guiasEstudio = listaMutable.toList() // Asignar la lista mutable actualizada a guiasEstudio
+        notifyDataSetChanged()
+    }*/
 }

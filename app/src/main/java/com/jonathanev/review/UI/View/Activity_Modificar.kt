@@ -70,6 +70,7 @@ class Activity_Modificar : AppCompatActivity() {
     private var uri: Uri? = null
     private var longCaracteres = 0
     private var pregResBandera = false // Bandera para cuando se le de click atras o delante.
+    private var ruta: String = ""
 
     // Seleccionar imagen
     private val pickMedia =
@@ -121,6 +122,7 @@ class Activity_Modificar : AppCompatActivity() {
             pintarTexto(contadorPregunta)
         } else {
             position = intent.extras!!.getInt("file_position")
+            ruta = intent.extras!!.getString("ruta").toString()
             initUI(position)
         }
 
@@ -880,8 +882,13 @@ class Activity_Modificar : AppCompatActivity() {
         val db: DocumentBuilder
         try {
             db = dbf.newDocumentBuilder()
-            val fis: FileInputStream = openFileInput(nombreArchivo)
-            doc = db.parse(fis)
+            var filePath: File
+            if (ruta == "null"){
+                filePath = File(file, nombreArchivo)
+            } else {
+                filePath = File(ruta)
+            }
+            doc = db.parse(filePath)
 
             // Buscamos los Nodos Interrogante y accedemos a lo que se encuentre dentro.
             val cuestionario: NodeList = doc.getElementsByTagName("Interrogante")
