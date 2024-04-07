@@ -13,7 +13,6 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.Spannable
 import android.text.SpannableStringBuilder
-import android.text.Spanned
 import android.text.TextWatcher
 import android.text.style.ForegroundColorSpan
 import android.util.Log
@@ -39,7 +38,6 @@ import com.jonathanev.review.Data.Model.ColorPregModel
 import com.jonathanev.review.Fragments.Fragment_DialogColoresMod_popup
 import com.jonathanev.review.UI.ViewModel.ModificarViewModel
 import com.jonathanev.review.databinding.ActivityModificarBinding
-import dagger.hilt.EntryPoint
 import dagger.hilt.android.AndroidEntryPoint
 import org.w3c.dom.Document
 import org.w3c.dom.Element
@@ -47,7 +45,6 @@ import org.w3c.dom.NodeList
 import org.xml.sax.SAXException
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
-import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
 import javax.xml.parsers.DocumentBuilder
@@ -121,9 +118,9 @@ class Activity_Modificar : AppCompatActivity() {
             // Pintamos el texto del contador actual.
             pintarTexto(contadorPregunta)
         } else {
-            position = intent.extras!!.getInt("file_position")
+            // position = intent.extras!!.getInt("file_position")
             ruta = intent.extras!!.getString("ruta").toString()
-            initUI(position)
+            initUI(ruta)
         }
 
         modificarViewModel.guiaModel.observe(this) {
@@ -647,8 +644,8 @@ class Activity_Modificar : AppCompatActivity() {
         })
     }
 
-    private fun initUI(position: Int) {
-        modificarViewModel.getGuia(position)
+    private fun initUI(ruta: String) {
+        modificarViewModel.getGuia(ruta)
     }
 
     private fun initLoadAds() {

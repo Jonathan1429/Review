@@ -344,7 +344,7 @@ class Activity_RepasarGuia : AppCompatActivity() {
         try {
             db = dbf.newDocumentBuilder()
             var filePath: File
-            if (ruta == "null"){
+            if (ruta == "null" || ruta.isEmpty()){
                 filePath = File(file, nombreArchivo)
             } else {
                 filePath = File(ruta)

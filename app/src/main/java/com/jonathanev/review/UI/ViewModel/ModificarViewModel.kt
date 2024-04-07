@@ -13,7 +13,7 @@ class ModificarViewModel @Inject constructor(
 ) : ViewModel(){
     val guiaModel = MutableLiveData<GuiaModel>()
 
-    fun getGuia(position: Int){
-        guiaModel.postValue(getGuiaUseCase(position))
+    fun getGuia(ruta: String){
+        guiaModel.postValue(getGuiaUseCase(ruta))
     }
 }

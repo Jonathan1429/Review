@@ -62,7 +62,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // restoreMainFilePath()
+        restoreMainFilePath()
         initUI(file)
 
         guiasViewModel.guias.observe(this) {
@@ -304,9 +304,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                             .setPositiveButton("Si") { _, _ ->
                                 // Si entra al tercero es para eliminar la guia exitosamente
                                 if (file.exists()) {
-                                    val guia = guiasViewModel.getGuia(position)
-
-                                    File(file, guia.nombreGuia + ".xml").delete()
+                                    File(ruta).delete()
                                     Toast.makeText(
                                         context,
                                         "¡Archivo eliminado exitosamente!",
@@ -341,6 +339,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
 
                             val editor = preferencias.edit()
                             editor.putString("crear_folder", "cambiando_nombre")
+                            editor.putString("ruta", ruta)
                             editor.apply()
 
                             // Unicamente abrimos el dialogo y lo mostramos en la pantalla.
@@ -359,10 +358,10 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                         val subMenuBuilder = AlertDialog.Builder(context)
                         subMenuBuilder.setTitle("Mover a...")
 
-                        val rutaArchivo = "/data/data/com.jonathanev.review/files/zy/z.xml"
-                        var rutaSinArchivo = rutaArchivo.substringBeforeLast("/")
+                        // val rutaArchivo = "/data/data/com.jonathanev.review/files/zy/z.xml"
+                        var rutaSinArchivo = ruta.substringBeforeLast("/")
                         rutaSinArchivo = rutaSinArchivo.replace("/data/data/com.jonathanev.review/files/".toRegex(), "")
-                        if (rutaSinArchivo.equals("files")) {
+                        if (rutaSinArchivo.equals("/data/data/com.jonathanev.review/files")) {
                             val listaCarpetas = file.listFiles { file -> file.isDirectory }
 
                             //val nombresCarpetas = arrayOf<CharSequence>()
@@ -389,6 +388,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                                         // Borrar archivo
                                         File(file, guia.nombreGuia + ".xml").delete()
 
+                                        initUI(file)
                                         Toast.makeText(
                                             context, "El archivo se movió correctamente",
                                             Toast.LENGTH_SHORT
@@ -422,6 +422,11 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                                             val ruta = "$fileClickeado.xml"
                                             File(ruta).delete()
                                             initUI(file)
+
+                                            binding.imgvFolder.visibility = View.VISIBLE
+                                            binding.tvNuevaCarpeta.visibility = View.VISIBLE
+                                            binding.imgvBack.visibility = View.GONE
+                                            binding.tvRegresar.visibility = View.GONE
 
                                             Toast.makeText(
                                                 context, "El archivo se movió correctamente",

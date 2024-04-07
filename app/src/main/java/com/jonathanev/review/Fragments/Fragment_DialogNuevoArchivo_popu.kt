@@ -82,6 +82,7 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
             requireActivity().getSharedPreferences("crear_folder", Context.MODE_PRIVATE)
 
         val lv_folder = preferenciasFolder.getString("crear_folder", "no existe")
+        val lv_ruta = preferenciasFolder.getString("ruta", "no existe")
 
         if (lv_folder.equals("creando_folder")) {
             binding!!.tilNombreArchivo.hint = "Nombre de la carpeta"
@@ -99,8 +100,11 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
             if (lv_folder.equals("cambiando_nombre")) {
                 if (!binding!!.etNombreArchivo.text.toString().isEmpty()) {
                     // Ruta + nombre del archivo.
-                    var archivo = File("" + file)
-                    if (archivo.exists()) {
+                    val rutaSinArchivo = lv_ruta.toString().substringBeforeLast("/")
+                    //val archivo = lv_ruta?.replace(rutaSinArchivo + "/".toRegex(), "")
+                    //var archivo = File("" + lv_ruta)
+                    file = File(rutaSinArchivo)
+                    if (file.exists()) {
                         var item = ""
                         // Defino la ruta donde busco los ficheros.
                         var archivoExiste = false
@@ -113,11 +117,13 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
                             for (i in files.indices) {
                                 // Sacamos del array files el nombre recuperandolo por posición.
                                 archivos = files[i]
-                                item = archivos.getName().replace(".xml".toRegex(), "")
-                                // Comparamos el texto ingresado en la App con el recuperado.
-                                if ((binding!!.etNombreArchivo.text.toString() == item)) {
-                                    archivoExiste = true
-                                    break
+                                if (!archivos.isDirectory) {
+                                    item = archivos.getName().replace(".xml".toRegex(), "")
+                                    // Comparamos el texto ingresado en la App con el recuperado.
+                                    if ((binding!!.etNombreArchivo.text.toString() == item)) {
+                                        archivoExiste = true
+                                        break
+                                    }
                                 }
                             }
                         }
@@ -133,32 +139,34 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
                                             "¿seguro deseas continuar?")
                                 )
                                 .setPositiveButton(
-                                    "Continuar",
-                                    DialogInterface.OnClickListener { _, _ -> // Si el usuario quiere continuar reemplazamos el archivo.
-                                        val nuevoArchivo =
-                                            File("$file/${binding!!.etNombreArchivo.text.toString()}.xml")
-                                        if (archivos?.renameTo(nuevoArchivo) == true) {
-                                            Toast.makeText(
-                                                context, "Archivo renombrado exitosamente",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                            cerrarTodosDialogos()
-                                        } else {
-                                            Toast.makeText(
-                                                context, "No se pudo renombrar el archivo",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                            cerrarDialogo()
-                                        }
-                                    })
+                                    "Continuar"
+                                ) { _, _ -> // Si el usuario quiere continuar reemplazamos el archivo.
+                                    val nuevoArchivo =
+                                        File("$rutaSinArchivo/${binding!!.etNombreArchivo.text.toString()}.xml")
+                                    val rutaRenombrar = File(lv_ruta.toString())
+                                    if (rutaRenombrar.renameTo(nuevoArchivo)) {
+                                        Toast.makeText(
+                                            context, "Archivo renombrado exitosamente",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        cerrarTodosDialogos()
+                                    } else {
+                                        Toast.makeText(
+                                            context, "No se pudo renombrar el archivo",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        cerrarDialogo()
+                                    }
+                                }
                                 .setNegativeButton(
                                     "Cancelar"
                                 ) { dialog, _ -> dialog.dismiss() }.create().show()
                         } else {
                             // Si el archivo no existe directamente pasamos a cambiar el nombre.
                             val nuevoArchivo =
-                                File("$file/${binding!!.etNombreArchivo.text.toString()}.xml")
-                            if (archivos?.renameTo(nuevoArchivo) == true) {
+                                File("$rutaSinArchivo/${binding!!.etNombreArchivo.text.toString()}.xml")
+                            val rutaRenombrar = File(lv_ruta.toString())
+                            if (rutaRenombrar.renameTo(nuevoArchivo)) {
                                 Toast.makeText(
                                     context, "Archivo renombrado exitosamente",
                                     Toast.LENGTH_SHORT
