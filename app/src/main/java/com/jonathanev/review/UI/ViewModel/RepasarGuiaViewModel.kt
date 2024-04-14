@@ -10,11 +10,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 class RepasarGuiaViewModel @Inject constructor(
-    private val getGuiaPosicionUseCase: getGuiaPosicionUseCase
+    val getGuiaUseCase: getGuiaUseCase
 ): ViewModel(){
     val guiaModel = MutableLiveData<GuiaModel>()
 
-    fun getGuia(position: Int){
-        guiaModel.postValue(getGuiaPosicionUseCase(position))
+    fun getGuia(ruta: String){
+        guiaModel.postValue(getGuiaUseCase(ruta))
     }
 }

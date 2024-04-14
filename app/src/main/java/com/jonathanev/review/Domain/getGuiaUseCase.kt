@@ -10,9 +10,11 @@ class getGuiaUseCase @Inject constructor(
     operator fun invoke(ruta: String): GuiaModel {
         val archivo = ruta.substringAfterLast("/")
         var guia: GuiaModel = GuiaModel("", 0)
+
         for ((posicion, valor) in guiaProvider.guias.withIndex()){
-            if (archivo.equals(valor)){
-                guia = guiaProvider.guias[posicion]
+            val guiaXML = "${valor.nombreGuia}.xml"
+            if (archivo == guiaXML){
+                guia.nombreGuia = guiaProvider.guias[posicion].nombreGuia
                 break
             }
         }

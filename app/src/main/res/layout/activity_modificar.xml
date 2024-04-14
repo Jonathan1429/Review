@@ -152,37 +152,43 @@
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/tilContenidoPregResp"
+            <FrameLayout
+                android:id="@+id/flContenidoPregResp"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginStart="6dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginEnd="6dp"
-                android:hint="@string/lblCuestionario"
-                android:labelFor="@+id/tvContenidoPregResp"
-                android:padding="15dp"
-                android:visibility="visible"
-                app:endIconMode="clear_text">
+                android:layout_height="match_parent">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etPregResp"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilContenidoPregResp"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:autofillHints="testHint"
-                    android:background="@android:color/transparent"
-                    android:gravity="top"
-                    android:inputType="text|textMultiLine"
-                    android:scrollbars="vertical"
-                    android:textSize="18sp" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:layout_marginStart="6dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="6dp"
+                    android:hint="@string/lblCuestionario"
+                    android:labelFor="@+id/tvContenidoPregResp"
+                    android:padding="15dp"
+                    android:visibility="visible"
+                    app:endIconMode="clear_text">
 
-            <com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
-                android:id="@+id/ivImagen"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_margin="20dp"
-                android:visibility="gone"/>
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etPregResp"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:autofillHints="testHint"
+                        android:background="@android:color/transparent"
+                        android:gravity="top"
+                        android:inputType="text|textMultiLine"
+                        android:scrollbars="vertical"
+                        android:textSize="18sp" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
+                    android:id="@+id/ivImagen"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="20dp"
+                    android:visibility="gone" />
+            </FrameLayout>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 

@@ -697,9 +697,9 @@ class Activity_Cuestionario : AppCompatActivity() {
                 Toast.LENGTH_SHORT
             ).show()
             Log.i("Creación: ", "Guia de estudio creada exitosamente")
-
+            val ruta = "$file/$nombreArchivo.xml"
             val intent: Intent = Intent(applicationContext, Activity_RepasarGuia::class.java)
-            intent.putExtra("nombre_archivo", nombreArchivo)
+            intent.putExtra("ruta", ruta)
             startActivity(intent)
             finish()
         } catch (e: IOException) {

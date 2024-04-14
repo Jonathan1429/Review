@@ -18,6 +18,7 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.animation.doOnEnd
 import androidx.core.net.toUri
 import androidx.core.view.isGone
 import com.davemorrissey.labs.subscaleview.ImageSource
@@ -45,8 +46,7 @@ import javax.xml.parsers.ParserConfigurationException
 @AndroidEntryPoint
 class Activity_RepasarGuia : AppCompatActivity() {
     private var binding: ActivityRepasarGuiaBinding? = null
-    private lateinit var nombreArchivo: String
-    private var position: Int = 0
+    private var nombreArchivo: String = ""
     private val preguntas: ArrayList<String> = ArrayList()
     private val respuestas: ArrayList<String> = ArrayList()
     private val preguntasColor: ArrayList<ColorPregModel> = ArrayList()
@@ -74,31 +74,16 @@ class Activity_RepasarGuia : AppCompatActivity() {
         editor.putString("nombre_archivo", nombreArchivo)
         editor.apply()
 
-        if (nombreArchivo == "null"){
-            position = intent.extras!!.getInt("file_position")
-            ruta = intent.extras!!.getString("ruta").toString()
-            initUI(position)
-        } else {
-            binding!!.barraSuperiorRegreso.tvTituloToolbar.text = nombreArchivo
+        ruta = intent.extras!!.getString("ruta").toString()
+        initUI(ruta)
 
-            if (!nombreArchivo.contains(".xml")) {
-                nombreArchivo = "$nombreArchivo.xml"
-            }
-            // Obtenemos los datos del XML y los guardamos en su respectivo ArrayList.
-            obtenerDatosXML()
-
-            // Pintamos el texto del contador actual.
-            pintarTexto()
-        }
-
-
-        repasarGuiaViewModel.guiaModel.observe(this){
+        repasarGuiaViewModel.guiaModel.observe(this) {
             //binding!!.barraSuperiorRegreso.tvTituloToolbar.text = "Guia: $it.nombreGuia"
-            //nombreArchivo = it.nombreGuia
+            nombreArchivo = it.nombreGuia
 
             // Guardo el nombre del archivo enviado desde el popupFragmentListarGuias.
-            if (it.nombreGuia.contains(".xml")){
-                nombreArchivo = nombreArchivo!!.replace(".xml".toRegex(), "")
+            if (it.nombreGuia.contains(".xml")) {
+                nombreArchivo = nombreArchivo.replace(".xml".toRegex(), "")
             }
 
             binding!!.barraSuperiorRegreso.tvTituloToolbar.text = "Guia: ${it.nombreGuia}"
@@ -114,14 +99,12 @@ class Activity_RepasarGuia : AppCompatActivity() {
         binding!!.barraSuperiorRegreso.imgvBack.setOnClickListener { onBackPressed() }
 
         binding!!.imgvPregResp.setOnClickListener {
-            if (binding!!.lblPregResp.text.toString() == "Pregunta"){
-                //mostrarRespuesta(builder)
+            if (binding!!.lblPregResp.text.toString() == "Pregunta") {
                 binding!!.lblPregResp.text = "Respuesta"
-                pintarTexto()
             } else {
                 binding!!.lblPregResp.text = "Pregunta"
-                pintarTexto()
             }
+
             girarCardView()
         }
 
@@ -162,7 +145,8 @@ class Activity_RepasarGuia : AppCompatActivity() {
                 AlertDialog.Builder(this@Activity_RepasarGuia)
                     .setTitle("¡Atención!")
                     .setMessage("Se acabaron las preguntas, ¿Quieres repetir la guia?")
-                    .setPositiveButton("Si"
+                    .setPositiveButton(
+                        "Si"
                     ) { dialogInterface, i ->
                         contadorPregunta = 0
 
@@ -172,25 +156,26 @@ class Activity_RepasarGuia : AppCompatActivity() {
                         // Mostramos el primer valor de la pregunta pintado.
                         pintarTexto()
                     }
-                    .setNegativeButton("Cancelar"
+                    .setNegativeButton(
+                        "Cancelar"
                     ) { dialog, i -> dialog.dismiss() }.create().show()
             }
         }
 
         binding!!.imgvEdit.setOnClickListener {
             // Recuperar el valor de SharedPreferences
-            val preferences = getSharedPreferences("MiPref", MODE_PRIVATE)
-            val nombreArchivo = preferences.getString("nombre_archivo", "")
+            // val preferences = getSharedPreferences("MiPref", MODE_PRIVATE)
+            // val nombreArchivo = preferences.getString("nombre_archivo", "")
 
             val intent: Intent = Intent(applicationContext, Activity_Modificar::class.java)
-            intent.putExtra("nombre_archivo", nombreArchivo)
+            intent.putExtra("ruta", ruta)
             startActivity(intent)
             finish()
         }
     }
 
-    private fun initUI(position: Int) {
-        repasarGuiaViewModel.getGuia(position)
+    private fun initUI(ruta: String) {
+        repasarGuiaViewModel.getGuia(ruta)
     }
 
     private fun initLoadAds() {
@@ -199,15 +184,19 @@ class Activity_RepasarGuia : AppCompatActivity() {
         val adRequest = AdRequest.Builder().build()
         binding!!.adView.loadAd(adRequest)
 
-        binding!!.adView.adListener = object : AdListener(){
+        binding!!.adView.adListener = object : AdListener() {
             override fun onAdLoaded() {
             }
-            override fun onAdFailedToLoad(adError : LoadAdError) {
+
+            override fun onAdFailedToLoad(adError: LoadAdError) {
             }
+
             override fun onAdOpened() {
             }
+
             override fun onAdClicked() {
             }
+
             override fun onAdClosed() {
             }
         }
@@ -218,29 +207,34 @@ class Activity_RepasarGuia : AppCompatActivity() {
         onAdLeftApplication: Cuando el usuario abandone la aplicación.
         onAdClosed: Se llama al cerrar la publicidad.*/
     }
+
     private fun girarCardView() {
         if (!binding!!.tilContenidoPregResp.isGone) {
-            val flipAnimator =
-                ObjectAnimator.ofFloat(binding!!.tilContenidoPregResp, "rotationY", 0f, 360f)
-            flipAnimator.duration = 1000 // Duración de la animación en milisegundos
+            pintarTexto()
+            var flipAnimator =
+                ObjectAnimator.ofFloat(binding!!.flContenidoPregResp, "rotationY", 0f, 180f)
+            flipAnimator.duration = 0 // Duración de la animación en milisegundos
             flipAnimator.start()
-            /*flipAnimator.doOnEnd {
-                showImageOrText()
-                //growCard()
-                //binding!!.ivImagen.visibility = View.GONE
-                //binding!!.tilContenidoPregResp.visibility = View.VISIBLE
-            }*/
+            flipAnimator.doOnEnd {
+                //showImageOrText()
+                flipAnimator =
+                    ObjectAnimator.ofFloat(binding!!.flContenidoPregResp, "rotationY", 180f, 0f)
+                flipAnimator.duration = 1000 // Duración de la animación en milisegundos
+                flipAnimator.start()
+            }
         } else {
-            val flipAnimator =
-                ObjectAnimator.ofFloat(binding!!.ivImagen, "rotationY", 0f, 360f)
-            flipAnimator.duration = 1000 // Duración de la animación en milisegundos
+            pintarTexto()
+            var flipAnimator =
+                ObjectAnimator.ofFloat(binding!!.flContenidoPregResp, "rotationY", 0f, 180f) // ivImagen
+            flipAnimator.duration = 0 // Duración de la animación en milisegundos
             flipAnimator.start()
-            /*flipAnimator.doOnEnd {
-                showImageOrText()
-                //growCard()
-                //binding!!.ivImagen.visibility = View.GONE
-                //binding!!.tilContenidoPregResp.visibility = View.VISIBLE
-            }*/
+            flipAnimator.doOnEnd {
+                //showImageOrText()
+                flipAnimator =
+                    ObjectAnimator.ofFloat(binding!!.flContenidoPregResp, "rotationY", 180f, 0f)
+                flipAnimator.duration = 1000 // Duración de la animación en milisegundos
+                flipAnimator.start()
+            }
         }
     }
 
@@ -344,7 +338,7 @@ class Activity_RepasarGuia : AppCompatActivity() {
         try {
             db = dbf.newDocumentBuilder()
             var filePath: File
-            if (ruta == "null" || ruta.isEmpty()){
+            if (ruta == "null" || ruta.isEmpty()) {
                 filePath = File(file, nombreArchivo)
             } else {
                 filePath = File(ruta)

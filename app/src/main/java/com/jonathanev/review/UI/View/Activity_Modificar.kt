@@ -25,6 +25,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.animation.doOnEnd
 import androidx.core.net.toUri
 import androidx.core.view.isGone
 import androidx.core.widget.ImageViewCompat
@@ -56,7 +57,6 @@ class Activity_Modificar : AppCompatActivity() {
     private var binding: ActivityModificarBinding? = null
     private lateinit var nombreArchivo: String
     private var colorActual: Int = 0
-    private var position: Int = 0
     private val preguntas: ArrayList<String> = ArrayList()
     private val respuestas: ArrayList<String> = ArrayList()
     private val preguntasColor: ArrayList<ColorPregModel> = ArrayList()
@@ -103,25 +103,8 @@ class Activity_Modificar : AppCompatActivity() {
         // Sección de anuncios
         initLoadAds()
 
-        nombreArchivo = intent.extras!!.getString("nombre_archivo").toString()
-
-        if (nombreArchivo != "null") {
-            binding!!.barraSuperiorRegreso.tvTituloToolbar.text = "Modificando: $nombreArchivo"
-
-            if (!nombreArchivo.contains(".xml")) {
-                nombreArchivo = "$nombreArchivo.xml"
-            }
-
-            // Obtenemos los datos del XML y los guardamos en su respectivo ArrayList.
-            obtenerDatosXML()
-
-            // Pintamos el texto del contador actual.
-            pintarTexto(contadorPregunta)
-        } else {
-            // position = intent.extras!!.getInt("file_position")
-            ruta = intent.extras!!.getString("ruta").toString()
-            initUI(ruta)
-        }
+        ruta = intent.extras!!.getString("ruta").toString()
+        initUI(ruta)
 
         modificarViewModel.guiaModel.observe(this) {
             nombreArchivo = it.nombreGuia
@@ -351,6 +334,12 @@ class Activity_Modificar : AppCompatActivity() {
                     if (contadorPregunta < longi) {
                         // Pintamos el texto en la pregunta actual
 
+                        binding!!.lblPregResp.text = "Pregunta"
+                        binding!!.tilContenidoPregResp.visibility = View.VISIBLE
+                        binding!!.ivImagen.visibility = View.GONE
+                        binding!!.imgvCancelar.visibility = View.GONE
+                        binding!!.imgvQuitColor.visibility = View.VISIBLE
+                        binding!!.imgvSelColor.visibility = View.VISIBLE
                         pintarTexto(contadorPregunta + 1)
                     } else if (!dialMasPreg) {
                         // ¿Quieres agregar más preguntas?
@@ -366,9 +355,9 @@ class Activity_Modificar : AppCompatActivity() {
                                 binding!!.etPregResp.setText("")
                                 binding!!.tilContenidoPregResp.visibility = View.VISIBLE
                                 binding!!.ivImagen.visibility = View.GONE
-                    binding!!.imgvCancelar.visibility = View.GONE
-                    binding!!.imgvQuitColor.visibility = View.VISIBLE
-                    binding!!.imgvSelColor.visibility = View.VISIBLE
+                                binding!!.imgvCancelar.visibility = View.GONE
+                                binding!!.imgvQuitColor.visibility = View.VISIBLE
+                                binding!!.imgvSelColor.visibility = View.VISIBLE
                                 dialMasPreg = true
                                 Toast.makeText(
                                     applicationContext, "Ya puedes agregar " +
@@ -680,21 +669,29 @@ class Activity_Modificar : AppCompatActivity() {
 
     private fun girarCardView() {
         if (!binding!!.tilContenidoPregResp.isGone) {
-            val flipAnimator =
-                ObjectAnimator.ofFloat(binding!!.tilContenidoPregResp, "rotationY", 0f, 360f)
-            flipAnimator.duration = 1000 // Duración de la animación en milisegundos
+            var flipAnimator =
+                ObjectAnimator.ofFloat(binding!!.flContenidoPregResp, "rotationY", 0f, 180f)
+            flipAnimator.duration = 0 // Duración de la animación en milisegundos
             flipAnimator.start()
+            flipAnimator.doOnEnd {
+                //showImageOrText()
+                flipAnimator =
+                    ObjectAnimator.ofFloat(binding!!.flContenidoPregResp, "rotationY", 180f, 0f)
+                flipAnimator.duration = 1000 // Duración de la animación en milisegundos
+                flipAnimator.start()
+            }
         } else {
-            val flipAnimator =
-                ObjectAnimator.ofFloat(binding!!.ivImagen, "rotationY", 0f, 360f)
-            flipAnimator.duration = 1000 // Duración de la animación en milisegundos
+            var flipAnimator =
+                ObjectAnimator.ofFloat(binding!!.flContenidoPregResp, "rotationY", 0f, 180f) // ivImagen
+            flipAnimator.duration = 0 // Duración de la animación en milisegundos
             flipAnimator.start()
-            /*flipAnimator.doOnEnd {
-                showImageOrText()
-                //growCard()
-                //binding!!.ivImagen.visibility = View.GONE
-                //binding!!.tilContenidoPregResp.visibility = View.VISIBLE
-            }*/
+            flipAnimator.doOnEnd {
+                //showImageOrText()
+                flipAnimator =
+                    ObjectAnimator.ofFloat(binding!!.flContenidoPregResp, "rotationY", 180f, 0f)
+                flipAnimator.duration = 1000 // Duración de la animación en milisegundos
+                flipAnimator.start()
+            }
         }
     }
 
@@ -727,13 +724,10 @@ class Activity_Modificar : AppCompatActivity() {
 
     private fun borrarCrearXML(nombreArchivo: String?) {
         // Eliminamos el archivo anteriormente creado
-        if (file.exists()) {
-            File(file, nombreArchivo).delete()
-            Log.d("ArchivoEliminado", "Archivo eliminado")
-        } else {
-            Log.d("ArchivoEliminado", "Archivo no eliminado")
-        }
+        // val path = File(file, nombreArchivo.toString())
 
+        File(ruta).delete()
+        Log.d("ArchivoEliminado", "Archivo eliminado")
         //Vamos a crear el archivo que acabamos de eliminar pero con el nuevo cuestionario
         try {
             fos = openFileOutput(nombreArchivo, MODE_PRIVATE)
@@ -748,8 +742,8 @@ class Activity_Modificar : AppCompatActivity() {
             // Creo la etiqueta interrogante con su respectiva pregunta
             for (i in preguntas.indices) {
                 serializer.startTag("", "Interrogante")
-                serializer.attribute("", "pregunta", preguntas.get(i))
-                serializer.attribute("", "respuesta", respuestas.get(i))
+                serializer.attribute("", "pregunta", preguntas[i])
+                serializer.attribute("", "respuesta", respuestas[i])
                 serializer.endTag("", "Interrogante")
             }
 
@@ -767,7 +761,7 @@ class Activity_Modificar : AppCompatActivity() {
 
             Log.i("Crear archivo: ", "Guia de estudio modificada exitosamente")
             val intent: Intent = Intent(applicationContext, Activity_RepasarGuia::class.java)
-            intent.putExtra("nombre_archivo", nombreArchivo)
+            intent.putExtra("ruta", ruta)
             startActivity(intent)
             finish()
         } catch (e: IOException) {
@@ -880,7 +874,7 @@ class Activity_Modificar : AppCompatActivity() {
         try {
             db = dbf.newDocumentBuilder()
             var filePath: File
-            if (ruta == "null"){
+            if (ruta == "null") {
                 filePath = File(file, nombreArchivo)
             } else {
                 filePath = File(ruta)

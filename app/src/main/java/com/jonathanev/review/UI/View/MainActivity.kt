@@ -83,20 +83,18 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkAndRequestPermissions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val permissionReadExternalStorage = ContextCompat.checkSelfPermission(
-                this,
-                android.Manifest.permission.READ_EXTERNAL_STORAGE
-            )
+        val permissionReadExternalStorage = ContextCompat.checkSelfPermission(
+            this,
+            android.Manifest.permission.READ_EXTERNAL_STORAGE
+        )
 
-            if (permissionReadExternalStorage != PackageManager.PERMISSION_GRANTED) {
-                // Si no tienes permisos, solicítalos
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),
-                    REQUEST_PERMISSION_CODE
-                )
-            }
+        if (permissionReadExternalStorage != PackageManager.PERMISSION_GRANTED) {
+            // Si no tienes permisos, solicítalos
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),
+                REQUEST_PERMISSION_CODE
+            )
         }
     }
 }

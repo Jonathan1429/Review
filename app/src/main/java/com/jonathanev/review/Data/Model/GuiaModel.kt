@@ -23,4 +23,4 @@ import java.util.Objects
         return Objects.hash(nombreGuia)
     }
 }*/
-data class GuiaModel(val nombreGuia: String, val imgGuia: Int)
+data class GuiaModel(var nombreGuia: String, val imgGuia: Int)

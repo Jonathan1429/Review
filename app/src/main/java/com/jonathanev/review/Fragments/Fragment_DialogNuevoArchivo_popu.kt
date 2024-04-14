@@ -118,7 +118,7 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
                                 // Sacamos del array files el nombre recuperandolo por posición.
                                 archivos = files[i]
                                 if (!archivos.isDirectory) {
-                                    item = archivos.getName().replace(".xml".toRegex(), "")
+                                    item = archivos.name.replace(".xml".toRegex(), "")
                                     // Comparamos el texto ingresado en la App con el recuperado.
                                     if ((binding!!.etNombreArchivo.text.toString() == item)) {
                                         archivoExiste = true
