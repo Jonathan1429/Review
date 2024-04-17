@@ -6,12 +6,14 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <!-- BUGS
-         1.- Al momento de pintar un texto si el fin es menor que el inicio de selección truena.
+         1.- Si pegas un texto la última letra te la pone de color(Modificando).
 
          MEJORAS
+         1.- Si ya tienes lleno el txt con un texto que sea diferente a la media... y le das click
+         al icono para agregar una imagen, advertirle que se borrará si continua.
 
-         2.- Hacer MVVM tanto al crear una guia como en las opciones de las guías.
-
+         PROBAR
+         1.- Copiar y pegar un texto con color, copiar un texto(nueva guia, modificación de guia)
     -->
     <application
         android:name=".ReviewApp"

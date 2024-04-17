@@ -67,12 +67,12 @@ class Activity_RepasarGuia : AppCompatActivity() {
         initLoadAds()
 
         binding!!.barraSuperiorRegreso.imgvSave.visibility = View.GONE
-        nombreArchivo = intent.extras!!.getString("nombre_archivo").toString()
+        //nombreArchivo = intent.extras!!.getString("nombre_archivo").toString()
 
-        val preferences = getSharedPreferences("MiPref", MODE_PRIVATE)
-        val editor = preferences.edit()
-        editor.putString("nombre_archivo", nombreArchivo)
-        editor.apply()
+        //val preferences = getSharedPreferences("MiPref", MODE_PRIVATE)
+        //val editor = preferences.edit()
+        //editor.putString("nombre_archivo", nombreArchivo)
+        //editor.apply()
 
         ruta = intent.extras!!.getString("ruta").toString()
         initUI(ruta)

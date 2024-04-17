@@ -776,17 +776,19 @@ class Activity_Modificar : AppCompatActivity() {
             val color: Int = colorSpan.foregroundColor
 
             // Agregar la etiqueta de inicio al texto
-            val etiqIni: String = "«$color»"
-            val etiqFin: String = "«/$color»"
-            editable.replace(start, start, etiqIni)
-            // Actualizar la posición de inicio del span
-            // colorSpan = new ForegroundColorSpan(colorSpan.getForegroundColor());
-            // editable.setSpan(colorSpan, start + etiqIni.length(), end + etiqIni.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            if (color != -16777216) {
+                val etiqIni: String = "«$color»"
+                val etiqFin: String = "«/$color»"
+                editable.replace(start, start, etiqIni)
+                // Actualizar la posición de inicio del span
+                // colorSpan = new ForegroundColorSpan(colorSpan.getForegroundColor());
+                // editable.setSpan(colorSpan, start + etiqIni.length(), end + etiqIni.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-            // Agregar la etiqueta de cierre al texto
-            editable.replace(end + etiqIni.length, end + etiqIni.length, etiqFin)
-            // Actualizar la posición de finalización del span
-            // editable.setSpan(colorSpan, start + etiqIni.length(), end + etiqIni.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                // Agregar la etiqueta de cierre al texto
+                editable.replace(end + etiqIni.length, end + etiqIni.length, etiqFin)
+                // Actualizar la posición de finalización del span
+                // editable.setSpan(colorSpan, start + etiqIni.length(), end + etiqIni.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
         }
     }
 
@@ -825,6 +827,7 @@ class Activity_Modificar : AppCompatActivity() {
             inicio = texto.indexOf("«") + 1
             fin = texto.indexOf("»")
             val color: String = texto.substring(inicio, fin)
+
             val longColor: Int = color.length
             val colEntero: Int = color.toInt()
             inicio = fin + 1
