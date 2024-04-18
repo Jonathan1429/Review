@@ -13,7 +13,6 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.Spannable
 import android.text.SpannableStringBuilder
-import android.text.Spanned
 import android.text.TextWatcher
 import android.text.style.ForegroundColorSpan
 import android.util.Log
@@ -24,7 +23,6 @@ import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.*
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
@@ -538,7 +536,9 @@ class Activity_Cuestionario : AppCompatActivity() {
             }
 
             override fun afterTextChanged(texto: Editable?) {
-                if (!texto.toString().contains("content://media/picker")) {
+                val lv_lonCaracAct = binding!!.etPregResp.length()
+
+                if (!texto.toString().contains("content://media/picker") && (lv_lonCaracAct-longCaracteres) == 1) {
                     pintarLetra(texto)
                 }
             }
@@ -813,7 +813,7 @@ class Activity_Cuestionario : AppCompatActivity() {
                 val cursorPosition = binding!!.etPregResp.selectionStart
 
                 val currentLength = texto.length
-                if (currentLength > longCaracteres) {
+                // if (currentLength > longCaracteres) {
                     val lastCharIndex = cursorPosition - 1
 
                     it.setSpan(
@@ -825,7 +825,7 @@ class Activity_Cuestionario : AppCompatActivity() {
 
                     binding!!.etPregResp.setSelection(lastCharIndex + 1)
                     pregResBandera = false
-                }
+                // }
             }
         }
     }

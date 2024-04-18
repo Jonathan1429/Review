@@ -626,7 +626,9 @@ class Activity_Modificar : AppCompatActivity() {
             }
 
             override fun afterTextChanged(texto: Editable?) {
-                if (!texto.toString().contains("content://media/picker")) {
+                val lv_lonCaracAct = binding!!.etPregResp.length()
+
+                if (!texto.toString().contains("content://media/picker") && (lv_lonCaracAct-longCaracteres) == 1) {
                     pintarLetra(texto)
                 }
             }
@@ -913,7 +915,7 @@ class Activity_Modificar : AppCompatActivity() {
                 val cursorPosition = binding!!.etPregResp.selectionStart
 
                 val currentLength = texto.length
-                if (currentLength > longCaracteres) {
+                // if (currentLength > longCaracteres) {
                     val lastCharIndex = cursorPosition - 1
 
                     it.setSpan(
@@ -925,7 +927,7 @@ class Activity_Modificar : AppCompatActivity() {
 
                     binding!!.etPregResp.setSelection(lastCharIndex + 1)
                     pregResBandera = false
-                }
+                // }
             }
         }
     }
