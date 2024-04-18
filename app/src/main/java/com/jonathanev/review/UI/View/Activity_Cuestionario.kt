@@ -289,6 +289,7 @@ class Activity_Cuestionario : AppCompatActivity() {
                     // en los et.
                     if (contadorPregunta < longi) {
                         // Pintamos el texto en la pregunta actual
+                        binding!!.lblPregResp.text = "Pregunta"
                         pintarTexto(contadorPregunta + 1)
                     } else {
                         binding!!.lblPregResp.text = "Pregunta"

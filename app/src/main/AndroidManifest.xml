@@ -9,8 +9,10 @@
          1.- Si pegas un texto la última letra te la pone de color(Modificando, Creación).
          SOLUCIONADO
 
-         2.- Al darle next estando en pregunta avanzas a la parte de la Respuesta y debes de
+         2.- Al darle next estando en respuesta avanzas a la parte de la Respuesta y debes de
          ir a la pregunta, no directamente a la respuesta(Creando guia)
+         SOLUCIONADO
+
          3.- Lo que salga con este número de color 52223 decirle que no ponga etiquetas, esto lo
          tendríamos que poner en el modificando y creando
          4.- Error cuando modificas una guía dentro de una carpeta, parece que el error sale después
