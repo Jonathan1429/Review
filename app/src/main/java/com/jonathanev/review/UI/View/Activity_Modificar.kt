@@ -731,8 +731,10 @@ class Activity_Modificar : AppCompatActivity() {
         File(ruta).delete()
         Log.d("ArchivoEliminado", "Archivo eliminado")
         //Vamos a crear el archivo que acabamos de eliminar pero con el nuevo cuestionario
+
         try {
-            fos = openFileOutput(nombreArchivo, MODE_PRIVATE)
+            // fos = openFileOutput(nombreArchivo, MODE_PRIVATE)
+            fos = FileOutputStream(ruta)
             serializer.setOutput(fos, "UTF-8")
             serializer.startDocument(null, java.lang.Boolean.valueOf(true))
             serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true)

@@ -4,11 +4,9 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -16,14 +14,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.FragmentManager
 import com.jonathanev.review.Core.Constants.file
 import com.jonathanev.review.UI.View.Activity_Cuestionario
 import com.jonathanev.review.databinding.FragmentNuevoArchivoBinding
 import java.io.File
-import java.nio.file.Files
 
 class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
     private var binding: FragmentNuevoArchivoBinding? = null
@@ -97,8 +92,20 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
         }
 
         binding!!.btnGuardarGuiaEstudio.setOnClickListener {
-            if (lv_folder.equals("cambiando_nombre")) {
-                if (!binding!!.etNombreArchivo.text.toString().isEmpty()) {
+            if (binding!!.etNombreArchivo.text!!.isEmpty()) {
+                Toast.makeText(
+                    context, "Ingresa un nombre",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else if (binding!!.etNombreArchivo.text!!.contains("/")) {
+                Toast.makeText(
+                    context, "No puede haber / en el nombre",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                val archivo = binding!!.etNombreArchivo.text.toString().trim()
+
+                if (lv_folder.equals("cambiando_nombre")) {
                     // Ruta + nombre del archivo.
                     val rutaSinArchivo = lv_ruta.toString().substringBeforeLast("/")
                     //val archivo = lv_ruta?.replace(rutaSinArchivo + "/".toRegex(), "")
@@ -120,7 +127,7 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
                                 if (!archivos.isDirectory) {
                                     item = archivos.name.replace(".xml".toRegex(), "")
                                     // Comparamos el texto ingresado en la App con el recuperado.
-                                    if ((binding!!.etNombreArchivo.text.toString() == item)) {
+                                    if ((archivo == item)) {
                                         archivoExiste = true
                                         break
                                     }
@@ -134,7 +141,7 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
                             AlertDialog.Builder(context)
                                 .setTitle("¡Atención!")
                                 .setMessage(
-                                    ("Ya tienes un archivo con el mismo nombre, " +
+                                    ("Ya tienes una guia con el mismo nombre, " +
                                             "si continuas se va a sobreescribir el archivo, " +
                                             "¿seguro deseas continuar?")
                                 )
@@ -142,7 +149,7 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
                                     "Continuar"
                                 ) { _, _ -> // Si el usuario quiere continuar reemplazamos el archivo.
                                     val nuevoArchivo =
-                                        File("$rutaSinArchivo/${binding!!.etNombreArchivo.text.toString()}.xml")
+                                        File("$rutaSinArchivo/${archivo}.xml")
                                     val rutaRenombrar = File(lv_ruta.toString())
                                     if (rutaRenombrar.renameTo(nuevoArchivo)) {
                                         Toast.makeText(
@@ -164,37 +171,19 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
                         } else {
                             // Si el archivo no existe directamente pasamos a cambiar el nombre.
                             val nuevoArchivo =
-                                File("$rutaSinArchivo/${binding!!.etNombreArchivo.text.toString()}.xml")
+                                File("$rutaSinArchivo/${archivo}.xml")
                             val rutaRenombrar = File(lv_ruta.toString())
-                            if (rutaRenombrar.renameTo(nuevoArchivo)) {
-                                Toast.makeText(
-                                    context, "Archivo renombrado exitosamente",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                cerrarDialogo()
-                            } else {
-                                Toast.makeText(
-                                    context, "No se pudo renombrar el archivo",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                cerrarDialogo()
+
+                            // Renombrar archivo
+                            if (!rutaRenombrar.renameTo(nuevoArchivo)) {
+                                Log.i("Archivo:", "No se pudo renombrar el archivo")
                             }
+
+                            cerrarDialogo()
                         }
                     }
-                } else {
-                    Toast.makeText(
-                        context, "Ingresa un nuevo nombre",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            } else if (lv_folder.equals("creando_folder")) {
-                if (binding!!.etNombreArchivo.text.toString().isEmpty()) {
-                    Toast.makeText(
-                        context, "Ingresa un nombre",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                } else {
-                    val folderName = binding!!.etNombreArchivo.text
+                } else if (lv_folder.equals("creando_folder")) {
+                    val folderName = binding!!.etNombreArchivo.text!!.trim()
 
                     // Asegúrate de obtener la ruta absoluta del directorio
                     val directorioAbsoluto = file.absolutePath
@@ -227,88 +216,66 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
                             Toast.LENGTH_SHORT
                         ).show()
                     }
-                }
-            } else {
-                @SuppressLint("SdCardPath")
-                var item = ""
-                // Defino la ruta donde busco los ficheros.
-                var archivoExiste = false
-                if (file.exists()) {
-                    // Creo el array de tipo File con el contenido de la carpeta.
-                    val files = file.listFiles()
-                    var archivo: File? = null
-                    // Hacemos un ciclo por cada fichero para extraer el nombre uno a uno.
-                    for (i in files.indices) {
-                        // Sacamos del array files el nombre recuperandolo por posición.
-                        archivo = files[i]
-                        item = archivo.name.replace(".xml".toRegex(), "")
-                        // Comparamos el texto ingresado en la App con el recuperado.
-                        if ((binding!!.etNombreArchivo.text.toString() == item)) {
-                            archivoExiste = true
-                            break
+                } else {
+                    @SuppressLint("SdCardPath")
+                    var item = ""
+                    // Defino la ruta donde busco los ficheros.
+                    var archivoExiste = false
+                    if (file.exists()) {
+                        // Creo el array de tipo File con el contenido de la carpeta.
+                        val files = file.listFiles()
+                        var archivo: File? = null
+                        // Hacemos un ciclo por cada fichero para extraer el nombre uno a uno.
+                        for (i in files.indices) {
+                            // Sacamos del array files el nombre recuperandolo por posición.
+                            archivo = files[i]
+                            item = archivo.name.replace(".xml".toRegex(), "")
+                            // Comparamos el texto ingresado en la App con el recuperado.
+                            if ((binding!!.etNombreArchivo.text.toString().trim() == item)) {
+                                archivoExiste = true
+                                break
+                            }
                         }
-                    }
 
-                    // Si hay un archivo existente entra
-                    if (archivoExiste) {
-                        // Se ejecuta cuando se regresa sin guardar.
-                        AlertDialog.Builder(context)
-                            .setTitle("¡Atención!")
-                            .setMessage(
-                                ("Ya tienes una guía con el mismo nombre, " +
-                                        "si continuas se va a sobreescribir el archivo, " +
-                                        "¿seguro deseas continuar?")
-                            )
-                            .setPositiveButton(
-                                "Continuar",
-                                object : DialogInterface.OnClickListener {
-                                    override fun onClick(
-                                        dialogInterface: DialogInterface,
-                                        i: Int
-                                    ) {
-                                        // Si hay un valor dentro del campo enviamos el nombre del archivo a
-                                        // Activity_Cuestionario.
-                                        val intent =
-                                            Intent(activity, Activity_Cuestionario::class.java)
-                                        intent.putExtra(
-                                            "nombre_archivo",
-                                            binding!!.etNombreArchivo.text.toString()
-                                        )
-                                        // Recuperamos el dialogo abierto actualmente
-                                        // (Fragment_DialogNuevoArchivo.java) y lo cerramos.
-                                        val dialogActual = dialog
-                                        dialogActual!!.dismiss()
-                                        binding!!.etNombreArchivo.setText("")
-                                        startActivity(intent)
-                                    }
-                                })
-                            .setNegativeButton(
-                                "Cancelar",
-                                object : DialogInterface.OnClickListener {
-                                    override fun onClick(dialog: DialogInterface, i: Int) {
-                                        dialog.dismiss()
-                                    }
-                                }).create().show()
-                    } else { // Sino hay un archivo existente entra aquí
-                        // Si hay un valor dentro del campo enviamos el nombre del archivo a
-                        // Activity_Cuestionario.
-                        if (binding!!.etNombreArchivo.text.toString().isEmpty()) {
-                            Toast.makeText(
-                                context,
-                                "Tienes que colocar un nombre para el archivo",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        } else {
+                        // Si hay un archivo existente entra
+                        if (archivoExiste) {
+                            // Se ejecuta cuando se regresa sin guardar.
+                            AlertDialog.Builder(context)
+                                .setTitle("¡Atención!")
+                                .setMessage(
+                                    ("Ya tienes una guía con el mismo nombre, " +
+                                            "si continuas se va a sobreescribir el archivo, " +
+                                            "¿seguro deseas continuar?")
+                                )
+                                .setPositiveButton(
+                                    "Continuar"
+                                ) { _, _ -> // Si hay un valor dentro del campo enviamos el nombre del archivo a
+                                    // Activity_Cuestionario.
+                                    val intent =
+                                        Intent(activity, Activity_Cuestionario::class.java)
+                                    intent.putExtra(
+                                        "nombre_archivo",
+                                        binding!!.etNombreArchivo.text.toString().trim()
+                                    )
+                                    // Recuperamos el dialogo abierto actualmente
+                                    // (Fragment_DialogNuevoArchivo.java) y lo cerramos.
+                                    val dialogActual = dialog
+                                    dialogActual!!.dismiss()
+                                    startActivity(intent)
+                                }
+                                .setNegativeButton(
+                                    "Cancelar"
+                                ) { dialog, _ -> dialog.dismiss() }.create().show()
+                        } else { // Sino hay un archivo existente entra aquí
                             val intent = Intent(activity, Activity_Cuestionario::class.java)
                             intent.putExtra(
                                 "nombre_archivo",
-                                binding!!.etNombreArchivo.text.toString()
+                                binding!!.etNombreArchivo.text.toString().trim()
                             )
                             // Recuperamos el dialogo abierto actualmente
                             // (Fragment_DialogNuevoArchivo.java) y lo cerramos.
                             val dialogActual = dialog
                             dialogActual!!.dismiss()
-                            binding!!.etNombreArchivo.setText("")
                             startActivity(intent)
                         }
                     }

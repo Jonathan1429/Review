@@ -15,18 +15,30 @@
 
          3.- Lo que salga con este número de color 52223 decirle que no ponga etiquetas, esto lo
          tendríamos que poner en el modificando y creando
+         SOLUCIONADO
+
          4.- Error cuando modificas una guía dentro de una carpeta, parece que el error sale después
              de que se guarda, ya que se abre la vista de repasar la guia
+         SOLUCIONADO
+
          5.- (CREENCIA) Probar copiar un texto de WhatsApp, creo que cuando se copia y se pega en la App
              trae textos extraños.
 
+         6.- Verificar que el nombre del archivo no contenga una /.
+         SOLUCIONADO
+
+         7.- Si vas a mover el archivo a una carpeta verificar que ahí no se encuentre el archivo y
+             advertir que si continua se va a borrar.
+         
          MEJORAS
          1.- Si ya tienes lleno el txt con un texto que sea diferente a la media... y le das click
-         al icono para agregar una imagen, advertirle que se borrará si continua.
+             al icono para agregar una imagen, advertirle que se borrará si continua.
+         2.- El icono de guardar se encima con el titulo, solucionar eso.
+         3.- Eliminar espacios de las orillas en modificar y crear la guia.
 
          PROBAR
-         1.- Copiar y pegar un texto con color, copiar un texto(nueva guia, modificación de guia)
-         2.- Probar los mismos nombres en diferentes carpetas para ver si se borran o que pasa
+         1.- Probar los mismos nombres en diferentes carpetas para ver si se borran o que pasa
+         2.- Copiar y pegar un texto con color, copiar un texto(nueva guia, modificación de guia)
     -->
     <application
         android:name=".ReviewApp"
