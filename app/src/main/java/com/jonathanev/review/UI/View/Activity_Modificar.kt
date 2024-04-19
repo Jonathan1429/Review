@@ -94,6 +94,12 @@ class Activity_Modificar : AppCompatActivity() {
                         ) { dialog, _ ->
                             dialog.dismiss()
                         }.create().show()
+                } else {
+                    binding!!.ivImagen.setImage(ImageSource.uri(uri)) //setImageURI(uri)
+                    binding!!.tilContenidoPregResp.visibility = View.GONE
+
+                    binding!!.ivImagen.visibility = View.VISIBLE
+                    binding!!.etPregResp.setText(uri.toString())
                 }
             } else {
                 binding!!.imgvCancelar.visibility = View.GONE
