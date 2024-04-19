@@ -76,11 +76,25 @@ class Activity_Modificar : AppCompatActivity() {
                 // Toma permisos de persistencia para la URI
                 takePersistableUriPermission(uri)
 
-                binding!!.ivImagen.setImage(ImageSource.uri(uri)) //setImageURI(uri)
-                binding!!.tilContenidoPregResp.visibility = View.GONE
+                if (binding!!.etPregResp.text!!.isNotEmpty()) {
+                    AlertDialog.Builder(this@Activity_Modificar)
+                        .setTitle("¡Atención!")
+                        .setMessage("Se borrará el texto para agregar la imagen, ¿Quieres continuar?")
+                        .setPositiveButton(
+                            "Si"
+                        ) { _, _ ->
+                            binding!!.ivImagen.setImage(ImageSource.uri(uri)) //setImageURI(uri)
+                            binding!!.tilContenidoPregResp.visibility = View.GONE
 
-                binding!!.ivImagen.visibility = View.VISIBLE
-                binding!!.etPregResp.setText(uri.toString())
+                            binding!!.ivImagen.visibility = View.VISIBLE
+                            binding!!.etPregResp.setText(uri.toString())
+                        }
+                        .setNegativeButton(
+                            "Cancelar"
+                        ) { dialog, _ ->
+                            dialog.dismiss()
+                        }.create().show()
+                }
             } else {
                 binding!!.imgvCancelar.visibility = View.GONE
 
@@ -628,7 +642,9 @@ class Activity_Modificar : AppCompatActivity() {
             override fun afterTextChanged(texto: Editable?) {
                 val lv_lonCaracAct = binding!!.etPregResp.length()
 
-                if (!texto.toString().contains("content://media/picker") && (lv_lonCaracAct-longCaracteres) == 1) {
+                if (!texto.toString()
+                        .contains("content://media/picker") && (lv_lonCaracAct - longCaracteres) == 1
+                ) {
                     pintarLetra(texto)
                 }
             }
@@ -684,7 +700,12 @@ class Activity_Modificar : AppCompatActivity() {
             }
         } else {
             var flipAnimator =
-                ObjectAnimator.ofFloat(binding!!.flContenidoPregResp, "rotationY", 0f, 180f) // ivImagen
+                ObjectAnimator.ofFloat(
+                    binding!!.flContenidoPregResp,
+                    "rotationY",
+                    0f,
+                    180f
+                ) // ivImagen
             flipAnimator.duration = 0 // Duración de la animación en milisegundos
             flipAnimator.start()
             flipAnimator.doOnEnd {
@@ -918,17 +939,17 @@ class Activity_Modificar : AppCompatActivity() {
 
                 val currentLength = texto.length
                 // if (currentLength > longCaracteres) {
-                    val lastCharIndex = cursorPosition - 1
+                val lastCharIndex = cursorPosition - 1
 
-                    it.setSpan(
-                        ForegroundColorSpan(colorActual),
-                        lastCharIndex,
-                        lastCharIndex + 1,
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
+                it.setSpan(
+                    ForegroundColorSpan(colorActual),
+                    lastCharIndex,
+                    lastCharIndex + 1,
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
 
-                    binding!!.etPregResp.setSelection(lastCharIndex + 1)
-                    pregResBandera = false
+                binding!!.etPregResp.setSelection(lastCharIndex + 1)
+                pregResBandera = false
                 // }
             }
         }
