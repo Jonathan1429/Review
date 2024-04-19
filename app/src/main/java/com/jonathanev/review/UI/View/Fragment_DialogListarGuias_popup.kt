@@ -360,7 +360,10 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
 
                         // val rutaArchivo = "/data/data/com.jonathanev.review/files/zy/z.xml"
                         var rutaSinArchivo = ruta.substringBeforeLast("/")
-                        rutaSinArchivo = rutaSinArchivo.replace("/data/data/com.jonathanev.review/files/".toRegex(), "")
+                        rutaSinArchivo = rutaSinArchivo.replace(
+                            "/data/data/com.jonathanev.review/files/".toRegex(),
+                            ""
+                        )
                         if (rutaSinArchivo.equals("/data/data/com.jonathanev.review/files")) {
                             val listaCarpetas = file.listFiles { file -> file.isDirectory }
 
@@ -379,20 +382,55 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                                         // Copiar el archivo
                                         val guia = guiasViewModel.getGuia(position)
 
-                                        Files.copy(
-                                            Paths.get("" + file + "/" + guia.nombreGuia + ".xml"),
-                                            Paths.get("" + file + "/" + selectedFolder + "/" + guia.nombreGuia + ".xml"),
-                                            StandardCopyOption.REPLACE_EXISTING
-                                        )
+                                        val archivoEnCarpeta =
+                                            File("" + file + "/" + selectedFolder + "/" + guia.nombreGuia + ".xml")
+                                        if (archivoEnCarpeta.exists()) {
+                                            AlertDialog.Builder(context)
+                                                .setTitle("¡Atención!")
+                                                .setMessage(
+                                                    ("Ya tienes una guía con el mismo nombre, " +
+                                                            "si continuas se va a sobreescribir la guia, " +
+                                                            "¿seguro deseas continuar?")
+                                                )
+                                                .setPositiveButton(
+                                                    "Continuar"
+                                                ) { _, _ ->
+                                                    Files.copy(
+                                                        Paths.get("" + file + "/" + guia.nombreGuia + ".xml"),
+                                                        Paths.get("" + file + "/" + selectedFolder + "/" + guia.nombreGuia + ".xml"),
+                                                        StandardCopyOption.REPLACE_EXISTING
+                                                    )
 
-                                        // Borrar archivo
-                                        File(file, guia.nombreGuia + ".xml").delete()
+                                                    // Borrar archivo
+                                                    File(file, guia.nombreGuia + ".xml").delete()
 
-                                        initUI(file)
-                                        Toast.makeText(
-                                            context, "El archivo se movió correctamente",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
+                                                    initUI(file)
+                                                    Toast.makeText(
+                                                        context,
+                                                        "El archivo se movió correctamente",
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
+                                                }
+                                                .setNegativeButton(
+                                                    "Cancelar"
+                                                ) { dialog, _ -> dialog.dismiss() }.create().show()
+                                        } else {
+                                            Files.copy(
+                                                Paths.get("" + file + "/" + guia.nombreGuia + ".xml"),
+                                                Paths.get("" + file + "/" + selectedFolder + "/" + guia.nombreGuia + ".xml"),
+                                                StandardCopyOption.REPLACE_EXISTING
+                                            )
+
+                                            // Borrar archivo
+                                            File(file, guia.nombreGuia + ".xml").delete()
+
+                                            initUI(file)
+                                            Toast.makeText(
+                                                context, "El archivo se movió correctamente",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+
                                     } catch (e: Exception) {
                                         println("Error al copiar el archivo: ${e.message}")
                                     }
