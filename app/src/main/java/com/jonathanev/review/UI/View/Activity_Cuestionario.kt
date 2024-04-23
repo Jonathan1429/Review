@@ -26,6 +26,7 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts.*
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.animation.doOnEnd
 import androidx.core.net.toUri
 import androidx.core.view.isGone
 import androidx.core.widget.ImageViewCompat
@@ -604,45 +605,33 @@ class Activity_Cuestionario : AppCompatActivity() {
 
     private fun girarCardView() {
         if (!binding!!.tilContenidoPregResp.isGone) {
-            val flipAnimator =
-                ObjectAnimator.ofFloat(binding!!.tilContenidoPregResp, "rotationY", 0f, 360f)
-            flipAnimator.duration = 1000 // Duración de la animación en milisegundos
+            var flipAnimator =
+                ObjectAnimator.ofFloat(binding!!.flContenidoPregResp, "rotationY", 0f, 180f)
+            flipAnimator.duration = 0 // Duración de la animación en milisegundos
             flipAnimator.start()
+            flipAnimator.doOnEnd {
+                flipAnimator =
+                    ObjectAnimator.ofFloat(binding!!.flContenidoPregResp, "rotationY", 180f, 0f)
+                flipAnimator.duration = 1000 // Duración de la animación en milisegundos
+                flipAnimator.start()
+            }
         } else {
-            val flipAnimator =
-                ObjectAnimator.ofFloat(binding!!.ivImagen, "rotationY", 0f, 360f)
-            flipAnimator.duration = 1000 // Duración de la animación en milisegundos
+            var flipAnimator =
+                ObjectAnimator.ofFloat(
+                    binding!!.flContenidoPregResp,
+                    "rotationY",
+                    0f,
+                    180f
+                ) // ivImagen
+            flipAnimator.duration = 0 // Duración de la animación en milisegundos
             flipAnimator.start()
-            /*flipAnimator.doOnEnd {
-                showImageOrText()
-                //growCard()
-                //binding!!.ivImagen.visibility = View.GONE
-                //binding!!.tilContenidoPregResp.visibility = View.VISIBLE
-            }*/
+            flipAnimator.doOnEnd {
+                flipAnimator =
+                    ObjectAnimator.ofFloat(binding!!.flContenidoPregResp, "rotationY", 180f, 0f)
+                flipAnimator.duration = 1000 // Duración de la animación en milisegundos
+                flipAnimator.start()
+            }
         }
-    }
-
-    private fun showImageOrText() {
-        val disappearAnimation = AlphaAnimation(1.0f, 0.0f)
-        disappearAnimation.duration = 200
-
-        val appearAnimation = AlphaAnimation(0.0f, 1.0f)
-        appearAnimation.duration = 1000
-
-        disappearAnimation.setAnimationListener(object : Animation.AnimationListener {
-            override fun onAnimationStart(p0: Animation?) {
-            }
-
-            override fun onAnimationEnd(p0: Animation?) {
-                //binding!!.ivImagen.visibility = View.GONE
-                //binding!!.tilContenidoPregResp.visibility = View.VISIBLE
-            }
-
-            override fun onAnimationRepeat(p0: Animation?) {
-            }
-        })
-
-        binding!!.ivImagen.startAnimation(disappearAnimation)
     }
 
     // Toma permisos de persistencia para la URI
@@ -657,7 +646,7 @@ class Activity_Cuestionario : AppCompatActivity() {
     }
 
     // Método que se ejecuta cuando el back del telefono es presionado.
-    public override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.action == KeyEvent.ACTION_DOWN) {
             cancelarArchivo()
             return true
