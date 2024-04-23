@@ -17,7 +17,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.jonathanev.review.Core.Constants.changeFilePath
 import com.jonathanev.review.Core.Constants.file
 import com.jonathanev.review.Core.Constants.restoreMainFilePath
@@ -66,7 +65,11 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
         initUI(file)
 
         guiasViewModel.guias.observe(this) {
-            showGuias(it)
+            if (it.isEmpty()){
+                binding.tvSinGuias.visibility = View.VISIBLE
+            } else {
+                showGuias(it)
+            }
         }
 
         // Agregar un OnScrollListener al RecyclerView para detectar cuando el usuario se desplaza.
