@@ -25,7 +25,7 @@
         android:name=".ReviewApp"
         android:allowBackup="true"
         android:icon="@drawable/img_inicio"
-        android:label="@string/app_name"
+        android:label="@string/nameApp"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Review"

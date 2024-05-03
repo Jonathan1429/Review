@@ -23,10 +23,18 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-
+            minifyEnabled true // Optimisation, reduction, ofuscation
+            shrinkResources true // Reduction about resources (Image)
             debuggable false
+            resValue("string", "nameApp", "Review")
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.debug
+        }
+
+        debug {
+            minifyEnabled false // Optimisation, reduction, ofuscation
+            debuggable true
+            resValue("string", "nameApp", "Review [DEBUG]")
         }
     }
     compileOptions {
