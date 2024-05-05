@@ -1,18 +1,17 @@
 package com.jonathanev.review.UI.View
 
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.view.View
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
 import com.jonathanev.review.Core.Constants.file
 import com.jonathanev.review.Fragments.Fragment_DialogNuevoArchivo_popu
+import com.jonathanev.review.UI.ViewModel.MainActivityViewModel
 import com.jonathanev.review.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -23,6 +22,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private var binding: ActivityMainBinding? = null
+    private val mainActivityViewModel: MainActivityViewModel by viewModels()
 
     // Array TEXTO donde guardaremos los nombres de los ficheros.
     var item: ArrayList<String> = ArrayList()
@@ -31,6 +31,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding!!.root)
+
+        initUI()
 
         // Revisar permisos
         checkAndRequestPermissions()
@@ -80,6 +82,10 @@ class MainActivity : AppCompatActivity() {
                 dialogo.show(supportFragmentManager, "Fragment")
             }
         }
+    }
+
+    private fun initUI() {
+        mainActivityViewModel.getAllGuias(file)
     }
 
     private fun checkAndRequestPermissions() {

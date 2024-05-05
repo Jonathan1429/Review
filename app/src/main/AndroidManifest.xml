@@ -11,13 +11,20 @@
          NO COMPROBADO AÚN
 
          2.- Cuando no hay guías está en blanco.
+         (SOLUCIONADO)
 
          3.- En la creación de una guía da doble vuelta en lugar de 180°
          SOLUCIONADO
 
+         4.- Ocurrió un error al momento de crear una guía: estuve copiando lo que estaba en chatGPT
+             y cambie de colores partes del texto
+
+         5.- El título de modificando no aparece cuando se va a modificar desde el repaso de una guía
+
          MEJORAS
          1.- Usar la obtención de la variable mutable de una guia al dar click en una guia en específico.
 
+         2.- Poner un mensaje al momento de cambiar el nombre de una guia.
          PRUEBAS
 
     -->
