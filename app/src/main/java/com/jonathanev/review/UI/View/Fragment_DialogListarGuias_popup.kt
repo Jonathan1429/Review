@@ -345,6 +345,12 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                             editor.putString("ruta", ruta)
                             editor.apply()
 
+                            Toast.makeText(
+                                context,
+                                "¡El nombre se cambió correctamente!",
+                                Toast.LENGTH_SHORT
+                            ).show()
+
                             // Unicamente abrimos el dialogo y lo mostramos en la pantalla.
                             val dialogo = Fragment_DialogNuevoArchivo_popu()
                             dialogo.show(childFragmentManager, "Fragment")
