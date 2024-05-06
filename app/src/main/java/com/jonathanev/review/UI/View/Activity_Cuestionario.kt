@@ -24,6 +24,7 @@ import android.view.animation.Animation
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts.*
+import androidx.activity.viewModels
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.animation.doOnEnd
@@ -38,12 +39,15 @@ import com.google.android.gms.ads.MobileAds
 import com.jonathanev.review.Core.Constants.file
 import com.jonathanev.review.Data.Model.ColorPregModel
 import com.jonathanev.review.Fragments.Fragment_DialogColores_popup
+import com.jonathanev.review.UI.ViewModel.ActivityCuestionarioViewModel
 import com.jonathanev.review.databinding.ActivityCuestionarioBinding
+import dagger.hilt.android.AndroidEntryPoint
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 
+@AndroidEntryPoint
 class Activity_Cuestionario : AppCompatActivity() {
     private var binding: ActivityCuestionarioBinding? = null
     private var nombreArchivo: String? = null
@@ -57,6 +61,7 @@ class Activity_Cuestionario : AppCompatActivity() {
     private var uri: Uri? = null
     private var longCaracteres = 0
     private var pregResBandera = false // Bandera para cuando se le de click atras o delante.
+    private val activityCuestionarioViewModel by viewModels<ActivityCuestionarioViewModel>()
 
     // Seleccionar imagen
     private val pickMedia =
@@ -712,7 +717,9 @@ class Activity_Cuestionario : AppCompatActivity() {
             val ruta = "$file/$nombreArchivo.xml"
             val intent: Intent = Intent(applicationContext, Activity_RepasarGuia::class.java)
             intent.putExtra("ruta", ruta)
+
             startActivity(intent)
+            activityCuestionarioViewModel.getAllUpdatedGuides(file)
             finish()
         } catch (e: IOException) {
             e.printStackTrace()

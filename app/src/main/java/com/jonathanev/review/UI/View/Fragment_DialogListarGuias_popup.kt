@@ -19,11 +19,11 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jonathanev.review.Core.Constants.changeFilePath
 import com.jonathanev.review.Core.Constants.file
+import com.jonathanev.review.Core.Constants.path
 import com.jonathanev.review.Core.Constants.restoreMainFilePath
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Fragments.Adaptadores.ListarGuiasAdapter
-import com.jonathanev.review.Fragments.Fragment_DialogNuevoArchivo_popu
-import com.jonathanev.review.Fragments.Fragment_DialogNuevoArchivo_popu.DialogListener
+import com.jonathanev.review.UI.View.Fragment_DialogNuevoArchivo_popu.DialogListener
 import com.jonathanev.review.R
 import com.jonathanev.review.UI.ViewModel.FragDialListarGuiasViewModel
 import com.jonathanev.review.databinding.FragmentListarGuiasBinding
@@ -62,7 +62,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
         super.onViewCreated(view, savedInstanceState)
 
         restoreMainFilePath()
-        initUI(file)
+        initUI()
 
         guiasViewModel.guias.observe(this) {
             if (it.isEmpty()){
@@ -94,8 +94,8 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                 binding.imgvBack.visibility = View.GONE
                 binding.tvRegresar.visibility = View.GONE
 
-                restoreMainFilePath()
-                initUI(file)
+                // initUI()
+                guiasViewModel.getAllUpdatedGuides(file)
             } else {
                 // Creamos las preferencias y dentro de ellas guardamos el arreglo item
                 val preferencias: SharedPreferences =
@@ -115,8 +115,8 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
         }
     }
 
-    private fun initUI(file: File) {
-        guiasViewModel.getAllGuias(file)
+    private fun initUI() {
+        guiasViewModel.getAllGuias()
     }
 
     private fun showGuias(guiaModels: List<GuiaModel>) {
@@ -159,7 +159,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                 )
             ) { dialog, which ->
                 restoreMainFilePath()
-                val ruta = "$fileClickeado"
+                // val ruta = "$fileClickeado"
                 when (which) {
                     0 -> {
                         changeFilePath(guia.nombreGuia)
@@ -167,7 +167,8 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                         binding.tvNuevaCarpeta.visibility = View.GONE
                         binding.imgvBack.visibility = View.VISIBLE
                         binding.tvRegresar.visibility = View.VISIBLE
-                        initUI(file)
+                        //initUI()
+                        guiasViewModel.getAllUpdatedGuides(file)
                     }
 
                     1 -> {
@@ -187,6 +188,9 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                                             "¡Carpeta eliminada exitosamente!",
                                             Toast.LENGTH_SHORT
                                         ).show()
+
+                                        // initUI()
+                                        guiasViewModel.getAllUpdatedGuides(file)
                                     } else {
                                         Toast.makeText(
                                             context,
@@ -195,11 +199,13 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                                         ).show()
                                     }
 
+
                                     // Recuperamos el dialogo abierto actualmente
                                     // (Fragment_DialogListarGuias_popup.java)
                                     // y lo cerramos.
                                     val dialogoEliminarGuia = getDialog()
                                     dialogoEliminarGuia?.dismiss()
+
                                 } else {
                                     Toast.makeText(
                                         context, "La ruta para eliminar el " +
@@ -314,6 +320,9 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                                         Toast.LENGTH_SHORT
                                     ).show()
 
+                                    // initUI()
+                                    guiasViewModel.getAllUpdatedGuides(file)
+
                                     // Recuperamos el dialogo abierto actualmente
                                     // (Fragment_DialogListarGuias_popup.java)
                                     // y lo cerramos.
@@ -345,22 +354,25 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                             editor.putString("ruta", ruta)
                             editor.apply()
 
-                            Toast.makeText(
+                            /*Toast.makeText(
                                 context,
                                 "¡El nombre se cambió correctamente!",
                                 Toast.LENGTH_SHORT
                             ).show()
 
+                            // initUI()
+                            guiasViewModel.getAllUpdatedGuides(file)*/
+
                             // Unicamente abrimos el dialogo y lo mostramos en la pantalla.
                             val dialogo = Fragment_DialogNuevoArchivo_popu()
                             dialogo.show(childFragmentManager, "Fragment")
-                        } else {
+                        } /*else {
                             Toast.makeText(
                                 context, "La ruta para cambiar " +
                                         "el nombre del archivo actualmente no existe.",
                                 Toast.LENGTH_SHORT
                             ).show()
-                        }
+                        }*/
                     }
 
                     4 -> {
@@ -369,11 +381,12 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
 
                         // val rutaArchivo = "/data/data/com.jonathanev.review/files/zy/z.xml"
                         var rutaSinArchivo = ruta.substringBeforeLast("/")
-                        rutaSinArchivo = rutaSinArchivo.replace(
-                            "/data/data/com.jonathanev.review/files/".toRegex(),
+                        /*rutaSinArchivo = rutaSinArchivo.replace(
+                            path.toRegex(),
                             ""
-                        )
-                        if (rutaSinArchivo.equals("/data/data/com.jonathanev.review/files")) {
+                        )*/
+
+                        if (rutaSinArchivo == path) {
                             val listaCarpetas = file.listFiles { file -> file.isDirectory }
 
                             //val nombresCarpetas = arrayOf<CharSequence>()
@@ -413,7 +426,9 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                                                     // Borrar archivo
                                                     File(file, guia.nombreGuia + ".xml").delete()
 
-                                                    initUI(file)
+                                                    guiasViewModel.getAllUpdatedGuides(file)
+
+                                                    //initUI()
                                                     Toast.makeText(
                                                         context,
                                                         "El archivo se movió correctamente",
@@ -433,7 +448,9 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                                             // Borrar archivo
                                             File(file, guia.nombreGuia + ".xml").delete()
 
-                                            initUI(file)
+                                            // initUI()
+
+                                            guiasViewModel.getAllUpdatedGuides(file)
                                             Toast.makeText(
                                                 context, "El archivo se movió correctamente",
                                                 Toast.LENGTH_SHORT
@@ -461,14 +478,14 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
 
                                             Files.copy(
                                                 Paths.get("$fileClickeado.xml"),
-                                                Paths.get("/data/data/com.jonathanev.review/files/" + guia.nombreGuia + ".xml"),
+                                                Paths.get(path + "/" + guia.nombreGuia + ".xml"),
                                                 StandardCopyOption.REPLACE_EXISTING
                                             )
 
                                             // Borrar archivo
                                             val ruta = "$fileClickeado.xml"
                                             File(ruta).delete()
-                                            initUI(file)
+                                            guiasViewModel.getAllUpdatedGuides(file)
 
                                             binding.imgvFolder.visibility = View.VISIBLE
                                             binding.tvNuevaCarpeta.visibility = View.VISIBLE

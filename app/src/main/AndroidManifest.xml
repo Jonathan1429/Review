@@ -25,8 +25,15 @@
          1.- Usar la obtención de la variable mutable de una guia al dar click en una guia en específico.
 
          2.- Poner un mensaje al momento de cambiar el nombre de una guia.
+
+         3.- Agregar un progress bar cuando esté cargando las guias de estudio
          PRUEBAS
 
+         1.- Cambiar el nombre de una guia y que esta ya exista y le des en continuar
+
+         2.- Cambiar el nombre de una guia y que esta no exista.
+
+         3.- Probar que cuando le des en crear una nueva guia lo haga correctamente
     -->
     <application
         android:name=".ReviewApp"

@@ -1,4 +1,4 @@
-package com.jonathanev.review.Fragments
+package com.jonathanev.review.UI.View
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
@@ -15,13 +15,20 @@ import android.view.ViewGroup
 import android.view.Window
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.viewModels
+import com.jonathanev.review.Core.Constants
 import com.jonathanev.review.Core.Constants.file
-import com.jonathanev.review.UI.View.Activity_Cuestionario
+import com.jonathanev.review.Core.Constants.restoreMainFilePath
+import com.jonathanev.review.UI.ViewModel.FragDialListarGuiasViewModel
+import com.jonathanev.review.UI.ViewModel.FragDialNuevoArchViewModel
 import com.jonathanev.review.databinding.FragmentNuevoArchivoBinding
+import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 
+@AndroidEntryPoint
 class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
     private var binding: FragmentNuevoArchivoBinding? = null
+    private val fragDialNuevoArchViewModel by viewModels<FragDialNuevoArchViewModel>()
 
     interface DialogListener {
         fun onDialogClosed()
@@ -156,6 +163,10 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
                                             context, "Archivo renombrado exitosamente",
                                             Toast.LENGTH_SHORT
                                         ).show()
+
+                                        fragDialNuevoArchViewModel.getAllUpdatedGuides(file)
+
+                                        // restoreMainFilePath()
                                         cerrarTodosDialogos()
                                     } else {
                                         Toast.makeText(
@@ -175,8 +186,14 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
                             val rutaRenombrar = File(lv_ruta.toString())
 
                             // Renombrar archivo
-                            if (!rutaRenombrar.renameTo(nuevoArchivo)) {
-                                Log.i("Archivo:", "No se pudo renombrar el archivo")
+                            if (rutaRenombrar.renameTo(nuevoArchivo)) {
+                                // restoreMainFilePath()
+                                fragDialNuevoArchViewModel.getAllUpdatedGuides(file)
+
+                                Toast.makeText(
+                                    context, "Archivo renombrado exitosamente",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
 
                             cerrarDialogo()
@@ -203,6 +220,7 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
                             ).show()
                             //cerrarDialogo()
                             cerrarTodosDialogos()
+                            fragDialNuevoArchViewModel.getAllUpdatedGuides(file)
                         } else {
                             Toast.makeText(
                                 context, "No se pudo crear la carpeta exitosamente",
@@ -261,6 +279,7 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
                                     // (Fragment_DialogNuevoArchivo.java) y lo cerramos.
                                     val dialogActual = dialog
                                     dialogActual!!.dismiss()
+
                                     startActivity(intent)
                                 }
                                 .setNegativeButton(
@@ -272,10 +291,12 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
                                 "nombre_archivo",
                                 binding!!.etNombreArchivo.text.toString().trim()
                             )
+
                             // Recuperamos el dialogo abierto actualmente
                             // (Fragment_DialogNuevoArchivo.java) y lo cerramos.
                             val dialogActual = dialog
                             dialogActual!!.dismiss()
+
                             startActivity(intent)
                         }
                     }
