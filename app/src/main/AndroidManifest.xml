@@ -20,6 +20,13 @@
              y cambie de colores partes del texto
 
          5.- El título de modificando no aparece cuando se va a modificar desde el repaso de una guía
+         SOLUCIONADO
+
+         6.- Los iconos de las opciones están bugueados ya que a veces no funciona esa parte,
+             no suele funcionar cuando estas en la ultima pregunta, regresas y vuelves delante,
+             anteriormente debe estar una imagen en la respuesta
+
+         7.- Reiniciar el provider siempre que se de click en el botón Abrir Guias.
 
          MEJORAS
          1.- Usar la obtención de la variable mutable de una guia al dar click en una guia en específico.

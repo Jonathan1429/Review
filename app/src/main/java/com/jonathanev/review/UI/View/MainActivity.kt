@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.jonathanev.review.Core.Constants.file
+import com.jonathanev.review.Core.Constants.restoreMainFilePath
 import com.jonathanev.review.UI.ViewModel.MainActivityViewModel
 import com.jonathanev.review.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -77,7 +78,8 @@ class MainActivity : AppCompatActivity() {
                     ).show()
                 }
             } else {
-                // initUI()
+                restoreMainFilePath()
+                initUI()
                 val dialogo = Fragment_DialogListarGuias_popup()
                 dialogo.show(supportFragmentManager, "Fragment")
             }

@@ -94,7 +94,8 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                 binding.imgvBack.visibility = View.GONE
                 binding.tvRegresar.visibility = View.GONE
 
-                // initUI()
+                restoreMainFilePath()
+                initUI()
                 guiasViewModel.getAllUpdatedGuides(file)
             } else {
                 // Creamos las preferencias y dentro de ellas guardamos el arreglo item
