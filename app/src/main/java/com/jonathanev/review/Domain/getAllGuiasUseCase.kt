@@ -27,20 +27,23 @@ class getAllGuiasUseCase @Inject constructor(
                 var name = ""
                 var image = 0
 
-                if (archivo.name.contains(".xml")) {
+                if (archivo.name.contains(".xml")) {           // File (guiasPivote)
                     // Guardamos el nombre del fichero en la lista item.
                     name = archivo.name.replace(".xml".toRegex(), "")
                     image = getRandomGuiaImage()
                     guiasPivote.add(GuiaModel(name, image))
-                } else if (archivo.isDirectory){
+                } else if (archivo.isDirectory){                    // Folder (guias)
                     image = R.drawable.img_carpeta
                     name = archivo.name
                     guias.add(GuiaModel(name, image))
                 }
             }
 
-            guiasPivote.sortedBy { it.nombreGuia }
-            guias.addAll(guiasPivote)
+            val carpetasOrdenadas = guias.sortedBy { it.nombreGuia }
+            guias.clear()
+            val guiasOrdenadas = guiasPivote.sortedBy { it.nombreGuia }
+            guias.addAll(carpetasOrdenadas)
+            guias.addAll(guiasOrdenadas)
             return guias
         } else {
             guias.clear()
