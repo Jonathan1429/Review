@@ -28,6 +28,9 @@
 
          7.- Reiniciar el provider siempre que se de click en el botón Abrir Guias.
 
+         8.- Cuando no hay preguntas anteriores siempre pasa al et pregunta, cuando no debería
+             ocurrir alguna acción.
+
          MEJORAS
          1.- Usar la obtención de la variable mutable de una guia al dar click en una guia en específico.
 

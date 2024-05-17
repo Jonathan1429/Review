@@ -10,7 +10,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.jonathanev.review.Core.Constants.file
-import com.jonathanev.review.Core.Constants.restoreMainFilePath
 import com.jonathanev.review.UI.ViewModel.MainActivityViewModel
 import com.jonathanev.review.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -26,6 +25,7 @@ class MainActivity : AppCompatActivity() {
 
     // Array TEXTO donde guardaremos los nombres de los ficheros.
     var item: ArrayList<String> = ArrayList()
+
     @RequiresApi(api = Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,7 +59,7 @@ class MainActivity : AppCompatActivity() {
 
             editor = preferencias.edit()
             editor.putString("crear_folder", "no existe")
-            editor.commit()
+            editor.apply()
         }
 
         binding!!.btnAbrirGuiaEstudioHabilitado.setOnClickListener {
@@ -78,11 +78,17 @@ class MainActivity : AppCompatActivity() {
                     ).show()
                 }
             } else {
-                restoreMainFilePath()
-                initUI()
+                mainActivityViewModel.getMainPath()
+
                 val dialogo = Fragment_DialogListarGuias_popup()
                 dialogo.show(supportFragmentManager, "Fragment")
             }
+        }
+
+        mainActivityViewModel.file.observe(this) {
+            file = it
+
+            initUI()
         }
     }
 

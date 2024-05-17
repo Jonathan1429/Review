@@ -8,7 +8,6 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,10 +15,7 @@ import android.view.Window
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
-import com.jonathanev.review.Core.Constants
 import com.jonathanev.review.Core.Constants.file
-import com.jonathanev.review.Core.Constants.restoreMainFilePath
-import com.jonathanev.review.UI.ViewModel.FragDialListarGuiasViewModel
 import com.jonathanev.review.UI.ViewModel.FragDialNuevoArchViewModel
 import com.jonathanev.review.databinding.FragmentNuevoArchivoBinding
 import dagger.hilt.android.AndroidEntryPoint

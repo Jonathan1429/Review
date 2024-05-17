@@ -17,14 +17,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.jonathanev.review.Core.Constants.changeFilePath
 import com.jonathanev.review.Core.Constants.file
 import com.jonathanev.review.Core.Constants.path
-import com.jonathanev.review.Core.Constants.restoreMainFilePath
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Fragments.Adaptadores.ListarGuiasAdapter
-import com.jonathanev.review.UI.View.Fragment_DialogNuevoArchivo_popu.DialogListener
 import com.jonathanev.review.R
+import com.jonathanev.review.UI.View.Fragment_DialogNuevoArchivo_popu.DialogListener
 import com.jonathanev.review.UI.ViewModel.FragDialListarGuiasViewModel
 import com.jonathanev.review.databinding.FragmentListarGuiasBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -61,15 +59,20 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        restoreMainFilePath()
         initUI()
 
         guiasViewModel.guias.observe(this) {
-            if (it.isEmpty()){
+            if (it.isEmpty()) {
                 binding.tvSinGuias.visibility = View.VISIBLE
             } else {
                 showGuias(it)
             }
+        }
+
+        guiasViewModel.file.observe(this) {
+            file = it
+
+            guiasViewModel.getAllUpdatedGuides(file)
         }
 
         // Agregar un OnScrollListener al RecyclerView para detectar cuando el usuario se desplaza.
@@ -94,9 +97,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                 binding.imgvBack.visibility = View.GONE
                 binding.tvRegresar.visibility = View.GONE
 
-                restoreMainFilePath()
-                initUI()
-                guiasViewModel.getAllUpdatedGuides(file)
+                guiasViewModel.getMainPath()
             } else {
                 // Creamos las preferencias y dentro de ellas guardamos el arreglo item
                 val preferencias: SharedPreferences =
@@ -155,21 +156,18 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                 arrayOf<CharSequence>(
                     "Abrir",
                     "Eliminar",
-                    // "Cambiar nombre",
                     "Cancelar"
                 )
             ) { dialog, which ->
-                restoreMainFilePath()
-                // val ruta = "$fileClickeado"
+                guiasViewModel.getMainPath()
                 when (which) {
                     0 -> {
-                        changeFilePath(guia.nombreGuia)
+                        changePath(guia.nombreGuia)
+
                         binding.imgvFolder.visibility = View.GONE
                         binding.tvNuevaCarpeta.visibility = View.GONE
                         binding.imgvBack.visibility = View.VISIBLE
                         binding.tvRegresar.visibility = View.VISIBLE
-                        //initUI()
-                        guiasViewModel.getAllUpdatedGuides(file)
                     }
 
                     1 -> {
@@ -190,7 +188,6 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                                             Toast.LENGTH_SHORT
                                         ).show()
 
-                                        // initUI()
                                         guiasViewModel.getAllUpdatedGuides(file)
                                     } else {
                                         Toast.makeText(
@@ -252,7 +249,6 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
             }
             builder.create().show()
         } else {
-            // restoreMainFilePath()
             // Creo una alerta donde me saldrán una lista de items
             val builder = AlertDialog.Builder(context)
             builder.setIcon(R.drawable.ic_advertencia)
@@ -268,11 +264,6 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                 )
             ) { dialog, which ->
 
-                // val filePath = File(filesDir, nombreArchivo)
-                /*if (file.toString().length == 38){
-
-                }*/
-                restoreMainFilePath()
                 val ruta = "$fileClickeado.xml"
                 when (which) {
                     0 -> {
@@ -355,42 +346,20 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                             editor.putString("ruta", ruta)
                             editor.apply()
 
-                            /*Toast.makeText(
-                                context,
-                                "¡El nombre se cambió correctamente!",
-                                Toast.LENGTH_SHORT
-                            ).show()
-
-                            // initUI()
-                            guiasViewModel.getAllUpdatedGuides(file)*/
-
                             // Unicamente abrimos el dialogo y lo mostramos en la pantalla.
                             val dialogo = Fragment_DialogNuevoArchivo_popu()
                             dialogo.show(childFragmentManager, "Fragment")
-                        } /*else {
-                            Toast.makeText(
-                                context, "La ruta para cambiar " +
-                                        "el nombre del archivo actualmente no existe.",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }*/
+                        }
                     }
 
                     4 -> {
                         val subMenuBuilder = AlertDialog.Builder(context)
                         subMenuBuilder.setTitle("Mover a...")
 
-                        // val rutaArchivo = "/data/data/com.jonathanev.review/files/zy/z.xml"
                         var rutaSinArchivo = ruta.substringBeforeLast("/")
-                        /*rutaSinArchivo = rutaSinArchivo.replace(
-                            path.toRegex(),
-                            ""
-                        )*/
 
                         if (rutaSinArchivo == path) {
                             val listaCarpetas = file.listFiles { file -> file.isDirectory }
-
-                            //val nombresCarpetas = arrayOf<CharSequence>()
 
                             if (listaCarpetas != null) {
                                 // Método 1: Usando copyOf()
@@ -429,7 +398,6 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
 
                                                     guiasViewModel.getAllUpdatedGuides(file)
 
-                                                    //initUI()
                                                     Toast.makeText(
                                                         context,
                                                         "El archivo se movió correctamente",
@@ -448,8 +416,6 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
 
                                             // Borrar archivo
                                             File(file, guia.nombreGuia + ".xml").delete()
-
-                                            // initUI()
 
                                             guiasViewModel.getAllUpdatedGuides(file)
                                             Toast.makeText(
@@ -518,6 +484,10 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
             }
             builder.create().show()
         }
+    }
+
+    private fun changePath(folder: String) {
+        guiasViewModel.changeFilePath(folder)
     }
 
     private fun deleteFolder(fileClickeado: File): Boolean {
