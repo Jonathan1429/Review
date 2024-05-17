@@ -14,6 +14,8 @@ import android.view.ViewGroup
 import android.view.Window
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -59,19 +61,22 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // showGuias(emptyList())
         initUI()
 
-        guiasViewModel.guias.observe(this) {
+        guiasViewModel.guias.observe(viewLifecycleOwner) {
             if (it.isEmpty()) {
                 binding.tvSinGuias.visibility = View.VISIBLE
             } else {
                 showGuias(it)
             }
+
+            binding.progressBar.visibility = View.INVISIBLE
         }
 
         guiasViewModel.file.observe(this) {
             file = it
-
+            binding.progressBar.visibility = View.VISIBLE
             guiasViewModel.getAllUpdatedGuides(file)
         }
 
@@ -118,6 +123,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
     }
 
     private fun initUI() {
+        binding.progressBar.visibility = View.VISIBLE
         guiasViewModel.getAllGuias()
     }
 
@@ -127,7 +133,6 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
         binding.lvGuiasEstudio.layoutManager = LinearLayoutManager(context)
         binding.lvGuiasEstudio.setHasFixedSize(true)
         binding.lvGuiasEstudio.adapter = adaptadorListarGuias
-
         /*cargarElementos(guiaModels)*/
     }
 

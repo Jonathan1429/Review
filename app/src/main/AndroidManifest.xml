@@ -27,6 +27,7 @@
              anteriormente debe estar una imagen en la respuesta
 
          7.- Reiniciar el provider siempre que se de click en el botón Abrir Guias.
+         SOLUCIONADO
 
          8.- Cuando no hay preguntas anteriores siempre pasa al et pregunta, cuando no debería
              ocurrir alguna acción.
@@ -37,6 +38,11 @@
          2.- Poner un mensaje al momento de cambiar el nombre de una guia.
 
          3.- Agregar un progress bar cuando esté cargando las guias de estudio
+         SOLUCIONADO
+
+         4.- Modificación de la ruta a través de los UseCase
+         SOLUCIONADO
+
          PRUEBAS
 
          1.- Cambiar el nombre de una guia y que esta ya exista y le des en continuar
