@@ -10,26 +10,14 @@
              trae textos extraños.
          NO COMPROBADO AÚN
 
-         2.- Cuando no hay guías está en blanco.
-         (SOLUCIONADO)
-
-         3.- En la creación de una guía da doble vuelta en lugar de 180°
-         SOLUCIONADO
-
-         4.- Ocurrió un error al momento de crear una guía: estuve copiando lo que estaba en chatGPT
+         2.- Ocurrió un error al momento de crear una guía: estuve copiando lo que estaba en chatGPT
              y cambie de colores partes del texto
 
-         5.- El título de modificando no aparece cuando se va a modificar desde el repaso de una guía
-         SOLUCIONADO
-
-         6.- Los iconos de las opciones están bugueados ya que a veces no funciona esa parte,
+         3.- Los iconos de las opciones están bugueados ya que a veces no funciona esa parte,
              no suele funcionar cuando estas en la ultima pregunta, regresas y vuelves delante,
              anteriormente debe estar una imagen en la respuesta
 
-         7.- Reiniciar el provider siempre que se de click en el botón Abrir Guias.
-         SOLUCIONADO
-
-         8.- Cuando no hay preguntas anteriores siempre pasa al et pregunta, cuando no debería
+         4.- Cuando no hay preguntas anteriores siempre pasa al et pregunta, cuando no debería
              ocurrir alguna acción.
 
          MEJORAS
@@ -37,22 +25,10 @@
 
          2.- Poner un mensaje al momento de cambiar el nombre de una guia.
 
-         3.- Agregar un progress bar cuando esté cargando las guias de estudio
-         SOLUCIONADO
-
-         4.- Modificación de la ruta a través de los UseCase
-         SOLUCIONADO
-
          PRUEBAS
 
-         1.- Cambiar el nombre de una guia y que esta ya exista y le des en continuar
-         PROBADO
-
-         2.- Cambiar el nombre de una guia y que esta no exista.
-         PROBADO
-
-         3.- Probar que cuando le des en crear una nueva guia lo haga correctamente
-         PROBADO
+         1.- Probar cuando se eliminen guias o se cambien de lugar cuando la carpeta o el lugar se
+         quede vacío
     -->
     <application
         android:name=".ReviewApp"
