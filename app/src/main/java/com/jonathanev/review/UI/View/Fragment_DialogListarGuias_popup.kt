@@ -276,7 +276,6 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                         val intentAbrirGuia = Intent(activity, Activity_RepasarGuia::class.java)
                         //intentAbrirGuia.putExtra("nombre_archivo", guia.nombreGuia)
                         intentAbrirGuia.putExtra("ruta", ruta)
-                        intentAbrirGuia.putExtra("file_position", position)
                         startActivity(intentAbrirGuia)
 
                         // Recuperamos el dialogo abierto actualmente
@@ -291,7 +290,6 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                             Intent(activity, Activity_Modificar::class.java)
                         //intentModificarGuia.putExtra("nombre_archivo", guia.nombreGuia)
                         intentModificarGuia.putExtra("ruta", ruta)
-                        intentModificarGuia.putExtra("file_position", position)
                         startActivity(intentModificarGuia)
                         // Recuperamos el dialogo abierto actualmente
                         // (Fragment_DialogListarGuias.java) y lo cerramos.
@@ -317,7 +315,6 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                                         Toast.LENGTH_SHORT
                                     ).show()
 
-                                    // initUI()
                                     guiasViewModel.getAllUpdatedGuides(file)
 
                                     // Recuperamos el dialogo abierto actualmente
@@ -455,8 +452,8 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                                             )
 
                                             // Borrar archivo
-                                            val ruta = "$fileClickeado.xml"
-                                            File(ruta).delete()
+                                            val rutaPrincipal = "$fileClickeado.xml"
+                                            File(rutaPrincipal).delete()
                                             guiasViewModel.getAllUpdatedGuides(file)
 
                                             binding.imgvFolder.visibility = View.VISIBLE

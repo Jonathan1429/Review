@@ -46,10 +46,13 @@
          PRUEBAS
 
          1.- Cambiar el nombre de una guia y que esta ya exista y le des en continuar
+         PROBADO
 
          2.- Cambiar el nombre de una guia y que esta no exista.
+         PROBADO
 
          3.- Probar que cuando le des en crear una nueva guia lo haga correctamente
+         PROBADO
     -->
     <application
         android:name=".ReviewApp"
