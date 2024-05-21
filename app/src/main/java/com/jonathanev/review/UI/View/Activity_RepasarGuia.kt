@@ -108,7 +108,6 @@ class Activity_RepasarGuia : AppCompatActivity() {
 
         binding!!.imgvPrevious.setOnClickListener {
             //binding!!.btnMostrarRespuesta.text = "Mostrar respuesta"
-            binding!!.lblPregResp.text = "Pregunta"
             if (contadorPregunta == 0) {
                 Toast.makeText(
                     applicationContext, "No tienes preguntas anteriores",
@@ -118,6 +117,8 @@ class Activity_RepasarGuia : AppCompatActivity() {
                 Log.i("Crear pregunta: ", "No tienes preguntas anteriores")
             } else {
                 contadorPregunta--
+
+                binding!!.lblPregResp.text = "Pregunta"
                 binding!!.etPregResp.setText("")
 
                 // Pintamos el valor anterior de colores.

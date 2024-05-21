@@ -18,7 +18,9 @@
              anteriormente debe estar una imagen en la respuesta
 
          4.- Cuando no hay preguntas anteriores siempre pasa al et pregunta, cuando no debería
-             ocurrir alguna acción.
+             ocurrir alguna acción. (Repasar Guia)
+             (SOLUCIONADO)
+
 
          MEJORAS
          1.- Usar la obtención de la variable mutable de una guia al dar click en una guia en específico.
