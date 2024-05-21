@@ -16,6 +16,7 @@
          3.- Los iconos de las opciones están bugueados ya que a veces no funciona esa parte,
              no suele funcionar cuando estas en la ultima pregunta, regresas y vuelves delante,
              anteriormente debe estar una imagen en la respuesta
+             (SOLUCIONADO)
 
          4.- Cuando no hay preguntas anteriores siempre pasa al et pregunta, cuando no debería
              ocurrir alguna acción. (Repasar Guia)

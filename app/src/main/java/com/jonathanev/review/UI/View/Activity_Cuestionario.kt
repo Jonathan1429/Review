@@ -315,10 +315,10 @@ class Activity_Cuestionario : AppCompatActivity() {
                     // en los et.
                     if (contadorPregunta < longi) {
                         // Pintamos el texto en la pregunta actual
-                        binding!!.lblPregResp.text = "Pregunta"
+                        // binding!!.lblPregResp.text = "Pregunta"
                         pintarTexto(contadorPregunta + 1)
                     } else {
-                        binding!!.lblPregResp.text = "Pregunta"
+                        // binding!!.lblPregResp.text = "Pregunta"
                         binding!!.tilContenidoPregResp.visibility = View.VISIBLE
                         binding!!.ivImagen.visibility = View.GONE
                         binding!!.etPregResp.setText("")
@@ -339,14 +339,14 @@ class Activity_Cuestionario : AppCompatActivity() {
                     // Se colocan las etiquetas en cada palabra con color
                     colocarEtiquetas(colorSpans, editable)
                     respuestas.add(contadorPregunta, editable.toString())
-
-                    binding!!.imgvCancelar.visibility = View.GONE
-                    binding!!.imgvQuitColor.visibility = View.VISIBLE
-                    binding!!.imgvSelColor.visibility = View.VISIBLE
-
-                    binding!!.lblPregResp.text = "Pregunta"
                     binding!!.etPregResp.setText("")
                 }
+
+                binding!!.imgvCancelar.visibility = View.GONE
+                binding!!.imgvQuitColor.visibility = View.VISIBLE
+                binding!!.imgvSelColor.visibility = View.VISIBLE
+
+                binding!!.lblPregResp.text = "Pregunta"
 
                 contadorPregunta++
             }
