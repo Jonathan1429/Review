@@ -908,7 +908,6 @@ class Activity_Cuestionario : AppCompatActivity() {
 
                 binding!!.etPregResp.setSelection(lastCharIndex + 1)
                 pregResBandera = false
-                // }
             }
         }
     }
