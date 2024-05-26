@@ -13,8 +13,23 @@ class ActivityCuestionarioViewModel @Inject constructor(
     private val guiaRepository: GuiaRepository
 ) : ViewModel(){
     var guias = MutableLiveData<List<GuiaModel>>()
+    var colorAnterior = MutableLiveData<Int>()
+    var saveClicked = MutableLiveData<Boolean>().apply { value = false }
+    var rollClicked = MutableLiveData<Boolean>().apply { value = false }
 
     fun getAllUpdatedGuides(file: File){
         guias.postValue(guiaRepository.getGuias(file))
+    }
+
+    fun clickedSave(){
+        saveClicked.postValue(!saveClicked.value!!)
+    }
+
+    fun clickedRoll(){
+        rollClicked.postValue(!rollClicked.value!!)
+    }
+
+    fun setColorAnterior(color: Int){
+        colorAnterior.postValue(color)
     }
 }

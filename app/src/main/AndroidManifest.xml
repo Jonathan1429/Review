@@ -22,6 +22,9 @@
              ocurrir alguna acción. (Repasar Guia)
              (SOLUCIONADO)
 
+         5.- Poner las etiquetas de los colores correctamente donde inicia y termina un color.
+         (SOLUCIONADO: activity_cuestionario)
+
 
          MEJORAS
          1.- Usar la obtención de la variable mutable de una guia al dar click en una guia en específico.
