@@ -1,6 +1,5 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.Core.Constants.file
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.R
 import java.io.File
@@ -20,7 +19,6 @@ class getAllGuiasUseCase @Inject constructor(
         guiasPivote.clear()
         // Hacemos un ciclo por cada fichero para extraer el nombre de cada uno.
         if (files!!.isNotEmpty()) {
-
             for (i in files.indices) {
                 // Sacamos del array files el primer fichero.
                 val archivo: File = files[i]

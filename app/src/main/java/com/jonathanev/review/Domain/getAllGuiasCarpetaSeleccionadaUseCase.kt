@@ -39,7 +39,9 @@ class getAllGuiasCarpetaSeleccionadaUseCase @Inject constructor(
             }
         }
 
-
-        return guias.sortedBy { it.nombreGuia }
+        val guiasOrdenadas = guias.sortedBy { it.nombreGuia }
+        guias.clear()
+        guias.addAll(guiasOrdenadas)
+        return guias
     }
 }

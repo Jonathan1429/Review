@@ -1,5 +1,6 @@
 package com.jonathanev.review.UI.ViewModel
 
+import android.net.Uri
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.jonathanev.review.Data.GuiaRepository
@@ -13,6 +14,7 @@ class ActivityCuestionarioViewModel @Inject constructor(
     private val guiaRepository: GuiaRepository
 ) : ViewModel(){
     var guias = MutableLiveData<List<GuiaModel>>()
+    var imagenes = MutableLiveData<List<Uri>>()
     var colorAnterior = MutableLiveData<Int>()
     var saveClicked = MutableLiveData<Boolean>().apply { value = false }
     var rollClicked = MutableLiveData<Boolean>().apply { value = false }

@@ -2,14 +2,17 @@ package com.jonathanev.review.UI.View
 
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
 import android.text.Editable
 import android.text.Spannable
 import android.text.SpannableStringBuilder
@@ -19,15 +22,13 @@ import android.util.Log
 import android.util.Xml
 import android.view.KeyEvent
 import android.view.View
-import android.view.animation.AlphaAnimation
-import android.view.animation.Animation
 import android.widget.Toast
-import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts.*
 import androidx.activity.viewModels
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.animation.doOnEnd
+import androidx.core.app.ActivityCompat
 import androidx.core.net.toUri
 import androidx.core.view.isGone
 import androidx.core.widget.ImageViewCompat
@@ -36,7 +37,11 @@ import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
+import com.jonathanev.review.Core.Constants.PICK_IMAGE_REQUEST
 import com.jonathanev.review.Core.Constants.file
+import com.jonathanev.review.Core.Constants.fileImages
+import com.jonathanev.review.Core.Constants.fileImagesPiv
+import com.jonathanev.review.Core.Constants.rutaPrin
 import com.jonathanev.review.Data.Model.ColorPregModel
 import com.jonathanev.review.Fragments.Fragment_DialogColores_popup
 import com.jonathanev.review.UI.ViewModel.ActivityCuestionarioViewModel
@@ -46,6 +51,9 @@ import org.xmlpull.v1.XmlSerializer
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.nio.file.StandardCopyOption
 
 @AndroidEntryPoint
 class Activity_Cuestionario : AppCompatActivity() {
@@ -61,10 +69,12 @@ class Activity_Cuestionario : AppCompatActivity() {
     private val respuestasColor: ArrayList<ColorPregModel> = ArrayList()
     var builder: SpannableStringBuilder? = null
     private var contadorPregunta: Int = 0
+    private var contadorImagen = 1
     private var uri: Uri? = null
     private var longCaracteres = 0
     private var pregResBandera = false // Bandera para cuando se le de click atras o delante.
     private val activityCuestionarioViewModel by viewModels<ActivityCuestionarioViewModel>()
+    private var filename: String = "" // Ruta/imagen.png
 
     // Seleccionar imagen
     private val pickMedia =
@@ -116,9 +126,18 @@ class Activity_Cuestionario : AppCompatActivity() {
         binding = ActivityCuestionarioBinding.inflate(layoutInflater)
         setContentView(binding!!.root)
 
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(
+                android.Manifest.permission.READ_EXTERNAL_STORAGE,
+                android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ),
+            PICK_IMAGE_REQUEST
+        )
+
         // Sección de anuncios
         initLoadAds()
-        //initUI()
+        initUI()
 
         // Recibimos el nombre del archivo del popupFragment Nueva Guia.
         nombreArchivo = intent.extras!!.getString("nombre_archivo")
@@ -127,11 +146,17 @@ class Activity_Cuestionario : AppCompatActivity() {
         binding!!.barraSuperiorRegreso.tvTituloToolbar.text = "Creando: $nombreArchivo"
         colorActual = Color.BLACK
 
-        binding!!.barraSuperiorRegreso.imgvBack.setOnClickListener { cancelarArchivo() }
+        binding!!.barraSuperiorRegreso.imgvBack.setOnClickListener {
+            cancelarArchivo()
+            deleteImages()
+        }
 
         binding!!.imgvPregResp.setOnClickListener {
             activityCuestionarioViewModel.setColorAnterior(colorPintarPalabra)
             activityCuestionarioViewModel.clickedRoll()
+
+            contadorImagen += 1
+            filename = "$contadorImagen.png"
         }
 
         binding!!.imgvPrevious.setOnClickListener {
@@ -392,7 +417,8 @@ class Activity_Cuestionario : AppCompatActivity() {
 
             binding!!.imgvCancelar.visibility = View.VISIBLE
 
-            pickMedia.launch(PickVisualMediaRequest(PickVisualMedia.ImageOnly))
+            // pickMedia.launch(PickVisualMediaRequest(PickVisualMedia.ImageOnly))
+            openSomeActivityForResult()
         }
 
         // Cambio de botones visibles
@@ -421,16 +447,16 @@ class Activity_Cuestionario : AppCompatActivity() {
                 if (!texto.toString()
                         .contains("content://media/picker") && (lv_lonCaracAct - longCaracteres) == 1
                 ) {
-                   if(colorActual != -16777216){
-                       pintarLetra(texto)
-                   }
+                    if (colorActual != -16777216) {
+                        pintarLetra(texto)
+                    }
                 } /*else {
                     activityCuestionarioViewModel.getColorAnteriorInicial()
                 }*/
             }
         })
 
-        activityCuestionarioViewModel.saveClicked.observe(this){
+        activityCuestionarioViewModel.saveClicked.observe(this) {
             if (it) {
                 // Se le quita 1 para hacer referencia al arreglo
                 // tamaño 3-1 = 2 [0,1,2].
@@ -457,7 +483,10 @@ class Activity_Cuestionario : AppCompatActivity() {
                             Toast.LENGTH_SHORT
                         ).show()
 
-                        Log.i("Crear pregunta: ", "Asegurate de llenar una pregunta y una respuesta")
+                        Log.i(
+                            "Crear pregunta: ",
+                            "Asegurate de llenar una pregunta y una respuesta"
+                        )
 
                         activityCuestionarioViewModel.clickedSave()
                     }
@@ -465,7 +494,8 @@ class Activity_Cuestionario : AppCompatActivity() {
                     if (binding!!.lblPregResp.text.toString() == "Pregunta") {
                         if ((contadorPregunta + 1) <= longi && longi > 0) {
                             var editable: Editable =
-                                Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
+                                Editable.Factory.getInstance()
+                                    .newEditable(binding!!.etPregResp.text)
                             var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
                                 0,
                                 editable.length,
@@ -494,7 +524,8 @@ class Activity_Cuestionario : AppCompatActivity() {
                     } else {
                         if (longi == 0) {
                             var editable: Editable =
-                                Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
+                                Editable.Factory.getInstance()
+                                    .newEditable(binding!!.etPregResp.text)
                             var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
                                 0,
                                 editable.length,
@@ -544,8 +575,8 @@ class Activity_Cuestionario : AppCompatActivity() {
             }
         }
 
-        activityCuestionarioViewModel.rollClicked.observe(this){
-            if (it){
+        activityCuestionarioViewModel.rollClicked.observe(this) {
+            if (it) {
                 if (binding!!.etPregResp.text.toString().isNotEmpty()) {
                     var editable: Editable =
                         Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
@@ -604,8 +635,8 @@ class Activity_Cuestionario : AppCompatActivity() {
             }
         }
 
-        activityCuestionarioViewModel.colorAnterior.observe(this){
-            if(posColorInicial == -1){
+        activityCuestionarioViewModel.colorAnterior.observe(this) {
+            if (posColorInicial == -1) {
                 colorPintarPalabra = it
 
                 val cursorPosition = binding!!.etPregResp.selectionStart
@@ -616,7 +647,11 @@ class Activity_Cuestionario : AppCompatActivity() {
                 posColorFinal = cursorPosition
 
                 // Obtener los spans dentro del rango especificado
-                val spansToRemove = binding!!.etPregResp.text!!.getSpans(posColorInicial, posColorFinal, ForegroundColorSpan::class.java)
+                val spansToRemove = binding!!.etPregResp.text!!.getSpans(
+                    posColorInicial,
+                    posColorFinal,
+                    ForegroundColorSpan::class.java
+                )
 
                 for (span in spansToRemove) {
                     binding!!.etPregResp.text!!.removeSpan(span)
@@ -632,6 +667,119 @@ class Activity_Cuestionario : AppCompatActivity() {
                 posColorInicial = -1
                 posColorFinal = -1
                 colorPintarPalabra = 0
+            }
+        }
+    }
+
+    private fun deleteImages() {
+        if (fileImagesPiv.delete()) {
+            fileImagesPiv.mkdirs()
+        }
+    }
+
+    private fun initUI() {
+        val ltImages = fileImages.listFiles()
+
+        val imagenesOrde = ltImages?.sortedBy { it.name }
+        if (!imagenesOrde.isNullOrEmpty()) {
+            for (i in ltImages) {
+                var ultimaImagen = i.path.substringAfterLast("/")
+                ultimaImagen = ultimaImagen.replace(".png".toRegex(), "")
+                var ultimaImagenEntero = ultimaImagen.toInt()
+                if (contadorImagen < ultimaImagenEntero) {
+                    contadorImagen = ultimaImagenEntero
+                }
+            }
+
+            contadorImagen += 1
+            filename = "$contadorImagen.png"
+        } else {
+            filename = "$contadorImagen.png"
+        }
+    }
+
+    private fun openSomeActivityForResult() {
+        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        resultLauncher.launch(intent)
+    }
+
+    private var resultLauncher = registerForActivityResult(StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val data: Intent? = result.data
+            if (data != null && data.data != null) {
+                val selectedImageUri: Uri? = data.data
+                if (selectedImageUri != null) {
+                    val bitmap =
+                        MediaStore.Images.Media.getBitmap(this.contentResolver, selectedImageUri)
+                    saveImageToInternalStorage(bitmap)
+                }
+            }
+        } else {
+            binding!!.imgvCancelar.visibility = View.GONE
+
+            binding!!.imgvQuitColor.visibility = View.VISIBLE
+            binding!!.imgvSelColor.visibility = View.VISIBLE
+        }
+    }
+
+    private fun saveImageToInternalStorage(bitmap: Bitmap) {
+        var fos: FileOutputStream? = null
+        try {
+            // val f = File(fileImagesPiv, filename)
+            fos = openFileOutput(filename, MODE_PRIVATE)
+            // fos = FileOutputStream(f)
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
+
+            if (binding!!.etPregResp.text!!.isNotEmpty()) {
+                AlertDialog.Builder(this@Activity_Cuestionario)
+                    .setTitle("¡Atención!")
+                    .setMessage("Se borrará el texto para agregar la imagen, ¿Quieres continuar?")
+                    .setPositiveButton(
+                        "Si"
+                    ) { _, _ ->
+                        Files.copy(
+                            Paths.get("$rutaPrin/$filename"),
+                            Paths.get("$fileImagesPiv/$filename"),
+                            StandardCopyOption.REPLACE_EXISTING
+                        )
+
+                        // Borrar archivo
+                        File(rutaPrin, filename).delete()
+
+                        binding!!.ivImagen.setImage(ImageSource.uri("$fileImagesPiv/$filename")) //setImageURI(uri)
+                        binding!!.tilContenidoPregResp.visibility = View.GONE
+
+                        binding!!.ivImagen.visibility = View.VISIBLE
+                        binding!!.etPregResp.setText("content://media/picker$fileImagesPiv/$filename")
+                    }
+                    .setNegativeButton(
+                        "Cancelar"
+                    ) { dialog, _ ->
+                        dialog.dismiss()
+                    }.create().show()
+            } else {
+                Files.copy(
+                    Paths.get("$rutaPrin/$filename"),
+                    Paths.get("$fileImagesPiv/$filename"),
+                    StandardCopyOption.REPLACE_EXISTING
+                )
+
+                // Borrar archivo
+                File(rutaPrin, filename).delete()
+
+                binding!!.ivImagen.setImage(ImageSource.uri("$fileImagesPiv/$filename")) //setImageURI(uri)
+                binding!!.tilContenidoPregResp.visibility = View.GONE
+
+                binding!!.ivImagen.visibility = View.VISIBLE
+                binding!!.etPregResp.setText("content://media/picker$fileImagesPiv/$filename")
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            try {
+                fos?.close()
+            } catch (e: IOException) {
+                e.printStackTrace()
             }
         }
     }
@@ -735,7 +883,7 @@ class Activity_Cuestionario : AppCompatActivity() {
                 } else {
                     Log.d("ArchivoEliminado", "Archivo no eliminado")
                 }
-                onBackPressed()
+                finish()
             }
             .setNegativeButton(
                 "Cancelar"
@@ -767,20 +915,71 @@ class Activity_Cuestionario : AppCompatActivity() {
             serializer.endDocument()
             serializer.flush()
             fos?.close()
-            Toast.makeText(
-                this, "Guia de estudio creada exitosamente",
-                Toast.LENGTH_SHORT
-            ).show()
-            Log.i("Creación: ", "Guia de estudio creada exitosamente")
-            val ruta = "$file/$nombreArchivo.xml"
+
+            val rutaGuiaCreada = File("$rutaPrin/$nombreArchivo.xml")
+            if (rutaGuiaCreada.exists()) {
+                Toast.makeText(
+                    this, "Guia de estudio creada exitosamente",
+                    Toast.LENGTH_SHORT
+                ).show()
+                Log.i("Creación: ", "Guia de estudio creada exitosamente")
+
+                Files.copy(
+                    Paths.get("$rutaPrin/$nombreArchivo.xml"),
+                    Paths.get("$file/$nombreArchivo.xml"),
+                    StandardCopyOption.REPLACE_EXISTING
+                )
+
+                // Borrar archivo
+                File(rutaPrin, "$nombreArchivo.xml").delete()
+                val ruta = "$file/$nombreArchivo.xml"
+                val intent: Intent = Intent(applicationContext, Activity_RepasarGuia::class.java)
+                intent.putExtra("ruta", ruta)
+
+                startActivity(intent)
+                activityCuestionarioViewModel.getAllUpdatedGuides(file)
+                copyImages()
+                finish()
+            } else {
+                Toast.makeText(
+                    this, "Guia de estudio no se creó correctamente",
+                    Toast.LENGTH_SHORT
+                ).show()
+                Log.i("Creación: ", "Guia de estudio no se creó correctamente")
+            }
+
+            /*val ruta = "$file/$nombreArchivo.xml"
             val intent: Intent = Intent(applicationContext, Activity_RepasarGuia::class.java)
             intent.putExtra("ruta", ruta)
 
             startActivity(intent)
             activityCuestionarioViewModel.getAllUpdatedGuides(file)
-            finish()
+            finish()*/
         } catch (e: IOException) {
             e.printStackTrace()
+        }
+    }
+
+    private fun copyImages() {
+        val images = fileImagesPiv.listFiles()
+        // Hacemos un ciclo por cada fichero para extraer el nombre de cada uno.
+        if (!images.isNullOrEmpty()) {
+            for (i in images.indices) {
+                // Sacamos del array files el primer fichero.
+                val archivo: File = images[i]
+                var name = ""
+
+                name = archivo.name
+
+                Files.copy(
+                    Paths.get("$fileImagesPiv/$name"),
+                    Paths.get("$fileImages/$name"),
+                    StandardCopyOption.REPLACE_EXISTING
+                )
+
+                // Borrar archivo
+                File(fileImagesPiv, name).delete()
+            }
         }
     }
 
@@ -815,13 +1014,15 @@ class Activity_Cuestionario : AppCompatActivity() {
         var texto: String = ""
         if (binding!!.lblPregResp.text.toString() == "Pregunta") {
             texto = preguntas[contadorPregunta]
-            uri = texto.toUri()
+            // uri = texto.toUri()
         } else {
             texto = respuestas[contadorPregunta]
-            uri = texto.toUri()
+            // uri = texto.toUri()
         }
 
-        if (texto.contains("content://media/picker")) {
+        if (texto.contains("content://media/picker/")) {
+            texto = texto.replace("content://media/picker/".toRegex(), "")
+            uri = texto.toUri()
             binding!!.ivImagen.setImage(ImageSource.uri(uri!!)) //setImageURI(uri)
             binding!!.tilContenidoPregResp.visibility = View.GONE
             binding!!.ivImagen.visibility = View.VISIBLE
@@ -891,8 +1092,8 @@ class Activity_Cuestionario : AppCompatActivity() {
 
                 val lastCharIndex = cursorPosition - 1
 
-                if (colorActual != colorPintarPalabra){
-                    if (colorPintarPalabra == 0){
+                if (colorActual != colorPintarPalabra) {
+                    if (colorPintarPalabra == 0) {
                         activityCuestionarioViewModel.setColorAnterior(colorActual)
                     } /*else {
                         activityCuestionarioViewModel.setColorAnterior(colorPintarPalabra)
@@ -921,7 +1122,7 @@ class Activity_Cuestionario : AppCompatActivity() {
         ImageViewCompat.setImageTintList(binding!!.imgvSelColor, ColorStateList.valueOf(color))
         colorActual = color
 
-        if (posColorInicial != -1){
+        if (posColorInicial != -1) {
             activityCuestionarioViewModel.setColorAnterior(colorPintarPalabra)
         }
     }

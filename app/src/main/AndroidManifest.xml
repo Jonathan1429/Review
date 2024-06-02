@@ -25,6 +25,8 @@
          5.- Poner las etiquetas de los colores correctamente donde inicia y termina un color.
          (SOLUCIONADO: activity_cuestionario, modificar)
 
+         6.- Si el texto agregado es la imagen, no debe decirte que se borrará el texto para
+             agregar una imagen.
 
          MEJORAS
          1.- Usar la obtención de la variable mutable de una guia al dar click en una guia en específico.
