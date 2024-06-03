@@ -24,6 +24,7 @@ import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
+import com.jonathanev.review.Core.Constants
 import com.jonathanev.review.Core.Constants.file
 import com.jonathanev.review.Data.Model.ColorPregModel
 import com.jonathanev.review.UI.ViewModel.RepasarGuiaViewModel
@@ -94,7 +95,7 @@ class Activity_RepasarGuia : AppCompatActivity() {
             pintarTexto()
         }
 
-        binding!!.barraSuperiorRegreso.imgvBack.setOnClickListener { onBackPressed() }
+        binding!!.barraSuperiorRegreso.imgvBack.setOnClickListener { finish() }
 
         binding!!.imgvPregResp.setOnClickListener {
             if (binding!!.lblPregResp.text.toString() == "Pregunta") {
@@ -274,55 +275,59 @@ class Activity_RepasarGuia : AppCompatActivity() {
         var texto: String = ""
         if (binding!!.lblPregResp.text.toString() == "Pregunta") {
             texto = preguntas[contadorPregunta]
-            uri = texto.toUri()
+            // uri = texto.toUri()
         } else {
             texto = respuestas[contadorPregunta]
-            uri = texto.toUri()
+            // uri = texto.toUri()
         }
 
         if (texto.contains("content://media/picker")) {
-            binding!!.ivImagen.setImage(ImageSource.uri(uri!!)) //setImageURI(uri)
+            texto = texto.replace("content://media/picker/".toRegex(), "")
+            uri = texto.toUri()
+            // binding!!.ivImagen.setImage(ImageSource.uri("${Constants.fileImages}/4.png")) //setImageURI(uri)
+            // setImage puede ser con Uri o con texto, hay que probar en este caso
+            binding!!.ivImagen.setImage(ImageSource.uri(texto)) //setImageURI(uri)
             binding!!.tilContenidoPregResp.visibility = View.GONE
             binding!!.ivImagen.visibility = View.VISIBLE
         } else {
             binding!!.tilContenidoPregResp.visibility = View.VISIBLE
             binding!!.ivImagen.visibility = View.GONE
-        }
 
-        while (texto.contains("«")) {
-            inicio = texto.indexOf("«") + 1
-            fin = texto.indexOf("»")
-            val color: String = texto.substring(inicio, fin)
-            val longColor: Int = color.length
-            val colEntero: Int = color.toInt()
-            inicio = fin + 1
-            fin = texto.indexOf("«", inicio)
-            colorPregModel =
-                ColorPregModel((inicio - longColor - 2), (fin - longColor - 2), colEntero)
+            while (texto.contains("«")) {
+                inicio = texto.indexOf("«") + 1
+                fin = texto.indexOf("»")
+                val color: String = texto.substring(inicio, fin)
+                val longColor: Int = color.length
+                val colEntero: Int = color.toInt()
+                inicio = fin + 1
+                fin = texto.indexOf("«", inicio)
+                colorPregModel =
+                    ColorPregModel((inicio - longColor - 2), (fin - longColor - 2), colEntero)
 
-            if (binding!!.lblPregResp.text.toString() == "Pregunta") {
-                preguntasColor.add(contColorPreg, colorPregModel)
-            } else {
-                respuestasColor.add(contColorPreg, colorPregModel)
+                if (binding!!.lblPregResp.text.toString() == "Pregunta") {
+                    preguntasColor.add(contColorPreg, colorPregModel)
+                } else {
+                    respuestasColor.add(contColorPreg, colorPregModel)
+                }
+
+                // Eliminar la primera etiqueta y su contenido
+                texto = texto.replaceFirst("«.*?»".toRegex(), "")
+
+                // Eliminar la segunda etiqueta y su contenido
+                texto = texto.replaceFirst("«.*?»".toRegex(), "")
+                contColorPreg++
             }
 
-            // Eliminar la primera etiqueta y su contenido
-            texto = texto.replaceFirst("«.*?»".toRegex(), "")
-
-            // Eliminar la segunda etiqueta y su contenido
-            texto = texto.replaceFirst("«.*?»".toRegex(), "")
-            contColorPreg++
-        }
-
-        builder = SpannableStringBuilder(texto)
-        for (coloresPreguntas: ColorPregModel in if (binding!!.lblPregResp.text.toString() == "Pregunta") preguntasColor else respuestasColor) {
-            val colorSpan: ForegroundColorSpan = ForegroundColorSpan(coloresPreguntas.color)
-            builder!!.setSpan(
-                colorSpan,
-                coloresPreguntas.inicioColor,
-                coloresPreguntas.finColor,
-                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-            )
+            builder = SpannableStringBuilder(texto)
+            for (coloresPreguntas: ColorPregModel in if (binding!!.lblPregResp.text.toString() == "Pregunta") preguntasColor else respuestasColor) {
+                val colorSpan: ForegroundColorSpan = ForegroundColorSpan(coloresPreguntas.color)
+                builder!!.setSpan(
+                    colorSpan,
+                    coloresPreguntas.inicioColor,
+                    coloresPreguntas.finColor,
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+            }
         }
 
         preguntasColor.clear()

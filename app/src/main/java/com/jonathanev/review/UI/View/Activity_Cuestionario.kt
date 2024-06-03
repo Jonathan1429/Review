@@ -748,9 +748,8 @@ class Activity_Cuestionario : AppCompatActivity() {
 
                         binding!!.ivImagen.setImage(ImageSource.uri("$fileImagesPiv/$filename")) //setImageURI(uri)
                         binding!!.tilContenidoPregResp.visibility = View.GONE
-
                         binding!!.ivImagen.visibility = View.VISIBLE
-                        binding!!.etPregResp.setText("content://media/picker$fileImagesPiv/$filename")
+                        binding!!.etPregResp.setText("content://media/picker$fileImages/$filename")
                     }
                     .setNegativeButton(
                         "Cancelar"
@@ -771,7 +770,7 @@ class Activity_Cuestionario : AppCompatActivity() {
                 binding!!.tilContenidoPregResp.visibility = View.GONE
 
                 binding!!.ivImagen.visibility = View.VISIBLE
-                binding!!.etPregResp.setText("content://media/picker$fileImagesPiv/$filename")
+                binding!!.etPregResp.setText("content://media/picker$fileImages/$filename")
             }
         } catch (e: Exception) {
             e.printStackTrace()
