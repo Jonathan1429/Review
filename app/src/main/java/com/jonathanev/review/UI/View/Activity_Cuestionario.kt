@@ -730,7 +730,7 @@ class Activity_Cuestionario : AppCompatActivity() {
             // fos = FileOutputStream(f)
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
 
-            if (binding!!.etPregResp.text!!.isNotEmpty()) {
+            if (binding!!.etPregResp.text!!.isNotEmpty() && !binding!!.etPregResp.text!!.contains("content://media/picker")) {
                 AlertDialog.Builder(this@Activity_Cuestionario)
                     .setTitle("¡Atención!")
                     .setMessage("Se borrará el texto para agregar la imagen, ¿Quieres continuar?")

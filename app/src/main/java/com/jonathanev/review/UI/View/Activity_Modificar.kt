@@ -2,14 +2,17 @@ package com.jonathanev.review.UI.View
 
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
 import android.text.Editable
 import android.text.Spannable
 import android.text.SpannableStringBuilder
@@ -20,13 +23,11 @@ import android.util.Xml
 import android.view.KeyEvent
 import android.view.View
 import android.widget.Toast
-import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.animation.doOnEnd
-import androidx.core.net.toUri
 import androidx.core.view.isGone
 import androidx.core.widget.ImageViewCompat
 import com.davemorrissey.labs.subscaleview.ImageSource
@@ -35,6 +36,9 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
 import com.jonathanev.review.Core.Constants.file
+import com.jonathanev.review.Core.Constants.fileImages
+import com.jonathanev.review.Core.Constants.fileImagesPiv
+import com.jonathanev.review.Core.Constants.rutaPrin
 import com.jonathanev.review.Data.Model.ColorPregModel
 import com.jonathanev.review.Fragments.Fragment_DialogColoresMod_popup
 import com.jonathanev.review.UI.ViewModel.ModificarViewModel
@@ -48,6 +52,9 @@ import org.xmlpull.v1.XmlSerializer
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.nio.file.StandardCopyOption
 import javax.xml.parsers.DocumentBuilder
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.parsers.ParserConfigurationException
@@ -66,11 +73,13 @@ class Activity_Modificar : AppCompatActivity() {
     private val respuestasColor: ArrayList<ColorPregModel> = ArrayList()
     var builder: SpannableStringBuilder? = null
     private var contadorPregunta: Int = 0
+    private var contadorImagen = 1
     private var dialMasPreg: Boolean = false
     private var uri: Uri? = null
     private var longCaracteres = 0
     private var pregResBandera = false // Bandera para cuando se le de click atras o delante.
     private var ruta: String = ""
+    private var filename: String = ""
 
     // Seleccionar imagen
     private val pickMedia =
@@ -487,7 +496,8 @@ class Activity_Modificar : AppCompatActivity() {
 
             binding!!.imgvCancelar.visibility = View.VISIBLE
 
-            pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            // pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            openSomeActivityForResult()
         }
 
         binding!!.etPregResp.addTextChangedListener(object : TextWatcher {
@@ -504,14 +514,14 @@ class Activity_Modificar : AppCompatActivity() {
                 if (!texto.toString()
                         .contains("content://media/picker") && (lv_lonCaracAct - longCaracteres) == 1
                 ) {
-                    if(colorActual != -16777216){
+                    if (colorActual != -16777216) {
                         pintarLetra(texto)
                     }
                 }
             }
         })
 
-        modificarViewModel.saveClicked.observe(this){
+        modificarViewModel.saveClicked.observe(this) {
             if (it) {
                 // Se le quita 1 para hacer referencia al arreglo
                 // tamaño 3-1 = 2 [0,1,2].
@@ -538,7 +548,10 @@ class Activity_Modificar : AppCompatActivity() {
                             Toast.LENGTH_SHORT
                         ).show()
 
-                        Log.i("Crear pregunta: ", "Asegurate de llenar una pregunta y una respuesta")
+                        Log.i(
+                            "Crear pregunta: ",
+                            "Asegurate de llenar una pregunta y una respuesta"
+                        )
 
                         modificarViewModel.clickedSave()
                     }
@@ -546,7 +559,8 @@ class Activity_Modificar : AppCompatActivity() {
                     if (binding!!.lblPregResp.text.toString() == "Pregunta") {
                         if ((contadorPregunta + 1) <= longi && longi > 0) {
                             var editable: Editable =
-                                Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
+                                Editable.Factory.getInstance()
+                                    .newEditable(binding!!.etPregResp.text)
                             var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
                                 0,
                                 editable.length,
@@ -575,7 +589,8 @@ class Activity_Modificar : AppCompatActivity() {
                     } else {
                         if (longi == 0) {
                             var editable: Editable =
-                                Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
+                                Editable.Factory.getInstance()
+                                    .newEditable(binding!!.etPregResp.text)
                             var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
                                 0,
                                 editable.length,
@@ -625,8 +640,8 @@ class Activity_Modificar : AppCompatActivity() {
             }
         }
 
-        modificarViewModel.rollClicked.observe(this){
-            if (it){
+        modificarViewModel.rollClicked.observe(this) {
+            if (it) {
                 if (binding!!.etPregResp.text.toString().isNotEmpty()) {
                     var editable: Editable =
                         Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
@@ -680,13 +695,13 @@ class Activity_Modificar : AppCompatActivity() {
                     ).show()
 
                     Log.i("Crear pregunta: ", "Asegurate de no dejar ningun campo vacio")
-                    modificarViewModel.clickedRoll()
                 }
+                modificarViewModel.clickedRoll()
             }
         }
 
-        modificarViewModel.colorAnterior.observe(this){
-            if(posColorInicial == -1){
+        modificarViewModel.colorAnterior.observe(this) {
+            if (posColorInicial == -1) {
                 colorPintarPalabra = it
 
                 val cursorPosition = binding!!.etPregResp.selectionStart
@@ -697,7 +712,11 @@ class Activity_Modificar : AppCompatActivity() {
                 posColorFinal = cursorPosition
 
                 // Obtener los spans dentro del rango especificado
-                val spansToRemove = binding!!.etPregResp.text!!.getSpans(posColorInicial, posColorFinal, ForegroundColorSpan::class.java)
+                val spansToRemove = binding!!.etPregResp.text!!.getSpans(
+                    posColorInicial,
+                    posColorFinal,
+                    ForegroundColorSpan::class.java
+                )
 
                 for (span in spansToRemove) {
                     binding!!.etPregResp.text!!.removeSpan(span)
@@ -717,8 +736,124 @@ class Activity_Modificar : AppCompatActivity() {
         }
     }
 
+    private fun openSomeActivityForResult() {
+        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        resultLauncher.launch(intent)
+    }
+
+    private var resultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val data: Intent? = result.data
+                if (data != null && data.data != null) {
+                    val selectedImageUri: Uri? = data.data
+                    if (selectedImageUri != null) {
+                        val bitmap =
+                            MediaStore.Images.Media.getBitmap(
+                                this.contentResolver,
+                                selectedImageUri
+                            )
+                        saveImageToInternalStorage(bitmap)
+                    }
+                }
+            } else {
+                binding!!.imgvCancelar.visibility = View.GONE
+
+                binding!!.imgvQuitColor.visibility = View.VISIBLE
+                binding!!.imgvSelColor.visibility = View.VISIBLE
+            }
+        }
+
+    private fun saveImageToInternalStorage(bitmap: Bitmap?) {
+        var fos: FileOutputStream? = null
+        try {
+            // val f = File(fileImagesPiv, filename)
+            if (bitmap != null) {
+                fos = openFileOutput(filename, MODE_PRIVATE)
+                // fos = FileOutputStream(f)
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
+
+                if (binding!!.etPregResp.text!!.isNotEmpty() && !binding!!.etPregResp.text!!.contains("content://media/picker")) {
+                    AlertDialog.Builder(this@Activity_Modificar)
+                        .setTitle("¡Atención!")
+                        .setMessage("Se borrará el texto para agregar la imagen, ¿Quieres continuar?")
+                        .setPositiveButton(
+                            "Si"
+                        ) { _, _ ->
+                            Files.copy(
+                                Paths.get("$rutaPrin/$filename"),
+                                Paths.get("$fileImagesPiv/$filename"),
+                                StandardCopyOption.REPLACE_EXISTING
+                            )
+
+                            // Borrar archivo
+                            File(rutaPrin, filename).delete()
+
+                            binding!!.ivImagen.setImage(ImageSource.uri("$fileImagesPiv/$filename")) //setImageURI(uri)
+                            binding!!.tilContenidoPregResp.visibility = View.GONE
+                            binding!!.ivImagen.visibility = View.VISIBLE
+                            binding!!.etPregResp.setText("content://media/picker$fileImages/$filename")
+
+                            contadorImagen += 1
+                            filename = "$contadorImagen.png"
+                        }
+                        .setNegativeButton(
+                            "Cancelar"
+                        ) { dialog, _ ->
+                            dialog.dismiss()
+                        }.create().show()
+                } else {
+                    Files.copy(
+                        Paths.get("$rutaPrin/$filename"),
+                        Paths.get("$fileImagesPiv/$filename"),
+                        StandardCopyOption.REPLACE_EXISTING
+                    )
+
+                    // Borrar archivo
+                    File(rutaPrin, filename).delete()
+
+                    binding!!.ivImagen.setImage(ImageSource.uri("$fileImagesPiv/$filename")) //setImageURI(uri)
+                    binding!!.tilContenidoPregResp.visibility = View.GONE
+
+                    binding!!.ivImagen.visibility = View.VISIBLE
+                    binding!!.etPregResp.setText("content://media/picker$fileImages/$filename")
+
+                    contadorImagen += 1
+                    filename = "$contadorImagen.png"
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            try {
+                fos?.close()
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     private fun initUI(ruta: String) {
         modificarViewModel.getGuia(ruta)
+
+        val ltImages = fileImages.listFiles()
+
+        val imagenesOrde = ltImages?.sortedBy { it.name }
+        if (!imagenesOrde.isNullOrEmpty()) {
+            for (i in ltImages) {
+                var ultimaImagen = i.path.substringAfterLast("/")
+                ultimaImagen = ultimaImagen.replace(".png".toRegex(), "")
+                var ultimaImagenEntero = ultimaImagen.toInt()
+                if (contadorImagen < ultimaImagenEntero) {
+                    contadorImagen = ultimaImagenEntero
+                }
+            }
+
+            contadorImagen += 1
+            filename = "$contadorImagen.png"
+        } else {
+            filename = "$contadorImagen.png"
+        }
     }
 
     private fun initLoadAds() {
@@ -851,12 +986,38 @@ class Activity_Modificar : AppCompatActivity() {
             ).show()
 
             Log.i("Crear archivo: ", "Guia de estudio modificada exitosamente")
+
+            val ruta = "$file/$nombreArchivo"
             val intent: Intent = Intent(applicationContext, Activity_RepasarGuia::class.java)
             intent.putExtra("ruta", ruta)
             startActivity(intent)
+            copyImages()
             finish()
         } catch (e: IOException) {
             e.printStackTrace()
+        }
+    }
+
+    private fun copyImages() {
+        val images = fileImagesPiv.listFiles()
+        // Hacemos un ciclo por cada fichero para extraer el nombre de cada uno.
+        if (!images.isNullOrEmpty()) {
+            for (i in images.indices) {
+                // Sacamos del array files el primer fichero.
+                val archivo: File = images[i]
+                var name = ""
+
+                name = archivo.name
+
+                Files.copy(
+                    Paths.get("$fileImagesPiv/$name"),
+                    Paths.get("$fileImages/$name"),
+                    StandardCopyOption.REPLACE_EXISTING
+                )
+
+                // Borrar archivo
+                File(fileImagesPiv, name).delete()
+            }
         }
     }
 
@@ -891,20 +1052,23 @@ class Activity_Modificar : AppCompatActivity() {
         var texto: String = ""
         if (binding!!.lblPregResp.text.toString() == "Pregunta") {
             texto = preguntas[contadorPregunta]
-            uri = texto.toUri()
+            // uri = texto.toUri()
         } else {
             texto = respuestas[contadorPregunta]
-            uri = texto.toUri()
+            // uri = texto.toUri()
         }
 
         if (texto.contains("content://media/picker")) {
-            binding!!.ivImagen.setImage(ImageSource.uri(uri!!)) //setImageURI(uri)
+            binding!!.etPregResp.setText(texto)
+            texto = texto.replace("content://media/picker/".toRegex(), "")
+            binding!!.ivImagen.setImage(ImageSource.uri(texto)) //setImageURI(uri)
             binding!!.tilContenidoPregResp.visibility = View.GONE
             binding!!.ivImagen.visibility = View.VISIBLE
 
             binding!!.imgvCancelar.visibility = View.VISIBLE
             binding!!.imgvQuitColor.visibility = View.GONE
             binding!!.imgvSelColor.visibility = View.GONE
+
         } else {
             binding!!.tilContenidoPregResp.visibility = View.VISIBLE
             binding!!.ivImagen.visibility = View.GONE
@@ -912,53 +1076,53 @@ class Activity_Modificar : AppCompatActivity() {
             binding!!.imgvCancelar.visibility = View.GONE
             binding!!.imgvQuitColor.visibility = View.VISIBLE
             binding!!.imgvSelColor.visibility = View.VISIBLE
-        }
 
-        while (texto.contains("«")) {
-            inicio = texto.indexOf("«") + 1
-            fin = texto.indexOf("»")
-            val color: String = texto.substring(inicio, fin)
+            while (texto.contains("«")) {
+                inicio = texto.indexOf("«") + 1
+                fin = texto.indexOf("»")
+                val color: String = texto.substring(inicio, fin)
 
-            val longColor: Int = color.length
-            val colEntero: Int = color.toInt()
-            inicio = fin + 1
-            fin = texto.indexOf("«", inicio)
-            colorPregModel =
-                ColorPregModel((inicio - longColor - 2), (fin - longColor - 2), colEntero)
+                val longColor: Int = color.length
+                val colEntero: Int = color.toInt()
+                inicio = fin + 1
+                fin = texto.indexOf("«", inicio)
+                colorPregModel =
+                    ColorPregModel((inicio - longColor - 2), (fin - longColor - 2), colEntero)
 
-            if (binding!!.lblPregResp.text.toString() == "Pregunta") {
-                preguntasColor.add(contColorPreg, colorPregModel)
-            } else {
-                respuestasColor.add(contColorPreg, colorPregModel)
+                if (binding!!.lblPregResp.text.toString() == "Pregunta") {
+                    preguntasColor.add(contColorPreg, colorPregModel)
+                } else {
+                    respuestasColor.add(contColorPreg, colorPregModel)
+                }
+
+                // Eliminar la primera etiqueta y su contenido
+                texto = texto.replaceFirst("«.*?»".toRegex(), "")
+
+                // Eliminar la segunda etiqueta y su contenido
+                texto = texto.replaceFirst("«.*?»".toRegex(), "")
+                contColorPreg++
             }
 
-            // Eliminar la primera etiqueta y su contenido
-            texto = texto.replaceFirst("«.*?»".toRegex(), "")
 
-            // Eliminar la segunda etiqueta y su contenido
-            texto = texto.replaceFirst("«.*?»".toRegex(), "")
-            contColorPreg++
+            builder = SpannableStringBuilder(texto)
+            for (coloresPreguntas: ColorPregModel in if (binding!!.lblPregResp.text.toString() == "Pregunta") preguntasColor else respuestasColor) {
+                val colorSpan: ForegroundColorSpan = ForegroundColorSpan(coloresPreguntas.color)
+                builder!!.setSpan(
+                    colorSpan,
+                    coloresPreguntas.inicioColor,
+                    coloresPreguntas.finColor,
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+            }
+
+            preguntasColor.clear()
+            respuestasColor.clear()
+
+            // Bandera ingresada para que no haga cambios de color cuando se detecte un cambio en ET.
+            pregResBandera = true
+            binding!!.etPregResp.text = builder
+            pregResBandera = false
         }
-
-
-        builder = SpannableStringBuilder(texto)
-        for (coloresPreguntas: ColorPregModel in if (binding!!.lblPregResp.text.toString() == "Pregunta") preguntasColor else respuestasColor) {
-            val colorSpan: ForegroundColorSpan = ForegroundColorSpan(coloresPreguntas.color)
-            builder!!.setSpan(
-                colorSpan,
-                coloresPreguntas.inicioColor,
-                coloresPreguntas.finColor,
-                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-            )
-        }
-
-        preguntasColor.clear()
-        respuestasColor.clear()
-
-        // Bandera ingresada para que no haga cambios de color cuando se detecte un cambio en ET.
-        pregResBandera = true
-        binding!!.etPregResp.text = builder
-        pregResBandera = false
     }
 
     private fun obtenerDatosXML() {
@@ -1004,8 +1168,8 @@ class Activity_Modificar : AppCompatActivity() {
                 val cursorPosition = binding!!.etPregResp.selectionStart
                 val lastCharIndex = cursorPosition - 1
 
-                if (colorActual != colorPintarPalabra){
-                    if (colorPintarPalabra == 0){
+                if (colorActual != colorPintarPalabra) {
+                    if (colorPintarPalabra == 0) {
                         modificarViewModel.setColorAnterior(colorActual)
                     }
                 }
@@ -1033,7 +1197,7 @@ class Activity_Modificar : AppCompatActivity() {
         ImageViewCompat.setImageTintList(binding!!.imgvSelColor, ColorStateList.valueOf(color))
         colorActual = color
 
-        if (posColorInicial != -1){
+        if (posColorInicial != -1) {
             modificarViewModel.setColorAnterior(colorPintarPalabra)
         }
     }

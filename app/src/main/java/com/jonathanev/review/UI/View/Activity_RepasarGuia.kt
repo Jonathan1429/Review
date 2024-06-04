@@ -283,7 +283,7 @@ class Activity_RepasarGuia : AppCompatActivity() {
 
         if (texto.contains("content://media/picker")) {
             texto = texto.replace("content://media/picker/".toRegex(), "")
-            uri = texto.toUri()
+            // uri = texto.toUri()
             // binding!!.ivImagen.setImage(ImageSource.uri("${Constants.fileImages}/4.png")) //setImageURI(uri)
             // setImage puede ser con Uri o con texto, hay que probar en este caso
             binding!!.ivImagen.setImage(ImageSource.uri(texto)) //setImageURI(uri)
