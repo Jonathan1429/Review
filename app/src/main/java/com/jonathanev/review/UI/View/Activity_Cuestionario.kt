@@ -43,7 +43,9 @@ import com.jonathanev.review.Core.Constants.fileImages
 import com.jonathanev.review.Core.Constants.fileImagesPiv
 import com.jonathanev.review.Core.Constants.rutaPrin
 import com.jonathanev.review.Data.Model.ColorPregModel
+import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Fragments.Fragment_DialogColores_popup
+import com.jonathanev.review.R
 import com.jonathanev.review.UI.ViewModel.ActivityCuestionarioViewModel
 import com.jonathanev.review.databinding.ActivityCuestionarioBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -69,7 +71,7 @@ class Activity_Cuestionario : AppCompatActivity() {
     private val respuestasColor: ArrayList<ColorPregModel> = ArrayList()
     var builder: SpannableStringBuilder? = null
     private var contadorPregunta: Int = 0
-    private var contadorImagen = 1
+    private var contadorImagen = 0
     private var uri: Uri? = null
     private var longCaracteres = 0
     private var pregResBandera = false // Bandera para cuando se le de click atras o delante.
@@ -683,11 +685,23 @@ class Activity_Cuestionario : AppCompatActivity() {
 
     private fun initUI() {
         val ltImages = fileImages.listFiles()
+        val imagenes = mutableListOf<String>()
+        if (ltImages!!.isNotEmpty()) {
+            for (i in ltImages.indices) {
+                // Sacamos del array files el primer fichero.
+                val archivo: File = ltImages[i]
+                var name = ""
 
-        val imagenesOrde = ltImages?.sortedBy { it.name }
-        if (!imagenesOrde.isNullOrEmpty()) {
-            for (i in ltImages) {
-                var ultimaImagen = i.path.substringAfterLast("/")
+                if (!archivo.isDirectory) {                    // Folder (guias)
+                    name = archivo.name
+                    imagenes.add(name)
+                }
+            }
+        }
+
+        if (imagenes.isNotEmpty()) {
+            for (i in imagenes) {
+                var ultimaImagen = i.substringAfterLast("/")
                 ultimaImagen = ultimaImagen.replace(".png".toRegex(), "")
                 var ultimaImagenEntero = ultimaImagen.toInt()
                 if (contadorImagen < ultimaImagenEntero) {
@@ -737,7 +751,7 @@ class Activity_Cuestionario : AppCompatActivity() {
             if (binding!!.etPregResp.text!!.isNotEmpty() && !binding!!.etPregResp.text!!.contains("content://media/picker")) {
                 AlertDialog.Builder(this@Activity_Cuestionario)
                     .setTitle("¡Atención!")
-                    .setMessage("Se borrará el texto para agregar la imagen, ¿Quieres continuar?")
+                    .setMessage("Se borrará el contenido para agregar la imagen, ¿Quieres continuar?")
                     .setPositiveButton(
                         "Si"
                     ) { _, _ ->
@@ -777,8 +791,8 @@ class Activity_Cuestionario : AppCompatActivity() {
 
                 binding!!.ivImagen.setImage(ImageSource.uri("$fileImagesPiv/$filename")) //setImageURI(uri)
                 binding!!.tilContenidoPregResp.visibility = View.GONE
-
                 binding!!.ivImagen.visibility = View.VISIBLE
+
                 val cifrado = cifrar("content://media/picker$fileImages/$filename", 3)
                 binding!!.etPregResp.setText(cifrado)
             }

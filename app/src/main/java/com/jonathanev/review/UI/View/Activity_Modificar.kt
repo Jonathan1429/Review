@@ -73,7 +73,7 @@ class Activity_Modificar : AppCompatActivity() {
     private val respuestasColor: ArrayList<ColorPregModel> = ArrayList()
     var builder: SpannableStringBuilder? = null
     private var contadorPregunta: Int = 0
-    private var contadorImagen = 1
+    private var contadorImagen = 0
     private var dialMasPreg: Boolean = false
     private var uri: Uri? = null
     private var longCaracteres = 0
@@ -777,13 +777,16 @@ class Activity_Modificar : AppCompatActivity() {
                 // fos = FileOutputStream(f)
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
 
+                var ruta: String = file.toString()
+                ruta = ruta.replace("guias".toRegex(), "imagenes")
+
                 if (binding!!.etPregResp.text!!.isNotEmpty() && !binding!!.etPregResp.text!!.contains(
                         "content://media/picker"
                     )
                 ) {
                     AlertDialog.Builder(this@Activity_Modificar)
                         .setTitle("¡Atención!")
-                        .setMessage("Se borrará el texto para agregar la imagen, ¿Quieres continuar?")
+                        .setMessage("Se borrará el contenido para agregar la imagen, ¿Quieres continuar?")
                         .setPositiveButton(
                             "Si"
                         ) { _, _ ->
@@ -799,7 +802,7 @@ class Activity_Modificar : AppCompatActivity() {
                             binding!!.ivImagen.setImage(ImageSource.uri("$fileImagesPiv/$filename")) //setImageURI(uri)
                             binding!!.tilContenidoPregResp.visibility = View.GONE
                             binding!!.ivImagen.visibility = View.VISIBLE
-                            val cifrado = cifrar("content://media/picker$fileImages/$filename", 3)
+                            val cifrado = cifrar("content://media/picker$ruta/$filename", 3)
                             binding!!.etPregResp.setText(cifrado)
 
                             // contadorImagen += 1
@@ -828,7 +831,7 @@ class Activity_Modificar : AppCompatActivity() {
                     binding!!.tilContenidoPregResp.visibility = View.GONE
 
                     binding!!.ivImagen.visibility = View.VISIBLE
-                    val cifrado = cifrar("content://media/picker$fileImages/$filename", 3)
+                    val cifrado = cifrar("content://media/picker$ruta/$filename", 3)
                     binding!!.etPregResp.setText(cifrado)
 
                     // contadorImagen += 1
@@ -849,12 +852,29 @@ class Activity_Modificar : AppCompatActivity() {
     private fun initUI(ruta: String) {
         modificarViewModel.getGuia(ruta)
 
-        val ltImages = fileImages.listFiles()
+        var ruta: String = file.toString()
+        ruta = ruta.replace("guias".toRegex(), "imagenes")
+        var rutaFile  = File(ruta)
 
-        val imagenesOrde = ltImages?.sortedBy { it.name }
-        if (!imagenesOrde.isNullOrEmpty()) {
-            for (i in ltImages) {
-                var ultimaImagen = i.path.substringAfterLast("/")
+        val ltImages = rutaFile.listFiles()
+
+        val imagenes = mutableListOf<String>()
+        if (ltImages!!.isNotEmpty()) {
+            for (i in ltImages.indices) {
+                // Sacamos del array files el primer fichero.
+                val archivo: File = ltImages[i]
+                var name = ""
+
+                if (!archivo.isDirectory) {                    // Folder (guias)
+                    name = archivo.name
+                    imagenes.add(name)
+                }
+            }
+        }
+
+        if (imagenes.isNotEmpty()) {
+            for (i in imagenes) {
+                var ultimaImagen = i.substringAfterLast("/")
                 ultimaImagen = ultimaImagen.replace(".png".toRegex(), "")
                 var ultimaImagenEntero = ultimaImagen.toInt()
                 if (contadorImagen < ultimaImagenEntero) {
@@ -1023,9 +1043,12 @@ class Activity_Modificar : AppCompatActivity() {
 
                 name = archivo.name
 
+                var rutaImagen = file.toString()
+                rutaImagen = rutaImagen.replace("guias".toRegex(), "imagenes")
+                val rutaImagPath = File(rutaImagen)
                 Files.copy(
                     Paths.get("$fileImagesPiv/$name"),
-                    Paths.get("$fileImages/$name"),
+                    Paths.get("$rutaImagPath/$name"),
                     StandardCopyOption.REPLACE_EXISTING
                 )
 
@@ -1075,9 +1098,10 @@ class Activity_Modificar : AppCompatActivity() {
         if (texto.contains("frqwhqw://phgld/slfnhu/")) {
             val descifrado = cifrar(texto, 26 - 3)
             binding!!.etPregResp.setText(texto)
-            texto = descifrado.replace("content://media/picker/".toRegex(), "")
-            texto = texto.replace("imagenes".toRegex(), "imagenesPivote")
-            binding!!.ivImagen.setImage(ImageSource.uri(texto)) //setImageURI(uri)
+            // texto = descifrado.replace("content://media/picker/".toRegex(), "")
+            // texto = texto.replace("imagenes".toRegex(), "imagenesPivote")
+            val imagen = descifrado.substringAfterLast("/")
+            binding!!.ivImagen.setImage(ImageSource.uri("$fileImagesPiv/$imagen")) //setImageURI(uri)
             binding!!.tilContenidoPregResp.visibility = View.GONE
             binding!!.ivImagen.visibility = View.VISIBLE
 
