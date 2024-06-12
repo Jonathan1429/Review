@@ -753,7 +753,8 @@ class Activity_Cuestionario : AppCompatActivity() {
                         binding!!.ivImagen.setImage(ImageSource.uri("$fileImagesPiv/$filename")) //setImageURI(uri)
                         binding!!.tilContenidoPregResp.visibility = View.GONE
                         binding!!.ivImagen.visibility = View.VISIBLE
-                        binding!!.etPregResp.setText("content://media/picker$fileImages/$filename")
+                        val cifrado = cifrar("content://media/picker$fileImages/$filename", 3)
+                        binding!!.etPregResp.setText(cifrado)
                     }
                     .setNegativeButton(
                         "Cancelar"
@@ -778,7 +779,8 @@ class Activity_Cuestionario : AppCompatActivity() {
                 binding!!.tilContenidoPregResp.visibility = View.GONE
 
                 binding!!.ivImagen.visibility = View.VISIBLE
-                binding!!.etPregResp.setText("content://media/picker$fileImages/$filename")
+                val cifrado = cifrar("content://media/picker$fileImages/$filename", 3)
+                binding!!.etPregResp.setText(cifrado)
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -1028,9 +1030,10 @@ class Activity_Cuestionario : AppCompatActivity() {
             // uri = texto.toUri()
         }
 
-        if (texto.contains("content://media/picker/")) {
+        if (texto.contains("frqwhqw://phgld/slfnhu/")) {
+            val descifrado = cifrar(texto, 26 - 3)
             binding!!.etPregResp.setText(texto)
-            texto = texto.replace("content://media/picker/".toRegex(), "")
+            texto = descifrado.replace("content://media/picker/".toRegex(), "")
             texto = texto.replace("imagenes".toRegex(), "imagenesPivote")
             // uri = texto.toUri()
             binding!!.ivImagen.setImage(ImageSource.uri(texto)) //setImageURI(uri)
@@ -1136,5 +1139,21 @@ class Activity_Cuestionario : AppCompatActivity() {
         if (posColorInicial != -1) {
             activityCuestionarioViewModel.setColorAnterior(colorPintarPalabra)
         }
+    }
+
+    fun cifrar(texto: String, desplazamiento: Int): String {
+        val resultado = StringBuilder()
+
+        for (caracter in texto) {
+            if (caracter.isLetter()) {
+                val base = if (caracter.isUpperCase()) 'A' else 'a'
+                val letraCifrada = ((caracter - base + desplazamiento) % 26 + base.code).toChar()
+                resultado.append(letraCifrada)
+            } else {
+                resultado.append(caracter)
+            }
+        }
+
+        return resultado.toString()
     }
 }

@@ -26,6 +26,7 @@ class MainActivity : AppCompatActivity() {
 
     private var binding: ActivityMainBinding? = null
     private val mainActivityViewModel: MainActivityViewModel by viewModels()
+    private var carpetasImagenes = mutableListOf<String>()
 
     // Array TEXTO donde guardaremos los nombres de los ficheros.
     var item: ArrayList<String> = ArrayList()
@@ -81,6 +82,10 @@ class MainActivity : AppCompatActivity() {
             file = it
             initUI()
         }
+
+        mainActivityViewModel.carpetas.observe(this){
+            carpetasImagenes.addAll(it)
+        }
     }
 
     // Create and validate folders
@@ -121,13 +126,31 @@ class MainActivity : AppCompatActivity() {
             val dialog: AlertDialog = builder.create()
             dialog.show()
         } else {
-            foldersCreated = true
+            // Crear subcarpetas para las imagenes
+            for (subCarpeta in carpetasImagenes){
+                var rutaSubcarpeta = File("$fileImages/$subCarpeta")
+
+                // Vas creando y verificando que las carpetas se crean correctamente
+                if (!rutaSubcarpeta.exists()) {
+                    rutaSubcarpeta.mkdirs()
+                    if (!rutaSubcarpeta.exists()){
+                        foldersCreated = false
+                        break
+                    } else {
+                        foldersCreated = true
+                    }
+                } else {
+                    foldersCreated = true
+                }
+            }
         }
 
         return foldersCreated
     }
 
     private fun initUI() {
+        mainActivityViewModel.getAllFolders(file)
+
         if (createFolders()) {
             mainActivityViewModel.getAllGuias(file)
         }

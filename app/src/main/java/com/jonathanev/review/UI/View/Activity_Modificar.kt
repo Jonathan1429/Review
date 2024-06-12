@@ -777,7 +777,10 @@ class Activity_Modificar : AppCompatActivity() {
                 // fos = FileOutputStream(f)
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
 
-                if (binding!!.etPregResp.text!!.isNotEmpty() && !binding!!.etPregResp.text!!.contains("content://media/picker")) {
+                if (binding!!.etPregResp.text!!.isNotEmpty() && !binding!!.etPregResp.text!!.contains(
+                        "content://media/picker"
+                    )
+                ) {
                     AlertDialog.Builder(this@Activity_Modificar)
                         .setTitle("¡Atención!")
                         .setMessage("Se borrará el texto para agregar la imagen, ¿Quieres continuar?")
@@ -796,7 +799,8 @@ class Activity_Modificar : AppCompatActivity() {
                             binding!!.ivImagen.setImage(ImageSource.uri("$fileImagesPiv/$filename")) //setImageURI(uri)
                             binding!!.tilContenidoPregResp.visibility = View.GONE
                             binding!!.ivImagen.visibility = View.VISIBLE
-                            binding!!.etPregResp.setText("content://media/picker$fileImages/$filename")
+                            val cifrado = cifrar("content://media/picker$fileImages/$filename", 3)
+                            binding!!.etPregResp.setText(cifrado)
 
                             // contadorImagen += 1
                             // filename = "$contadorImagen.png"
@@ -824,7 +828,8 @@ class Activity_Modificar : AppCompatActivity() {
                     binding!!.tilContenidoPregResp.visibility = View.GONE
 
                     binding!!.ivImagen.visibility = View.VISIBLE
-                    binding!!.etPregResp.setText("content://media/picker$fileImages/$filename")
+                    val cifrado = cifrar("content://media/picker$fileImages/$filename", 3)
+                    binding!!.etPregResp.setText(cifrado)
 
                     // contadorImagen += 1
                     // filename = "$contadorImagen.png"
@@ -1067,9 +1072,10 @@ class Activity_Modificar : AppCompatActivity() {
             // uri = texto.toUri()
         }
 
-        if (texto.contains("content://media/picker")) {
+        if (texto.contains("frqwhqw://phgld/slfnhu/")) {
+            val descifrado = cifrar(texto, 26 - 3)
             binding!!.etPregResp.setText(texto)
-            texto = texto.replace("content://media/picker/".toRegex(), "")
+            texto = descifrado.replace("content://media/picker/".toRegex(), "")
             texto = texto.replace("imagenes".toRegex(), "imagenesPivote")
             binding!!.ivImagen.setImage(ImageSource.uri(texto)) //setImageURI(uri)
             binding!!.tilContenidoPregResp.visibility = View.GONE
@@ -1216,5 +1222,21 @@ class Activity_Modificar : AppCompatActivity() {
         if (fileImagesPiv.delete()) {
             fileImagesPiv.mkdirs()
         }
+    }
+
+    fun cifrar(texto: String, desplazamiento: Int): String {
+        val resultado = StringBuilder()
+
+        for (caracter in texto) {
+            if (caracter.isLetter()) {
+                val base = if (caracter.isUpperCase()) 'A' else 'a'
+                val letraCifrada = ((caracter - base + desplazamiento) % 26 + base.code).toChar()
+                resultado.append(letraCifrada)
+            } else {
+                resultado.append(caracter)
+            }
+        }
+
+        return resultado.toString()
     }
 }
