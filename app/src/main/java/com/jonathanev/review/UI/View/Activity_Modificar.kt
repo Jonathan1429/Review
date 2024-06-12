@@ -170,13 +170,17 @@ class Activity_Modificar : AppCompatActivity() {
                 ).show()
 
                 Log.i("Modificar archivo: ", "No se hicieron cambios en el archivo")
-                onBackPressed()
+                deleteImages()
+                finish()
             }
         })
 
         binding!!.imgvPregResp.setOnClickListener {
             modificarViewModel.setColorAnterior(colorPintarPalabra)
             modificarViewModel.clickedRoll()
+
+            contadorImagen += 1
+            filename = "$contadorImagen.png"
         }
 
         binding!!.imgvPrevious.setOnClickListener {
@@ -684,6 +688,7 @@ class Activity_Modificar : AppCompatActivity() {
                         girarCardView()
                     }
 
+                    modificarViewModel.clickedRoll()
                     posColorFinal = -1
                     posColorInicial = -1
                     colorPintarPalabra = 0
@@ -696,7 +701,6 @@ class Activity_Modificar : AppCompatActivity() {
 
                     Log.i("Crear pregunta: ", "Asegurate de no dejar ningun campo vacio")
                 }
-                modificarViewModel.clickedRoll()
             }
         }
 
@@ -794,13 +798,17 @@ class Activity_Modificar : AppCompatActivity() {
                             binding!!.ivImagen.visibility = View.VISIBLE
                             binding!!.etPregResp.setText("content://media/picker$fileImages/$filename")
 
-                            contadorImagen += 1
-                            filename = "$contadorImagen.png"
+                            // contadorImagen += 1
+                            // filename = "$contadorImagen.png"
                         }
                         .setNegativeButton(
                             "Cancelar"
                         ) { dialog, _ ->
                             dialog.dismiss()
+                            binding!!.imgvCancelar.visibility = View.GONE
+
+                            binding!!.imgvQuitColor.visibility = View.VISIBLE
+                            binding!!.imgvSelColor.visibility = View.VISIBLE
                         }.create().show()
                 } else {
                     Files.copy(
@@ -818,8 +826,8 @@ class Activity_Modificar : AppCompatActivity() {
                     binding!!.ivImagen.visibility = View.VISIBLE
                     binding!!.etPregResp.setText("content://media/picker$fileImages/$filename")
 
-                    contadorImagen += 1
-                    filename = "$contadorImagen.png"
+                    // contadorImagen += 1
+                    // filename = "$contadorImagen.png"
                 }
             }
         } catch (e: Exception) {
@@ -940,7 +948,8 @@ class Activity_Modificar : AppCompatActivity() {
             ).show()
 
             Log.i("Crear archivo: ", "No se hicieron cambios en el archivo")
-            onBackPressed()
+            deleteImages()
+            finish()
             return true
         }
         return super.onKeyDown(keyCode, event)
@@ -1061,6 +1070,7 @@ class Activity_Modificar : AppCompatActivity() {
         if (texto.contains("content://media/picker")) {
             binding!!.etPregResp.setText(texto)
             texto = texto.replace("content://media/picker/".toRegex(), "")
+            texto = texto.replace("imagenes".toRegex(), "imagenesPivote")
             binding!!.ivImagen.setImage(ImageSource.uri(texto)) //setImageURI(uri)
             binding!!.tilContenidoPregResp.visibility = View.GONE
             binding!!.ivImagen.visibility = View.VISIBLE
@@ -1199,6 +1209,12 @@ class Activity_Modificar : AppCompatActivity() {
 
         if (posColorInicial != -1) {
             modificarViewModel.setColorAnterior(colorPintarPalabra)
+        }
+    }
+
+    private fun deleteImages() {
+        if (fileImagesPiv.delete()) {
+            fileImagesPiv.mkdirs()
         }
     }
 }

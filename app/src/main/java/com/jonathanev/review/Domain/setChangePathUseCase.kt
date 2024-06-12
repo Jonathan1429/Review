@@ -5,6 +5,6 @@ import javax.inject.Inject
 
 class setChangePathUseCase @Inject constructor() {
     operator fun invoke(folderName: String): File {
-        return File("/data/data/com.jonathanev.review/files/$folderName")
+        return File("/data/data/com.jonathanev.review/files/guias/$folderName")
     }
 }

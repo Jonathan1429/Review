@@ -294,7 +294,7 @@ class Activity_Cuestionario : AppCompatActivity() {
                     // en los et.
                     if (contadorPregunta < longi) {
                         // Pintamos el texto en la pregunta actual
-                        // binding!!.lblPregResp.text = "Pregunta"
+                        binding!!.lblPregResp.text = "Pregunta"
                         pintarTexto(contadorPregunta + 1)
                     } else {
                         // binding!!.lblPregResp.text = "Pregunta"
@@ -592,6 +592,7 @@ class Activity_Cuestionario : AppCompatActivity() {
                     if (binding!!.lblPregResp.text.toString() == "Pregunta") {
                         if ((contadorPregunta + 1) > respuestas.size) {
                             binding!!.lblPregResp.text = "Respuesta"
+                            // binding!!.lblPregResp.text = "Respuesta"
                             preguntas.add(contadorPregunta, editable.toString())
                             binding!!.etPregResp.setText("")
                             binding!!.ivImagen.visibility = View.GONE
@@ -604,6 +605,7 @@ class Activity_Cuestionario : AppCompatActivity() {
                             binding!!.lblPregResp.text = "Respuesta"
                             preguntas[contadorPregunta] = editable.toString()
                             pintarTexto(contadorPregunta)
+                            // binding!!.lblPregResp.text = "Respuesta"
                         }
                         girarCardView()
                     } else {
@@ -611,14 +613,17 @@ class Activity_Cuestionario : AppCompatActivity() {
                             binding!!.lblPregResp.text = "Pregunta"
                             respuestas.add(contadorPregunta, editable.toString())
                             pintarTexto(contadorPregunta)
+                            // binding!!.lblPregResp.text = "Pregunta"
                         } else {
                             binding!!.lblPregResp.text = "Pregunta"
                             respuestas[contadorPregunta] = editable.toString()
                             pintarTexto(contadorPregunta)
+                            // binding!!.lblPregResp.text = "Pregunta"
                         }
                         girarCardView()
                     }
 
+                    activityCuestionarioViewModel.clickedRoll()
                     posColorFinal = -1
                     posColorInicial = -1
                     colorPintarPalabra = 0
@@ -630,7 +635,6 @@ class Activity_Cuestionario : AppCompatActivity() {
                     ).show()
 
                     Log.i("Crear pregunta: ", "Asegurate de no dejar ningun campo vacio")
-                    activityCuestionarioViewModel.clickedRoll()
                 }
             }
         }
@@ -755,6 +759,10 @@ class Activity_Cuestionario : AppCompatActivity() {
                         "Cancelar"
                     ) { dialog, _ ->
                         dialog.dismiss()
+                        binding!!.imgvCancelar.visibility = View.GONE
+
+                        binding!!.imgvQuitColor.visibility = View.VISIBLE
+                        binding!!.imgvSelColor.visibility = View.VISIBLE
                     }.create().show()
             } else {
                 Files.copy(
@@ -859,6 +867,7 @@ class Activity_Cuestionario : AppCompatActivity() {
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.action == KeyEvent.ACTION_DOWN) {
             cancelarArchivo()
+            deleteImages()
             return true
         }
         return super.onKeyDown(keyCode, event)
@@ -1020,9 +1029,11 @@ class Activity_Cuestionario : AppCompatActivity() {
         }
 
         if (texto.contains("content://media/picker/")) {
+            binding!!.etPregResp.setText(texto)
             texto = texto.replace("content://media/picker/".toRegex(), "")
-            uri = texto.toUri()
-            binding!!.ivImagen.setImage(ImageSource.uri(uri!!)) //setImageURI(uri)
+            texto = texto.replace("imagenes".toRegex(), "imagenesPivote")
+            // uri = texto.toUri()
+            binding!!.ivImagen.setImage(ImageSource.uri(texto)) //setImageURI(uri)
             binding!!.tilContenidoPregResp.visibility = View.GONE
             binding!!.ivImagen.visibility = View.VISIBLE
 
@@ -1036,52 +1047,53 @@ class Activity_Cuestionario : AppCompatActivity() {
             binding!!.imgvCancelar.visibility = View.GONE
             binding!!.imgvQuitColor.visibility = View.VISIBLE
             binding!!.imgvSelColor.visibility = View.VISIBLE
-        }
 
-        while (texto.contains("«")) {
-            inicio = texto.indexOf("«") + 1
-            fin = texto.indexOf("»")
-            val color: String = texto.substring(inicio, fin)
-            val longColor: Int = color.length
-            val colEntero: Int = color.toInt()
-            inicio = fin + 1
-            fin = texto.indexOf("«", inicio)
-            colorPregModel =
-                ColorPregModel((inicio - longColor - 2), (fin - longColor - 2), colEntero)
+            while (texto.contains("«")) {
+                inicio = texto.indexOf("«") + 1
+                fin = texto.indexOf("»")
+                val color: String = texto.substring(inicio, fin)
+                val longColor: Int = color.length
+                val colEntero: Int = color.toInt()
+                inicio = fin + 1
+                fin = texto.indexOf("«", inicio)
+                colorPregModel =
+                    ColorPregModel((inicio - longColor - 2), (fin - longColor - 2), colEntero)
 
-            if (binding!!.lblPregResp.text.toString() == "Pregunta") {
-                preguntasColor.add(contColorPreg, colorPregModel)
-            } else {
-                respuestasColor.add(contColorPreg, colorPregModel)
+                if (binding!!.lblPregResp.text.toString() == "Pregunta") {
+                    preguntasColor.add(contColorPreg, colorPregModel)
+                } else {
+                    respuestasColor.add(contColorPreg, colorPregModel)
+                }
+
+                // Eliminar la primera etiqueta y su contenido
+                texto = texto.replaceFirst("«.*?»".toRegex(), "")
+
+                // Eliminar la segunda etiqueta y su contenido
+                texto = texto.replaceFirst("«.*?»".toRegex(), "")
+                contColorPreg++
             }
 
-            // Eliminar la primera etiqueta y su contenido
-            texto = texto.replaceFirst("«.*?»".toRegex(), "")
 
-            // Eliminar la segunda etiqueta y su contenido
-            texto = texto.replaceFirst("«.*?»".toRegex(), "")
-            contColorPreg++
-        }
+            builder = SpannableStringBuilder(texto)
+            for (coloresPreguntas: ColorPregModel in if (binding!!.lblPregResp.text.toString() == "Pregunta") preguntasColor else respuestasColor) {
+                val colorSpan: ForegroundColorSpan = ForegroundColorSpan(coloresPreguntas.color)
+                builder!!.setSpan(
+                    colorSpan,
+                    coloresPreguntas.inicioColor,
+                    coloresPreguntas.finColor,
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+            }
 
-
-        builder = SpannableStringBuilder(texto)
-        for (coloresPreguntas: ColorPregModel in if (binding!!.lblPregResp.text.toString() == "Pregunta") preguntasColor else respuestasColor) {
-            val colorSpan: ForegroundColorSpan = ForegroundColorSpan(coloresPreguntas.color)
-            builder!!.setSpan(
-                colorSpan,
-                coloresPreguntas.inicioColor,
-                coloresPreguntas.finColor,
-                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-            )
+            binding!!.etPregResp.text = builder
         }
 
         preguntasColor.clear()
         respuestasColor.clear()
 
         // Bandera ingresada para que no haga cambios de color cuando se detecte un cambio en ET.
-        pregResBandera = true
-        binding!!.etPregResp.text = builder
-        pregResBandera = false
+        // pregResBandera = true
+        // pregResBandera = false
     }
 
     private fun pintarLetra(texto: Editable?) {
