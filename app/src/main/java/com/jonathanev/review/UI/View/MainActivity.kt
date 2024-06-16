@@ -45,6 +45,8 @@ class MainActivity : AppCompatActivity() {
         // Utilizamos un botón que es reutilizado, unicamente le cambiamos el texto.
         binding!!.btnAbrirGuiaEstudioHabilitado.text = "Abrir Guia"
         binding!!.btnNuevaGuiaEstudio.setOnClickListener { // Unicamente abrimos el dialogo y lo mostramos en la pantalla.
+            mainActivityViewModel.getAllFolders(file)
+
             if (createFolders()) {
                 val dialogo: Fragment_DialogNuevoArchivo_popu = Fragment_DialogNuevoArchivo_popu()
                 dialogo.show(getSupportFragmentManager(), "Fragment_nuevo")
@@ -70,6 +72,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding!!.btnAbrirGuiaEstudioHabilitado.setOnClickListener {
+            mainActivityViewModel.getAllFolders(file)
+
             if (createFolders()) {
                 mainActivityViewModel.getMainPath()
 

@@ -13,21 +13,10 @@
          2.- Ocurrió un error al momento de crear una guía: estuve copiando lo que estaba en chatGPT
              y cambie de colores partes del texto
 
-         3.- Los iconos de las opciones están bugueados ya que a veces no funciona esa parte,
-             no suele funcionar cuando estas en la ultima pregunta, regresas y vuelves delante,
-             anteriormente debe estar una imagen en la respuesta
-             (SOLUCIONADO)
+         3.- Asegurarse que no puedas acceder a las imagenes si realmente el usuario no te dió permiso.
 
-         4.- Cuando no hay preguntas anteriores siempre pasa al et pregunta, cuando no debería
-             ocurrir alguna acción. (Repasar Guia)
-             (SOLUCIONADO)
-
-         5.- Poner las etiquetas de los colores correctamente donde inicia y termina un color.
-         (SOLUCIONADO: activity_cuestionario, modificar)
-
-         6.- Si el texto agregado es la imagen, no debe decirte que se borrará el texto para
-             agregar una imagen.
-             (SOLUCIONADO)
+         4.- Si el usuario tiene texto y quiere agregar una imagen..., al dar click fuera del re-
+             cuadro ya no regresarán los iconos.
 
          MEJORAS
          1.- Usar la obtención de la variable mutable de una guia al dar click en una guia en específico.

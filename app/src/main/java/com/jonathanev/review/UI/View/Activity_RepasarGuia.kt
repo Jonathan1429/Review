@@ -281,8 +281,10 @@ class Activity_RepasarGuia : AppCompatActivity() {
             // uri = texto.toUri()
         }
 
-        if (texto.contains("content://media/picker")) {
-            texto = texto.replace("content://media/picker/".toRegex(), "")
+        if (texto.contains("frqwhqw://phgld/slfnhu/")) {
+            val descifrado = cifrar(texto, 26 - 3)
+            texto = descifrado.replace("content://media/picker/".toRegex(), "")
+            // texto = texto.replace("content://media/picker/".toRegex(), "")
             // uri = texto.toUri()
             // binding!!.ivImagen.setImage(ImageSource.uri("${Constants.fileImages}/4.png")) //setImageURI(uri)
             // setImage puede ser con Uri o con texto, hay que probar en este caso
@@ -367,5 +369,21 @@ class Activity_RepasarGuia : AppCompatActivity() {
         } catch (e: IOException) {
             e.printStackTrace()
         }
+    }
+
+    fun cifrar(texto: String, desplazamiento: Int): String {
+        val resultado = StringBuilder()
+
+        for (caracter in texto) {
+            if (caracter.isLetter()) {
+                val base = if (caracter.isUpperCase()) 'A' else 'a'
+                val letraCifrada = ((caracter - base + desplazamiento) % 26 + base.code).toChar()
+                resultado.append(letraCifrada)
+            } else {
+                resultado.append(caracter)
+            }
+        }
+
+        return resultado.toString()
     }
 }

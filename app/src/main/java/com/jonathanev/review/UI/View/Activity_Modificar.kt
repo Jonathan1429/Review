@@ -28,6 +28,7 @@ import androidx.activity.viewModels
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.animation.doOnEnd
+import androidx.core.net.toUri
 import androidx.core.view.isGone
 import androidx.core.widget.ImageViewCompat
 import com.davemorrissey.labs.subscaleview.ImageSource
@@ -178,9 +179,6 @@ class Activity_Modificar : AppCompatActivity() {
         binding!!.imgvPregResp.setOnClickListener {
             modificarViewModel.setColorAnterior(colorPintarPalabra)
             modificarViewModel.clickedRoll()
-
-            contadorImagen += 1
-            filename = "$contadorImagen.png"
         }
 
         binding!!.imgvPrevious.setOnClickListener {
@@ -805,8 +803,8 @@ class Activity_Modificar : AppCompatActivity() {
                             val cifrado = cifrar("content://media/picker$ruta/$filename", 3)
                             binding!!.etPregResp.setText(cifrado)
 
-                            // contadorImagen += 1
-                            // filename = "$contadorImagen.png"
+                            contadorImagen += 1
+                            filename = "$contadorImagen.png"
                         }
                         .setNegativeButton(
                             "Cancelar"
@@ -834,8 +832,8 @@ class Activity_Modificar : AppCompatActivity() {
                     val cifrado = cifrar("content://media/picker$ruta/$filename", 3)
                     binding!!.etPregResp.setText(cifrado)
 
-                    // contadorImagen += 1
-                    // filename = "$contadorImagen.png"
+                    contadorImagen += 1
+                    filename = "$contadorImagen.png"
                 }
             }
         } catch (e: Exception) {
@@ -1101,7 +1099,14 @@ class Activity_Modificar : AppCompatActivity() {
             // texto = descifrado.replace("content://media/picker/".toRegex(), "")
             // texto = texto.replace("imagenes".toRegex(), "imagenesPivote")
             val imagen = descifrado.substringAfterLast("/")
-            binding!!.ivImagen.setImage(ImageSource.uri("$fileImagesPiv/$imagen")) //setImageURI(uri)
+            // file
+            if (descifrado.contains("imagenesPivote")){
+                binding!!.ivImagen.setImage(ImageSource.uri("$fileImagesPiv/$imagen")) //setImageURI(uri)
+            } else {
+                var uri = "$file/$imagen"
+                uri = uri.replace("guias", "imagenes")
+                binding!!.ivImagen.setImage(ImageSource.uri(uri))
+            }
             binding!!.tilContenidoPregResp.visibility = View.GONE
             binding!!.ivImagen.visibility = View.VISIBLE
 
