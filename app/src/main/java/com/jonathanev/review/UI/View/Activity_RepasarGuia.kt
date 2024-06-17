@@ -225,7 +225,12 @@ class Activity_RepasarGuia : AppCompatActivity() {
         } else {
             pintarTexto()
             var flipAnimator =
-                ObjectAnimator.ofFloat(binding!!.flContenidoPregResp, "rotationY", 0f, 180f) // ivImagen
+                ObjectAnimator.ofFloat(
+                    binding!!.flContenidoPregResp,
+                    "rotationY",
+                    0f,
+                    180f
+                ) // ivImagen
             flipAnimator.duration = 0 // Duración de la animación en milisegundos
             flipAnimator.start()
             flipAnimator.doOnEnd {
@@ -288,7 +293,10 @@ class Activity_RepasarGuia : AppCompatActivity() {
             // uri = texto.toUri()
             // binding!!.ivImagen.setImage(ImageSource.uri("${Constants.fileImages}/4.png")) //setImageURI(uri)
             // setImage puede ser con Uri o con texto, hay que probar en este caso
-            binding!!.ivImagen.setImage(ImageSource.uri(texto)) //setImageURI(uri)
+            val imagen = texto.substringAfterLast("/")
+            var uri = "$file/$imagen"
+            uri = uri.replace("guias", "imagenes")
+            binding!!.ivImagen.setImage(ImageSource.uri(uri)) //setImageURI(uri)
             binding!!.tilContenidoPregResp.visibility = View.GONE
             binding!!.ivImagen.visibility = View.VISIBLE
         } else {
@@ -371,7 +379,7 @@ class Activity_RepasarGuia : AppCompatActivity() {
         }
     }
 
-    fun cifrar(texto: String, desplazamiento: Int): String {
+    private fun cifrar(texto: String, desplazamiento: Int): String {
         val resultado = StringBuilder()
 
         for (caracter in texto) {

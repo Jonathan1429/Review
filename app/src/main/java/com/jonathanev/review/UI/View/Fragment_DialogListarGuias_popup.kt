@@ -8,18 +8,18 @@ import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.isInvisible
-import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jonathanev.review.Core.Constants.file
+import com.jonathanev.review.Core.Constants.fileImages
 import com.jonathanev.review.Core.Constants.path
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Fragments.Adaptadores.ListarGuiasAdapter
@@ -28,10 +28,19 @@ import com.jonathanev.review.UI.View.Fragment_DialogNuevoArchivo_popu.DialogList
 import com.jonathanev.review.UI.ViewModel.FragDialListarGuiasViewModel
 import com.jonathanev.review.databinding.FragmentListarGuiasBinding
 import dagger.hilt.android.AndroidEntryPoint
+import org.w3c.dom.Document
+import org.w3c.dom.Element
+import org.w3c.dom.NodeList
+import org.xml.sax.SAXException
 import java.io.File
+import java.io.FileInputStream
+import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
+import javax.xml.parsers.DocumentBuilder
+import javax.xml.parsers.DocumentBuilderFactory
+import javax.xml.parsers.ParserConfigurationException
 
 @AndroidEntryPoint
 class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
@@ -42,6 +51,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
     private lateinit var adaptadorListarGuias: ListarGuiasAdapter
     private val elementosPorCarga = 10 // Cantidad de elementos a cargar por cada carga adicional
     private var numeroElementosCargados = 0 // Número actual de elementos cargados
+    private val rutaImagenes: ArrayList<String> = ArrayList()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -271,7 +281,6 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                     "Cancelar"
                 )
             ) { dialog, which ->
-
                 val ruta = "$fileClickeado.xml"
                 when (which) {
                     0 -> {
@@ -392,6 +401,8 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                                                 .setPositiveButton(
                                                     "Continuar"
                                                 ) { _, _ ->
+                                                    moverImagenes(ruta, selectedFolder)
+
                                                     Files.copy(
                                                         Paths.get("" + file + "/" + guia.nombreGuia + ".xml"),
                                                         Paths.get("" + file + "/" + selectedFolder + "/" + guia.nombreGuia + ".xml"),
@@ -415,6 +426,8 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                                                     "Cancelar"
                                                 ) { dialog, _ -> dialog.dismiss() }.create().show()
                                         } else {
+                                            moverImagenes(ruta, selectedFolder)
+
                                             Files.copy(
                                                 Paths.get("" + file + "/" + guia.nombreGuia + ".xml"),
                                                 Paths.get("" + file + "/" + selectedFolder + "/" + guia.nombreGuia + ".xml"),
@@ -427,6 +440,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                                             guiasViewModel.getAllUpdatedGuides(file)
                                             /*val dialogoEliminarGuia = getDialog()
                                             dialogoEliminarGuia!!.dismiss()*/
+
 
                                             Toast.makeText(
                                                 context, "El archivo se movió correctamente",
@@ -452,6 +466,9 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                                         try {
                                             // Copiar el archivo
                                             val guia = guiasViewModel.getGuia(position)
+
+                                            val selectedFolder = "Principal"
+                                            moverImagenes(ruta, selectedFolder)
 
                                             Files.copy(
                                                 Paths.get("$fileClickeado.xml"),
@@ -533,5 +550,97 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
             dialog.window!!.setLayout(900, 1200)
             dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         }
+    }
+
+    private fun moverImagenes(fileClickeado: String, selectedFolder: String) {
+        //obtenerDatosXML(fileClickeado, selectedFolder)
+        var doc: Document? = null
+        val dbf: DocumentBuilderFactory = DocumentBuilderFactory.newInstance()
+        val db: DocumentBuilder
+        try {
+            db = dbf.newDocumentBuilder()
+            var filePath: File = File(fileClickeado)
+            val fis = FileInputStream(filePath)
+
+            doc = db.parse(fis)
+
+            // Buscamos los Nodos Interrogante y accedemos a lo que se encuentre dentro.
+            val cuestionario: NodeList = doc.getElementsByTagName("Interrogante")
+            for (i in 0 until cuestionario.length) {
+                // Accedes a los elementos de dicho nodo
+                val e: Element = cuestionario.item(i) as Element
+                if (e.getAttribute("pregunta").contains("frqwhqw://phgld/slfnhu/")) {
+                    var descifrado = cifrar(e.getAttribute("pregunta"), 26 - 3)
+                    // descifrado = descifrado.replace("content://media/picker/".toRegex(), "")
+                    val imagen = descifrado.substringAfterLast("/")
+                    val ruta = fileClickeado.substringBeforeLast("/")
+                    var rutaImagen = ruta.replace("guias", "imagenes")
+                    val rutaActual = "$rutaImagen/$imagen"
+
+                    if (selectedFolder != "Principal") {
+                        rutaImagen = "$rutaImagen/$selectedFolder/$imagen"
+                    } else {
+                        rutaImagen = "$fileImages/$imagen"
+                    }
+
+                    // Actualizamos la ruta guardada en el txt.
+                    e.setAttribute("pregunta", rutaImagen)
+                    Files.copy(
+                        Paths.get("" + rutaActual),
+                        Paths.get("" + rutaImagen),
+                        StandardCopyOption.REPLACE_EXISTING
+                    )
+
+                    File(rutaActual).delete()
+                }
+
+                if (e.getAttribute("respuesta").contains("frqwhqw://phgld/slfnhu/")) {
+                    var descifrado = cifrar(e.getAttribute("respuesta"), 26 - 3)
+                    val imagen = descifrado.substringAfterLast("/")
+                    val ruta = fileClickeado.substringBeforeLast("/")
+                    var rutaImagen = ruta.replace("guias", "imagenes")
+                    val rutaActual = "$rutaImagen/$imagen"
+
+                    if (selectedFolder != "Principal") {
+                        rutaImagen = "$rutaImagen/$selectedFolder/$imagen"
+                    } else {
+                        rutaImagen = "$fileImages/$imagen"
+                    }
+
+                    // Actualizamos la ruta guardada en el txt.
+                    e.setAttribute("respuesta", rutaImagen)
+
+                    Files.copy(
+                        Paths.get("" + rutaActual),
+                        Paths.get("" + rutaImagen),
+                        StandardCopyOption.REPLACE_EXISTING
+                    )
+
+                    File(rutaActual).delete()
+                }
+            }
+        } catch (e: ParserConfigurationException) {
+            e.printStackTrace()
+        } catch (e: SAXException) {
+            e.printStackTrace()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun cifrar(texto: String, desplazamiento: Int): String {
+        val resultado = StringBuilder()
+
+        for (caracter in texto) {
+            if (caracter.isLetter()) {
+                val base = if (caracter.isUpperCase()) 'A' else 'a'
+                val letraCifrada = ((caracter - base + desplazamiento) % 26 + base.code).toChar()
+                resultado.append(letraCifrada)
+            } else {
+                resultado.append(caracter)
+            }
+        }
+
+        return resultado.toString()
     }
 }
