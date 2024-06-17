@@ -583,8 +583,6 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                         rutaImagen = "$fileImages/$imagen"
                     }
 
-                    // Actualizamos la ruta guardada en el txt.
-                    e.setAttribute("pregunta", rutaImagen)
                     Files.copy(
                         Paths.get("" + rutaActual),
                         Paths.get("" + rutaImagen),
@@ -606,9 +604,6 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                     } else {
                         rutaImagen = "$fileImages/$imagen"
                     }
-
-                    // Actualizamos la ruta guardada en el txt.
-                    e.setAttribute("respuesta", rutaImagen)
 
                     Files.copy(
                         Paths.get("" + rutaActual),
