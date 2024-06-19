@@ -17,6 +17,7 @@
 
          4.- Si el usuario tiene texto y quiere agregar una imagen..., al dar click fuera del re-
              cuadro ya no regresarán los iconos.
+             (SOLUCIONADO)
 
          MEJORAS
          1.- Usar la obtención de la variable mutable de una guia al dar click en una guia en específico.
@@ -30,6 +31,7 @@
          5.- Al momento de crear el nombre de algo no puedes poner una /
 
          6.- Asegurarte de borrar las ImagenesPivote cuando le das para atras, botones o demás.
+         (SOLUCIONADO)
 
          PRUEBAS
 

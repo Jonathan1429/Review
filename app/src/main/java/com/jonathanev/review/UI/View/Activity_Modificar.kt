@@ -785,6 +785,7 @@ class Activity_Modificar : AppCompatActivity() {
                     AlertDialog.Builder(this@Activity_Modificar)
                         .setTitle("¡Atención!")
                         .setMessage("Se borrará el contenido para agregar la imagen, ¿Quieres continuar?")
+                        .setCancelable(false)
                         .setPositiveButton(
                             "Si"
                         ) { _, _ ->
@@ -798,13 +799,13 @@ class Activity_Modificar : AppCompatActivity() {
                             File(rutaPrin, filename).delete()
 
                             binding!!.ivImagen.setImage(ImageSource.uri("$fileImagesPiv/$filename")) //setImageURI(uri)
-                            binding!!.tilContenidoPregResp.visibility = View.GONE
-                            binding!!.ivImagen.visibility = View.VISIBLE
                             val cifrado = cifrar("content://media/picker$ruta/$filename", 3)
                             binding!!.etPregResp.setText(cifrado)
-
                             contadorImagen += 1
                             filename = "$contadorImagen.png"
+
+                            binding!!.tilContenidoPregResp.visibility = View.GONE
+                            binding!!.ivImagen.visibility = View.VISIBLE
                         }
                         .setNegativeButton(
                             "Cancelar"

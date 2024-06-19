@@ -761,6 +761,7 @@ class Activity_Cuestionario : AppCompatActivity() {
                 AlertDialog.Builder(this@Activity_Cuestionario)
                     .setTitle("¡Atención!")
                     .setMessage("Se borrará el contenido para agregar la imagen, ¿Quieres continuar?")
+                    .setCancelable(false)
                     .setPositiveButton(
                         "Si"
                     ) { _, _ ->
