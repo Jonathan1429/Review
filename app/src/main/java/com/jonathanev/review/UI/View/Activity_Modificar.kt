@@ -75,6 +75,7 @@ class Activity_Modificar : AppCompatActivity() {
     var builder: SpannableStringBuilder? = null
     private var contadorPregunta: Int = 0
     private var contadorImagen = 0
+    private var imagenPiv = 0
     private var dialMasPreg: Boolean = false
     private var uri: Uri? = null
     private var longCaracteres = 0
@@ -162,19 +163,18 @@ class Activity_Modificar : AppCompatActivity() {
             pintarTexto(contadorPregunta)
         }
 
-        binding!!.barraSuperiorRegreso.imgvBack.setOnClickListener(object : View.OnClickListener {
-            public override fun onClick(view: View) {
-                Toast.makeText(
-                    applicationContext,
-                    "No se hicieron cambios en el archivo",
-                    Toast.LENGTH_SHORT
-                ).show()
+        binding!!.barraSuperiorRegreso.imgvBack.setOnClickListener {
+            deleteImages()
 
-                Log.i("Modificar archivo: ", "No se hicieron cambios en el archivo")
-                deleteImages()
-                finish()
-            }
-        })
+            Toast.makeText(
+                applicationContext,
+                "No se hicieron cambios en el archivo",
+                Toast.LENGTH_SHORT
+            ).show()
+
+            Log.i("Modificar archivo: ", "No se hicieron cambios en el archivo")
+            finish()
+        }
 
         binding!!.imgvPregResp.setOnClickListener {
             modificarViewModel.setColorAnterior(colorPintarPalabra)
@@ -852,7 +852,7 @@ class Activity_Modificar : AppCompatActivity() {
 
         var ruta: String = file.toString()
         ruta = ruta.replace("guias".toRegex(), "imagenes")
-        var rutaFile  = File(ruta)
+        var rutaFile = File(ruta)
 
         val ltImages = rutaFile.listFiles()
 
@@ -885,6 +885,8 @@ class Activity_Modificar : AppCompatActivity() {
         } else {
             filename = "$contadorImagen.png"
         }
+
+        imagenPiv = contadorImagen
     }
 
     private fun initLoadAds() {
@@ -964,6 +966,8 @@ class Activity_Modificar : AppCompatActivity() {
     // Método que se ejecuta cuando el back del telefono es presionado.
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.action == KeyEvent.ACTION_DOWN) {
+            deleteImages()
+
             Toast.makeText(
                 applicationContext,
                 "No se hicieron cambios en el archivo",
@@ -971,7 +975,6 @@ class Activity_Modificar : AppCompatActivity() {
             ).show()
 
             Log.i("Crear archivo: ", "No se hicieron cambios en el archivo")
-            deleteImages()
             finish()
             return true
         }
@@ -1100,13 +1103,23 @@ class Activity_Modificar : AppCompatActivity() {
             // texto = texto.replace("imagenes".toRegex(), "imagenesPivote")
             val imagen = descifrado.substringAfterLast("/")
             // file
-            if (descifrado.contains("imagenesPivote")){
+            val imagenInt = imagen.replace(".png", "").toInt()
+            if (imagenInt >= imagenPiv) {
                 binding!!.ivImagen.setImage(ImageSource.uri("$fileImagesPiv/$imagen")) //setImageURI(uri)
             } else {
                 var uri = "$file/$imagen"
                 uri = uri.replace("guias", "imagenes")
                 binding!!.ivImagen.setImage(ImageSource.uri(uri))
             }
+
+            /*if (descifrado.contains("imagenesPivote")){
+                binding!!.ivImagen.setImage(ImageSource.uri("$fileImagesPiv/$imagen")) //setImageURI(uri)
+            } else {
+                var uri = "$file/$imagen"
+                uri = uri.replace("guias", "imagenes")
+                binding!!.ivImagen.setImage(ImageSource.uri(uri))
+            }*/
+
             binding!!.tilContenidoPregResp.visibility = View.GONE
             binding!!.ivImagen.visibility = View.VISIBLE
 
@@ -1248,8 +1261,17 @@ class Activity_Modificar : AppCompatActivity() {
     }
 
     private fun deleteImages() {
-        if (fileImagesPiv.delete()) {
-            fileImagesPiv.mkdirs()
+        if (fileImagesPiv.exists()) {
+            borrarContenidoEnPiv()
+        }
+    }
+
+    private fun borrarContenidoEnPiv() {
+        val files = fileImagesPiv.listFiles()
+        if (files != null) {
+            for (subFile in files) {
+                subFile.delete()
+            }
         }
     }
 

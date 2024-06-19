@@ -678,8 +678,17 @@ class Activity_Cuestionario : AppCompatActivity() {
     }
 
     private fun deleteImages() {
-        if (fileImagesPiv.delete()) {
-            fileImagesPiv.mkdirs()
+        if (fileImagesPiv.exists()) {
+            borrarContenidoEnPiv()
+        }
+    }
+
+    private fun borrarContenidoEnPiv() {
+        val files = fileImagesPiv.listFiles()
+        if (files != null) {
+            for (subFile in files) {
+                subFile.delete()
+            }
         }
     }
 
