@@ -29,9 +29,9 @@ import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.animation.doOnEnd
 import androidx.core.app.ActivityCompat
-import androidx.core.net.toUri
 import androidx.core.view.isGone
 import androidx.core.widget.ImageViewCompat
+import androidx.lifecycle.lifecycleScope
 import com.davemorrissey.labs.subscaleview.ImageSource
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
@@ -43,12 +43,13 @@ import com.jonathanev.review.Core.Constants.fileImages
 import com.jonathanev.review.Core.Constants.fileImagesPiv
 import com.jonathanev.review.Core.Constants.rutaPrin
 import com.jonathanev.review.Data.Model.ColorPregModel
-import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Fragments.Fragment_DialogColores_popup
-import com.jonathanev.review.R
 import com.jonathanev.review.UI.ViewModel.ActivityCuestionarioViewModel
 import com.jonathanev.review.databinding.ActivityCuestionarioBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
 import java.io.FileOutputStream
@@ -139,7 +140,14 @@ class Activity_Cuestionario : AppCompatActivity() {
 
         // Sección de anuncios
         initLoadAds()
-        initUI()
+        lifecycleScope.launch(Dispatchers.IO) {
+
+            // Cambia al hilo principal para actualizar la UI.
+            withContext(Dispatchers.Main) {
+                initUI()
+            }
+
+        }
 
         // Recibimos el nombre del archivo del popupFragment Nueva Guia.
         nombreArchivo = intent.extras!!.getString("nombre_archivo")
@@ -156,9 +164,6 @@ class Activity_Cuestionario : AppCompatActivity() {
         binding!!.imgvPregResp.setOnClickListener {
             activityCuestionarioViewModel.setColorAnterior(colorPintarPalabra)
             activityCuestionarioViewModel.clickedRoll()
-
-            contadorImagen += 1
-            filename = "$contadorImagen.png"
         }
 
         binding!!.imgvPrevious.setOnClickListener {
@@ -453,8 +458,8 @@ class Activity_Cuestionario : AppCompatActivity() {
                         pintarLetra(texto)
                     }
                 } /*else {
-                    activityCuestionarioViewModel.getColorAnteriorInicial()
-                }*/
+                activityCuestionarioViewModel.getColorAnteriorInicial()
+            }*/
             }
         })
 
@@ -675,7 +680,19 @@ class Activity_Cuestionario : AppCompatActivity() {
                 colorPintarPalabra = 0
             }
         }
+
+        activityCuestionarioViewModel.contImagenes.observe(this@Activity_Cuestionario) { contImagen ->
+            contadorImagen = contImagen
+            filename = "$contadorImagen.png"
+        }
     }
+
+
+    /*private suspend fun guardarContadorImagen(contadorImagen: Int) {
+        dataStore.edit { preferences ->
+            preferences[intPreferencesKey("contador")] = contadorImagen
+        }
+    }*/
 
     private fun deleteImages() {
         if (fileImagesPiv.exists()) {
@@ -692,8 +709,14 @@ class Activity_Cuestionario : AppCompatActivity() {
         }
     }
 
-    private fun initUI() {
-        val ltImages = fileImages.listFiles()
+    /*private fun getCountImage() = dataStore.data.map { preferences ->
+        ImagenCont(contadorImagen = preferences[intPreferencesKey("contador")] ?: 75)
+    }*/
+
+    private suspend fun initUI() {
+        activityCuestionarioViewModel.setIncrementCounter()
+
+        /*val ltImages = fileImages.listFiles()
         val imagenes = mutableListOf<String>()
         if (ltImages!!.isNotEmpty()) {
             for (i in ltImages.indices) {
@@ -722,7 +745,7 @@ class Activity_Cuestionario : AppCompatActivity() {
             filename = "$contadorImagen.png"
         } else {
             filename = "$contadorImagen.png"
-        }
+        }*/
     }
 
     private fun openSomeActivityForResult() {
@@ -779,6 +802,13 @@ class Activity_Cuestionario : AppCompatActivity() {
                         binding!!.ivImagen.visibility = View.VISIBLE
                         val cifrado = cifrar("content://media/picker$fileImages/$filename", 3)
                         binding!!.etPregResp.setText(cifrado)
+
+                        // contadorImagen += 1
+                        // filename = "$contadorImagen.png"
+
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            activityCuestionarioViewModel.setIncrementCounter()
+                        }
                     }
                     .setNegativeButton(
                         "Cancelar"
@@ -805,6 +835,13 @@ class Activity_Cuestionario : AppCompatActivity() {
 
                 val cifrado = cifrar("content://media/picker$fileImages/$filename", 3)
                 binding!!.etPregResp.setText(cifrado)
+
+                // contadorImagen += 1
+                // filename = "$contadorImagen.png"
+
+                lifecycleScope.launch(Dispatchers.IO) {
+                    activityCuestionarioViewModel.setIncrementCounter()
+                }
             }
         } catch (e: Exception) {
             e.printStackTrace()

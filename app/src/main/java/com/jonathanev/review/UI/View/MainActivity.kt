@@ -3,7 +3,6 @@ package com.jonathanev.review.UI.View
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
@@ -87,7 +86,7 @@ class MainActivity : AppCompatActivity() {
             initUI()
         }
 
-        mainActivityViewModel.carpetas.observe(this){
+        mainActivityViewModel.carpetas.observe(this) {
             carpetasImagenes.addAll(it)
         }
     }
@@ -105,7 +104,7 @@ class MainActivity : AppCompatActivity() {
             fileImages.mkdirs()
         }
 
-        if (!fileImagesPiv.exists()){
+        if (!fileImagesPiv.exists()) {
             fileImagesPiv.mkdirs()
         }
 
@@ -131,13 +130,13 @@ class MainActivity : AppCompatActivity() {
             dialog.show()
         } else {
             // Crear subcarpetas para las imagenes
-            for (subCarpeta in carpetasImagenes){
+            for (subCarpeta in carpetasImagenes) {
                 var rutaSubcarpeta = File("$fileImages/$subCarpeta")
 
                 // Vas creando y verificando que las carpetas se crean correctamente
                 if (!rutaSubcarpeta.exists()) {
                     rutaSubcarpeta.mkdirs()
-                    if (!rutaSubcarpeta.exists()){
+                    if (!rutaSubcarpeta.exists()) {
                         foldersCreated = false
                         break
                     } else {

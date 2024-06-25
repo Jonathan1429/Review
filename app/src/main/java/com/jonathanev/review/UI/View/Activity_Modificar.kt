@@ -28,16 +28,15 @@ import androidx.activity.viewModels
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.animation.doOnEnd
-import androidx.core.net.toUri
 import androidx.core.view.isGone
 import androidx.core.widget.ImageViewCompat
+import androidx.lifecycle.lifecycleScope
 import com.davemorrissey.labs.subscaleview.ImageSource
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
 import com.jonathanev.review.Core.Constants.file
-import com.jonathanev.review.Core.Constants.fileImages
 import com.jonathanev.review.Core.Constants.fileImagesPiv
 import com.jonathanev.review.Core.Constants.rutaPrin
 import com.jonathanev.review.Data.Model.ColorPregModel
@@ -45,6 +44,8 @@ import com.jonathanev.review.Fragments.Fragment_DialogColoresMod_popup
 import com.jonathanev.review.UI.ViewModel.ModificarViewModel
 import com.jonathanev.review.databinding.ActivityModificarBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.NodeList
@@ -138,30 +139,7 @@ class Activity_Modificar : AppCompatActivity() {
         initLoadAds()
 
         ruta = intent.extras!!.getString("ruta").toString()
-        initUI(ruta)
-
-        modificarViewModel.guiaModel.observe(this) {
-            nombreArchivo = it.nombreGuia
-            // Guardo el nombre del archivo enviado desde el popupFragmentListarGuias.
-            if (nombreArchivo.contains(".xml")) {
-                nombreArchivo = nombreArchivo!!.replace(".xml".toRegex(), "")
-            }
-
-            binding!!.barraSuperiorRegreso.tvTituloToolbar.text = "Modificando: $nombreArchivo"
-            colorActual = Color.BLACK
-
-            // Aquí simplemente nos aseguramos que tenga el xml, si lo tiene no entramos.
-            // En teoria ya todos los archivos no tienen el .xml porque lo recupero del ListarGuias
-            if (!nombreArchivo.contains(".xml")) {
-                nombreArchivo = "$nombreArchivo.xml"
-            }
-
-            // Obtenemos los datos del XML y los guardamos en su respectivo ArrayList.
-            obtenerDatosXML()
-
-            // Pintamos el texto del contador actual.
-            pintarTexto(contadorPregunta)
-        }
+        initUI()
 
         binding!!.barraSuperiorRegreso.imgvBack.setOnClickListener {
             deleteImages()
@@ -736,7 +714,86 @@ class Activity_Modificar : AppCompatActivity() {
                 colorPintarPalabra = 0
             }
         }
+
+        modificarViewModel.contImagenes.observe(this@Activity_Modificar) { contImagen ->
+            contadorImagen = contImagen
+            if (imagenPiv == 0) {
+                imagenPiv = contadorImagen
+            }
+
+            filename = "$contadorImagen.png"
+
+
+            modificarViewModel.getGuia(ruta)
+        }
+
+        modificarViewModel.guiaModel.observe(this@Activity_Modificar) {
+            nombreArchivo = it.nombreGuia
+            // Guardo el nombre del archivo enviado desde el popupFragmentListarGuias.
+            if (nombreArchivo.contains(".xml")) {
+                nombreArchivo = nombreArchivo!!.replace(".xml".toRegex(), "")
+            }
+
+            binding!!.barraSuperiorRegreso.tvTituloToolbar.text = "Modificando: $nombreArchivo"
+            colorActual = Color.BLACK
+
+            // Aquí simplemente nos aseguramos que tenga el xml, si lo tiene no entramos.
+            // En teoria ya todos los archivos no tienen el .xml porque lo recupero del ListarGuias
+            if (!nombreArchivo.contains(".xml")) {
+                nombreArchivo = "$nombreArchivo.xml"
+            }
+
+            // Obtenemos los datos del XML y los guardamos en su respectivo ArrayList.
+            obtenerDatosXML()
+
+            // Pintamos el texto del contador actual.
+            pintarTexto(contadorPregunta)
+        }
     }
+
+    private fun initUI() {
+        modificarViewModel.getCountImage()
+
+        /*var ruta: String = file.toString()
+        ruta = ruta.replace("guias".toRegex(), "imagenes")
+        var rutaFile = File(ruta)
+
+        val ltImages = rutaFile.listFiles()
+
+        val imagenes = mutableListOf<String>()
+        if (ltImages!!.isNotEmpty()) {
+            for (i in ltImages.indices) {
+                // Sacamos del array files el primer fichero.
+                val archivo: File = ltImages[i]
+                var name = ""
+
+                if (!archivo.isDirectory) {                    // Folder (guias)
+                    name = archivo.name
+                    imagenes.add(name)
+                }
+            }
+        }
+
+        if (imagenes.isNotEmpty()) {
+            for (i in imagenes) {
+                var ultimaImagen = i.substringAfterLast("/")
+                ultimaImagen = ultimaImagen.replace(".png".toRegex(), "")
+                var ultimaImagenEntero = ultimaImagen.toInt()
+                if (contadorImagen < ultimaImagenEntero) {
+                    contadorImagen = ultimaImagenEntero
+                }
+            }
+
+            contadorImagen += 1
+            filename = "$contadorImagen.png"
+        } else {
+            filename = "$contadorImagen.png"
+        }*/
+
+    }
+    /*private fun getCountImage() = dataStore.data.map { preferences ->
+        ImagenCont(contadorImagen = preferences[intPreferencesKey("contador")] ?: 75)
+    }*/
 
     private fun openSomeActivityForResult() {
         val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
@@ -801,11 +858,15 @@ class Activity_Modificar : AppCompatActivity() {
                             binding!!.ivImagen.setImage(ImageSource.uri("$fileImagesPiv/$filename")) //setImageURI(uri)
                             val cifrado = cifrar("content://media/picker$ruta/$filename", 3)
                             binding!!.etPregResp.setText(cifrado)
-                            contadorImagen += 1
-                            filename = "$contadorImagen.png"
+                            // contadorImagen += 1
+                            // filename = "$contadorImagen.png"
 
                             binding!!.tilContenidoPregResp.visibility = View.GONE
                             binding!!.ivImagen.visibility = View.VISIBLE
+
+                            lifecycleScope.launch(Dispatchers.IO) {
+                                modificarViewModel.setIncrementCounter()
+                            }
                         }
                         .setNegativeButton(
                             "Cancelar"
@@ -828,13 +889,17 @@ class Activity_Modificar : AppCompatActivity() {
 
                     binding!!.ivImagen.setImage(ImageSource.uri("$fileImagesPiv/$filename")) //setImageURI(uri)
                     binding!!.tilContenidoPregResp.visibility = View.GONE
-
                     binding!!.ivImagen.visibility = View.VISIBLE
+
                     val cifrado = cifrar("content://media/picker$ruta/$filename", 3)
                     binding!!.etPregResp.setText(cifrado)
 
-                    contadorImagen += 1
-                    filename = "$contadorImagen.png"
+                    // contadorImagen += 1
+                    // filename = "$contadorImagen.png"
+
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        modificarViewModel.setIncrementCounter()
+                    }
                 }
             }
         } catch (e: Exception) {
@@ -848,47 +913,11 @@ class Activity_Modificar : AppCompatActivity() {
         }
     }
 
-    private fun initUI(ruta: String) {
-        modificarViewModel.getGuia(ruta)
-
-        var ruta: String = file.toString()
-        ruta = ruta.replace("guias".toRegex(), "imagenes")
-        var rutaFile = File(ruta)
-
-        val ltImages = rutaFile.listFiles()
-
-        val imagenes = mutableListOf<String>()
-        if (ltImages!!.isNotEmpty()) {
-            for (i in ltImages.indices) {
-                // Sacamos del array files el primer fichero.
-                val archivo: File = ltImages[i]
-                var name = ""
-
-                if (!archivo.isDirectory) {                    // Folder (guias)
-                    name = archivo.name
-                    imagenes.add(name)
-                }
-            }
+    /*private suspend fun guardarContadorImagen(contadorImagen: Int) {
+        dataStore.edit { preferences ->
+            preferences[intPreferencesKey("contador")] = contadorImagen
         }
-
-        if (imagenes.isNotEmpty()) {
-            for (i in imagenes) {
-                var ultimaImagen = i.substringAfterLast("/")
-                ultimaImagen = ultimaImagen.replace(".png".toRegex(), "")
-                var ultimaImagenEntero = ultimaImagen.toInt()
-                if (contadorImagen < ultimaImagenEntero) {
-                    contadorImagen = ultimaImagenEntero
-                }
-            }
-
-            contadorImagen += 1
-            filename = "$contadorImagen.png"
-        } else {
-            filename = "$contadorImagen.png"
-        }
-
-        imagenPiv = contadorImagen
-    }
+    }*/
 
     private fun initLoadAds() {
         MobileAds.initialize(this) { }
