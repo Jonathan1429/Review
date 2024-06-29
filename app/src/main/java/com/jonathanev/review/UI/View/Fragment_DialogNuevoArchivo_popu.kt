@@ -15,6 +15,10 @@ import android.view.Window
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
+import com.jonathanev.review.Core.Constants.cons_dataStore
+import com.jonathanev.review.Core.Constants.cons_guias
+import com.jonathanev.review.Core.Constants.cons_imagenes
+import com.jonathanev.review.Core.Constants.cons_imagenesPiv
 import com.jonathanev.review.Core.Constants.file
 import com.jonathanev.review.UI.ViewModel.FragDialNuevoArchViewModel
 import com.jonathanev.review.databinding.FragmentNuevoArchivoBinding
@@ -103,6 +107,15 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
             } else if (binding!!.etNombreArchivo.text!!.contains("/")) {
                 Toast.makeText(
                     context, "No puede haber / en el nombre",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else if (binding!!.etNombreArchivo.text!!.equals(cons_dataStore) ||
+                binding!!.etNombreArchivo.text!!.equals(cons_guias) ||
+                binding!!.etNombreArchivo.text!!.equals(cons_imagenes) ||
+                binding!!.etNombreArchivo.text!!.equals(cons_imagenesPiv)
+            ) {
+                Toast.makeText(
+                    context, "Palabra reservada, escribe otro nombre",
                     Toast.LENGTH_SHORT
                 ).show()
             } else {
@@ -236,11 +249,30 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
                     // Defino la ruta donde busco los ficheros.
                     var archivoExiste = false
                     if (file.exists()) {
+                        var item = ""
+                        // Defino la ruta donde busco los ficheros.
+                        var archivoExiste = false
                         // Creo el array de tipo File con el contenido de la carpeta.
                         val files = file.listFiles()
-                        var archivo: File? = null
+                        var archivos: File? = null
+
                         // Hacemos un ciclo por cada fichero para extraer el nombre uno a uno.
-                        for (i in files.indices) {
+                        if (!files.isNullOrEmpty()) {
+                            for (i in files.indices) {
+                                // Sacamos del array files el nombre recuperandolo por posición.
+                                archivos = files[i]
+                                if (!archivos.isDirectory) {
+                                    item = archivos.name.replace(".xml".toRegex(), "")
+                                    // Comparamos el texto ingresado en la App con el recuperado.
+                                    if ((archivo == item)) {
+                                        archivoExiste = true
+                                        break
+                                    }
+                                }
+                            }
+                        }
+                        // Hacemos un ciclo por cada fichero para extraer el nombre uno a uno.
+                        /*for (i in files.indices) {
                             // Sacamos del array files el nombre recuperandolo por posición.
                             archivo = files[i]
                             item = archivo.name.replace(".xml".toRegex(), "")
@@ -249,7 +281,7 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
                                 archivoExiste = true
                                 break
                             }
-                        }
+                        }*/
 
                         // Si hay un archivo existente entra
                         if (archivoExiste) {

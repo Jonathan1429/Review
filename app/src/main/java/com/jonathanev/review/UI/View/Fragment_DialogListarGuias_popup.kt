@@ -166,7 +166,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
         val guia = guiasViewModel.getGuia(position)
 
         val fileClickeado = File("" + file + "/" + guia.nombreGuia)
-        if (fileClickeado.isDirectory) {
+        if (guia.carpeta) { // fileClickeado.isDirectory
             val builder = AlertDialog.Builder(context)
             builder.setIcon(R.drawable.ic_advertencia)
             builder.setTitle("¿Qué acción deseas realizar?")

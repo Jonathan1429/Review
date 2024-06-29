@@ -15,4 +15,11 @@ object Constants {
     const val baseRutaImagenCifrado = "frqwhqw://phgld/slfnhu/"
     const val baseRutaImagen = "content://media/picker/"
     const val PICK_IMAGE_REQUEST = 1
+
+    // Guias y carpetas que no se pueden crear
+    const val cons_dataStore = "datastore"
+    const val cons_guias = "guias"
+    const val cons_imagenes = "imagenes"
+    const val cons_imagenesPiv = "imagenesPivote"
+    // const val conv_int_carpeta = 2131165351
 }

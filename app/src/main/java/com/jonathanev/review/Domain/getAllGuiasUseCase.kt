@@ -33,7 +33,7 @@ class getAllGuiasUseCase @Inject constructor(
                 } else if (archivo.isDirectory){                    // Folder (guias)
                     image = R.drawable.img_carpeta
                     name = archivo.name
-                    guias.add(GuiaModel(name, image))
+                    guias.add(GuiaModel(name, image, true))
                 }
             }
 
