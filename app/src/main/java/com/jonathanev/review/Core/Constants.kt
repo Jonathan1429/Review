@@ -12,5 +12,7 @@ object Constants {
     val fileImages = File("/data/data/com.jonathanev.review/files/imagenes/")
     val fileImagesPiv = File("/data/data/com.jonathanev.review/files/imagenesPivote/")
 
+    const val baseRutaImagenCifrado = "frqwhqw://phgld/slfnhu/"
+    const val baseRutaImagen = "content://media/picker/"
     const val PICK_IMAGE_REQUEST = 1
 }

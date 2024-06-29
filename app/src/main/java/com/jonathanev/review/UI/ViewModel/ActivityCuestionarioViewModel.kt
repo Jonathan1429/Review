@@ -4,10 +4,12 @@ import android.app.Application
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
+import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.Data.GuiaRepository
 import com.jonathanev.review.Data.Model.DataStoreManager
 import com.jonathanev.review.Data.Model.GuiaModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
 
@@ -44,6 +46,12 @@ class ActivityCuestionarioViewModel @Inject constructor(
     // Data Store
     fun getCountImage() {
         dataStore.getCountImage()
+    }
+
+    fun llamaCorruIncremento() {
+        viewModelScope.launch {
+            setIncrementCounter()
+        }
     }
 
     suspend fun setIncrementCounter() {

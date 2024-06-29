@@ -30,12 +30,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.animation.doOnEnd
 import androidx.core.view.isGone
 import androidx.core.widget.ImageViewCompat
-import androidx.lifecycle.lifecycleScope
 import com.davemorrissey.labs.subscaleview.ImageSource
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
+import com.jonathanev.review.Core.Constants.baseRutaImagen
+import com.jonathanev.review.Core.Constants.baseRutaImagenCifrado
 import com.jonathanev.review.Core.Constants.file
 import com.jonathanev.review.Core.Constants.fileImagesPiv
 import com.jonathanev.review.Core.Constants.rutaPrin
@@ -44,8 +45,6 @@ import com.jonathanev.review.Fragments.Fragment_DialogColoresMod_popup
 import com.jonathanev.review.UI.ViewModel.ModificarViewModel
 import com.jonathanev.review.databinding.ActivityModificarBinding
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.NodeList
@@ -138,9 +137,8 @@ class Activity_Modificar : AppCompatActivity() {
         // Sección de anuncios
         initLoadAds()
 
-        ruta = intent.extras!!.getString("ruta").toString()
         initUI()
-
+        ruta = intent.extras!!.getString("ruta").toString()
         binding!!.barraSuperiorRegreso.imgvBack.setOnClickListener {
             deleteImages()
 
@@ -311,7 +309,7 @@ class Activity_Modificar : AppCompatActivity() {
                             .setMessage("Se acabaron las preguntas, ¿Quieres agregar más?")
                             .setPositiveButton(
                                 "Si"
-                            ) { dialogInterface, i -> // Cambiaremos el texto del toolbar.
+                            ) { _, _ -> // Cambiaremos el texto del toolbar.
                                 //binding!!.barraSuperiorRegreso.tvTituloToolbar.text =
                                 //    "Agrega más preguntas a la guía"
                                 binding!!.lblPregResp.text = "Pregunta"
@@ -334,7 +332,7 @@ class Activity_Modificar : AppCompatActivity() {
                             }
                             .setNegativeButton(
                                 "Cancelar"
-                            ) { dialog, i ->
+                            ) { dialog, _ ->
                                 dialog.dismiss()
                                 contadorPregunta--
                             }.setOnCancelListener {
@@ -492,7 +490,7 @@ class Activity_Modificar : AppCompatActivity() {
                 val lv_lonCaracAct = binding!!.etPregResp.length()
 
                 if (!texto.toString()
-                        .contains("content://media/picker") && (lv_lonCaracAct - longCaracteres) == 1
+                        .contains(baseRutaImagenCifrado) && (lv_lonCaracAct - longCaracteres) == 1
                 ) {
                     if (colorActual != -16777216) {
                         pintarLetra(texto)
@@ -723,11 +721,12 @@ class Activity_Modificar : AppCompatActivity() {
 
             filename = "$contadorImagen.png"
 
-
-            modificarViewModel.getGuia(ruta)
+            if (preguntas.isEmpty()) {
+                modificarViewModel.getGuia(ruta)
+            }
         }
 
-        modificarViewModel.guiaModel.observe(this@Activity_Modificar) {
+        modificarViewModel.guiaModel.observe(this) {
             nombreArchivo = it.nombreGuia
             // Guardo el nombre del archivo enviado desde el popupFragmentListarGuias.
             if (nombreArchivo.contains(".xml")) {
@@ -753,6 +752,7 @@ class Activity_Modificar : AppCompatActivity() {
 
     private fun initUI() {
         modificarViewModel.getCountImage()
+
 
         /*var ruta: String = file.toString()
         ruta = ruta.replace("guias".toRegex(), "imagenes")
@@ -791,6 +791,7 @@ class Activity_Modificar : AppCompatActivity() {
         }*/
 
     }
+
     /*private fun getCountImage() = dataStore.data.map { preferences ->
         ImagenCont(contadorImagen = preferences[intPreferencesKey("contador")] ?: 75)
     }*/
@@ -835,9 +836,8 @@ class Activity_Modificar : AppCompatActivity() {
                 var ruta: String = file.toString()
                 ruta = ruta.replace("guias".toRegex(), "imagenes")
 
-                if (binding!!.etPregResp.text!!.isNotEmpty() && !binding!!.etPregResp.text!!.contains(
-                        "content://media/picker"
-                    )
+                if (binding!!.etPregResp.text!!.isNotEmpty()
+                    && !binding!!.etPregResp.text!!.contains(baseRutaImagenCifrado)
                 ) {
                     AlertDialog.Builder(this@Activity_Modificar)
                         .setTitle("¡Atención!")
@@ -856,7 +856,7 @@ class Activity_Modificar : AppCompatActivity() {
                             File(rutaPrin, filename).delete()
 
                             binding!!.ivImagen.setImage(ImageSource.uri("$fileImagesPiv/$filename")) //setImageURI(uri)
-                            val cifrado = cifrar("content://media/picker$ruta/$filename", 3)
+                            val cifrado = cifrar("$baseRutaImagen$ruta/$filename", 3)
                             binding!!.etPregResp.setText(cifrado)
                             // contadorImagen += 1
                             // filename = "$contadorImagen.png"
@@ -864,9 +864,7 @@ class Activity_Modificar : AppCompatActivity() {
                             binding!!.tilContenidoPregResp.visibility = View.GONE
                             binding!!.ivImagen.visibility = View.VISIBLE
 
-                            lifecycleScope.launch(Dispatchers.IO) {
-                                modificarViewModel.setIncrementCounter()
-                            }
+                            modificarViewModel.llamaCorruIncremento()
                         }
                         .setNegativeButton(
                             "Cancelar"
@@ -891,15 +889,13 @@ class Activity_Modificar : AppCompatActivity() {
                     binding!!.tilContenidoPregResp.visibility = View.GONE
                     binding!!.ivImagen.visibility = View.VISIBLE
 
-                    val cifrado = cifrar("content://media/picker$ruta/$filename", 3)
+                    val cifrado = cifrar("$baseRutaImagen$ruta/$filename", 3)
                     binding!!.etPregResp.setText(cifrado)
-
+                    val l = preguntas[contadorPregunta]
                     // contadorImagen += 1
                     // filename = "$contadorImagen.png"
 
-                    lifecycleScope.launch(Dispatchers.IO) {
-                        modificarViewModel.setIncrementCounter()
-                    }
+                    modificarViewModel.llamaCorruIncremento()
                 }
             }
         } catch (e: Exception) {
@@ -1126,7 +1122,7 @@ class Activity_Modificar : AppCompatActivity() {
             // uri = texto.toUri()
         }
 
-        if (texto.contains("frqwhqw://phgld/slfnhu/")) {
+        if (texto.contains(baseRutaImagenCifrado)) {
             val descifrado = cifrar(texto, 26 - 3)
             binding!!.etPregResp.setText(texto)
             // texto = descifrado.replace("content://media/picker/".toRegex(), "")

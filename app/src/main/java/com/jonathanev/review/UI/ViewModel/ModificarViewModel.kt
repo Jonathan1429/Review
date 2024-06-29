@@ -4,10 +4,12 @@ import android.app.Application
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
+import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.Data.Model.DataStoreManager
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Domain.getGuiaUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -21,6 +23,27 @@ class ModificarViewModel @Inject constructor(
     var colorAnterior = MutableLiveData<Int>()
     var saveClicked = MutableLiveData<Boolean>().apply { value = false }
     var rollClicked = MutableLiveData<Boolean>().apply { value = false }
+
+    // Data Store
+    fun getCountImage() {
+        viewModelScope.launch {
+            dataStore.getCountImage()
+        }
+    }
+
+    fun llamaCorruIncremento() {
+        viewModelScope.launch {
+            setIncrementCounter()
+        }
+    }
+
+    suspend fun setIncrementCounter() {
+        dataStore.setIncrementCounter()
+    }
+
+    suspend fun resetCounter() {
+        dataStore.resetCounter()
+    }
 
     fun getGuia(ruta: String) {
         guiaModel.postValue(getGuiaUseCase(ruta))
@@ -36,18 +59,5 @@ class ModificarViewModel @Inject constructor(
 
     fun setColorAnterior(color: Int) {
         colorAnterior.postValue(color)
-    }
-
-    // Data Store
-    fun getCountImage() {
-        dataStore.getCountImage()
-    }
-
-    suspend fun setIncrementCounter() {
-        dataStore.setIncrementCounter()
-    }
-
-    suspend fun resetCounter() {
-        dataStore.resetCounter()
     }
 }
