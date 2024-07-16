@@ -91,7 +91,7 @@ dependencies {
     implementation 'org.parceler:parceler-api:1.1.12'
 
     // Anuncios publicitarios
-    implementation 'com.google.android.gms:play-services-ads:22.1.0'
+    implementation 'com.google.android.gms:play-services-ads:23.2.0'
 
     // Zoom en la imagen
     //implementation 'com.github.MikeOrtiz:TouchImageView:1.4.1' // last SupportLib version
