@@ -71,9 +71,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding!!.btnAbrirGuiaEstudioHabilitado.setOnClickListener {
-            mainActivityViewModel.getAllFolders(file)
-
             if (createFolders()) {
+                mainActivityViewModel.getAllFolders(file)
                 mainActivityViewModel.getMainPath()
 
                 val dialogo = Fragment_DialogListarGuias_popup()
@@ -129,6 +128,8 @@ class MainActivity : AppCompatActivity() {
             val dialog: AlertDialog = builder.create()
             dialog.show()
         } else {
+            foldersCreated = true
+
             // Crear subcarpetas para las imagenes
             for (subCarpeta in carpetasImagenes) {
                 var rutaSubcarpeta = File("$fileImages/$subCarpeta")
@@ -152,9 +153,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initUI() {
-        mainActivityViewModel.getAllFolders(file)
-
         if (createFolders()) {
+            mainActivityViewModel.getAllFolders(file)
             mainActivityViewModel.getAllGuias(file)
         }
     }

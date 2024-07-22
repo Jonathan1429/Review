@@ -11,6 +11,7 @@ class getAllFolders @Inject constructor() {
         // val files = arrayOf(file)
         val files = file.listFiles()
 
+        carpetasImagenes.clear()
         // Hacemos un ciclo por cada fichero para extraer el nombre de cada uno.
         if (files!!.isNotEmpty()) {
             for (i in files.indices) {
