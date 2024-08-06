@@ -446,7 +446,18 @@ class Activity_Cuestionario : AppCompatActivity() {
                         .contains(baseRutaImagenCifrado) && (lv_lonCaracAct - longCaracteres) == 1
                 ) {
                     if (colorActual != -16777216) {
-                        pintarLetra(texto)
+                        val cursorPosition = binding!!.etPregResp.selectionStart
+
+                        // Si es diferente de 1 quiere decir que es otra palabra la que se está pintando.
+                        val palabrasDiferentes = posColorFinal - cursorPosition
+
+                        if (palabrasDiferentes == 1 || palabrasDiferentes == -1 || posColorFinal == -1){
+                            pintarLetra(texto)
+                        } else {
+                            posColorInicial = -1
+                            activityCuestionarioViewModel.setColorAnterior(colorPintarPalabra)
+                            pintarLetra(texto)
+                        }
                     }
                 } /*else {
                 activityCuestionarioViewModel.getColorAnteriorInicial()
@@ -645,8 +656,8 @@ class Activity_Cuestionario : AppCompatActivity() {
                 val lastCharIndex = cursorPosition - 1
                 posColorInicial = lastCharIndex
             } else {
-                val cursorPosition = binding!!.etPregResp.selectionStart
-                posColorFinal = cursorPosition
+                /*al cursorPosition = binding!!.etPregResp.selectionStart
+                posColorFinal = cursorPosition*/
 
                 // Obtener los spans dentro del rango especificado
                 val spansToRemove = binding!!.etPregResp.text!!.getSpans(
@@ -1154,8 +1165,8 @@ class Activity_Cuestionario : AppCompatActivity() {
         texto?.let {
             if (it.isNotEmpty() && !pregResBandera) {
                 val cursorPosition = binding!!.etPregResp.selectionStart
-
                 val lastCharIndex = cursorPosition - 1
+                posColorFinal = lastCharIndex + 1
 
                 if (colorActual != colorPintarPalabra) {
                     if (colorPintarPalabra == 0) {
