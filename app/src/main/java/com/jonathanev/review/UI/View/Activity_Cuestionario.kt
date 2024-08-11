@@ -153,7 +153,6 @@ class Activity_Cuestionario : AppCompatActivity() {
         }
 
         binding!!.imgvPregResp.setOnClickListener {
-            activityCuestionarioViewModel.setColorAnterior(colorPintarPalabra)
             activityCuestionarioViewModel.clickedRoll()
         }
 
@@ -180,6 +179,8 @@ class Activity_Cuestionario : AppCompatActivity() {
                         // Se resta uno al final y así se queda neutral.
                         contadorPregunta++
                     } else {
+                        setSpanPalabra()
+
                         // Si los campos están bien se sobre escribe.
                         var editable: Editable =
                             Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
@@ -217,6 +218,8 @@ class Activity_Cuestionario : AppCompatActivity() {
                         Log.i("Crear pregunta: ", "Asegurate de llenar pregunta y respuesta")
                         contadorPregunta++
                     } else {
+                        setSpanPalabra()
+
                         if (binding!!.lblPregResp.text.toString() == "Respuesta") {
                             // Si los campos están bien se sobre escribe.
                             var editable: Editable =
@@ -266,10 +269,11 @@ class Activity_Cuestionario : AppCompatActivity() {
 
                 Log.i("Crear pregunta: ", "Asegurate de no dejar ningun campo vacio")
             } else {
+                setSpanPalabra()
+
                 // Se le quita 1 para hacer referencia al arreglo
                 // tamaño 3-1 = 2 [0,1,2].
                 //val longi: Int = preguntas.size - 1 HAY QUE VALIDAR SI AQUÍ TAMBIÉN FUNCIONA COMENTANDO ESTE
-
                 if (contadorPregunta <= longi) {
                     var editable: Editable =
                         Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
@@ -385,7 +389,6 @@ class Activity_Cuestionario : AppCompatActivity() {
         }
 
         binding!!.barraSuperiorRegreso.imgvSave.setOnClickListener {
-            activityCuestionarioViewModel.setColorAnterior(colorPintarPalabra)
             activityCuestionarioViewModel.clickedSave()
         }
 
@@ -432,36 +435,30 @@ class Activity_Cuestionario : AppCompatActivity() {
         }
 
         binding!!.etPregResp.addTextChangedListener(object : TextWatcher {
+            private var textoAnterior: String = ""
+            private var seAgregoSaltoDeLinea = false
+
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                // Guarda el texto antes del cambio
+                textoAnterior = s?.toString() ?: ""
                 longCaracteres = binding!!.etPregResp.length()
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                // Aquí puedes verificar si se ha añadido un salto de línea en este momento
+                seAgregoSaltoDeLinea =
+                    count > before && s?.subSequence(start, start + count)?.contains("\n") == true
             }
 
             override fun afterTextChanged(texto: Editable?) {
-                val lv_lonCaracAct = binding!!.etPregResp.length()
-
                 if (!texto.toString()
-                        .contains(baseRutaImagenCifrado) && (lv_lonCaracAct - longCaracteres) == 1
+                        .contains(baseRutaImagenCifrado) && (binding!!.etPregResp.length() - longCaracteres) == 1
                 ) {
-                    if (colorActual != -16777216) {
-                        val cursorPosition = binding!!.etPregResp.selectionStart
-
-                        // Si es diferente de 1 quiere decir que es otra palabra la que se está pintando.
-                        val palabrasDiferentes = posColorFinal - cursorPosition
-
-                        if (palabrasDiferentes == 1 || palabrasDiferentes == -1 || posColorFinal == -1){
-                            pintarLetra(texto)
-                        } else {
-                            posColorInicial = -1
-                            activityCuestionarioViewModel.setColorAnterior(colorPintarPalabra)
-                            pintarLetra(texto)
-                        }
+                    // Si hay un salto de linea o es color negro no se pinta nada
+                    if (colorActual != -16777216 && !seAgregoSaltoDeLinea) {
+                        pintarLetra(texto)
                     }
-                } /*else {
-                activityCuestionarioViewModel.getColorAnteriorInicial()
-            }*/
+                }
             }
         })
 
@@ -483,6 +480,7 @@ class Activity_Cuestionario : AppCompatActivity() {
 
                         activityCuestionarioViewModel.clickedSave()
                     } else if ((contadorPregunta + 1) > longi && binding!!.lblPregResp.text.toString() == "Pregunta") {
+                        setSpanPalabra()
                         crearArchivo(nombreArchivo)
                         binding!!.ivImagen.visibility = View.GONE
                     } else {
@@ -502,6 +500,8 @@ class Activity_Cuestionario : AppCompatActivity() {
                 } else {
                     if (binding!!.lblPregResp.text.toString() == "Pregunta") {
                         if ((contadorPregunta + 1) <= longi && longi > 0) {
+                            setSpanPalabra()
+
                             var editable: Editable =
                                 Editable.Factory.getInstance()
                                     .newEditable(binding!!.etPregResp.text)
@@ -532,6 +532,8 @@ class Activity_Cuestionario : AppCompatActivity() {
                         }
                     } else {
                         if (longi == 0) {
+                            setSpanPalabra()
+
                             var editable: Editable =
                                 Editable.Factory.getInstance()
                                     .newEditable(binding!!.etPregResp.text)
@@ -548,6 +550,8 @@ class Activity_Cuestionario : AppCompatActivity() {
                             crearArchivo(nombreArchivo)
                         } else {
                             if ((contadorPregunta + 1) <= longi) {
+                                setSpanPalabra()
+
                                 var editable: Editable =
                                     Editable.Factory.getInstance()
                                         .newEditable(binding!!.etPregResp.text)
@@ -563,6 +567,8 @@ class Activity_Cuestionario : AppCompatActivity() {
 
                                 crearArchivo(nombreArchivo)
                             } else {
+                                setSpanPalabra()
+
                                 var editable: Editable =
                                     Editable.Factory.getInstance()
                                         .newEditable(binding!!.etPregResp.text)
@@ -587,6 +593,8 @@ class Activity_Cuestionario : AppCompatActivity() {
         activityCuestionarioViewModel.rollClicked.observe(this) {
             if (it) {
                 if (binding!!.etPregResp.text.toString().isNotEmpty()) {
+                    setSpanPalabra()
+
                     var editable: Editable =
                         Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
                     var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
@@ -689,13 +697,110 @@ class Activity_Cuestionario : AppCompatActivity() {
         }
     }
 
+    private fun setSpanPalabra() {
+        var editable: Editable =
+            Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
+        var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
+            0,
+            editable.length,
+            ForegroundColorSpan::class.java
+        )
+        val sortedSpans = colorSpans.sortedBy { editable.getSpanStart(it) }
 
-    /*private suspend fun guardarContadorImagen(contadorImagen: Int) {
-        dataStore.edit { preferences ->
-            preferences[intPreferencesKey("contador")] = contadorImagen
+        var start = -1
+        var end = 0
+        var endAnterior = 0
+        var isColNuevo = false
+        var colorAnterior = 0
+        var colorNuevo = 0
+        var isDoubleColors = false
+
+        for (colorSpan: ForegroundColorSpan in sortedSpans) {
+            // Se ejecuta solo al inicio
+            if (start == -1) {
+                start = editable.getSpanStart(colorSpan)
+            }
+
+            // Verificación de superposición de colores
+            if (end > editable.getSpanEnd(colorSpan)) {
+                // Mensaje de suporposición de colores
+                isDoubleColors = true
+            }
+            end = editable.getSpanEnd(colorSpan)
+            colorNuevo = colorSpan.foregroundColor
+
+            // Logica del color
+            if (colorAnterior != colorNuevo) {
+                if (colorAnterior == 0) {
+                    isColNuevo = false
+                    colorAnterior = colorNuevo
+                    endAnterior = end - 1
+                } else {
+                    isColNuevo = true
+                }
+            }
+
+            // Se agrupan los valores por colores (En un solo span se agrupa)
+            if (isColNuevo || (end - endAnterior) != 1) {
+                // Obtener los spans dentro del rango especificado
+                val spansToRemove = binding!!.etPregResp.text!!.getSpans(
+                    start,
+                    endAnterior,
+                    ForegroundColorSpan::class.java
+                )
+
+                for (span in spansToRemove) {
+                    binding!!.etPregResp.text!!.removeSpan(span)
+                }
+
+                binding!!.etPregResp.text!!.setSpan(
+                    ForegroundColorSpan(colorAnterior),
+                    start,
+                    endAnterior,
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+
+                start = editable.getSpanStart(colorSpan)
+                endAnterior = end
+
+                if (isColNuevo) {
+                    colorAnterior = colorNuevo
+                    isColNuevo = false
+                }
+            } else {
+                endAnterior = end
+            }
         }
-    }*/
 
+        // El ultimo span de color se pinta aquí
+        if (colorSpans.isNotEmpty()) {
+            // Obtener los spans dentro del rango especificado
+            val spansToRemove = binding!!.etPregResp.text!!.getSpans(
+                start,
+                endAnterior,
+                ForegroundColorSpan::class.java
+            )
+
+            for (span in spansToRemove) {
+                binding!!.etPregResp.text!!.removeSpan(span)
+            }
+
+            binding!!.etPregResp.text!!.setSpan(
+                ForegroundColorSpan(colorAnterior),
+                start,
+                endAnterior,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+        }
+
+        if (isDoubleColors) {
+            Toast.makeText(
+                applicationContext,
+                "Sobreescribiste colores y mantuvimos los últimos seleccionados",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
     private fun deleteImages() {
         if (fileImagesPiv.exists()) {
             borrarContenidoEnPiv()
@@ -711,43 +816,8 @@ class Activity_Cuestionario : AppCompatActivity() {
         }
     }
 
-    /*private fun getCountImage() = dataStore.data.map { preferences ->
-        ImagenCont(contadorImagen = preferences[intPreferencesKey("contador")] ?: 75)
-    }*/
-
     private fun initUI() {
         activityCuestionarioViewModel.getCountImage()
-
-        /*val ltImages = fileImages.listFiles()
-        val imagenes = mutableListOf<String>()
-        if (ltImages!!.isNotEmpty()) {
-            for (i in ltImages.indices) {
-                // Sacamos del array files el primer fichero.
-                val archivo: File = ltImages[i]
-                var name = ""
-
-                if (!archivo.isDirectory) {                    // Folder (guias)
-                    name = archivo.name
-                    imagenes.add(name)
-                }
-            }
-        }
-
-        if (imagenes.isNotEmpty()) {
-            for (i in imagenes) {
-                var ultimaImagen = i.substringAfterLast("/")
-                ultimaImagen = ultimaImagen.replace(".png".toRegex(), "")
-                var ultimaImagenEntero = ultimaImagen.toInt()
-                if (contadorImagen < ultimaImagenEntero) {
-                    contadorImagen = ultimaImagenEntero
-                }
-            }
-
-            contadorImagen += 1
-            filename = "$contadorImagen.png"
-        } else {
-            filename = "$contadorImagen.png"
-        }*/
     }
 
     private fun openSomeActivityForResult() {
@@ -777,9 +847,7 @@ class Activity_Cuestionario : AppCompatActivity() {
     private fun saveImageToInternalStorage(bitmap: Bitmap) {
         var fos: FileOutputStream? = null
         try {
-            // val f = File(fileImagesPiv, filename)
             fos = openFileOutput(filename, MODE_PRIVATE)
-            // fos = FileOutputStream(f)
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
 
             if (binding!!.etPregResp.text!!.isNotEmpty() && !binding!!.etPregResp.text!!.contains(
@@ -1061,20 +1129,14 @@ class Activity_Cuestionario : AppCompatActivity() {
             val end: Int = editable.getSpanEnd(colorSpan)
             val color: Int = colorSpan.foregroundColor
 
-            // Agregar la etiqueta de inicio al texto
-            if (color != -16777216) {
-                val etiqIni: String = "«$color»"
-                val etiqFin: String = "«/$color»"
-                editable.replace(start, start, etiqIni)
-                // Actualizar la posición de inicio del span
-                // colorSpan = new ForegroundColorSpan(colorSpan.getForegroundColor());
-                // editable.setSpan(colorSpan, start + etiqIni.length(), end + etiqIni.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            val etiqIni: String = "«$color»"
+            val etiqFin: String = "«/$color»"
 
-                // Agregar la etiqueta de cierre al texto
-                editable.replace(end + etiqIni.length, end + etiqIni.length, etiqFin)
-                // Actualizar la posición de finalización del span
-                // editable.setSpan(colorSpan, start + etiqIni.length(), end + etiqIni.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            }
+            // Agregar la etiqueta de inicio al texto
+            editable.replace(start, start, etiqIni)
+
+            // Agregar la etiqueta de cierre al texto
+            editable.replace(end + etiqIni.length, end + etiqIni.length, etiqFin)
         }
     }
 
@@ -1168,14 +1230,6 @@ class Activity_Cuestionario : AppCompatActivity() {
                 val lastCharIndex = cursorPosition - 1
                 posColorFinal = lastCharIndex + 1
 
-                if (colorActual != colorPintarPalabra) {
-                    if (colorPintarPalabra == 0) {
-                        activityCuestionarioViewModel.setColorAnterior(colorActual)
-                    } /*else {
-                        activityCuestionarioViewModel.setColorAnterior(colorPintarPalabra)
-                    }*/
-                }
-
                 it.setSpan(
                     ForegroundColorSpan(colorActual),
                     lastCharIndex,
@@ -1197,10 +1251,6 @@ class Activity_Cuestionario : AppCompatActivity() {
         ImageViewCompat.setImageTintMode(binding!!.imgvSelColor, PorterDuff.Mode.SRC_ATOP)
         ImageViewCompat.setImageTintList(binding!!.imgvSelColor, ColorStateList.valueOf(color))
         colorActual = color
-
-        if (posColorInicial != -1) {
-            activityCuestionarioViewModel.setColorAnterior(colorPintarPalabra)
-        }
     }
 
     fun cifrar(texto: String, desplazamiento: Int): String {

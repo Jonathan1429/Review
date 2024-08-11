@@ -39,10 +39,6 @@ class ActivityCuestionarioViewModel @Inject constructor(
         rollClicked.postValue(!rollClicked.value!!)
     }
 
-    fun setColorAnterior(color: Int) {
-        colorAnterior.postValue(color)
-    }
-
     // Data Store
     fun getCountImage() {
         dataStore.getCountImage()

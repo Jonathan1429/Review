@@ -56,8 +56,4 @@ class ModificarViewModel @Inject constructor(
     fun clickedRoll() {
         rollClicked.postValue(!rollClicked.value!!)
     }
-
-    fun setColorAnterior(color: Int) {
-        colorAnterior.postValue(color)
-    }
 }
