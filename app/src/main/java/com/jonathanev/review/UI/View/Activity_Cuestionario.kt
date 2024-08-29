@@ -450,7 +450,6 @@ class Activity_Cuestionario : AppCompatActivity() {
             }
         }
 
-        
         activityCuestionarioViewModel.rollClicked.observe(this) {
             if (it) {
                 if (binding!!.etPregResp.text.toString().isNotEmpty()) {
