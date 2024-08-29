@@ -12,7 +12,7 @@
 ~h
 # Command Line History (newest to oldest):
 :q
-|2,0,1724959651,,"q"
+|2,0,1724960583,,"q"
 
 # Search String History (newest to oldest):
 
@@ -23,16 +23,34 @@
 # Debug Line History (newest to oldest):
 
 # Registers:
+""-	CHAR	0
+	M
+|3,1,36,0,1,0,1724960560,"M"
 
 # File marks:
-'0  1  0  ~/.gitconfig
-|4,48,1,0,1724959651,"~/.gitconfig"
+'0  7  0  ~/.git/MERGE_MSG
+|4,48,7,0,1724960632,"~/.git/MERGE_MSG"
+'1  1  0  ~/.gitconfig
+|4,49,1,0,1724959651,"~/.gitconfig"
 
 # Jumplist (newest first):
+-'  7  0  ~/.git/MERGE_MSG
+|4,39,7,0,1724960632,"~/.git/MERGE_MSG"
+-'  1  0  ~/.git/MERGE_MSG
+|4,39,1,0,1724960524,"~/.git/MERGE_MSG"
+-'  1  0  ~/.gitconfig
+|4,39,1,0,1724959651,"~/.gitconfig"
 -'  1  0  ~/.gitconfig
 |4,39,1,0,1724959651,"~/.gitconfig"
 
 # History of marks within files (newest to oldest):
+
+> ~/.git/MERGE_MSG
+	*	1724960630	0
+	"	7	0
+	^	2	0
+	.	1	39
+	+	1	39
 
 > ~/.gitconfig
 	*	1724959646	0
