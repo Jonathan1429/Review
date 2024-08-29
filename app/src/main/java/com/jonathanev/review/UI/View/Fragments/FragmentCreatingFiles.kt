@@ -1,5 +1,6 @@
 package com.jonathanev.review.UI.View.Fragments
 
+import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.graphics.PorterDuff
 import android.graphics.drawable.GradientDrawable
@@ -8,11 +9,19 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.graphics.ColorUtils
 import androidx.core.os.BundleCompat
+import androidx.core.os.bundleOf
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.jonathanev.review.Data.FolderAction
+import com.jonathanev.review.Data.Model.ScreenData
 import com.jonathanev.review.Fragments.Adaptadores.ListarIconosAdapter
 import com.jonathanev.review.R
 import com.jonathanev.review.UI.ViewModel.Fragments.FragCreateFilesViewModel
@@ -20,6 +29,7 @@ import com.jonathanev.review.databinding.FragmentCreateFilesBinding
 import com.skydoves.colorpickerview.flag.BubbleFlag
 import com.skydoves.colorpickerview.flag.FlagMode
 import com.skydoves.colorpickerview.listeners.ColorListener
+import kotlinx.coroutines.launch
 
 class FragmentCreatingFiles : Fragment() {
     private var _binding: FragmentCreateFilesBinding? = null
@@ -27,17 +37,6 @@ class FragmentCreatingFiles : Fragment() {
     private lateinit var iconsAdapter: ListarIconosAdapter
     private val viewModel: FragCreateFilesViewModel by viewModels()
     private var mode: FolderAction = FolderAction.NONE
-
-    /*companion object {
-        fun newInstance(mode: FolderAction): FragmentDialogNuevoArchivoPopu {
-            val args = Bundle().apply {
-                putString("dialog_mode", mode.name)
-            }
-            return FragmentDialogNuevoArchivoPopu().apply {
-                arguments = args
-            }
-        }
-    }*/
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -63,6 +62,7 @@ class FragmentCreatingFiles : Fragment() {
 
         viewModel.loadIconsFor(mode)
         initUI()
+        initListeners()
 
         // 1) crear adapter una vez
         iconsAdapter = ListarIconosAdapter { pos -> viewModel.onIconSelected(pos) }
@@ -70,30 +70,75 @@ class FragmentCreatingFiles : Fragment() {
         binding.fragmentCreate.rvIconos.layoutManager =
             GridLayoutManager(requireContext(), 6)
 
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uiState.collect { state ->
+                    // Cargar íconos en el adapter si cambia la lista
+                    iconsAdapter.submitList(state.icons)
+                    iconsAdapter.handleItemClick(state.selectedIndex)
+
+                    // Actualizar preview
+                    binding.fragmentCreate.prevCarpeta.ivCarpeta.setImageResource(state.icons[state.selectedIndex])
+                    val background =
+                        binding.fragmentCreate.prevCarpeta.bgCarpeta.background as GradientDrawable
+                    binding.fragmentCreate.prevCarpeta.ivCarpeta.imageTintMode =
+                        PorterDuff.Mode.SRC_ATOP
+                    val color50 = ColorUtils.setAlphaComponent(state.color, 50)
+                    background.setColor(color50)
+
+                    binding.fragmentCreate.prevCarpeta.ivCarpeta.imageTintList =
+                        ColorStateList.valueOf(state.color)
+                }
+            }
+        }
+    }
+
+    private fun initListeners() {
         binding.fragmentCreate.colorPickerView.setColorListener(ColorListener { color, _ ->
             viewModel.setColor(color)
         })
 
-        viewModel.uiState.observe(viewLifecycleOwner) { state ->
-            // Cargar íconos en el adapter si cambia la lista
-            iconsAdapter.submitList(state.icons)
-            iconsAdapter.handleItemClick(state.selectedIndex)
-
-            // Actualizar preview
-            binding.fragmentCreate.prevCarpeta.ivCarpeta.setImageResource(state.icons[state.selectedIndex])
-            val background = binding.fragmentCreate.prevCarpeta.bgCarpeta.background as GradientDrawable
-            binding.fragmentCreate.prevCarpeta.ivCarpeta.imageTintMode = PorterDuff.Mode.SRC_ATOP
-            val color50 = ColorUtils.setAlphaComponent(state.color, 50)
-            background.setColor(color50)
-
-            binding.fragmentCreate.prevCarpeta.ivCarpeta.imageTintList = ColorStateList.valueOf(state.color)
+        binding.btnApply.setOnClickListener {
+            createFile()
         }
     }
 
+    private fun createFile() {
+        val name = binding.fragmentCreate.etNombre.text.toString()
+        val description =
+            binding.fragmentCreate.fragmentComponentsFile.etDescription.text.toString()
+
+        val isEmpty = viewModel.validations(name)
+
+        if (isEmpty) {
+            Toast.makeText(requireContext(), "Necesitas tener un nombre", Toast.LENGTH_SHORT)
+                .show()
+            return
+        }
+
+        val state = viewModel.uiState.value
+
+        val data = ScreenData(
+            name = name,
+            description = description,
+            icon = state.icons[state.selectedIndex],
+            color = state.color
+        )
+
+        findNavController().navigate(
+            R.id.action_fragmentCreateFiles_to_fragmentCreateFile2,
+            bundleOf(
+                "mode" to mode,
+                "screenData" to data
+            )
+        )
+    }
+
     private fun initUI() {
-        if (mode == FolderAction.CREATING_FOLDER){
+        if (mode == FolderAction.CREATING_FOLDER) {
             showFolderUI()
-        } else{
+        } else {
             showFileUI()
         }
     }

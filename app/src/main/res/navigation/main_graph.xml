@@ -27,6 +27,14 @@
         <action
             android:id="@+id/action_fragmentCreateFiles_to_fragmentCreateFile2"
             app:destination="@id/fragmentCreateFile2" />
+        <argument
+            android:name="mode"
+            app:argType="com.jonathanev.review.Data.FolderAction"
+            app:nullable="true" />
+        <argument
+            android:name="screenData"
+            app:argType="com.jonathanev.review.Data.Model.ScreenData"
+            app:nullable="true" />
     </fragment>
 
     <fragment

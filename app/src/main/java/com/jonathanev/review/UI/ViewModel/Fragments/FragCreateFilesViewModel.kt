@@ -1,23 +1,22 @@
 package com.jonathanev.review.UI.ViewModel.Fragments
 
 import android.graphics.Color
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.jonathanev.review.Data.FolderAction
 import com.jonathanev.review.Data.Model.prueba.PreviewState
-import com.jonathanev.review.Domain.CreatingFolderUseCase
 import com.jonathanev.review.R
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 @HiltViewModel
 class FragCreateFilesViewModel @Inject constructor() : ViewModel() {
-    private val _uiState = MutableLiveData(PreviewState())
-    val uiState: LiveData<PreviewState> get() = _uiState
+    private val _uiState = MutableStateFlow(PreviewState())
+    val uiState = _uiState.asStateFlow()
 
     fun loadIconsFor(action: FolderAction) {
-        val icons = when(action) {
+        val icons = when (action) {
             FolderAction.CREATING_FILE -> listOf(R.drawable.ic_lightbulb_solid_full)
             FolderAction.CREATING_FOLDER -> listOf(
                 R.drawable.ic_anchor_solid_full,
@@ -30,7 +29,7 @@ class FragCreateFilesViewModel @Inject constructor() : ViewModel() {
             FolderAction.NONE -> emptyList()
         }
 
-        _uiState.value = _uiState.value!!.copy(
+        _uiState.value = _uiState.value.copy(
             icons = icons,
             selectedIndex = 0,
             icon = icons.first(),
@@ -41,7 +40,7 @@ class FragCreateFilesViewModel @Inject constructor() : ViewModel() {
     }
 
     fun onIconSelected(position: Int) {
-        val current = _uiState.value!!
+        val current = _uiState.value
         _uiState.value = current.copy(
             selectedIndex = position,
             icon = current.icons[position]
@@ -49,6 +48,10 @@ class FragCreateFilesViewModel @Inject constructor() : ViewModel() {
     }
 
     fun setColor(color: Int) {
-        _uiState.value = _uiState.value!!.copy(color = color)
+        _uiState.value = _uiState.value.copy(color = color)
+    }
+
+    fun validations(text: String): Boolean {
+        return text.isEmpty()
     }
 }
