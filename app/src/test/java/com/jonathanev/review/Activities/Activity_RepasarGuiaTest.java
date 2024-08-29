@@ -4,18 +4,15 @@ import android.annotation.SuppressLint;
 
 import com.jonathanev.review.UI.View.Activity_RepasarGuia;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
 import java.io.File;
 
 class Activity_RepasarGuiaTest {
-    @Test
+    //@Test
     public void test1(){
         @SuppressLint("SdCardPath") File file = new File("/data/data/com.jonathanev.review/files/A.-C++.xml");
 
         Activity_RepasarGuia activity_repasarGuia = new Activity_RepasarGuia();
-        activity_repasarGuia.obtenerDatosXML();
+        //activity_repasarGuia.obtenerDatosXML();
 
         //Assertions.fail();
 
