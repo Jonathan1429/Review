@@ -91,7 +91,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     // Create and validate folders
-    private fun createFolders(): Boolean {
+    fun createFolders(): Boolean {
         var foldersCreated = false
 
         if (!file.exists()) {

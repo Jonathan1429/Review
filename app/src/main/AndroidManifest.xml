@@ -44,6 +44,7 @@
          1.- Probar cuando se eliminen guias o se cambien de lugar..., le salga la leyenda que
          no tienes carpetas creadas.
          (SOLUCIONADO)
+
     -->
     <application
         android:name=".ReviewApp"
