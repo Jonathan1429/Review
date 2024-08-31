@@ -12,6 +12,7 @@ import com.jonathanev.review.Data.Model.DataStoreManager
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.Model.GuiasVerificacionModel
 import com.jonathanev.review.Domain.setClickRegresarModicandoUseCase
+import com.jonathanev.review.Domain.setClickSiguienteModificandoUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.io.File
@@ -20,7 +21,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ActivityCuestionarioViewModel @Inject constructor(
     private val guiaRepository: GuiaRepository,
-    private val setClickRegresar: setClickRegresarModicandoUseCase,
+    private val setClickRegresarModicandoUseCase: setClickRegresarModicandoUseCase,
+    private val setClickSiguienteModicandoUseCase: setClickSiguienteModificandoUseCase,
     application: Application
 ) : ViewModel() {
     var guias = MutableLiveData<List<GuiaModel>>()
@@ -28,8 +30,11 @@ class ActivityCuestionarioViewModel @Inject constructor(
     var saveClicked = MutableLiveData<Boolean>().apply { value = false }
     var rollClicked = MutableLiveData<Boolean>().apply { value = false }
 
-    private val _buttonClickEvent = MutableLiveData<Boolean>()
-    val lvClickImgvPrevious: LiveData<Boolean> get() = _buttonClickEvent
+    // Click events
+    private val _buttonClickEventBack = MutableLiveData<Boolean>()
+    val lvClickImgvPrevious: LiveData<Boolean> get() = _buttonClickEventBack
+    private val _buttonClickEventNext = MutableLiveData<Boolean>()
+    val lvClickImgvNext: LiveData<Boolean> get() = _buttonClickEventNext
 
     // Data Store
     private val dataStore = DataStoreManager.getInstance(application)
@@ -66,8 +71,13 @@ class ActivityCuestionarioViewModel @Inject constructor(
         dataStore.resetCounter()
     }
 
-    fun onClickImgvPrevious(){
-        _buttonClickEvent.value = true
+    // Click events
+    fun onClickImgvPrevious() {
+        _buttonClickEventBack.value = true
+    }
+
+    fun onClickImgvNext() {
+        _buttonClickEventNext.value = true
     }
 
     fun onClickRegresar(
@@ -77,6 +87,28 @@ class ActivityCuestionarioViewModel @Inject constructor(
         editable: Editable,
         isEtPregunta: Boolean
     ): GuiasVerificacionModel {
-        return setClickRegresar(preguntas, respuestas, contadorPregunta, editable, isEtPregunta)
+        return setClickRegresarModicandoUseCase(
+            preguntas,
+            respuestas,
+            contadorPregunta,
+            editable,
+            isEtPregunta
+        )
+    }
+
+    fun onClickSiguiente(
+        preguntas: ArrayList<String>,
+        respuestas: ArrayList<String>,
+        contadorPregunta: Int,
+        editable: Editable,
+        isEtPregunta: Boolean
+    ): GuiasVerificacionModel {
+        return setClickSiguienteModicandoUseCase(
+            preguntas,
+            respuestas,
+            contadorPregunta,
+            editable,
+            isEtPregunta
+        )
     }
 }

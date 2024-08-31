@@ -23,7 +23,8 @@ import android.util.Xml
 import android.view.KeyEvent
 import android.view.View
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts.*
+import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.activity.viewModels
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
@@ -161,66 +162,7 @@ class Activity_Cuestionario : AppCompatActivity() {
         }
 
         binding!!.imgvNext.setOnClickListener {
-            // Validamos campos vacios en la pregunta o respuesta.
-            val longi: Int = respuestas.size - 1
-
-            if ((contadorPregunta <= longi && binding!!.etPregResp.text.toString()
-                    .isEmpty()) || (binding!!.lblPregResp.text == "Pregunta" && contadorPregunta > longi) || binding!!.etPregResp.text.toString()
-                    .isEmpty()
-            ) {
-                Toast.makeText(
-                    applicationContext,
-                    "Asegurate de no dejar ningun campo vacio",
-                    Toast.LENGTH_SHORT
-                ).show()
-
-                Log.i("Crear pregunta: ", "Asegurate de no dejar ningun campo vacio")
-            } else {
-                setSpanPalabra()
-
-                // Se le quita 1 para hacer referencia al arreglo
-                // tamaño 3-1 = 2 [0,1,2].
-                //val longi: Int = preguntas.size - 1 HAY QUE VALIDAR SI AQUÍ TAMBIÉN FUNCIONA COMENTANDO ESTE
-                if (contadorPregunta <= longi) {
-                    // Se colocan las etiquetas en cada palabra con color
-                    val editable = colocarEtiquetas()
-
-                    if (binding!!.lblPregResp.text.toString() == "Pregunta") {
-                        preguntas[contadorPregunta] = editable.toString()
-                    } else {
-                        respuestas[contadorPregunta] = editable.toString()
-                    }
-
-                    // Mientras el contadorPregunta sea menor escribiremos la siguiente pregunta
-                    // en los et.
-                    if (contadorPregunta < longi) {
-                        // Pintamos el texto en la pregunta actual
-                        binding!!.lblPregResp.text = "Pregunta"
-                        pintarTexto(contadorPregunta + 1)
-                    } else {
-                        // binding!!.lblPregResp.text = "Pregunta"
-                        binding!!.tilContenidoPregResp.visibility = View.VISIBLE
-                        binding!!.ivImagen.visibility = View.GONE
-                        binding!!.etPregResp.setText("")
-                    }
-                } else { // Si contadorPregunta es mayor a lo que hay en el arreglo.
-                    binding!!.tilContenidoPregResp.visibility = View.VISIBLE
-                    binding!!.ivImagen.visibility = View.GONE
-
-                    // Se colocan las etiquetas en cada palabra con color
-                    val editable = colocarEtiquetas()
-                    respuestas.add(contadorPregunta, editable.toString())
-                    binding!!.etPregResp.setText("")
-                }
-
-                binding!!.imgvCancelar.visibility = View.GONE
-                binding!!.imgvQuitColor.visibility = View.VISIBLE
-                binding!!.imgvSelColor.visibility = View.VISIBLE
-
-                binding!!.lblPregResp.text = "Pregunta"
-
-                contadorPregunta++
-            }
+            activityCuestionarioViewModel.onClickImgvNext()
         }
 
         binding!!.imgvEliminar.setOnClickListener {
@@ -450,7 +392,6 @@ class Activity_Cuestionario : AppCompatActivity() {
             }
         }
 
-        
         activityCuestionarioViewModel.rollClicked.observe(this) {
             if (it) {
                 if (binding!!.etPregResp.text.toString().isNotEmpty()) {
@@ -552,6 +493,10 @@ class Activity_Cuestionario : AppCompatActivity() {
         activityCuestionarioViewModel.lvClickImgvPrevious.observe(this) {
             accionesAlDarClickAtras()
         }
+
+        activityCuestionarioViewModel.lvClickImgvNext.observe(this) {
+            accionesAlDarClickSiguiente()
+        }
     }
 
     private fun accionesAlDarClickAtras() {
@@ -559,20 +504,61 @@ class Activity_Cuestionario : AppCompatActivity() {
         val editable = colocarEtiquetas()
 
         var isEtPregunta = false
-        if (binding!!.lblPregResp.text.toString() == "Pregunta"){
+        if (binding!!.lblPregResp.text.toString() == "Pregunta") {
             isEtPregunta = true
         }
 
-        val retturn = activityCuestionarioViewModel.onClickRegresar(preguntas,respuestas, contadorPregunta, editable, isEtPregunta)
+        val retturn = activityCuestionarioViewModel.onClickRegresar(
+            preguntas,
+            respuestas,
+            contadorPregunta,
+            editable,
+            isEtPregunta
+        )
         Log.i("Respuesta", "La respuesta es: ${retturn.shouldUpdateLabel}")
 
-        if (retturn.shouldUpdateLabel){
+        if (retturn.shouldUpdateLabel) {
             binding!!.lblPregResp.text = "Pregunta"
             contadorPregunta = retturn.contadorPregunta
             pintarTexto(contadorPregunta)
         } else {
             Toast.makeText(applicationContext, retturn.message, Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun accionesAlDarClickSiguiente() {
+        setSpanPalabra()
+        val editable = colocarEtiquetas()
+
+        var isEtPregunta = false
+        if (binding!!.lblPregResp.text.toString() == "Pregunta") {
+            isEtPregunta = true
+        }
+        val retturn = activityCuestionarioViewModel.onClickSiguiente(preguntas, respuestas, contadorPregunta, editable,isEtPregunta)
+
+        if (retturn.shouldUpdateLabel){
+            binding!!.lblPregResp.text = "Pregunta"
+            val posPregFin = preguntas.size - 1
+
+            contadorPregunta = retturn.contadorPregunta
+            if (contadorPregunta <= posPregFin) {
+                // Pintamos el texto en la pregunta actual
+                pintarTexto(contadorPregunta)
+            } else {
+                // binding!!.lblPregResp.text = "Pregunta"
+                binding!!.tilContenidoPregResp.visibility = View.VISIBLE
+                binding!!.ivImagen.visibility = View.GONE
+                binding!!.etPregResp.text?.clear()
+            }
+
+            // Se encuentre o no una imagen cargada se deben activar estos botones
+            binding!!.imgvCancelar.visibility = View.GONE
+            binding!!.imgvQuitColor.visibility = View.VISIBLE
+            binding!!.imgvSelColor.visibility = View.VISIBLE
+        } else {
+            Toast.makeText(applicationContext, retturn.message, Toast.LENGTH_SHORT).show()
+        }
+        // binding!!.lblPregResp.text = "Pregunta"
     }
 
     private fun setSpanPalabra() {
