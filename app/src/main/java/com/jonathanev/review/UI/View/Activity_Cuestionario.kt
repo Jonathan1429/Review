@@ -158,11 +158,38 @@ class Activity_Cuestionario : AppCompatActivity() {
         }
 
         binding!!.imgvPrevious.setOnClickListener {
-            activityCuestionarioViewModel.onClickImgvPrevious()
+            val editable: Editable =
+                Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
+            var isEtPregunta = false
+            if (binding!!.lblPregResp.text.toString() == "Pregunta") {
+                isEtPregunta = true
+            }
+
+            activityCuestionarioViewModel.onClickImgvPrevious(
+                preguntas,
+                respuestas,
+                contadorPregunta,
+                editable,
+                isEtPregunta
+            )
         }
 
         binding!!.imgvNext.setOnClickListener {
-            activityCuestionarioViewModel.onClickImgvNext()
+            val editable: Editable =
+                Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
+            val textoPregResp = binding!!.etPregResp.text.toString()
+            var isEtPregunta = false
+            if (binding!!.lblPregResp.text.toString() == "Pregunta") {
+                isEtPregunta = true
+            }
+
+            activityCuestionarioViewModel.onClickImgvNext(
+                preguntas,
+                respuestas,
+                contadorPregunta,
+                editable,
+                isEtPregunta
+            )
         }
 
         binding!!.imgvEliminar.setOnClickListener {
@@ -302,6 +329,14 @@ class Activity_Cuestionario : AppCompatActivity() {
 
         activityCuestionarioViewModel.saveClicked.observe(this) {
             if (it) {
+                var editable: Editable =
+                    Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
+                var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
+                    0,
+                    editable.length,
+                    ForegroundColorSpan::class.java
+                )
+
                 // Se le quita 1 para hacer referencia al arreglo
                 // tamaño 3-1 = 2 [0,1,2].
                 val longi: Int = respuestas.size
@@ -341,7 +376,7 @@ class Activity_Cuestionario : AppCompatActivity() {
                             setSpanPalabra()
 
                             // Se colocan las etiquetas en cada palabra con color
-                            val editable = colocarEtiquetas()
+                            val editable = colocarEtiquetas(colorSpans, editable)
                             preguntas[contadorPregunta] = editable.toString()
 
                             crearArchivo(nombreArchivo)
@@ -364,7 +399,7 @@ class Activity_Cuestionario : AppCompatActivity() {
                             setSpanPalabra()
 
                             // Se colocan las etiquetas en cada palabra con color
-                            val editable = colocarEtiquetas()
+                            val editable = colocarEtiquetas(colorSpans, editable)
                             respuestas.add(editable.toString())
 
                             crearArchivo(nombreArchivo)
@@ -373,7 +408,7 @@ class Activity_Cuestionario : AppCompatActivity() {
                                 setSpanPalabra()
 
                                 // Se colocan las etiquetas en cada palabra con color
-                                val editable = colocarEtiquetas()
+                                val editable = colocarEtiquetas(colorSpans, editable)
                                 respuestas[contadorPregunta] = editable.toString()
 
                                 crearArchivo(nombreArchivo)
@@ -381,7 +416,7 @@ class Activity_Cuestionario : AppCompatActivity() {
                                 setSpanPalabra()
 
                                 // Se colocan las etiquetas en cada palabra con color
-                                val editable = colocarEtiquetas()
+                                val editable = colocarEtiquetas(colorSpans, editable)
                                 respuestas.add(editable.toString())
 
                                 crearArchivo(nombreArchivo)
@@ -397,14 +432,33 @@ class Activity_Cuestionario : AppCompatActivity() {
                 if (binding!!.etPregResp.text.toString().isNotEmpty()) {
                     setSpanPalabra()
 
+                    var editable: Editable =
+                        Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
+                    var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
+                        0,
+                        editable.length,
+                        ForegroundColorSpan::class.java
+                    )
+
                     // Se colocan las etiquetas en cada palabra con color
-                    val editable = colocarEtiquetas()
+                    val editableEditquetas = colocarEtiquetas(colorSpans, editable)
+
+                    /*val editable: Editable =
+                        Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
+                    val responseSpanPalabra = activityCuestionarioViewModel.setSpan(editable)
+                    val responseColocarEtiquetas =
+                        activityCuestionarioViewModel.setEtiquetas(responseSpanPalabra.editable)*/
+
+                    // setSpanPalabra()
+
+                    // Se colocan las etiquetas en cada palabra con color
+                    // val editable = colocarEtiquetas()
 
                     if (binding!!.lblPregResp.text.toString() == "Pregunta") {
                         if ((contadorPregunta + 1) > respuestas.size) {
                             binding!!.lblPregResp.text = "Respuesta"
                             // binding!!.lblPregResp.text = "Respuesta"
-                            preguntas.add(contadorPregunta, editable.toString())
+                            preguntas.add(contadorPregunta, editableEditquetas.toString())
                             binding!!.etPregResp.setText("")
                             binding!!.ivImagen.visibility = View.GONE
                             binding!!.tilContenidoPregResp.visibility = View.VISIBLE
@@ -414,7 +468,7 @@ class Activity_Cuestionario : AppCompatActivity() {
                             binding!!.imgvSelColor.visibility = View.VISIBLE
                         } else {
                             binding!!.lblPregResp.text = "Respuesta"
-                            preguntas[contadorPregunta] = editable.toString()
+                            preguntas[contadorPregunta] = editableEditquetas.toString()
                             pintarTexto(contadorPregunta)
                             // binding!!.lblPregResp.text = "Respuesta"
                         }
@@ -422,12 +476,12 @@ class Activity_Cuestionario : AppCompatActivity() {
                     } else {
                         if ((contadorPregunta + 1) > respuestas.size) {
                             binding!!.lblPregResp.text = "Pregunta"
-                            respuestas.add(contadorPregunta, editable.toString())
+                            respuestas.add(contadorPregunta, editableEditquetas.toString())
                             pintarTexto(contadorPregunta)
                             // binding!!.lblPregResp.text = "Pregunta"
                         } else {
                             binding!!.lblPregResp.text = "Pregunta"
-                            respuestas[contadorPregunta] = editable.toString()
+                            respuestas[contadorPregunta] = editableEditquetas.toString()
                             pintarTexto(contadorPregunta)
                             // binding!!.lblPregResp.text = "Pregunta"
                         }
@@ -490,75 +544,87 @@ class Activity_Cuestionario : AppCompatActivity() {
             filename = "$contadorImagen.png"
         }
 
-        activityCuestionarioViewModel.lvClickImgvPrevious.observe(this) {
-            accionesAlDarClickAtras()
-        }
+        activityCuestionarioViewModel.uiStateBtnBack.observe(this) { uiState ->
+            contadorPregunta = uiState.contadorPregunta
 
-        activityCuestionarioViewModel.lvClickImgvNext.observe(this) {
-            accionesAlDarClickSiguiente()
-        }
-    }
+            if (uiState.isUpdatedAskAns) {
+                binding!!.lblPregResp.text = "Pregunta"
 
-    private fun accionesAlDarClickAtras() {
-        setSpanPalabra()
-        val editable = colocarEtiquetas()
+                // Agregar el texto en el et cuando hay un builder
+                if (uiState.isThereMoreAsks && !uiState.isShowImage) {
+                    binding!!.etPregResp.text = uiState.builder
+                } else {
+                    // Cuando hay una imagen hay que poner esto
+                    binding!!.etPregResp.setText(uiState.textImgEcrypted)
+                    binding!!.ivImagen.setImage(ImageSource.uri(uiState.textImgUnencrypted))
+                }
 
-        var isEtPregunta = false
-        if (binding!!.lblPregResp.text.toString() == "Pregunta") {
-            isEtPregunta = true
-        }
+                binding!!.tilContenidoPregResp.visibility =
+                    if (uiState.isShowImage) View.GONE else View.VISIBLE
+                binding!!.ivImagen.visibility = if (uiState.isShowImage) View.VISIBLE else View.GONE
+                binding!!.imgvCancelar.visibility =
+                    if (uiState.isShowCancelar) View.VISIBLE else View.GONE
+                binding!!.imgvQuitColor.visibility =
+                    if (uiState.isShowQuitColor) View.VISIBLE else View.GONE
+                binding!!.imgvSelColor.visibility =
+                    if (uiState.isShowSelColor) View.VISIBLE else View.GONE
+                if (uiState.isClearText) {
+                    binding!!.etPregResp.text?.clear()
+                }
 
-        val retturn = activityCuestionarioViewModel.onClickRegresar(
-            preguntas,
-            respuestas,
-            contadorPregunta,
-            editable,
-            isEtPregunta
-        )
-        Log.i("Respuesta", "La respuesta es: ${retturn.shouldUpdateLabel}")
-
-        if (retturn.shouldUpdateLabel) {
-            binding!!.lblPregResp.text = "Pregunta"
-            contadorPregunta = retturn.contadorPregunta
-            pintarTexto(contadorPregunta)
-        } else {
-            Toast.makeText(applicationContext, retturn.message, Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun accionesAlDarClickSiguiente() {
-        setSpanPalabra()
-        val editable = colocarEtiquetas()
-
-        var isEtPregunta = false
-        if (binding!!.lblPregResp.text.toString() == "Pregunta") {
-            isEtPregunta = true
-        }
-        val retturn = activityCuestionarioViewModel.onClickSiguiente(preguntas, respuestas, contadorPregunta, editable,isEtPregunta)
-
-        if (retturn.shouldUpdateLabel){
-            binding!!.lblPregResp.text = "Pregunta"
-            val posPregFin = preguntas.size - 1
-
-            contadorPregunta = retturn.contadorPregunta
-            if (contadorPregunta <= posPregFin) {
-                // Pintamos el texto en la pregunta actual
-                pintarTexto(contadorPregunta)
+                if (uiState.responseSpanPalabra?.isDoubleColors == true) {
+                    Log.i("Sobreponen palabras", uiState.responseSpanPalabra.message)
+                    Toast.makeText(
+                        applicationContext,
+                        uiState.responseSpanPalabra.message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             } else {
-                // binding!!.lblPregResp.text = "Pregunta"
-                binding!!.tilContenidoPregResp.visibility = View.VISIBLE
-                binding!!.ivImagen.visibility = View.GONE
-                binding!!.etPregResp.text?.clear()
+                Toast.makeText(applicationContext, uiState.message, Toast.LENGTH_SHORT).show()
             }
-
-            // Se encuentre o no una imagen cargada se deben activar estos botones
-            binding!!.imgvCancelar.visibility = View.GONE
-            binding!!.imgvQuitColor.visibility = View.VISIBLE
-            binding!!.imgvSelColor.visibility = View.VISIBLE
-        } else {
-            Toast.makeText(applicationContext, retturn.message, Toast.LENGTH_SHORT).show()
         }
-        // binding!!.lblPregResp.text = "Pregunta"
+
+        activityCuestionarioViewModel.uiStateBtnNext.observe(this) { uiState ->
+            contadorPregunta = uiState.contadorPregunta
+
+            if (uiState.isUpdatedAskAns) {
+                binding!!.lblPregResp.text = "Pregunta"
+                // val posPregFin = preguntas.size - 1
+
+                // Agregar el texto en el et cuando hay un builder
+                if (uiState.isThereMoreAsks && !uiState.isShowImage) {
+                    binding!!.etPregResp.text = uiState.builder
+                } else {
+                    // Cuando hay una imagen hay que poner esto
+                    binding!!.etPregResp.setText(uiState.textImgEcrypted)
+                    binding!!.ivImagen.setImage(ImageSource.uri(uiState.textImgUnencrypted))
+                }
+                if (uiState.isClearText) {
+                    binding!!.etPregResp.text?.clear()
+                }
+                binding!!.tilContenidoPregResp.visibility =
+                    if (uiState.isShowImage) View.GONE else View.VISIBLE
+                binding!!.ivImagen.visibility = if (uiState.isShowImage) View.VISIBLE else View.GONE
+                binding!!.imgvCancelar.visibility =
+                    if (uiState.isShowCancelar) View.VISIBLE else View.GONE
+                binding!!.imgvQuitColor.visibility =
+                    if (uiState.isShowQuitColor) View.VISIBLE else View.GONE
+                binding!!.imgvSelColor.visibility =
+                    if (uiState.isShowSelColor) View.VISIBLE else View.GONE
+
+                if (uiState.responseSpanPalabra?.isDoubleColors == true) {
+                    Log.i("Sobreponen palabras", uiState.responseSpanPalabra.message)
+                    Toast.makeText(
+                        applicationContext,
+                        uiState.responseSpanPalabra.message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            } else {
+                Toast.makeText(applicationContext, uiState.message, Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun setSpanPalabra() {
@@ -992,15 +1058,7 @@ class Activity_Cuestionario : AppCompatActivity() {
         }
     }
 
-    private fun colocarEtiquetas(): Editable {
-        val editable: Editable =
-            Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
-        val colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
-            0,
-            editable.length,
-            ForegroundColorSpan::class.java
-        )
-
+    private fun colocarEtiquetas(colorSpans: Array<ForegroundColorSpan>, editable: Editable): Editable {
         for (colorSpan: ForegroundColorSpan in colorSpans) {
             val start: Int = editable.getSpanStart(colorSpan)
             val end: Int = editable.getSpanEnd(colorSpan)

@@ -1,101 +1,96 @@
 package com.jonathanev.review.Domain
 
 import android.text.Editable
-import android.util.Log
-import android.view.View
-import android.widget.Toast
-import com.jonathanev.review.Data.Model.GuiasVerificacionModel
+import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import javax.inject.Inject
 
-class setClickSiguienteModificandoUseCase @Inject constructor() {
+class setClickSiguienteModificandoUseCase @Inject constructor(
+    private val setSpanPalabraUseCase: setSpanPalabraUseCase,
+    private val setColocarEtiquetasUseCase: setColocarEtiquetasUseCase,
+    private val setPintarTextosUseCase: setPintarTextosUseCase
+) {
     operator fun invoke(
         preguntas: ArrayList<String>,
         respuestas: ArrayList<String>,
         contadorPregunta: Int,
         editable: Editable,
         isEtPregunta: Boolean
-    ): GuiasVerificacionModel {
-        // Validamos campos vacios en la pregunta o respuesta.
-        // val longi: Int = respuestas.size - 1
+    ): ValidacionesGuiaModel {
         val posPregFin = preguntas.size - 1
         val posRespFin = respuestas.size - 1
+        val responseSpanPalabra = setSpanPalabraUseCase(editable)
+        val responseEtiquetaEditable = setColocarEtiquetasUseCase(responseSpanPalabra.editable)
 
         return when {
-            editable.toString().isEmpty() || (editable.toString().isNotEmpty() && contadorPregunta > posPregFin) -> {
-                GuiasVerificacionModel(
+            responseEtiquetaEditable.toString().isEmpty() || (responseEtiquetaEditable.toString()
+                .isNotEmpty() && contadorPregunta > posPregFin) -> {
+                ValidacionesGuiaModel(
                     message = "Asegurate de llenar pregunta y respuesta",
                     contadorPregunta = contadorPregunta,
-                    shouldUpdateLabel = false,
                     preguntas = preguntas,
                     respuestas = respuestas
                 )
             }
             else -> {
+                // Label pregunta
                 if (isEtPregunta) {
-                    preguntas[contadorPregunta] = editable.toString()
+                    preguntas[contadorPregunta] = responseEtiquetaEditable.toString()
                 } else {
                     if (contadorPregunta > posRespFin) {
-                        respuestas.add(contadorPregunta, editable.toString())
+                        respuestas.add(contadorPregunta, responseEtiquetaEditable.toString())
                     } else {
-                        respuestas[contadorPregunta] = editable.toString()
+                        respuestas[contadorPregunta] = responseEtiquetaEditable.toString()
                     }
                 }
 
-                GuiasVerificacionModel(
-                    message = "Asegurate de llenar pregunta y respuesta",
-                    contadorPregunta = contadorPregunta + 1,
-                    shouldUpdateLabel = true,
-                    preguntas = preguntas,
-                    respuestas = respuestas
-                )
-            }
-        }
+                val contador = contadorPregunta + 1
+                // Si hay más preguntas pinta lo siguiente.
+                if (contador <= posPregFin) {
+                    // Pintamos el texto en la pregunta actual
+                    val setPintarTextosUseCase =
+                        setPintarTextosUseCase(isEtPregunta = true, preguntas, respuestas, contador)
 
-        /*if (binding!!.etPregResp.text.toString().isEmpty() || (binding!!.etPregResp.text.toString().isNotEmpty() && contadorPregunta > posPregFin)){
-            Toast.makeText(
-                applicationContext,
-                "Asegurate de llenar pregunta y respuesta",
-                Toast.LENGTH_SHORT
-            ).show()
-
-            Log.i("Crear pregunta: ", "Asegurate de no dejar ningun campo vacio")
-        } else {
-            setSpanPalabra()
-
-            var isEtPregunta = false
-            if (binding!!.lblPregResp.text.toString() == "Pregunta") {
-                isEtPregunta = true
-            }
-
-            if (isEtPregunta) {
-                preguntas[contadorPregunta] = binding!!.etPregResp.text.toString()
-            } else {
-                if (contadorPregunta > posRespFin) {
-                    respuestas.add(contadorPregunta, binding!!.etPregResp.text.toString())
+                    // Si no es una imagen entra
+                    if (!setPintarTextosUseCase.builder.isNullOrEmpty()) {
+                        ValidacionesGuiaModel(
+                            contadorPregunta = contador,
+                            responseSpanPalabra = responseSpanPalabra,
+                            isUpdatedAskAns = true,
+                            isShowQuitColor = true,
+                            isShowSelColor = true,
+                            isThereMoreAsks = true,
+                            builder = setPintarTextosUseCase.builder,
+                            preguntas = preguntas,
+                            respuestas = respuestas
+                        )
+                    } else {
+                        // Si es una imagen entra
+                        ValidacionesGuiaModel(
+                            contadorPregunta = contador,
+                            isUpdatedAskAns = true,
+                            isShowImage = true,
+                            isShowCancelar = true,
+                            isThereMoreAsks = true,
+                            textImgEcrypted = setPintarTextosUseCase.textImgEcrypted,
+                            textImgUnencrypted = setPintarTextosUseCase.textImgUnencrypted,
+                            preguntas = preguntas,
+                            respuestas = respuestas
+                        )
+                    }
                 } else {
-                    respuestas[contadorPregunta] = binding!!.etPregResp.text.toString()
+                    // Si no hay más preguntas.
+                    ValidacionesGuiaModel(
+                        contadorPregunta = contador,
+                        responseSpanPalabra = responseSpanPalabra,
+                        isUpdatedAskAns = true,
+                        isClearText = true,
+                        isShowQuitColor = true,
+                        isShowSelColor = true,
+                        preguntas = preguntas,
+                        respuestas = respuestas
+                    )
                 }
             }
-
-            // Mientras el contadorPregunta sea menor escribiremos la siguiente pregunta
-            // en los et.
-            contadorPregunta++
-            if (contadorPregunta <= posPregFin) {
-                // Pintamos el texto en la pregunta actual
-                binding!!.lblPregResp.text = "Pregunta"
-                pintarTexto(contadorPregunta)
-            } else {
-                // binding!!.lblPregResp.text = "Pregunta"
-                binding!!.tilContenidoPregResp.visibility = View.VISIBLE
-                binding!!.ivImagen.visibility = View.GONE
-                binding!!.etPregResp.text?.clear()
-            }
-
-            binding!!.imgvCancelar.visibility = View.GONE
-            binding!!.imgvQuitColor.visibility = View.VISIBLE
-            binding!!.imgvSelColor.visibility = View.VISIBLE
-
-            binding!!.lblPregResp.text = "Pregunta"
-        }*/
+        }
     }
 }
