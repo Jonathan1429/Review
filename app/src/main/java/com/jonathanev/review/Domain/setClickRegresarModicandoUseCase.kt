@@ -1,8 +1,9 @@
 package com.jonathanev.review.Domain
 
 import android.text.Editable
-import javax.inject.Inject
+import com.jonathanev.review.Data.Model.EstadoPreguntasRespuestas
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
+import javax.inject.Inject
 
 class setClickRegresarModicandoUseCase @Inject constructor(
     private val setSpanPalabraUseCase: setSpanPalabraUseCase,
@@ -24,44 +25,23 @@ class setClickRegresarModicandoUseCase @Inject constructor(
                 ValidacionesGuiaModel(
                     message = "Ya no tienes preguntas anteriores",
                     contadorPregunta = contadorPregunta,
-                    isUpdatedAskAns = false,
-                    preguntas = preguntas,
-                    respuestas = respuestas
+                    estadoPreguntasRespuestas = EstadoPreguntasRespuestas(preguntas, respuestas),
                 )
             }
 
             contadorPregunta > posPregFin && contadorPregunta > posRespFin && editable.isEmpty() -> {
                 val contador = contadorPregunta - 1
 
-                val setPintarTextosUseCase =
+                val validacionesGuiaModel =
                     setPintarTextosUseCase(isEtPregunta = true, preguntas, respuestas, contador)
 
-                // Si no es una imagen entra
-                if (!setPintarTextosUseCase.builder.isNullOrEmpty()) {
-                    ValidacionesGuiaModel(
-                        contadorPregunta = contador,
-                        isUpdatedAskAns = true,
-                        isShowQuitColor = true,
-                        isShowSelColor = true,
-                        isThereMoreAsks = true,
-                        builder = setPintarTextosUseCase.builder,
-                        preguntas = preguntas,
-                        respuestas = respuestas
+                val responseValGuiaModel: ValidacionesGuiaModel = validacionesGuiaModel.copy(
+                    estadoUI = validacionesGuiaModel.estadoUI.copy(
+                        isThereMoreAsks = true
                     )
-                } else {
-                    // Si es una imagen entra
-                    ValidacionesGuiaModel(
-                        contadorPregunta = contador,
-                        isUpdatedAskAns = true,
-                        isShowImage = true,
-                        isShowCancelar = true,
-                        isThereMoreAsks = true,
-                        textImgEcrypted = setPintarTextosUseCase.textImgEcrypted,
-                        textImgUnencrypted = setPintarTextosUseCase.textImgUnencrypted,
-                        preguntas = preguntas,
-                        respuestas = respuestas
-                    )
-                }
+                )
+
+                return responseValGuiaModel
             }
 
             editable.toString().isEmpty() || (editable.toString()
@@ -69,9 +49,7 @@ class setClickRegresarModicandoUseCase @Inject constructor(
                 ValidacionesGuiaModel(
                     message = "Asegurate de llenar pregunta y respuesta",
                     contadorPregunta = contadorPregunta,
-                    isUpdatedAskAns = false,
-                    preguntas = preguntas,
-                    respuestas = respuestas
+                    estadoPreguntasRespuestas = EstadoPreguntasRespuestas(preguntas, respuestas),
                 )
             }
 
@@ -92,35 +70,16 @@ class setClickRegresarModicandoUseCase @Inject constructor(
 
                 val contador = contadorPregunta - 1
 
-                val setPintarTextosUseCase =
+                val validacionesGuiaModel =
                     setPintarTextosUseCase(isEtPregunta = true, preguntas, respuestas, contador)
 
-                // Si no es una imagen entra
-                if (!setPintarTextosUseCase.builder.isNullOrEmpty()) {
-                    ValidacionesGuiaModel(
-                        contadorPregunta = contador,
-                        isUpdatedAskAns = true,
-                        isShowQuitColor = true,
-                        isShowSelColor = true,
-                        isThereMoreAsks = true,
-                        builder = setPintarTextosUseCase.builder,
-                        preguntas = preguntas,
-                        respuestas = respuestas
+                val responseValGuiaModel: ValidacionesGuiaModel = validacionesGuiaModel.copy(
+                    estadoUI = validacionesGuiaModel.estadoUI.copy(
+                        isThereMoreAsks = true
                     )
-                } else {
-                    // Si es una imagen entra
-                    ValidacionesGuiaModel(
-                        contadorPregunta = contador,
-                        isUpdatedAskAns = true,
-                        isShowImage = true,
-                        isShowCancelar = true,
-                        isThereMoreAsks = true,
-                        textImgEcrypted = setPintarTextosUseCase.textImgEcrypted,
-                        textImgUnencrypted = setPintarTextosUseCase.textImgUnencrypted,
-                        preguntas = preguntas,
-                        respuestas = respuestas
-                    )
-                }
+                )
+
+                return responseValGuiaModel
             }
         }
     }

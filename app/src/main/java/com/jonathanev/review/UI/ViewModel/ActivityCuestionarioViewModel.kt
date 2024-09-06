@@ -91,9 +91,7 @@ class ActivityCuestionarioViewModel @Inject constructor(
         editable: Editable,
         isEtPregunta: Boolean
     ) {
-        // val responseSpanPalabra = setSpan(editable)
-        // val responseEtiquetaEditable = setEtiquetas(responseSpanPalabra.editable)
-        val setClickRegresarModicandoUseCase = setClickRegresarModicandoUseCase(
+        val responseRegresarUseCase = setClickRegresarModicandoUseCase(
             preguntas,
             respuestas,
             contadorPregunta,
@@ -101,24 +99,7 @@ class ActivityCuestionarioViewModel @Inject constructor(
             isEtPregunta
         )
 
-        // Se actualizan las validaciones de las guias.
-        _uiStateBtnBack.value = ValidacionesGuiaModel(
-            setClickRegresarModicandoUseCase.message,
-            setClickRegresarModicandoUseCase.responseSpanPalabra,
-            setClickRegresarModicandoUseCase.textImgEcrypted,
-            setClickRegresarModicandoUseCase.textImgUnencrypted,
-            setClickRegresarModicandoUseCase.contadorPregunta,
-            setClickRegresarModicandoUseCase.isUpdatedAskAns,
-            setClickRegresarModicandoUseCase.isClearText,
-            setClickRegresarModicandoUseCase.isShowImage,
-            setClickRegresarModicandoUseCase.isShowCancelar,
-            setClickRegresarModicandoUseCase.isShowQuitColor,
-            setClickRegresarModicandoUseCase.isShowSelColor,
-            setClickRegresarModicandoUseCase.isThereMoreAsks,
-            setClickRegresarModicandoUseCase.builder,
-            setClickRegresarModicandoUseCase.preguntas,
-            setClickRegresarModicandoUseCase.respuestas
-        )
+        _uiStateBtnBack.value = responseRegresarUseCase
     }
 
     fun onClickImgvNext(
@@ -128,8 +109,7 @@ class ActivityCuestionarioViewModel @Inject constructor(
         editable: Editable,
         isEtPregunta: Boolean
     ) {
-        // _buttonClickEventNext.value = true
-        val setClickSiguienteModicandoUseCase = setClickSiguienteModicandoUseCase(
+        val responseSiguienteUseCase = setClickSiguienteModicandoUseCase(
             preguntas,
             respuestas,
             contadorPregunta,
@@ -137,24 +117,7 @@ class ActivityCuestionarioViewModel @Inject constructor(
             isEtPregunta
         )
 
-        // Se actualizan las validaciones de las guias.
-        _uiStateBtnNext.value = ValidacionesGuiaModel(
-            setClickSiguienteModicandoUseCase.message,
-            setClickSiguienteModicandoUseCase.responseSpanPalabra,
-            setClickSiguienteModicandoUseCase.textImgEcrypted,
-            setClickSiguienteModicandoUseCase.textImgUnencrypted,
-            setClickSiguienteModicandoUseCase.contadorPregunta,
-            setClickSiguienteModicandoUseCase.isUpdatedAskAns,
-            setClickSiguienteModicandoUseCase.isClearText,
-            setClickSiguienteModicandoUseCase.isShowImage,
-            setClickSiguienteModicandoUseCase.isShowCancelar,
-            setClickSiguienteModicandoUseCase.isShowQuitColor,
-            setClickSiguienteModicandoUseCase.isShowSelColor,
-            setClickSiguienteModicandoUseCase.isThereMoreAsks,
-            setClickSiguienteModicandoUseCase.builder,
-            setClickSiguienteModicandoUseCase.preguntas,
-            setClickSiguienteModicandoUseCase.respuestas
-        )
+        _uiStateBtnNext.value = responseSiguienteUseCase
     }
 
     fun setSpan(editable: Editable): SpanPalabraModel {

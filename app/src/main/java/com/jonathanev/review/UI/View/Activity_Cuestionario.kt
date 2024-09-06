@@ -547,30 +547,32 @@ class Activity_Cuestionario : AppCompatActivity() {
         activityCuestionarioViewModel.uiStateBtnBack.observe(this) { uiState ->
             contadorPregunta = uiState.contadorPregunta
 
-            if (uiState.isUpdatedAskAns) {
+            if (uiState.estadoUI.isUpdatedAskAns) {
                 binding!!.lblPregResp.text = "Pregunta"
 
-                // Agregar el texto en el et cuando hay un builder
-                if (uiState.isThereMoreAsks && !uiState.isShowImage) {
-                    binding!!.etPregResp.text = uiState.builder
+                if (!uiState.estadoUI.isThereMoreAsks) {
+                    binding!!.etPregResp.text?.clear()
                 } else {
-                    // Cuando hay una imagen hay que poner esto
-                    binding!!.etPregResp.setText(uiState.textImgEcrypted)
-                    binding!!.ivImagen.setImage(ImageSource.uri(uiState.textImgUnencrypted))
+                    // Agregar el texto en el et cuando hay un builder
+                    if (!uiState.estadoUI.isShowImage) {
+                        binding!!.etPregResp.text = uiState.builder
+                    } else {
+                        // Cuando hay una imagen hay que poner esto
+                        binding!!.etPregResp.setText(uiState.estadoImagen.textImgEcrypted)
+                        binding!!.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
+                    }
                 }
 
                 binding!!.tilContenidoPregResp.visibility =
-                    if (uiState.isShowImage) View.GONE else View.VISIBLE
-                binding!!.ivImagen.visibility = if (uiState.isShowImage) View.VISIBLE else View.GONE
+                    if (uiState.estadoUI.isShowImage) View.GONE else View.VISIBLE
+                binding!!.ivImagen.visibility =
+                    if (uiState.estadoUI.isShowImage) View.VISIBLE else View.GONE
                 binding!!.imgvCancelar.visibility =
-                    if (uiState.isShowCancelar) View.VISIBLE else View.GONE
+                    if (uiState.estadoUI.isShowCancelar) View.VISIBLE else View.GONE
                 binding!!.imgvQuitColor.visibility =
-                    if (uiState.isShowQuitColor) View.VISIBLE else View.GONE
+                    if (uiState.estadoUI.isShowQuitColor) View.VISIBLE else View.GONE
                 binding!!.imgvSelColor.visibility =
-                    if (uiState.isShowSelColor) View.VISIBLE else View.GONE
-                if (uiState.isClearText) {
-                    binding!!.etPregResp.text?.clear()
-                }
+                    if (uiState.estadoUI.isShowSelColor) View.VISIBLE else View.GONE
 
                 if (uiState.responseSpanPalabra?.isDoubleColors == true) {
                     Log.i("Sobreponen palabras", uiState.responseSpanPalabra.message)
@@ -588,30 +590,32 @@ class Activity_Cuestionario : AppCompatActivity() {
         activityCuestionarioViewModel.uiStateBtnNext.observe(this) { uiState ->
             contadorPregunta = uiState.contadorPregunta
 
-            if (uiState.isUpdatedAskAns) {
+            if (uiState.estadoUI.isUpdatedAskAns) {
                 binding!!.lblPregResp.text = "Pregunta"
                 // val posPregFin = preguntas.size - 1
-
-                // Agregar el texto en el et cuando hay un builder
-                if (uiState.isThereMoreAsks && !uiState.isShowImage) {
-                    binding!!.etPregResp.text = uiState.builder
-                } else {
-                    // Cuando hay una imagen hay que poner esto
-                    binding!!.etPregResp.setText(uiState.textImgEcrypted)
-                    binding!!.ivImagen.setImage(ImageSource.uri(uiState.textImgUnencrypted))
-                }
-                if (uiState.isClearText) {
+                if (!uiState.estadoUI.isThereMoreAsks) {
                     binding!!.etPregResp.text?.clear()
+                } else {
+                    // Agregar el texto en el et cuando hay un builder
+                    if (!uiState.estadoUI.isShowImage) {
+                        binding!!.etPregResp.text = uiState.builder
+                    } else {
+                        // Cuando hay una imagen hay que poner esto
+                        binding!!.etPregResp.setText(uiState.estadoImagen.textImgEcrypted)
+                        binding!!.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
+                    }
                 }
+
                 binding!!.tilContenidoPregResp.visibility =
-                    if (uiState.isShowImage) View.GONE else View.VISIBLE
-                binding!!.ivImagen.visibility = if (uiState.isShowImage) View.VISIBLE else View.GONE
+                    if (uiState.estadoUI.isShowImage) View.GONE else View.VISIBLE
+                binding!!.ivImagen.visibility =
+                    if (uiState.estadoUI.isShowImage) View.VISIBLE else View.GONE
                 binding!!.imgvCancelar.visibility =
-                    if (uiState.isShowCancelar) View.VISIBLE else View.GONE
+                    if (uiState.estadoUI.isShowCancelar) View.VISIBLE else View.GONE
                 binding!!.imgvQuitColor.visibility =
-                    if (uiState.isShowQuitColor) View.VISIBLE else View.GONE
+                    if (uiState.estadoUI.isShowQuitColor) View.VISIBLE else View.GONE
                 binding!!.imgvSelColor.visibility =
-                    if (uiState.isShowSelColor) View.VISIBLE else View.GONE
+                    if (uiState.estadoUI.isShowSelColor) View.VISIBLE else View.GONE
 
                 if (uiState.responseSpanPalabra?.isDoubleColors == true) {
                     Log.i("Sobreponen palabras", uiState.responseSpanPalabra.message)
@@ -1058,7 +1062,10 @@ class Activity_Cuestionario : AppCompatActivity() {
         }
     }
 
-    private fun colocarEtiquetas(colorSpans: Array<ForegroundColorSpan>, editable: Editable): Editable {
+    private fun colocarEtiquetas(
+        colorSpans: Array<ForegroundColorSpan>,
+        editable: Editable
+    ): Editable {
         for (colorSpan: ForegroundColorSpan in colorSpans) {
             val start: Int = editable.getSpanStart(colorSpan)
             val end: Int = editable.getSpanEnd(colorSpan)

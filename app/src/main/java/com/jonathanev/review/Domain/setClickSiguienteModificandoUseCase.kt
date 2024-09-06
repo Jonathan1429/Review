@@ -1,6 +1,8 @@
 package com.jonathanev.review.Domain
 
 import android.text.Editable
+import com.jonathanev.review.Data.Model.EstadoPreguntasRespuestas
+import com.jonathanev.review.Data.Model.EstadoUI
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import javax.inject.Inject
 
@@ -27,10 +29,10 @@ class setClickSiguienteModificandoUseCase @Inject constructor(
                 ValidacionesGuiaModel(
                     message = "Asegurate de llenar pregunta y respuesta",
                     contadorPregunta = contadorPregunta,
-                    preguntas = preguntas,
-                    respuestas = respuestas
+                    estadoPreguntasRespuestas = EstadoPreguntasRespuestas(preguntas, respuestas),
                 )
             }
+
             else -> {
                 // Label pregunta
                 if (isEtPregunta) {
@@ -46,48 +48,32 @@ class setClickSiguienteModificandoUseCase @Inject constructor(
                 val contador = contadorPregunta + 1
                 // Si hay más preguntas pinta lo siguiente.
                 if (contador <= posPregFin) {
-                    // Pintamos el texto en la pregunta actual
-                    val setPintarTextosUseCase =
+                    // Pintamos texto o regresamos la pregunta
+                    val validacionesguiaGuiaModel =
                         setPintarTextosUseCase(isEtPregunta = true, preguntas, respuestas, contador)
 
-                    // Si no es una imagen entra
-                    if (!setPintarTextosUseCase.builder.isNullOrEmpty()) {
-                        ValidacionesGuiaModel(
-                            contadorPregunta = contador,
-                            responseSpanPalabra = responseSpanPalabra,
-                            isUpdatedAskAns = true,
-                            isShowQuitColor = true,
-                            isShowSelColor = true,
-                            isThereMoreAsks = true,
-                            builder = setPintarTextosUseCase.builder,
-                            preguntas = preguntas,
-                            respuestas = respuestas
+                    val responseValGuiaModel: ValidacionesGuiaModel =
+                        validacionesguiaGuiaModel.copy(
+                            estadoUI = validacionesguiaGuiaModel.estadoUI.copy(isThereMoreAsks = true)
                         )
-                    } else {
-                        // Si es una imagen entra
-                        ValidacionesGuiaModel(
-                            contadorPregunta = contador,
-                            isUpdatedAskAns = true,
-                            isShowImage = true,
-                            isShowCancelar = true,
-                            isThereMoreAsks = true,
-                            textImgEcrypted = setPintarTextosUseCase.textImgEcrypted,
-                            textImgUnencrypted = setPintarTextosUseCase.textImgUnencrypted,
-                            preguntas = preguntas,
-                            respuestas = respuestas
-                        )
-                    }
+
+                    return responseValGuiaModel
+
+
                 } else {
                     // Si no hay más preguntas.
                     ValidacionesGuiaModel(
                         contadorPregunta = contador,
                         responseSpanPalabra = responseSpanPalabra,
-                        isUpdatedAskAns = true,
-                        isClearText = true,
-                        isShowQuitColor = true,
-                        isShowSelColor = true,
-                        preguntas = preguntas,
-                        respuestas = respuestas
+                        estadoUI = EstadoUI(
+                            isUpdatedAskAns = true,
+                            isClearText = true,
+                            isShowQuitColor = true,
+                            isShowSelColor = true
+                        ),
+                        estadoPreguntasRespuestas = EstadoPreguntasRespuestas(
+                            preguntas, respuestas
+                        ),
                     )
                 }
             }
