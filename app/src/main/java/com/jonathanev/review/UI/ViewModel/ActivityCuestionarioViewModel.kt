@@ -1,22 +1,26 @@
 package com.jonathanev.review.UI.ViewModel
 
 import android.app.Application
+import android.content.Context
 import android.text.Editable
+import android.text.style.ForegroundColorSpan
+import android.util.Log
+import android.view.View
+import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import com.jonathanev.review.Core.Constants.file
 import com.jonathanev.review.Data.GuiaRepository
 import com.jonathanev.review.Data.Model.DataStoreManager
 import com.jonathanev.review.Data.Model.GuiaModel
-import com.jonathanev.review.Data.Model.SpanPalabraModel
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import com.jonathanev.review.Domain.setClickRegresarModicandoUseCase
+import com.jonathanev.review.Domain.setClickSaveUseCase
 import com.jonathanev.review.Domain.setClickSiguienteModificandoUseCase
-import com.jonathanev.review.Domain.setColocarEtiquetasUseCase
-import com.jonathanev.review.Domain.setPintarTextosUseCase
-import com.jonathanev.review.Domain.setSpanPalabraUseCase
+import com.jonathanev.review.Domain.setCopyImagesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.io.File
@@ -27,41 +31,45 @@ class ActivityCuestionarioViewModel @Inject constructor(
     private val guiaRepository: GuiaRepository,
     private val setClickRegresarModicandoUseCase: setClickRegresarModicandoUseCase,
     private val setClickSiguienteModicandoUseCase: setClickSiguienteModificandoUseCase,
-    private val setSpanPalabraUseCase: setSpanPalabraUseCase,
-    private val setPintarTextosUseCase: setPintarTextosUseCase,
-    private val setColocarEtiquetas: setColocarEtiquetasUseCase,
+    private val setClickSaveUseCase: setClickSaveUseCase,
+    private val setCopyImagesUseCase: setCopyImagesUseCase,
     application: Application
 ) : ViewModel() {
     var guias = MutableLiveData<List<GuiaModel>>()
     var colorAnterior = MutableLiveData<Int>()
-    var saveClicked = MutableLiveData<Boolean>().apply { value = false }
+    // var saveClicked = MutableLiveData<Boolean>().apply { value = false }
     var rollClicked = MutableLiveData<Boolean>().apply { value = false }
 
     // Click events
-    private val _buttonClickEventBack = MutableLiveData<Boolean>()
-    val lvClickImgvPrevious: LiveData<Boolean> get() = _buttonClickEventBack
-    private val _buttonClickEventNext = MutableLiveData<Boolean>()
-    val lvClickImgvNext: LiveData<Boolean> get() = _buttonClickEventNext
-
     private val _uiStateBtnNext = MutableLiveData<ValidacionesGuiaModel>()
     val uiStateBtnNext: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnNext
     private val _uiStateBtnBack = MutableLiveData<ValidacionesGuiaModel>()
     val uiStateBtnBack: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnBack
+    private val _uiStateBtnSave = MutableLiveData<ValidacionesGuiaModel>()
+    val uiStateBtnSave: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnSave
+    /*private val _uiStateBtnSave = MutableLiveData<ValidacionesGuiaModel>()
+    val uiStateBtnSave: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnSave*/
 
     // Data Store
     private val dataStore = DataStoreManager.getInstance(application)
     val contImagenes = dataStore.getCountImage().asLiveData()
 
+    fun procesoActualizacion(){
+        getAllUpdatedGuides(file)
+        copyImages()
+    }
+
     fun getAllUpdatedGuides(file: File) {
         guias.postValue(guiaRepository.getGuias(file))
     }
 
-    fun clickedSave() {
-        saveClicked.postValue(!saveClicked.value!!)
+    fun copyImages(){
+        setCopyImagesUseCase()
     }
 
+
     fun clickedRoll() {
-        rollClicked.postValue(!rollClicked.value!!)
+        rollClicked.postValue(true)
     }
 
     // Data Store
@@ -120,11 +128,25 @@ class ActivityCuestionarioViewModel @Inject constructor(
         _uiStateBtnNext.value = responseSiguienteUseCase
     }
 
-    fun setSpan(editable: Editable): SpanPalabraModel {
-        return setSpanPalabraUseCase(editable)
-    }
+    fun onClickImgvSave(
+        preguntas: ArrayList<String>,
+        respuestas: ArrayList<String>,
+        contadorPregunta: Int,
+        editable: Editable,
+        nombreArchivo: String,
+        isEtPregunta: Boolean
+    ) {
+        val setClickSaveUseCase = setClickSaveUseCase(
+            preguntas,
+            respuestas,
+            contadorPregunta,
+            editable,
+            nombreArchivo,
+            isEtPregunta
+        )
 
-    fun setEtiquetas(editable: Editable): Editable {
-        return setColocarEtiquetas(editable)
+        _uiStateBtnSave.value = setClickSaveUseCase
+
+
     }
 }

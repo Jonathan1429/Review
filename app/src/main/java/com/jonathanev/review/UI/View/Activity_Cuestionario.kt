@@ -177,7 +177,6 @@ class Activity_Cuestionario : AppCompatActivity() {
         binding!!.imgvNext.setOnClickListener {
             val editable: Editable =
                 Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
-            val textoPregResp = binding!!.etPregResp.text.toString()
             var isEtPregunta = false
             if (binding!!.lblPregResp.text.toString() == "Pregunta") {
                 isEtPregunta = true
@@ -248,7 +247,37 @@ class Activity_Cuestionario : AppCompatActivity() {
         }
 
         binding!!.barraSuperiorRegreso.imgvSave.setOnClickListener {
-            activityCuestionarioViewModel.clickedSave()
+            val editable: Editable =
+                Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
+            var isEtPregunta = false
+            if (binding!!.lblPregResp.text.toString() == "Pregunta") {
+                isEtPregunta = true
+            }
+
+            activityCuestionarioViewModel.onClickImgvSave(
+                preguntas,
+                respuestas,
+                contadorPregunta,
+                editable,
+                nombreArchivo.toString(),
+                isEtPregunta
+            )
+        }
+
+        activityCuestionarioViewModel.uiStateBtnSave.observe(this) { uiState ->
+            Toast.makeText(
+                applicationContext,
+                uiState.message,
+                Toast.LENGTH_SHORT
+            ).show()
+
+            if (uiState.estadoUI.isCreatedGuia) {
+                val intent = Intent(applicationContext, Activity_RepasarGuia::class.java)
+                intent.putExtra("ruta", uiState.responseGuia.rutaGuiaEstudio)
+                startActivity(intent)
+                activityCuestionarioViewModel.procesoActualizacion()
+                finish()
+            }
         }
 
         // Visualización del DialogFragment de selección de colores.
@@ -327,106 +356,6 @@ class Activity_Cuestionario : AppCompatActivity() {
             }
         })
 
-        activityCuestionarioViewModel.saveClicked.observe(this) {
-            if (it) {
-                var editable: Editable =
-                    Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
-                var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
-                    0,
-                    editable.length,
-                    ForegroundColorSpan::class.java
-                )
-
-                // Se le quita 1 para hacer referencia al arreglo
-                // tamaño 3-1 = 2 [0,1,2].
-                val longi: Int = respuestas.size
-
-                if (binding!!.etPregResp.text.toString().isEmpty()) {
-                    if (respuestas.isEmpty() && binding!!.lblPregResp.text.toString() == "Pregunta") {
-                        Toast.makeText(
-                            applicationContext,
-                            "Debes tener como minimo una pregunta",
-                            Toast.LENGTH_SHORT
-                        ).show()
-
-                        Log.i("Crear pregunta: ", "Debes tener como minimo una pregunta")
-
-                        activityCuestionarioViewModel.clickedSave()
-                    } else if ((contadorPregunta + 1) > longi && binding!!.lblPregResp.text.toString() == "Pregunta") {
-                        setSpanPalabra()
-                        crearArchivo(nombreArchivo)
-                        binding!!.ivImagen.visibility = View.GONE
-                    } else {
-                        Toast.makeText(
-                            applicationContext,
-                            "Asegurate de llenar una pregunta y una respuesta",
-                            Toast.LENGTH_SHORT
-                        ).show()
-
-                        Log.i(
-                            "Crear pregunta: ",
-                            "Asegurate de llenar una pregunta y una respuesta"
-                        )
-
-                        activityCuestionarioViewModel.clickedSave()
-                    }
-                } else {
-                    if (binding!!.lblPregResp.text.toString() == "Pregunta") {
-                        if ((contadorPregunta + 1) <= longi && longi > 0) {
-                            setSpanPalabra()
-
-                            // Se colocan las etiquetas en cada palabra con color
-                            val editable = colocarEtiquetas(colorSpans, editable)
-                            preguntas[contadorPregunta] = editable.toString()
-
-                            crearArchivo(nombreArchivo)
-                        } else {
-                            Toast.makeText(
-                                applicationContext,
-                                "Asegurate de llenar una pregunta y una respuesta",
-                                Toast.LENGTH_SHORT
-                            ).show()
-
-                            Log.i(
-                                "Crear pregunta: ",
-                                "Asegurate de llenar una pregunta y una respuesta"
-                            )
-
-                            activityCuestionarioViewModel.clickedSave()
-                        }
-                    } else {
-                        if (longi == 0) {
-                            setSpanPalabra()
-
-                            // Se colocan las etiquetas en cada palabra con color
-                            val editable = colocarEtiquetas(colorSpans, editable)
-                            respuestas.add(editable.toString())
-
-                            crearArchivo(nombreArchivo)
-                        } else {
-                            if ((contadorPregunta + 1) <= longi) {
-                                setSpanPalabra()
-
-                                // Se colocan las etiquetas en cada palabra con color
-                                val editable = colocarEtiquetas(colorSpans, editable)
-                                respuestas[contadorPregunta] = editable.toString()
-
-                                crearArchivo(nombreArchivo)
-                            } else {
-                                setSpanPalabra()
-
-                                // Se colocan las etiquetas en cada palabra con color
-                                val editable = colocarEtiquetas(colorSpans, editable)
-                                respuestas.add(editable.toString())
-
-                                crearArchivo(nombreArchivo)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
         activityCuestionarioViewModel.rollClicked.observe(this) {
             if (it) {
                 if (binding!!.etPregResp.text.toString().isNotEmpty()) {
@@ -442,17 +371,6 @@ class Activity_Cuestionario : AppCompatActivity() {
 
                     // Se colocan las etiquetas en cada palabra con color
                     val editableEditquetas = colocarEtiquetas(colorSpans, editable)
-
-                    /*val editable: Editable =
-                        Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
-                    val responseSpanPalabra = activityCuestionarioViewModel.setSpan(editable)
-                    val responseColocarEtiquetas =
-                        activityCuestionarioViewModel.setEtiquetas(responseSpanPalabra.editable)*/
-
-                    // setSpanPalabra()
-
-                    // Se colocan las etiquetas en cada palabra con color
-                    // val editable = colocarEtiquetas()
 
                     if (binding!!.lblPregResp.text.toString() == "Pregunta") {
                         if ((contadorPregunta + 1) > respuestas.size) {
@@ -539,7 +457,7 @@ class Activity_Cuestionario : AppCompatActivity() {
             }
         }
 
-        activityCuestionarioViewModel.contImagenes.observe(this@Activity_Cuestionario) { contImagen ->
+        activityCuestionarioViewModel.contImagenes.observe(this) { contImagen ->
             contadorImagen = contImagen
             filename = "$contadorImagen.png"
         }
