@@ -1,12 +1,7 @@
 package com.jonathanev.review.UI.ViewModel
 
 import android.app.Application
-import android.content.Context
 import android.text.Editable
-import android.text.style.ForegroundColorSpan
-import android.util.Log
-import android.view.View
-import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -21,6 +16,7 @@ import com.jonathanev.review.Domain.setClickRegresarModicandoUseCase
 import com.jonathanev.review.Domain.setClickSaveUseCase
 import com.jonathanev.review.Domain.setClickSiguienteModificandoUseCase
 import com.jonathanev.review.Domain.setCopyImagesUseCase
+import com.jonathanev.review.Domain.setRollClickedUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.io.File
@@ -31,14 +27,19 @@ class ActivityCuestionarioViewModel @Inject constructor(
     private val guiaRepository: GuiaRepository,
     private val setClickRegresarModicandoUseCase: setClickRegresarModicandoUseCase,
     private val setClickSiguienteModicandoUseCase: setClickSiguienteModificandoUseCase,
+    private val setRollClickedUseCase: setRollClickedUseCase,
     private val setClickSaveUseCase: setClickSaveUseCase,
     private val setCopyImagesUseCase: setCopyImagesUseCase,
     application: Application
 ) : ViewModel() {
+    private var preguntas: ArrayList<String> = ArrayList()
+    private var respuestas: ArrayList<String> = ArrayList()
+    private var contadorPregunta: Int = 0
+
     var guias = MutableLiveData<List<GuiaModel>>()
     var colorAnterior = MutableLiveData<Int>()
     // var saveClicked = MutableLiveData<Boolean>().apply { value = false }
-    var rollClicked = MutableLiveData<Boolean>().apply { value = false }
+    // var rollClicked = MutableLiveData<Boolean>().apply { value = false }
 
     // Click events
     private val _uiStateBtnNext = MutableLiveData<ValidacionesGuiaModel>()
@@ -47,8 +48,8 @@ class ActivityCuestionarioViewModel @Inject constructor(
     val uiStateBtnBack: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnBack
     private val _uiStateBtnSave = MutableLiveData<ValidacionesGuiaModel>()
     val uiStateBtnSave: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnSave
-    /*private val _uiStateBtnSave = MutableLiveData<ValidacionesGuiaModel>()
-    val uiStateBtnSave: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnSave*/
+    private val _uiStateBtnRoll = MutableLiveData<ValidacionesGuiaModel>()
+    val uiStateBtnRoll: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnRoll
 
     // Data Store
     private val dataStore = DataStoreManager.getInstance(application)
@@ -63,13 +64,17 @@ class ActivityCuestionarioViewModel @Inject constructor(
         guias.postValue(guiaRepository.getGuias(file))
     }
 
-    fun copyImages(){
+    private fun copyImages(){
         setCopyImagesUseCase()
     }
 
 
-    fun clickedRoll() {
-        rollClicked.postValue(true)
+    fun clickedRoll(
+        editable: Editable,
+        isEtPregunta: Boolean
+    ) {
+        val responseRollClickedUseCase = setRollClickedUseCase(preguntas, respuestas, contadorPregunta, editable, isEtPregunta)
+        _uiStateBtnRoll.value = responseRollClickedUseCase
     }
 
     // Data Store
@@ -93,9 +98,6 @@ class ActivityCuestionarioViewModel @Inject constructor(
 
     // Click events
     fun onClickImgvPrevious(
-        preguntas: ArrayList<String>,
-        respuestas: ArrayList<String>,
-        contadorPregunta: Int,
         editable: Editable,
         isEtPregunta: Boolean
     ) {
@@ -107,13 +109,14 @@ class ActivityCuestionarioViewModel @Inject constructor(
             isEtPregunta
         )
 
+        if (responseRegresarUseCase.estadoUI.isUpdatedAskAns){
+            contadorPregunta--
+        }
+
         _uiStateBtnBack.value = responseRegresarUseCase
     }
 
     fun onClickImgvNext(
-        preguntas: ArrayList<String>,
-        respuestas: ArrayList<String>,
-        contadorPregunta: Int,
         editable: Editable,
         isEtPregunta: Boolean
     ) {
@@ -125,13 +128,14 @@ class ActivityCuestionarioViewModel @Inject constructor(
             isEtPregunta
         )
 
+        if (responseSiguienteUseCase.estadoUI.isUpdatedAskAns){
+            contadorPregunta++
+        }
+
         _uiStateBtnNext.value = responseSiguienteUseCase
     }
 
     fun onClickImgvSave(
-        preguntas: ArrayList<String>,
-        respuestas: ArrayList<String>,
-        contadorPregunta: Int,
         editable: Editable,
         nombreArchivo: String,
         isEtPregunta: Boolean

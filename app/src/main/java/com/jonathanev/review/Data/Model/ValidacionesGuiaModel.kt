@@ -5,8 +5,6 @@ import android.text.Editable
 data class ValidacionesGuiaModel(
     val message: String = "",
     val responseSpanPalabra: SpanPalabraModel? = null,
-    val contadorPregunta: Int = 0,
-    val estadoPreguntasRespuestas: EstadoPreguntasRespuestas = EstadoPreguntasRespuestas(),
     val estadoImagen: EstadoImagen = EstadoImagen(),
     val estadoUI: EstadoUI = EstadoUI(),
     val responseGuia: ResponseGuia = ResponseGuia(),
@@ -14,12 +12,7 @@ data class ValidacionesGuiaModel(
 )
 
 data class ResponseGuia(
-    val rutaGuiaEstudio: String = "",
-
-)
-data class EstadoPreguntasRespuestas(
-    val preguntas: ArrayList<String> = arrayListOf(),
-    val respuestas: ArrayList<String> = arrayListOf()
+    val rutaGuiaEstudio: String = ""
 )
 
 data class EstadoImagen(
@@ -36,4 +29,5 @@ data class EstadoUI(
     val isShowQuitColor: Boolean = false,
     val isShowSelColor: Boolean = false,
     val isThereMoreAsks: Boolean = false,
+    val isEtPregunta: Boolean = false
 )

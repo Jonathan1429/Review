@@ -1,7 +1,6 @@
 package com.jonathanev.review.Domain
 
 import android.text.Editable
-import com.jonathanev.review.Data.Model.EstadoPreguntasRespuestas
 import com.jonathanev.review.Data.Model.EstadoUI
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import javax.inject.Inject
@@ -28,8 +27,6 @@ class setClickSiguienteModificandoUseCase @Inject constructor(
                 .isNotEmpty() && contadorPregunta > posPregFin) -> {
                 ValidacionesGuiaModel(
                     message = "Asegurate de llenar pregunta y respuesta",
-                    contadorPregunta = contadorPregunta,
-                    estadoPreguntasRespuestas = EstadoPreguntasRespuestas(preguntas, respuestas),
                 )
             }
 
@@ -54,6 +51,7 @@ class setClickSiguienteModificandoUseCase @Inject constructor(
 
                     val responseValGuiaModel: ValidacionesGuiaModel =
                         validacionesguiaGuiaModel.copy(
+                            responseSpanPalabra = responseSpanPalabra,
                             estadoUI = validacionesguiaGuiaModel.estadoUI.copy(isThereMoreAsks = true)
                         )
 
@@ -63,17 +61,13 @@ class setClickSiguienteModificandoUseCase @Inject constructor(
                 } else {
                     // Si no hay más preguntas.
                     ValidacionesGuiaModel(
-                        contadorPregunta = contador,
                         responseSpanPalabra = responseSpanPalabra,
                         estadoUI = EstadoUI(
                             isUpdatedAskAns = true,
                             isClearText = true,
                             isShowQuitColor = true,
                             isShowSelColor = true
-                        ),
-                        estadoPreguntasRespuestas = EstadoPreguntasRespuestas(
-                            preguntas, respuestas
-                        ),
+                        )
                     )
                 }
             }

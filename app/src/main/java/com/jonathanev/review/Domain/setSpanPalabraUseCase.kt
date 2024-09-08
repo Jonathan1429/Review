@@ -12,7 +12,6 @@ class setSpanPalabraUseCase @Inject constructor() {
         val colorSpans: Array<ForegroundColorSpan> =
             editable.getSpans(0, editable.length, ForegroundColorSpan::class.java)
         val oldEditable = editable
-        val oldSpans = colorSpans
         val sortedSpans = colorSpans.sortedBy { editable.getSpanStart(it) }
 
         var start = -1
@@ -61,13 +60,6 @@ class setSpanPalabraUseCase @Inject constructor() {
                         editable.removeSpan(span)
                     }
                 }
-
-                /*editable.setSpan(
-                    ForegroundColorSpan(colorAnterior),
-                    start,
-                    endAnterior,
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                )*/
 
                 start = editable.getSpanStart(colorSpan)
                 endAnterior = end

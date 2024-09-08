@@ -1,7 +1,6 @@
 package com.jonathanev.review.Domain
 
 import android.text.Editable
-import com.jonathanev.review.Data.Model.EstadoPreguntasRespuestas
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import javax.inject.Inject
 
@@ -19,13 +18,14 @@ class setClickRegresarModicandoUseCase @Inject constructor(
     ): ValidacionesGuiaModel {
         val posPregFin = preguntas.size - 1
         val posRespFin = respuestas.size - 1
+        val responseSpanPalabra = setSpanPalabraUseCase(editable)
+        val responseEtiquetaEditable =
+            setColocarEtiquetasUseCase(responseSpanPalabra.editable)
 
         return when {
             contadorPregunta == 0 -> {
                 ValidacionesGuiaModel(
                     message = "Ya no tienes preguntas anteriores",
-                    contadorPregunta = contadorPregunta,
-                    estadoPreguntasRespuestas = EstadoPreguntasRespuestas(preguntas, respuestas),
                 )
             }
 
@@ -36,6 +36,7 @@ class setClickRegresarModicandoUseCase @Inject constructor(
                     setPintarTextosUseCase(isEtPregunta = true, preguntas, respuestas, contador)
 
                 val responseValGuiaModel: ValidacionesGuiaModel = validacionesGuiaModel.copy(
+                    responseSpanPalabra = responseSpanPalabra,
                     estadoUI = validacionesGuiaModel.estadoUI.copy(
                         isThereMoreAsks = true
                     )
@@ -48,16 +49,10 @@ class setClickRegresarModicandoUseCase @Inject constructor(
                 .isNotEmpty() && contadorPregunta > posPregFin) -> {
                 ValidacionesGuiaModel(
                     message = "Asegurate de llenar pregunta y respuesta",
-                    contadorPregunta = contadorPregunta,
-                    estadoPreguntasRespuestas = EstadoPreguntasRespuestas(preguntas, respuestas),
                 )
             }
 
             else -> {
-                val responseSpanPalabra = setSpanPalabraUseCase(editable)
-                val responseEtiquetaEditable =
-                    setColocarEtiquetasUseCase(responseSpanPalabra.editable)
-
                 if (isEtPregunta) {
                     preguntas[contadorPregunta] = responseEtiquetaEditable.toString()
                 } else {
@@ -73,13 +68,14 @@ class setClickRegresarModicandoUseCase @Inject constructor(
                 val validacionesGuiaModel =
                     setPintarTextosUseCase(isEtPregunta = true, preguntas, respuestas, contador)
 
-                val responseValGuiaModel: ValidacionesGuiaModel = validacionesGuiaModel.copy(
+                val response = validacionesGuiaModel.copy(
+                    responseSpanPalabra = responseSpanPalabra,
                     estadoUI = validacionesGuiaModel.estadoUI.copy(
                         isThereMoreAsks = true
                     )
                 )
 
-                return responseValGuiaModel
+                return response
             }
         }
     }

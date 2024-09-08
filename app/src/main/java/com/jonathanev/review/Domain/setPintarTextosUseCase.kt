@@ -7,7 +7,6 @@ import com.jonathanev.review.Core.Constants.baseRutaImagen
 import com.jonathanev.review.Core.Constants.baseRutaImagenCifrado
 import com.jonathanev.review.Data.Model.ColorPregModel
 import com.jonathanev.review.Data.Model.EstadoImagen
-import com.jonathanev.review.Data.Model.EstadoPreguntasRespuestas
 import com.jonathanev.review.Data.Model.EstadoUI
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import javax.inject.Inject
@@ -46,14 +45,12 @@ class setPintarTextosUseCase @Inject constructor(
 
             // Cuando lo que se va a mostrar es una imagen
             ValidacionesGuiaModel(
-                contadorPregunta = contadorPregunta,
                 estadoUI = EstadoUI(
                     isUpdatedAskAns = true,
                     isShowImage = true,
                     isShowCancelar = true,
                 ),
                 estadoImagen = EstadoImagen(cifrado, texto),
-                estadoPreguntasRespuestas = EstadoPreguntasRespuestas(preguntas, respuestas),
             )
         } else {
             while (texto.contains("«")) {
@@ -95,14 +92,12 @@ class setPintarTextosUseCase @Inject constructor(
 
             // Cuando lo que se va a pintar es texto
             ValidacionesGuiaModel(
-                contadorPregunta = contadorPregunta,
                 estadoUI = EstadoUI(
                     isUpdatedAskAns = true,
                     isShowQuitColor = true,
                     isShowSelColor = true,
                 ),
                 builder = builder,
-                estadoPreguntasRespuestas = EstadoPreguntasRespuestas(preguntas, respuestas),
             )
         }
     }

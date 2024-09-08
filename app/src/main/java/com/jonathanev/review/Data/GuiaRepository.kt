@@ -52,8 +52,8 @@ class GuiaRepository @Inject constructor(
             // Creo la etiqueta interrogante con su respectiva pregunta
             for (i in preguntas.indices) {
                 serializer.startTag("", "Interrogante")
-                serializer.attribute("", "pregunta", preguntas.get(i))
-                serializer.attribute("", "respuesta", respuestas.get(i))
+                serializer.attribute("", "pregunta", preguntas[i])
+                serializer.attribute("", "respuesta", respuestas[i])
                 serializer.endTag("", "Interrogante")
             }
             // Si los campos estan vacios simplemente cierro las etiquetas y directamente
