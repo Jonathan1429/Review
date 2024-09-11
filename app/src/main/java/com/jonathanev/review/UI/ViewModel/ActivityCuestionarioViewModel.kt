@@ -12,6 +12,7 @@ import com.jonathanev.review.Data.GuiaRepository
 import com.jonathanev.review.Data.Model.DataStoreManager
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
+import com.jonathanev.review.Domain.setClickEliminarUseCase
 import com.jonathanev.review.Domain.setClickRegresarModicandoUseCase
 import com.jonathanev.review.Domain.setClickSaveUseCase
 import com.jonathanev.review.Domain.setClickSiguienteModificandoUseCase
@@ -29,6 +30,7 @@ class ActivityCuestionarioViewModel @Inject constructor(
     private val setClickSiguienteModicandoUseCase: setClickSiguienteModificandoUseCase,
     private val setRollClickedUseCase: setRollClickedUseCase,
     private val setClickSaveUseCase: setClickSaveUseCase,
+    private val setClickEliminarUseCase: setClickEliminarUseCase,
     private val setCopyImagesUseCase: setCopyImagesUseCase,
     application: Application
 ) : ViewModel() {
@@ -50,12 +52,14 @@ class ActivityCuestionarioViewModel @Inject constructor(
     val uiStateBtnSave: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnSave
     private val _uiStateBtnRoll = MutableLiveData<ValidacionesGuiaModel>()
     val uiStateBtnRoll: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnRoll
+    private val _uiStateBtnEliminar = MutableLiveData<ValidacionesGuiaModel>()
+    val uiStateBtnEliminar: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnEliminar
 
     // Data Store
     private val dataStore = DataStoreManager.getInstance(application)
     val contImagenes = dataStore.getCountImage().asLiveData()
 
-    fun procesoActualizacion(){
+    fun procesoActualizacion() {
         getAllUpdatedGuides(file)
         copyImages()
     }
@@ -64,7 +68,7 @@ class ActivityCuestionarioViewModel @Inject constructor(
         guias.postValue(guiaRepository.getGuias(file))
     }
 
-    private fun copyImages(){
+    private fun copyImages() {
         setCopyImagesUseCase()
     }
 
@@ -73,7 +77,8 @@ class ActivityCuestionarioViewModel @Inject constructor(
         editable: Editable,
         isEtPregunta: Boolean
     ) {
-        val responseRollClickedUseCase = setRollClickedUseCase(preguntas, respuestas, contadorPregunta, editable, isEtPregunta)
+        val responseRollClickedUseCase =
+            setRollClickedUseCase(preguntas, respuestas, contadorPregunta, editable, isEtPregunta)
         _uiStateBtnRoll.value = responseRollClickedUseCase
     }
 
@@ -88,7 +93,7 @@ class ActivityCuestionarioViewModel @Inject constructor(
         }
     }
 
-    suspend fun setIncrementCounter() {
+    private suspend fun setIncrementCounter() {
         dataStore.setIncrementCounter()
     }
 
@@ -109,7 +114,7 @@ class ActivityCuestionarioViewModel @Inject constructor(
             isEtPregunta
         )
 
-        if (responseRegresarUseCase.estadoUI.isUpdatedAskAns){
+        if (responseRegresarUseCase.estadoUI.isUpdatedAskAns) {
             contadorPregunta--
         }
 
@@ -128,7 +133,7 @@ class ActivityCuestionarioViewModel @Inject constructor(
             isEtPregunta
         )
 
-        if (responseSiguienteUseCase.estadoUI.isUpdatedAskAns){
+        if (responseSiguienteUseCase.estadoUI.isUpdatedAskAns) {
             contadorPregunta++
         }
 
@@ -152,5 +157,16 @@ class ActivityCuestionarioViewModel @Inject constructor(
         _uiStateBtnSave.value = setClickSaveUseCase
 
 
+    }
+
+    fun onClickEliminar() {
+        val responseRegresarUseCase =
+            setClickEliminarUseCase(preguntas, respuestas, contadorPregunta)
+
+        if (contadorPregunta > 0) {
+            contadorPregunta--
+        }
+
+        _uiStateBtnEliminar.value = responseRegresarUseCase
     }
 }

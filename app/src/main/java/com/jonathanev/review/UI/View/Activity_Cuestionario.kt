@@ -78,7 +78,7 @@ class Activity_Cuestionario : AppCompatActivity() {
     private var filename: String = "" // Ruta/imagen.png
 
     // Seleccionar imagen
-    private val pickMedia =
+    /*private val pickMedia =
         registerForActivityResult(PickVisualMedia()) { uri ->
             if (uri != null) {
                 // Toma permisos de persistencia para la URI
@@ -115,7 +115,7 @@ class Activity_Cuestionario : AppCompatActivity() {
                 binding.imgvQuitColor.visibility = View.VISIBLE
                 binding.imgvSelColor.visibility = View.VISIBLE
             }
-        }
+        }*/
 
     // Creamos la serialización y la clase para crear archivos de manera global.
     var serializer: XmlSerializer = Xml.newSerializer()
@@ -326,53 +326,39 @@ class Activity_Cuestionario : AppCompatActivity() {
         }
 
         binding.imgvEliminar.setOnClickListener {
+            activityCuestionarioViewModel.onClickEliminar()
+        }
+
+        activityCuestionarioViewModel.uiStateBtnEliminar.observe(this) { uiState ->
             AlertDialog.Builder(this@Activity_Cuestionario)
                 .setTitle("¡Atención!")
-                .setMessage("¿Quieres eliminar la pregunta?")
-                .setPositiveButton("Si") { dialogInterface, i ->
-                    // Se le quita 1 para hacer referencia al arreglo
-                    // tamaño 3-1 = 2 [0,1,2].
-                    val longi: Int = respuestas.size
+                .setMessage("¿Quieres eliminar pregunta/respuesta?")
+                .setPositiveButton("Si") { _, _ ->
+                    binding.lblPregResp.text = "Pregunta"
 
-                    if (longi == 0) {
-                        //preguntas.removeFirst()
-                        //respuestas.removeFirst()
-
-                        if (binding.lblPregResp.text.toString() == "Pregunta") {
-                            binding.etPregResp.setText("")
+                    if (!uiState.estadoUI.isThereMoreAsks) {
+                        binding.etPregResp.text?.clear()
+                    } else {
+                        // Agregar el texto en el et cuando hay un builder
+                        if (!uiState.estadoUI.isShowImage) {
+                            binding.etPregResp.text = uiState.builder
                         } else {
-                            binding.lblPregResp.text = "Pregunta"
-                            binding.etPregResp.setText("")
-                        }
-                    } else if ((contadorPregunta + 1) == longi && (contadorPregunta + 1) == 1) {
-                        preguntas.removeAt(contadorPregunta)
-                        respuestas.removeAt(contadorPregunta)
-                        binding.lblPregResp.text = "Pregunta"
-                        binding.imgvSelColor.visibility = View.VISIBLE
-                        binding.tilContenidoPregResp.visibility = View.VISIBLE
-                        binding.ivImagen.visibility = View.GONE
-                        binding.etPregResp.setText("")
-                    } else if ((contadorPregunta + 1) == longi) {
-                        preguntas.removeAt(contadorPregunta)
-                        respuestas.removeAt(contadorPregunta)
-                        contadorPregunta--
-                        binding.lblPregResp.text = "Pregunta"
-                        pintarTexto(contadorPregunta)
-                    } else if (contadorPregunta < longi) {
-                        preguntas.removeAt(contadorPregunta)
-                        respuestas.removeAt(contadorPregunta)
-                        binding.lblPregResp.text = "Pregunta"
-                        pintarTexto(contadorPregunta)
-                    } else { // Cuando el contador es mayor a longi
-                        if (binding.lblPregResp.text.toString() == "Pregunta") {
-                            contadorPregunta--
-                            pintarTexto(contadorPregunta)
-                        } else {
-                            preguntas.removeAt(contadorPregunta)
-                            contadorPregunta--
-                            pintarTexto(contadorPregunta)
+                            // Cuando hay una imagen hay que poner esto
+                            binding.etPregResp.setText(uiState.estadoImagen.textImgEcrypted)
+                            binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
                         }
                     }
+
+                    binding.tilContenidoPregResp.visibility =
+                        if (uiState.estadoUI.isShowImage) View.GONE else View.VISIBLE
+                    binding.ivImagen.visibility =
+                        if (uiState.estadoUI.isShowImage) View.VISIBLE else View.GONE
+                    binding.imgvCancelar.visibility =
+                        if (uiState.estadoUI.isShowCancelar) View.VISIBLE else View.GONE
+                    binding.imgvQuitColor.visibility =
+                        if (uiState.estadoUI.isShowQuitColor) View.VISIBLE else View.GONE
+                    binding.imgvSelColor.visibility =
+                        if (uiState.estadoUI.isShowSelColor) View.VISIBLE else View.GONE
                 }
 
                 .setNegativeButton("Cancelar") { dialog, i ->
@@ -407,6 +393,7 @@ class Activity_Cuestionario : AppCompatActivity() {
                 intent.putExtra("ruta", uiState.responseGuia.rutaGuiaEstudio)
                 startActivity(intent)
                 activityCuestionarioViewModel.procesoActualizacion()
+                copyImages()
                 finish()
             }
         }
@@ -715,7 +702,7 @@ class Activity_Cuestionario : AppCompatActivity() {
     }
 
     // Toma permisos de persistencia para la URI
-    private fun takePersistableUriPermission(uri: Uri) {
+    /*private fun takePersistableUriPermission(uri: Uri) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             contentResolver.takePersistableUriPermission(
                 uri,
@@ -723,7 +710,7 @@ class Activity_Cuestionario : AppCompatActivity() {
                 //Intent.FLAG_GRANT_WRITE_URI_PERMISSION
             )
         }
-    }
+    }*/
 
     // Método que se ejecuta cuando el back del telefono es presionado.
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
@@ -760,77 +747,6 @@ class Activity_Cuestionario : AppCompatActivity() {
             ) { dialog, _ -> dialog.dismiss() }.create().show()
     }
 
-    // Creamos el archivo en el dispositivo e inicializamos algunas etiquetas.
-    private fun crearArchivo(nombreArchivo: String?) {
-        try {
-            fos = openFileOutput("$nombreArchivo.xml", MODE_PRIVATE)
-            serializer.setOutput(fos, "UTF-8")
-            serializer.startDocument(null, java.lang.Boolean.valueOf(true))
-            serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true)
-            serializer.startTag("", "GuiaEstudio")
-            serializer.attribute("", "version", "1.0")
-            serializer.startTag("", "Cuestionario")
-            serializer.attribute("", "nombreGuia", nombreArchivo)
-            // Creo la etiqueta interrogante con su respectiva pregunta
-            for (i in preguntas.indices) {
-                serializer.startTag("", "Interrogante")
-                serializer.attribute("", "pregunta", preguntas.get(i))
-                serializer.attribute("", "respuesta", respuestas.get(i))
-                serializer.endTag("", "Interrogante")
-            }
-            // Si los campos estan vacios simplemente cierro las etiquetas y directamente
-            // guardo el documento en el teléfono.
-            serializer.endTag("", "Cuestionario")
-            serializer.endTag("", "GuiaEstudio")
-            serializer.endDocument()
-            serializer.flush()
-            fos?.close()
-
-            val rutaGuiaCreada = File("$rutaPrin/$nombreArchivo.xml")
-            if (rutaGuiaCreada.exists()) {
-                Toast.makeText(
-                    this, "Guia de estudio creada exitosamente",
-                    Toast.LENGTH_SHORT
-                ).show()
-                Log.i("Creación: ", "Guia de estudio creada exitosamente")
-
-                Files.copy(
-                    Paths.get("$rutaPrin/$nombreArchivo.xml"),
-                    Paths.get("$file/$nombreArchivo.xml"),
-                    StandardCopyOption.REPLACE_EXISTING
-                )
-
-                // Borrar archivo
-                File(rutaPrin, "$nombreArchivo.xml").delete()
-                val ruta = "$file/$nombreArchivo.xml"
-                val intent: Intent =
-                    Intent(applicationContext, Activity_RepasarGuia::class.java)
-                intent.putExtra("ruta", ruta)
-
-                startActivity(intent)
-                activityCuestionarioViewModel.getAllUpdatedGuides(file)
-                copyImages()
-                finish()
-            } else {
-                Toast.makeText(
-                    this, "Guia de estudio no se creó correctamente",
-                    Toast.LENGTH_SHORT
-                ).show()
-                Log.i("Creación: ", "Guia de estudio no se creó correctamente")
-            }
-
-            /*val ruta = "$file/$nombreArchivo.xml"
-            val intent: Intent = Intent(applicationContext, Activity_RepasarGuia::class.java)
-            intent.putExtra("ruta", ruta)
-
-            startActivity(intent)
-            activityCuestionarioViewModel.getAllUpdatedGuides(file)
-            finish()*/
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-    }
-
     private fun copyImages() {
         val images = fileImagesPiv.listFiles()
         // Hacemos un ciclo por cada fichero para extraer el nombre de cada uno.
@@ -852,111 +768,6 @@ class Activity_Cuestionario : AppCompatActivity() {
                 File(fileImagesPiv, name).delete()
             }
         }
-    }
-
-    private fun colocarEtiquetas(
-        colorSpans: Array<ForegroundColorSpan>,
-        editable: Editable
-    ): Editable {
-        for (colorSpan: ForegroundColorSpan in colorSpans) {
-            val start: Int = editable.getSpanStart(colorSpan)
-            val end: Int = editable.getSpanEnd(colorSpan)
-            val color: Int = colorSpan.foregroundColor
-
-            val etiqIni: String = "«$color»"
-            val etiqFin: String = "«/$color»"
-
-            // Agregar la etiqueta de inicio al texto
-            editable.replace(start, start, etiqIni)
-
-            // Agregar la etiqueta de cierre al texto
-            editable.replace(end + etiqIni.length, end + etiqIni.length, etiqFin)
-        }
-
-        return editable
-    }
-
-    private fun pintarTexto(contadorPregunta: Int) {
-        var contColorPreg: Int = 0
-        var inicio: Int = 0
-        var fin: Int = 0
-        var colorPregModel: ColorPregModel? = null
-        var texto: String = ""
-        if (binding.lblPregResp.text.toString() == "Pregunta") {
-            texto = preguntas[contadorPregunta]
-            // uri = texto.toUri()
-        } else {
-            texto = respuestas[contadorPregunta]
-            // uri = texto.toUri()
-        }
-
-        if (texto.contains(baseRutaImagenCifrado)) {
-            val descifrado = cifrar(texto, 26 - 3)
-            binding.etPregResp.setText(texto)
-            texto = descifrado.replace(baseRutaImagen.toRegex(), "")
-            texto = texto.replace("imagenes".toRegex(), "imagenesPivote")
-            // uri = texto.toUri()
-            binding.ivImagen.setImage(ImageSource.uri(texto)) //setImageURI(uri)
-            binding.tilContenidoPregResp.visibility = View.GONE
-            binding.ivImagen.visibility = View.VISIBLE
-
-            binding.imgvCancelar.visibility = View.VISIBLE
-            binding.imgvQuitColor.visibility = View.GONE
-            binding.imgvSelColor.visibility = View.GONE
-        } else {
-            binding.tilContenidoPregResp.visibility = View.VISIBLE
-            binding.ivImagen.visibility = View.GONE
-
-            binding.imgvCancelar.visibility = View.GONE
-            binding.imgvQuitColor.visibility = View.VISIBLE
-            binding.imgvSelColor.visibility = View.VISIBLE
-
-            while (texto.contains("«")) {
-                inicio = texto.indexOf("«") + 1
-                fin = texto.indexOf("»")
-                val color: String = texto.substring(inicio, fin)
-                val longColor: Int = color.length
-                val colEntero: Int = color.toInt()
-                inicio = fin + 1
-                fin = texto.indexOf("«", inicio)
-                colorPregModel =
-                    ColorPregModel((inicio - longColor - 2), (fin - longColor - 2), colEntero)
-
-                if (binding.lblPregResp.text.toString() == "Pregunta") {
-                    preguntasColor.add(contColorPreg, colorPregModel)
-                } else {
-                    respuestasColor.add(contColorPreg, colorPregModel)
-                }
-
-                // Eliminar la primera etiqueta y su contenido
-                texto = texto.replaceFirst("«.*?»".toRegex(), "")
-
-                // Eliminar la segunda etiqueta y su contenido
-                texto = texto.replaceFirst("«.*?»".toRegex(), "")
-                contColorPreg++
-            }
-
-
-            builder = SpannableStringBuilder(texto)
-            for (coloresPreguntas: ColorPregModel in if (binding.lblPregResp.text.toString() == "Pregunta") preguntasColor else respuestasColor) {
-                val colorSpan: ForegroundColorSpan = ForegroundColorSpan(coloresPreguntas.color)
-                builder!!.setSpan(
-                    colorSpan,
-                    coloresPreguntas.inicioColor,
-                    coloresPreguntas.finColor,
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
-            }
-
-            binding.etPregResp.text = builder
-        }
-
-        preguntasColor.clear()
-        respuestasColor.clear()
-
-        // Bandera ingresada para que no haga cambios de color cuando se detecte un cambio en ET.
-        // pregResBandera = true
-        // pregResBandera = false
     }
 
     private fun pintarLetra(texto: Editable?) {
