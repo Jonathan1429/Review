@@ -12,11 +12,13 @@ import com.jonathanev.review.Data.GuiaRepository
 import com.jonathanev.review.Data.Model.DataStoreManager
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
+import com.jonathanev.review.Domain.setCifrarRutaImagenUseCase
 import com.jonathanev.review.Domain.setClickEliminarUseCase
 import com.jonathanev.review.Domain.setClickRegresarModicandoUseCase
 import com.jonathanev.review.Domain.setClickSaveUseCase
 import com.jonathanev.review.Domain.setClickSiguienteModificandoUseCase
 import com.jonathanev.review.Domain.setCopyImagesUseCase
+import com.jonathanev.review.Domain.setPintarLetraUseCase
 import com.jonathanev.review.Domain.setRollClickedUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -32,6 +34,8 @@ class ActivityCuestionarioViewModel @Inject constructor(
     private val setClickSaveUseCase: setClickSaveUseCase,
     private val setClickEliminarUseCase: setClickEliminarUseCase,
     private val setCopyImagesUseCase: setCopyImagesUseCase,
+    private val setCifrarRutaImagenUseCase: setCifrarRutaImagenUseCase,
+    private val setPintarLetraUseCase: setPintarLetraUseCase,
     application: Application
 ) : ViewModel() {
     private var preguntas: ArrayList<String> = ArrayList()
@@ -39,7 +43,6 @@ class ActivityCuestionarioViewModel @Inject constructor(
     private var contadorPregunta: Int = 0
 
     var guias = MutableLiveData<List<GuiaModel>>()
-    var colorAnterior = MutableLiveData<Int>()
     // var saveClicked = MutableLiveData<Boolean>().apply { value = false }
     // var rollClicked = MutableLiveData<Boolean>().apply { value = false }
 
@@ -64,7 +67,7 @@ class ActivityCuestionarioViewModel @Inject constructor(
         copyImages()
     }
 
-    fun getAllUpdatedGuides(file: File) {
+    private fun getAllUpdatedGuides(file: File) {
         guias.postValue(guiaRepository.getGuias(file))
     }
 
@@ -99,6 +102,14 @@ class ActivityCuestionarioViewModel @Inject constructor(
 
     suspend fun resetCounter() {
         dataStore.resetCounter()
+    }
+
+    fun getUrlImagenCifrada(urlImagen: String, noCifrado: Int):String {
+        return setCifrarRutaImagenUseCase(urlImagen, noCifrado)
+    }
+
+    fun setPintarLetra(texto: Editable?, cursorPosition: Int, colorActual: Int) {
+        setPintarLetraUseCase(texto, cursorPosition, colorActual)
     }
 
     // Click events

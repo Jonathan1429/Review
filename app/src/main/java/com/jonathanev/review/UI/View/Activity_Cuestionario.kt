@@ -10,7 +10,6 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.text.Editable
@@ -23,7 +22,6 @@ import android.util.Xml
 import android.view.KeyEvent
 import android.view.View
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.activity.viewModels
 import androidx.annotation.ColorInt
@@ -65,12 +63,6 @@ class Activity_Cuestionario : AppCompatActivity() {
     private var colorPintarPalabra: Int = 0
     private var posColorInicial: Int = -1
     private var posColorFinal: Int = -1
-    private var preguntas: ArrayList<String> = ArrayList()
-    private var respuestas: ArrayList<String> = ArrayList()
-    private val preguntasColor: ArrayList<ColorPregModel> = ArrayList()
-    private val respuestasColor: ArrayList<ColorPregModel> = ArrayList()
-    var builder: SpannableStringBuilder? = null
-    private var contadorPregunta: Int = 0
     private var contadorImagen = 0
     private var longCaracteres = 0
     private var pregResBandera = false // Bandera para cuando se le de click atras o delante.
@@ -116,10 +108,6 @@ class Activity_Cuestionario : AppCompatActivity() {
                 binding.imgvSelColor.visibility = View.VISIBLE
             }
         }*/
-
-    // Creamos la serialización y la clase para crear archivos de manera global.
-    var serializer: XmlSerializer = Xml.newSerializer()
-    var fos: FileOutputStream? = null
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -468,46 +456,13 @@ class Activity_Cuestionario : AppCompatActivity() {
                 ) {
                     // Si hay un salto de linea o es color negro no se pinta nada
                     if (colorActual != -16777216 && !seAgregoSaltoDeLinea) {
-                        pintarLetra(texto)
+                        val cursorPosition = binding.etPregResp.selectionStart
+                        activityCuestionarioViewModel.setPintarLetra(texto, cursorPosition, colorActual)
+                        //pintarLetra(texto)
                     }
                 }
             }
         })
-
-        activityCuestionarioViewModel.colorAnterior.observe(this) {
-            if (posColorInicial == -1) {
-                colorPintarPalabra = it
-
-                val cursorPosition = binding.etPregResp.selectionStart
-                val lastCharIndex = cursorPosition - 1
-                posColorInicial = lastCharIndex
-            } else {
-                /*al cursorPosition = binding.etPregResp.selectionStart
-                posColorFinal = cursorPosition*/
-
-                // Obtener los spans dentro del rango especificado
-                val spansToRemove = binding.etPregResp.text!!.getSpans(
-                    posColorInicial,
-                    posColorFinal,
-                    ForegroundColorSpan::class.java
-                )
-
-                for (span in spansToRemove) {
-                    binding.etPregResp.text!!.removeSpan(span)
-                }
-
-                binding.etPregResp.text!!.setSpan(
-                    ForegroundColorSpan(colorPintarPalabra),
-                    posColorInicial,
-                    posColorFinal,
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
-
-                posColorInicial = -1
-                posColorFinal = -1
-                colorPintarPalabra = 0
-            }
-        }
 
         activityCuestionarioViewModel.contImagenes.observe(this) { contImagen ->
             contadorImagen = contImagen
@@ -567,7 +522,7 @@ class Activity_Cuestionario : AppCompatActivity() {
             fos = openFileOutput(filename, MODE_PRIVATE)
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
 
-            if (binding.etPregResp.text!!.isNotEmpty() && !binding!!.etPregResp.text!!.contains(
+            if (binding.etPregResp.text!!.isNotEmpty() && !binding.etPregResp.text!!.contains(
                     baseRutaImagen
                 )
             ) {
@@ -590,11 +545,8 @@ class Activity_Cuestionario : AppCompatActivity() {
                         binding.ivImagen.setImage(ImageSource.uri("$fileImagesPiv/$filename")) //setImageURI(uri)
                         binding.tilContenidoPregResp.visibility = View.GONE
                         binding.ivImagen.visibility = View.VISIBLE
-                        val cifrado = cifrar("$baseRutaImagen$fileImages/$filename", 3)
+                        val cifrado = activityCuestionarioViewModel.getUrlImagenCifrada("$baseRutaImagen$fileImages/$filename", 3)
                         binding.etPregResp.setText(cifrado)
-
-                        // contadorImagen += 1
-                        // filename = "$contadorImagen.png"
 
                         activityCuestionarioViewModel.llamaCorruIncremento()
                     }
@@ -621,11 +573,8 @@ class Activity_Cuestionario : AppCompatActivity() {
                 binding.tilContenidoPregResp.visibility = View.GONE
                 binding.ivImagen.visibility = View.VISIBLE
 
-                val cifrado = cifrar("$baseRutaImagen$fileImages/$filename", 3)
+                val cifrado = activityCuestionarioViewModel.getUrlImagenCifrada("$baseRutaImagen$fileImages/$filename", 3)
                 binding.etPregResp.setText(cifrado)
-
-                // contadorImagen += 1
-                // filename = "$contadorImagen.png"
 
                 activityCuestionarioViewModel.llamaCorruIncremento()
             }
@@ -770,26 +719,6 @@ class Activity_Cuestionario : AppCompatActivity() {
         }
     }
 
-    private fun pintarLetra(texto: Editable?) {
-        texto?.let {
-            if (it.isNotEmpty() && !pregResBandera) {
-                val cursorPosition = binding.etPregResp.selectionStart
-                val lastCharIndex = cursorPosition - 1
-                posColorFinal = lastCharIndex + 1
-
-                it.setSpan(
-                    ForegroundColorSpan(colorActual),
-                    lastCharIndex,
-                    lastCharIndex + 1,
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
-
-                binding.etPregResp.setSelection(lastCharIndex + 1)
-                pregResBandera = false
-            }
-        }
-    }
-
     fun setColor(@ColorInt color: Int?) {
         if (color == null) {
             ImageViewCompat.setImageTintList(binding.imgvSelColor, null)
@@ -798,22 +727,5 @@ class Activity_Cuestionario : AppCompatActivity() {
         ImageViewCompat.setImageTintMode(binding.imgvSelColor, PorterDuff.Mode.SRC_ATOP)
         ImageViewCompat.setImageTintList(binding.imgvSelColor, ColorStateList.valueOf(color))
         colorActual = color
-    }
-
-    fun cifrar(texto: String, desplazamiento: Int): String {
-        val resultado = StringBuilder()
-
-        for (caracter in texto) {
-            if (caracter.isLetter()) {
-                val base = if (caracter.isUpperCase()) 'A' else 'a'
-                val letraCifrada =
-                    ((caracter - base + desplazamiento) % 26 + base.code).toChar()
-                resultado.append(letraCifrada)
-            } else {
-                resultado.append(caracter)
-            }
-        }
-
-        return resultado.toString()
     }
 }
