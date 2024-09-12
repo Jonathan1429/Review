@@ -13,6 +13,7 @@ import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import com.jonathanev.review.Domain.getGuiaUseCase
 import com.jonathanev.review.Domain.getObtenerDatosXMLUseCase
 import com.jonathanev.review.Domain.setClickRegresarModicandoUseCase
+import com.jonathanev.review.Domain.setClickSiguienteModificandoUseCase
 import com.jonathanev.review.Domain.setRollClickedUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -23,18 +24,22 @@ class ModificarViewModel @Inject constructor(
     application: Application,
     private val setRollClickedUseCase: setRollClickedUseCase,
     private val setClickRegresarModicandoUseCase: setClickRegresarModicandoUseCase,
+    private val setClickSiguienteModicandoUseCase: setClickSiguienteModificandoUseCase,
     private val getObtenerDatosXMLUseCase: getObtenerDatosXMLUseCase,
     val getGuiaUseCase: getGuiaUseCase
 ) : ViewModel() {
-    private var preguntas: ArrayList<String> = ArrayList()
+    var preguntas: ArrayList<String> = ArrayList()
     private var respuestas: ArrayList<String> = ArrayList()
-    private var contadorPregunta: Int = 0
+    var contadorPregunta: Int = 0
+    var showMessageMoreQuestions: Boolean = true
 
     // Click events
     private val _uiStateBtnRoll = MutableLiveData<ValidacionesGuiaModel>()
     val uiStateBtnRoll: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnRoll
     private val _uiStateBtnBack = MutableLiveData<ValidacionesGuiaModel>()
     val uiStateBtnBack: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnBack
+    private val _uiStateBtnNext = MutableLiveData<ValidacionesGuiaModel>()
+    val uiStateBtnNext: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnNext
 
     private val _uiShowDates = MutableLiveData<Boolean>()
     val uiShowDates: LiveData<Boolean> get() = _uiShowDates
@@ -106,6 +111,25 @@ class ModificarViewModel @Inject constructor(
         }
 
         _uiStateBtnBack.value = responseRegresarUseCase
+    }
+
+    fun onClickImgvNext(
+        editable: Editable,
+        isEtPregunta: Boolean
+    ) {
+        val responseSiguienteUseCase = setClickSiguienteModicandoUseCase(
+            preguntas,
+            respuestas,
+            contadorPregunta,
+            editable,
+            isEtPregunta
+        )
+
+        if (responseSiguienteUseCase.estadoUI.isUpdatedAskAns) {
+            contadorPregunta++
+        }
+
+        _uiStateBtnNext.value = responseSiguienteUseCase
     }
 
     fun clickedRoll(
