@@ -8,10 +8,15 @@ import com.jonathanev.review.Core.Constants.rutaPrin
 import com.jonathanev.review.Data.Model.EstadoUI
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.Model.GuiaProvider
+import com.jonathanev.review.Data.Model.PreguntaRespuesta
 import com.jonathanev.review.Data.Model.ResponseGuia
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import com.jonathanev.review.Domain.getAllGuiasUseCase
 import dagger.hilt.android.qualifiers.ApplicationContext
+import org.w3c.dom.Document
+import org.w3c.dom.Element
+import org.w3c.dom.NodeList
+import org.xml.sax.SAXException
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
 import java.io.FileOutputStream
@@ -20,6 +25,9 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import javax.inject.Inject
+import javax.xml.parsers.DocumentBuilder
+import javax.xml.parsers.DocumentBuilderFactory
+import javax.xml.parsers.ParserConfigurationException
 import kotlin.io.path.exists
 
 class GuiaRepository @Inject constructor(
@@ -101,5 +109,40 @@ class GuiaRepository @Inject constructor(
                 message = "Guia de estudio no se creó correctamente"
             )
         }
+    }
+
+    fun obtenerDatosXML(nombreArchivo: String, ruta: String): List<PreguntaRespuesta> {
+        val preguntasRespuestas = mutableListOf<PreguntaRespuesta>()
+        val dbf: DocumentBuilderFactory = DocumentBuilderFactory.newInstance()
+        val db: DocumentBuilder
+        try {
+            db = dbf.newDocumentBuilder()
+            val filePath: File = if (ruta == "null") {
+                File(file, nombreArchivo)
+            } else {
+                File(ruta)
+            }
+            val doc = db.parse(filePath)
+
+            // Buscamos los Nodos Interrogante y accedemos a lo que se encuentre dentro.
+            val cuestionario: NodeList = doc.getElementsByTagName("Interrogante")
+            for (i in 0 until cuestionario.length) {
+                // Accedes a los elmentos de dicho nodo
+                val e: Element = cuestionario.item(i) as Element
+
+                // Guardo cada uno de los valores en su respectivo arreglo.
+                val pregunta = e.getAttribute("pregunta")
+                val respuesta = e.getAttribute("respuesta")
+                preguntasRespuestas.add(PreguntaRespuesta(pregunta, respuesta))
+            }
+        } catch (e: ParserConfigurationException) {
+            e.printStackTrace()
+        } catch (e: SAXException) {
+            e.printStackTrace()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+
+        return preguntasRespuestas
     }
 }

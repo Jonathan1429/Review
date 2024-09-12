@@ -7,6 +7,7 @@ import javax.inject.Inject
 
 class setClickSaveUseCase @Inject constructor(
     private val setSpanPalabraUseCase: setSpanPalabraUseCase,
+    private val setColocarEtiquetasUseCase: setColocarEtiquetasUseCase,
     private val setCrearXmlUseCasel: setCrearXmlUseCasel
 ) {
     operator fun invoke(
@@ -20,6 +21,7 @@ class setClickSaveUseCase @Inject constructor(
         val posPregFin = preguntas.size - 1
         val posRespFin = respuestas.size - 1
         val responseSpanPalabra = setSpanPalabraUseCase(editable)
+        val responseEtiquetaEditable = setColocarEtiquetasUseCase(responseSpanPalabra.editable)
 
         return when {
             responseSpanPalabra.editable.isEmpty() || isEtPregunta && posPregFin != posRespFin -> {
@@ -37,12 +39,12 @@ class setClickSaveUseCase @Inject constructor(
             else -> {
                 // Label pregunta
                 if (isEtPregunta) {
-                    preguntas[contadorPregunta] = responseSpanPalabra.editable.toString()
+                    preguntas[contadorPregunta] = responseEtiquetaEditable.toString()
                 } else {
                     if (contadorPregunta > posRespFin) {
-                        respuestas.add(contadorPregunta, responseSpanPalabra.editable.toString())
+                        respuestas.add(contadorPregunta, responseEtiquetaEditable.toString())
                     } else {
-                        respuestas[contadorPregunta] = responseSpanPalabra.editable.toString()
+                        respuestas[contadorPregunta] = responseEtiquetaEditable.toString()
                     }
                 }
 

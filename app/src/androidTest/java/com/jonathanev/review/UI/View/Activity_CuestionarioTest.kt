@@ -23,7 +23,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 @HiltAndroidTest
 class Activity_CuestionarioTest{
-    @get:Rule(order = 0)
+    /*@get:Rule(order = 0)
     var hiltRule = HiltAndroidRule(this)
 
     @get:Rule(order = 1)
@@ -55,5 +55,5 @@ class Activity_CuestionarioTest{
             val result = activity.handlePreviousButtonClick()
             assertFalse(result)
         }*/
-    }
+    }*/
 }

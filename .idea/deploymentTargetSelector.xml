@@ -13,21 +13,13 @@
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
-      <SelectionState runConfigName="darle_click_al_botón_de_atras_al_crear_una_guia()">
-        <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2024-08-28T22:05:30.664803100Z">
-          <Target type="DEFAULT_BOOT">
-            <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\jose_\.android\avd\Pixel_4_XL_API_35.avd" />
-            </handle>
-          </Target>
-        </DropdownSelection>
-        <DialogSelection />
-      </SelectionState>
-      <SelectionState runConfigName="Activity_CuestionarioTest">
+      <SelectionState runConfigName="should_apply_color_to_the_last_character()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="useAppContext()">
+      <SelectionState runConfigName="setPintarLetraUseCaseTest">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="Tests in 'com'">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

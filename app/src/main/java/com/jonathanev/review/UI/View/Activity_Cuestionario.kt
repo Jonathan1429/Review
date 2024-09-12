@@ -60,12 +60,8 @@ class Activity_Cuestionario : AppCompatActivity() {
     private lateinit var binding: ActivityCuestionarioBinding
     private var nombreArchivo: String? = null
     private var colorActual: Int = 0
-    private var colorPintarPalabra: Int = 0
-    private var posColorInicial: Int = -1
-    private var posColorFinal: Int = -1
     private var contadorImagen = 0
     private var longCaracteres = 0
-    private var pregResBandera = false // Bandera para cuando se le de click atras o delante.
     private val activityCuestionarioViewModel by viewModels<ActivityCuestionarioViewModel>()
     private var filename: String = "" // Ruta/imagen.png
 

@@ -62,7 +62,7 @@ import javax.xml.parsers.ParserConfigurationException
 
 @AndroidEntryPoint
 class Activity_Modificar : AppCompatActivity() {
-    private var binding: ActivityModificarBinding? = null
+    private lateinit var binding: ActivityModificarBinding
     private lateinit var nombreArchivo: String
     private var colorActual: Int = 0
     private var colorPintarPalabra: Int = 0
@@ -91,18 +91,18 @@ class Activity_Modificar : AppCompatActivity() {
                 // Toma permisos de persistencia para la URI
                 takePersistableUriPermission(uri)
 
-                if (binding!!.etPregResp.text!!.isNotEmpty()) {
+                if (binding.etPregResp.text!!.isNotEmpty()) {
                     AlertDialog.Builder(this@Activity_Modificar)
                         .setTitle("¡Atención!")
                         .setMessage("Se borrará el texto para agregar la imagen, ¿Quieres continuar?")
                         .setPositiveButton(
                             "Si"
                         ) { _, _ ->
-                            binding!!.ivImagen.setImage(ImageSource.uri(uri)) //setImageURI(uri)
-                            binding!!.tilContenidoPregResp.visibility = View.GONE
+                            binding.ivImagen.setImage(ImageSource.uri(uri)) //setImageURI(uri)
+                            binding.tilContenidoPregResp.visibility = View.GONE
 
-                            binding!!.ivImagen.visibility = View.VISIBLE
-                            binding!!.etPregResp.setText(uri.toString())
+                            binding.ivImagen.visibility = View.VISIBLE
+                            binding.etPregResp.setText(uri.toString())
                         }
                         .setNegativeButton(
                             "Cancelar"
@@ -110,17 +110,17 @@ class Activity_Modificar : AppCompatActivity() {
                             dialog.dismiss()
                         }.create().show()
                 } else {
-                    binding!!.ivImagen.setImage(ImageSource.uri(uri)) //setImageURI(uri)
-                    binding!!.tilContenidoPregResp.visibility = View.GONE
+                    binding.ivImagen.setImage(ImageSource.uri(uri)) //setImageURI(uri)
+                    binding.tilContenidoPregResp.visibility = View.GONE
 
-                    binding!!.ivImagen.visibility = View.VISIBLE
-                    binding!!.etPregResp.setText(uri.toString())
+                    binding.ivImagen.visibility = View.VISIBLE
+                    binding.etPregResp.setText(uri.toString())
                 }
             } else {
-                binding!!.imgvCancelar.visibility = View.GONE
+                binding.imgvCancelar.visibility = View.GONE
 
-                binding!!.imgvQuitColor.visibility = View.VISIBLE
-                binding!!.imgvSelColor.visibility = View.VISIBLE
+                binding.imgvQuitColor.visibility = View.VISIBLE
+                binding.imgvSelColor.visibility = View.VISIBLE
             }
         }
 
@@ -133,31 +133,82 @@ class Activity_Modificar : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityModificarBinding.inflate(layoutInflater)
-        setContentView(binding!!.root)
+        setContentView(binding.root)
 
         // Sección de anuncios
         initLoadAds()
 
         initUI()
         ruta = intent.extras!!.getString("ruta").toString()
-        binding!!.barraSuperiorRegreso.imgvBack.setOnClickListener {
+        binding.barraSuperiorRegreso.imgvBack.setOnClickListener {
+            cancelarArchivo()
             deleteImages()
-
-            Toast.makeText(
-                applicationContext,
-                "No se hicieron cambios en el archivo",
-                Toast.LENGTH_SHORT
-            ).show()
-
-            Log.i("Modificar archivo: ", "No se hicieron cambios en el archivo")
-            finish()
         }
 
-        binding!!.imgvPregResp.setOnClickListener {
-            modificarViewModel.clickedRoll()
+        binding.imgvPregResp.setOnClickListener {
+            val editable: Editable =
+                Editable.Factory.getInstance().newEditable(binding.etPregResp.text)
+
+            var isEtPregunta = false
+            if (binding.lblPregResp.text.toString() == "Pregunta") {
+                isEtPregunta = true
+            }
+            modificarViewModel.clickedRoll(
+                editable,
+                isEtPregunta
+            )
         }
 
-        binding!!.imgvPrevious.setOnClickListener {
+        modificarViewModel.uiStateBtnRoll.observe(this) { uiState ->
+            if (uiState.estadoUI.isUpdatedAskAns) {
+                girarCardView()
+                if (uiState.estadoUI.isEtPregunta) {
+                    binding.lblPregResp.text = "Respuesta"
+                } else {
+                    binding.lblPregResp.text = "Pregunta"
+                }
+
+                if (uiState.estadoUI.isClearText) {
+                    binding.etPregResp.text?.clear()
+                } else {
+                    // Agregar el texto en el et cuando hay un builder
+                    if (!uiState.estadoUI.isShowImage) {
+                        binding.etPregResp.text = uiState.builder
+                    } else {
+                        // Cuando hay una imagen hay que poner esto
+                        binding.etPregResp.setText(uiState.estadoImagen.textImgEcrypted)
+                        binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
+                    }
+                }
+
+                binding.tilContenidoPregResp.visibility =
+                    if (uiState.estadoUI.isShowImage) View.GONE else View.VISIBLE
+                binding.ivImagen.visibility =
+                    if (uiState.estadoUI.isShowImage) View.VISIBLE else View.GONE
+                binding.imgvCancelar.visibility =
+                    if (uiState.estadoUI.isShowCancelar) View.VISIBLE else View.GONE
+                binding.imgvQuitColor.visibility =
+                    if (uiState.estadoUI.isShowQuitColor) View.VISIBLE else View.GONE
+                binding.imgvSelColor.visibility =
+                    if (uiState.estadoUI.isShowSelColor) View.VISIBLE else View.GONE
+
+                if (uiState.responseSpanPalabra?.isDoubleColors == true) {
+                    Toast.makeText(
+                        applicationContext,
+                        uiState.responseSpanPalabra.message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            } else {
+                Toast.makeText(
+                    applicationContext,
+                    uiState.message,
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+
+        binding.imgvPrevious.setOnClickListener {
             // El contadorPregunta tiene que ser mayor a 0 sino significa que no hay preguntas anteriores.
             if (contadorPregunta > 0) {
                 // Se le quita 1 para hacer referencia al arreglo
@@ -169,7 +220,7 @@ class Activity_Modificar : AppCompatActivity() {
                 // de lo que esté en la posición 0.
                 if (contadorPregunta <= longi) {
                     // Validamos campos vacios en la pregunta y respuesta.
-                    if (binding!!.etPregResp.text.toString().isEmpty()) {
+                    if (binding.etPregResp.text.toString().isEmpty()) {
                         Toast.makeText(
                             applicationContext,
                             "Asegurate de no dejar ningun campo vacio",
@@ -185,7 +236,7 @@ class Activity_Modificar : AppCompatActivity() {
 
                         // Si los campos están bien se sobre escribe.
                         var editable: Editable =
-                            Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
+                            Editable.Factory.getInstance().newEditable(binding.etPregResp.text)
                         var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
                             0,
                             editable.length,
@@ -195,20 +246,20 @@ class Activity_Modificar : AppCompatActivity() {
                         // Se colocan las etiquetas en cada palabra con color
                         colocarEtiquetas(colorSpans, editable)
 
-                        if (binding!!.lblPregResp.text.toString() == "Pregunta") {
+                        if (binding.lblPregResp.text.toString() == "Pregunta") {
                             preguntas[contadorPregunta] = editable.toString()
                         } else {
                             respuestas[contadorPregunta] = editable.toString()
                         }
 
-                        binding!!.lblPregResp.text = "Pregunta"
+                        binding.lblPregResp.text = "Pregunta"
                         // Pintamos el texto en la pregunta actual
                         pintarTexto(contadorPregunta - 1)
                     }
                 } else {
-                    if (binding!!.lblPregResp.text.toString() == "Pregunta" && binding!!.etPregResp.text.toString()
+                    if (binding.lblPregResp.text.toString() == "Pregunta" && binding!!.etPregResp.text.toString()
                             .isNotEmpty() ||
-                        binding!!.lblPregResp.text.toString() == "Respuesta" && binding!!.etPregResp.text.toString()
+                        binding.lblPregResp.text.toString() == "Respuesta" && binding!!.etPregResp.text.toString()
                             .isEmpty()
                     ) {
                         Toast.makeText(
@@ -222,11 +273,11 @@ class Activity_Modificar : AppCompatActivity() {
                     } else {
                         setSpanPalabra()
 
-                        if (binding!!.lblPregResp.text.toString() == "Respuesta") {
+                        if (binding.lblPregResp.text.toString() == "Respuesta") {
                             // Si los campos están bien se sobre escribe.
                             var editable: Editable =
                                 Editable.Factory.getInstance()
-                                    .newEditable(binding!!.etPregResp.text)
+                                    .newEditable(binding.etPregResp.text)
                             var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
                                 0,
                                 editable.length,
@@ -237,7 +288,7 @@ class Activity_Modificar : AppCompatActivity() {
                             colocarEtiquetas(colorSpans, editable)
 
                             respuestas.add(contadorPregunta, editable.toString())
-                            binding!!.lblPregResp.text = "Pregunta"
+                            binding.lblPregResp.text = "Pregunta"
                         }
 
                         pintarTexto(contadorPregunta - 1)
@@ -256,12 +307,12 @@ class Activity_Modificar : AppCompatActivity() {
             }
         }
 
-        binding!!.imgvNext.setOnClickListener {
+        binding.imgvNext.setOnClickListener {
             // Validamos campos vacios en la pregunta o respuesta.
             val longi: Int = respuestas.size - 1
 
-            if ((contadorPregunta <= longi && binding!!.etPregResp.text.toString()
-                    .isEmpty()) || (binding!!.lblPregResp.text == "Pregunta" && contadorPregunta > longi) || binding!!.etPregResp.text.toString()
+            if ((contadorPregunta <= longi && binding.etPregResp.text.toString()
+                    .isEmpty()) || (binding.lblPregResp.text == "Pregunta" && contadorPregunta > longi) || binding!!.etPregResp.text.toString()
                     .isEmpty()
             ) {
                 Toast.makeText(
@@ -280,7 +331,7 @@ class Activity_Modificar : AppCompatActivity() {
 
                 if (contadorPregunta <= longi) {
                     var editable: Editable =
-                        Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
+                        Editable.Factory.getInstance().newEditable(binding.etPregResp.text)
                     var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
                         0,
                         editable.length,
@@ -290,7 +341,7 @@ class Activity_Modificar : AppCompatActivity() {
                     // Se colocan las etiquetas en cada palabra con color
                     colocarEtiquetas(colorSpans, editable)
 
-                    if (binding!!.lblPregResp.text.toString() == "Pregunta") {
+                    if (binding.lblPregResp.text.toString() == "Pregunta") {
                         preguntas[contadorPregunta] = editable.toString()
                     } else {
                         respuestas[contadorPregunta] = editable.toString()
@@ -301,12 +352,12 @@ class Activity_Modificar : AppCompatActivity() {
                     if (contadorPregunta < longi) {
                         // Pintamos el texto en la pregunta actual
 
-                        binding!!.lblPregResp.text = "Pregunta"
-                        binding!!.tilContenidoPregResp.visibility = View.VISIBLE
-                        binding!!.ivImagen.visibility = View.GONE
-                        binding!!.imgvCancelar.visibility = View.GONE
-                        binding!!.imgvQuitColor.visibility = View.VISIBLE
-                        binding!!.imgvSelColor.visibility = View.VISIBLE
+                        binding.lblPregResp.text = "Pregunta"
+                        binding.tilContenidoPregResp.visibility = View.VISIBLE
+                        binding.ivImagen.visibility = View.GONE
+                        binding.imgvCancelar.visibility = View.GONE
+                        binding.imgvQuitColor.visibility = View.VISIBLE
+                        binding.imgvSelColor.visibility = View.VISIBLE
                         pintarTexto(contadorPregunta + 1)
                     } else if (!dialMasPreg) {
                         // ¿Quieres agregar más preguntas?
@@ -316,15 +367,15 @@ class Activity_Modificar : AppCompatActivity() {
                             .setPositiveButton(
                                 "Si"
                             ) { _, _ -> // Cambiaremos el texto del toolbar.
-                                //binding!!.barraSuperiorRegreso.tvTituloToolbar.text =
+                                //binding.barraSuperiorRegreso.tvTituloToolbar.text =
                                 //    "Agrega más preguntas a la guía"
-                                binding!!.lblPregResp.text = "Pregunta"
-                                binding!!.etPregResp.setText("")
-                                binding!!.tilContenidoPregResp.visibility = View.VISIBLE
-                                binding!!.ivImagen.visibility = View.GONE
-                                binding!!.imgvCancelar.visibility = View.GONE
-                                binding!!.imgvQuitColor.visibility = View.VISIBLE
-                                binding!!.imgvSelColor.visibility = View.VISIBLE
+                                binding.lblPregResp.text = "Pregunta"
+                                binding.etPregResp.setText("")
+                                binding.tilContenidoPregResp.visibility = View.VISIBLE
+                                binding.ivImagen.visibility = View.GONE
+                                binding.imgvCancelar.visibility = View.GONE
+                                binding.imgvQuitColor.visibility = View.VISIBLE
+                                binding.imgvSelColor.visibility = View.VISIBLE
                                 dialMasPreg = true
                                 Toast.makeText(
                                     applicationContext, "Ya puedes agregar " +
@@ -348,23 +399,23 @@ class Activity_Modificar : AppCompatActivity() {
                         // Si le das click a que si, ya no te preguntará nuevamente
                         // aunque te regreses a componer otras preg.
                         // Si el contadorPregunta es igual entonces solo escribiremos los campos vacios.
-                        binding!!.lblPregResp.text = "Pregunta"
-                        binding!!.tilContenidoPregResp.visibility = View.VISIBLE
-                        binding!!.ivImagen.visibility = View.GONE
+                        binding.lblPregResp.text = "Pregunta"
+                        binding.tilContenidoPregResp.visibility = View.VISIBLE
+                        binding.ivImagen.visibility = View.GONE
 
-                        binding!!.imgvCancelar.visibility = View.GONE
-                        binding!!.imgvQuitColor.visibility = View.VISIBLE
-                        binding!!.imgvSelColor.visibility = View.VISIBLE
+                        binding.imgvCancelar.visibility = View.GONE
+                        binding.imgvQuitColor.visibility = View.VISIBLE
+                        binding.imgvSelColor.visibility = View.VISIBLE
 
-                        binding!!.etPregResp.setText("")
+                        binding.etPregResp.setText("")
                     }
                 } else { // Si contadorPregunta es mayor a lo que hay en el arreglo.
-                    binding!!.tilContenidoPregResp.visibility = View.VISIBLE
-                    binding!!.ivImagen.visibility = View.GONE
+                    binding.tilContenidoPregResp.visibility = View.VISIBLE
+                    binding.ivImagen.visibility = View.GONE
 
                     var editable: Editable =
                         Editable.Factory.getInstance()
-                            .newEditable(binding!!.etPregResp.text)
+                            .newEditable(binding.etPregResp.text)
                     var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
                         0,
                         editable.length,
@@ -375,19 +426,19 @@ class Activity_Modificar : AppCompatActivity() {
                     colocarEtiquetas(colorSpans, editable)
                     respuestas.add(contadorPregunta, editable.toString())
 
-                    binding!!.imgvCancelar.visibility = View.GONE
-                    binding!!.imgvQuitColor.visibility = View.VISIBLE
-                    binding!!.imgvSelColor.visibility = View.VISIBLE
+                    binding.imgvCancelar.visibility = View.GONE
+                    binding.imgvQuitColor.visibility = View.VISIBLE
+                    binding.imgvSelColor.visibility = View.VISIBLE
 
-                    binding!!.lblPregResp.text = "Pregunta"
-                    binding!!.etPregResp.setText("")
+                    binding.lblPregResp.text = "Pregunta"
+                    binding.etPregResp.setText("")
 
                 }
                 contadorPregunta++
             }
         }
 
-        binding!!.imgvEliminar.setOnClickListener {
+        binding.imgvEliminar.setOnClickListener {
             AlertDialog.Builder(this@Activity_Modificar)
                 .setTitle("¡Atención!")
                 .setMessage("¿Quieres eliminar la pregunta?")
@@ -400,33 +451,33 @@ class Activity_Modificar : AppCompatActivity() {
                         //preguntas.removeFirst()
                         //respuestas.removeFirst()
 
-                        if (binding!!.lblPregResp.text.toString() == "Pregunta") {
-                            binding!!.etPregResp.setText("")
+                        if (binding.lblPregResp.text.toString() == "Pregunta") {
+                            binding.etPregResp.setText("")
                         } else {
-                            binding!!.lblPregResp.text = "Pregunta"
-                            binding!!.etPregResp.setText("")
+                            binding.lblPregResp.text = "Pregunta"
+                            binding.etPregResp.setText("")
                         }
                     } else if ((contadorPregunta + 1) == longi && (contadorPregunta + 1) == 1) {
                         preguntas.removeAt(contadorPregunta)
                         respuestas.removeAt(contadorPregunta)
-                        binding!!.lblPregResp.text = "Pregunta"
-                        binding!!.imgvSelColor.visibility = View.GONE
-                        binding!!.ivImagen.visibility = View.GONE
-                        binding!!.tilContenidoPregResp.visibility = View.VISIBLE
-                        binding!!.etPregResp.setText("")
+                        binding.lblPregResp.text = "Pregunta"
+                        binding.imgvSelColor.visibility = View.GONE
+                        binding.ivImagen.visibility = View.GONE
+                        binding.tilContenidoPregResp.visibility = View.VISIBLE
+                        binding.etPregResp.setText("")
                     } else if ((contadorPregunta + 1) == longi) {
                         preguntas.removeAt(contadorPregunta)
                         respuestas.removeAt(contadorPregunta)
                         contadorPregunta--
-                        binding!!.lblPregResp.text = "Pregunta"
+                        binding.lblPregResp.text = "Pregunta"
                         pintarTexto(contadorPregunta)
                     } else if (contadorPregunta < longi) {
                         preguntas.removeAt(contadorPregunta)
                         respuestas.removeAt(contadorPregunta)
-                        binding!!.lblPregResp.text = "Pregunta"
+                        binding.lblPregResp.text = "Pregunta"
                         pintarTexto(contadorPregunta)
                     } else { // Cuando el contador es mayor a longi
-                        if (binding!!.lblPregResp.text.toString() == "Pregunta") {
+                        if (binding.lblPregResp.text.toString() == "Pregunta") {
                             contadorPregunta--
                             pintarTexto(contadorPregunta)
                         } else {
@@ -440,12 +491,12 @@ class Activity_Modificar : AppCompatActivity() {
                 }.create().show()
         }
 
-        binding!!.barraSuperiorRegreso.imgvSave.setOnClickListener {
+        binding.barraSuperiorRegreso.imgvSave.setOnClickListener {
             modificarViewModel.clickedSave()
         }
 
         // Visualización del DialogFragment de selección de colores.
-        binding!!.imgvSelColor.setOnClickListener {
+        binding.imgvSelColor.setOnClickListener {
             // Unicamente abrimos el dialogo y lo mostramos en la pantalla.
             val dialogo: Fragment_DialogColoresMod_popup = Fragment_DialogColoresMod_popup()
             //=====================================================================================================================
@@ -453,44 +504,44 @@ class Activity_Modificar : AppCompatActivity() {
         }
 
         // Cambio de botones visibles
-        binding!!.imgvCancelar.setOnClickListener {
-            binding!!.imgvSelColor.visibility = View.VISIBLE
-            binding!!.imgvQuitColor.visibility = View.VISIBLE
-            binding!!.tilContenidoPregResp.visibility = View.VISIBLE
+        binding.imgvCancelar.setOnClickListener {
+            binding.imgvSelColor.visibility = View.VISIBLE
+            binding.imgvQuitColor.visibility = View.VISIBLE
+            binding.tilContenidoPregResp.visibility = View.VISIBLE
 
-            binding!!.ivImagen.visibility = View.GONE
-            binding!!.imgvCancelar.visibility = View.GONE
+            binding.ivImagen.visibility = View.GONE
+            binding.imgvCancelar.visibility = View.GONE
 
-            binding!!.etPregResp.setText("")
+            binding.etPregResp.setText("")
         }
 
         // Eliminar textos con colores
-        binding!!.imgvQuitColor.setOnClickListener {
-            val text = binding!!.etPregResp.text
+        binding.imgvQuitColor.setOnClickListener {
+            val text = binding.etPregResp.text
             val spannableStringBuilder: SpannableStringBuilder = SpannableStringBuilder(text)
             spannableStringBuilder.clearSpans()
 
-            binding!!.etPregResp.text = spannableStringBuilder
+            binding.etPregResp.text = spannableStringBuilder
         }
 
-        binding!!.imgvImage.setOnClickListener {
-            binding!!.imgvSelColor.visibility = View.GONE
-            binding!!.imgvQuitColor.visibility = View.GONE
+        binding.imgvImage.setOnClickListener {
+            binding.imgvSelColor.visibility = View.GONE
+            binding.imgvQuitColor.visibility = View.GONE
 
-            binding!!.imgvCancelar.visibility = View.VISIBLE
+            binding.imgvCancelar.visibility = View.VISIBLE
 
             // pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
             openSomeActivityForResult()
         }
 
-        binding!!.etPregResp.addTextChangedListener(object : TextWatcher {
+        binding.etPregResp.addTextChangedListener(object : TextWatcher {
             private var textoAnterior: String = ""
             private var seAgregoSaltoDeLinea = false
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
                 // Guarda el texto antes del cambio
                 textoAnterior = s?.toString() ?: ""
-                longCaracteres = binding!!.etPregResp.length()
+                longCaracteres = binding.etPregResp.length()
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
@@ -501,7 +552,7 @@ class Activity_Modificar : AppCompatActivity() {
 
             override fun afterTextChanged(texto: Editable?) {
                 if (!texto.toString()
-                        .contains(baseRutaImagenCifrado) && (binding!!.etPregResp.length() - longCaracteres) == 1
+                        .contains(baseRutaImagenCifrado) && (binding.etPregResp.length() - longCaracteres) == 1
                 ) {
                     // Si hay un salto de linea o es color negro no se pinta nada
                     if (colorActual != -16777216 && !seAgregoSaltoDeLinea) {
@@ -517,8 +568,8 @@ class Activity_Modificar : AppCompatActivity() {
                 // tamaño 3-1 = 2 [0,1,2].
                 val longi: Int = respuestas.size
 
-                if (binding!!.etPregResp.text.toString().isEmpty()) {
-                    if (respuestas.isEmpty() && binding!!.lblPregResp.text.toString() == "Pregunta") {
+                if (binding.etPregResp.text.toString().isEmpty()) {
+                    if (respuestas.isEmpty() && binding.lblPregResp.text.toString() == "Pregunta") {
                         Toast.makeText(
                             applicationContext,
                             "Debes tener como minimo una pregunta",
@@ -528,10 +579,10 @@ class Activity_Modificar : AppCompatActivity() {
                         Log.i("Crear pregunta: ", "Debes tener como minimo una pregunta")
 
                         modificarViewModel.clickedSave()
-                    } else if ((contadorPregunta + 1) > longi && binding!!.lblPregResp.text.toString() == "Pregunta") {
+                    } else if ((contadorPregunta + 1) > longi && binding.lblPregResp.text.toString() == "Pregunta") {
                         setSpanPalabra()
                         borrarCrearXML(nombreArchivo)
-                        binding!!.ivImagen.visibility = View.GONE
+                        binding.ivImagen.visibility = View.GONE
                     } else {
                         Toast.makeText(
                             applicationContext,
@@ -547,13 +598,13 @@ class Activity_Modificar : AppCompatActivity() {
                         modificarViewModel.clickedSave()
                     }
                 } else {
-                    if (binding!!.lblPregResp.text.toString() == "Pregunta") {
+                    if (binding.lblPregResp.text.toString() == "Pregunta") {
                         if ((contadorPregunta + 1) <= longi && longi > 0) {
                             setSpanPalabra()
 
                             var editable: Editable =
                                 Editable.Factory.getInstance()
-                                    .newEditable(binding!!.etPregResp.text)
+                                    .newEditable(binding.etPregResp.text)
                             var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
                                 0,
                                 editable.length,
@@ -585,7 +636,7 @@ class Activity_Modificar : AppCompatActivity() {
 
                             var editable: Editable =
                                 Editable.Factory.getInstance()
-                                    .newEditable(binding!!.etPregResp.text)
+                                    .newEditable(binding.etPregResp.text)
                             var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
                                 0,
                                 editable.length,
@@ -603,7 +654,7 @@ class Activity_Modificar : AppCompatActivity() {
 
                                 var editable: Editable =
                                     Editable.Factory.getInstance()
-                                        .newEditable(binding!!.etPregResp.text)
+                                        .newEditable(binding.etPregResp.text)
                                 var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
                                     0,
                                     editable.length,
@@ -620,7 +671,7 @@ class Activity_Modificar : AppCompatActivity() {
 
                                 var editable: Editable =
                                     Editable.Factory.getInstance()
-                                        .newEditable(binding!!.etPregResp.text)
+                                        .newEditable(binding.etPregResp.text)
                                 var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
                                     0,
                                     editable.length,
@@ -639,91 +690,29 @@ class Activity_Modificar : AppCompatActivity() {
             }
         }
 
-        modificarViewModel.rollClicked.observe(this) {
-            if (it) {
-                if (binding!!.etPregResp.text.toString().isNotEmpty()) {
-                    setSpanPalabra()
-
-                    var editable: Editable =
-                        Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
-                    var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
-                        0,
-                        editable.length,
-                        ForegroundColorSpan::class.java
-                    )
-
-                    // Se colocan las etiquetas en cada palabra con color
-                    colocarEtiquetas(colorSpans, editable)
-
-                    if (binding!!.lblPregResp.text.toString() == "Pregunta") {
-                        if ((contadorPregunta + 1) > respuestas.size) {
-                            binding!!.lblPregResp.text = "Respuesta"
-                            preguntas.add(contadorPregunta, editable.toString())
-                            binding!!.etPregResp.setText("")
-                            binding!!.ivImagen.visibility = View.GONE
-                            binding!!.tilContenidoPregResp.visibility = View.VISIBLE
-
-                            binding!!.imgvCancelar.visibility = View.GONE
-                            binding!!.imgvQuitColor.visibility = View.VISIBLE
-                            binding!!.imgvSelColor.visibility = View.VISIBLE
-                        } else {
-                            binding!!.lblPregResp.text = "Respuesta"
-                            preguntas[contadorPregunta] = editable.toString()
-                            pintarTexto(contadorPregunta)
-                        }
-                        girarCardView()
-                    } else {
-                        if ((contadorPregunta + 1) > respuestas.size) {
-                            binding!!.lblPregResp.text = "Pregunta"
-                            respuestas.add(contadorPregunta, editable.toString())
-                            pintarTexto(contadorPregunta)
-                        } else {
-                            binding!!.lblPregResp.text = "Pregunta"
-                            respuestas[contadorPregunta] = editable.toString()
-                            pintarTexto(contadorPregunta)
-                        }
-                        girarCardView()
-                    }
-
-                    modificarViewModel.clickedRoll()
-                    posColorFinal = -1
-                    posColorInicial = -1
-                    colorPintarPalabra = 0
-                } else {
-                    Toast.makeText(
-                        applicationContext,
-                        "Asegurate de no dejar ningun campo vacio",
-                        Toast.LENGTH_SHORT
-                    ).show()
-
-                    Log.i("Crear pregunta: ", "Asegurate de no dejar ningun campo vacio")
-                }
-            }
-        }
-
         modificarViewModel.colorAnterior.observe(this) {
             if (posColorInicial == -1) {
                 colorPintarPalabra = it
 
-                val cursorPosition = binding!!.etPregResp.selectionStart
+                val cursorPosition = binding.etPregResp.selectionStart
                 val lastCharIndex = cursorPosition - 1
                 posColorInicial = lastCharIndex
             } else {
-                /*val cursorPosition = binding!!.etPregResp.selectionStart
+                /*val cursorPosition = binding.etPregResp.selectionStart
                 posColorFinal = cursorPosition*/
 
                 // Obtener los spans dentro del rango especificado
-                val spansToRemove = binding!!.etPregResp.text!!.getSpans(
+                val spansToRemove = binding.etPregResp.text!!.getSpans(
                     posColorInicial,
                     posColorFinal,
                     ForegroundColorSpan::class.java
                 )
 
                 for (span in spansToRemove) {
-                    binding!!.etPregResp.text!!.removeSpan(span)
+                    binding.etPregResp.text!!.removeSpan(span)
                 }
 
-                binding!!.etPregResp.text!!.setSpan(
+                binding.etPregResp.text!!.setSpan(
                     ForegroundColorSpan(colorPintarPalabra),
                     posColorInicial,
                     posColorFinal,
@@ -753,10 +742,10 @@ class Activity_Modificar : AppCompatActivity() {
             nombreArchivo = it.nombreGuia
             // Guardo el nombre del archivo enviado desde el popupFragmentListarGuias.
             if (nombreArchivo.contains(".xml")) {
-                nombreArchivo = nombreArchivo!!.replace(".xml".toRegex(), "")
+                nombreArchivo = nombreArchivo.replace(".xml".toRegex(), "")
             }
 
-            binding!!.barraSuperiorRegreso.tvTituloToolbar.text = "Modificando: $nombreArchivo"
+            binding.barraSuperiorRegreso.tvTituloToolbar.text = "Modificando: $nombreArchivo"
             colorActual = Color.BLACK
 
             // Aquí simplemente nos aseguramos que tenga el xml, si lo tiene no entramos.
@@ -767,7 +756,10 @@ class Activity_Modificar : AppCompatActivity() {
 
             // Obtenemos los datos del XML y los guardamos en su respectivo ArrayList.
             obtenerDatosXML()
+            modificarViewModel.getObtenerDatosXML(nombreArchivo, ruta)
+        }
 
+        modificarViewModel.uiShowDates.observe(this){
             // Pintamos el texto del contador actual.
             pintarTexto(contadorPregunta)
         }
@@ -775,7 +767,7 @@ class Activity_Modificar : AppCompatActivity() {
 
     private fun setSpanPalabra() {
         var editable: Editable =
-            Editable.Factory.getInstance().newEditable(binding!!.etPregResp.text)
+            Editable.Factory.getInstance().newEditable(binding.etPregResp.text)
         var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
             0,
             editable.length,
@@ -819,17 +811,17 @@ class Activity_Modificar : AppCompatActivity() {
             // Se agrupan los valores por colores (En un solo span se agrupa)
             if (isColNuevo || (end - endAnterior) != 1) {
                 // Obtener los spans dentro del rango especificado
-                val spansToRemove = binding!!.etPregResp.text!!.getSpans(
+                val spansToRemove = binding.etPregResp.text!!.getSpans(
                     start,
                     endAnterior,
                     ForegroundColorSpan::class.java
                 )
 
                 for (span in spansToRemove) {
-                    binding!!.etPregResp.text!!.removeSpan(span)
+                    binding.etPregResp.text!!.removeSpan(span)
                 }
 
-                binding!!.etPregResp.text!!.setSpan(
+                binding.etPregResp.text!!.setSpan(
                     ForegroundColorSpan(colorAnterior),
                     start,
                     endAnterior,
@@ -851,17 +843,17 @@ class Activity_Modificar : AppCompatActivity() {
         // El ultimo span de color se pinta aquí
         if (colorSpans.isNotEmpty()) {
             // Obtener los spans dentro del rango especificado
-            val spansToRemove = binding!!.etPregResp.text!!.getSpans(
+            val spansToRemove = binding.etPregResp.text!!.getSpans(
                 start,
                 endAnterior,
                 ForegroundColorSpan::class.java
             )
 
             for (span in spansToRemove) {
-                binding!!.etPregResp.text!!.removeSpan(span)
+                binding.etPregResp.text!!.removeSpan(span)
             }
 
-            binding!!.etPregResp.text!!.setSpan(
+            binding.etPregResp.text!!.setSpan(
                 ForegroundColorSpan(colorAnterior),
                 start,
                 endAnterior,
@@ -903,10 +895,10 @@ class Activity_Modificar : AppCompatActivity() {
                     }
                 }
             } else {
-                binding!!.imgvCancelar.visibility = View.GONE
+                binding.imgvCancelar.visibility = View.GONE
 
-                binding!!.imgvQuitColor.visibility = View.VISIBLE
-                binding!!.imgvSelColor.visibility = View.VISIBLE
+                binding.imgvQuitColor.visibility = View.VISIBLE
+                binding.imgvSelColor.visibility = View.VISIBLE
             }
         }
 
@@ -922,8 +914,8 @@ class Activity_Modificar : AppCompatActivity() {
                 var ruta: String = file.toString()
                 ruta = ruta.replace("guias".toRegex(), "imagenes")
 
-                if (binding!!.etPregResp.text!!.isNotEmpty()
-                    && !binding!!.etPregResp.text!!.contains(baseRutaImagenCifrado)
+                if (binding.etPregResp.text!!.isNotEmpty()
+                    && !binding.etPregResp.text!!.contains(baseRutaImagenCifrado)
                 ) {
                     AlertDialog.Builder(this@Activity_Modificar)
                         .setTitle("¡Atención!")
@@ -941,14 +933,14 @@ class Activity_Modificar : AppCompatActivity() {
                             // Borrar archivo
                             File(rutaPrin, filename).delete()
 
-                            binding!!.ivImagen.setImage(ImageSource.uri("$fileImagesPiv/$filename")) //setImageURI(uri)
+                            binding.ivImagen.setImage(ImageSource.uri("$fileImagesPiv/$filename")) //setImageURI(uri)
                             val cifrado = cifrar("$baseRutaImagen$ruta/$filename", 3)
-                            binding!!.etPregResp.setText(cifrado)
+                            binding.etPregResp.setText(cifrado)
                             // contadorImagen += 1
                             // filename = "$contadorImagen.png"
 
-                            binding!!.tilContenidoPregResp.visibility = View.GONE
-                            binding!!.ivImagen.visibility = View.VISIBLE
+                            binding.tilContenidoPregResp.visibility = View.GONE
+                            binding.ivImagen.visibility = View.VISIBLE
 
                             modificarViewModel.llamaCorruIncremento()
                         }
@@ -956,10 +948,10 @@ class Activity_Modificar : AppCompatActivity() {
                             "Cancelar"
                         ) { dialog, _ ->
                             dialog.dismiss()
-                            binding!!.imgvCancelar.visibility = View.GONE
+                            binding.imgvCancelar.visibility = View.GONE
 
-                            binding!!.imgvQuitColor.visibility = View.VISIBLE
-                            binding!!.imgvSelColor.visibility = View.VISIBLE
+                            binding.imgvQuitColor.visibility = View.VISIBLE
+                            binding.imgvSelColor.visibility = View.VISIBLE
                         }.create().show()
                 } else {
                     Files.copy(
@@ -971,12 +963,12 @@ class Activity_Modificar : AppCompatActivity() {
                     // Borrar archivo
                     File(rutaPrin, filename).delete()
 
-                    binding!!.ivImagen.setImage(ImageSource.uri("$fileImagesPiv/$filename")) //setImageURI(uri)
-                    binding!!.tilContenidoPregResp.visibility = View.GONE
-                    binding!!.ivImagen.visibility = View.VISIBLE
+                    binding.ivImagen.setImage(ImageSource.uri("$fileImagesPiv/$filename")) //setImageURI(uri)
+                    binding.tilContenidoPregResp.visibility = View.GONE
+                    binding.ivImagen.visibility = View.VISIBLE
 
                     val cifrado = cifrar("$baseRutaImagen$ruta/$filename", 3)
-                    binding!!.etPregResp.setText(cifrado)
+                    binding.etPregResp.setText(cifrado)
                     val l = preguntas[contadorPregunta]
                     // contadorImagen += 1
                     // filename = "$contadorImagen.png"
@@ -999,9 +991,9 @@ class Activity_Modificar : AppCompatActivity() {
         MobileAds.initialize(this) { }
 
         val adRequest = AdRequest.Builder().build()
-        binding!!.adView.loadAd(adRequest)
+        binding.adView.loadAd(adRequest)
 
-        binding!!.adView.adListener = object : AdListener() {
+        binding.adView.adListener = object : AdListener() {
             override fun onAdLoaded() {
             }
 
@@ -1026,22 +1018,22 @@ class Activity_Modificar : AppCompatActivity() {
     }
 
     private fun girarCardView() {
-        if (!binding!!.tilContenidoPregResp.isGone) {
+        if (!binding.tilContenidoPregResp.isGone) {
             var flipAnimator =
-                ObjectAnimator.ofFloat(binding!!.flContenidoPregResp, "rotationY", 0f, 180f)
+                ObjectAnimator.ofFloat(binding.flContenidoPregResp, "rotationY", 0f, 180f)
             flipAnimator.duration = 0 // Duración de la animación en milisegundos
             flipAnimator.start()
             flipAnimator.doOnEnd {
                 //showImageOrText()
                 flipAnimator =
-                    ObjectAnimator.ofFloat(binding!!.flContenidoPregResp, "rotationY", 180f, 0f)
+                    ObjectAnimator.ofFloat(binding.flContenidoPregResp, "rotationY", 180f, 0f)
                 flipAnimator.duration = 1000 // Duración de la animación en milisegundos
                 flipAnimator.start()
             }
         } else {
             var flipAnimator =
                 ObjectAnimator.ofFloat(
-                    binding!!.flContenidoPregResp,
+                    binding.flContenidoPregResp,
                     "rotationY",
                     0f,
                     180f
@@ -1051,7 +1043,7 @@ class Activity_Modificar : AppCompatActivity() {
             flipAnimator.doOnEnd {
                 //showImageOrText()
                 flipAnimator =
-                    ObjectAnimator.ofFloat(binding!!.flContenidoPregResp, "rotationY", 180f, 0f)
+                    ObjectAnimator.ofFloat(binding.flContenidoPregResp, "rotationY", 180f, 0f)
                 flipAnimator.duration = 1000 // Duración de la animación en milisegundos
                 flipAnimator.start()
             }
@@ -1073,18 +1065,35 @@ class Activity_Modificar : AppCompatActivity() {
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.action == KeyEvent.ACTION_DOWN) {
             deleteImages()
-
-            Toast.makeText(
-                applicationContext,
-                "No se hicieron cambios en el archivo",
-                Toast.LENGTH_SHORT
-            ).show()
-
-            Log.i("Crear archivo: ", "No se hicieron cambios en el archivo")
-            finish()
+            cancelarArchivo()
             return true
         }
         return super.onKeyDown(keyCode, event)
+    }
+
+    // Mostrará un mensaje diciendo que el archivo se eliminará ya que no se terminó de crear.
+    private fun cancelarArchivo() {
+        // Se ejecuta cuando se regresa sin guardar.
+        AlertDialog.Builder(this@Activity_Modificar)
+            .setTitle("¡Atención!")
+            .setMessage(
+                "Aún no terminas de modificar, no se guardará nada, " +
+                        "¿seguro deseas continuar?"
+            )
+            .setPositiveButton(
+                "Continuar"
+            ) { _, _ -> // Si el archivo se creó y existe, se elimina y te informa en consola
+                if (file.exists()) {
+                    File(file, "$nombreArchivo.xml").delete()
+                    Log.d("ArchivoEliminado", "Archivo eliminado")
+                } else {
+                    Log.d("ArchivoEliminado", "Archivo no eliminado")
+                }
+                finish()
+            }
+            .setNegativeButton(
+                "Cancelar"
+            ) { dialog, _ -> dialog.dismiss() }.create().show()
     }
 
     private fun borrarCrearXML(nombreArchivo: String?) {
@@ -1188,7 +1197,7 @@ class Activity_Modificar : AppCompatActivity() {
         var fin: Int = 0
         var colorPregModel: ColorPregModel? = null
         var texto: String = ""
-        if (binding!!.lblPregResp.text.toString() == "Pregunta") {
+        if (binding.lblPregResp.text.toString() == "Pregunta") {
             texto = preguntas[contadorPregunta]
             // uri = texto.toUri()
         } else {
@@ -1198,34 +1207,34 @@ class Activity_Modificar : AppCompatActivity() {
 
         if (texto.contains(baseRutaImagenCifrado)) {
             val descifrado = cifrar(texto, 26 - 3)
-            binding!!.etPregResp.setText(texto)
+            binding.etPregResp.setText(texto)
             // texto = descifrado.replace("content://media/picker/".toRegex(), "")
             // texto = texto.replace("imagenes".toRegex(), "imagenesPivote")
             val imagen = descifrado.substringAfterLast("/")
             // file
             val imagenInt = imagen.replace(".png", "").toInt()
             if (imagenInt >= imagenPiv) {
-                binding!!.ivImagen.setImage(ImageSource.uri("$fileImagesPiv/$imagen")) //setImageURI(uri)
+                binding.ivImagen.setImage(ImageSource.uri("$fileImagesPiv/$imagen")) //setImageURI(uri)
             } else {
                 var uri = "$file/$imagen"
                 uri = uri.replace("guias", "imagenes")
-                binding!!.ivImagen.setImage(ImageSource.uri(uri))
+                binding.ivImagen.setImage(ImageSource.uri(uri))
             }
 
-            binding!!.tilContenidoPregResp.visibility = View.GONE
-            binding!!.ivImagen.visibility = View.VISIBLE
+            binding.tilContenidoPregResp.visibility = View.GONE
+            binding.ivImagen.visibility = View.VISIBLE
 
-            binding!!.imgvCancelar.visibility = View.VISIBLE
-            binding!!.imgvQuitColor.visibility = View.GONE
-            binding!!.imgvSelColor.visibility = View.GONE
+            binding.imgvCancelar.visibility = View.VISIBLE
+            binding.imgvQuitColor.visibility = View.GONE
+            binding.imgvSelColor.visibility = View.GONE
 
         } else {
-            binding!!.tilContenidoPregResp.visibility = View.VISIBLE
-            binding!!.ivImagen.visibility = View.GONE
+            binding.tilContenidoPregResp.visibility = View.VISIBLE
+            binding.ivImagen.visibility = View.GONE
 
-            binding!!.imgvCancelar.visibility = View.GONE
-            binding!!.imgvQuitColor.visibility = View.VISIBLE
-            binding!!.imgvSelColor.visibility = View.VISIBLE
+            binding.imgvCancelar.visibility = View.GONE
+            binding.imgvQuitColor.visibility = View.VISIBLE
+            binding.imgvSelColor.visibility = View.VISIBLE
 
             while (texto.contains("«")) {
                 inicio = texto.indexOf("«") + 1
@@ -1239,7 +1248,7 @@ class Activity_Modificar : AppCompatActivity() {
                 colorPregModel =
                     ColorPregModel((inicio - longColor - 2), (fin - longColor - 2), colEntero)
 
-                if (binding!!.lblPregResp.text.toString() == "Pregunta") {
+                if (binding.lblPregResp.text.toString() == "Pregunta") {
                     preguntasColor.add(contColorPreg, colorPregModel)
                 } else {
                     respuestasColor.add(contColorPreg, colorPregModel)
@@ -1255,7 +1264,7 @@ class Activity_Modificar : AppCompatActivity() {
 
 
             builder = SpannableStringBuilder(texto)
-            for (coloresPreguntas: ColorPregModel in if (binding!!.lblPregResp.text.toString() == "Pregunta") preguntasColor else respuestasColor) {
+            for (coloresPreguntas: ColorPregModel in if (binding.lblPregResp.text.toString() == "Pregunta") preguntasColor else respuestasColor) {
                 val colorSpan: ForegroundColorSpan = ForegroundColorSpan(coloresPreguntas.color)
                 builder!!.setSpan(
                     colorSpan,
@@ -1270,7 +1279,7 @@ class Activity_Modificar : AppCompatActivity() {
 
             // Bandera ingresada para que no haga cambios de color cuando se detecte un cambio en ET.
             pregResBandera = true
-            binding!!.etPregResp.text = builder
+            binding.etPregResp.text = builder
             pregResBandera = false
         }
     }
@@ -1315,7 +1324,7 @@ class Activity_Modificar : AppCompatActivity() {
     private fun pintarLetra(texto: Editable?) {
         texto?.let {
             if (it.isNotEmpty() && !pregResBandera) {
-                val cursorPosition = binding!!.etPregResp.selectionStart
+                val cursorPosition = binding.etPregResp.selectionStart
                 val lastCharIndex = cursorPosition - 1
                 posColorFinal = lastCharIndex + 1
 
@@ -1326,7 +1335,7 @@ class Activity_Modificar : AppCompatActivity() {
                     Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                 )
 
-                binding!!.etPregResp.setSelection(lastCharIndex + 1)
+                binding.etPregResp.setSelection(lastCharIndex + 1)
                 pregResBandera = false
             }
         }
@@ -1335,11 +1344,11 @@ class Activity_Modificar : AppCompatActivity() {
     // Cambiar color del icono (ImageView)
     fun setColor(@ColorInt color: Int?) {
         if (color == null) {
-            ImageViewCompat.setImageTintList(binding!!.imgvSelColor, null)
+            ImageViewCompat.setImageTintList(binding.imgvSelColor, null)
             return
         }
-        ImageViewCompat.setImageTintMode(binding!!.imgvSelColor, PorterDuff.Mode.SRC_ATOP)
-        ImageViewCompat.setImageTintList(binding!!.imgvSelColor, ColorStateList.valueOf(color))
+        ImageViewCompat.setImageTintMode(binding.imgvSelColor, PorterDuff.Mode.SRC_ATOP)
+        ImageViewCompat.setImageTintList(binding.imgvSelColor, ColorStateList.valueOf(color))
         colorActual = color
     }
 
