@@ -14,10 +14,8 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.text.Editable
-import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.TextWatcher
-import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.util.Xml
 import android.view.KeyEvent
@@ -38,6 +36,7 @@ import com.google.android.gms.ads.MobileAds
 import com.jonathanev.review.Core.Constants.baseRutaImagen
 import com.jonathanev.review.Core.Constants.baseRutaImagenCifrado
 import com.jonathanev.review.Core.Constants.file
+import com.jonathanev.review.Core.Constants.fileImages
 import com.jonathanev.review.Core.Constants.fileImagesPiv
 import com.jonathanev.review.Core.Constants.rutaPrin
 import com.jonathanev.review.Data.Model.ColorPregModel
@@ -45,10 +44,6 @@ import com.jonathanev.review.Fragments.Fragment_DialogColoresMod_popup
 import com.jonathanev.review.UI.ViewModel.ModificarViewModel
 import com.jonathanev.review.databinding.ActivityModificarBinding
 import dagger.hilt.android.AndroidEntryPoint
-import org.w3c.dom.Document
-import org.w3c.dom.Element
-import org.w3c.dom.NodeList
-import org.xml.sax.SAXException
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
 import java.io.FileOutputStream
@@ -56,31 +51,16 @@ import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
-import javax.xml.parsers.DocumentBuilder
-import javax.xml.parsers.DocumentBuilderFactory
-import javax.xml.parsers.ParserConfigurationException
 
 @AndroidEntryPoint
 class Activity_Modificar : AppCompatActivity() {
     private lateinit var binding: ActivityModificarBinding
     private lateinit var nombreArchivo: String
     private var colorActual: Int = 0
-    private var colorPintarPalabra: Int = 0
-    private var posColorInicial: Int = -1
-    private var posColorFinal: Int = -1
-    private val preguntas: ArrayList<String> = ArrayList()
-    private val respuestas: ArrayList<String> = ArrayList()
-    private val preguntasColor: ArrayList<ColorPregModel> = ArrayList()
-    private val respuestasColor: ArrayList<ColorPregModel> = ArrayList()
-    var builder: SpannableStringBuilder? = null
     private var contadorPregunta: Int = 0
     private var contadorImagen = 0
     private var imagenPiv = 0
-    private var dialMasPreg: Boolean = false
-    private var uri: Uri? = null
     private var longCaracteres = 0
-    private var textoAnterior = ""
-    private var pregResBandera = false // Bandera para cuando se le de click atras o delante.
     private var ruta: String = ""
     private var filename: String = ""
 
@@ -124,9 +104,6 @@ class Activity_Modificar : AppCompatActivity() {
             }
         }
 
-    // Creamos la serialización y la clase para crear archivos de manera global.
-    private var serializer: XmlSerializer = Xml.newSerializer()
-    private var fos: FileOutputStream? = null
     private val modificarViewModel: ModificarViewModel by viewModels()
 
     @SuppressLint("ClickableViewAccessibility", "SetTextI18n")
@@ -272,7 +249,7 @@ class Activity_Modificar : AppCompatActivity() {
             }
 
             // Do you want to add more questions?
-            if ((contadorPregunta + 1) == modificarViewModel.preguntas.size && modificarViewModel.showMessageMoreQuestions){
+            if ((contadorPregunta + 1) == modificarViewModel.preguntas.size && modificarViewModel.showMessageMoreQuestions) {
                 AlertDialog.Builder(this@Activity_Modificar)
                     .setTitle("¡Atención!")
                     .setMessage("Se acabaron las preguntas, ¿Quieres agregar más?")
@@ -497,10 +474,7 @@ class Activity_Modificar : AppCompatActivity() {
             }
 
             filename = "$contadorImagen.png"
-
-            if (preguntas.isEmpty()) {
-                modificarViewModel.getGuia(ruta)
-            }
+            modificarViewModel.getGuia(ruta)
         }
 
         // Get review
@@ -598,10 +572,11 @@ class Activity_Modificar : AppCompatActivity() {
                             File(rutaPrin, filename).delete()
 
                             binding.ivImagen.setImage(ImageSource.uri("$fileImagesPiv/$filename")) //setImageURI(uri)
-                            val cifrado = cifrar("$baseRutaImagen$ruta/$filename", 3)
+                            val cifrado = modificarViewModel.getUrlImagenCifrada(
+                                "$baseRutaImagen$fileImages/$filename",
+                                3
+                            )
                             binding.etPregResp.setText(cifrado)
-                            // contadorImagen += 1
-                            // filename = "$contadorImagen.png"
 
                             binding.tilContenidoPregResp.visibility = View.GONE
                             binding.ivImagen.visibility = View.VISIBLE
@@ -631,12 +606,12 @@ class Activity_Modificar : AppCompatActivity() {
                     binding.tilContenidoPregResp.visibility = View.GONE
                     binding.ivImagen.visibility = View.VISIBLE
 
-                    val cifrado = cifrar("$baseRutaImagen$ruta/$filename", 3)
-                    binding.etPregResp.setText(cifrado)
-                    val l = preguntas[contadorPregunta]
-                    // contadorImagen += 1
-                    // filename = "$contadorImagen.png"
+                    val cifrado = modificarViewModel.getUrlImagenCifrada(
+                        "$baseRutaImagen$fileImages/$filename",
+                        3
+                    )
 
+                    binding.etPregResp.setText(cifrado)
                     modificarViewModel.llamaCorruIncremento()
                 }
             }
@@ -810,21 +785,5 @@ class Activity_Modificar : AppCompatActivity() {
                 subFile.delete()
             }
         }
-    }
-
-    fun cifrar(texto: String, desplazamiento: Int): String {
-        val resultado = StringBuilder()
-
-        for (caracter in texto) {
-            if (caracter.isLetter()) {
-                val base = if (caracter.isUpperCase()) 'A' else 'a'
-                val letraCifrada = ((caracter - base + desplazamiento) % 26 + base.code).toChar()
-                resultado.append(letraCifrada)
-            } else {
-                resultado.append(caracter)
-            }
-        }
-
-        return resultado.toString()
     }
 }

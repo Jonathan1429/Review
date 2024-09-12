@@ -12,6 +12,7 @@ import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import com.jonathanev.review.Domain.getGuiaUseCase
 import com.jonathanev.review.Domain.getObtenerDatosXMLUseCase
+import com.jonathanev.review.Domain.setCifrarRutaImagenUseCase
 import com.jonathanev.review.Domain.setClickEliminarUseCase
 import com.jonathanev.review.Domain.setClickRegresarModicandoUseCase
 import com.jonathanev.review.Domain.setClickSaveUseCase
@@ -31,6 +32,7 @@ class ModificarViewModel @Inject constructor(
     private val setClickSiguienteModicandoUseCase: setClickSiguienteModificandoUseCase,
     private val setClickEliminarUseCase: setClickEliminarUseCase,
     private val setClickSaveUseCase: setClickSaveUseCase,
+    private val setCifrarRutaImagenUseCase: setCifrarRutaImagenUseCase,
     private val setPintarLetraUseCase: setPintarLetraUseCase,
     private val getObtenerDatosXMLUseCase: getObtenerDatosXMLUseCase,
     private val setPintarTextosUseCase: setPintarTextosUseCase,
@@ -102,6 +104,10 @@ class ModificarViewModel @Inject constructor(
             )
 
         return responseValGuiaModel
+    }
+
+    fun getUrlImagenCifrada(urlImagen: String, noCifrado: Int):String {
+        return setCifrarRutaImagenUseCase(urlImagen, noCifrado)
     }
 
     fun setPintarLetra(texto: Editable?, cursorPosition: Int, colorActual: Int) {

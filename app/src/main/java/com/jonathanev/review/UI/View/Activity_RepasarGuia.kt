@@ -44,7 +44,7 @@ import javax.xml.parsers.ParserConfigurationException
 
 @AndroidEntryPoint
 class Activity_RepasarGuia : AppCompatActivity() {
-    private var binding: ActivityRepasarGuiaBinding? = null
+    private lateinit var binding: ActivityRepasarGuiaBinding
     private var nombreArchivo: String = ""
     private val preguntas: ArrayList<String> = ArrayList()
     private val respuestas: ArrayList<String> = ArrayList()
@@ -60,24 +60,17 @@ class Activity_RepasarGuia : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRepasarGuiaBinding.inflate(layoutInflater)
-        setContentView(binding!!.root)
+        setContentView(binding.root)
 
         // Sección de anuncios
         initLoadAds()
 
-        binding!!.barraSuperiorRegreso.imgvSave.visibility = View.GONE
-        //nombreArchivo = intent.extras!!.getString("nombre_archivo").toString()
-
-        //val preferences = getSharedPreferences("MiPref", MODE_PRIVATE)
-        //val editor = preferences.edit()
-        //editor.putString("nombre_archivo", nombreArchivo)
-        //editor.apply()
-
+        binding.barraSuperiorRegreso.imgvSave.visibility = View.GONE
         ruta = intent.extras!!.getString("ruta").toString()
         initUI(ruta)
 
         repasarGuiaViewModel.guiaModel.observe(this) {
-            //binding!!.barraSuperiorRegreso.tvTituloToolbar.text = "Guia: $it.nombreGuia"
+            //binding.barraSuperiorRegreso.tvTituloToolbar.text = "Guia: $it.nombreGuia"
             nombreArchivo = it.nombreGuia
 
             // Guardo el nombre del archivo enviado desde el popupFragmentListarGuias.
@@ -85,30 +78,36 @@ class Activity_RepasarGuia : AppCompatActivity() {
                 nombreArchivo = nombreArchivo.replace(".xml".toRegex(), "")
             }
 
-            binding!!.barraSuperiorRegreso.tvTituloToolbar.text = "Guia: ${it.nombreGuia}"
+            binding.barraSuperiorRegreso.tvTituloToolbar.text = "Guia: ${it.nombreGuia}"
             nombreArchivo = "${it.nombreGuia}.xml"
 
             // Obtenemos los datos del XML y los guardamos en su respectivo ArrayList.
-            obtenerDatosXML()
+            val texto = repasarGuiaViewModel.getObtenerDatosXML(nombreArchivo, ruta)
 
-            // Pintamos el texto del contador actual.
-            pintarTexto()
+            // Agregar el texto en el et cuando hay un builder
+            if (!texto.estadoUI.isShowImage) {
+                binding.etPregResp.text = texto.builder
+            } else {
+                // Cuando hay una imagen hay que poner esto
+                binding.etPregResp.setText(texto.estadoImagen.textImgEcrypted)
+                binding.ivImagen.setImage(ImageSource.uri(texto.estadoImagen.textImgUnencrypted))
+            }
         }
 
-        binding!!.barraSuperiorRegreso.imgvBack.setOnClickListener { finish() }
+        binding.barraSuperiorRegreso.imgvBack.setOnClickListener { finish() }
 
-        binding!!.imgvPregResp.setOnClickListener {
-            if (binding!!.lblPregResp.text.toString() == "Pregunta") {
-                binding!!.lblPregResp.text = "Respuesta"
+        binding.imgvPregResp.setOnClickListener {
+            if (binding.lblPregResp.text.toString() == "Pregunta") {
+                binding.lblPregResp.text = "Respuesta"
             } else {
-                binding!!.lblPregResp.text = "Pregunta"
+                binding.lblPregResp.text = "Pregunta"
             }
 
             girarCardView()
         }
 
-        binding!!.imgvPrevious.setOnClickListener {
-            //binding!!.btnMostrarRespuesta.text = "Mostrar respuesta"
+        binding.imgvPrevious.setOnClickListener {
+            //binding.btnMostrarRespuesta.text = "Mostrar respuesta"
             if (contadorPregunta == 0) {
                 Toast.makeText(
                     applicationContext, "No tienes preguntas anteriores",
@@ -119,15 +118,15 @@ class Activity_RepasarGuia : AppCompatActivity() {
             } else {
                 contadorPregunta--
 
-                binding!!.lblPregResp.text = "Pregunta"
-                binding!!.etPregResp.setText("")
+                binding.lblPregResp.text = "Pregunta"
+                binding.etPregResp.setText("")
 
                 // Pintamos el valor anterior de colores.
                 pintarTexto()
             }
         }
 
-        binding!!.imgvNext.setOnClickListener {
+        binding.imgvNext.setOnClickListener {
             contadorPregunta++
             val preguntasTotales: Int = preguntas.size
 
@@ -135,8 +134,8 @@ class Activity_RepasarGuia : AppCompatActivity() {
             if ((contadorPregunta + 1) <= preguntasTotales) {
                 // Pintamos el valor siguiente con colores.
 
-                binding!!.lblPregResp.text = "Pregunta"
-                binding!!.etPregResp.setText("")
+                binding.lblPregResp.text = "Pregunta"
+                binding.etPregResp.setText("")
                 pintarTexto()
             } else {
                 contadorPregunta--
@@ -150,8 +149,8 @@ class Activity_RepasarGuia : AppCompatActivity() {
                     ) { dialogInterface, i ->
                         contadorPregunta = 0
 
-                        binding!!.lblPregResp.text = "Pregunta"
-                        binding!!.etPregResp.setText("")
+                        binding.lblPregResp.text = "Pregunta"
+                        binding.etPregResp.setText("")
 
                         // Mostramos el primer valor de la pregunta pintado.
                         pintarTexto()
@@ -162,7 +161,7 @@ class Activity_RepasarGuia : AppCompatActivity() {
             }
         }
 
-        binding!!.imgvEdit.setOnClickListener {
+        binding.imgvEdit.setOnClickListener {
             // Recuperar el valor de SharedPreferences
             // val preferences = getSharedPreferences("MiPref", MODE_PRIVATE)
             // val nombreArchivo = preferences.getString("nombre_archivo", "")
@@ -182,9 +181,9 @@ class Activity_RepasarGuia : AppCompatActivity() {
         MobileAds.initialize(this) { }
 
         val adRequest = AdRequest.Builder().build()
-        binding!!.adView.loadAd(adRequest)
+        binding.adView.loadAd(adRequest)
 
-        binding!!.adView.adListener = object : AdListener() {
+        binding.adView.adListener = object : AdListener() {
             override fun onAdLoaded() {
             }
 
@@ -209,16 +208,16 @@ class Activity_RepasarGuia : AppCompatActivity() {
     }
 
     private fun girarCardView() {
-        if (!binding!!.tilContenidoPregResp.isGone) {
+        if (!binding.tilContenidoPregResp.isGone) {
             pintarTexto()
             var flipAnimator =
-                ObjectAnimator.ofFloat(binding!!.flContenidoPregResp, "rotationY", 0f, 180f)
+                ObjectAnimator.ofFloat(binding.flContenidoPregResp, "rotationY", 0f, 180f)
             flipAnimator.duration = 0 // Duración de la animación en milisegundos
             flipAnimator.start()
             flipAnimator.doOnEnd {
                 //showImageOrText()
                 flipAnimator =
-                    ObjectAnimator.ofFloat(binding!!.flContenidoPregResp, "rotationY", 180f, 0f)
+                    ObjectAnimator.ofFloat(binding.flContenidoPregResp, "rotationY", 180f, 0f)
                 flipAnimator.duration = 1000 // Duración de la animación en milisegundos
                 flipAnimator.start()
             }
@@ -226,7 +225,7 @@ class Activity_RepasarGuia : AppCompatActivity() {
             pintarTexto()
             var flipAnimator =
                 ObjectAnimator.ofFloat(
-                    binding!!.flContenidoPregResp,
+                    binding.flContenidoPregResp,
                     "rotationY",
                     0f,
                     180f
@@ -236,7 +235,7 @@ class Activity_RepasarGuia : AppCompatActivity() {
             flipAnimator.doOnEnd {
                 //showImageOrText()
                 flipAnimator =
-                    ObjectAnimator.ofFloat(binding!!.flContenidoPregResp, "rotationY", 180f, 0f)
+                    ObjectAnimator.ofFloat(binding.flContenidoPregResp, "rotationY", 180f, 0f)
                 flipAnimator.duration = 1000 // Duración de la animación en milisegundos
                 flipAnimator.start()
             }
@@ -255,12 +254,12 @@ class Activity_RepasarGuia : AppCompatActivity() {
             }
 
             override fun onAnimationEnd(p0: Animation?) {
-                if (binding!!.ivImagen.isGone) {
-                    binding!!.ivImagen.visibility = View.VISIBLE
-                    binding!!.tilContenidoPregResp.visibility = View.GONE
+                if (binding.ivImagen.isGone) {
+                    binding.ivImagen.visibility = View.VISIBLE
+                    binding.tilContenidoPregResp.visibility = View.GONE
                 } else {
-                    binding!!.ivImagen.visibility = View.GONE
-                    binding!!.tilContenidoPregResp.visibility = View.VISIBLE
+                    binding.ivImagen.visibility = View.GONE
+                    binding.tilContenidoPregResp.visibility = View.VISIBLE
                 }
             }
 
@@ -268,8 +267,8 @@ class Activity_RepasarGuia : AppCompatActivity() {
             }
         })
 
-        binding!!.ivImagen.startAnimation(disappearAnimation)
-        //binding!!.tilContenidoPregResp.startAnimation(appearAnimation)
+        binding.ivImagen.startAnimation(disappearAnimation)
+        //binding.tilContenidoPregResp.startAnimation(appearAnimation)
     }
 
     private fun pintarTexto() {
@@ -278,7 +277,7 @@ class Activity_RepasarGuia : AppCompatActivity() {
         var fin: Int = 0
         var colorPregModel: ColorPregModel? = null
         var texto: String = ""
-        if (binding!!.lblPregResp.text.toString() == "Pregunta") {
+        if (binding.lblPregResp.text.toString() == "Pregunta") {
             texto = preguntas[contadorPregunta]
             // uri = texto.toUri()
         } else {
@@ -291,17 +290,17 @@ class Activity_RepasarGuia : AppCompatActivity() {
             texto = descifrado.replace("content://media/picker/".toRegex(), "")
             // texto = texto.replace("content://media/picker/".toRegex(), "")
             // uri = texto.toUri()
-            // binding!!.ivImagen.setImage(ImageSource.uri("${Constants.fileImages}/4.png")) //setImageURI(uri)
+            // binding.ivImagen.setImage(ImageSource.uri("${Constants.fileImages}/4.png")) //setImageURI(uri)
             // setImage puede ser con Uri o con texto, hay que probar en este caso
             val imagen = texto.substringAfterLast("/")
             var uri = "$file/$imagen"
             uri = uri.replace("guias", "imagenes")
-            binding!!.ivImagen.setImage(ImageSource.uri(uri)) //setImageURI(uri)
-            binding!!.tilContenidoPregResp.visibility = View.GONE
-            binding!!.ivImagen.visibility = View.VISIBLE
+            binding.ivImagen.setImage(ImageSource.uri(uri)) //setImageURI(uri)
+            binding.tilContenidoPregResp.visibility = View.GONE
+            binding.ivImagen.visibility = View.VISIBLE
         } else {
-            binding!!.tilContenidoPregResp.visibility = View.VISIBLE
-            binding!!.ivImagen.visibility = View.GONE
+            binding.tilContenidoPregResp.visibility = View.VISIBLE
+            binding.ivImagen.visibility = View.GONE
 
             while (texto.contains("«")) {
                 inicio = texto.indexOf("«") + 1
@@ -314,7 +313,7 @@ class Activity_RepasarGuia : AppCompatActivity() {
                 colorPregModel =
                     ColorPregModel((inicio - longColor - 2), (fin - longColor - 2), colEntero)
 
-                if (binding!!.lblPregResp.text.toString() == "Pregunta") {
+                if (binding.lblPregResp.text.toString() == "Pregunta") {
                     preguntasColor.add(contColorPreg, colorPregModel)
                 } else {
                     respuestasColor.add(contColorPreg, colorPregModel)
@@ -329,7 +328,7 @@ class Activity_RepasarGuia : AppCompatActivity() {
             }
 
             builder = SpannableStringBuilder(texto)
-            for (coloresPreguntas: ColorPregModel in if (binding!!.lblPregResp.text.toString() == "Pregunta") preguntasColor else respuestasColor) {
+            for (coloresPreguntas: ColorPregModel in if (binding.lblPregResp.text.toString() == "Pregunta") preguntasColor else respuestasColor) {
                 val colorSpan: ForegroundColorSpan = ForegroundColorSpan(coloresPreguntas.color)
                 builder!!.setSpan(
                     colorSpan,
@@ -342,7 +341,7 @@ class Activity_RepasarGuia : AppCompatActivity() {
 
         preguntasColor.clear()
         respuestasColor.clear()
-        binding!!.etPregResp.text = builder
+        binding.etPregResp.text = builder
     }
 
     private fun obtenerDatosXML() {
