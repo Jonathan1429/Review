@@ -14,6 +14,7 @@ import com.jonathanev.review.Domain.getGuiaUseCase
 import com.jonathanev.review.Domain.getObtenerDatosXMLUseCase
 import com.jonathanev.review.Domain.setClickEliminarUseCase
 import com.jonathanev.review.Domain.setClickRegresarModicandoUseCase
+import com.jonathanev.review.Domain.setClickSaveUseCase
 import com.jonathanev.review.Domain.setClickSiguienteModificandoUseCase
 import com.jonathanev.review.Domain.setRollClickedUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,6 +28,7 @@ class ModificarViewModel @Inject constructor(
     private val setClickRegresarModicandoUseCase: setClickRegresarModicandoUseCase,
     private val setClickSiguienteModicandoUseCase: setClickSiguienteModificandoUseCase,
     private val setClickEliminarUseCase: setClickEliminarUseCase,
+    private val setClickSaveUseCase: setClickSaveUseCase,
     private val getObtenerDatosXMLUseCase: getObtenerDatosXMLUseCase,
     val getGuiaUseCase: getGuiaUseCase
 ) : ViewModel() {
@@ -44,6 +46,8 @@ class ModificarViewModel @Inject constructor(
     val uiStateBtnNext: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnNext
     private val _uiStateBtnEliminar = MutableLiveData<ValidacionesGuiaModel>()
     val uiStateBtnEliminar: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnEliminar
+    private val _uiStateBtnSave = MutableLiveData<ValidacionesGuiaModel>()
+    val uiStateBtnSave: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnSave
 
     private val _uiShowDates = MutableLiveData<Boolean>()
     val uiShowDates: LiveData<Boolean> get() = _uiShowDates
@@ -52,8 +56,7 @@ class ModificarViewModel @Inject constructor(
     val contImagenes = dataStore.getCountImage().asLiveData()
     val guiaModel = MutableLiveData<GuiaModel>()
     var colorAnterior = MutableLiveData<Int>()
-    var saveClicked = MutableLiveData<Boolean>().apply { value = false }
-
+    // var saveClicked = MutableLiveData<Boolean>().apply { value = false }
     // var rollClicked = MutableLiveData<Boolean>().apply { value = false }
 
     // Data Store
@@ -79,10 +82,6 @@ class ModificarViewModel @Inject constructor(
 
     fun getGuia(ruta: String) {
         guiaModel.postValue(getGuiaUseCase(ruta))
-    }
-
-    fun clickedSave() {
-        saveClicked.postValue(!saveClicked.value!!)
     }
 
     fun getObtenerDatosXML(nombreArchivo: String, ruta: String) {
@@ -154,5 +153,22 @@ class ModificarViewModel @Inject constructor(
         }
 
         _uiStateBtnEliminar.value = responseRegresarUseCase
+    }
+
+    fun onClickImgvSave(
+        editable: Editable,
+        nombreArchivo: String,
+        isEtPregunta: Boolean
+    ) {
+        val setClickSaveUseCase = setClickSaveUseCase(
+            preguntas,
+            respuestas,
+            contadorPregunta,
+            editable,
+            nombreArchivo,
+            isEtPregunta
+        )
+
+        _uiStateBtnSave.value = setClickSaveUseCase
     }
 }

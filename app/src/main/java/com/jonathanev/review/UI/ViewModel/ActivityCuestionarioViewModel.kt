@@ -166,8 +166,6 @@ class ActivityCuestionarioViewModel @Inject constructor(
         )
 
         _uiStateBtnSave.value = setClickSaveUseCase
-
-
     }
 
     fun onClickEliminar() {

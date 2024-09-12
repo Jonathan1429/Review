@@ -388,7 +388,34 @@ class Activity_Modificar : AppCompatActivity() {
         }
 
         binding.barraSuperiorRegreso.imgvSave.setOnClickListener {
-            modificarViewModel.clickedSave()
+            val editable: Editable =
+                Editable.Factory.getInstance().newEditable(binding.etPregResp.text)
+            var isEtPregunta = false
+            if (binding.lblPregResp.text.toString() == "Pregunta") {
+                isEtPregunta = true
+            }
+
+            modificarViewModel.onClickImgvSave(
+                editable,
+                nombreArchivo,
+                isEtPregunta
+            )
+        }
+
+        modificarViewModel.uiStateBtnSave.observe(this) { uiState ->
+            Toast.makeText(
+                applicationContext,
+                uiState.message,
+                Toast.LENGTH_SHORT
+            ).show()
+
+            if (uiState.estadoUI.isCreatedGuia) {
+                val intent = Intent(applicationContext, Activity_RepasarGuia::class.java)
+                intent.putExtra("ruta", uiState.responseGuia.rutaGuiaEstudio)
+                startActivity(intent)
+                copyImages()
+                finish()
+            }
         }
 
         // Visualización del DialogFragment de selección de colores.
@@ -457,134 +484,6 @@ class Activity_Modificar : AppCompatActivity() {
                 }
             }
         })
-
-        modificarViewModel.saveClicked.observe(this) {
-            if (it) {
-                // Se le quita 1 para hacer referencia al arreglo
-                // tamaño 3-1 = 2 [0,1,2].
-                val longi: Int = respuestas.size
-
-                if (binding.etPregResp.text.toString().isEmpty()) {
-                    if (respuestas.isEmpty() && binding.lblPregResp.text.toString() == "Pregunta") {
-                        Toast.makeText(
-                            applicationContext,
-                            "Debes tener como minimo una pregunta",
-                            Toast.LENGTH_SHORT
-                        ).show()
-
-                        Log.i("Crear pregunta: ", "Debes tener como minimo una pregunta")
-
-                        modificarViewModel.clickedSave()
-                    } else if ((contadorPregunta + 1) > longi && binding.lblPregResp.text.toString() == "Pregunta") {
-                        setSpanPalabra()
-                        borrarCrearXML(nombreArchivo)
-                        binding.ivImagen.visibility = View.GONE
-                    } else {
-                        Toast.makeText(
-                            applicationContext,
-                            "Asegurate de llenar una pregunta y una respuesta",
-                            Toast.LENGTH_SHORT
-                        ).show()
-
-                        Log.i(
-                            "Crear pregunta: ",
-                            "Asegurate de llenar una pregunta y una respuesta"
-                        )
-
-                        modificarViewModel.clickedSave()
-                    }
-                } else {
-                    if (binding.lblPregResp.text.toString() == "Pregunta") {
-                        if ((contadorPregunta + 1) <= longi && longi > 0) {
-                            setSpanPalabra()
-
-                            var editable: Editable =
-                                Editable.Factory.getInstance()
-                                    .newEditable(binding.etPregResp.text)
-                            var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
-                                0,
-                                editable.length,
-                                ForegroundColorSpan::class.java
-                            )
-
-                            // Se colocan las etiquetas en cada palabra con color
-                            colocarEtiquetas(colorSpans, editable)
-                            preguntas[contadorPregunta] = editable.toString()
-
-                            borrarCrearXML(nombreArchivo)
-                        } else {
-                            Toast.makeText(
-                                applicationContext,
-                                "Asegurate de llenar una pregunta y una respuesta",
-                                Toast.LENGTH_SHORT
-                            ).show()
-
-                            Log.i(
-                                "Crear pregunta: ",
-                                "Asegurate de llenar una pregunta y una respuesta"
-                            )
-
-                            modificarViewModel.clickedSave()
-                        }
-                    } else {
-                        if (longi == 0) {
-                            setSpanPalabra()
-
-                            var editable: Editable =
-                                Editable.Factory.getInstance()
-                                    .newEditable(binding.etPregResp.text)
-                            var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
-                                0,
-                                editable.length,
-                                ForegroundColorSpan::class.java
-                            )
-
-                            // Se colocan las etiquetas en cada palabra con color
-                            colocarEtiquetas(colorSpans, editable)
-                            respuestas.add(editable.toString())
-
-                            borrarCrearXML(nombreArchivo)
-                        } else {
-                            if ((contadorPregunta + 1) <= longi) {
-                                setSpanPalabra()
-
-                                var editable: Editable =
-                                    Editable.Factory.getInstance()
-                                        .newEditable(binding.etPregResp.text)
-                                var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
-                                    0,
-                                    editable.length,
-                                    ForegroundColorSpan::class.java
-                                )
-
-                                // Se colocan las etiquetas en cada palabra con color
-                                colocarEtiquetas(colorSpans, editable)
-                                respuestas[contadorPregunta] = editable.toString()
-
-                                borrarCrearXML(nombreArchivo)
-                            } else {
-                                setSpanPalabra()
-
-                                var editable: Editable =
-                                    Editable.Factory.getInstance()
-                                        .newEditable(binding.etPregResp.text)
-                                var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
-                                    0,
-                                    editable.length,
-                                    ForegroundColorSpan::class.java
-                                )
-
-                                // Se colocan las etiquetas en cada palabra con color
-                                colocarEtiquetas(colorSpans, editable)
-                                respuestas.add(editable.toString())
-
-                                borrarCrearXML(nombreArchivo)
-                            }
-                        }
-                    }
-                }
-            }
-        }
 
         modificarViewModel.colorAnterior.observe(this) {
             if (posColorInicial == -1) {
