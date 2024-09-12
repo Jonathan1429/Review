@@ -394,11 +394,14 @@ class Activity_Modificar : AppCompatActivity() {
             if (binding.lblPregResp.text.toString() == "Pregunta") {
                 isEtPregunta = true
             }
+            val didTheGuideAlreadyExist = true
 
             modificarViewModel.onClickImgvSave(
                 editable,
                 nombreArchivo,
-                isEtPregunta
+                isEtPregunta,
+                didTheGuideAlreadyExist,
+                ruta
             )
         }
 
@@ -479,47 +482,14 @@ class Activity_Modificar : AppCompatActivity() {
                 ) {
                     // Si hay un salto de linea o es color negro no se pinta nada
                     if (colorActual != -16777216 && !seAgregoSaltoDeLinea) {
-                        pintarLetra(texto)
+                        val cursorPosition = binding.etPregResp.selectionStart
+                        modificarViewModel.setPintarLetra(texto, cursorPosition, colorActual)
                     }
                 }
             }
         })
 
-        modificarViewModel.colorAnterior.observe(this) {
-            if (posColorInicial == -1) {
-                colorPintarPalabra = it
-
-                val cursorPosition = binding.etPregResp.selectionStart
-                val lastCharIndex = cursorPosition - 1
-                posColorInicial = lastCharIndex
-            } else {
-                /*val cursorPosition = binding.etPregResp.selectionStart
-                posColorFinal = cursorPosition*/
-
-                // Obtener los spans dentro del rango especificado
-                val spansToRemove = binding.etPregResp.text!!.getSpans(
-                    posColorInicial,
-                    posColorFinal,
-                    ForegroundColorSpan::class.java
-                )
-
-                for (span in spansToRemove) {
-                    binding.etPregResp.text!!.removeSpan(span)
-                }
-
-                binding.etPregResp.text!!.setSpan(
-                    ForegroundColorSpan(colorPintarPalabra),
-                    posColorInicial,
-                    posColorFinal,
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
-
-                posColorInicial = -1
-                posColorFinal = -1
-                colorPintarPalabra = 0
-            }
-        }
-
+        // Get image count
         modificarViewModel.contImagenes.observe(this@Activity_Modificar) { contImagen ->
             contadorImagen = contImagen
             if (imagenPiv == 0) {
@@ -533,6 +503,7 @@ class Activity_Modificar : AppCompatActivity() {
             }
         }
 
+        // Get review
         modificarViewModel.guiaModel.observe(this) {
             nombreArchivo = it.nombreGuia
             // Guardo el nombre del archivo enviado desde el popupFragmentListarGuias.
@@ -550,118 +521,16 @@ class Activity_Modificar : AppCompatActivity() {
             }
 
             // Obtenemos los datos del XML y los guardamos en su respectivo ArrayList.
-            obtenerDatosXML()
-            modificarViewModel.getObtenerDatosXML(nombreArchivo, ruta)
-        }
+            val texto = modificarViewModel.getObtenerDatosXML(nombreArchivo, ruta)
 
-        modificarViewModel.uiShowDates.observe(this) {
-            // Pintamos el texto del contador actual.
-            pintarTexto(contadorPregunta)
-        }
-    }
-
-    private fun setSpanPalabra() {
-        var editable: Editable =
-            Editable.Factory.getInstance().newEditable(binding.etPregResp.text)
-        var colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
-            0,
-            editable.length,
-            ForegroundColorSpan::class.java
-        )
-        val sortedSpans = colorSpans.sortedBy { editable.getSpanStart(it) }
-
-        var start = -1
-        var end = 0
-        var endAnterior = 0
-        var isColNuevo = false
-        var colorAnterior = 0
-        var colorNuevo = 0
-        var isDoubleColors = false
-
-        for (colorSpan: ForegroundColorSpan in sortedSpans) {
-            // Se ejecuta solo al inicio
-            if (start == -1) {
-                start = editable.getSpanStart(colorSpan)
-            }
-
-            // Verificación de superposición de colores
-            if (end > editable.getSpanEnd(colorSpan)) {
-                // Mensaje de suporposición de colores
-                isDoubleColors = true
-            }
-            end = editable.getSpanEnd(colorSpan)
-            colorNuevo = colorSpan.foregroundColor
-
-            // Logica del color
-            if (colorAnterior != colorNuevo) {
-                if (colorAnterior == 0) {
-                    isColNuevo = false
-                    colorAnterior = colorNuevo
-                    endAnterior = end - 1
-                } else {
-                    isColNuevo = true
-                }
-            }
-
-            // Se agrupan los valores por colores (En un solo span se agrupa)
-            if (isColNuevo || (end - endAnterior) != 1) {
-                // Obtener los spans dentro del rango especificado
-                val spansToRemove = binding.etPregResp.text!!.getSpans(
-                    start,
-                    endAnterior,
-                    ForegroundColorSpan::class.java
-                )
-
-                for (span in spansToRemove) {
-                    binding.etPregResp.text!!.removeSpan(span)
-                }
-
-                binding.etPregResp.text!!.setSpan(
-                    ForegroundColorSpan(colorAnterior),
-                    start,
-                    endAnterior,
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
-
-                start = editable.getSpanStart(colorSpan)
-                endAnterior = end
-
-                if (isColNuevo) {
-                    colorAnterior = colorNuevo
-                    isColNuevo = false
-                }
+            // Agregar el texto en el et cuando hay un builder
+            if (!texto.estadoUI.isShowImage) {
+                binding.etPregResp.text = texto.builder
             } else {
-                endAnterior = end
+                // Cuando hay una imagen hay que poner esto
+                binding.etPregResp.setText(texto.estadoImagen.textImgEcrypted)
+                binding.ivImagen.setImage(ImageSource.uri(texto.estadoImagen.textImgUnencrypted))
             }
-        }
-
-        // El ultimo span de color se pinta aquí
-        if (colorSpans.isNotEmpty()) {
-            // Obtener los spans dentro del rango especificado
-            val spansToRemove = binding.etPregResp.text!!.getSpans(
-                start,
-                endAnterior,
-                ForegroundColorSpan::class.java
-            )
-
-            for (span in spansToRemove) {
-                binding.etPregResp.text!!.removeSpan(span)
-            }
-
-            binding.etPregResp.text!!.setSpan(
-                ForegroundColorSpan(colorAnterior),
-                start,
-                endAnterior,
-                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-            )
-        }
-
-        if (isDoubleColors) {
-            Toast.makeText(
-                applicationContext,
-                "Sobreescribiste colores y mantuvimos los últimos seleccionados",
-                Toast.LENGTH_SHORT
-            ).show()
         }
     }
 
@@ -891,58 +760,6 @@ class Activity_Modificar : AppCompatActivity() {
             ) { dialog, _ -> dialog.dismiss() }.create().show()
     }
 
-    private fun borrarCrearXML(nombreArchivo: String?) {
-        // Eliminamos el archivo anteriormente creado
-        // val path = File(file, nombreArchivo.toString())
-
-        File(ruta).delete()
-        Log.d("ArchivoEliminado", "Archivo eliminado")
-        //Vamos a crear el archivo que acabamos de eliminar pero con el nuevo cuestionario
-
-        try {
-            // fos = openFileOutput(nombreArchivo, MODE_PRIVATE)
-            fos = FileOutputStream(ruta)
-            serializer.setOutput(fos, "UTF-8")
-            serializer.startDocument(null, java.lang.Boolean.valueOf(true))
-            serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true)
-            serializer.startTag("", "GuiaEstudio")
-            serializer.attribute("", "version", "1.0")
-            serializer.startTag("", "Cuestionario")
-            serializer.attribute("", "nombreGuia", nombreArchivo)
-
-            // Creo la etiqueta interrogante con su respectiva pregunta
-            for (i in preguntas.indices) {
-                serializer.startTag("", "Interrogante")
-                serializer.attribute("", "pregunta", preguntas[i])
-                serializer.attribute("", "respuesta", respuestas[i])
-                serializer.endTag("", "Interrogante")
-            }
-
-            // Si los campos estan vacios simplemente cierro las etiquetas y directamente
-            // guardo el documento en el teléfono.
-            serializer.endTag("", "Cuestionario")
-            serializer.endTag("", "GuiaEstudio")
-            serializer.endDocument()
-            serializer.flush()
-            fos?.close()
-            Toast.makeText(
-                applicationContext, "Guia de estudio modificada exitosamente",
-                Toast.LENGTH_SHORT
-            ).show()
-
-            Log.i("Crear archivo: ", "Guia de estudio modificada exitosamente")
-
-            val ruta = "$file/$nombreArchivo"
-            val intent: Intent = Intent(applicationContext, Activity_RepasarGuia::class.java)
-            intent.putExtra("ruta", ruta)
-            startActivity(intent)
-            copyImages()
-            finish()
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-    }
-
     private fun copyImages() {
         val images = fileImagesPiv.listFiles()
         // Hacemos un ciclo por cada fichero para extraer el nombre de cada uno.
@@ -965,173 +782,6 @@ class Activity_Modificar : AppCompatActivity() {
 
                 // Borrar archivo
                 File(fileImagesPiv, name).delete()
-            }
-        }
-    }
-
-    private fun colocarEtiquetas(colorSpans: Array<ForegroundColorSpan>, editable: Editable) {
-        for (colorSpan: ForegroundColorSpan in colorSpans) {
-            val start: Int = editable.getSpanStart(colorSpan)
-            val end: Int = editable.getSpanEnd(colorSpan)
-            val color: Int = colorSpan.foregroundColor
-
-            val etiqIni: String = "«$color»"
-            val etiqFin: String = "«/$color»"
-
-            // Agregar la etiqueta de inicio al texto
-            editable.replace(start, start, etiqIni)
-
-            // Agregar la etiqueta de cierre al texto
-            editable.replace(end + etiqIni.length, end + etiqIni.length, etiqFin)
-        }
-    }
-
-    private fun pintarTexto(contadorPregunta: Int) {
-        var contColorPreg: Int = 0
-        var inicio: Int = 0
-        var fin: Int = 0
-        var colorPregModel: ColorPregModel? = null
-        var texto: String = ""
-        if (binding.lblPregResp.text.toString() == "Pregunta") {
-            texto = preguntas[contadorPregunta]
-            // uri = texto.toUri()
-        } else {
-            texto = respuestas[contadorPregunta]
-            // uri = texto.toUri()
-        }
-
-        if (texto.contains(baseRutaImagenCifrado)) {
-            val descifrado = cifrar(texto, 26 - 3)
-            binding.etPregResp.setText(texto)
-            // texto = descifrado.replace("content://media/picker/".toRegex(), "")
-            // texto = texto.replace("imagenes".toRegex(), "imagenesPivote")
-            val imagen = descifrado.substringAfterLast("/")
-            // file
-            val imagenInt = imagen.replace(".png", "").toInt()
-            if (imagenInt >= imagenPiv) {
-                binding.ivImagen.setImage(ImageSource.uri("$fileImagesPiv/$imagen")) //setImageURI(uri)
-            } else {
-                var uri = "$file/$imagen"
-                uri = uri.replace("guias", "imagenes")
-                binding.ivImagen.setImage(ImageSource.uri(uri))
-            }
-
-            binding.tilContenidoPregResp.visibility = View.GONE
-            binding.ivImagen.visibility = View.VISIBLE
-
-            binding.imgvCancelar.visibility = View.VISIBLE
-            binding.imgvQuitColor.visibility = View.GONE
-            binding.imgvSelColor.visibility = View.GONE
-
-        } else {
-            binding.tilContenidoPregResp.visibility = View.VISIBLE
-            binding.ivImagen.visibility = View.GONE
-
-            binding.imgvCancelar.visibility = View.GONE
-            binding.imgvQuitColor.visibility = View.VISIBLE
-            binding.imgvSelColor.visibility = View.VISIBLE
-
-            while (texto.contains("«")) {
-                inicio = texto.indexOf("«") + 1
-                fin = texto.indexOf("»")
-                val color: String = texto.substring(inicio, fin)
-
-                val longColor: Int = color.length
-                val colEntero: Int = color.toInt()
-                inicio = fin + 1
-                fin = texto.indexOf("«", inicio)
-                colorPregModel =
-                    ColorPregModel((inicio - longColor - 2), (fin - longColor - 2), colEntero)
-
-                if (binding.lblPregResp.text.toString() == "Pregunta") {
-                    preguntasColor.add(contColorPreg, colorPregModel)
-                } else {
-                    respuestasColor.add(contColorPreg, colorPregModel)
-                }
-
-                // Eliminar la primera etiqueta y su contenido
-                texto = texto.replaceFirst("«.*?»".toRegex(), "")
-
-                // Eliminar la segunda etiqueta y su contenido
-                texto = texto.replaceFirst("«.*?»".toRegex(), "")
-                contColorPreg++
-            }
-
-
-            builder = SpannableStringBuilder(texto)
-            for (coloresPreguntas: ColorPregModel in if (binding.lblPregResp.text.toString() == "Pregunta") preguntasColor else respuestasColor) {
-                val colorSpan: ForegroundColorSpan = ForegroundColorSpan(coloresPreguntas.color)
-                builder!!.setSpan(
-                    colorSpan,
-                    coloresPreguntas.inicioColor,
-                    coloresPreguntas.finColor,
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
-            }
-
-            preguntasColor.clear()
-            respuestasColor.clear()
-
-            // Bandera ingresada para que no haga cambios de color cuando se detecte un cambio en ET.
-            pregResBandera = true
-            binding.etPregResp.text = builder
-            pregResBandera = false
-        }
-    }
-
-    private fun obtenerDatosXML() {
-        var doc: Document? = null
-        val dbf: DocumentBuilderFactory = DocumentBuilderFactory.newInstance()
-        val db: DocumentBuilder
-        try {
-            db = dbf.newDocumentBuilder()
-            var filePath: File
-            if (ruta == "null") {
-                filePath = File(file, nombreArchivo)
-            } else {
-                filePath = File(ruta)
-            }
-            doc = db.parse(filePath)
-
-            // Buscamos los Nodos Interrogante y accedemos a lo que se encuentre dentro.
-            val cuestionario: NodeList = doc.getElementsByTagName("Interrogante")
-            for (i in 0 until cuestionario.getLength()) {
-                // Obtienes el nodo actual y lo guardamos en info.
-                // Este no lo utilizamos ya que arriba ya accedimos al ultimo Nodo
-                // Node info = cuestionario.item(i);
-
-                // Accedes a los elmentos de dicho nodo
-                val e: Element = cuestionario.item(i) as Element
-
-                // Guardo cada uno de los valores en su respectivo arreglo.
-                preguntas.add(e.getAttribute("pregunta"))
-                respuestas.add(e.getAttribute("respuesta"))
-            }
-        } catch (e: ParserConfigurationException) {
-            e.printStackTrace()
-        } catch (e: SAXException) {
-            e.printStackTrace()
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-    }
-
-    private fun pintarLetra(texto: Editable?) {
-        texto?.let {
-            if (it.isNotEmpty() && !pregResBandera) {
-                val cursorPosition = binding.etPregResp.selectionStart
-                val lastCharIndex = cursorPosition - 1
-                posColorFinal = lastCharIndex + 1
-
-                it.setSpan(
-                    ForegroundColorSpan(colorActual),
-                    lastCharIndex,
-                    lastCharIndex + 1,
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
-
-                binding.etPregResp.setSelection(lastCharIndex + 1)
-                pregResBandera = false
             }
         }
     }

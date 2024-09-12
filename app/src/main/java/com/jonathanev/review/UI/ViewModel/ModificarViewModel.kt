@@ -16,6 +16,8 @@ import com.jonathanev.review.Domain.setClickEliminarUseCase
 import com.jonathanev.review.Domain.setClickRegresarModicandoUseCase
 import com.jonathanev.review.Domain.setClickSaveUseCase
 import com.jonathanev.review.Domain.setClickSiguienteModificandoUseCase
+import com.jonathanev.review.Domain.setPintarLetraUseCase
+import com.jonathanev.review.Domain.setPintarTextosUseCase
 import com.jonathanev.review.Domain.setRollClickedUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -29,7 +31,9 @@ class ModificarViewModel @Inject constructor(
     private val setClickSiguienteModicandoUseCase: setClickSiguienteModificandoUseCase,
     private val setClickEliminarUseCase: setClickEliminarUseCase,
     private val setClickSaveUseCase: setClickSaveUseCase,
+    private val setPintarLetraUseCase: setPintarLetraUseCase,
     private val getObtenerDatosXMLUseCase: getObtenerDatosXMLUseCase,
+    private val setPintarTextosUseCase: setPintarTextosUseCase,
     val getGuiaUseCase: getGuiaUseCase
 ) : ViewModel() {
     var preguntas: ArrayList<String> = ArrayList()
@@ -84,16 +88,24 @@ class ModificarViewModel @Inject constructor(
         guiaModel.postValue(getGuiaUseCase(ruta))
     }
 
-    fun getObtenerDatosXML(nombreArchivo: String, ruta: String) {
+    fun getObtenerDatosXML(nombreArchivo: String, ruta: String): ValidacionesGuiaModel {
         val datos = getObtenerDatosXMLUseCase(nombreArchivo, ruta)
         datos.forEach { preguntaRespuesta ->
             preguntas.add(preguntaRespuesta.pregunta)
             respuestas.add(preguntaRespuesta.respuesta)
         }
 
-        if (preguntas.isNotEmpty()){
-            _uiShowDates.value = true
-        }
+        val textoPregunta = setPintarTextosUseCase(true, preguntas, respuestas, contadorPregunta)
+        val responseValGuiaModel: ValidacionesGuiaModel =
+            textoPregunta.copy(
+                estadoUI = textoPregunta.estadoUI.copy(isThereMoreAsks = true)
+            )
+
+        return responseValGuiaModel
+    }
+
+    fun setPintarLetra(texto: Editable?, cursorPosition: Int, colorActual: Int) {
+        setPintarLetraUseCase(texto, cursorPosition, colorActual)
     }
 
     // Click events
@@ -158,7 +170,9 @@ class ModificarViewModel @Inject constructor(
     fun onClickImgvSave(
         editable: Editable,
         nombreArchivo: String,
-        isEtPregunta: Boolean
+        isEtPregunta: Boolean,
+        didTheGuideAlreadyExist: Boolean,
+        ruta: String
     ) {
         val setClickSaveUseCase = setClickSaveUseCase(
             preguntas,
@@ -166,7 +180,9 @@ class ModificarViewModel @Inject constructor(
             contadorPregunta,
             editable,
             nombreArchivo,
-            isEtPregunta
+            isEtPregunta,
+            didTheGuideAlreadyExist,
+            ruta
         )
 
         _uiStateBtnSave.value = setClickSaveUseCase

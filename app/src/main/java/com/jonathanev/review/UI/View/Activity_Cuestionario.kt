@@ -452,7 +452,6 @@ class Activity_Cuestionario : AppCompatActivity() {
                     if (colorActual != -16777216 && !seAgregoSaltoDeLinea) {
                         val cursorPosition = binding.etPregResp.selectionStart
                         activityCuestionarioViewModel.setPintarLetra(texto, cursorPosition, colorActual)
-                        //pintarLetra(texto)
                     }
                 }
             }

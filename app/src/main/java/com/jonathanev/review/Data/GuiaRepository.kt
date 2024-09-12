@@ -1,7 +1,10 @@
 package com.jonathanev.review.Data
 
 import android.content.Context
+import android.content.Intent
+import android.util.Log
 import android.util.Xml
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity.MODE_PRIVATE
 import com.jonathanev.review.Core.Constants.file
 import com.jonathanev.review.Core.Constants.rutaPrin
@@ -12,8 +15,8 @@ import com.jonathanev.review.Data.Model.PreguntaRespuesta
 import com.jonathanev.review.Data.Model.ResponseGuia
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import com.jonathanev.review.Domain.getAllGuiasUseCase
+import com.jonathanev.review.UI.View.Activity_RepasarGuia
 import dagger.hilt.android.qualifiers.ApplicationContext
-import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.NodeList
 import org.xml.sax.SAXException
@@ -107,6 +110,71 @@ class GuiaRepository @Inject constructor(
 
             ValidacionesGuiaModel(
                 message = "Guia de estudio no se creó correctamente"
+            )
+        }
+    }
+
+    fun borrarCrearXML(
+        nombreArchivo: String,
+        preguntas: ArrayList<String>,
+        respuestas: ArrayList<String>,
+        ruta: String
+    ): ValidacionesGuiaModel{
+        // Eliminamos el archivo anteriormente creado
+        File(ruta).delete()
+        Log.d("ArchivoEliminado", "Archivo eliminado")
+
+        //Vamos a crear el archivo que acabamos de eliminar pero con el nuevo cuestionario
+        val fos: FileOutputStream
+        val serializer: XmlSerializer = Xml.newSerializer()
+
+        return try {
+            // fos = openFileOutput(nombreArchivo, MODE_PRIVATE)
+            fos = FileOutputStream(ruta)
+            serializer.setOutput(fos, "UTF-8")
+            serializer.startDocument(null, java.lang.Boolean.valueOf(true))
+            serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true)
+            serializer.startTag("", "GuiaEstudio")
+            serializer.attribute("", "version", "1.0")
+            serializer.startTag("", "Cuestionario")
+            serializer.attribute("", "nombreGuia", nombreArchivo)
+
+            // Creo la etiqueta interrogante con su respectiva pregunta
+            for (i in preguntas.indices) {
+                serializer.startTag("", "Interrogante")
+                serializer.attribute("", "pregunta", preguntas[i])
+                serializer.attribute("", "respuesta", respuestas[i])
+                serializer.endTag("", "Interrogante")
+            }
+
+            // Si los campos estan vacios simplemente cierro las etiquetas y directamente
+            // guardo el documento en el teléfono.
+            serializer.endTag("", "Cuestionario")
+            serializer.endTag("", "GuiaEstudio")
+            serializer.endDocument()
+            serializer.flush()
+            fos.close()
+
+            val rutaActualizada = "$file/$nombreArchivo"
+            ValidacionesGuiaModel(
+                message = "Guia de estudio creada exitosamente",
+                responseGuia = ResponseGuia(rutaActualizada),
+                estadoUI = EstadoUI(
+                    isCreatedGuia = true,
+                )
+            )
+
+            /*val ruta = "$file/$nombreArchivo"
+            val intent: Intent = Intent(applicationContext, Activity_RepasarGuia::class.java)
+            intent.putExtra("ruta", ruta)
+            startActivity(intent)
+            copyImages()
+            finish()*/
+        } catch (e: IOException) {
+            e.printStackTrace()
+
+            ValidacionesGuiaModel(
+                message = "Guia de estudio no se creó correctamente",
             )
         }
     }

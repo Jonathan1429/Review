@@ -8,7 +8,8 @@ import javax.inject.Inject
 class setClickSaveUseCase @Inject constructor(
     private val setSpanPalabraUseCase: setSpanPalabraUseCase,
     private val setColocarEtiquetasUseCase: setColocarEtiquetasUseCase,
-    private val setCrearXmlUseCasel: setCrearXmlUseCasel
+    private val setCrearXmlUseCase: setCrearXmlUseCase,
+    private val setBorrarCrearXmlUseCase: setBorrarCrearXmlUseCase
 ) {
     operator fun invoke(
         preguntas: ArrayList<String>,
@@ -16,7 +17,9 @@ class setClickSaveUseCase @Inject constructor(
         contadorPregunta: Int,
         editable: Editable,
         nombreArchivo: String,
-        isEtPregunta: Boolean
+        isEtPregunta: Boolean,
+        didTheGuideAlreadyExist: Boolean,
+        ruta: String
     ): ValidacionesGuiaModel {
         val posPregFin = preguntas.size - 1
         val posRespFin = respuestas.size - 1
@@ -27,7 +30,7 @@ class setClickSaveUseCase @Inject constructor(
             responseSpanPalabra.editable.isEmpty() || isEtPregunta && posPregFin != posRespFin -> {
                 if (isEtPregunta && posPregFin > -1) {
                     // Se tiene que guardar la guia y crear el archivo
-                    setCrearXmlUseCasel(nombreArchivo, preguntas, respuestas)
+                    setCrearXmlUseCase(nombreArchivo, preguntas, respuestas)
                 } else {
                     ValidacionesGuiaModel(
                         message = "Asegurate de llenar pregunta y respuesta",
@@ -49,7 +52,11 @@ class setClickSaveUseCase @Inject constructor(
                 }
 
                 // Se tiene que guardar la guia y crear el archivo
-                setCrearXmlUseCasel(nombreArchivo, preguntas, respuestas)
+                if (!didTheGuideAlreadyExist){
+                    setCrearXmlUseCase(nombreArchivo, preguntas, respuestas)
+                } else {
+                    setBorrarCrearXmlUseCase(nombreArchivo, preguntas, respuestas, ruta)
+                }
             }
         }
     }

@@ -162,7 +162,9 @@ class ActivityCuestionarioViewModel @Inject constructor(
             contadorPregunta,
             editable,
             nombreArchivo,
-            isEtPregunta
+            isEtPregunta,
+            false,
+            ""
         )
 
         _uiStateBtnSave.value = setClickSaveUseCase
