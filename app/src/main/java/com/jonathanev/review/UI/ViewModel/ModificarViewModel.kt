@@ -12,6 +12,7 @@ import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import com.jonathanev.review.Domain.getGuiaUseCase
 import com.jonathanev.review.Domain.getObtenerDatosXMLUseCase
+import com.jonathanev.review.Domain.setClickRegresarModicandoUseCase
 import com.jonathanev.review.Domain.setRollClickedUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -21,6 +22,7 @@ import javax.inject.Inject
 class ModificarViewModel @Inject constructor(
     application: Application,
     private val setRollClickedUseCase: setRollClickedUseCase,
+    private val setClickRegresarModicandoUseCase: setClickRegresarModicandoUseCase,
     private val getObtenerDatosXMLUseCase: getObtenerDatosXMLUseCase,
     val getGuiaUseCase: getGuiaUseCase
 ) : ViewModel() {
@@ -31,6 +33,8 @@ class ModificarViewModel @Inject constructor(
     // Click events
     private val _uiStateBtnRoll = MutableLiveData<ValidacionesGuiaModel>()
     val uiStateBtnRoll: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnRoll
+    private val _uiStateBtnBack = MutableLiveData<ValidacionesGuiaModel>()
+    val uiStateBtnBack: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnBack
 
     private val _uiShowDates = MutableLiveData<Boolean>()
     val uiShowDates: LiveData<Boolean> get() = _uiShowDates
@@ -82,6 +86,26 @@ class ModificarViewModel @Inject constructor(
         if (preguntas.isNotEmpty()){
             _uiShowDates.value = true
         }
+    }
+
+    // Click events
+    fun onClickImgvPrevious(
+        editable: Editable,
+        isEtPregunta: Boolean
+    ) {
+        val responseRegresarUseCase = setClickRegresarModicandoUseCase(
+            preguntas,
+            respuestas,
+            contadorPregunta,
+            editable,
+            isEtPregunta
+        )
+
+        if (responseRegresarUseCase.estadoUI.isUpdatedAskAns) {
+            contadorPregunta--
+        }
+
+        _uiStateBtnBack.value = responseRegresarUseCase
     }
 
     fun clickedRoll(

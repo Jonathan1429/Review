@@ -44,13 +44,13 @@ class DataStoreManager private constructor(private val context: Context) {
                 }
             }
             .map { pref ->
-                pref[contador_imagenes_key] ?: 83
+                pref[contador_imagenes_key] ?: 0
             }
     }
 
     suspend fun setIncrementCounter() {
         dataStore.edit { pref ->
-            val currentCounter = pref[contador_imagenes_key] ?: 83
+            val currentCounter = pref[contador_imagenes_key] ?: 0
             pref[contador_imagenes_key] = currentCounter + 1
         }
     }
