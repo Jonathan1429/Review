@@ -351,54 +351,40 @@ class Activity_Modificar : AppCompatActivity() {
         binding.imgvEliminar.setOnClickListener {
             AlertDialog.Builder(this@Activity_Modificar)
                 .setTitle("¡Atención!")
-                .setMessage("¿Quieres eliminar la pregunta?")
+                .setMessage("¿Quieres eliminar pregunta/respuesta?")
                 .setPositiveButton("Si") { _, _ ->
-                    // Se le quita 1 para hacer referencia al arreglo
-                    // tamaño 3-1 = 2 [0,1,2].
-                    val longi: Int = respuestas.size
-
-                    if (longi == 0) {
-                        //preguntas.removeFirst()
-                        //respuestas.removeFirst()
-
-                        if (binding.lblPregResp.text.toString() == "Pregunta") {
-                            binding.etPregResp.setText("")
-                        } else {
-                            binding.lblPregResp.text = "Pregunta"
-                            binding.etPregResp.setText("")
-                        }
-                    } else if ((contadorPregunta + 1) == longi && (contadorPregunta + 1) == 1) {
-                        preguntas.removeAt(contadorPregunta)
-                        respuestas.removeAt(contadorPregunta)
-                        binding.lblPregResp.text = "Pregunta"
-                        binding.imgvSelColor.visibility = View.GONE
-                        binding.ivImagen.visibility = View.GONE
-                        binding.tilContenidoPregResp.visibility = View.VISIBLE
-                        binding.etPregResp.setText("")
-                    } else if ((contadorPregunta + 1) == longi) {
-                        preguntas.removeAt(contadorPregunta)
-                        respuestas.removeAt(contadorPregunta)
-                        contadorPregunta--
-                        binding.lblPregResp.text = "Pregunta"
-                        pintarTexto(contadorPregunta)
-                    } else if (contadorPregunta < longi) {
-                        preguntas.removeAt(contadorPregunta)
-                        respuestas.removeAt(contadorPregunta)
-                        binding.lblPregResp.text = "Pregunta"
-                        pintarTexto(contadorPregunta)
-                    } else { // Cuando el contador es mayor a longi
-                        if (binding.lblPregResp.text.toString() == "Pregunta") {
-                            contadorPregunta--
-                            pintarTexto(contadorPregunta)
-                        } else {
-                            preguntas.removeAt(contadorPregunta)
-                            contadorPregunta--
-                            pintarTexto(contadorPregunta)
-                        }
-                    }
-                }.setNegativeButton("Cancelar") { dialog, i ->
+                    modificarViewModel.onClickEliminar()
+                }.setNegativeButton("Cancelar") { dialog, _ ->
                     dialog.dismiss()
                 }.create().show()
+        }
+
+        modificarViewModel.uiStateBtnEliminar.observe(this) { uiState ->
+            binding.lblPregResp.text = "Pregunta"
+
+            if (!uiState.estadoUI.isThereMoreAsks) {
+                binding.etPregResp.text?.clear()
+            } else {
+                // Agregar el texto en el et cuando hay un builder
+                if (!uiState.estadoUI.isShowImage) {
+                    binding.etPregResp.text = uiState.builder
+                } else {
+                    // Cuando hay una imagen hay que poner esto
+                    binding.etPregResp.setText(uiState.estadoImagen.textImgEcrypted)
+                    binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
+                }
+            }
+
+            binding.tilContenidoPregResp.visibility =
+                if (uiState.estadoUI.isShowImage) View.GONE else View.VISIBLE
+            binding.ivImagen.visibility =
+                if (uiState.estadoUI.isShowImage) View.VISIBLE else View.GONE
+            binding.imgvCancelar.visibility =
+                if (uiState.estadoUI.isShowCancelar) View.VISIBLE else View.GONE
+            binding.imgvQuitColor.visibility =
+                if (uiState.estadoUI.isShowQuitColor) View.VISIBLE else View.GONE
+            binding.imgvSelColor.visibility =
+                if (uiState.estadoUI.isShowSelColor) View.VISIBLE else View.GONE
         }
 
         binding.barraSuperiorRegreso.imgvSave.setOnClickListener {

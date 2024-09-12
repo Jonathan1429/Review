@@ -310,44 +310,42 @@ class Activity_Cuestionario : AppCompatActivity() {
         }
 
         binding.imgvEliminar.setOnClickListener {
-            activityCuestionarioViewModel.onClickEliminar()
-        }
-
-        activityCuestionarioViewModel.uiStateBtnEliminar.observe(this) { uiState ->
             AlertDialog.Builder(this@Activity_Cuestionario)
                 .setTitle("¡Atención!")
                 .setMessage("¿Quieres eliminar pregunta/respuesta?")
                 .setPositiveButton("Si") { _, _ ->
-                    binding.lblPregResp.text = "Pregunta"
-
-                    if (!uiState.estadoUI.isThereMoreAsks) {
-                        binding.etPregResp.text?.clear()
-                    } else {
-                        // Agregar el texto en el et cuando hay un builder
-                        if (!uiState.estadoUI.isShowImage) {
-                            binding.etPregResp.text = uiState.builder
-                        } else {
-                            // Cuando hay una imagen hay que poner esto
-                            binding.etPregResp.setText(uiState.estadoImagen.textImgEcrypted)
-                            binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
-                        }
-                    }
-
-                    binding.tilContenidoPregResp.visibility =
-                        if (uiState.estadoUI.isShowImage) View.GONE else View.VISIBLE
-                    binding.ivImagen.visibility =
-                        if (uiState.estadoUI.isShowImage) View.VISIBLE else View.GONE
-                    binding.imgvCancelar.visibility =
-                        if (uiState.estadoUI.isShowCancelar) View.VISIBLE else View.GONE
-                    binding.imgvQuitColor.visibility =
-                        if (uiState.estadoUI.isShowQuitColor) View.VISIBLE else View.GONE
-                    binding.imgvSelColor.visibility =
-                        if (uiState.estadoUI.isShowSelColor) View.VISIBLE else View.GONE
-                }
-
-                .setNegativeButton("Cancelar") { dialog, i ->
+                    activityCuestionarioViewModel.onClickEliminar()
+                }.setNegativeButton("Cancelar") { dialog, _ ->
                     dialog.dismiss()
                 }.create().show()
+        }
+
+        activityCuestionarioViewModel.uiStateBtnEliminar.observe(this) { uiState ->
+            binding.lblPregResp.text = "Pregunta"
+
+            if (!uiState.estadoUI.isThereMoreAsks) {
+                binding.etPregResp.text?.clear()
+            } else {
+                // Agregar el texto en el et cuando hay un builder
+                if (!uiState.estadoUI.isShowImage) {
+                    binding.etPregResp.text = uiState.builder
+                } else {
+                    // Cuando hay una imagen hay que poner esto
+                    binding.etPregResp.setText(uiState.estadoImagen.textImgEcrypted)
+                    binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
+                }
+            }
+
+            binding.tilContenidoPregResp.visibility =
+                if (uiState.estadoUI.isShowImage) View.GONE else View.VISIBLE
+            binding.ivImagen.visibility =
+                if (uiState.estadoUI.isShowImage) View.VISIBLE else View.GONE
+            binding.imgvCancelar.visibility =
+                if (uiState.estadoUI.isShowCancelar) View.VISIBLE else View.GONE
+            binding.imgvQuitColor.visibility =
+                if (uiState.estadoUI.isShowQuitColor) View.VISIBLE else View.GONE
+            binding.imgvSelColor.visibility =
+                if (uiState.estadoUI.isShowSelColor) View.VISIBLE else View.GONE
         }
 
         binding.barraSuperiorRegreso.imgvSave.setOnClickListener {

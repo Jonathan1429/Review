@@ -12,6 +12,7 @@ import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import com.jonathanev.review.Domain.getGuiaUseCase
 import com.jonathanev.review.Domain.getObtenerDatosXMLUseCase
+import com.jonathanev.review.Domain.setClickEliminarUseCase
 import com.jonathanev.review.Domain.setClickRegresarModicandoUseCase
 import com.jonathanev.review.Domain.setClickSiguienteModificandoUseCase
 import com.jonathanev.review.Domain.setRollClickedUseCase
@@ -25,6 +26,7 @@ class ModificarViewModel @Inject constructor(
     private val setRollClickedUseCase: setRollClickedUseCase,
     private val setClickRegresarModicandoUseCase: setClickRegresarModicandoUseCase,
     private val setClickSiguienteModicandoUseCase: setClickSiguienteModificandoUseCase,
+    private val setClickEliminarUseCase: setClickEliminarUseCase,
     private val getObtenerDatosXMLUseCase: getObtenerDatosXMLUseCase,
     val getGuiaUseCase: getGuiaUseCase
 ) : ViewModel() {
@@ -40,6 +42,8 @@ class ModificarViewModel @Inject constructor(
     val uiStateBtnBack: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnBack
     private val _uiStateBtnNext = MutableLiveData<ValidacionesGuiaModel>()
     val uiStateBtnNext: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnNext
+    private val _uiStateBtnEliminar = MutableLiveData<ValidacionesGuiaModel>()
+    val uiStateBtnEliminar: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnEliminar
 
     private val _uiShowDates = MutableLiveData<Boolean>()
     val uiShowDates: LiveData<Boolean> get() = _uiShowDates
@@ -139,5 +143,16 @@ class ModificarViewModel @Inject constructor(
         val responseRollClickedUseCase =
             setRollClickedUseCase(preguntas, respuestas, contadorPregunta, editable, isEtPregunta)
         _uiStateBtnRoll.value = responseRollClickedUseCase
+    }
+
+    fun onClickEliminar() {
+        val responseRegresarUseCase =
+            setClickEliminarUseCase(preguntas, respuestas, contadorPregunta)
+
+        if (contadorPregunta > 0) {
+            contadorPregunta--
+        }
+
+        _uiStateBtnEliminar.value = responseRegresarUseCase
     }
 }
