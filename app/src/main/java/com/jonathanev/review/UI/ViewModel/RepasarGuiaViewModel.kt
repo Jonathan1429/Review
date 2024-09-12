@@ -4,7 +4,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
-import com.jonathanev.review.Domain.getGuiaPosicionUseCase
 import com.jonathanev.review.Domain.getGuiaUseCase
 import com.jonathanev.review.Domain.getObtenerDatosXMLUseCase
 import com.jonathanev.review.Domain.setPintarTextosUseCase
@@ -42,4 +41,11 @@ class RepasarGuiaViewModel @Inject constructor(
 
         return responseValGuiaModel
     }
+
+    fun getPintarTexto(isEtPregunta: Boolean): ValidacionesGuiaModel {
+        val texto = setPintarTextosUseCase(isEtPregunta, preguntas, respuestas, contadorPregunta)
+        return texto
+    }
+
+
 }

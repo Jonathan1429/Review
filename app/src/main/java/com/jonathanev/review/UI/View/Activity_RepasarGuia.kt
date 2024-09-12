@@ -17,14 +17,12 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.animation.doOnEnd
-import androidx.core.net.toUri
 import androidx.core.view.isGone
 import com.davemorrissey.labs.subscaleview.ImageSource
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
-import com.jonathanev.review.Core.Constants
 import com.jonathanev.review.Core.Constants.file
 import com.jonathanev.review.Data.Model.ColorPregModel
 import com.jonathanev.review.UI.ViewModel.RepasarGuiaViewModel
@@ -70,7 +68,6 @@ class Activity_RepasarGuia : AppCompatActivity() {
         initUI(ruta)
 
         repasarGuiaViewModel.guiaModel.observe(this) {
-            //binding.barraSuperiorRegreso.tvTituloToolbar.text = "Guia: $it.nombreGuia"
             nombreArchivo = it.nombreGuia
 
             // Guardo el nombre del archivo enviado desde el popupFragmentListarGuias.
@@ -208,8 +205,34 @@ class Activity_RepasarGuia : AppCompatActivity() {
     }
 
     private fun girarCardView() {
+        var isEtPregunta = false
+        if (binding.lblPregResp.text.toString() == "Pregunta") {
+            isEtPregunta = true
+        }
+
         if (!binding.tilContenidoPregResp.isGone) {
-            pintarTexto()
+            // Get text
+            val texto = repasarGuiaViewModel.getPintarTexto(isEtPregunta)
+            if (texto.estadoUI.isEtPregunta) {
+                binding.lblPregResp.text = "Respuesta"
+            } else {
+                binding.lblPregResp.text = "Pregunta"
+            }
+
+            if (texto.estadoUI.isClearText) {
+                binding.etPregResp.text?.clear()
+            } else {
+                // Agregar el texto en el et cuando hay un builder
+                if (!texto.estadoUI.isShowImage) {
+                    binding.etPregResp.text = texto.builder
+                } else {
+                    // Cuando hay una imagen hay que poner esto
+                    binding.etPregResp.setText(texto.estadoImagen.textImgEcrypted)
+                    binding.ivImagen.setImage(ImageSource.uri(texto.estadoImagen.textImgUnencrypted))
+                }
+            }
+
+            // Flip animator
             var flipAnimator =
                 ObjectAnimator.ofFloat(binding.flContenidoPregResp, "rotationY", 0f, 180f)
             flipAnimator.duration = 0 // Duración de la animación en milisegundos
@@ -222,7 +245,28 @@ class Activity_RepasarGuia : AppCompatActivity() {
                 flipAnimator.start()
             }
         } else {
-            pintarTexto()
+            // Get text
+            val texto = repasarGuiaViewModel.getPintarTexto(isEtPregunta)
+            if (texto.estadoUI.isEtPregunta) {
+                binding.lblPregResp.text = "Respuesta"
+            } else {
+                binding.lblPregResp.text = "Pregunta"
+            }
+
+            if (texto.estadoUI.isClearText) {
+                binding.etPregResp.text?.clear()
+            } else {
+                // Agregar el texto en el et cuando hay un builder
+                if (!texto.estadoUI.isShowImage) {
+                    binding.etPregResp.text = texto.builder
+                } else {
+                    // Cuando hay una imagen hay que poner esto
+                    binding.etPregResp.setText(texto.estadoImagen.textImgEcrypted)
+                    binding.ivImagen.setImage(ImageSource.uri(texto.estadoImagen.textImgUnencrypted))
+                }
+            }
+
+            // Flip animator
             var flipAnimator =
                 ObjectAnimator.ofFloat(
                     binding.flContenidoPregResp,
