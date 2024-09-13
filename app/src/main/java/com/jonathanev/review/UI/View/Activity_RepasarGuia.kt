@@ -4,41 +4,20 @@ import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.text.Editable
-import android.text.Spannable
-import android.text.SpannableStringBuilder
-import android.text.style.ForegroundColorSpan
-import android.util.Log
 import android.view.View
-import android.view.animation.AlphaAnimation
-import android.view.animation.Animation
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.animation.doOnEnd
-import androidx.core.view.isGone
 import com.davemorrissey.labs.subscaleview.ImageSource
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
-import com.jonathanev.review.Core.Constants.file
-import com.jonathanev.review.Data.Model.ColorPregModel
 import com.jonathanev.review.UI.ViewModel.RepasarGuiaViewModel
 import com.jonathanev.review.databinding.ActivityRepasarGuiaBinding
 import dagger.hilt.android.AndroidEntryPoint
-import org.w3c.dom.Document
-import org.w3c.dom.Element
-import org.w3c.dom.NodeList
-import org.xml.sax.SAXException
-import java.io.File
-import java.io.FileInputStream
-import java.io.IOException
-import javax.xml.parsers.DocumentBuilder
-import javax.xml.parsers.DocumentBuilderFactory
-import javax.xml.parsers.ParserConfigurationException
 
 
 @AndroidEntryPoint
@@ -88,12 +67,6 @@ class Activity_RepasarGuia : AppCompatActivity() {
         binding.barraSuperiorRegreso.imgvBack.setOnClickListener { finish() }
 
         binding.imgvPregResp.setOnClickListener {
-            if (binding.lblPregResp.text.toString() == "Pregunta") {
-                binding.lblPregResp.text = "Respuesta"
-            } else {
-                binding.lblPregResp.text = "Pregunta"
-            }
-
             girarCardView()
         }
 
@@ -127,7 +100,7 @@ class Activity_RepasarGuia : AppCompatActivity() {
             repasarGuiaViewModel.onClickNext()
         }
 
-        repasarGuiaViewModel.uiStateBtnNext.observe(this){ uiState ->
+        repasarGuiaViewModel.uiStateBtnNext.observe(this) { uiState ->
             if (uiState.estadoUI.isUpdatedAskAns) {
                 binding.lblPregResp.text = "Pregunta"
 
@@ -225,85 +198,55 @@ class Activity_RepasarGuia : AppCompatActivity() {
         onAdClosed: Se llama al cerrar la publicidad.*/
     }
 
+    @SuppressLint("SetTextI18n")
     private fun girarCardView() {
-        var isEtPregunta = false
+        var isEtPregunta = true
         if (binding.lblPregResp.text.toString() == "Pregunta") {
-            isEtPregunta = true
+            //Get Respuesta
+            isEtPregunta = false
         }
 
-        if (!binding.tilContenidoPregResp.isGone) {
-            // Get text
-            val texto = repasarGuiaViewModel.getPintarTexto(isEtPregunta)
-            if (texto.estadoUI.isEtPregunta) {
-                binding.lblPregResp.text = "Respuesta"
-            } else {
-                binding.lblPregResp.text = "Pregunta"
-            }
-
-            if (texto.estadoUI.isClearText) {
-                binding.etPregResp.text?.clear()
-            } else {
-                // Agregar el texto en el et cuando hay un builder
-                if (!texto.estadoUI.isShowImage) {
-                    binding.etPregResp.text = texto.builder
-                } else {
-                    // Cuando hay una imagen hay que poner esto
-                    binding.etPregResp.setText(texto.estadoImagen.textImgEcrypted)
-                    binding.ivImagen.setImage(ImageSource.uri(texto.estadoImagen.textImgUnencrypted))
-                }
-            }
-
-            // Flip animator
-            var flipAnimator =
-                ObjectAnimator.ofFloat(binding.flContenidoPregResp, "rotationY", 0f, 180f)
-            flipAnimator.duration = 0 // Duración de la animación en milisegundos
-            flipAnimator.start()
-            flipAnimator.doOnEnd {
-                //showImageOrText()
-                flipAnimator =
-                    ObjectAnimator.ofFloat(binding.flContenidoPregResp, "rotationY", 180f, 0f)
-                flipAnimator.duration = 1000 // Duración de la animación en milisegundos
-                flipAnimator.start()
-            }
+        // Get text
+        val texto = repasarGuiaViewModel.getPintarTexto(isEtPregunta)
+        if (!isEtPregunta) {
+            binding.lblPregResp.text = "Respuesta"
         } else {
-            // Get text
-            val texto = repasarGuiaViewModel.getPintarTexto(isEtPregunta)
-            if (texto.estadoUI.isEtPregunta) {
-                binding.lblPregResp.text = "Respuesta"
-            } else {
-                binding.lblPregResp.text = "Pregunta"
-            }
+            binding.lblPregResp.text = "Pregunta"
+        }
 
-            if (texto.estadoUI.isClearText) {
-                binding.etPregResp.text?.clear()
+        if (texto.estadoUI.isClearText) {
+            binding.etPregResp.text?.clear()
+        } else {
+            // Agregar el texto en el et cuando hay un builder
+            if (!texto.estadoUI.isShowImage) {
+                binding.etPregResp.text = texto.builder
             } else {
-                // Agregar el texto en el et cuando hay un builder
-                if (!texto.estadoUI.isShowImage) {
-                    binding.etPregResp.text = texto.builder
-                } else {
-                    // Cuando hay una imagen hay que poner esto
-                    binding.etPregResp.setText(texto.estadoImagen.textImgEcrypted)
-                    binding.ivImagen.setImage(ImageSource.uri(texto.estadoImagen.textImgUnencrypted))
-                }
-            }
+                // Cuando hay una imagen hay que poner esto
+                val imagen = texto.estadoImagen.textImgUnencrypted.replace(
+                    "imagenesPivote".toRegex(),
+                    "imagenes"
+                )
 
-            // Flip animator
-            var flipAnimator =
-                ObjectAnimator.ofFloat(
-                    binding.flContenidoPregResp,
-                    "rotationY",
-                    0f,
-                    180f
-                ) // ivImagen
-            flipAnimator.duration = 0 // Duración de la animación en milisegundos
+                binding.etPregResp.setText(texto.estadoImagen.textImgEcrypted)
+                binding.ivImagen.setImage(ImageSource.uri(imagen))
+            }
+        }
+
+        binding.tilContenidoPregResp.visibility =
+            if (texto.estadoUI.isShowImage) View.GONE else View.VISIBLE
+        binding.ivImagen.visibility =
+            if (texto.estadoUI.isShowImage) View.VISIBLE else View.GONE
+
+        var flipAnimator =
+            ObjectAnimator.ofFloat(binding.flContenidoPregResp, "rotationY", 0f, 180f)
+        flipAnimator.duration = 0 // Duración de la animación en milisegundos
+        flipAnimator.start()
+        flipAnimator.doOnEnd {
+            //showImageOrText()
+            flipAnimator =
+                ObjectAnimator.ofFloat(binding.flContenidoPregResp, "rotationY", 180f, 0f)
+            flipAnimator.duration = 1000 // Duración de la animación en milisegundos
             flipAnimator.start()
-            flipAnimator.doOnEnd {
-                //showImageOrText()
-                flipAnimator =
-                    ObjectAnimator.ofFloat(binding.flContenidoPregResp, "rotationY", 180f, 0f)
-                flipAnimator.duration = 1000 // Duración de la animación en milisegundos
-                flipAnimator.start()
-            }
         }
     }
 }
