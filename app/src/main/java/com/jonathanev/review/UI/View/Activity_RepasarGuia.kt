@@ -6,6 +6,7 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.text.Editable
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
@@ -104,8 +105,31 @@ class Activity_RepasarGuia : AppCompatActivity() {
         }
 
         binding.imgvPrevious.setOnClickListener {
-            //binding.btnMostrarRespuesta.text = "Mostrar respuesta"
-            if (contadorPregunta == 0) {
+            repasarGuiaViewModel.onClickBefore()
+        }
+
+        repasarGuiaViewModel.uiStateBtnBack.observe(this) { uiState ->
+            if (uiState.estadoUI.isUpdatedAskAns) {
+                binding.lblPregResp.text = "Pregunta"
+
+                // Agregar el texto en el et cuando hay un builder
+                if (!uiState.estadoUI.isShowImage) {
+                    binding.etPregResp.text = uiState.builder
+                } else {
+                    // Cuando hay una imagen hay que poner esto
+                    binding.etPregResp.setText(uiState.estadoImagen.textImgEcrypted)
+                    binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
+                }
+
+                binding.tilContenidoPregResp.visibility =
+                    if (uiState.estadoUI.isShowImage) View.GONE else View.VISIBLE
+                binding.ivImagen.visibility =
+                    if (uiState.estadoUI.isShowImage) View.VISIBLE else View.GONE
+            } else {
+                Toast.makeText(applicationContext, uiState.message, Toast.LENGTH_SHORT).show()
+            }
+
+            /*if (contadorPregunta == 0) {
                 Toast.makeText(
                     applicationContext, "No tienes preguntas anteriores",
                     Toast.LENGTH_SHORT
@@ -120,7 +144,7 @@ class Activity_RepasarGuia : AppCompatActivity() {
 
                 // Pintamos el valor anterior de colores.
                 pintarTexto()
-            }
+            }*/
         }
 
         binding.imgvNext.setOnClickListener {
