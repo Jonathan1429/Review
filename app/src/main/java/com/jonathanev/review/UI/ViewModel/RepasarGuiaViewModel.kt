@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import com.jonathanev.review.Domain.getClickRegresarUseCase
+import com.jonathanev.review.Domain.getClickSiguienteUseCase
 import com.jonathanev.review.Domain.getGuiaUseCase
 import com.jonathanev.review.Domain.getObtenerDatosXMLUseCase
 import com.jonathanev.review.Domain.setPintarTextosUseCase
@@ -17,7 +18,8 @@ class RepasarGuiaViewModel @Inject constructor(
     private val setPintarTextosUseCase: setPintarTextosUseCase,
     private val getGuiaUseCase: getGuiaUseCase,
     private val getObtenerDatosXMLUseCase: getObtenerDatosXMLUseCase,
-    private val getClickRegresarUseCase: getClickRegresarUseCase
+    private val getClickRegresarUseCase: getClickRegresarUseCase,
+    private val getClickSiguienteUseCase: getClickSiguienteUseCase
 ): ViewModel(){
     var preguntas: ArrayList<String> = ArrayList()
     private var respuestas: ArrayList<String> = ArrayList()
@@ -27,6 +29,8 @@ class RepasarGuiaViewModel @Inject constructor(
 
     private val _uiStateBtnBack = MutableLiveData<ValidacionesGuiaModel>()
     val uiStateBtnBack: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnBack
+    private val _uiStateBtnNext = MutableLiveData<ValidacionesGuiaModel>()
+    val uiStateBtnNext: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnNext
 
     fun getGuia(ruta: String){
         guiaModel.postValue(getGuiaUseCase(ruta))
@@ -54,7 +58,13 @@ class RepasarGuiaViewModel @Inject constructor(
     }
 
     fun onClickNext(){
+        val responseSiguiente = getClickSiguienteUseCase(contadorPregunta, preguntas, respuestas)
 
+        if (responseSiguiente.estadoUI.isUpdatedAskAns) {
+            contadorPregunta++
+        }
+
+        _uiStateBtnNext.value = responseSiguiente
     }
 
     fun onClickBefore(){
