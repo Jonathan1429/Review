@@ -17,7 +17,7 @@ data class ResponseGuia(
 
 data class EstadoImagen(
     val textImgEcrypted: String = "",
-    val textImgUnencrypted: String = ""
+    var textImgUnencrypted: String = ""
 )
 
 data class EstadoUI(

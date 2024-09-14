@@ -62,12 +62,56 @@ class Activity_RepasarGuia : AppCompatActivity() {
                 binding.etPregResp.setText(texto.estadoImagen.textImgEcrypted)
                 binding.ivImagen.setImage(ImageSource.uri(texto.estadoImagen.textImgUnencrypted))
             }
+
+            binding.tilContenidoPregResp.visibility =
+                if (texto.estadoUI.isShowImage) View.GONE else View.VISIBLE
+            binding.ivImagen.visibility =
+                if (texto.estadoUI.isShowImage) View.VISIBLE else View.GONE
         }
 
         binding.barraSuperiorRegreso.imgvBack.setOnClickListener { finish() }
 
         binding.imgvPregResp.setOnClickListener {
-            girarCardView()
+            var isEtPregunta = true
+            if (binding.lblPregResp.text.toString() == "Pregunta") {
+                //Get Respuesta
+                isEtPregunta = false
+            }
+
+            // Get text
+            repasarGuiaViewModel.onClickRoll(isEtPregunta)
+        }
+
+        repasarGuiaViewModel.uiStateBtnRoll.observe(this) { uiState ->
+            if (uiState.estadoUI.isUpdatedAskAns) {
+                girarCardView()
+
+                if (!uiState.estadoUI.isEtPregunta) {
+                    binding.lblPregResp.text = "Respuesta"
+                } else {
+                    binding.lblPregResp.text = "Pregunta"
+                }
+
+                if (uiState.estadoUI.isClearText) {
+                    binding.etPregResp.text?.clear()
+                } else {
+                    // Agregar el texto en el et cuando hay un builder
+                    if (!uiState.estadoUI.isShowImage) {
+                        binding.etPregResp.text = uiState.builder
+                    } else {
+                        // Cuando hay una imagen hay que poner esto
+                        binding.etPregResp.setText(uiState.estadoImagen.textImgEcrypted)
+                        binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
+                    }
+                }
+
+                binding.tilContenidoPregResp.visibility =
+                    if (uiState.estadoUI.isShowImage) View.GONE else View.VISIBLE
+                binding.ivImagen.visibility =
+                    if (uiState.estadoUI.isShowImage) View.VISIBLE else View.GONE
+            } else {
+                Toast.makeText(applicationContext, uiState.message, Toast.LENGTH_SHORT).show()
+            }
         }
 
         binding.imgvPrevious.setOnClickListener {
@@ -126,7 +170,7 @@ class Activity_RepasarGuia : AppCompatActivity() {
                     ) { _, _ ->
                         binding.lblPregResp.text = "Pregunta"
                         repasarGuiaViewModel.contadorPregunta = 0
-                        val texto = repasarGuiaViewModel.getPintarTexto(true)
+                        val texto = repasarGuiaViewModel.getReinicioGuia(true)
                         if (texto.estadoUI.isEtPregunta) {
                             binding.lblPregResp.text = "Respuesta"
                         } else {
@@ -200,43 +244,6 @@ class Activity_RepasarGuia : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     private fun girarCardView() {
-        var isEtPregunta = true
-        if (binding.lblPregResp.text.toString() == "Pregunta") {
-            //Get Respuesta
-            isEtPregunta = false
-        }
-
-        // Get text
-        val texto = repasarGuiaViewModel.getPintarTexto(isEtPregunta)
-        if (!isEtPregunta) {
-            binding.lblPregResp.text = "Respuesta"
-        } else {
-            binding.lblPregResp.text = "Pregunta"
-        }
-
-        if (texto.estadoUI.isClearText) {
-            binding.etPregResp.text?.clear()
-        } else {
-            // Agregar el texto en el et cuando hay un builder
-            if (!texto.estadoUI.isShowImage) {
-                binding.etPregResp.text = texto.builder
-            } else {
-                // Cuando hay una imagen hay que poner esto
-                val imagen = texto.estadoImagen.textImgUnencrypted.replace(
-                    "imagenesPivote".toRegex(),
-                    "imagenes"
-                )
-
-                binding.etPregResp.setText(texto.estadoImagen.textImgEcrypted)
-                binding.ivImagen.setImage(ImageSource.uri(imagen))
-            }
-        }
-
-        binding.tilContenidoPregResp.visibility =
-            if (texto.estadoUI.isShowImage) View.GONE else View.VISIBLE
-        binding.ivImagen.visibility =
-            if (texto.estadoUI.isShowImage) View.VISIBLE else View.GONE
-
         var flipAnimator =
             ObjectAnimator.ofFloat(binding.flContenidoPregResp, "rotationY", 0f, 180f)
         flipAnimator.duration = 0 // Duración de la animación en milisegundos

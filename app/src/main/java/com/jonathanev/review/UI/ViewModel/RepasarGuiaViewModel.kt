@@ -31,6 +31,8 @@ class RepasarGuiaViewModel @Inject constructor(
     val uiStateBtnBack: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnBack
     private val _uiStateBtnNext = MutableLiveData<ValidacionesGuiaModel>()
     val uiStateBtnNext: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnNext
+    private val _uiStateBtnRoll = MutableLiveData<ValidacionesGuiaModel>()
+    val uiStateBtnRoll: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnRoll
 
     fun getGuia(ruta: String){
         guiaModel.postValue(getGuiaUseCase(ruta))
@@ -43,7 +45,7 @@ class RepasarGuiaViewModel @Inject constructor(
             respuestas.add(preguntaRespuesta.respuesta)
         }
 
-        val textoPregunta = setPintarTextosUseCase(true, preguntas, respuestas, contadorPregunta)
+        val textoPregunta = setPintarTextosUseCase(true, preguntas, respuestas, contadorPregunta, isRepasar = true)
         val responseValGuiaModel: ValidacionesGuiaModel =
             textoPregunta.copy(
                 estadoUI = textoPregunta.estadoUI.copy(isThereMoreAsks = true)
@@ -52,8 +54,15 @@ class RepasarGuiaViewModel @Inject constructor(
         return responseValGuiaModel
     }
 
-    fun getPintarTexto(isEtPregunta: Boolean): ValidacionesGuiaModel {
-        val texto = setPintarTextosUseCase(isEtPregunta, preguntas, respuestas, contadorPregunta)
+    fun onClickRoll(isEtPregunta: Boolean) {
+        val texto = setPintarTextosUseCase(isEtPregunta, preguntas, respuestas, contadorPregunta, isRepasar = true)
+
+        _uiStateBtnRoll.value = texto
+    }
+
+    fun getReinicioGuia(isEtPregunta: Boolean): ValidacionesGuiaModel {
+        val texto = setPintarTextosUseCase(isEtPregunta, preguntas, respuestas, contadorPregunta, isRepasar = true)
+
         return texto
     }
 

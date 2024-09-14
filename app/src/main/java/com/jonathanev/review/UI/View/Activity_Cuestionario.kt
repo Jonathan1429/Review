@@ -613,33 +613,20 @@ class Activity_Cuestionario : AppCompatActivity() {
     }
 
     private fun girarCardView() {
-        if (!binding.tilContenidoPregResp.isGone) {
-            var flipAnimator =
-                ObjectAnimator.ofFloat(binding.flContenidoPregResp, "rotationY", 0f, 180f)
-            flipAnimator.duration = 0 // Duración de la animación en milisegundos
+        var flipAnimator =
+            ObjectAnimator.ofFloat(
+                binding.flContenidoPregResp,
+                "rotationY",
+                0f,
+                180f
+            ) // ivImagen
+        flipAnimator.duration = 0 // Duración de la animación en milisegundos
+        flipAnimator.start()
+        flipAnimator.doOnEnd {
+            flipAnimator =
+                ObjectAnimator.ofFloat(binding.flContenidoPregResp, "rotationY", 180f, 0f)
+            flipAnimator.duration = 1000 // Duración de la animación en milisegundos
             flipAnimator.start()
-            flipAnimator.doOnEnd {
-                flipAnimator =
-                    ObjectAnimator.ofFloat(binding.flContenidoPregResp, "rotationY", 180f, 0f)
-                flipAnimator.duration = 1000 // Duración de la animación en milisegundos
-                flipAnimator.start()
-            }
-        } else {
-            var flipAnimator =
-                ObjectAnimator.ofFloat(
-                    binding.flContenidoPregResp,
-                    "rotationY",
-                    0f,
-                    180f
-                ) // ivImagen
-            flipAnimator.duration = 0 // Duración de la animación en milisegundos
-            flipAnimator.start()
-            flipAnimator.doOnEnd {
-                flipAnimator =
-                    ObjectAnimator.ofFloat(binding.flContenidoPregResp, "rotationY", 180f, 0f)
-                flipAnimator.duration = 1000 // Duración de la animación en milisegundos
-                flipAnimator.start()
-            }
         }
     }
 

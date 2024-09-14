@@ -21,7 +21,7 @@ class getClickRegresarUseCase @Inject constructor(
                 val contador = contadorPregunta - 1
 
                 val response =
-                    setPintarTextosUseCase(true, preguntas, respuestas, contador)
+                    setPintarTextosUseCase(true, preguntas, respuestas, contador, isRepasar = true)
 
                 return response
             }

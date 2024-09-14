@@ -18,7 +18,8 @@ class setPintarTextosUseCase @Inject constructor(
         isEtPregunta: Boolean,
         preguntas: ArrayList<String>,
         respuestas: ArrayList<String>,
-        contadorPregunta: Int
+        contadorPregunta: Int,
+        isRepasar: Boolean = false
     ): ValidacionesGuiaModel {
         var contColorPreg: Int = 0
         var inicio: Int = 0
@@ -41,7 +42,9 @@ class setPintarTextosUseCase @Inject constructor(
             val descifrado = setCifrarRutaImagenUseCase(texto, 26 - 3)// cifrar(texto, 26 - 3)
             val cifrado = texto
             texto = descifrado.replace(baseRutaImagen.toRegex(), "")
-            texto = texto.replace("imagenes".toRegex(), "imagenesPivote")
+            if (!isRepasar){
+                texto = texto.replace("imagenes".toRegex(), "imagenesPivote")
+            }
 
             // Cuando lo que se va a mostrar es una imagen
             ValidacionesGuiaModel(

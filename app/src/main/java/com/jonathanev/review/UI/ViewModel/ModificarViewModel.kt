@@ -21,7 +21,9 @@ import com.jonathanev.review.Domain.setPintarLetraUseCase
 import com.jonathanev.review.Domain.setPintarTextosUseCase
 import com.jonathanev.review.Domain.setRollClickedUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -55,13 +57,13 @@ class ModificarViewModel @Inject constructor(
     private val _uiStateBtnSave = MutableLiveData<ValidacionesGuiaModel>()
     val uiStateBtnSave: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnSave
 
-    private val _uiShowDates = MutableLiveData<Boolean>()
-    val uiShowDates: LiveData<Boolean> get() = _uiShowDates
-
     private val dataStore = DataStoreManager.getInstance(application)
     val contImagenes = dataStore.getCountImage().asLiveData()
     val guiaModel = MutableLiveData<GuiaModel>()
-    var colorAnterior = MutableLiveData<Int>()
+
+    private val _textoImagenCorrutina = MutableLiveData<String>()
+    val textoImagenCorrutina: LiveData<String> get() = _textoImagenCorrutina
+
     // var saveClicked = MutableLiveData<Boolean>().apply { value = false }
     // var rollClicked = MutableLiveData<Boolean>().apply { value = false }
 
@@ -72,14 +74,18 @@ class ModificarViewModel @Inject constructor(
         }
     }
 
-    fun llamaCorruIncremento() {
-        viewModelScope.launch {
+    fun llamaCorruIncremento(cifrado: String) {
+        viewModelScope.launch(Dispatchers.Main) {
             setIncrementCounter()
+
+            _textoImagenCorrutina.value = cifrado
         }
     }
 
-    suspend fun setIncrementCounter() {
-        dataStore.setIncrementCounter()
+    private suspend fun setIncrementCounter() {
+        withContext(Dispatchers.IO){
+            dataStore.setIncrementCounter()
+        }
     }
 
     suspend fun resetCounter() {

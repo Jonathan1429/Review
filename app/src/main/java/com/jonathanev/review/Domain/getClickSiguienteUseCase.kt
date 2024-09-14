@@ -17,7 +17,13 @@ class getClickSiguienteUseCase @Inject constructor(
         // Si hay más preguntas pinta lo siguiente.
         return if (contador <= posPregFin) {
             // Pintamos texto o regresamos la pregunta
-            setPintarTextosUseCase(isEtPregunta = true, preguntas, respuestas, contador)
+            setPintarTextosUseCase(
+                isEtPregunta = true,
+                preguntas,
+                respuestas,
+                contador,
+                isRepasar = true
+            )
 
         } else {
             // Si no hay más preguntas.

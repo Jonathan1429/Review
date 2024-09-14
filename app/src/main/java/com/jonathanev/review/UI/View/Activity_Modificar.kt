@@ -17,7 +17,6 @@ import android.text.Editable
 import android.text.SpannableStringBuilder
 import android.text.TextWatcher
 import android.util.Log
-import android.util.Xml
 import android.view.KeyEvent
 import android.view.View
 import android.widget.Toast
@@ -26,7 +25,7 @@ import androidx.activity.viewModels
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.animation.doOnEnd
-import androidx.core.view.isGone
+import androidx.core.net.toUri
 import androidx.core.widget.ImageViewCompat
 import com.davemorrissey.labs.subscaleview.ImageSource
 import com.google.android.gms.ads.AdListener
@@ -36,19 +35,17 @@ import com.google.android.gms.ads.MobileAds
 import com.jonathanev.review.Core.Constants.baseRutaImagen
 import com.jonathanev.review.Core.Constants.baseRutaImagenCifrado
 import com.jonathanev.review.Core.Constants.file
-import com.jonathanev.review.Core.Constants.fileImages
 import com.jonathanev.review.Core.Constants.fileImagesPiv
 import com.jonathanev.review.Core.Constants.rutaPrin
-import com.jonathanev.review.Data.Model.ColorPregModel
 import com.jonathanev.review.Fragments.Fragment_DialogColoresMod_popup
 import com.jonathanev.review.UI.ViewModel.ModificarViewModel
 import com.jonathanev.review.databinding.ActivityModificarBinding
 import dagger.hilt.android.AndroidEntryPoint
-import org.xmlpull.v1.XmlSerializer
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 
@@ -57,7 +54,6 @@ class Activity_Modificar : AppCompatActivity() {
     private lateinit var binding: ActivityModificarBinding
     private lateinit var nombreArchivo: String
     private var colorActual: Int = 0
-    private var contadorPregunta: Int = 0
     private var contadorImagen = 0
     private var imagenPiv = 0
     private var longCaracteres = 0
@@ -111,12 +107,11 @@ class Activity_Modificar : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityModificarBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         // Sección de anuncios
         initLoadAds()
 
-        initUI()
         ruta = intent.extras!!.getString("ruta").toString()
+        initUI()
         binding.barraSuperiorRegreso.imgvBack.setOnClickListener {
             cancelarArchivo()
             deleteImages()
@@ -154,7 +149,28 @@ class Activity_Modificar : AppCompatActivity() {
                     } else {
                         // Cuando hay una imagen hay que poner esto
                         binding.etPregResp.setText(uiState.estadoImagen.textImgEcrypted)
-                        binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
+
+                        val rutaImagen = File(uiState.estadoImagen.textImgUnencrypted)
+                        if (rutaImagen.exists()){
+                            binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
+                        } else {
+                            // Sino se encuentra la ruta especificada
+                            if (uiState.estadoImagen.textImgUnencrypted.contains("imagenesPivote")) {
+                                uiState.estadoImagen.textImgUnencrypted =
+                                    uiState.estadoImagen.textImgUnencrypted.replace(
+                                        "imagenesPivote".toRegex(),
+                                        "imagenes"
+                                    )
+                                binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
+                            } else {
+                                uiState.estadoImagen.textImgUnencrypted =
+                                    uiState.estadoImagen.textImgUnencrypted.replace(
+                                        "imagenes".toRegex(),
+                                        "imagenesPivote"
+                                    )
+                                binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
+                            }
+                        }
                     }
                 }
 
@@ -212,7 +228,28 @@ class Activity_Modificar : AppCompatActivity() {
                     } else {
                         // Cuando hay una imagen hay que poner esto
                         binding.etPregResp.setText(uiState.estadoImagen.textImgEcrypted)
-                        binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
+
+                        val rutaImagen = File(uiState.estadoImagen.textImgUnencrypted)
+                        if (rutaImagen.exists()){
+                            binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
+                        } else {
+                            // Sino se encuentra la ruta especificada
+                            if (uiState.estadoImagen.textImgUnencrypted.contains("imagenesPivote")) {
+                                uiState.estadoImagen.textImgUnencrypted =
+                                    uiState.estadoImagen.textImgUnencrypted.replace(
+                                        "imagenesPivote".toRegex(),
+                                        "imagenes"
+                                    )
+                                binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
+                            } else {
+                                uiState.estadoImagen.textImgUnencrypted =
+                                    uiState.estadoImagen.textImgUnencrypted.replace(
+                                        "imagenes".toRegex(),
+                                        "imagenesPivote"
+                                    )
+                                binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
+                            }
+                        }
                     }
                 }
 
@@ -249,7 +286,7 @@ class Activity_Modificar : AppCompatActivity() {
             }
 
             // Do you want to add more questions?
-            if ((contadorPregunta + 1) == modificarViewModel.preguntas.size && modificarViewModel.showMessageMoreQuestions) {
+            if ((modificarViewModel.contadorPregunta + 1) == modificarViewModel.preguntas.size && modificarViewModel.showMessageMoreQuestions) {
                 AlertDialog.Builder(this@Activity_Modificar)
                     .setTitle("¡Atención!")
                     .setMessage("Se acabaron las preguntas, ¿Quieres agregar más?")
@@ -297,7 +334,28 @@ class Activity_Modificar : AppCompatActivity() {
                     } else {
                         // Cuando hay una imagen hay que poner esto
                         binding.etPregResp.setText(uiState.estadoImagen.textImgEcrypted)
-                        binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
+
+                        val rutaImagen = File(uiState.estadoImagen.textImgUnencrypted)
+                        if (rutaImagen.exists()){
+                            binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
+                        } else {
+                            // Sino se encuentra la ruta especificada
+                            if (uiState.estadoImagen.textImgUnencrypted.contains("imagenesPivote")) {
+                                uiState.estadoImagen.textImgUnencrypted =
+                                    uiState.estadoImagen.textImgUnencrypted.replace(
+                                        "imagenesPivote".toRegex(),
+                                        "imagenes"
+                                    )
+                                binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
+                            } else {
+                                uiState.estadoImagen.textImgUnencrypted =
+                                    uiState.estadoImagen.textImgUnencrypted.replace(
+                                        "imagenes".toRegex(),
+                                        "imagenesPivote"
+                                    )
+                                binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
+                            }
+                        }
                     }
                 }
 
@@ -474,7 +532,6 @@ class Activity_Modificar : AppCompatActivity() {
             }
 
             filename = "$contadorImagen.png"
-            modificarViewModel.getGuia(ruta)
         }
 
         // Get review
@@ -504,12 +561,52 @@ class Activity_Modificar : AppCompatActivity() {
                 // Cuando hay una imagen hay que poner esto
                 binding.etPregResp.setText(texto.estadoImagen.textImgEcrypted)
                 binding.ivImagen.setImage(ImageSource.uri(texto.estadoImagen.textImgUnencrypted))
+
+                // Sino se carga correctamente la imagen
+                if (!binding.ivImagen.isImageLoaded) {
+                    if (texto.estadoImagen.textImgUnencrypted.contains("imagenesPivote")) {
+                        texto.estadoImagen.textImgUnencrypted =
+                            texto.estadoImagen.textImgUnencrypted.replace(
+                                "imagenesPivote".toRegex(),
+                                "imagenes"
+                            )
+                        binding.ivImagen.setImage(ImageSource.uri(texto.estadoImagen.textImgUnencrypted))
+                    } else {
+                        texto.estadoImagen.textImgUnencrypted =
+                            texto.estadoImagen.textImgUnencrypted.replace(
+                                "imagenes".toRegex(),
+                                "imagenesPivote"
+                            )
+                        binding.ivImagen.setImage(ImageSource.uri(texto.estadoImagen.textImgUnencrypted))
+                    }
+                }
+            }
+
+            binding.tilContenidoPregResp.visibility =
+                if (texto.estadoUI.isShowImage) View.GONE else View.VISIBLE
+            binding.ivImagen.visibility =
+                if (texto.estadoUI.isShowImage) View.VISIBLE else View.GONE
+            binding.imgvCancelar.visibility =
+                if (texto.estadoUI.isShowCancelar) View.VISIBLE else View.GONE
+            binding.imgvQuitColor.visibility =
+                if (texto.estadoUI.isShowQuitColor) View.VISIBLE else View.GONE
+            binding.imgvSelColor.visibility =
+                if (texto.estadoUI.isShowSelColor) View.VISIBLE else View.GONE
+        }
+
+        modificarViewModel.textoImagenCorrutina.observe(this) { texto ->
+            binding.etPregResp.apply {
+                setText("")
+                post {
+                    setText(texto)
+                }
             }
         }
     }
 
     private fun initUI() {
         modificarViewModel.getCountImage()
+        modificarViewModel.getGuia(ruta)
     }
 
     private fun openSomeActivityForResult() {
@@ -543,10 +640,8 @@ class Activity_Modificar : AppCompatActivity() {
     private fun saveImageToInternalStorage(bitmap: Bitmap?) {
         var fos: FileOutputStream? = null
         try {
-            // val f = File(fileImagesPiv, filename)
             if (bitmap != null) {
                 fos = openFileOutput(filename, MODE_PRIVATE)
-                // fos = FileOutputStream(f)
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
 
                 var ruta: String = file.toString()
@@ -573,15 +668,16 @@ class Activity_Modificar : AppCompatActivity() {
 
                             binding.ivImagen.setImage(ImageSource.uri("$fileImagesPiv/$filename")) //setImageURI(uri)
                             val cifrado = modificarViewModel.getUrlImagenCifrada(
-                                "$baseRutaImagen$fileImages/$filename",
+                                "$baseRutaImagen$ruta/$filename",
                                 3
                             )
-                            binding.etPregResp.setText(cifrado)
+                            // "$baseRutaImagen$fileImages/$filename",
+                            // binding.etPregResp.setText(cifrado)
 
                             binding.tilContenidoPregResp.visibility = View.GONE
                             binding.ivImagen.visibility = View.VISIBLE
 
-                            modificarViewModel.llamaCorruIncremento()
+                            modificarViewModel.llamaCorruIncremento(cifrado)
                         }
                         .setNegativeButton(
                             "Cancelar"
@@ -607,12 +703,12 @@ class Activity_Modificar : AppCompatActivity() {
                     binding.ivImagen.visibility = View.VISIBLE
 
                     val cifrado = modificarViewModel.getUrlImagenCifrada(
-                        "$baseRutaImagen$fileImages/$filename",
+                        "$baseRutaImagen$ruta/$filename",
                         3
                     )
 
-                    binding.etPregResp.setText(cifrado)
-                    modificarViewModel.llamaCorruIncremento()
+                    //binding.etPregResp.setText(cifrado)
+                    modificarViewModel.llamaCorruIncremento(cifrado)
                 }
             }
         } catch (e: Exception) {
@@ -657,35 +753,21 @@ class Activity_Modificar : AppCompatActivity() {
     }
 
     private fun girarCardView() {
-        if (!binding.tilContenidoPregResp.isGone) {
-            var flipAnimator =
-                ObjectAnimator.ofFloat(binding.flContenidoPregResp, "rotationY", 0f, 180f)
-            flipAnimator.duration = 0 // Duración de la animación en milisegundos
+        var flipAnimator =
+            ObjectAnimator.ofFloat(
+                binding.flContenidoPregResp,
+                "rotationY",
+                0f,
+                180f
+            ) // ivImagen
+        flipAnimator.duration = 0 // Duración de la animación en milisegundos
+        flipAnimator.start()
+        flipAnimator.doOnEnd {
+            //showImageOrText()
+            flipAnimator =
+                ObjectAnimator.ofFloat(binding.flContenidoPregResp, "rotationY", 180f, 0f)
+            flipAnimator.duration = 1000 // Duración de la animación en milisegundos
             flipAnimator.start()
-            flipAnimator.doOnEnd {
-                //showImageOrText()
-                flipAnimator =
-                    ObjectAnimator.ofFloat(binding.flContenidoPregResp, "rotationY", 180f, 0f)
-                flipAnimator.duration = 1000 // Duración de la animación en milisegundos
-                flipAnimator.start()
-            }
-        } else {
-            var flipAnimator =
-                ObjectAnimator.ofFloat(
-                    binding.flContenidoPregResp,
-                    "rotationY",
-                    0f,
-                    180f
-                ) // ivImagen
-            flipAnimator.duration = 0 // Duración de la animación en milisegundos
-            flipAnimator.start()
-            flipAnimator.doOnEnd {
-                //showImageOrText()
-                flipAnimator =
-                    ObjectAnimator.ofFloat(binding.flContenidoPregResp, "rotationY", 180f, 0f)
-                flipAnimator.duration = 1000 // Duración de la animación en milisegundos
-                flipAnimator.start()
-            }
         }
     }
 
