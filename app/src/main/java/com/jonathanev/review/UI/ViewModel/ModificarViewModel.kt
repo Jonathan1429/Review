@@ -83,7 +83,7 @@ class ModificarViewModel @Inject constructor(
     }
 
     private suspend fun setIncrementCounter() {
-        withContext(Dispatchers.IO){
+        withContext(Dispatchers.IO) {
             dataStore.setIncrementCounter()
         }
     }
@@ -112,7 +112,7 @@ class ModificarViewModel @Inject constructor(
         return responseValGuiaModel
     }
 
-    fun getUrlImagenCifrada(urlImagen: String, noCifrado: Int):String {
+    fun getUrlImagenCifrada(urlImagen: String, noCifrado: Int): String {
         return setCifrarRutaImagenUseCase(urlImagen, noCifrado)
     }
 

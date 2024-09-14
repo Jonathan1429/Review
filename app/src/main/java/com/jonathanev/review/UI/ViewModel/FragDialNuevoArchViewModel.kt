@@ -14,7 +14,7 @@ class FragDialNuevoArchViewModel @Inject constructor(
 ) : ViewModel() {
     var guias = MutableLiveData<List<GuiaModel>>()
 
-    fun getAllUpdatedGuides(file: File){
+    fun getAllUpdatedGuides(file: File) {
         guias.postValue(guiaRepository.getGuias(file))
     }
 }

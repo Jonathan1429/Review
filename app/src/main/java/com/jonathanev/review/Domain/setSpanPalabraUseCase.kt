@@ -3,7 +3,6 @@ package com.jonathanev.review.Domain
 import android.text.Editable
 import android.text.Spannable
 import android.text.style.ForegroundColorSpan
-import android.widget.Toast
 import com.jonathanev.review.Data.Model.SpanPalabraModel
 import javax.inject.Inject
 
@@ -47,7 +46,7 @@ class setSpanPalabraUseCase @Inject constructor() {
             }
 
             //if ((end - endAnterior) != 1) {
-            if (toCleaningColors){
+            if (toCleaningColors) {
                 // Obtener los spans dentro del rango especificado
                 val spansToRemove = oldEditable.getSpans(
                     start,

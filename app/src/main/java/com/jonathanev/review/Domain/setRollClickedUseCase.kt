@@ -90,54 +90,6 @@ class setRollClickedUseCase @Inject constructor(
                         )
                     }
                 }
-
-            /*if (binding!!.lblPregResp.text.toString() == "Pregunta") {
-                if ((contadorPregunta + 1) > respuestas.size) {
-                    binding!!.lblPregResp.text = "Respuesta"
-                    // binding!!.lblPregResp.text = "Respuesta"
-                    preguntas.add(contadorPregunta, editableEditquetas.toString())
-                    binding!!.etPregResp.setText("")
-                    binding!!.ivImagen.visibility = View.GONE
-                    binding!!.tilContenidoPregResp.visibility = View.VISIBLE
-
-                    binding!!.imgvCancelar.visibility = View.GONE
-                    binding!!.imgvQuitColor.visibility = View.VISIBLE
-                    binding!!.imgvSelColor.visibility = View.VISIBLE
-                } else {
-                    binding!!.lblPregResp.text = "Respuesta"
-                    preguntas[contadorPregunta] = editableEditquetas.toString()
-                    pintarTexto(contadorPregunta)
-                    // binding!!.lblPregResp.text = "Respuesta"
-                }
-                girarCardView()
-            } else {
-                if ((contadorPregunta + 1) > respuestas.size) {
-                    binding!!.lblPregResp.text = "Pregunta"
-                    respuestas.add(contadorPregunta, editableEditquetas.toString())
-                    pintarTexto(contadorPregunta)
-                    // binding!!.lblPregResp.text = "Pregunta"
-                } else {
-                    binding!!.lblPregResp.text = "Pregunta"
-                    respuestas[contadorPregunta] = editableEditquetas.toString()
-                    pintarTexto(contadorPregunta)
-                    // binding!!.lblPregResp.text = "Pregunta"
-                }
-                girarCardView()
-            }
-
-            activityCuestionarioViewModel.clickedRoll()
-            posColorFinal = -1
-            posColorInicial = -1
-            colorPintarPalabra = 0
-        } else {
-            Toast.makeText(
-                applicationContext,
-                "Asegurate de no dejar ningun campo vacio",
-                Toast.LENGTH_SHORT
-            ).show()
-
-            Log.i("Crear pregunta: ", "Asegurate de no dejar ningun campo vacio")
-        }*/
         }
     }
 }

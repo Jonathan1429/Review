@@ -21,5 +21,4 @@ object Constants {
     const val cons_guias = "guias"
     const val cons_imagenes = "imagenes"
     const val cons_imagenesPiv = "imagenesPivote"
-    // const val conv_int_carpeta = 2131165351
 }

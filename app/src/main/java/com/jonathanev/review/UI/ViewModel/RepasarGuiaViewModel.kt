@@ -20,7 +20,7 @@ class RepasarGuiaViewModel @Inject constructor(
     private val getObtenerDatosXMLUseCase: getObtenerDatosXMLUseCase,
     private val getClickRegresarUseCase: getClickRegresarUseCase,
     private val getClickSiguienteUseCase: getClickSiguienteUseCase
-): ViewModel(){
+) : ViewModel() {
     var preguntas: ArrayList<String> = ArrayList()
     private var respuestas: ArrayList<String> = ArrayList()
     var contadorPregunta: Int = 0
@@ -34,7 +34,7 @@ class RepasarGuiaViewModel @Inject constructor(
     private val _uiStateBtnRoll = MutableLiveData<ValidacionesGuiaModel>()
     val uiStateBtnRoll: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnRoll
 
-    fun getGuia(ruta: String){
+    fun getGuia(ruta: String) {
         guiaModel.postValue(getGuiaUseCase(ruta))
     }
 
@@ -45,7 +45,8 @@ class RepasarGuiaViewModel @Inject constructor(
             respuestas.add(preguntaRespuesta.respuesta)
         }
 
-        val textoPregunta = setPintarTextosUseCase(true, preguntas, respuestas, contadorPregunta, isRepasar = true)
+        val textoPregunta =
+            setPintarTextosUseCase(true, preguntas, respuestas, contadorPregunta, isRepasar = true)
         val responseValGuiaModel: ValidacionesGuiaModel =
             textoPregunta.copy(
                 estadoUI = textoPregunta.estadoUI.copy(isThereMoreAsks = true)
@@ -55,18 +56,30 @@ class RepasarGuiaViewModel @Inject constructor(
     }
 
     fun onClickRoll(isEtPregunta: Boolean) {
-        val texto = setPintarTextosUseCase(isEtPregunta, preguntas, respuestas, contadorPregunta, isRepasar = true)
+        val texto = setPintarTextosUseCase(
+            isEtPregunta,
+            preguntas,
+            respuestas,
+            contadorPregunta,
+            isRepasar = true
+        )
 
         _uiStateBtnRoll.value = texto
     }
 
     fun getReinicioGuia(isEtPregunta: Boolean): ValidacionesGuiaModel {
-        val texto = setPintarTextosUseCase(isEtPregunta, preguntas, respuestas, contadorPregunta, isRepasar = true)
+        val texto = setPintarTextosUseCase(
+            isEtPregunta,
+            preguntas,
+            respuestas,
+            contadorPregunta,
+            isRepasar = true
+        )
 
         return texto
     }
 
-    fun onClickNext(){
+    fun onClickNext() {
         val responseSiguiente = getClickSiguienteUseCase(contadorPregunta, preguntas, respuestas)
 
         if (responseSiguiente.estadoUI.isUpdatedAskAns) {
@@ -76,7 +89,7 @@ class RepasarGuiaViewModel @Inject constructor(
         _uiStateBtnNext.value = responseSiguiente
     }
 
-    fun onClickBefore(){
+    fun onClickBefore() {
         val responseRegresar = getClickRegresarUseCase(contadorPregunta, preguntas, respuestas)
 
         if (responseRegresar.estadoUI.isUpdatedAskAns) {

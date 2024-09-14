@@ -42,7 +42,7 @@ class setPintarTextosUseCase @Inject constructor(
             val descifrado = setCifrarRutaImagenUseCase(texto, 26 - 3)// cifrar(texto, 26 - 3)
             val cifrado = texto
             texto = descifrado.replace(baseRutaImagen.toRegex(), "")
-            if (!isRepasar){
+            if (!isRepasar) {
                 texto = texto.replace("imagenes".toRegex(), "imagenesPivote")
             }
 

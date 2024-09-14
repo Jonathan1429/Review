@@ -9,7 +9,7 @@ import java.nio.file.StandardCopyOption
 import javax.inject.Inject
 
 class setCopyImagesUseCase @Inject constructor() {
-    operator fun invoke(){
+    operator fun invoke() {
         val images = fileImagesPiv.listFiles()
         // Hacemos un ciclo por cada fichero para extraer el nombre de cada uno.
         if (!images.isNullOrEmpty()) {

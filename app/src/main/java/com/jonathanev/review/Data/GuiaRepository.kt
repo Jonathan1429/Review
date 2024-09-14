@@ -1,10 +1,8 @@
 package com.jonathanev.review.Data
 
 import android.content.Context
-import android.content.Intent
 import android.util.Log
 import android.util.Xml
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity.MODE_PRIVATE
 import com.jonathanev.review.Core.Constants.file
 import com.jonathanev.review.Core.Constants.rutaPrin
@@ -15,7 +13,6 @@ import com.jonathanev.review.Data.Model.PreguntaRespuesta
 import com.jonathanev.review.Data.Model.ResponseGuia
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import com.jonathanev.review.Domain.getAllGuiasUseCase
-import com.jonathanev.review.UI.View.Activity_RepasarGuia
 import dagger.hilt.android.qualifiers.ApplicationContext
 import org.w3c.dom.Element
 import org.w3c.dom.NodeList
@@ -119,7 +116,7 @@ class GuiaRepository @Inject constructor(
         preguntas: ArrayList<String>,
         respuestas: ArrayList<String>,
         ruta: String
-    ): ValidacionesGuiaModel{
+    ): ValidacionesGuiaModel {
         // Eliminamos el archivo anteriormente creado
         File(ruta).delete()
         Log.d("ArchivoEliminado", "Archivo eliminado")
@@ -163,13 +160,6 @@ class GuiaRepository @Inject constructor(
                     isCreatedGuia = true,
                 )
             )
-
-            /*val ruta = "$file/$nombreArchivo"
-            val intent: Intent = Intent(applicationContext, Activity_RepasarGuia::class.java)
-            intent.putExtra("ruta", ruta)
-            startActivity(intent)
-            copyImages()
-            finish()*/
         } catch (e: IOException) {
             e.printStackTrace()
 

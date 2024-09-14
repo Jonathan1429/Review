@@ -25,7 +25,6 @@ import androidx.activity.viewModels
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.animation.doOnEnd
-import androidx.core.net.toUri
 import androidx.core.widget.ImageViewCompat
 import com.davemorrissey.labs.subscaleview.ImageSource
 import com.google.android.gms.ads.AdListener
@@ -45,7 +44,6 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.nio.file.Files
-import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 
@@ -151,7 +149,7 @@ class Activity_Modificar : AppCompatActivity() {
                         binding.etPregResp.setText(uiState.estadoImagen.textImgEcrypted)
 
                         val rutaImagen = File(uiState.estadoImagen.textImgUnencrypted)
-                        if (rutaImagen.exists()){
+                        if (rutaImagen.exists()) {
                             binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
                         } else {
                             // Sino se encuentra la ruta especificada
@@ -230,7 +228,7 @@ class Activity_Modificar : AppCompatActivity() {
                         binding.etPregResp.setText(uiState.estadoImagen.textImgEcrypted)
 
                         val rutaImagen = File(uiState.estadoImagen.textImgUnencrypted)
-                        if (rutaImagen.exists()){
+                        if (rutaImagen.exists()) {
                             binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
                         } else {
                             // Sino se encuentra la ruta especificada
@@ -336,7 +334,7 @@ class Activity_Modificar : AppCompatActivity() {
                         binding.etPregResp.setText(uiState.estadoImagen.textImgEcrypted)
 
                         val rutaImagen = File(uiState.estadoImagen.textImgUnencrypted)
-                        if (rutaImagen.exists()){
+                        if (rutaImagen.exists()) {
                             binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
                         } else {
                             // Sino se encuentra la ruta especificada

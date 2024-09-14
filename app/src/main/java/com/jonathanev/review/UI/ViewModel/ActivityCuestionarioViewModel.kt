@@ -104,7 +104,7 @@ class ActivityCuestionarioViewModel @Inject constructor(
         dataStore.resetCounter()
     }
 
-    fun getUrlImagenCifrada(urlImagen: String, noCifrado: Int):String {
+    fun getUrlImagenCifrada(urlImagen: String, noCifrado: Int): String {
         return setCifrarRutaImagenUseCase(urlImagen, noCifrado)
     }
 

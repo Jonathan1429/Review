@@ -52,7 +52,7 @@ class setClickSaveUseCase @Inject constructor(
                 }
 
                 // Se tiene que guardar la guia y crear el archivo
-                if (!didTheGuideAlreadyExist){
+                if (!didTheGuideAlreadyExist) {
                     setCrearXmlUseCase(nombreArchivo, preguntas, respuestas)
                 } else {
                     setBorrarCrearXmlUseCase(nombreArchivo, preguntas, respuestas, ruta)

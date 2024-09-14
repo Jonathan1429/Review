@@ -5,7 +5,7 @@ import android.text.Spannable
 import android.text.style.ForegroundColorSpan
 import javax.inject.Inject
 
-class setPintarLetraUseCase @Inject constructor(){
+class setPintarLetraUseCase @Inject constructor() {
     operator fun invoke(texto: Editable?, cursorPosition: Int, colorActual: Int) {
         texto?.let { letra ->
             if (letra.isNotEmpty()) {

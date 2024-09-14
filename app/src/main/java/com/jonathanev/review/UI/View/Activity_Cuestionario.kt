@@ -13,12 +13,9 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.text.Editable
-import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.TextWatcher
-import android.text.style.ForegroundColorSpan
 import android.util.Log
-import android.util.Xml
 import android.view.KeyEvent
 import android.view.View
 import android.widget.Toast
@@ -28,7 +25,6 @@ import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.animation.doOnEnd
 import androidx.core.app.ActivityCompat
-import androidx.core.view.isGone
 import androidx.core.widget.ImageViewCompat
 import com.davemorrissey.labs.subscaleview.ImageSource
 import com.google.android.gms.ads.AdListener
@@ -42,12 +38,10 @@ import com.jonathanev.review.Core.Constants.file
 import com.jonathanev.review.Core.Constants.fileImages
 import com.jonathanev.review.Core.Constants.fileImagesPiv
 import com.jonathanev.review.Core.Constants.rutaPrin
-import com.jonathanev.review.Data.Model.ColorPregModel
 import com.jonathanev.review.Fragments.Fragment_DialogColores_popup
 import com.jonathanev.review.UI.ViewModel.ActivityCuestionarioViewModel
 import com.jonathanev.review.databinding.ActivityCuestionarioBinding
 import dagger.hilt.android.AndroidEntryPoint
-import org.xmlpull.v1.XmlSerializer
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -451,7 +445,11 @@ class Activity_Cuestionario : AppCompatActivity() {
                     // Si hay un salto de linea o es color negro no se pinta nada
                     if (colorActual != -16777216 && !seAgregoSaltoDeLinea) {
                         val cursorPosition = binding.etPregResp.selectionStart
-                        activityCuestionarioViewModel.setPintarLetra(texto, cursorPosition, colorActual)
+                        activityCuestionarioViewModel.setPintarLetra(
+                            texto,
+                            cursorPosition,
+                            colorActual
+                        )
                     }
                 }
             }
@@ -538,7 +536,10 @@ class Activity_Cuestionario : AppCompatActivity() {
                         binding.ivImagen.setImage(ImageSource.uri("$fileImagesPiv/$filename")) //setImageURI(uri)
                         binding.tilContenidoPregResp.visibility = View.GONE
                         binding.ivImagen.visibility = View.VISIBLE
-                        val cifrado = activityCuestionarioViewModel.getUrlImagenCifrada("$baseRutaImagen$fileImages/$filename", 3)
+                        val cifrado = activityCuestionarioViewModel.getUrlImagenCifrada(
+                            "$baseRutaImagen$fileImages/$filename",
+                            3
+                        )
                         binding.etPregResp.setText(cifrado)
 
                         activityCuestionarioViewModel.llamaCorruIncremento()
@@ -566,7 +567,10 @@ class Activity_Cuestionario : AppCompatActivity() {
                 binding.tilContenidoPregResp.visibility = View.GONE
                 binding.ivImagen.visibility = View.VISIBLE
 
-                val cifrado = activityCuestionarioViewModel.getUrlImagenCifrada("$baseRutaImagen$fileImages/$filename", 3)
+                val cifrado = activityCuestionarioViewModel.getUrlImagenCifrada(
+                    "$baseRutaImagen$fileImages/$filename",
+                    3
+                )
                 binding.etPregResp.setText(cifrado)
 
                 activityCuestionarioViewModel.llamaCorruIncremento()

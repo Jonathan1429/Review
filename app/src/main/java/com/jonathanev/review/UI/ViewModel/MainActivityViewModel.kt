@@ -21,15 +21,15 @@ class MainActivityViewModel @Inject constructor(
     var file = MutableLiveData<File>()
     var carpetas = MutableLiveData<List<String>>()
 
-    fun getAllGuias(file: File){
+    fun getAllGuias(file: File) {
         guias.postValue(guiaRepository.getGuias(file))
     }
 
-    fun getMainPath(){
+    fun getMainPath() {
         file.postValue(getMainPathUseCase())
     }
 
-    fun getAllFolders(file: File){
+    fun getAllFolders(file: File) {
         carpetas.postValue(getAllFoldersUseCase(file))
     }
 }
