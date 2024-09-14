@@ -9,7 +9,7 @@ import com.jonathanev.review.Core.Constants.rutaPrin
 import com.jonathanev.review.Data.Model.EstadoUI
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.Model.GuiaProvider
-import com.jonathanev.review.Data.Model.PreguntaRespuesta
+import com.jonathanev.review.Data.Model.PreguntaRespuestaModel
 import com.jonathanev.review.Data.Model.ResponseGuia
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import com.jonathanev.review.Domain.getAllGuiasUseCase
@@ -169,8 +169,8 @@ class GuiaRepository @Inject constructor(
         }
     }
 
-    fun obtenerDatosXML(nombreArchivo: String, ruta: String): List<PreguntaRespuesta> {
-        val preguntasRespuestas = mutableListOf<PreguntaRespuesta>()
+    fun obtenerDatosXML(nombreArchivo: String, ruta: String): List<PreguntaRespuestaModel> {
+        val preguntasRespuestas = mutableListOf<PreguntaRespuestaModel>()
         val dbf: DocumentBuilderFactory = DocumentBuilderFactory.newInstance()
         val db: DocumentBuilder
         try {
@@ -191,7 +191,7 @@ class GuiaRepository @Inject constructor(
                 // Guardo cada uno de los valores en su respectivo arreglo.
                 val pregunta = e.getAttribute("pregunta")
                 val respuesta = e.getAttribute("respuesta")
-                preguntasRespuestas.add(PreguntaRespuesta(pregunta, respuesta))
+                preguntasRespuestas.add(PreguntaRespuestaModel(pregunta, respuesta))
             }
         } catch (e: ParserConfigurationException) {
             e.printStackTrace()

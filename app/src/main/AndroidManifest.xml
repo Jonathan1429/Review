@@ -14,36 +14,16 @@
 
          3.- Asegurarse que no puedas acceder a las imagenes si realmente el usuario no te dió permiso.
 
-         4.- Si el usuario tiene texto y quiere agregar una imagen..., al dar click fuera del re-
-             cuadro ya no regresarán los iconos.
-             (SOLUCIONADO)
-
          MEJORAS
          1.- Usar la obtención de la variable mutable de una guia al dar click en una guia en específico.
 
-         2.- Poner un mensaje al momento de cambiar el nombre de una guia.
-         (SOLUCIONADO)
+         2.- Mientras se esté cargando una imagen debe de salir un signo de carga
 
-         3.- Cuando creas una guia y ya hay una carpeta con el mismo nombre no deja crearla.
-         (SOLUCIONADO)
+         3.-Poder cambiarle el nombre a una carpeta
 
-         4.- Hay que controlar que no puedan crear carpetas que se llamen Guias y tampoco imagenes
-         (SOLUCIONADO)
-
-         5.- Al momento de crear el nombre de algo no puedes poner una /
-         (SOLUCIONADO)
-
-         6.- Asegurarte de borrar las ImagenesPivote cuando le das para atras, botones o demás.
-         (SOLUCIONADO)
-
-        7.- Aumentar de manera seguida el número de la imagen guardando el dato en una DataStore.
-        (SOLUCIONADO)
-
+         4.- Implementar un botón que limpie archivos basura (Imagenes)
 
          PRUEBAS
-         1.- Probar cuando se eliminen guias o se cambien de lugar..., le salga la leyenda que
-         no tienes carpetas creadas.
-         (SOLUCIONADO)
 
     -->
     <application

@@ -233,7 +233,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                             .create().show()
                     }
                     /*2 ->
-                        // Se ejecuta cuando quiere cambiar el nombre de la guía
+                        // Se ejecuta cuando quiere cambiar el nombre de la carpeta
                         if (fileClickeado.exists()) {
                             // Creamos las preferencias y dentro de ellas guardamos el arreglo item
                             val preferencias: SharedPreferences =

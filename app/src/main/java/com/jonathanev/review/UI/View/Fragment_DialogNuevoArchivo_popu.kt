@@ -94,7 +94,7 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
         } else if (lv_folder.equals("cambiar_nom_folder")) {
             binding!!.tilNombreArchivo.hint = "Nombre de la carpeta"
             binding!!.btnGuardarGuiaEstudio.text = "Cambiar nombre"
-        } else {
+        } else { // Creando guia
             binding!!.btnGuardarGuiaEstudio.text = "Guardar guía"
         }
 
