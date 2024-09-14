@@ -100,8 +100,14 @@ class Activity_RepasarGuia : AppCompatActivity() {
                         binding.etPregResp.text = uiState.builder
                     } else {
                         // Cuando hay una imagen hay que poner esto
+                        // Se realizan estos cambios porque la ruta guardada en el et no es
+                        // totalmente la correcta (solo la ruta se guarda hasta imagenes)
+                        val imagen = uiState.estadoImagen.textImgUnencrypted.substringAfterLast("/")
+                        val carpetaImagen = ruta.substringBeforeLast("/")
+                        var ruta = "$carpetaImagen/$imagen"
+                        ruta = ruta.replace("guias", "imagenes")
                         binding.etPregResp.setText(uiState.estadoImagen.textImgEcrypted)
-                        binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
+                        binding.ivImagen.setImage(ImageSource.uri(ruta))
                     }
                 }
 
@@ -127,8 +133,14 @@ class Activity_RepasarGuia : AppCompatActivity() {
                     binding.etPregResp.text = uiState.builder
                 } else {
                     // Cuando hay una imagen hay que poner esto
+                    // Se realizan estos cambios porque la ruta guardada en el et no es
+                    // totalmente la correcta (solo la ruta se guarda hasta imagenes)
+                    val imagen = uiState.estadoImagen.textImgUnencrypted.substringAfterLast("/")
+                    val carpetaImagen = ruta.substringBeforeLast("/")
+                    var ruta = "$carpetaImagen/$imagen"
+                    ruta = ruta.replace("guias", "imagenes")
                     binding.etPregResp.setText(uiState.estadoImagen.textImgEcrypted)
-                    binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
+                    binding.ivImagen.setImage(ImageSource.uri(ruta))
                 }
 
                 binding.tilContenidoPregResp.visibility =
@@ -153,8 +165,14 @@ class Activity_RepasarGuia : AppCompatActivity() {
                     binding.etPregResp.text = uiState.builder
                 } else {
                     // Cuando hay una imagen hay que poner esto
+                    // Se realizan estos cambios porque la ruta guardada en el et no es
+                    // totalmente la correcta (solo la ruta se guarda hasta imagenes)
+                    val imagen = uiState.estadoImagen.textImgUnencrypted.substringAfterLast("/")
+                    val carpetaImagen = ruta.substringBeforeLast("/")
+                    var ruta = "$carpetaImagen/$imagen"
+                    ruta = ruta.replace("guias", "imagenes")
                     binding.etPregResp.setText(uiState.estadoImagen.textImgEcrypted)
-                    binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
+                    binding.ivImagen.setImage(ImageSource.uri(ruta))
                 }
 
                 binding.tilContenidoPregResp.visibility =
