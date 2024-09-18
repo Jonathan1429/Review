@@ -38,8 +38,9 @@ class Activity_RepasarGuia : AppCompatActivity() {
 
         binding.barraSuperiorRegreso.imgvSave.visibility = View.GONE
         ruta = intent.extras!!.getString("ruta").toString()
-        initUI(ruta)
 
+        initUI(ruta)
+        initListeners()
         repasarGuiaViewModel.guiaModel.observe(this) {
             nombreArchivo = it.nombreGuia
 
@@ -69,27 +70,14 @@ class Activity_RepasarGuia : AppCompatActivity() {
                 if (texto.estadoUI.isShowImage) View.VISIBLE else View.GONE
         }
 
-        binding.barraSuperiorRegreso.imgvBack.setOnClickListener { finish() }
-
-        binding.imgvPregResp.setOnClickListener {
-            var isEtPregunta = true
-            if (binding.lblPregResp.text.toString() == "Pregunta") {
-                //Get Respuesta
-                isEtPregunta = false
-            }
-
-            // Get text
-            repasarGuiaViewModel.onClickRoll(isEtPregunta)
-        }
-
         repasarGuiaViewModel.uiStateBtnRoll.observe(this) { uiState ->
             if (uiState.estadoUI.isUpdatedAskAns) {
                 girarCardView()
 
-                if (!uiState.estadoUI.isEtPregunta) {
-                    binding.lblPregResp.text = "Respuesta"
-                } else {
+                if (binding.lblPregResp.text == "Respuesta"){
                     binding.lblPregResp.text = "Pregunta"
+                } else {
+                    binding.lblPregResp.text = "Respuesta"
                 }
 
                 if (uiState.estadoUI.isClearText) {
@@ -120,9 +108,64 @@ class Activity_RepasarGuia : AppCompatActivity() {
             }
         }
 
-        binding.imgvPrevious.setOnClickListener {
-            repasarGuiaViewModel.onClickBefore()
-        }
+        repasarGuiaViewModel.uiStateBtnNext
+            .observe(this) { uiState ->
+                if (uiState.estadoUI.isUpdatedAskAns) {
+                    binding.lblPregResp.text = "Pregunta"
+
+                    // Agregar el texto en el et cuando hay un builder
+                    if (!uiState.estadoUI.isShowImage) {
+                        binding.etPregResp.text = uiState.builder
+                    } else {
+                        // Cuando hay una imagen hay que poner esto
+                        // Se realizan estos cambios porque la ruta guardada en el et no es
+                        // totalmente la correcta (solo la ruta se guarda hasta imagenes)
+                        val imagen = uiState.estadoImagen.textImgUnencrypted.substringAfterLast("/")
+                        val carpetaImagen = ruta.substringBeforeLast("/")
+                        var ruta = "$carpetaImagen/$imagen"
+                        ruta = ruta.replace("guias", "imagenes")
+                        binding.etPregResp.setText(uiState.estadoImagen.textImgEcrypted)
+                        binding.ivImagen.setImage(ImageSource.uri(ruta))
+                    }
+
+                    binding.tilContenidoPregResp.visibility =
+                        if (uiState.estadoUI.isShowImage) View.GONE else View.VISIBLE
+                    binding.ivImagen.visibility =
+                        if (uiState.estadoUI.isShowImage) View.VISIBLE else View.GONE
+                } else {
+                    AlertDialog.Builder(this@Activity_RepasarGuia)
+                        .setTitle("¡Atención!")
+                        .setMessage(uiState.message)
+                        .setPositiveButton(
+                            "Si"
+                        ) { _, _ ->
+                            binding.lblPregResp.text = "Pregunta"
+                            repasarGuiaViewModel.contadorPregunta = 0
+                            val texto = repasarGuiaViewModel.getReinicioGuia(true)
+                            if (texto.estadoUI.isEtPregunta) {
+                                binding.lblPregResp.text = "Respuesta"
+                            } else {
+                                binding.lblPregResp.text = "Pregunta"
+                            }
+
+                            if (texto.estadoUI.isClearText) {
+                                binding.etPregResp.text?.clear()
+                            } else {
+                                // Agregar el texto en el et cuando hay un builder
+                                if (!texto.estadoUI.isShowImage) {
+                                    binding.etPregResp.text = texto.builder
+                                } else {
+                                    // Cuando hay una imagen hay que poner esto
+                                    binding.etPregResp.setText(texto.estadoImagen.textImgEcrypted)
+                                    binding.ivImagen.setImage(ImageSource.uri(texto.estadoImagen.textImgUnencrypted))
+                                }
+                            }
+                        }
+                        .setNegativeButton(
+                            "Cancelar"
+                        ) { dialog, _ -> dialog.dismiss() }.create().show()
+                }
+            }
 
         repasarGuiaViewModel.uiStateBtnBack.observe(this) { uiState ->
             if (uiState.estadoUI.isUpdatedAskAns) {
@@ -151,68 +194,29 @@ class Activity_RepasarGuia : AppCompatActivity() {
                 Toast.makeText(applicationContext, uiState.message, Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun initListeners() {
+        binding.imgvPregResp.setOnClickListener {
+            var isEtPregunta = true
+            if (binding.lblPregResp.text.toString() == "Pregunta") {
+                //Get Respuesta
+                isEtPregunta = false
+            }
+
+            // Get text
+            repasarGuiaViewModel.onClickRoll(isEtPregunta)
+        }
 
         binding.imgvNext.setOnClickListener {
             repasarGuiaViewModel.onClickNext()
         }
 
-        repasarGuiaViewModel.uiStateBtnNext.observe(this) { uiState ->
-            if (uiState.estadoUI.isUpdatedAskAns) {
-                binding.lblPregResp.text = "Pregunta"
-
-                // Agregar el texto en el et cuando hay un builder
-                if (!uiState.estadoUI.isShowImage) {
-                    binding.etPregResp.text = uiState.builder
-                } else {
-                    // Cuando hay una imagen hay que poner esto
-                    // Se realizan estos cambios porque la ruta guardada en el et no es
-                    // totalmente la correcta (solo la ruta se guarda hasta imagenes)
-                    val imagen = uiState.estadoImagen.textImgUnencrypted.substringAfterLast("/")
-                    val carpetaImagen = ruta.substringBeforeLast("/")
-                    var ruta = "$carpetaImagen/$imagen"
-                    ruta = ruta.replace("guias", "imagenes")
-                    binding.etPregResp.setText(uiState.estadoImagen.textImgEcrypted)
-                    binding.ivImagen.setImage(ImageSource.uri(ruta))
-                }
-
-                binding.tilContenidoPregResp.visibility =
-                    if (uiState.estadoUI.isShowImage) View.GONE else View.VISIBLE
-                binding.ivImagen.visibility =
-                    if (uiState.estadoUI.isShowImage) View.VISIBLE else View.GONE
-            } else {
-                AlertDialog.Builder(this@Activity_RepasarGuia)
-                    .setTitle("¡Atención!")
-                    .setMessage(uiState.message)
-                    .setPositiveButton(
-                        "Si"
-                    ) { _, _ ->
-                        binding.lblPregResp.text = "Pregunta"
-                        repasarGuiaViewModel.contadorPregunta = 0
-                        val texto = repasarGuiaViewModel.getReinicioGuia(true)
-                        if (texto.estadoUI.isEtPregunta) {
-                            binding.lblPregResp.text = "Respuesta"
-                        } else {
-                            binding.lblPregResp.text = "Pregunta"
-                        }
-
-                        if (texto.estadoUI.isClearText) {
-                            binding.etPregResp.text?.clear()
-                        } else {
-                            // Agregar el texto en el et cuando hay un builder
-                            if (!texto.estadoUI.isShowImage) {
-                                binding.etPregResp.text = texto.builder
-                            } else {
-                                // Cuando hay una imagen hay que poner esto
-                                binding.etPregResp.setText(texto.estadoImagen.textImgEcrypted)
-                                binding.ivImagen.setImage(ImageSource.uri(texto.estadoImagen.textImgUnencrypted))
-                            }
-                        }
-                    }
-                    .setNegativeButton(
-                        "Cancelar"
-                    ) { dialog, _ -> dialog.dismiss() }.create().show()
-            }
+        binding.imgvPrevious.setOnClickListener {
+            repasarGuiaViewModel.onClickBefore()
         }
+
+        binding.barraSuperiorRegreso.imgvBack.setOnClickListener { finish() }
 
         binding.imgvEdit.setOnClickListener {
             // Recuperar el valor de SharedPreferences

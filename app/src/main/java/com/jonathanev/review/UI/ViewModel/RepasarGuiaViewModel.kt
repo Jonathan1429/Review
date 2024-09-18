@@ -39,10 +39,15 @@ class RepasarGuiaViewModel @Inject constructor(
     }
 
     fun getObtenerDatosXML(nombreArchivo: String, ruta: String): ValidacionesGuiaModel {
-        val datos = getObtenerDatosXMLUseCase(nombreArchivo, ruta)
-        datos.forEach { preguntaRespuesta ->
-            preguntas.add(preguntaRespuesta.pregunta)
-            respuestas.add(preguntaRespuesta.respuesta)
+        if (respuestas.isEmpty()) {
+            preguntas.clear()
+            respuestas.clear()
+
+            val datos = getObtenerDatosXMLUseCase(nombreArchivo, ruta)
+            datos.forEach { preguntaRespuesta ->
+                preguntas.add(preguntaRespuesta.pregunta)
+                respuestas.add(preguntaRespuesta.respuesta)
+            }
         }
 
         val textoPregunta =

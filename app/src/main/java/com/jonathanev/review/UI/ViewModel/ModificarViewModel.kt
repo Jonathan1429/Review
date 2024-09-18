@@ -97,10 +97,15 @@ class ModificarViewModel @Inject constructor(
     }
 
     fun getObtenerDatosXML(nombreArchivo: String, ruta: String): ValidacionesGuiaModel {
-        val datos = getObtenerDatosXMLUseCase(nombreArchivo, ruta)
-        datos.forEach { preguntaRespuesta ->
-            preguntas.add(preguntaRespuesta.pregunta)
-            respuestas.add(preguntaRespuesta.respuesta)
+        if (respuestas.isEmpty()) {
+            preguntas.clear()
+            respuestas.clear()
+
+            val datos = getObtenerDatosXMLUseCase(nombreArchivo, ruta)
+            datos.forEach { preguntaRespuesta ->
+                preguntas.add(preguntaRespuesta.pregunta)
+                respuestas.add(preguntaRespuesta.respuesta)
+            }
         }
 
         val textoPregunta = setPintarTextosUseCase(true, preguntas, respuestas, contadorPregunta)
@@ -116,7 +121,7 @@ class ModificarViewModel @Inject constructor(
         return setCifrarRutaImagenUseCase(urlImagen, noCifrado)
     }
 
-    fun setPintarLetra(texto: Editable?, cursorPosition: Int, colorActual: Int) {
+    fun setPintarLetra(texto: Editable, cursorPosition: Int, colorActual: Int) {
         setPintarLetraUseCase(texto, cursorPosition, colorActual)
     }
 

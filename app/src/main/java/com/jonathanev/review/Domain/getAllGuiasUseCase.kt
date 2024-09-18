@@ -19,21 +19,22 @@ class getAllGuiasUseCase @Inject constructor(
         guiasPivote.clear()
         // Hacemos un ciclo por cada fichero para extraer el nombre de cada uno.
         if (files!!.isNotEmpty()) {
+            var image = 0
+            image = getRandomGuiaImage()
+
             for (i in files.indices) {
                 // Sacamos del array files el primer fichero.
                 val archivo: File = files[i]
                 var name = ""
-                var image = 0
 
                 if (archivo.name.contains(".xml")) {           // File (guiasPivote)
                     // Guardamos el nombre del fichero en la lista item.
                     name = archivo.name.replace(".xml".toRegex(), "")
-                    image = getRandomGuiaImage()
                     guiasPivote.add(GuiaModel(name, image))
                 } else if (archivo.isDirectory){                    // Folder (guias)
-                    image = R.drawable.img_carpeta
+                    // image = R.drawable.img_carpeta
                     name = archivo.name
-                    guias.add(GuiaModel(name, image, true))
+                    guias.add(GuiaModel(name, R.drawable.img_carpeta, true))
                 }
             }
 

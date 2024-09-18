@@ -45,20 +45,20 @@
         <activity
             android:name="com.jonathanev.review.UI.View.Activity_Modificar"
             android:exported="false"
-            android:screenOrientation="userPortrait"
-            android:windowSoftInputMode="adjustPan" />
+            android:windowSoftInputMode="adjustPan"
+            android:configChanges="screenSize|smallestScreenSize|orientation"/>
 
         <activity
             android:name="com.jonathanev.review.UI.View.Activity_RepasarGuia"
             android:exported="false"
-            android:screenOrientation="userPortrait" />
+            android:configChanges="screenSize|smallestScreenSize|orientation"/>
 
         <!-- El WindowSoft... es para que no se muevan los componentes cuando se habra el teclado -->
         <activity
             android:name="com.jonathanev.review.UI.View.Activity_Cuestionario"
             android:exported="true"
-            android:screenOrientation="userPortrait"
-            android:windowSoftInputMode="adjustPan">
+            android:windowSoftInputMode="adjustPan"
+            android:configChanges="screenSize|smallestScreenSize|orientation">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -67,8 +67,7 @@
         </activity>
         <activity
             android:name="com.jonathanev.review.UI.View.MainActivity"
-            android:exported="true"
-            android:screenOrientation="userPortrait">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -110,24 +110,7 @@ class Activity_Modificar : AppCompatActivity() {
 
         ruta = intent.extras!!.getString("ruta").toString()
         initUI()
-        binding.barraSuperiorRegreso.imgvBack.setOnClickListener {
-            cancelarArchivo()
-            deleteImages()
-        }
-
-        binding.imgvPregResp.setOnClickListener {
-            val editable: Editable =
-                Editable.Factory.getInstance().newEditable(binding.etPregResp.text)
-
-            var isEtPregunta = false
-            if (binding.lblPregResp.text.toString() == "Pregunta") {
-                isEtPregunta = true
-            }
-            modificarViewModel.clickedRoll(
-                editable,
-                isEtPregunta
-            )
-        }
+        initListeners()
 
         modificarViewModel.uiStateBtnRoll.observe(this) { uiState ->
             if (uiState.estadoUI.isUpdatedAskAns) {
@@ -199,20 +182,6 @@ class Activity_Modificar : AppCompatActivity() {
             }
         }
 
-        binding.imgvPrevious.setOnClickListener {
-            val editable: Editable =
-                Editable.Factory.getInstance().newEditable(binding.etPregResp.text)
-            var isEtPregunta = false
-            if (binding.lblPregResp.text.toString() == "Pregunta") {
-                isEtPregunta = true
-            }
-
-            modificarViewModel.onClickImgvPrevious(
-                editable,
-                isEtPregunta
-            )
-        }
-
         modificarViewModel.uiStateBtnBack.observe(this) { uiState ->
             if (uiState.estadoUI.isUpdatedAskAns) {
                 binding.lblPregResp.text = "Pregunta"
@@ -272,50 +241,6 @@ class Activity_Modificar : AppCompatActivity() {
                 }
             } else {
                 Toast.makeText(applicationContext, uiState.message, Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        binding.imgvNext.setOnClickListener {
-            val editable: Editable =
-                Editable.Factory.getInstance().newEditable(binding.etPregResp.text)
-            var isEtPregunta = false
-            if (binding.lblPregResp.text.toString() == "Pregunta") {
-                isEtPregunta = true
-            }
-
-            // Do you want to add more questions?
-            if ((modificarViewModel.contadorPregunta + 1) == modificarViewModel.preguntas.size && modificarViewModel.showMessageMoreQuestions) {
-                AlertDialog.Builder(this@Activity_Modificar)
-                    .setTitle("¡Atención!")
-                    .setMessage("Se acabaron las preguntas, ¿Quieres agregar más?")
-                    .setPositiveButton(
-                        "Si"
-                    ) { _, _ ->
-                        modificarViewModel.showMessageMoreQuestions =
-                            !modificarViewModel.showMessageMoreQuestions
-
-                        modificarViewModel.onClickImgvNext(
-                            editable,
-                            isEtPregunta
-                        )
-
-                        Toast.makeText(
-                            applicationContext, "Ya puedes agregar " +
-                                    "mas preguntas", Toast.LENGTH_LONG
-                        ).show()
-                    }
-                    .setNegativeButton(
-                        "Cancelar"
-                    ) { dialog, _ ->
-                        dialog.dismiss()
-                    }.setOnCancelListener {
-
-                    }.create().show()
-            } else {
-                modificarViewModel.onClickImgvNext(
-                    editable,
-                    isEtPregunta
-                )
             }
         }
 
@@ -381,17 +306,6 @@ class Activity_Modificar : AppCompatActivity() {
             }
         }
 
-        binding.imgvEliminar.setOnClickListener {
-            AlertDialog.Builder(this@Activity_Modificar)
-                .setTitle("¡Atención!")
-                .setMessage("¿Quieres eliminar pregunta/respuesta?")
-                .setPositiveButton("Si") { _, _ ->
-                    modificarViewModel.onClickEliminar()
-                }.setNegativeButton("Cancelar") { dialog, _ ->
-                    dialog.dismiss()
-                }.create().show()
-        }
-
         modificarViewModel.uiStateBtnEliminar.observe(this) { uiState ->
             binding.lblPregResp.text = "Pregunta"
 
@@ -420,24 +334,6 @@ class Activity_Modificar : AppCompatActivity() {
                 if (uiState.estadoUI.isShowSelColor) View.VISIBLE else View.GONE
         }
 
-        binding.barraSuperiorRegreso.imgvSave.setOnClickListener {
-            val editable: Editable =
-                Editable.Factory.getInstance().newEditable(binding.etPregResp.text)
-            var isEtPregunta = false
-            if (binding.lblPregResp.text.toString() == "Pregunta") {
-                isEtPregunta = true
-            }
-            val didTheGuideAlreadyExist = true
-
-            modificarViewModel.onClickImgvSave(
-                editable,
-                nombreArchivo,
-                isEtPregunta,
-                didTheGuideAlreadyExist,
-                ruta
-            )
-        }
-
         modificarViewModel.uiStateBtnSave.observe(this) { uiState ->
             Toast.makeText(
                 applicationContext,
@@ -453,74 +349,6 @@ class Activity_Modificar : AppCompatActivity() {
                 finish()
             }
         }
-
-        // Visualización del DialogFragment de selección de colores.
-        binding.imgvSelColor.setOnClickListener {
-            // Unicamente abrimos el dialogo y lo mostramos en la pantalla.
-            val dialogo: Fragment_DialogColoresMod_popup = Fragment_DialogColoresMod_popup()
-            //=====================================================================================================================
-            dialogo.show(supportFragmentManager, "FragmentColor")
-        }
-
-        // Cambio de botones visibles
-        binding.imgvCancelar.setOnClickListener {
-            binding.imgvSelColor.visibility = View.VISIBLE
-            binding.imgvQuitColor.visibility = View.VISIBLE
-            binding.tilContenidoPregResp.visibility = View.VISIBLE
-
-            binding.ivImagen.visibility = View.GONE
-            binding.imgvCancelar.visibility = View.GONE
-
-            binding.etPregResp.setText("")
-        }
-
-        // Eliminar textos con colores
-        binding.imgvQuitColor.setOnClickListener {
-            val text = binding.etPregResp.text
-            val spannableStringBuilder: SpannableStringBuilder = SpannableStringBuilder(text)
-            spannableStringBuilder.clearSpans()
-
-            binding.etPregResp.text = spannableStringBuilder
-        }
-
-        binding.imgvImage.setOnClickListener {
-            binding.imgvSelColor.visibility = View.GONE
-            binding.imgvQuitColor.visibility = View.GONE
-
-            binding.imgvCancelar.visibility = View.VISIBLE
-
-            // pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-            openSomeActivityForResult()
-        }
-
-        binding.etPregResp.addTextChangedListener(object : TextWatcher {
-            private var textoAnterior: String = ""
-            private var seAgregoSaltoDeLinea = false
-
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                // Guarda el texto antes del cambio
-                textoAnterior = s?.toString() ?: ""
-                longCaracteres = binding.etPregResp.length()
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                // Aquí puedes verificar si se ha añadido un salto de línea en este momento
-                seAgregoSaltoDeLinea =
-                    count > before && s?.subSequence(start, start + count)?.contains("\n") == true
-            }
-
-            override fun afterTextChanged(texto: Editable?) {
-                if (!texto.toString()
-                        .contains(baseRutaImagenCifrado) && (binding.etPregResp.length() - longCaracteres) == 1
-                ) {
-                    // Si hay un salto de linea o es color negro no se pinta nada
-                    if (colorActual != -16777216 && !seAgregoSaltoDeLinea) {
-                        val cursorPosition = binding.etPregResp.selectionStart
-                        modificarViewModel.setPintarLetra(texto, cursorPosition, colorActual)
-                    }
-                }
-            }
-        })
 
         // Get image count
         modificarViewModel.contImagenes.observe(this@Activity_Modificar) { contImagen ->
@@ -600,6 +428,183 @@ class Activity_Modificar : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun initListeners() {
+        binding.barraSuperiorRegreso.imgvBack.setOnClickListener {
+            cancelarArchivo()
+            deleteImages()
+        }
+
+        binding.imgvPregResp.setOnClickListener {
+            val editable: Editable =
+                Editable.Factory.getInstance().newEditable(binding.etPregResp.text)
+
+            var isEtPregunta = false
+            if (binding.lblPregResp.text.toString() == "Pregunta") {
+                isEtPregunta = true
+            }
+            modificarViewModel.clickedRoll(
+                editable,
+                isEtPregunta
+            )
+        }
+
+        binding.imgvPrevious.setOnClickListener {
+            val editable: Editable =
+                Editable.Factory.getInstance().newEditable(binding.etPregResp.text)
+            var isEtPregunta = false
+            if (binding.lblPregResp.text.toString() == "Pregunta") {
+                isEtPregunta = true
+            }
+
+            modificarViewModel.onClickImgvPrevious(
+                editable,
+                isEtPregunta
+            )
+        }
+
+        binding.imgvNext.setOnClickListener {
+            val editable: Editable =
+                Editable.Factory.getInstance().newEditable(binding.etPregResp.text)
+            var isEtPregunta = false
+            if (binding.lblPregResp.text.toString() == "Pregunta") {
+                isEtPregunta = true
+            }
+
+            // Do you want to add more questions?
+            if ((modificarViewModel.contadorPregunta + 1) == modificarViewModel.preguntas.size && modificarViewModel.showMessageMoreQuestions) {
+                AlertDialog.Builder(this@Activity_Modificar)
+                    .setTitle("¡Atención!")
+                    .setMessage("Se acabaron las preguntas, ¿Quieres agregar más?")
+                    .setPositiveButton(
+                        "Si"
+                    ) { _, _ ->
+                        modificarViewModel.showMessageMoreQuestions =
+                            !modificarViewModel.showMessageMoreQuestions
+
+                        modificarViewModel.onClickImgvNext(
+                            editable,
+                            isEtPregunta
+                        )
+
+                        Toast.makeText(
+                            applicationContext, "Ya puedes agregar " +
+                                    "mas preguntas", Toast.LENGTH_LONG
+                        ).show()
+                    }
+                    .setNegativeButton(
+                        "Cancelar"
+                    ) { dialog, _ ->
+                        dialog.dismiss()
+                    }.setOnCancelListener {
+
+                    }.create().show()
+            } else {
+                modificarViewModel.onClickImgvNext(
+                    editable,
+                    isEtPregunta
+                )
+            }
+        }
+
+        binding.imgvEliminar.setOnClickListener {
+            AlertDialog.Builder(this@Activity_Modificar)
+                .setTitle("¡Atención!")
+                .setMessage("¿Quieres eliminar pregunta/respuesta?")
+                .setPositiveButton("Si") { _, _ ->
+                    modificarViewModel.onClickEliminar()
+                }.setNegativeButton("Cancelar") { dialog, _ ->
+                    dialog.dismiss()
+                }.create().show()
+        }
+
+        binding.barraSuperiorRegreso.imgvSave.setOnClickListener {
+            val editable: Editable =
+                Editable.Factory.getInstance().newEditable(binding.etPregResp.text)
+            var isEtPregunta = false
+            if (binding.lblPregResp.text.toString() == "Pregunta") {
+                isEtPregunta = true
+            }
+            val didTheGuideAlreadyExist = true
+
+            modificarViewModel.onClickImgvSave(
+                editable,
+                nombreArchivo,
+                isEtPregunta,
+                didTheGuideAlreadyExist,
+                ruta
+            )
+        }
+
+        // Visualización del DialogFragment de selección de colores.
+        binding.imgvSelColor.setOnClickListener {
+            // Unicamente abrimos el dialogo y lo mostramos en la pantalla.
+            val dialogo: Fragment_DialogColoresMod_popup = Fragment_DialogColoresMod_popup()
+            //=====================================================================================================================
+            dialogo.show(supportFragmentManager, "FragmentColor")
+        }
+
+        // Cambio de botones visibles
+        binding.imgvCancelar.setOnClickListener {
+            binding.imgvSelColor.visibility = View.VISIBLE
+            binding.imgvQuitColor.visibility = View.VISIBLE
+            binding.tilContenidoPregResp.visibility = View.VISIBLE
+
+            binding.ivImagen.visibility = View.GONE
+            binding.imgvCancelar.visibility = View.GONE
+
+            binding.etPregResp.setText("")
+        }
+
+        // Eliminar textos con colores
+        binding.imgvQuitColor.setOnClickListener {
+            val text = binding.etPregResp.text
+            val spannableStringBuilder: SpannableStringBuilder = SpannableStringBuilder(text)
+            spannableStringBuilder.clearSpans()
+
+            binding.etPregResp.text = spannableStringBuilder
+        }
+
+        binding.imgvImage.setOnClickListener {
+            binding.imgvSelColor.visibility = View.GONE
+            binding.imgvQuitColor.visibility = View.GONE
+
+            binding.imgvCancelar.visibility = View.VISIBLE
+
+            // pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            openSomeActivityForResult()
+        }
+
+        binding.etPregResp.addTextChangedListener(object : TextWatcher {
+            private var textoAnterior: String = ""
+            private var seAgregoSaltoDeLinea = false
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                // Guarda el texto antes del cambio
+                textoAnterior = s?.toString() ?: ""
+                longCaracteres = binding.etPregResp.length()
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                // Aquí puedes verificar si se ha añadido un salto de línea en este momento
+                seAgregoSaltoDeLinea =
+                    count > before && s?.subSequence(start, start + count)?.contains("\n") == true
+            }
+
+            override fun afterTextChanged(texto: Editable) {
+                if (!texto.toString()
+                        .contains(baseRutaImagenCifrado) && (binding.etPregResp.length() - longCaracteres) == 1
+                ) {
+                    // Si hay un salto de linea o es color negro no se pinta nada
+                    if (colorActual != -16777216 && !seAgregoSaltoDeLinea) {
+                        val cursorPosition = binding.etPregResp.selectionStart
+                        Log.d("CursorPosition", cursorPosition.toString()) // Verifica el valor
+                        modificarViewModel.setPintarLetra(texto, cursorPosition, colorActual)
+                    }
+                }
+            }
+        })
     }
 
     private fun initUI() {

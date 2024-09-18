@@ -117,6 +117,7 @@ class Activity_Cuestionario : AppCompatActivity() {
         // Sección de anuncios
         initLoadAds()
         initUI()
+        initListeners()
 
         // Recibimos el nombre del archivo del popupFragment Nueva Guia.
         nombreArchivo = intent.extras!!.getString("nombre_archivo")
@@ -124,25 +125,6 @@ class Activity_Cuestionario : AppCompatActivity() {
         // Se cambia el nombre del titulo del toolbar
         binding.barraSuperiorRegreso.tvTituloToolbar.text = "Creando: $nombreArchivo"
         colorActual = Color.BLACK
-
-        binding.barraSuperiorRegreso.imgvBack.setOnClickListener {
-            cancelarArchivo()
-            deleteImages()
-        }
-
-        binding.imgvPregResp.setOnClickListener {
-            val editable: Editable =
-                Editable.Factory.getInstance().newEditable(binding.etPregResp.text)
-
-            var isEtPregunta = false
-            if (binding.lblPregResp.text.toString() == "Pregunta") {
-                isEtPregunta = true
-            }
-            activityCuestionarioViewModel.clickedRoll(
-                editable,
-                isEtPregunta
-            )
-        }
 
         activityCuestionarioViewModel.uiStateBtnRoll.observe(this) { uiState ->
             if (uiState.estadoUI.isUpdatedAskAns) {
@@ -193,20 +175,6 @@ class Activity_Cuestionario : AppCompatActivity() {
             }
         }
 
-        binding.imgvPrevious.setOnClickListener {
-            val editable: Editable =
-                Editable.Factory.getInstance().newEditable(binding.etPregResp.text)
-            var isEtPregunta = false
-            if (binding.lblPregResp.text.toString() == "Pregunta") {
-                isEtPregunta = true
-            }
-
-            activityCuestionarioViewModel.onClickImgvPrevious(
-                editable,
-                isEtPregunta
-            )
-        }
-
         activityCuestionarioViewModel.uiStateBtnBack.observe(this) { uiState ->
             if (uiState.estadoUI.isUpdatedAskAns) {
                 binding.lblPregResp.text = "Pregunta"
@@ -246,20 +214,6 @@ class Activity_Cuestionario : AppCompatActivity() {
             } else {
                 Toast.makeText(applicationContext, uiState.message, Toast.LENGTH_SHORT).show()
             }
-        }
-
-        binding.imgvNext.setOnClickListener {
-            val editable: Editable =
-                Editable.Factory.getInstance().newEditable(binding.etPregResp.text)
-            var isEtPregunta = false
-            if (binding.lblPregResp.text.toString() == "Pregunta") {
-                isEtPregunta = true
-            }
-
-            activityCuestionarioViewModel.onClickImgvNext(
-                editable,
-                isEtPregunta
-            )
         }
 
         activityCuestionarioViewModel.uiStateBtnNext.observe(this) { uiState ->
@@ -303,17 +257,6 @@ class Activity_Cuestionario : AppCompatActivity() {
             }
         }
 
-        binding.imgvEliminar.setOnClickListener {
-            AlertDialog.Builder(this@Activity_Cuestionario)
-                .setTitle("¡Atención!")
-                .setMessage("¿Quieres eliminar pregunta/respuesta?")
-                .setPositiveButton("Si") { _, _ ->
-                    activityCuestionarioViewModel.onClickEliminar()
-                }.setNegativeButton("Cancelar") { dialog, _ ->
-                    dialog.dismiss()
-                }.create().show()
-        }
-
         activityCuestionarioViewModel.uiStateBtnEliminar.observe(this) { uiState ->
             binding.lblPregResp.text = "Pregunta"
 
@@ -342,21 +285,6 @@ class Activity_Cuestionario : AppCompatActivity() {
                 if (uiState.estadoUI.isShowSelColor) View.VISIBLE else View.GONE
         }
 
-        binding.barraSuperiorRegreso.imgvSave.setOnClickListener {
-            val editable: Editable =
-                Editable.Factory.getInstance().newEditable(binding.etPregResp.text)
-            var isEtPregunta = false
-            if (binding.lblPregResp.text.toString() == "Pregunta") {
-                isEtPregunta = true
-            }
-
-            activityCuestionarioViewModel.onClickImgvSave(
-                editable,
-                nombreArchivo.toString(),
-                isEtPregunta
-            )
-        }
-
         activityCuestionarioViewModel.uiStateBtnSave.observe(this) { uiState ->
             Toast.makeText(
                 applicationContext,
@@ -372,6 +300,86 @@ class Activity_Cuestionario : AppCompatActivity() {
                 copyImages()
                 finish()
             }
+        }
+
+        activityCuestionarioViewModel.contImagenes.observe(this) { contImagen ->
+            contadorImagen = contImagen
+            filename = "$contadorImagen.png"
+        }
+    }
+
+    private fun initListeners() {
+        binding.barraSuperiorRegreso.imgvBack.setOnClickListener {
+            cancelarArchivo()
+            deleteImages()
+        }
+
+        binding.imgvPregResp.setOnClickListener {
+            val editable: Editable =
+                Editable.Factory.getInstance().newEditable(binding.etPregResp.text)
+
+            var isEtPregunta = false
+            if (binding.lblPregResp.text.toString() == "Pregunta") {
+                isEtPregunta = true
+            }
+            activityCuestionarioViewModel.clickedRoll(
+                editable,
+                isEtPregunta
+            )
+        }
+
+        binding.imgvPrevious.setOnClickListener {
+            val editable: Editable =
+                Editable.Factory.getInstance().newEditable(binding.etPregResp.text)
+            var isEtPregunta = false
+            if (binding.lblPregResp.text.toString() == "Pregunta") {
+                isEtPregunta = true
+            }
+
+            activityCuestionarioViewModel.onClickImgvPrevious(
+                editable,
+                isEtPregunta
+            )
+        }
+
+        binding.imgvNext.setOnClickListener {
+            val editable: Editable =
+                Editable.Factory.getInstance().newEditable(binding.etPregResp.text)
+            var isEtPregunta = false
+            if (binding.lblPregResp.text.toString() == "Pregunta") {
+                isEtPregunta = true
+            }
+
+            activityCuestionarioViewModel.onClickImgvNext(
+                editable,
+                isEtPregunta
+            )
+        }
+
+        binding.imgvEliminar.setOnClickListener {
+            AlertDialog.Builder(this@Activity_Cuestionario)
+                .setTitle("¡Atención!")
+                .setMessage("¿Quieres eliminar pregunta/respuesta?")
+                .setPositiveButton("Si") { _, _ ->
+                    activityCuestionarioViewModel.onClickEliminar()
+                }.setNegativeButton("Cancelar") { dialog, _ ->
+                    dialog.dismiss()
+                }.create().show()
+        }
+
+        binding.barraSuperiorRegreso.imgvSave.setOnClickListener {
+            val editable: Editable =
+                Editable.Factory.getInstance().newEditable(binding.etPregResp.text)
+            var isEtPregunta = false
+            if (binding.lblPregResp.text.toString() == "Pregunta") {
+                isEtPregunta = true
+            }
+
+            activityCuestionarioViewModel.onClickImgvSave(
+                editable,
+                nombreArchivo.toString(),
+                isEtPregunta
+            )
         }
 
         // Visualización del DialogFragment de selección de colores.
@@ -454,11 +462,6 @@ class Activity_Cuestionario : AppCompatActivity() {
                 }
             }
         })
-
-        activityCuestionarioViewModel.contImagenes.observe(this) { contImagen ->
-            contadorImagen = contImagen
-            filename = "$contadorImagen.png"
-        }
     }
 
     private fun deleteImages() {

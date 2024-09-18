@@ -46,6 +46,7 @@ class setSpanPalabraUseCase @Inject constructor() {
             }
 
             //if ((end - endAnterior) != 1) {
+            // Limpiar colores encimados
             if (toCleaningColors) {
                 // Obtener los spans dentro del rango especificado
                 val spansToRemove = oldEditable.getSpans(
@@ -66,7 +67,7 @@ class setSpanPalabraUseCase @Inject constructor() {
                 colorAnterior = colorNuevo
                 isColNuevo = false
                 toCleaningColors = false
-            } else if (isColNuevo) {
+            } else if (isColNuevo || (end - endAnterior) != 1) {
                 // Obtener los spans dentro del rango especificado
                 val spansToRemove = oldEditable.getSpans(
                     start,
