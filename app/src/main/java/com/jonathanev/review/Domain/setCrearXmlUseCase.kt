@@ -10,8 +10,10 @@ class setCrearXmlUseCase @Inject constructor(
     operator fun invoke(
         nombreArchivo: String,
         preguntas: ArrayList<String>,
-        respuestas: ArrayList<String>
+        respuestas: ArrayList<String>,
+        didTheGuideAlreadyExist: Boolean,
+        ruta: String
     ): ValidacionesGuiaModel {
-        return guiaRepository.saveFile(nombreArchivo, preguntas, respuestas)
+        return guiaRepository.saveFile(nombreArchivo, preguntas, respuestas, didTheGuideAlreadyExist, ruta)
     }
 }

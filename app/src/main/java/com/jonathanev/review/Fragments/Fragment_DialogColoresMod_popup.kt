@@ -18,32 +18,32 @@ import com.skydoves.colorpickerview.flag.FlagMode
 import com.skydoves.colorpickerview.listeners.ColorListener
 
 class Fragment_DialogColoresMod_popup : DialogFragment() {
-    private var binding: FragmentColoresBinding? = null
+    private lateinit var binding: FragmentColoresBinding
     //private var colorActual = 0
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
         binding = FragmentColoresBinding.inflate(layoutInflater)
-        return binding!!.root
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val bubbleFlag = BubbleFlag(context)
         bubbleFlag.flagMode = FlagMode.FADE
-        binding!!.colorPickerView.flagView = bubbleFlag
-        binding!!.colorPickerView.setColorListener(ColorListener { color, _ ->
+        binding.colorPickerView.flagView = bubbleFlag
+        binding.colorPickerView.setColorListener(ColorListener { color, _ ->
             setLayoutColor(color)
             val activityModificar = activity as Activity_Modificar?
             activityModificar!!.setColor(color)
         })
         val fragment: Fragment = this
-        binding!!.btnContinuar.setOnClickListener {
+        binding.btnContinuar.setOnClickListener {
             requireActivity().supportFragmentManager.beginTransaction().remove(fragment).commit()
         }
-        binding!!.btnDefault.setOnClickListener {
+        binding.btnDefault.setOnClickListener {
             requireActivity().supportFragmentManager.beginTransaction().remove(fragment).commit()
             (activity as? Activity_Modificar)?.setColor(Color.BLACK)
         }
@@ -51,13 +51,13 @@ class Fragment_DialogColoresMod_popup : DialogFragment() {
 
     @SuppressLint("SetTextI18n")
     private fun setLayoutColor(color: Int) {
-        binding!!.colorHexadecimal.text = "#" + binding!!.colorPickerView.colorEnvelope.hexCode
-        if (binding!!.colorHexadecimal.text.toString() == "#FF000000") {
-            binding!!.btnContinuar.setTextColor(Color.WHITE)
+        binding.colorHexadecimal.text = "#" + binding.colorPickerView.colorEnvelope.hexCode
+        if (binding.colorHexadecimal.text.toString() == "#FF000000") {
+            binding.btnContinuar.setTextColor(Color.WHITE)
         } else {
-            binding!!.btnContinuar.setTextColor(Color.BLACK)
+            binding.btnContinuar.setTextColor(Color.BLACK)
         }
-        binding!!.btnContinuar.setBackgroundColor(color)
+        binding.btnContinuar.setBackgroundColor(color)
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -71,6 +71,7 @@ class Fragment_DialogColoresMod_popup : DialogFragment() {
         val dialog = dialog
         if (dialog != null) {
             dialog.window!!.setLayout(700, 1000)
+            //dialog.window!!.setLayout(300, 600)
             dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         }
     }

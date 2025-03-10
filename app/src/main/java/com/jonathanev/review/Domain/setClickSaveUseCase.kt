@@ -8,8 +8,7 @@ import javax.inject.Inject
 class setClickSaveUseCase @Inject constructor(
     private val setSpanPalabraUseCase: setSpanPalabraUseCase,
     private val setColocarEtiquetasUseCase: setColocarEtiquetasUseCase,
-    private val setCrearXmlUseCase: setCrearXmlUseCase,
-    private val setBorrarCrearXmlUseCase: setBorrarCrearXmlUseCase
+    private val setCrearXmlUseCase: setCrearXmlUseCase
 ) {
     operator fun invoke(
         preguntas: ArrayList<String>,
@@ -29,8 +28,16 @@ class setClickSaveUseCase @Inject constructor(
         return when {
             responseSpanPalabra.editable.isEmpty() || isEtPregunta && posPregFin != posRespFin -> {
                 if (isEtPregunta && posPregFin > -1) {
+                    setCrearXmlUseCase(nombreArchivo, preguntas, respuestas, didTheGuideAlreadyExist, ruta)
+
+                    /*// Si el archivo no existe
+                    if (!didTheGuideAlreadyExist) {
+                        setCrearXmlUseCase(nombreArchivo, preguntas, respuestas)
+                    } else { // Si el archivo ya existe
+                        setBorrarCrearXmlUseCase(nombreArchivo, preguntas, respuestas, ruta)
+                    }*/
                     // Se tiene que guardar la guia y crear el archivo
-                    setCrearXmlUseCase(nombreArchivo, preguntas, respuestas)
+                    //setCrearXmlUseCase(nombreArchivo, preguntas, respuestas)
                 } else {
                     ValidacionesGuiaModel(
                         message = "Asegurate de llenar pregunta y respuesta",
@@ -51,12 +58,14 @@ class setClickSaveUseCase @Inject constructor(
                     }
                 }
 
-                // Se tiene que guardar la guia y crear el archivo
+                setCrearXmlUseCase(nombreArchivo, preguntas, respuestas, didTheGuideAlreadyExist, ruta)
+
+                /*// Si el archivo no existe
                 if (!didTheGuideAlreadyExist) {
                     setCrearXmlUseCase(nombreArchivo, preguntas, respuestas)
-                } else {
+                } else { // Si el archivo ya existe
                     setBorrarCrearXmlUseCase(nombreArchivo, preguntas, respuestas, ruta)
-                }
+                }*/
             }
         }
     }

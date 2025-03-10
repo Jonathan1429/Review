@@ -52,6 +52,7 @@ class Activity_Modificar : AppCompatActivity() {
     private lateinit var binding: ActivityModificarBinding
     private lateinit var nombreArchivo: String
     private var colorActual: Int = 0
+    private var inicioColor: Int = 0
     private var contadorImagen = 0
     private var imagenPiv = 0
     private var longCaracteres = 0
@@ -598,14 +599,39 @@ class Activity_Modificar : AppCompatActivity() {
                 ) {
                     // Si hay un salto de linea o es color negro no se pinta nada
                     if (colorActual != -16777216 && !seAgregoSaltoDeLinea) {
+
                         val cursorPosition = binding.etPregResp.selectionStart
                         Log.d("CursorPosition", cursorPosition.toString()) // Verifica el valor
                         modificarViewModel.setPintarLetra(texto, cursorPosition, colorActual)
+                        //setPintarLetra(texto, cursorPosition, colorActual)
+                        binding.etPregResp.setSelection(cursorPosition)
+                        binding.etPregResp.invalidate()
+
+                        val metrics = resources.displayMetrics
+                        Log.d("ScreenInfo", "Width: ${metrics.widthPixels}, Height: ${metrics.heightPixels}, Density: ${metrics.density}")
                     }
                 }
             }
         })
     }
+
+    /*private fun setPintarLetra(texto: Editable, cursorPosition: Int, colorActual: Int) {
+        texto.let {
+            if (it.isNotEmpty()) {
+                val lastCharIndex = binding.etPregResp.selectionStart - 1
+                posColorFinal = lastCharIndex + 1
+
+                it.setSpan(
+                    ForegroundColorSpan(colorActual),
+                    lastCharIndex,
+                    lastCharIndex + 1,
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+
+                binding.etPregResp.setSelection(lastCharIndex + 1)
+            }
+        }
+    }*/
 
     private fun initUI() {
         modificarViewModel.getCountImage()
@@ -855,6 +881,7 @@ class Activity_Modificar : AppCompatActivity() {
         ImageViewCompat.setImageTintMode(binding.imgvSelColor, PorterDuff.Mode.SRC_ATOP)
         ImageViewCompat.setImageTintList(binding.imgvSelColor, ColorStateList.valueOf(color))
         colorActual = color
+        inicioColor = binding.etPregResp.selectionStart
     }
 
     private fun deleteImages() {

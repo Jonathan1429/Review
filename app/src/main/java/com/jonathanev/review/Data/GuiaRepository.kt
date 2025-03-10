@@ -43,90 +43,22 @@ class GuiaRepository @Inject constructor(
     fun saveFile(
         nombreArchivo: String,
         preguntas: ArrayList<String>,
-        respuestas: ArrayList<String>
-    ): ValidacionesGuiaModel {
-        val fos: FileOutputStream
-        val serializer: XmlSerializer = Xml.newSerializer()
-
-        return try {
-            fos = context.openFileOutput("$nombreArchivo.xml", MODE_PRIVATE)
-            serializer.setOutput(fos, "UTF-8")
-            serializer.startDocument(null, java.lang.Boolean.valueOf(true))
-            serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true)
-            serializer.startTag("", "GuiaEstudio")
-            serializer.attribute("", "version", "1.0")
-            serializer.startTag("", "Cuestionario")
-            serializer.attribute("", "nombreGuia", nombreArchivo)
-            // Creo la etiqueta interrogante con su respectiva pregunta
-            for (i in preguntas.indices) {
-                serializer.startTag("", "Interrogante")
-                serializer.attribute("", "pregunta", preguntas[i])
-                serializer.attribute("", "respuesta", respuestas[i])
-                serializer.endTag("", "Interrogante")
-            }
-            // Si los campos estan vacios simplemente cierro las etiquetas y directamente
-            // guardo el documento en el teléfono.
-            serializer.endTag("", "Cuestionario")
-            serializer.endTag("", "GuiaEstudio")
-            serializer.endDocument()
-            serializer.flush()
-            fos?.close()
-
-            val rutaGuiaCreada = File("$rutaPrin/$nombreArchivo.xml")
-            if (rutaGuiaCreada.exists()) {
-                Files.copy(
-                    Paths.get("$rutaPrin/$nombreArchivo.xml"),
-                    Paths.get("$file/$nombreArchivo.xml"),
-                    StandardCopyOption.REPLACE_EXISTING
-                )
-
-                if (Paths.get("$file/$nombreArchivo.xml").exists()) {
-                    // Borrar archivo de files y agregarlo en una carpeta de guias
-                    File(rutaPrin, "$nombreArchivo.xml").delete()
-                    val ruta = "$file/$nombreArchivo.xml"
-
-                    ValidacionesGuiaModel(
-                        message = "Guia de estudio creada exitosamente",
-                        responseGuia = ResponseGuia(ruta),
-                        estadoUI = EstadoUI(
-                            isCreatedGuia = true,
-                        )
-                    )
-                } else {
-                    ValidacionesGuiaModel(
-                        message = "Guia de estudio no se creó correctamente"
-                    )
-                }
-            } else {
-                ValidacionesGuiaModel(
-                    message = "Guia de estudio no se creó correctamente"
-                )
-            }
-        } catch (e: IOException) {
-            e.printStackTrace()
-
-            ValidacionesGuiaModel(
-                message = "Guia de estudio no se creó correctamente"
-            )
-        }
-    }
-
-    fun borrarCrearXML(
-        nombreArchivo: String,
-        preguntas: ArrayList<String>,
         respuestas: ArrayList<String>,
+        didTheGuideAlreadyExist: Boolean,
         ruta: String
     ): ValidacionesGuiaModel {
         // Eliminamos el archivo anteriormente creado
-        File(ruta).delete()
-        Log.d("ArchivoEliminado", "Archivo eliminado")
+        if (didTheGuideAlreadyExist) {
+            File(ruta).delete()
+            Log.d("ArchivoEliminado", "Archivo eliminado")
+        }
 
         //Vamos a crear el archivo que acabamos de eliminar pero con el nuevo cuestionario
         val fos: FileOutputStream
         val serializer: XmlSerializer = Xml.newSerializer()
 
         return try {
-            // fos = openFileOutput(nombreArchivo, MODE_PRIVATE)
+            // fos = openFileOutput(nombreArchivo, MODE_PRIVATE) // Guarda el archivo en la raiz
             fos = FileOutputStream(ruta)
             serializer.setOutput(fos, "UTF-8")
             serializer.startDocument(null, java.lang.Boolean.valueOf(true))
@@ -168,6 +100,64 @@ class GuiaRepository @Inject constructor(
             )
         }
     }
+
+    /*fun borrarCrearXML(
+        nombreArchivo: String,
+        preguntas: ArrayList<String>,
+        respuestas: ArrayList<String>,
+        ruta: String
+    ): ValidacionesGuiaModel {
+        // Eliminamos el archivo anteriormente creado
+        File(ruta).delete()
+        Log.d("ArchivoEliminado", "Archivo eliminado")
+
+        //Vamos a crear el archivo que acabamos de eliminar pero con el nuevo cuestionario
+        val fos: FileOutputStream
+        val serializer: XmlSerializer = Xml.newSerializer()
+
+        return try {
+            // fos = openFileOutput(nombreArchivo, MODE_PRIVATE) // Guarda el archivo en la raiz
+            fos = FileOutputStream(ruta)
+            serializer.setOutput(fos, "UTF-8")
+            serializer.startDocument(null, java.lang.Boolean.valueOf(true))
+            serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true)
+            serializer.startTag("", "GuiaEstudio")
+            serializer.attribute("", "version", "1.0")
+            serializer.startTag("", "Cuestionario")
+            serializer.attribute("", "nombreGuia", nombreArchivo)
+
+            // Creo la etiqueta interrogante con su respectiva pregunta
+            for (i in preguntas.indices) {
+                serializer.startTag("", "Interrogante")
+                serializer.attribute("", "pregunta", preguntas[i])
+                serializer.attribute("", "respuesta", respuestas[i])
+                serializer.endTag("", "Interrogante")
+            }
+
+            // Si los campos estan vacios simplemente cierro las etiquetas y directamente
+            // guardo el documento en el teléfono.
+            serializer.endTag("", "Cuestionario")
+            serializer.endTag("", "GuiaEstudio")
+            serializer.endDocument()
+            serializer.flush()
+            fos.close()
+
+            val rutaActualizada = "$file/$nombreArchivo"
+            ValidacionesGuiaModel(
+                message = "Guia de estudio creada exitosamente",
+                responseGuia = ResponseGuia(rutaActualizada),
+                estadoUI = EstadoUI(
+                    isCreatedGuia = true,
+                )
+            )
+        } catch (e: IOException) {
+            e.printStackTrace()
+
+            ValidacionesGuiaModel(
+                message = "Guia de estudio no se creó correctamente",
+            )
+        }
+    }*/
 
     fun obtenerDatosXML(nombreArchivo: String, ruta: String): List<PreguntaRespuestaModel> {
         val preguntasRespuestas = mutableListOf<PreguntaRespuestaModel>()

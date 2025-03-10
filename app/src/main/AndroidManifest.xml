@@ -25,6 +25,10 @@
 
          PRUEBAS
 
+         NOTAS
+         Debes restablecer tu teclado, ya que sino tendrás problemas en los colores de los textos,
+         si esto no funciona debes instalar Gboard de Google.
+
     -->
     <application
         android:name=".ReviewApp"
