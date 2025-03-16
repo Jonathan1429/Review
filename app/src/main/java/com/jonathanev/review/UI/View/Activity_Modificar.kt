@@ -132,29 +132,46 @@ class Activity_Modificar : AppCompatActivity() {
                         // Cuando hay una imagen hay que poner esto
                         binding.etPregResp.setText(uiState.estadoImagen.textImgEcrypted)
 
-                        val rutaImagen = File(uiState.estadoImagen.textImgUnencrypted)
-                        if (rutaImagen.exists()) {
-                            binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
+                        var rutaBase = ruta.substringBeforeLast("/")
+
+                        // Reemplazamos la carpeta guias a seleccionar la carpeta de imagenes
+                        rutaBase = rutaBase.replace("guias".toRegex(), "imagenes")
+
+                        // val rutaImagenFile = File(uiState.estadoImagen.textImgUnencrypted)
+                        var rutaImagen = File(uiState.estadoImagen.textImgUnencrypted).toString()
+                        val imagen = rutaImagen.substringAfterLast("/")
+
+                        rutaImagen = "$rutaBase/$imagen"
+                        Log.i("Ruta completa: ", rutaImagen)
+
+                        if (File(rutaImagen).exists()) {
+                            binding.ivImagen.setImage(ImageSource.uri(rutaImagen))
                         } else {
                             // Sino se encuentra la ruta especificada
-                            if (uiState.estadoImagen.textImgUnencrypted.contains("imagenesPivote")) {
-                                uiState.estadoImagen.textImgUnencrypted =
+                            if (rutaImagen.contains("imagenesPivote")) {
+                                rutaImagen = rutaImagen.replace("imagenesPivote".toRegex(), "imagenes")
+
+                                /*uiState.estadoImagen.textImgUnencrypted =
                                     uiState.estadoImagen.textImgUnencrypted.replace(
                                         "imagenesPivote".toRegex(),
                                         "imagenes"
-                                    )
-                                binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
+                                    )*/
+                                binding.ivImagen.setImage(ImageSource.uri(rutaImagen))
                             } else {
-                                uiState.estadoImagen.textImgUnencrypted =
+                                rutaImagen = rutaImagen.replace("imagenes".toRegex(), "imagenesPivote")
+
+                                /*uiState.estadoImagen.textImgUnencrypted =
                                     uiState.estadoImagen.textImgUnencrypted.replace(
                                         "imagenes".toRegex(),
                                         "imagenesPivote"
-                                    )
-                                binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
+                                    )*/
+                                binding.ivImagen.setImage(ImageSource.uri(rutaImagen))
                             }
                         }
                     }
                 }
+                Log.i("Ruta: ", ruta)
+                Log.i("Es imagen: ", uiState.estadoUI.isShowImage.toString())
 
                 binding.tilContenidoPregResp.visibility =
                     if (uiState.estadoUI.isShowImage) View.GONE else View.VISIBLE
