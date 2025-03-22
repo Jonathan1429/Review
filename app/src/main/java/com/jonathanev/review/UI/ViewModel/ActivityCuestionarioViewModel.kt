@@ -154,7 +154,8 @@ class ActivityCuestionarioViewModel @Inject constructor(
     fun onClickImgvSave(
         editable: Editable,
         nombreArchivo: String,
-        isEtPregunta: Boolean
+        isEtPregunta: Boolean,
+        ruta: String
     ) {
         val setClickSaveUseCase = setClickSaveUseCase(
             preguntas,
@@ -164,7 +165,7 @@ class ActivityCuestionarioViewModel @Inject constructor(
             nombreArchivo,
             isEtPregunta,
             false,
-            ""
+            ruta
         )
 
         _uiStateBtnSave.value = setClickSaveUseCase

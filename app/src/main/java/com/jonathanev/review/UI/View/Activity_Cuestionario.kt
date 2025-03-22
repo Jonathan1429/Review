@@ -377,8 +377,9 @@ class Activity_Cuestionario : AppCompatActivity() {
 
             activityCuestionarioViewModel.onClickImgvSave(
                 editable,
-                nombreArchivo.toString(),
-                isEtPregunta
+                "$nombreArchivo.xml",
+                isEtPregunta,
+                "${file.absolutePath}/$nombreArchivo.xml"
             )
         }
 

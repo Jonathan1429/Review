@@ -84,10 +84,10 @@ class GuiaRepository @Inject constructor(
             serializer.flush()
             fos.close()
 
-            val rutaActualizada = "$file/$nombreArchivo"
+            // val rutaActualizada = "$file/$nombreArchivo"
             ValidacionesGuiaModel(
                 message = "Guia de estudio creada exitosamente",
-                responseGuia = ResponseGuia(rutaActualizada),
+                responseGuia = ResponseGuia(ruta),
                 estadoUI = EstadoUI(
                     isCreatedGuia = true,
                 )
