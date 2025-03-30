@@ -102,6 +102,9 @@ dependencies {
     // Fragments ViewModel
     implementation "androidx.fragment:fragment-ktx:1.6.2"
 
+    // Mock
+    testImplementation("io.mockk:mockk:1.13.8")
+
     // Dagger Hilt
     implementation "com.google.dagger:hilt-android:$daggerHilt"
     kapt "com.google.dagger:hilt-compiler:$daggerHilt"

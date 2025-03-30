@@ -6,19 +6,12 @@ import javax.inject.Inject
 
 class getGuiaUseCase @Inject constructor(
     private val guiaProvider: GuiaProvider
-){
+) {
     operator fun invoke(ruta: String): GuiaModel {
-        val archivo = ruta.substringAfterLast("/")
-        var guia: GuiaModel = GuiaModel("", 0)
+        val fileSelected = ruta.substringAfterLast("/")
 
-        for ((posicion, valor) in guiaProvider.guias.withIndex()){
-            val guiaXML = "${valor.nombreGuia}.xml"
-            if (archivo == guiaXML){
-                guia.nombreGuia = guiaProvider.guias[posicion].nombreGuia
-                break
-            }
-        }
-
-        return guia
+        return guiaProvider.guias
+            .firstOrNull { "${it.nombreGuia}.xml" == fileSelected }
+            ?.let { GuiaModel(it.nombreGuia, 0) } ?: GuiaModel("", 0)
     }
 }
