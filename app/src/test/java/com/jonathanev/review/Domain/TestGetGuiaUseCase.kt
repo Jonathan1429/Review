@@ -9,7 +9,7 @@ import org.junit.Test
 
 class TestGetGuiaUseCase {
     private val guiaProvider = mockk<GuiaProvider>()
-    private val getGuiaUseCase = getGuiaUseCase(guiaProvider)
+    private val getGuiaUseCase = GetGuiaUseCase(guiaProvider)
 
     @Test
     fun `cuando la ruta contiene un archivo existente, devuelve el GuiaModel correcto`() {

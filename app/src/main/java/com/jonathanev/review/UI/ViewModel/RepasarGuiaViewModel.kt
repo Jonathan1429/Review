@@ -7,7 +7,7 @@ import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import com.jonathanev.review.Domain.getClickRegresarUseCase
 import com.jonathanev.review.Domain.getClickSiguienteUseCase
-import com.jonathanev.review.Domain.getGuiaUseCase
+import com.jonathanev.review.Domain.GetGuiaUseCase
 import com.jonathanev.review.Domain.getObtenerDatosXMLUseCase
 import com.jonathanev.review.Domain.setPintarTextosUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,7 +16,7 @@ import javax.inject.Inject
 @HiltViewModel
 class RepasarGuiaViewModel @Inject constructor(
     private val setPintarTextosUseCase: setPintarTextosUseCase,
-    private val getGuiaUseCase: getGuiaUseCase,
+    private val getGuiaUseCase: GetGuiaUseCase,
     private val getObtenerDatosXMLUseCase: getObtenerDatosXMLUseCase,
     private val getClickRegresarUseCase: getClickRegresarUseCase,
     private val getClickSiguienteUseCase: getClickSiguienteUseCase

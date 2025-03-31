@@ -10,7 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.Data.Model.DataStoreManager
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
-import com.jonathanev.review.Domain.getGuiaUseCase
+import com.jonathanev.review.Domain.GetGuiaUseCase
 import com.jonathanev.review.Domain.getObtenerDatosXMLUseCase
 import com.jonathanev.review.Domain.setCifrarRutaImagenUseCase
 import com.jonathanev.review.Domain.setClickEliminarUseCase
@@ -38,7 +38,7 @@ class ModificarViewModel @Inject constructor(
     private val setPintarLetraUseCase: setPintarLetraUseCase,
     private val getObtenerDatosXMLUseCase: getObtenerDatosXMLUseCase,
     private val setPintarTextosUseCase: setPintarTextosUseCase,
-    val getGuiaUseCase: getGuiaUseCase
+    val getGuiaUseCase: GetGuiaUseCase
 ) : ViewModel() {
     var preguntas: ArrayList<String> = ArrayList()
     private var respuestas: ArrayList<String> = ArrayList()

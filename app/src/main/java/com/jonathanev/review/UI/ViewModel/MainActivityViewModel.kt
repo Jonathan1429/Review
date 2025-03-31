@@ -4,7 +4,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.jonathanev.review.Data.GuiaRepository
 import com.jonathanev.review.Data.Model.GuiaModel
-import com.jonathanev.review.Domain.getAllFolders
+import com.jonathanev.review.Domain.GetAllFoldersUseCase
 import com.jonathanev.review.Domain.getMainPathUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.io.File
@@ -14,7 +14,7 @@ import javax.inject.Inject
 class MainActivityViewModel @Inject constructor(
     private val guiaRepository: GuiaRepository,
     private val getMainPathUseCase: getMainPathUseCase,
-    private val getAllFoldersUseCase: getAllFolders
+    private val getAllFoldersUseCase: GetAllFoldersUseCase
 ) : ViewModel() {
 
     var guias = MutableLiveData<List<GuiaModel>>()
