@@ -13,13 +13,16 @@
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
-      <SelectionState runConfigName="should_apply_color_to_the_last_character()">
+      <SelectionState runConfigName="TestGetAllGuiasUseCase">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="setPintarLetraUseCaseTest">
+      <SelectionState runConfigName="obtiene_todas_las_guias()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="Tests in 'com'">
+      <SelectionState runConfigName="no_regresa_guias_de_estudio()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="obtiene_todas_las_carpetas_y_guias_en_ese_orden()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

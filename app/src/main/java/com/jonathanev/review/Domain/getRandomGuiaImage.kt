@@ -6,7 +6,7 @@ import javax.inject.Inject
 class getRandomGuiaImage @Inject constructor(){
     operator fun invoke(): Int{
         // Se crea un número random para saber cual imagen aparecerá en el listado.
-        var numeroRandom = (1..6).random()
+        val numeroRandom = (1..6).random()
         return when (numeroRandom) {
             1 -> R.drawable.img_estudiante1 //numeroRandom = R.drawable.cerebro
             2 -> R.drawable.img_estudiante2
