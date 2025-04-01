@@ -43,6 +43,14 @@
       </SelectionState>
       <SelectionState runConfigName="TestGetRandomGuiaImage">
         <option name="selectionMode" value="DROPDOWN" />
+        <DropdownSelection timestamp="2025-04-01T23:01:48.621762800Z">
+          <Target type="DEFAULT_BOOT">
+            <handle>
+              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\jose_\.android\avd\Pixel_6_API_35_N.avd" />
+            </handle>
+          </Target>
+        </DropdownSelection>
+        <DialogSelection />
       </SelectionState>
     </selectionStates>
   </component>
