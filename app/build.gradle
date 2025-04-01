@@ -6,6 +6,9 @@ plugins {
     id 'kotlin-kapt' // A traves de las anotaciones genera el código por atrás.
     id 'com.google.dagger.hilt.android'
     // id 'androidx.navigation.safeargs.kotlin'
+
+    // Test con Coverage
+    id("org.jetbrains.kotlinx.kover") version "0.9.1"
 }
 
 android {
@@ -47,6 +50,8 @@ android {
             minifyEnabled false // Optimisation, reduction, ofuscation
             debuggable true
             resValue("string", "nameApp", "Review [DEBUG]")
+
+            testCoverageEnabled true // Habilita cobertura en AndroidTest
         }
     }
     compileOptions {
@@ -161,7 +166,34 @@ dependencies {
 
     androidTestImplementation "io.mockk:mockk-android:${mockkVersion}"
     androidTestImplementation "io.mockk:mockk-agent:${mockkVersion}"
-
-    // implementation(kotlin("script-runtime"))
 }
 
+// Configuración para Kover
+kover {
+    // reportFormats = ['html', 'xml']
+}
+
+tasks.register('mergeAndroidTestCoverage') {
+    group = "verification"
+    description = "Combina la cobertura de pruebas de AndroidTest con Kover"
+
+    doLast {
+        // Usar Path de Java para manejar rutas de manera más confiable
+        def coverageDir = layout.buildDirectory.dir("coverage").get().asFile
+
+        // Crear la carpeta si no existe
+        if (!coverageDir.exists()) {
+            coverageDir.mkdirs()  // Usar método Groovy para crear el directorio
+        }
+
+        // Copiar los archivos de cobertura generados en connectedAndroidTest
+        fileTree(layout.buildDirectory.dir("outputs/code-coverage/connected").get().asFile).matching {
+            include "**/*.ec"
+        }.each { file ->
+            copy {
+                from file
+                into coverageDir
+            }
+        }
+    }
+}
