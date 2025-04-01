@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import com.jonathanev.review.Data.GuiaRepository
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Domain.GetAllFoldersUseCase
-import com.jonathanev.review.Domain.getMainPathUseCase
+import com.jonathanev.review.Domain.GetMainPathUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.io.File
 import javax.inject.Inject
@@ -13,7 +13,7 @@ import javax.inject.Inject
 @HiltViewModel
 class MainActivityViewModel @Inject constructor(
     private val guiaRepository: GuiaRepository,
-    private val getMainPathUseCase: getMainPathUseCase,
+    private val getMainPathUseCase: GetMainPathUseCase,
     private val getAllFoldersUseCase: GetAllFoldersUseCase
 ) : ViewModel() {
 

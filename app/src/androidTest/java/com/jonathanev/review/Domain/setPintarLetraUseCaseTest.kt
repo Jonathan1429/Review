@@ -7,11 +7,11 @@ import org.junit.Before
 import org.junit.Test
 
 class setPintarLetraUseCaseTest {
-    private lateinit var useCase: setPintarLetraUseCase
+    private lateinit var useCase: SetPintarLetraUseCase
 
     @Before
     fun setUp() {
-        useCase = setPintarLetraUseCase()
+        useCase = SetPintarLetraUseCase()
     }
 
     @Test
@@ -21,7 +21,7 @@ class setPintarLetraUseCaseTest {
         val cursorPosition = 4
         val color = 0xFF0000 // Color rojo
 
-        val useCase = setPintarLetraUseCase()
+        val useCase = SetPintarLetraUseCase()
 
         // Act
         useCase.invoke(editable, cursorPosition, color)

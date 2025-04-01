@@ -5,21 +5,21 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
-import com.jonathanev.review.Domain.getClickRegresarUseCase
-import com.jonathanev.review.Domain.getClickSiguienteUseCase
+import com.jonathanev.review.Domain.GetClickRegresarUseCase
+import com.jonathanev.review.Domain.GetClickSiguienteUseCase
 import com.jonathanev.review.Domain.GetGuiaUseCase
-import com.jonathanev.review.Domain.getObtenerDatosXMLUseCase
-import com.jonathanev.review.Domain.setPintarTextosUseCase
+import com.jonathanev.review.Domain.GetObtenerDatosXMLUseCase
+import com.jonathanev.review.Domain.SetPintarTextosUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
 class RepasarGuiaViewModel @Inject constructor(
-    private val setPintarTextosUseCase: setPintarTextosUseCase,
+    private val setPintarTextosUseCase: SetPintarTextosUseCase,
     private val getGuiaUseCase: GetGuiaUseCase,
-    private val getObtenerDatosXMLUseCase: getObtenerDatosXMLUseCase,
-    private val getClickRegresarUseCase: getClickRegresarUseCase,
-    private val getClickSiguienteUseCase: getClickSiguienteUseCase
+    private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
+    private val getClickRegresarUseCase: GetClickRegresarUseCase,
+    private val getClickSiguienteUseCase: GetClickSiguienteUseCase
 ) : ViewModel() {
     var preguntas: ArrayList<String> = ArrayList()
     private var respuestas: ArrayList<String> = ArrayList()

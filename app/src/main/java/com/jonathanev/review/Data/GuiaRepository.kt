@@ -3,16 +3,14 @@ package com.jonathanev.review.Data
 import android.content.Context
 import android.util.Log
 import android.util.Xml
-import androidx.appcompat.app.AppCompatActivity.MODE_PRIVATE
 import com.jonathanev.review.Core.Constants.file
-import com.jonathanev.review.Core.Constants.rutaPrin
 import com.jonathanev.review.Data.Model.EstadoUI
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.Model.GuiaProvider
 import com.jonathanev.review.Data.Model.PreguntaRespuestaModel
 import com.jonathanev.review.Data.Model.ResponseGuia
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
-import com.jonathanev.review.Domain.getAllGuiasUseCase
+import com.jonathanev.review.Domain.GetAllGuiasUseCase
 import dagger.hilt.android.qualifiers.ApplicationContext
 import org.w3c.dom.Element
 import org.w3c.dom.NodeList
@@ -21,17 +19,13 @@ import org.xmlpull.v1.XmlSerializer
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.nio.file.StandardCopyOption
 import javax.inject.Inject
 import javax.xml.parsers.DocumentBuilder
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.parsers.ParserConfigurationException
-import kotlin.io.path.exists
 
 class GuiaRepository @Inject constructor(
-    val getAllGuiasUseCase: getAllGuiasUseCase,
+    val getAllGuiasUseCase: GetAllGuiasUseCase,
     val guiaProvider: GuiaProvider,
     @ApplicationContext private val context: Context
 ) {

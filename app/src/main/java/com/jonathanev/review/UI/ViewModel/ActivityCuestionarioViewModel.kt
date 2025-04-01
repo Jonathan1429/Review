@@ -12,14 +12,14 @@ import com.jonathanev.review.Data.GuiaRepository
 import com.jonathanev.review.Data.Model.DataStoreManager
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
-import com.jonathanev.review.Domain.setCifrarRutaImagenUseCase
-import com.jonathanev.review.Domain.setClickEliminarUseCase
-import com.jonathanev.review.Domain.setClickRegresarModicandoUseCase
-import com.jonathanev.review.Domain.setClickSaveUseCase
-import com.jonathanev.review.Domain.setClickSiguienteModificandoUseCase
-import com.jonathanev.review.Domain.setCopyImagesUseCase
-import com.jonathanev.review.Domain.setPintarLetraUseCase
-import com.jonathanev.review.Domain.setRollClickedUseCase
+import com.jonathanev.review.Domain.SetCifrarRutaImagenUseCase
+import com.jonathanev.review.Domain.SetClickEliminarUseCase
+import com.jonathanev.review.Domain.SetClickRegresarModicandoUseCase
+import com.jonathanev.review.Domain.SetClickSaveUseCase
+import com.jonathanev.review.Domain.SetClickSiguienteModificandoUseCase
+import com.jonathanev.review.Domain.SetCopyImagesUseCase
+import com.jonathanev.review.Domain.SetPintarLetraUseCase
+import com.jonathanev.review.Domain.SetRollClickedUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.io.File
@@ -28,14 +28,14 @@ import javax.inject.Inject
 @HiltViewModel
 class ActivityCuestionarioViewModel @Inject constructor(
     private val guiaRepository: GuiaRepository,
-    private val setClickRegresarModicandoUseCase: setClickRegresarModicandoUseCase,
-    private val setClickSiguienteModicandoUseCase: setClickSiguienteModificandoUseCase,
-    private val setRollClickedUseCase: setRollClickedUseCase,
-    private val setClickSaveUseCase: setClickSaveUseCase,
-    private val setClickEliminarUseCase: setClickEliminarUseCase,
-    private val setCopyImagesUseCase: setCopyImagesUseCase,
-    private val setCifrarRutaImagenUseCase: setCifrarRutaImagenUseCase,
-    private val setPintarLetraUseCase: setPintarLetraUseCase,
+    private val setClickRegresarModicandoUseCase: SetClickRegresarModicandoUseCase,
+    private val setClickSiguienteModicandoUseCase: SetClickSiguienteModificandoUseCase,
+    private val setRollClickedUseCase: SetRollClickedUseCase,
+    private val setClickSaveUseCase: SetClickSaveUseCase,
+    private val setClickEliminarUseCase: SetClickEliminarUseCase,
+    private val setCopyImagesUseCase: SetCopyImagesUseCase,
+    private val setCifrarRutaImagenUseCase: SetCifrarRutaImagenUseCase,
+    private val setPintarLetraUseCase: SetPintarLetraUseCase,
     application: Application
 ) : ViewModel() {
     private var preguntas: ArrayList<String> = ArrayList()

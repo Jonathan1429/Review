@@ -3,8 +3,8 @@ package com.jonathanev.review.Domain
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import javax.inject.Inject
 
-class getClickSiguienteUseCase @Inject constructor(
-    private var setPintarTextosUseCase: setPintarTextosUseCase
+class GetClickSiguienteUseCase @Inject constructor(
+    private var setPintarTextosUseCase: SetPintarTextosUseCase
 ) {
     operator fun invoke(
         contadorPregunta: Int,

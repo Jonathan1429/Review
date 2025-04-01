@@ -3,7 +3,7 @@ package com.jonathanev.review.Domain
 import com.jonathanev.review.R
 import javax.inject.Inject
 
-class getRandomGuiaImage @Inject constructor(){
+class GetRandomGuiaImageUseCase @Inject constructor(){
     operator fun invoke(): Int{
         // Se crea un número random para saber cual imagen aparecerá en el listado.
         val numeroRandom = (1..6).random()

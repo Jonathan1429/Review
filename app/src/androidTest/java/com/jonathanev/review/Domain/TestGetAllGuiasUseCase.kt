@@ -9,8 +9,8 @@ import org.junit.Test
 import java.io.File
 
 class TestGetAllGuiasUseCase {
-    private val getRandomGuiaImage = mockk<getRandomGuiaImage>()
-    private val getAllGuiasUseCase = getAllGuiasUseCase(getRandomGuiaImage)
+    private val getRandomGuiaImageUseCase = mockk<GetRandomGuiaImageUseCase>()
+    private val getAllGuiasUseCase = GetAllGuiasUseCase(getRandomGuiaImageUseCase)
 
     @Test
     fun obtiene_todas_las_carpetas_y_guias_en_ese_orden() {
@@ -31,7 +31,7 @@ class TestGetAllGuiasUseCase {
         every { folder2.isDirectory } returns true
 
         // Configuración de mock para getRandomGuiaImage
-        every { getRandomGuiaImage.invoke() } returns R.drawable.img_estudiante4
+        every { getRandomGuiaImageUseCase.invoke() } returns R.drawable.img_estudiante4
 
         // Configuración de mock para listFiles
         every { ruta.listFiles() } returns arrayOf(file1, file2, folder1, folder2)
@@ -64,7 +64,7 @@ class TestGetAllGuiasUseCase {
         every { folder2.isDirectory } returns true
 
         // Configuración de mock para getRandomGuiaImage
-        every { getRandomGuiaImage.invoke() } returns R.drawable.img_estudiante4
+        every { getRandomGuiaImageUseCase.invoke() } returns R.drawable.img_estudiante4
 
         // Configuración de mock para listFiles
         every { ruta.listFiles() } returns arrayOf(folder1, folder2)
@@ -95,7 +95,7 @@ class TestGetAllGuiasUseCase {
         every { file2.isDirectory } returns false
 
         // Configuración de mock para getRandomGuiaImage
-        every { getRandomGuiaImage.invoke() } returns R.drawable.img_estudiante4
+        every { getRandomGuiaImageUseCase.invoke() } returns R.drawable.img_estudiante4
 
         // Configuración de mock para listFiles
         every { ruta.listFiles() } returns arrayOf(file2, file1)
@@ -118,7 +118,7 @@ class TestGetAllGuiasUseCase {
         val ruta = mockk<File>()
 
         every { ruta.listFiles() } returns emptyArray()
-        every { getRandomGuiaImage.invoke() } returns R.drawable.img_estudiante4
+        every { getRandomGuiaImageUseCase.invoke() } returns R.drawable.img_estudiante4
 
         val resultado = getAllGuiasUseCase(ruta)
         assertEquals(emptyList<String>(), resultado)

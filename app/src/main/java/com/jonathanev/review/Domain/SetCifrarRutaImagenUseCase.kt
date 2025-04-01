@@ -2,7 +2,7 @@ package com.jonathanev.review.Domain
 
 import javax.inject.Inject
 
-class setCifrarRutaImagenUseCase @Inject constructor() {
+class SetCifrarRutaImagenUseCase @Inject constructor() {
     operator fun invoke(texto: String, desplazamiento: Int): String {
         val resultado = StringBuilder()
 

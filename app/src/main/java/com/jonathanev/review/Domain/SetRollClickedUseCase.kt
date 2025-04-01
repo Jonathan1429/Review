@@ -5,10 +5,10 @@ import com.jonathanev.review.Data.Model.EstadoUI
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import javax.inject.Inject
 
-class setRollClickedUseCase @Inject constructor(
-    private val setSpanPalabraUseCase: setSpanPalabraUseCase,
-    private val setColocarEtiquetasUseCase: setColocarEtiquetasUseCase,
-    private val setPintarTextosUseCase: setPintarTextosUseCase
+class SetRollClickedUseCase @Inject constructor(
+    private val setSpanPalabraUseCase: SetSpanPalabraUseCase,
+    private val setColocarEtiquetasUseCase: SetColocarEtiquetasUseCase,
+    private val setPintarTextosUseCase: SetPintarTextosUseCase
 ) {
     operator fun invoke(
         preguntas: ArrayList<String>,

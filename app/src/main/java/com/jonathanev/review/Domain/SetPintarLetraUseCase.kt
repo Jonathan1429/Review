@@ -6,7 +6,7 @@ import android.text.style.ForegroundColorSpan
 import android.util.Log
 import javax.inject.Inject
 
-class setPintarLetraUseCase @Inject constructor() {
+class SetPintarLetraUseCase @Inject constructor() {
     operator fun invoke(texto: Editable?, cursorPosition: Int, colorActual: Int) {
         texto?.let { letra ->
             if (letra.isNotEmpty()) {

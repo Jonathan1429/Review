@@ -11,8 +11,8 @@ import com.jonathanev.review.Data.Model.EstadoUI
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import javax.inject.Inject
 
-class setPintarTextosUseCase @Inject constructor(
-    private val setCifrarRutaImagenUseCase: setCifrarRutaImagenUseCase
+class SetPintarTextosUseCase @Inject constructor(
+    private val setCifrarRutaImagenUseCase: SetCifrarRutaImagenUseCase
 ) {
     operator fun invoke(
         isEtPregunta: Boolean,

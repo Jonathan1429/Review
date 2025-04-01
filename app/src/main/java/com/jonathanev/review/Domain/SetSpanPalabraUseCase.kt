@@ -6,7 +6,7 @@ import android.text.style.ForegroundColorSpan
 import com.jonathanev.review.Data.Model.SpanPalabraModel
 import javax.inject.Inject
 
-class setSpanPalabraUseCase @Inject constructor() {
+class SetSpanPalabraUseCase @Inject constructor() {
     operator fun invoke(editable: Editable): SpanPalabraModel {
         val colorSpans: Array<ForegroundColorSpan> =
             editable.getSpans(0, editable.length, ForegroundColorSpan::class.java)

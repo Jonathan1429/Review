@@ -4,7 +4,7 @@ import com.jonathanev.review.Data.GuiaRepository
 import com.jonathanev.review.Data.Model.PreguntaRespuestaModel
 import javax.inject.Inject
 
-class getObtenerDatosXMLUseCase @Inject constructor(
+class GetObtenerDatosXMLUseCase @Inject constructor(
     private val guiaRepository: GuiaRepository
 ){
     operator fun invoke(nombreArchivo: String, ruta: String): List<PreguntaRespuestaModel>{

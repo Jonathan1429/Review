@@ -11,7 +11,7 @@ import kotlin.random.Random
 
 @RunWith(AndroidJUnit4::class)
 class TestGetRandomGuiaImage {
-    private val getRandomGuiaImage = getRandomGuiaImage()
+    private val getRandomGuiaImageUseCase = GetRandomGuiaImageUseCase()
 
     @Test
     fun should_return_correct_drawable_based_on_random_number() {
@@ -19,7 +19,7 @@ class TestGetRandomGuiaImage {
 
         every { Random.nextInt(1, 7) } returns 1  // Forzamos que devuelva 3
 
-        val result = getRandomGuiaImage.invoke()
+        val result = getRandomGuiaImageUseCase.invoke()
 
         assertEquals(R.drawable.img_estudiante1, result)  // Verificamos que devuelve la imagen esperada
     }

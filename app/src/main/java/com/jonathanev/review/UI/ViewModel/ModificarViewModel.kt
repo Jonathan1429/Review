@@ -11,15 +11,15 @@ import com.jonathanev.review.Data.Model.DataStoreManager
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import com.jonathanev.review.Domain.GetGuiaUseCase
-import com.jonathanev.review.Domain.getObtenerDatosXMLUseCase
-import com.jonathanev.review.Domain.setCifrarRutaImagenUseCase
-import com.jonathanev.review.Domain.setClickEliminarUseCase
-import com.jonathanev.review.Domain.setClickRegresarModicandoUseCase
-import com.jonathanev.review.Domain.setClickSaveUseCase
-import com.jonathanev.review.Domain.setClickSiguienteModificandoUseCase
-import com.jonathanev.review.Domain.setPintarLetraUseCase
-import com.jonathanev.review.Domain.setPintarTextosUseCase
-import com.jonathanev.review.Domain.setRollClickedUseCase
+import com.jonathanev.review.Domain.GetObtenerDatosXMLUseCase
+import com.jonathanev.review.Domain.SetCifrarRutaImagenUseCase
+import com.jonathanev.review.Domain.SetClickEliminarUseCase
+import com.jonathanev.review.Domain.SetClickRegresarModicandoUseCase
+import com.jonathanev.review.Domain.SetClickSaveUseCase
+import com.jonathanev.review.Domain.SetClickSiguienteModificandoUseCase
+import com.jonathanev.review.Domain.SetPintarLetraUseCase
+import com.jonathanev.review.Domain.SetPintarTextosUseCase
+import com.jonathanev.review.Domain.SetRollClickedUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -29,15 +29,15 @@ import javax.inject.Inject
 @HiltViewModel
 class ModificarViewModel @Inject constructor(
     application: Application,
-    private val setRollClickedUseCase: setRollClickedUseCase,
-    private val setClickRegresarModicandoUseCase: setClickRegresarModicandoUseCase,
-    private val setClickSiguienteModicandoUseCase: setClickSiguienteModificandoUseCase,
-    private val setClickEliminarUseCase: setClickEliminarUseCase,
-    private val setClickSaveUseCase: setClickSaveUseCase,
-    private val setCifrarRutaImagenUseCase: setCifrarRutaImagenUseCase,
-    private val setPintarLetraUseCase: setPintarLetraUseCase,
-    private val getObtenerDatosXMLUseCase: getObtenerDatosXMLUseCase,
-    private val setPintarTextosUseCase: setPintarTextosUseCase,
+    private val setRollClickedUseCase: SetRollClickedUseCase,
+    private val setClickRegresarModicandoUseCase: SetClickRegresarModicandoUseCase,
+    private val setClickSiguienteModicandoUseCase: SetClickSiguienteModificandoUseCase,
+    private val setClickEliminarUseCase: SetClickEliminarUseCase,
+    private val setClickSaveUseCase: SetClickSaveUseCase,
+    private val setCifrarRutaImagenUseCase: SetCifrarRutaImagenUseCase,
+    private val setPintarLetraUseCase: SetPintarLetraUseCase,
+    private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
+    private val setPintarTextosUseCase: SetPintarTextosUseCase,
     val getGuiaUseCase: GetGuiaUseCase
 ) : ViewModel() {
     var preguntas: ArrayList<String> = ArrayList()

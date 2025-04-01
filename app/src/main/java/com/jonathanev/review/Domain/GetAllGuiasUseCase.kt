@@ -5,12 +5,12 @@ import com.jonathanev.review.R
 import java.io.File
 import javax.inject.Inject
 
-class getAllGuiasUseCase @Inject constructor(
-    val getRandomGuiaImage: getRandomGuiaImage
+class GetAllGuiasUseCase @Inject constructor(
+    val getRandomGuiaImageUseCase: GetRandomGuiaImageUseCase
 ) {
     operator fun invoke(file: File): List<GuiaModel> {
         val files = file.listFiles() ?: return emptyList()
-        val image = getRandomGuiaImage()
+        val image = getRandomGuiaImageUseCase()
 
         return files.map { archivo ->
             val isFolder = archivo.isDirectory

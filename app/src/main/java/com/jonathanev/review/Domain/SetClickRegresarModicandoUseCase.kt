@@ -4,10 +4,10 @@ import android.text.Editable
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import javax.inject.Inject
 
-class setClickRegresarModicandoUseCase @Inject constructor(
-    private val setSpanPalabraUseCase: setSpanPalabraUseCase,
-    private val setColocarEtiquetasUseCase: setColocarEtiquetasUseCase,
-    private val setPintarTextosUseCase: setPintarTextosUseCase
+class SetClickRegresarModicandoUseCase @Inject constructor(
+    private val setSpanPalabraUseCase: SetSpanPalabraUseCase,
+    private val setColocarEtiquetasUseCase: SetColocarEtiquetasUseCase,
+    private val setPintarTextosUseCase: SetPintarTextosUseCase
 ) {
     operator fun invoke(
         preguntas: ArrayList<String>,

@@ -4,7 +4,7 @@ import android.text.Editable
 import android.text.style.ForegroundColorSpan
 import javax.inject.Inject
 
-class setColocarEtiquetasUseCase @Inject constructor() {
+class SetColocarEtiquetasUseCase @Inject constructor() {
     operator fun invoke(editable: Editable): Editable {
         val colorSpans: Array<ForegroundColorSpan> = editable.getSpans(
             0,

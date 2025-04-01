@@ -4,7 +4,7 @@ import com.jonathanev.review.Data.GuiaRepository
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import javax.inject.Inject
 
-class setCrearXmlUseCase @Inject constructor(
+class SetCrearXmlUseCase @Inject constructor(
     private val guiaRepository: GuiaRepository
 ) {
     operator fun invoke(

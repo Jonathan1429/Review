@@ -4,8 +4,8 @@ import com.jonathanev.review.Data.Model.EstadoUI
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import javax.inject.Inject
 
-class setClickEliminarUseCase @Inject constructor(
-    private val setPintarTextosUseCase: setPintarTextosUseCase
+class SetClickEliminarUseCase @Inject constructor(
+    private val setPintarTextosUseCase: SetPintarTextosUseCase
 ) {
     operator fun invoke(
         preguntas: ArrayList<String>,

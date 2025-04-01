@@ -5,9 +5,9 @@ import androidx.lifecycle.ViewModel
 import com.jonathanev.review.Data.GuiaRepository
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.Model.GuiaProvider
-import com.jonathanev.review.Domain.getGuiaPosicionUseCase
-import com.jonathanev.review.Domain.getMainPathUseCase
-import com.jonathanev.review.Domain.setChangePathUseCase
+import com.jonathanev.review.Domain.GetGuiaPosicionUseCase
+import com.jonathanev.review.Domain.GetMainPathUseCase
+import com.jonathanev.review.Domain.SetChangePathUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.io.File
 import javax.inject.Inject
@@ -16,9 +16,9 @@ import javax.inject.Inject
 class FragDialListarGuiasViewModel @Inject constructor(
     private val guiaRepository: GuiaRepository,
     private val guiaProvider: GuiaProvider,
-    private val getGuiaPosicionUseCase: getGuiaPosicionUseCase,
-    private val setChangePathUseCase: setChangePathUseCase,
-    private val getMainPathUseCase: getMainPathUseCase
+    private val getGuiaPosicionUseCase: GetGuiaPosicionUseCase,
+    private val setChangePathUseCase: SetChangePathUseCase,
+    private val getMainPathUseCase: GetMainPathUseCase
 ) : ViewModel() {
     var guias = MutableLiveData<List<GuiaModel>>()
     var file = MutableLiveData<File>()
