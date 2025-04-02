@@ -2,9 +2,13 @@ package com.jonathanev.review.Domain
 
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.R
+import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertNotNull
+import junit.framework.TestCase.assertNull
 import org.junit.Test
 import java.io.File
 
@@ -49,6 +53,9 @@ class TestGetAllGuiasUseCase {
             ),
             resultado
         )
+        // Así verificas que la injección es correcta, jamás vendrá null esta parte
+        // a menos que la syntax de la injección se hiciera mal
+        assertNotNull(getAllGuiasUseCase.getRandomGuiaImageUseCase)
     }
 
     @Test
@@ -80,6 +87,9 @@ class TestGetAllGuiasUseCase {
             ),
             resultado
         )
+        // Así verificas que la injección es correcta, jamás vendrá null esta parte
+        // a menos que la syntax de la injección se hiciera mal
+        assertNotNull(getAllGuiasUseCase.getRandomGuiaImageUseCase)
     }
 
     @Test
@@ -111,16 +121,21 @@ class TestGetAllGuiasUseCase {
             ),
             resultado
         )
+        // Así verificas que la injección es correcta, jamás vendrá null esta parte
+        // a menos que la syntax de la injección se hiciera mal
+        assertNotNull(getAllGuiasUseCase.getRandomGuiaImageUseCase)
     }
 
     @Test
     fun no_regresa_guias_de_estudio(){
         val ruta = mockk<File>()
 
-        every { ruta.listFiles() } returns emptyArray()
-        every { getRandomGuiaImageUseCase.invoke() } returns R.drawable.img_estudiante4
+        every { ruta.listFiles() } returns null
 
         val resultado = getAllGuiasUseCase(ruta)
-        assertEquals(emptyList<String>(), resultado)
+        assertEquals(emptyList<GuiaModel>(), resultado)
+        // Así verificas que la injección es correcta, jamás vendrá null esta parte
+        // a menos que la syntax de la injección se hiciera mal
+        assertNotNull(getAllGuiasUseCase.getRandomGuiaImageUseCase)
     }
 }
