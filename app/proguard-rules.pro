@@ -21,3 +21,5 @@
 #-renamesourcefileattribute SourceFile
 
 -keep class com.jonathanev.review.Core.*
+-keep class com.google.android.gms.** { *; }
+-keep class com.google.firebase.** { *; }

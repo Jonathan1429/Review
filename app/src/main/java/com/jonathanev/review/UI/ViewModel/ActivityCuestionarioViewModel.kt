@@ -108,7 +108,7 @@ class ActivityCuestionarioViewModel @Inject constructor(
         return setCifrarRutaImagenUseCase(urlImagen, noCifrado)
     }
 
-    fun setPintarLetra(texto: Editable?, cursorPosition: Int, colorActual: Int) {
+    fun setPintarLetra(texto: Editable, cursorPosition: Int, colorActual: Int) {
         setPintarLetraUseCase(texto, cursorPosition, colorActual)
     }
 

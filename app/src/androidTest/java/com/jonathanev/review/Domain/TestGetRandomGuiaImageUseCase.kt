@@ -10,7 +10,7 @@ import org.junit.runner.RunWith
 import kotlin.random.Random
 
 @RunWith(AndroidJUnit4::class)
-class TestGetRandomGuiaImage {
+class TestGetRandomGuiaImageUseCase {
     private val getRandomGuiaImageUseCase = GetRandomGuiaImageUseCase()
 
     @Test

@@ -24,9 +24,6 @@
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
-      <SelectionState runConfigName="regresa_la_imagen_2()">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
       <SelectionState runConfigName="TestGetRandomGuiaImage">
         <option name="selectionMode" value="DROPDOWN" />
         <DropdownSelection timestamp="2025-04-01T23:01:48.621762800Z">
@@ -45,6 +42,9 @@
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
       <SelectionState runConfigName="instancia_getAllGuiasUseCase_correctamente()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="se_aplica_color_al_ultimo_caracter()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

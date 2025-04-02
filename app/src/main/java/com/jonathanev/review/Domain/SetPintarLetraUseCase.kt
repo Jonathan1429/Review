@@ -3,44 +3,16 @@ package com.jonathanev.review.Domain
 import android.text.Editable
 import android.text.Spannable
 import android.text.style.ForegroundColorSpan
-import android.util.Log
 import javax.inject.Inject
 
 class SetPintarLetraUseCase @Inject constructor() {
-    operator fun invoke(texto: Editable?, cursorPosition: Int, colorActual: Int) {
-        texto?.let { letra ->
-            if (letra.isNotEmpty()) {
-                val lastCharIndex = cursorPosition - 1
-
-                // Aplicar color a la letra actual
-                letra.setSpan(
-                    ForegroundColorSpan(colorActual),
-                    lastCharIndex,
-                    lastCharIndex + 1,
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
-            }
-
-            val allSpans = letra.getSpans(0, letra.length, ForegroundColorSpan::class.java)
-            Log.d("Spans", "Spans after update: ${letra.getSpans(0, letra.length, ForegroundColorSpan::class.java).size}")
-
-            /*texto?.let {
-                if (it.isNotEmpty() && !pregResBandera) {
-                    val cursorPosition = binding!!.etPregResp.selectionStart
-                    val lastCharIndex = cursorPosition - 1
-                    posColorFinal = lastCharIndex + 1
-
-                    it.setSpan(
-                        ForegroundColorSpan(colorActual),
-                        lastCharIndex,
-                        lastCharIndex + 1,
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-
-                    binding!!.etPregResp.setSelection(lastCharIndex + 1)
-                    pregResBandera = false
-                }
-            }*/
-        }
+    operator fun invoke(letter: Editable, cursorPosition: Int, actualColor: Int) {
+        // Aplicar color a la letra actual
+        letter.setSpan(
+            ForegroundColorSpan(actualColor),
+            cursorPosition - 1,    // Painting color - start
+            cursorPosition,        // Painting color - end
+            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
     }
 }
