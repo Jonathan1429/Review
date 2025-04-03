@@ -24,13 +24,7 @@
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
-      <SelectionState runConfigName="das_click_siguiente_sino_hay_mas_te_regresa_un_mensaje_que_no_hay_mas_preguntas()">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
-      <SelectionState runConfigName="TestGetClickSiguienteUseCase">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
-      <SelectionState runConfigName="das_click_siguiente_si_hay_mas_preguntas_te_va_a_regresar_esa()">
+      <SelectionState runConfigName="obtiene_todas_las_carpetas_y_guias_en_ese_orden()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

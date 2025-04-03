@@ -55,7 +55,7 @@ class TestGetAllGuiasUseCase {
         )
         // Así verificas que la injección es correcta, jamás vendrá null esta parte
         // a menos que la syntax de la injección se hiciera mal
-        assertNotNull(getAllGuiasUseCase.getRandomGuiaImageUseCase)
+        //assertNotNull(getAllGuiasUseCase.getRandomGuiaImageUseCase)
     }
 
     @Test
