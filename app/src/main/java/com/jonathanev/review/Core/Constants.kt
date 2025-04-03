@@ -8,7 +8,7 @@ object Constants {
     const val path = "/data/data/com.jonathanev.review/files/guias"
 
     val rutaPrin = File("/data/data/com.jonathanev.review/files/")
-    var file: File = File("/data/data/com.jonathanev.review/files/guias/")
+    val file: File = File("/data/data/com.jonathanev.review/files/guias/")
     val fileImages = File("/data/data/com.jonathanev.review/files/imagenes/")
     val fileImagesPiv = File("/data/data/com.jonathanev.review/files/imagenesPivote/")
 

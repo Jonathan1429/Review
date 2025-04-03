@@ -9,6 +9,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.jonathanev.review.Core.Constants
 import com.jonathanev.review.Core.Constants.file
 import com.jonathanev.review.Core.Constants.fileImages
 import com.jonathanev.review.Core.Constants.fileImagesPiv
@@ -44,24 +45,22 @@ class MainActivity : AppCompatActivity() {
         // Utilizamos un botón que es reutilizado, unicamente le cambiamos el texto.
         binding!!.btnAbrirGuiaEstudioHabilitado.text = "Abrir Guia"
         binding!!.btnNuevaGuiaEstudio.setOnClickListener { // Unicamente abrimos el dialogo y lo mostramos en la pantalla.
-            mainActivityViewModel.getMainPath()
-
             if (createFolders()) {
                 val dialogo: Fragment_DialogNuevoArchivo_popu = Fragment_DialogNuevoArchivo_popu()
-                dialogo.show(getSupportFragmentManager(), "Fragment_nuevo")
+                dialogo.show(supportFragmentManager, "Fragment_nuevo")
 
                 // Creamos las preferencias y dentro de ellas guardamos el arreglo item
                 var preferencias =
                     applicationContext.getSharedPreferences("cambiar_nombre", MODE_PRIVATE)
                 var editor = preferencias.edit()
                 editor.putString("cambiar_nombre", "no existe")
-                editor.commit()
+                editor.apply()
 
                 // Creamos las preferencias y dentro de ellas guardamos el arreglo item
                 preferencias =
                     applicationContext.getSharedPreferences(
                         "crear_folder",
-                        AppCompatActivity.MODE_PRIVATE
+                        MODE_PRIVATE
                     )
 
                 editor = preferencias.edit()
@@ -72,26 +71,17 @@ class MainActivity : AppCompatActivity() {
 
         binding!!.btnAbrirGuiaEstudioHabilitado.setOnClickListener {
             if (createFolders()) {
-                mainActivityViewModel.getAllFolders(file)
-                mainActivityViewModel.getMainPath()
+                // Cuando lo abres cargas el repositorio principal
+                mainActivityViewModel.getAllGuias(file)
 
                 val dialogo = Fragment_DialogListarGuias_popup()
                 dialogo.show(supportFragmentManager, "Fragment")
             }
         }
-
-        mainActivityViewModel.file.observe(this) {
-            file = it
-            initUI()
-        }
-
-        mainActivityViewModel.carpetas.observe(this) {
-            carpetasImagenes.addAll(it)
-        }
     }
 
     // Create and validate folders
-    fun createFolders(): Boolean {
+    private fun createFolders(): Boolean {
         var foldersCreated = false
 
         if (!file.exists()) {
@@ -154,7 +144,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun initUI() {
         if (createFolders()) {
-            mainActivityViewModel.getAllFolders(file)
             mainActivityViewModel.getAllGuias(file)
         }
     }

@@ -124,10 +124,7 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
                 if (lv_folder.equals("cambiando_nombre")) {
                     // Ruta + nombre del archivo.
                     val rutaSinArchivo = lv_ruta.toString().substringBeforeLast("/")
-                    //val archivo = lv_ruta?.replace(rutaSinArchivo + "/".toRegex(), "")
-                    //var archivo = File("" + lv_ruta)
-                    file = File(rutaSinArchivo)
-                    if (file.exists()) {
+                    if (File(rutaSinArchivo).exists()) {
                         var item = ""
                         // Defino la ruta donde busco los ficheros.
                         var archivoExiste = false

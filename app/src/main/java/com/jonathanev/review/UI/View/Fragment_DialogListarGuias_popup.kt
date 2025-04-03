@@ -50,7 +50,6 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
     private lateinit var adaptadorListarGuias: ListarGuiasAdapter
     private val elementosPorCarga = 10 // Cantidad de elementos a cargar por cada carga adicional
     private var numeroElementosCargados = 0 // Número actual de elementos cargados
-    private val rutaImagenes: ArrayList<String> = ArrayList()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -70,7 +69,6 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // showGuias(emptyList())
         initUI()
 
         guiasViewModel.guias.observe(viewLifecycleOwner) {
@@ -87,9 +85,8 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
         }
 
         guiasViewModel.file.observe(this) {
-            file = it
             binding.progressBar.visibility = View.VISIBLE
-            guiasViewModel.getAllUpdatedGuides(file)
+            guiasViewModel.getAllUpdatedGuides(it)
         }
 
         // Agregar un OnScrollListener al RecyclerView para detectar cuando el usuario se desplaza.
@@ -136,6 +133,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
 
     private fun initUI() {
         binding.progressBar.visibility = View.VISIBLE
+        //guiasViewModel.getMainPath()
         guiasViewModel.getAllGuias()
     }
 
@@ -176,7 +174,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                     "Cancelar"
                 )
             ) { dialog, which ->
-                guiasViewModel.getMainPath()
+                //guiasViewModel.getMainPath()
                 when (which) {
                     0 -> {
                         changePath(guia.nombreGuia)
