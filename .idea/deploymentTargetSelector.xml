@@ -24,27 +24,10 @@
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
-      <SelectionState runConfigName="TestGetRandomGuiaImage">
-        <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-04-01T23:01:48.621762800Z">
-          <Target type="DEFAULT_BOOT">
-            <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\jose_\.android\avd\Pixel_6_API_35_N.avd" />
-            </handle>
-          </Target>
-        </DropdownSelection>
-        <DialogSelection />
-      </SelectionState>
-      <SelectionState runConfigName="obtiene_todas_las_guias_y_llama_a_getRandomGuiaImageUseCase()">
+      <SelectionState runConfigName="das_click_en_regresar_y_te_regresa_la_pregunta_anterior()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="TestGetAllGuiasUseCase">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
-      <SelectionState runConfigName="instancia_getAllGuiasUseCase_correctamente()">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
-      <SelectionState runConfigName="se_aplica_color_al_ultimo_caracter()">
+      <SelectionState runConfigName="TestGetClickRegresarUseCase">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>
