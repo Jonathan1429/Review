@@ -30,6 +30,15 @@
       <SelectionState runConfigName="TestGetClickRegresarUseCase">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
+      <SelectionState runConfigName="das_click_siguiente_sino_hay_mas_te_regresa_un_mensaje_que_no_hay_mas_preguntas()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="TestGetClickSiguienteUseCase">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="das_click_siguiente_si_hay_mas_preguntas_te_va_a_regresar_esa()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
     </selectionStates>
   </component>
 </project>
