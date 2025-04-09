@@ -12,30 +12,20 @@ class SetClickEliminarUseCase @Inject constructor(
         respuestas: ArrayList<String>,
         contadorPregunta: Int
     ): ValidacionesGuiaModel {
-        val pospregfin = preguntas.size - 1
-        val posRespFin = respuestas.size - 1
+        preguntas.removeAtOrNull(contadorPregunta)
+        respuestas.removeAtOrNull(contadorPregunta)
 
-        if (contadorPregunta <= pospregfin) {
-            preguntas.removeAt(contadorPregunta)
-        }
-
-        if (contadorPregunta <= posRespFin) {
-            respuestas.removeAt(contadorPregunta)
-        }
-
-        if (contadorPregunta > 0) {
-            val contador = contadorPregunta - 1
+        return if (contadorPregunta > 0) {
             val validacionesGuiaModel =
-                setPintarTextosUseCase(true, preguntas, respuestas, contador)
-            val response = validacionesGuiaModel.copy(
+                setPintarTextosUseCase(true, preguntas, respuestas, contadorPregunta - 1)
+
+            validacionesGuiaModel.copy(
                 estadoUI = validacionesGuiaModel.estadoUI.copy(
                     isThereMoreAsks = true
                 )
             )
-
-            return response
         } else {
-            return ValidacionesGuiaModel(
+            ValidacionesGuiaModel(
                 estadoUI = EstadoUI(
                     isUpdatedAskAns = true,
                     isClearText = true,
@@ -44,5 +34,9 @@ class SetClickEliminarUseCase @Inject constructor(
                 )
             )
         }
+    }
+
+    private fun ArrayList<String>.removeAtOrNull(index: Int) {
+        if (index in indices) removeAt(index)
     }
 }

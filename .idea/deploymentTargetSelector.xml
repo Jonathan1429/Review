@@ -24,7 +24,13 @@
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
-      <SelectionState runConfigName="obtiene_todas_las_carpetas_y_guias_en_ese_orden()">
+      <SelectionState runConfigName="te_va_a_regresar_una_pregunta_anterior()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="TestSetClickEliminarUseCase">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="solo_elimina_en_respuestas_si_preguntas_no_tiene_indice()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>
