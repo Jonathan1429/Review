@@ -18,9 +18,6 @@ class SetClickRegresarModicandoUseCase @Inject constructor(
     ): ValidacionesGuiaModel {
         val posPregFin = preguntas.size - 1
         val posRespFin = respuestas.size - 1
-        val responseSpanPalabra = setSpanPalabraUseCase(editable)
-        val responseEtiquetaEditable =
-            setColocarEtiquetasUseCase(responseSpanPalabra.editable)
 
         return when {
             contadorPregunta == 0 -> {
@@ -28,54 +25,54 @@ class SetClickRegresarModicandoUseCase @Inject constructor(
                     message = "Ya no tienes preguntas anteriores",
                 )
             }
-
-            contadorPregunta > posPregFin && contadorPregunta > posRespFin && editable.isEmpty() -> {
-                val contador = contadorPregunta - 1
-
-                val validacionesGuiaModel =
-                    setPintarTextosUseCase(isEtPregunta = true, preguntas, respuestas, contador)
-
-                val responseValGuiaModel: ValidacionesGuiaModel = validacionesGuiaModel.copy(
-                    responseSpanPalabra = responseSpanPalabra,
-                    estadoUI = validacionesGuiaModel.estadoUI.copy(
-                        isThereMoreAsks = true
-                    )
-                )
-
-                return responseValGuiaModel
-            }
-
-            editable.toString().isEmpty() || (editable.toString()
-                .isNotEmpty() && contadorPregunta > posPregFin) -> {
+            editable.isEmpty() && !isEtPregunta || isEtPregunta && contadorPregunta <= posPregFin && editable.isEmpty() || contadorPregunta > posPregFin && editable.isNotEmpty() -> {
                 ValidacionesGuiaModel(
                     message = "Asegurate de llenar pregunta y respuesta",
                 )
             }
-
             else -> {
-                if (isEtPregunta) {
-                    preguntas[contadorPregunta] = responseEtiquetaEditable.toString()
-                } else {
-                    if (contadorPregunta > posRespFin) {
-                        respuestas.add(contadorPregunta, responseEtiquetaEditable.toString())
-                    } else {
-                        respuestas[contadorPregunta] = responseEtiquetaEditable.toString()
-                    }
-                }
+                if(editable.isEmpty()){
+                    // Pintar texto anterior
+                    val validacionesGuiaModel =
+                        setPintarTextosUseCase(
+                            isEtPregunta = true,
+                            preguntas,
+                            respuestas,
+                            contadorPregunta - 1
+                        )
 
-                val contador = contadorPregunta - 1
-
-                val validacionesGuiaModel =
-                    setPintarTextosUseCase(isEtPregunta = true, preguntas, respuestas, contador)
-
-                val response = validacionesGuiaModel.copy(
-                    responseSpanPalabra = responseSpanPalabra,
-                    estadoUI = validacionesGuiaModel.estadoUI.copy(
-                        isThereMoreAsks = true
+                    validacionesGuiaModel.copy(
+                        estadoUI = validacionesGuiaModel.estadoUI.copy(
+                            isThereMoreAsks = true
+                        )
                     )
-                )
+                } else{
+                    val responseSpanPalabra = setSpanPalabraUseCase(editable)
+                    val responseEtiquetaEditable =
+                        setColocarEtiquetasUseCase(responseSpanPalabra.editable)
 
-                return response
+                    if (isEtPregunta) {
+                        preguntas[contadorPregunta] = responseEtiquetaEditable.toString()
+                    } else {
+                        if (contadorPregunta > posRespFin) {
+                            respuestas.add(contadorPregunta, responseEtiquetaEditable.toString())
+                        } else {
+                            respuestas[contadorPregunta] = responseEtiquetaEditable.toString()
+                        }
+                    }
+
+                    val contador = contadorPregunta - 1
+
+                    val validacionesGuiaModel =
+                        setPintarTextosUseCase(isEtPregunta = true, preguntas, respuestas, contador)
+
+                    validacionesGuiaModel.copy(
+                        responseSpanPalabra = responseSpanPalabra,
+                        estadoUI = validacionesGuiaModel.estadoUI.copy(
+                            isThereMoreAsks = true
+                        )
+                    )
+                }
             }
         }
     }

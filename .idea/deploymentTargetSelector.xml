@@ -24,13 +24,19 @@
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
-      <SelectionState runConfigName="te_va_a_regresar_una_pregunta_anterior()">
+      <SelectionState runConfigName="TestSetClickRegresarModificandouseCase">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="TestSetClickEliminarUseCase">
+      <SelectionState runConfigName="mensaje_para_llenar_pregunta_estando_en_pregunta_con_posicion_valida()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="solo_elimina_en_respuestas_si_preguntas_no_tiene_indice()">
+      <SelectionState runConfigName="solo_recupera_la_pregunta_anterior1()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="contadorMayorYEditableConContenido_entraAlElseFinal()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="muestra_mensaje_si_esta_llena_la_pregunta_y_no_la_respuesta()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>
