@@ -17,79 +17,52 @@ class SetRollClickedUseCase @Inject constructor(
         editable: Editable,
         isEtPregunta: Boolean
     ): ValidacionesGuiaModel {
+        if (editable.isEmpty()) {
+            return ValidacionesGuiaModel(
+                message = "Asegurate de llenar pregunta y respuesta"
+            )
+        }
+
         val responseSpanPalabra = setSpanPalabraUseCase(editable)
         val responseEtiquetaEditable = setColocarEtiquetasUseCase(responseSpanPalabra.editable)
 
-        return when {
-            responseEtiquetaEditable.isEmpty() ->
-                ValidacionesGuiaModel(
-                    message = "Asegurate de llenar pregunta y respuesta",
-                )
+        val listaDestino = if (isEtPregunta) preguntas else respuestas
+        val pintarLista = if (!isEtPregunta) preguntas else respuestas
+        val posTotales = listaDestino.lastIndex
 
-            else ->
-                if (isEtPregunta) {
-                    if ((contadorPregunta + 1) > respuestas.size) {
-                        preguntas.add(contadorPregunta, responseEtiquetaEditable.toString())
-
-                        ValidacionesGuiaModel(
-                            estadoUI = EstadoUI(
-                                isUpdatedAskAns = true,
-                                isClearText = true,
-                                isShowQuitColor = true,
-                                isShowSelColor = true,
-                                isEtPregunta = true
-                            )
-                        )
-                    } else {
-                        preguntas[contadorPregunta] = responseEtiquetaEditable.toString()
-                        val responsePintarTextos = setPintarTextosUseCase(
-                            false, // Get answer
-                            preguntas,
-                            respuestas,
-                            contadorPregunta
-                        )
-
-                        responsePintarTextos.copy(
-                            responseSpanPalabra = responseSpanPalabra,
-                            estadoUI = responsePintarTextos.estadoUI.copy(
-                                isEtPregunta = true
-                            )
-                        )
-                    }
-                } else {
-                    if ((contadorPregunta + 1) > respuestas.size) {
-                        respuestas.add(contadorPregunta, responseEtiquetaEditable.toString())
-
-                        val responsePintarTextos = setPintarTextosUseCase(
-                            true, // Get question
-                            preguntas,
-                            respuestas,
-                            contadorPregunta
-                        )
-
-                        responsePintarTextos.copy(
-                            responseSpanPalabra = responseSpanPalabra,
-                            estadoUI = responsePintarTextos.estadoUI.copy(
-                                isEtPregunta = false
-                            )
-                        )
-                    } else {
-                        respuestas[contadorPregunta] = responseEtiquetaEditable.toString()
-                        val responsePintarTextos = setPintarTextosUseCase(
-                            true, // Get question
-                            preguntas,
-                            respuestas,
-                            contadorPregunta
-                        )
-
-                        responsePintarTextos.copy(
-                            responseSpanPalabra = responseSpanPalabra,
-                            estadoUI = responsePintarTextos.estadoUI.copy(
-                                isEtPregunta = false
-                            )
-                        )
-                    }
-                }
+        if (contadorPregunta <= posTotales) {
+            listaDestino[contadorPregunta] = responseEtiquetaEditable.toString()
+        } else {
+            listaDestino.add(contadorPregunta, responseEtiquetaEditable.toString())
         }
+
+        // Pintamos la pregunta/respuesta si existe
+        if (contadorPregunta <= pintarLista.lastIndex) {
+            val responsePintarTextos = setPintarTextosUseCase(
+                isEtPregunta = isEtPregunta,
+                preguntas = preguntas,
+                respuestas = respuestas,
+                contadorPregunta = contadorPregunta
+            )
+
+            return responsePintarTextos.copy(
+                responseSpanPalabra = responseSpanPalabra,
+                estadoUI = responsePintarTextos.estadoUI.copy(
+                    isEtPregunta = !isEtPregunta
+                )
+            )
+        }
+
+        // Cuando se regresa la respuesta vacia se activan estas banderas
+        return ValidacionesGuiaModel(
+            estadoUI = EstadoUI(
+                isUpdatedAskAns = true,
+                isClearText = true,
+                isShowQuitColor = true,
+                isShowSelColor = true,
+                isEtPregunta = false
+            ),
+            responseSpanPalabra = responseSpanPalabra
+        )
     }
 }
