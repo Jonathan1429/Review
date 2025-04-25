@@ -5,6 +5,11 @@ import javax.inject.Inject
 
 class GetAllFoldersUseCase @Inject constructor() {
 
-    operator fun invoke(file: File): List<String> =
-        file.listFiles()?.filter { it.isDirectory }?.map { it.name }?.sorted() ?: emptyList()
+    operator fun invoke(file: File): List<String> {
+        val files = file.listFiles() ?: return emptyList()
+
+        return files
+            .sortedWith(compareBy<File>({ !it.isDirectory }, { it.name }))
+            .map { it.name }
+    }
 }
