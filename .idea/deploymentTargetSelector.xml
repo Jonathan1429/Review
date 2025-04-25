@@ -24,16 +24,19 @@
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
-      <SelectionState runConfigName="TestSetClickRegresarModificandouseCase">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
-      <SelectionState runConfigName="contadorMayorYEditableConContenido_entraAlElseFinal()">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
-      <SelectionState runConfigName="muestra_mensaje_si_esta_llena_la_pregunta_y_no_la_respuesta()">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
       <SelectionState runConfigName="TestGetAllGuiasUseCase">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="mostrar_mensaje_que_debe_de_llegar_pregunta_y_respuesta()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="guardar_la_guia_despues_de_darle_next_despues_de_lo_ultimo_guardado()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="TestSetClickSaveUseCase">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="guardar_el_xml_sobreescribiendo_la_pregunta()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

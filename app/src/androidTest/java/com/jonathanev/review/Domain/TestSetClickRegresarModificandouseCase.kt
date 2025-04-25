@@ -1,14 +1,11 @@
 package com.jonathanev.review.Domain
 
-import android.text.Editable
 import android.text.SpannableStringBuilder
 import com.jonathanev.review.Data.Model.EstadoUI
 import com.jonathanev.review.Data.Model.SpanPalabraModel
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
 
@@ -141,7 +138,7 @@ class TestSetClickRegresarModificandouseCase {
                 respuestas,
                 contador
             )
-        } returns             ValidacionesGuiaModel(
+        } returns ValidacionesGuiaModel(
             estadoUI = EstadoUI(
                 isUpdatedAskAns = true,
                 isShowQuitColor = true,
