@@ -1,6 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <application
-        android:name="dagger.hilt.android.testing.HiltTestApplication"
-        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-    </application>
+
+    <instrumentation
+        android:name="com.jonathanev.review.CustomTestRunner"
+        android:targetPackage="com.jonathanev.review"
+        android:handleProfiling="true"
+        android:functionalTest="true" />
 </manifest>

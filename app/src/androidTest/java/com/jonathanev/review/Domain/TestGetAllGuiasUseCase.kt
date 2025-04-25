@@ -2,13 +2,10 @@ package com.jonathanev.review.Domain
 
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.R
-import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotNull
-import junit.framework.TestCase.assertNull
 import org.junit.Test
 import java.io.File
 
