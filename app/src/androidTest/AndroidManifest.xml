@@ -1,8 +1,0 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <instrumentation
-        android:name="com.jonathanev.review.CustomTestRunner"
-        android:targetPackage="com.jonathanev.review"
-        android:handleProfiling="true"
-        android:functionalTest="true" />
-</manifest>

@@ -5,36 +5,9 @@ plugins {
     // Necesario para Dagger Hilt
     id 'kotlin-kapt' // A traves de las anotaciones genera el código por atrás.
     id 'com.google.dagger.hilt.android'
-    // id 'androidx.navigation.safeargs.kotlin'
 
-    // Test con Coverage
-    //id 'org.jetbrains.kotlinx.kover'
-    //id 'com.vanniktech.android.junit.jacoco'
-    //id 'com.vanniktech.android.junit.jacoco' version '0.16.0'  // <<– plugin de Vanniktech :contentReference[oaicite:0]{index=0}
+    // Test con jacoco - Reporte
     id 'jacoco'
-}
-import org.gradle.testing.jacoco.plugins.JacocoTaskExtension
-
-// Configura **todas** las tareas de unit test** para que vuelquen su coverage aquí:
-/*tasks.withType(Test).configureEach {
-    // Cada task escribirá un archivo ${buildDir}/jacoco/${taskName}.exec
-    jacoco.destinationFile = file("$buildDir/jacoco/${name}.exec")
-}*/
-
-tasks.register("createJacocoDir") {
-    doLast {
-        mkdir("$buildDir/jacoco")
-    }
-}
-
-tasks.withType(Test).configureEach { Test t ->
-    // 1) asegúrate de crear la carpeta antes de correr tests
-    t.dependsOn("createJacocoDir")
-    // 2) si usas Kotlintest/JUnit5
-    t.useJUnitPlatform()
-    // 3) configura el archivo .exec via la extensión JaCoCo
-    t.extensions.getByType(JacocoTaskExtension).destinationFile =
-            file("$buildDir/jacoco/${t.name}.exec")
 }
 
 android {
@@ -48,19 +21,10 @@ android {
         versionCode 13
         versionName "2.4"
 
-        // Sin DaggerHilt
-        // testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
-        // Con DaggerHilt
+        // Con TestRunner personalizado, falta investigar mas este punto
         //testInstrumentationRunner "com.jonathanev.review.CustomTestRunner"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-    }
 
-    // Creación de un segundo Manifest para pruebas
-    sourceSets {
-        androidTest {
-            manifest.srcFile 'src/androidTest/AndroidManifest.xml'
-        }
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -83,12 +47,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
+        jvmTarget = JavaVersion.VERSION_17
     }
 
     buildFeatures {
@@ -115,7 +79,7 @@ android {
 
             // asegúrate de que exista la carpeta
             unitTestTask.doFirst {
-                file("$buildDir/jacoco").mkdirs()
+                file(layout.buildDirectory.dir("/jacoco")).mkdirs()
             }
 
             // ← aquí configuramos el .exec a través de la extensión de Jacoco
@@ -123,15 +87,11 @@ android {
                     JacocoTaskExtension
             ) { jacocoExt ->
                 jacocoExt.destinationFile = file(
-                        "$buildDir/jacoco/${unitTestTask.name}.exec"
+                        layout.buildDirectory.dir("/jacoco/${unitTestTask.name}.exec")
                 )
             }
         }
     }
-
-    /*testOptions {
-        execution 'ANDROIDX_TEST_ORCHESTRATOR' // ← NECESARIO para que se genere el coverage.ec
-    }*/
 
     namespace 'com.jonathanev.review'
 }
@@ -162,7 +122,7 @@ dependencies {
     // Dagger Hilt
     implementation "com.google.dagger:hilt-android:$daggerHilt"
     kapt "com.google.dagger:hilt-compiler:$daggerHilt"
-    kapt "com.google.dagger:hilt-android-testing:2.48"
+    kapt "com.google.dagger:hilt-android-compiler:$daggerHilt"
 
     //implementation 'androidx.appcompat:appcompat:1.6.1'
     //implementation 'com.google.android.material:material:1.9.0'
@@ -199,25 +159,19 @@ dependencies {
     testImplementation("io.mockk:mockk:1.13.12")
     testImplementation("io.mockk:mockk-agent:1.13.12")
 
-    kapt 'com.google.dagger:hilt-android-compiler:2.48'
-
-    androidTestImplementation 'com.google.dagger:hilt-android-testing:2.48'
-    kaptAndroidTest 'com.google.dagger:hilt-android-compiler:2.48'
-
     // UITesting
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
     androidTestImplementation("androidx.test.espresso:espresso-contrib:3.6.1")
     androidTestImplementation("androidx.test.espresso:espresso-intents:3.6.1")
-    androidTestImplementation("com.google.dagger:hilt-android-testing:2.52")
     androidTestImplementation("androidx.fragment:fragment-testing:1.8.2")
     kaptTest("com.google.dagger:hilt-android-compiler:2.52")
 
     androidTestImplementation "io.mockk:mockk-android:${mockkVersion}"
     androidTestImplementation "io.mockk:mockk-agent:${mockkVersion}"
 
-    androidTestImplementation("com.google.dagger:hilt-android-testing:2.52")
-    kaptAndroidTest("com.google.dagger:hilt-android-compiler:2.52")
+    testImplementation("com.google.dagger:hilt-android-testing:$daggerHilt")
+    kaptTest("com.google.dagger:hilt-compiler:$daggerHilt")
 
     // Para que JUnit Platform reconozca y lance JUnit4:
     testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.9.0"
@@ -226,22 +180,9 @@ dependencies {
 
 // Configuración de Jacoco
 jacoco {
-    toolVersion = "0.8.8"
+    toolVersion = "0.8.11"
 }
 
-/*tasks.register("createJacocoDir") {
-    doLast { mkdir("$buildDir/jacoco") }
-}*/
-
-/*tasks.withType(Test).configureEach { t ->
-    dependsOn("createJacocoDir")
-    useJUnitPlatform()  // si usas Kotlintest/JUnit5
-    extensions.configure(JacocoTaskExtension) {
-        destinationFile = file("$buildDir/jacoco/${t.name}.exec")
-    }
-}*/
-
-// 1) Primero limpia y corre solo unit tests:
 tasks.register("jacocoTestReport", JacocoReport) {
     group = "verification"
     description = "Combina cobertura de unit tests e AndroidTest en un único reporte"
@@ -250,16 +191,17 @@ tasks.register("jacocoTestReport", JacocoReport) {
     dependsOn("testDebugUnitTest", "connectedDebugAndroidTest")
 
     executionData.setFrom(
-            fileTree("$buildDir/jacoco")      { include("*.exec") },
-            fileTree("$buildDir/outputs/code_coverage/debugAndroidTest/connected") {
+            fileTree(layout.buildDirectory.dir("jacoco")) { include("*.exec") },
+            fileTree(layout.buildDirectory.dir("/outputs/code_coverage/debugAndroidTest/connected")) {
                 include("**/coverage.ec")
             }
     )
 
-    def javaClasses = fileTree("$buildDir/intermediates/javac/debug/classes") {
+    def javaClasses = fileTree(layout.buildDirectory.dir("/intermediates/javac/debug/classes")) {
         exclude("**/R*.class", "**/BuildConfig.*", "**/Manifest*.*")
     }
-    def kotlinClasses = fileTree("$buildDir/tmp/kotlin-classes/debug") {
+
+    def kotlinClasses = fileTree(layout.buildDirectory.dir("/tmp/kotlin-classes/debug")) {
         exclude("**/R*.class", "**/BuildConfig.*", "**/Manifest*.*")
     }
     classDirectories.setFrom(javaClasses + kotlinClasses)
@@ -270,203 +212,3 @@ tasks.register("jacocoTestReport", JacocoReport) {
         html.required.set(true)
     }
 }
-
-
-// Configuración de la dependencia CLI
-// Configuración del CLI de Kover (para coverage de unit tests)
-// 1) Configura el CLI de Kover si no lo tienes ya
-configurations {
-    koverCli {
-        canBeConsumed = false
-        canBeResolved = true
-    }
-}
-
-dependencies {
-    koverCli "org.jetbrains.kotlinx:kover-cli:0.9.1"
-}
-
-// Función para obtener la ruta al JAR
-def cliJar = { configurations.koverCli.singleFile }
-
-// 2) Task único que corre tests y genera reporte combinado
-task generateMergedCoverage {
-    group = "verification"
-    description = "Ejecuta tests (unit + android), fusiona cobertura y genera reporte"
-
-    // 1º asegúrate de ejecutar ambos tests
-    dependsOn "connectedDebugAndroidTest", "testDebugUnitTest"
-
-    doLast {
-        // Directorio temporal donde copiaremos .ec + .ic
-        def tempCovDir = file("$buildDir/coverageTmp")
-        tempCovDir.deleteDir()
-        tempCovDir.mkdirs()
-
-        // Copiamos el .ec de AndroidTest (busca recursivamente cualquier coverage.ec)
-        copy {
-            from fileTree("$buildDir/outputs/code_coverage/debugAndroidTest/connected") {
-                include "**/coverage.ec"
-            }
-            into tempCovDir
-        }
-        // Copiamos el .ic de unit tests
-        copy {
-            from file("$buildDir/kover/bin-reports/testDebugUnitTest.ic")
-            into tempCovDir
-        }
-
-        // 2º Fusionar ambos en merged-report.ic
-        def mergeArgs = [
-                "java", "-jar", cliJar().absolutePath,
-                "merge"
-        ]
-        // Añadimos cada .ec y .ic al array de args
-        fileTree(tempCovDir).matching { include "*.ec", "*.ic" }.files.each { f ->
-            mergeArgs << f.absolutePath
-        }
-        mergeArgs << "--target" << "$buildDir/kover/merged-report.ic"
-
-        exec {
-            commandLine mergeArgs
-        }
-
-        // 3º Generar HTML + XML
-        def reportArgs = [
-                "java", "-jar", cliJar().absolutePath,
-                "report",
-                "$buildDir/kover/merged-report.ic",
-                "--classfiles", "$buildDir/intermediates/javac/debug/classes",
-                "--classfiles", "$buildDir/tmp/kotlin-classes/debug",
-                "--src", "src/main/java",
-                "--src", "src/main/kotlin",
-                "--html", "$buildDir/reports/coverage/merged-html",
-                "--xml", "$buildDir/reports/coverage/merged.xml",
-                "--title", "Cobertura combinada"
-        ]
-
-        exec {
-            commandLine reportArgs
-        }
-
-        println "\n✅ Reporte combinado listo:\n" +
-                "  • HTML → ${buildDir}/reports/coverage/merged-html/index.html\n" +
-                "  • XML  → ${buildDir}/reports/coverage/merged.xml\n"
-    }
-}
-
-
-/*configurations {
-    koverCli {
-        canBeConsumed = false
-        canBeResolved = true
-    }
-}
-
-dependencies {
-    implementation 'androidx.test:runner:1.6.2'
-    add("koverCli", "org.jetbrains.kotlinx:kover-cli:0.9.1")
-}
-
-kover {
-    // Configurar para cubrir todo el proyecto
-}
-
-task copyCoverageFiles {
-    group = "verification"
-    description = "Copia archivos .ic y .ec a la carpeta de cobertura"
-
-    doLast {
-        def coverageDir = layout.buildDirectory.dir("coverage").get().asFile
-        if (!coverageDir.exists()) coverageDir.mkdirs()
-
-        // Ruta del archivo .ic generado para pruebas unitarias
-        def icFile = file("${buildDir}/kover/bin-reports/testDebugUnitTest.ic")
-
-        // Actualiza la ruta del archivo .ec para que coincida con la ubicación de tu archivo
-        def ecFileTree = fileTree("${buildDir}/outputs/code_coverage/debugAndroidTest/connected/Pixel_6_API_35_N(AVD) - 15").matching {
-            include("**//*coverage.ec")
-        }
-
-        def ecFile = ecFileTree.singleFile
-
-        if (!icFile.exists() || !ecFile.exists()) {
-            throw new GradleException("No se encontró alguno de los archivos: ${icFile.absolutePath} o ${ecFile?.absolutePath}")
-        }
-
-        // Copiar los archivos .ic y .ec a la carpeta de cobertura
-        copy {
-            from(icFile)
-            into(coverageDir)
-        }
-
-        copy {
-            from(ecFile)
-            into(coverageDir)
-        }
-
-        println "Archivos copiados: ${coverageDir.listFiles().collect { it.name }}"
-    }
-}
-
-
-task mergeCoverageFiles {
-    dependsOn("copyCoverageFiles")
-
-    doLast {
-        exec {
-            commandLine(
-                    "java",
-                    "-jar", configurations.koverCli.singleFile.absolutePath,
-                    "merge",
-                    "${buildDir}/coverage",
-                    "--target", "${buildDir}/kover/merged-report.ic"
-            )
-        }
-    }
-}
-
-task generateCoverageReport {
-    dependsOn("mergeCoverageFiles")
-
-    doLast {
-        exec {
-            commandLine 'java', '-jar',
-                    'C:/Users/jose_/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kover-cli/0.9.1/b1f747f64235915b7047789c77d1aca1cd614fb/kover-cli-0.9.1.jar',
-                    'report',
-                    "${buildDir}/kover/merged-report.ic",  // Ruta del archivo combinado
-                    '--classfiles', "${buildDir}/intermediates/javac/debug/classes",
-                    '--classfiles', "${buildDir}/tmp/kotlin-classes/debug",
-                    '--src', 'src/main/java',
-                    '--src', 'src/main/kotlin',
-                    '--html', "${buildDir}/reports/kover/merged-report/index.html",  // Ruta de la carpeta HTML
-                    '--xml', "${buildDir}/reports/kover/merged-report.xml",  // Ruta de archivo XML
-                    '--title', 'Cobertura combinada'
-        }
-    }
-}*/
-
-/*tasks.register('mergeAndroidTestCoverage') {
-    group = "verification"
-    description = "Combina la cobertura de pruebas de AndroidTest con Kover"
-
-    doLast {
-        // Usar Path de Java para manejar rutas de manera más confiable
-        def coverageDir = layout.buildDirectory.dir("coverage").get().asFile
-
-        // Crear la carpeta si no existe
-        if (!coverageDir.exists()) {
-            coverageDir.mkdirs()  // Usar método Groovy para crear el directorio
-        }
-
-        // Copiar los archivos de cobertura generados en connectedAndroidTest
-        fileTree(layout.buildDirectory.dir("outputs/code-coverage/connected").get().asFile).matching {
-            include "**//*borrar una diagonal.ec"
-        }.each { file ->
-            copy {
-                from file
-                into coverageDir
-            }
-        }
-    }
-}*/
