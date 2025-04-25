@@ -17,47 +17,47 @@ class SetClickSiguienteModificandoUseCase @Inject constructor(
         editable: Editable,
         isEtPregunta: Boolean
     ): ValidacionesGuiaModel {
-        val posPregFin = preguntas.size - 1
-        val posRespFin = respuestas.size - 1
-        val responseSpanPalabra = setSpanPalabraUseCase(editable)
-        val responseEtiquetaEditable = setColocarEtiquetasUseCase(responseSpanPalabra.editable)
-
         return when {
-            responseEtiquetaEditable.toString().isEmpty() || (responseEtiquetaEditable.toString()
-                .isNotEmpty() && contadorPregunta > posPregFin) -> {
+            editable.isEmpty() -> {
                 ValidacionesGuiaModel(
                     message = "Asegurate de llenar pregunta y respuesta",
                 )
             }
 
             else -> {
-                // Label pregunta
-                if (isEtPregunta) {
-                    preguntas[contadorPregunta] = responseEtiquetaEditable.toString()
-                } else {
-                    if (contadorPregunta > posRespFin) {
-                        respuestas.add(contadorPregunta, responseEtiquetaEditable.toString())
+                val responseSpanPalabra = setSpanPalabraUseCase(editable)
+                val responseEtiquetaEditable =
+                    setColocarEtiquetasUseCase(responseSpanPalabra.editable)
+
+                val posPregFin = preguntas.size - 1
+                val posRespFin = respuestas.size - 1
+
+                if (contadorPregunta <= posRespFin) {
+                    if (isEtPregunta) {
+                        preguntas[contadorPregunta] = responseEtiquetaEditable.toString()
                     } else {
                         respuestas[contadorPregunta] = responseEtiquetaEditable.toString()
                     }
+                } else {
+                    respuestas.add(contadorPregunta, responseEtiquetaEditable.toString())
                 }
 
-                val contador = contadorPregunta + 1
+                val conSiguientePregunta = contadorPregunta + 1
                 // Si hay más preguntas pinta lo siguiente.
-                if (contador <= posPregFin) {
+                if (conSiguientePregunta <= posPregFin) {
                     // Pintamos texto o regresamos la pregunta
                     val validacionesguiaGuiaModel =
-                        setPintarTextosUseCase(isEtPregunta = true, preguntas, respuestas, contador)
-
-                    val responseValGuiaModel: ValidacionesGuiaModel =
-                        validacionesguiaGuiaModel.copy(
-                            responseSpanPalabra = responseSpanPalabra,
-                            estadoUI = validacionesguiaGuiaModel.estadoUI.copy(isThereMoreAsks = true)
+                        setPintarTextosUseCase(
+                            isEtPregunta = true,
+                            preguntas,
+                            respuestas,
+                            conSiguientePregunta
                         )
 
-                    return responseValGuiaModel
-
-
+                    validacionesguiaGuiaModel.copy(
+                        responseSpanPalabra = responseSpanPalabra,
+                        estadoUI = validacionesguiaGuiaModel.estadoUI.copy(isThereMoreAsks = true)
+                    )
                 } else {
                     // Si no hay más preguntas.
                     ValidacionesGuiaModel(

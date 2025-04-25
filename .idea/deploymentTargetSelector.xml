@@ -24,10 +24,19 @@
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
-      <SelectionState runConfigName="TestSetClickSaveUseCase">
+      <SelectionState runConfigName="vamos_a_pintar_el_texto_siguiente_y_guardar_lo_anterior_en_pregunta()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="guardar_el_xml_sobreescribiendo_la_pregunta()">
+      <SelectionState runConfigName="TestSetClickSiguienteModificandoUseCase">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="guardar_lo_anterior_en_respuesta_y_ya_no_hay_mas_preguntas()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="despues_de_darle_next__darle_guardar_y_lo_haga_bien()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="TestSetClickSaveUseCase">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

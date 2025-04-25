@@ -88,7 +88,7 @@ class TestSetClickSaveUseCase {
 
     @Test
     fun despues_de_darle_next__darle_guardar_y_lo_haga_bien(){
-        val preguntas = arrayListOf("b, c")
+        val preguntas = arrayListOf("b", "c")
         val respuestas = arrayListOf("b", "c")
         val contador = 2
         val editable = SpannableStringBuilder("")
@@ -121,6 +121,9 @@ class TestSetClickSaveUseCase {
             didTheGuideAlreadyExist = false,
             ruta = "sd/guias"
         )
+
+        assertEquals(listOf("b", "c"), preguntas)
+        assertEquals(listOf("b", "c"), respuestas)
 
         assertEquals(
             ValidacionesGuiaModel(
@@ -169,6 +172,9 @@ class TestSetClickSaveUseCase {
             ruta = "sd/guias"
         )
 
+        assertEquals(listOf("b", "x"), preguntas)
+        assertEquals(listOf("b", "c"), respuestas)
+
         assertEquals(
             ValidacionesGuiaModel(
                 message = "Guia de estudio creada exitosamente",
@@ -182,7 +188,7 @@ class TestSetClickSaveUseCase {
 
     @Test
     fun guardar_el_xml_sobreescribiendo_la_respuesta(){
-        val preguntas = arrayListOf("b, c")
+        val preguntas = arrayListOf("b", "c")
         val respuestas = arrayListOf("b", "c")
         val contador = 1
         val editable = SpannableStringBuilder("x")
@@ -216,6 +222,9 @@ class TestSetClickSaveUseCase {
             ruta = "sd/guias"
         )
 
+        assertEquals(listOf("b", "c"), preguntas)
+        assertEquals(listOf("b", "x"), respuestas)
+
         assertEquals(
             ValidacionesGuiaModel(
                 message = "Guia de estudio creada exitosamente",
@@ -229,7 +238,7 @@ class TestSetClickSaveUseCase {
 
     @Test
     fun guardar_el_xml_escribiendo_la_respuesta(){
-        val preguntas = arrayListOf("b, c")
+        val preguntas = arrayListOf("b", "c")
         val respuestas = arrayListOf("b")
         val contador = 1
         val editable = SpannableStringBuilder("x")
@@ -262,6 +271,9 @@ class TestSetClickSaveUseCase {
             didTheGuideAlreadyExist = false,
             ruta = "sd/guias"
         )
+
+        assertEquals(listOf("b", "c"), preguntas)
+        assertEquals(listOf("b", "x"), respuestas)
 
         assertEquals(
             ValidacionesGuiaModel(
