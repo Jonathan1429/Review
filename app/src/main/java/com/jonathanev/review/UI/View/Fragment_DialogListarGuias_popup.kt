@@ -138,11 +138,19 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
     }
 
     private fun showGuias(guiaModels: List<GuiaModel>) {
-        adaptadorListarGuias =
+        val adaptador = ListarGuiasAdapter(guiaModels) { position ->
+            showGuiaOptions(position)
+        }
+        with(binding.lvGuiasEstudio) {
+            layoutManager = LinearLayoutManager(context)
+            setHasFixedSize(true)
+            adapter = adaptador
+        }
+        /*adaptadorListarGuias =
             ListarGuiasAdapter(guiaModels) { position -> showGuiaOptions(position) }
         binding.lvGuiasEstudio.layoutManager = LinearLayoutManager(context)
         binding.lvGuiasEstudio.setHasFixedSize(true)
-        binding.lvGuiasEstudio.adapter = adaptadorListarGuias
+        binding.lvGuiasEstudio.adapter = adaptadorListarGuias*/
         /*cargarElementos(guiaModels)*/
     }
 
@@ -162,7 +170,14 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
     private fun showGuiaOptions(position: Int) {
         val guia = guiasViewModel.getGuia(position)
 
-        val fileClickeado = File("" + file + "/" + guia.nombreGuia)
+        var fileClickeado: File? = null
+
+        guiasViewModel.file.value?.let {
+            fileClickeado = it
+        }
+
+        fileClickeado = File("" + fileClickeado + "/" + guia.nombreGuia)
+
         if (guia.carpeta) { // fileClickeado.isDirectory
             val builder = AlertDialog.Builder(context)
             builder.setIcon(R.drawable.ic_advertencia)
@@ -194,8 +209,8 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                             )
                             .setPositiveButton("Si") { _, _ ->
                                 // Si entra al tercero es para eliminar la guia exitosamente
-                                if (fileClickeado.exists()) {
-                                    val exito = deleteFolder(fileClickeado)
+                                if (fileClickeado!!.exists()) {
+                                    val exito = deleteFolder(fileClickeado!!)
                                     if (exito) {
                                         Toast.makeText(
                                             context,

@@ -7,22 +7,20 @@ import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Fragments.ViewHolders.ListarGuiasViewHolder
 import com.jonathanev.review.R
 
-class ListarGuiasAdapter(private var guiasEstudio: List<GuiaModel>, private val positionClicked: (Int) -> Unit): RecyclerView.Adapter<ListarGuiasViewHolder>() {
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ListarGuiasViewHolder {
-        var view = LayoutInflater.from(parent.context).inflate(R.layout.listar_guias_personalizado, parent, false)
-        return ListarGuiasViewHolder(view)
-    }
+class ListarGuiasAdapter(
+    private var guias: List<GuiaModel>,
+    private val onClick: (Int) -> Unit
+) : RecyclerView.Adapter<ListarGuiasViewHolder>() {
 
-    override fun getItemCount() = guiasEstudio.size
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ListarGuiasViewHolder {
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.listar_guias_personalizado, parent, false)
+        return ListarGuiasViewHolder(view, onClick)
+    }
 
     override fun onBindViewHolder(holder: ListarGuiasViewHolder, position: Int) {
-        holder.render(guiasEstudio[position], positionClicked)
+        holder.bind(guias[position])
     }
 
-    /*fun agregarGuias(nuevasGuias: List<GuiaModel>) {
-        val listaMutable = guiasEstudio.toMutableList() // Copiar la lista existente a una lista mutable
-        listaMutable.addAll(nuevasGuias) // Agregar las nuevas guías a la lista mutable
-        guiasEstudio = listaMutable.toList() // Asignar la lista mutable actualizada a guiasEstudio
-        notifyDataSetChanged()
-    }*/
+    override fun getItemCount() = guias.size
 }
