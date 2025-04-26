@@ -24,18 +24,6 @@
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
-      <SelectionState runConfigName="muestra_mensaje_de_llenar_pregunta_o_respuesta_si_esta_vacio_el_campo()">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
-      <SelectionState runConfigName="guardar_pregunta_mostrar_vacia_la_respuesta()">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
-      <SelectionState runConfigName="guardar_pregunta_mostrar_la_respuesta()">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
-      <SelectionState runConfigName="guardar_respuesta_mostrar_la_pregunta()">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
       <SelectionState runConfigName="TestSetRollClickedUseCase">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>

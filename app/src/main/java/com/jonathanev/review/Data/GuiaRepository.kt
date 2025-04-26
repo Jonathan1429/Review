@@ -1,7 +1,5 @@
 package com.jonathanev.review.Data
 
-import android.content.Context
-import android.util.Log
 import android.util.Xml
 import com.jonathanev.review.Core.Constants.file
 import com.jonathanev.review.Data.Model.EstadoUI
@@ -11,7 +9,6 @@ import com.jonathanev.review.Data.Model.PreguntaRespuestaModel
 import com.jonathanev.review.Data.Model.ResponseGuia
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import com.jonathanev.review.Domain.GetAllGuiasUseCase
-import dagger.hilt.android.qualifiers.ApplicationContext
 import org.w3c.dom.Element
 import org.w3c.dom.NodeList
 import org.xml.sax.SAXException
@@ -24,10 +21,20 @@ import javax.xml.parsers.DocumentBuilder
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.parsers.ParserConfigurationException
 
+class XmlSerializerFactory @Inject constructor() {
+    fun create(): XmlSerializer = Xml.newSerializer()
+}
+
+class FileOutputStreamFactory @Inject constructor() {
+    fun create(path: String): FileOutputStream = FileOutputStream(path)
+}
+
 class GuiaRepository @Inject constructor(
     val getAllGuiasUseCase: GetAllGuiasUseCase,
     val guiaProvider: GuiaProvider,
-    @ApplicationContext private val context: Context
+    private val xmlSerializerFactory: XmlSerializerFactory,
+    private val fileOutputStreamFactory: FileOutputStreamFactory
+    //@ApplicationContext private val context: Context
 ) {
     fun getGuias(file: File): List<GuiaModel> {
         guiaProvider.guias = getAllGuiasUseCase(file)
@@ -44,16 +51,14 @@ class GuiaRepository @Inject constructor(
         // Eliminamos el archivo anteriormente creado
         if (didTheGuideAlreadyExist) {
             File(ruta).delete()
-            Log.d("ArchivoEliminado", "Archivo eliminado")
+            //Log.d("ArchivoEliminado", "Archivo eliminado")
         }
 
         //Vamos a crear el archivo que acabamos de eliminar pero con el nuevo cuestionario
-        val fos: FileOutputStream
-        val serializer: XmlSerializer = Xml.newSerializer()
-
         return try {
+            val serializer = xmlSerializerFactory.create()
+            val fos = fileOutputStreamFactory.create(ruta)
             // fos = openFileOutput(nombreArchivo, MODE_PRIVATE) // Guarda el archivo en la raiz
-            fos = FileOutputStream(ruta)
             serializer.setOutput(fos, "UTF-8")
             serializer.startDocument(null, java.lang.Boolean.valueOf(true))
             serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true)
