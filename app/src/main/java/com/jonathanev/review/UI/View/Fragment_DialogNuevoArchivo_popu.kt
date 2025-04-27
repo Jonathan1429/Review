@@ -20,6 +20,7 @@ import com.jonathanev.review.Core.Constants.cons_guias
 import com.jonathanev.review.Core.Constants.cons_imagenes
 import com.jonathanev.review.Core.Constants.cons_imagenesPiv
 import com.jonathanev.review.Core.Constants.file
+import com.jonathanev.review.Core.Constants.fileImages
 import com.jonathanev.review.UI.ViewModel.FragDialNuevoArchViewModel
 import com.jonathanev.review.databinding.FragmentNuevoArchivoBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -208,17 +209,40 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
                 } else if (lv_folder.equals("creando_folder")) {
                     val folderName = binding!!.etNombreArchivo.text!!.trim()
 
-                    // Asegúrate de obtener la ruta absoluta del directorio
-                    val directorioAbsoluto = file.absolutePath
-
                     // Concatenar el directorio absoluto con el nombre de la carpeta
-                    val rutaCompletaCarpeta = "$directorioAbsoluto/$folderName/"
+                    val rutaGuias = "${file.absolutePath}/$folderName/"
+                    val rutaImagenes = "${fileImages.absolutePath}/$folderName/"
 
                     // Crear un objeto File con la ruta completa de la carpeta
-                    val folder = File(rutaCompletaCarpeta)
+                    val folder = File(rutaGuias)
+                    val images = File(rutaImagenes)
 
                     if (!folder.exists()) {
                         val created = folder.mkdirs()
+                        if (created) {
+                            Toast.makeText(
+                                context, "Carpeta creada exitosamente",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            //cerrarDialogo()
+                            cerrarTodosDialogos()
+                            fragDialNuevoArchViewModel.getAllUpdatedGuides(file)
+                        } else {
+                            Toast.makeText(
+                                context, "No se pudo crear la carpeta exitosamente",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            cerrarDialogo()
+                        }
+                    } else {
+                        Toast.makeText(
+                            context, "La carpeta ya existe",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+
+                    if (!images.exists()) {
+                        val created = images.mkdirs()
                         if (created) {
                             Toast.makeText(
                                 context, "Carpeta creada exitosamente",
