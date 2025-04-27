@@ -170,7 +170,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
     private fun showGuiaOptions(position: Int) {
         val guia = guiasViewModel.getGuia(position)
 
-        var fileClickeado: File? = null
+        var fileClickeado: File = file
 
         guiasViewModel.file.value?.let {
             fileClickeado = it

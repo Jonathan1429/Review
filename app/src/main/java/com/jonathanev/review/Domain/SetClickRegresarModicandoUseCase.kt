@@ -14,7 +14,8 @@ class SetClickRegresarModicandoUseCase @Inject constructor(
         respuestas: ArrayList<String>,
         contadorPregunta: Int,
         editable: Editable,
-        isEtPregunta: Boolean
+        isEtPregunta: Boolean,
+        ruta: String
     ): ValidacionesGuiaModel {
         val posPregFin = preguntas.size - 1
         val posRespFin = respuestas.size - 1
@@ -38,7 +39,8 @@ class SetClickRegresarModicandoUseCase @Inject constructor(
                             isEtPregunta = true,
                             preguntas,
                             respuestas,
-                            contadorPregunta - 1
+                            contadorPregunta - 1,
+                            ruta
                         )
 
                     validacionesGuiaModel.copy(
@@ -64,7 +66,7 @@ class SetClickRegresarModicandoUseCase @Inject constructor(
                     val contador = contadorPregunta - 1
 
                     val validacionesGuiaModel =
-                        setPintarTextosUseCase(isEtPregunta = true, preguntas, respuestas, contador)
+                        setPintarTextosUseCase(isEtPregunta = true, preguntas, respuestas, contador, ruta)
 
                     validacionesGuiaModel.copy(
                         responseSpanPalabra = responseSpanPalabra,

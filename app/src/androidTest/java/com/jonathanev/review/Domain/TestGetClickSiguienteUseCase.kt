@@ -17,8 +17,9 @@ class TestGetClickSiguienteUseCase {
         val contadorPregunta = 2
         val preguntas = arrayListOf("a", "b", "c")
         val respuestas = arrayListOf("a", "b", "c")
+        val ruta = ""
 
-        val resultado = getClickSiguienteUseCase(contadorPregunta, preguntas, respuestas)
+        val resultado = getClickSiguienteUseCase(contadorPregunta, preguntas, respuestas, ruta)
         assertEquals(
             ValidacionesGuiaModel(
                 message = "Se acabaron las preguntas, ¿Quieres repetir la guia?",
@@ -29,23 +30,31 @@ class TestGetClickSiguienteUseCase {
     @Test
     fun das_click_siguiente_si_hay_mas_preguntas_te_va_a_regresar_esa() {
         val contadorPregunta = 1 // Pregunta actual = b
-        val preguntas = arrayListOf("a", "b", "c")
-        val respuestas = arrayListOf("a", "b", "c")
-        val setPintarTextosUseCase = mockk<SetPintarTextosUseCase>()
+        val preguntas = arrayListOf("a", "c", "e")
+        val respuestas = arrayListOf("b", "d", "f")
+        val ruta = ""
 
         // Si nosotros ponemos los valores tenemos que
-        /*every {
+        every {
             setPintarTextosUseCase.invoke(
-                true,
-                preguntas,
-                respuestas,
-                contadorPregunta + 1, // Pregunta que pintará = c
-                true
+                isEtPregunta = true,
+                preguntas = preguntas,
+                respuestas = respuestas,
+                contadorPregunta = contadorPregunta + 1, // Pregunta que pintará = c
+                ruta = ruta
             )
-        }*/
+        } returns ValidacionesGuiaModel(
+            estadoUI = EstadoUI(
+                isUpdatedAskAns = true,
+                isShowQuitColor = true,
+                isShowSelColor = true,
+            ),
+            builder = SpannableStringBuilder(preguntas[2]),
+            //builder = SpannableStringBuilder("c")
+        )
 
         // Si ponemos hacemos que el mock ponga los valores necesarios para que nos regrese ese reultado
-        every {
+        /*every {
             setPintarTextosUseCase.invoke(
                 any(),
                 any(),
@@ -60,10 +69,10 @@ class TestGetClickSiguienteUseCase {
                 isShowSelColor = true,
             ),
             builder = SpannableStringBuilder(preguntas[2]),
-        )
-        // Así nos aseguramos que el GetClickRegresarUseCase use el mock
-        val getClickSiguienteUseCase = GetClickSiguienteUseCase(setPintarTextosUseCase)
-        val resultado = getClickSiguienteUseCase(contadorPregunta, preguntas, respuestas)
+            //builder = SpannableStringBuilder("c")
+        )*/
+
+        val resultado = getClickSiguienteUseCase(contadorPregunta, preguntas, respuestas, ruta)
         assertEquals(
             ValidacionesGuiaModel(
                 estadoUI = EstadoUI(

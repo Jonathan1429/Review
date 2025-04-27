@@ -26,13 +26,15 @@ class TestSetClickRegresarModificandouseCase {
         val contador = 0 // 2
         val editable = SpannableStringBuilder("b")
         val isEtPregunta = false
+        val ruta = ""
 
         val respuesta = setClickRegresarModicandoUseCase(
             preguntas,
             respuestas,
             contador,
             editable,
-            isEtPregunta
+            isEtPregunta,
+            ruta
         )
         assertEquals(
             ValidacionesGuiaModel(
@@ -50,13 +52,15 @@ class TestSetClickRegresarModificandouseCase {
         val contador = 2
         val editable = SpannableStringBuilder()
         val isEtPregunta = false
+        val ruta = ""
 
         val respuesta = setClickRegresarModicandoUseCase(
             preguntas,
             respuestas,
             contador,
             editable,
-            isEtPregunta
+            isEtPregunta,
+            ruta
         )
         assertEquals(
             ValidacionesGuiaModel(
@@ -98,13 +102,15 @@ class TestSetClickRegresarModificandouseCase {
         val contador = 2
         val editable = SpannableStringBuilder()
         val isEtPregunta = true
+        val ruta = ""
 
         val respuesta = setClickRegresarModicandoUseCase(
             preguntas,
             respuestas,
             contador,
             editable,
-            isEtPregunta
+            isEtPregunta,
+            ruta
         )
         assertEquals(
             ValidacionesGuiaModel(
@@ -124,6 +130,7 @@ class TestSetClickRegresarModificandouseCase {
         val contador = 3 // > posPregFin (2)
         val editable = SpannableStringBuilder("algo") // contenido no vacío
         val isEtPregunta = true
+        val ruta = ""
 
         // Configurar los mocks para que devuelvan lo esperado
         every { setSpanPalabraUseCase.invoke(editable) } returns SpanPalabraModel(
@@ -136,7 +143,8 @@ class TestSetClickRegresarModificandouseCase {
                 isEtPregunta = true,
                 preguntas,
                 respuestas,
-                contador
+                contador,
+                ruta
             )
         } returns ValidacionesGuiaModel(
             estadoUI = EstadoUI(
@@ -153,7 +161,8 @@ class TestSetClickRegresarModificandouseCase {
             respuestas,
             contador,
             editable,
-            isEtPregunta
+            isEtPregunta,
+            ruta
         )
 
         // Asegurar que el valor retornado es el esperado
@@ -171,6 +180,7 @@ class TestSetClickRegresarModificandouseCase {
         val contador = 3 // pos = 3
         val editable = SpannableStringBuilder()
         val isEtPregunta = true
+        val ruta = ""
 
         every {
             setPintarTextosUseCase.invoke(
@@ -195,7 +205,8 @@ class TestSetClickRegresarModificandouseCase {
             respuestas,
             contador,
             editable,
-            isEtPregunta
+            isEtPregunta,
+            ruta
         )
 
         assertEquals(
@@ -220,6 +231,7 @@ class TestSetClickRegresarModificandouseCase {
         val contador = 1 // pos = 3
         val editable = SpannableStringBuilder("b")
         val isEtPregunta = true
+        val ruta = ""
 
         every { setSpanPalabraUseCase.invoke(editable) } returns SpanPalabraModel(
             editable = SpannableStringBuilder("b"),
@@ -249,7 +261,8 @@ class TestSetClickRegresarModificandouseCase {
             respuestas,
             contador,
             editable,
-            isEtPregunta
+            isEtPregunta,
+            ruta
         )
 
         assertEquals(
@@ -275,6 +288,7 @@ class TestSetClickRegresarModificandouseCase {
         val contador = 2 // pos = 3
         val editable = SpannableStringBuilder("b")
         val isEtPregunta = true
+        val ruta = ""
 
         every { setSpanPalabraUseCase.invoke(editable) } returns SpanPalabraModel(
             editable = SpannableStringBuilder("b"),
@@ -304,7 +318,8 @@ class TestSetClickRegresarModificandouseCase {
             respuestas,
             contador,
             editable,
-            isEtPregunta
+            isEtPregunta,
+            ruta
         )
 
         assertEquals(
@@ -330,6 +345,7 @@ class TestSetClickRegresarModificandouseCase {
         val contador = 2 // pos = 3
         val editable = SpannableStringBuilder("z")
         val isEtPregunta = false
+        val ruta = ""
 
         every { setSpanPalabraUseCase.invoke(editable) } returns SpanPalabraModel(
             editable = SpannableStringBuilder("z"),
@@ -359,7 +375,8 @@ class TestSetClickRegresarModificandouseCase {
             respuestas,
             contador,
             editable,
-            isEtPregunta
+            isEtPregunta,
+            ruta
         )
 
         assertEquals(
@@ -385,6 +402,7 @@ class TestSetClickRegresarModificandouseCase {
         val contador = 2 // pos = 3
         val editable = SpannableStringBuilder("z")
         val isEtPregunta = false
+        val ruta = ""
 
         every { setSpanPalabraUseCase.invoke(editable) } returns SpanPalabraModel(
             editable = SpannableStringBuilder("z"),
@@ -414,7 +432,8 @@ class TestSetClickRegresarModificandouseCase {
             respuestas,
             contador,
             editable,
-            isEtPregunta
+            isEtPregunta,
+            ruta
         )
 
         assertEquals(

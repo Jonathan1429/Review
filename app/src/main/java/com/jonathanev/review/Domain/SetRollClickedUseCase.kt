@@ -15,7 +15,8 @@ class SetRollClickedUseCase @Inject constructor(
         respuestas: ArrayList<String>,
         contadorPregunta: Int,
         editable: Editable,
-        isEtPregunta: Boolean
+        isEtPregunta: Boolean,
+        ruta: String
     ): ValidacionesGuiaModel {
         if (editable.isEmpty()) {
             return ValidacionesGuiaModel(
@@ -39,10 +40,11 @@ class SetRollClickedUseCase @Inject constructor(
         // Pintamos la pregunta/respuesta si existe
         if (contadorPregunta <= pintarLista.lastIndex) {
             val responsePintarTextos = setPintarTextosUseCase(
-                isEtPregunta = isEtPregunta,
+                isEtPregunta = !isEtPregunta, // Pintas lo opuesto
                 preguntas = preguntas,
                 respuestas = respuestas,
-                contadorPregunta = contadorPregunta
+                contadorPregunta = contadorPregunta,
+                ruta
             )
 
             return responsePintarTextos.copy(

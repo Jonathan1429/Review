@@ -9,7 +9,8 @@ class GetClickRegresarUseCase @Inject constructor(
     operator fun invoke(
         contadorPregunta: Int,
         preguntas: ArrayList<String>,
-        respuestas: ArrayList<String>
+        respuestas: ArrayList<String>,
+        ruta: String
     ): ValidacionesGuiaModel{
         return when {
             contadorPregunta == 0 -> {
@@ -21,7 +22,7 @@ class GetClickRegresarUseCase @Inject constructor(
                 val contador = contadorPregunta - 1
 
                 val response =
-                    setPintarTextosUseCase(true, preguntas, respuestas, contador, isRepasar = true)
+                    setPintarTextosUseCase(true, preguntas, respuestas, contador, ruta)
 
                 return response
             }

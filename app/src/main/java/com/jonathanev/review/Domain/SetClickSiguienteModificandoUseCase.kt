@@ -15,7 +15,8 @@ class SetClickSiguienteModificandoUseCase @Inject constructor(
         respuestas: ArrayList<String>,
         contadorPregunta: Int,
         editable: Editable,
-        isEtPregunta: Boolean
+        isEtPregunta: Boolean,
+        ruta: String
     ): ValidacionesGuiaModel {
         return when {
             editable.isEmpty() -> {
@@ -51,7 +52,8 @@ class SetClickSiguienteModificandoUseCase @Inject constructor(
                             isEtPregunta = true,
                             preguntas,
                             respuestas,
-                            conSiguientePregunta
+                            conSiguientePregunta,
+                            ruta
                         )
 
                     validacionesguiaGuiaModel.copy(

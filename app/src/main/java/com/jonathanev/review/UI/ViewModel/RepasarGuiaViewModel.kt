@@ -51,7 +51,7 @@ class RepasarGuiaViewModel @Inject constructor(
         }
 
         val textoPregunta =
-            setPintarTextosUseCase(true, preguntas, respuestas, contadorPregunta, isRepasar = true)
+            setPintarTextosUseCase(true, preguntas, respuestas, contadorPregunta, ruta)
         val responseValGuiaModel: ValidacionesGuiaModel =
             textoPregunta.copy(
                 estadoUI = textoPregunta.estadoUI.copy(isThereMoreAsks = true)
@@ -60,32 +60,32 @@ class RepasarGuiaViewModel @Inject constructor(
         return responseValGuiaModel
     }
 
-    fun onClickRoll(isEtPregunta: Boolean) {
+    fun onClickRoll(isEtPregunta: Boolean, ruta: String) {
         val texto = setPintarTextosUseCase(
             isEtPregunta,
             preguntas,
             respuestas,
             contadorPregunta,
-            isRepasar = true
+            ruta
         )
 
         _uiStateBtnRoll.value = texto
     }
 
-    fun getReinicioGuia(isEtPregunta: Boolean): ValidacionesGuiaModel {
+    fun getReinicioGuia(isEtPregunta: Boolean, ruta: String): ValidacionesGuiaModel {
         val texto = setPintarTextosUseCase(
             isEtPregunta,
             preguntas,
             respuestas,
             contadorPregunta,
-            isRepasar = true
+            ruta
         )
 
         return texto
     }
 
-    fun onClickNext() {
-        val responseSiguiente = getClickSiguienteUseCase(contadorPregunta, preguntas, respuestas)
+    fun onClickNext(ruta:String) {
+        val responseSiguiente = getClickSiguienteUseCase(contadorPregunta, preguntas, respuestas, ruta)
 
         if (responseSiguiente.estadoUI.isUpdatedAskAns) {
             contadorPregunta++
@@ -94,8 +94,8 @@ class RepasarGuiaViewModel @Inject constructor(
         _uiStateBtnNext.value = responseSiguiente
     }
 
-    fun onClickBefore() {
-        val responseRegresar = getClickRegresarUseCase(contadorPregunta, preguntas, respuestas)
+    fun onClickBefore(ruta: String) {
+        val responseRegresar = getClickRegresarUseCase(contadorPregunta, preguntas, respuestas, ruta)
 
         if (responseRegresar.estadoUI.isUpdatedAskAns) {
             contadorPregunta--

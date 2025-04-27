@@ -18,7 +18,7 @@ class TestGetClickRegresarUseCase {
         val preguntas = arrayListOf("a", "b", "c")
         val respuestas = arrayListOf("a", "b", "c")
 
-        val result = getClickRegresarUseCase(contador, preguntas, respuestas)
+        val result = getClickRegresarUseCase(contador, preguntas, respuestas, "")
         assertEquals(ValidacionesGuiaModel(message = "Ya no tienes preguntas anteriores"), result)
     }
 
@@ -28,6 +28,7 @@ class TestGetClickRegresarUseCase {
         val preguntas = arrayListOf("a", "b", "c")
         val respuestas = arrayListOf("a", "b", "c")
         val setPintarTextosUseCase = mockk<SetPintarTextosUseCase>()
+        val ruta = ""
 
         every {
             setPintarTextosUseCase.invoke(
@@ -49,7 +50,7 @@ class TestGetClickRegresarUseCase {
         // Así nos aseguramos que el GetClickRegresarUseCase use el mock
         val getClickRegresarUseCase = GetClickRegresarUseCase(setPintarTextosUseCase)
 
-        val result = getClickRegresarUseCase(contador, preguntas, respuestas)
+        val result = getClickRegresarUseCase(contador, preguntas, respuestas, ruta)
         assertEquals(
             ValidacionesGuiaModel(
                 estadoUI = EstadoUI(

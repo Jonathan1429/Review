@@ -17,6 +17,7 @@ class TestSetClickEliminarUseCase {
         val preguntas = arrayListOf("a", "b")
         val respuestas = arrayListOf("a", "b")
         val contador = 3
+        val ruta = ""
 
         every {
             setPintarTextosUseCase.invoke(
@@ -36,7 +37,7 @@ class TestSetClickEliminarUseCase {
             builder = SpannableStringBuilder("b"),
         )
 
-        val result = setClickEliminarUseCase(preguntas, respuestas, contador)
+        val result = setClickEliminarUseCase(preguntas, respuestas, contador, ruta)
         assertEquals(
             ValidacionesGuiaModel(
                 estadoUI = EstadoUI(
@@ -60,6 +61,7 @@ class TestSetClickEliminarUseCase {
         val preguntas = arrayListOf("a", "b")
         val respuestas = arrayListOf("a")
         val contador = 1
+        val ruta = ""
 
         every {
             setPintarTextosUseCase.invoke(
@@ -79,7 +81,7 @@ class TestSetClickEliminarUseCase {
             builder = SpannableStringBuilder("a"),
         )
 
-        val result = setClickEliminarUseCase(preguntas, respuestas, contador)
+        val result = setClickEliminarUseCase(preguntas, respuestas, contador, ruta)
         assertEquals(
             ValidacionesGuiaModel(
                 estadoUI = EstadoUI(
@@ -103,8 +105,9 @@ class TestSetClickEliminarUseCase {
         val preguntas = arrayListOf("a", "b")
         val respuestas = arrayListOf("a", "b")
         val contador = 0
+        val ruta = ""
 
-        val result = setClickEliminarUseCase(preguntas, respuestas, contador)
+        val result = setClickEliminarUseCase(preguntas, respuestas, contador, ruta)
         assertEquals(
             ValidacionesGuiaModel(
                 estadoUI = EstadoUI(
@@ -122,8 +125,9 @@ class TestSetClickEliminarUseCase {
         val preguntas = arrayListOf<String>()
         val respuestas = arrayListOf<String>()
         val contador = 0
+        val ruta = ""
 
-        val result = setClickEliminarUseCase(preguntas, respuestas, contador)
+        val result = setClickEliminarUseCase(preguntas, respuestas, contador, ruta)
         assertEquals(
             ValidacionesGuiaModel(
                 estadoUI = EstadoUI(
@@ -147,8 +151,9 @@ class TestSetClickEliminarUseCase {
         val preguntas = arrayListOf("a", "b")
         val respuestas = arrayListOf("a", "b")
         val contador = -1
+        val ruta = ""
 
-        val result = setClickEliminarUseCase(preguntas, respuestas, contador)
+        val result = setClickEliminarUseCase(preguntas, respuestas, contador, ruta)
 
         // Nada debe cambiar
         assertEquals(listOf("a", "b"), preguntas)

@@ -116,7 +116,7 @@ class Activity_Modificar : AppCompatActivity() {
         modificarViewModel.uiStateBtnRoll.observe(this) { uiState ->
             if (uiState.estadoUI.isUpdatedAskAns) {
                 girarCardView()
-                if (uiState.estadoUI.isEtPregunta) {
+                if (!uiState.estadoUI.isEtPregunta) {
                     binding.lblPregResp.text = "Respuesta"
                 } else {
                     binding.lblPregResp.text = "Pregunta"
@@ -407,7 +407,7 @@ class Activity_Modificar : AppCompatActivity() {
                 binding.ivImagen.setImage(ImageSource.uri(texto.estadoImagen.textImgUnencrypted))
 
                 // Sino se carga correctamente la imagen
-                if (!binding.ivImagen.isImageLoaded) {
+                /*if (!binding.ivImagen.isImageLoaded) {
                     if (texto.estadoImagen.textImgUnencrypted.contains("imagenesPivote")) {
                         texto.estadoImagen.textImgUnencrypted =
                             texto.estadoImagen.textImgUnencrypted.replace(
@@ -423,7 +423,7 @@ class Activity_Modificar : AppCompatActivity() {
                             )
                         binding.ivImagen.setImage(ImageSource.uri(texto.estadoImagen.textImgUnencrypted))
                     }
-                }
+                }*/
             }
 
             binding.tilContenidoPregResp.visibility =
@@ -464,7 +464,8 @@ class Activity_Modificar : AppCompatActivity() {
             }
             modificarViewModel.clickedRoll(
                 editable,
-                isEtPregunta
+                isEtPregunta,
+                ruta
             )
         }
 
@@ -478,7 +479,8 @@ class Activity_Modificar : AppCompatActivity() {
 
             modificarViewModel.onClickImgvPrevious(
                 editable,
-                isEtPregunta
+                isEtPregunta,
+                ruta
             )
         }
 
@@ -503,7 +505,8 @@ class Activity_Modificar : AppCompatActivity() {
 
                         modificarViewModel.onClickImgvNext(
                             editable,
-                            isEtPregunta
+                            isEtPregunta,
+                            ruta
                         )
 
                         Toast.makeText(
@@ -521,7 +524,8 @@ class Activity_Modificar : AppCompatActivity() {
             } else {
                 modificarViewModel.onClickImgvNext(
                     editable,
-                    isEtPregunta
+                    isEtPregunta,
+                    ruta
                 )
             }
         }
@@ -531,7 +535,7 @@ class Activity_Modificar : AppCompatActivity() {
                 .setTitle("¡Atención!")
                 .setMessage("¿Quieres eliminar pregunta/respuesta?")
                 .setPositiveButton("Si") { _, _ ->
-                    modificarViewModel.onClickEliminar()
+                    modificarViewModel.onClickEliminar(ruta)
                 }.setNegativeButton("Cancelar") { dialog, _ ->
                     dialog.dismiss()
                 }.create().show()

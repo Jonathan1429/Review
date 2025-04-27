@@ -108,7 +108,11 @@ class ModificarViewModel @Inject constructor(
             }
         }
 
-        val textoPregunta = setPintarTextosUseCase(true, preguntas, respuestas, contadorPregunta)
+        val textoPregunta = setPintarTextosUseCase(isEtPregunta = true,
+            preguntas = preguntas,
+            respuestas = respuestas,
+            contadorPregunta = contadorPregunta,
+            ruta = ruta)
         val responseValGuiaModel: ValidacionesGuiaModel =
             textoPregunta.copy(
                 estadoUI = textoPregunta.estadoUI.copy(isThereMoreAsks = true)
@@ -128,14 +132,16 @@ class ModificarViewModel @Inject constructor(
     // Click events
     fun onClickImgvPrevious(
         editable: Editable,
-        isEtPregunta: Boolean
+        isEtPregunta: Boolean,
+        ruta: String
     ) {
         val responseRegresarUseCase = setClickRegresarModicandoUseCase(
             preguntas,
             respuestas,
             contadorPregunta,
             editable,
-            isEtPregunta
+            isEtPregunta,
+            ruta
         )
 
         if (responseRegresarUseCase.estadoUI.isUpdatedAskAns) {
@@ -147,14 +153,16 @@ class ModificarViewModel @Inject constructor(
 
     fun onClickImgvNext(
         editable: Editable,
-        isEtPregunta: Boolean
+        isEtPregunta: Boolean,
+        ruta: String
     ) {
         val responseSiguienteUseCase = setClickSiguienteModicandoUseCase(
             preguntas,
             respuestas,
             contadorPregunta,
             editable,
-            isEtPregunta
+            isEtPregunta,
+            ruta
         )
 
         if (responseSiguienteUseCase.estadoUI.isUpdatedAskAns) {
@@ -166,16 +174,17 @@ class ModificarViewModel @Inject constructor(
 
     fun clickedRoll(
         editable: Editable,
-        isEtPregunta: Boolean
+        isEtPregunta: Boolean,
+        ruta: String
     ) {
         val responseRollClickedUseCase =
-            setRollClickedUseCase(preguntas, respuestas, contadorPregunta, editable, isEtPregunta)
+            setRollClickedUseCase(preguntas, respuestas, contadorPregunta, editable, isEtPregunta, ruta)
         _uiStateBtnRoll.value = responseRollClickedUseCase
     }
 
-    fun onClickEliminar() {
+    fun onClickEliminar(ruta: String) {
         val responseRegresarUseCase =
-            setClickEliminarUseCase(preguntas, respuestas, contadorPregunta)
+            setClickEliminarUseCase(preguntas, respuestas, contadorPregunta, ruta)
 
         if (contadorPregunta > 0) {
             contadorPregunta--

@@ -9,6 +9,7 @@ import com.jonathanev.review.Data.Model.ColorPregModel
 import com.jonathanev.review.Data.Model.EstadoImagen
 import com.jonathanev.review.Data.Model.EstadoUI
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
+import java.io.File
 import javax.inject.Inject
 
 class SetPintarTextosUseCase @Inject constructor(
@@ -19,7 +20,7 @@ class SetPintarTextosUseCase @Inject constructor(
         preguntas: ArrayList<String>,
         respuestas: ArrayList<String>,
         contadorPregunta: Int,
-        isRepasar: Boolean = false
+        ruta: String
     ): ValidacionesGuiaModel {
         var contColorPreg: Int = 0
         var inicio: Int = 0
@@ -42,7 +43,12 @@ class SetPintarTextosUseCase @Inject constructor(
             val descifrado = setCifrarRutaImagenUseCase(texto, 26 - 3)// cifrar(texto, 26 - 3)
             val cifrado = texto
             texto = descifrado.replace(baseRutaImagen.toRegex(), "")
-            if (!isRepasar) {
+            var soloRuta = ruta.replaceAfterLast("/", "")
+            soloRuta = soloRuta.replaceFirst("guias", "imagenes")
+            val imagen = texto.replaceBeforeLast("/", "").replace("/", "")
+            texto = "$soloRuta$imagen"
+
+            if (!File("" + texto).exists()) {
                 texto = texto.replace("imagenes".toRegex(), "imagenesPivote")
             }
 

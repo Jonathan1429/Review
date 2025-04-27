@@ -25,13 +25,15 @@ class TestSetRollClickedUseCase {
         val respuestas = arrayListOf<String>()
         val contador = 0
         val editable = SpannableStringBuilder()
+        val ruta = ""
 
         val resultado = setRollClickedUseCase(
             preguntas = preguntas,
             respuestas = respuestas,
             contadorPregunta = contador,
             editable = editable,
-            isEtPregunta = true
+            isEtPregunta = true,
+            ruta
         )
 
         assertEquals(
@@ -47,6 +49,7 @@ class TestSetRollClickedUseCase {
         val respuestas = arrayListOf<String>()
         val contador = 0
         val editable = SpannableStringBuilder("a")
+        val ruta = ""
 
         every { setSpanPalabraUseCase.invoke(any()) } returns SpanPalabraModel(
             editable = editable,
@@ -60,7 +63,8 @@ class TestSetRollClickedUseCase {
             respuestas = respuestas,
             contadorPregunta = contador,
             editable = editable,
-            isEtPregunta = true
+            isEtPregunta = true,
+            ruta
         )
 
         assertEquals(arrayListOf("a"), preguntas)
@@ -89,6 +93,7 @@ class TestSetRollClickedUseCase {
         val respuestas = arrayListOf("a")
         val contador = 0
         val editable = SpannableStringBuilder("b")
+        val ruta = ""
 
         every { setSpanPalabraUseCase.invoke(any()) } returns SpanPalabraModel(
             editable = editable,
@@ -97,7 +102,7 @@ class TestSetRollClickedUseCase {
 
         every { setColocarEtiquetasUseCase.invoke(any()) } returns editable
 
-        every { setPintarTextosUseCase.invoke(any(), any(), any(), any()) } returns
+        every { setPintarTextosUseCase.invoke(any(), any(), any(), any(), any()) } returns
                 ValidacionesGuiaModel(
                     estadoUI = EstadoUI(
                         isUpdatedAskAns = true,
@@ -112,7 +117,8 @@ class TestSetRollClickedUseCase {
             respuestas = respuestas,
             contadorPregunta = contador,
             editable = editable,
-            isEtPregunta = true
+            isEtPregunta = true,
+            ruta
         )
 
         assertEquals(arrayListOf("b"), preguntas)
@@ -141,6 +147,7 @@ class TestSetRollClickedUseCase {
         val respuestas = arrayListOf("a")
         val contador = 0
         val editable = SpannableStringBuilder("b")
+        val ruta = ""
 
         every { setSpanPalabraUseCase.invoke(any()) } returns SpanPalabraModel(
             editable = editable,
@@ -149,7 +156,7 @@ class TestSetRollClickedUseCase {
 
         every { setColocarEtiquetasUseCase.invoke(any()) } returns editable
 
-        every { setPintarTextosUseCase.invoke(any(), any(), any(), any()) } returns
+        every { setPintarTextosUseCase.invoke(any(), any(), any(), any(), any()) } returns
                 ValidacionesGuiaModel(
                     estadoUI = EstadoUI(
                         isUpdatedAskAns = true,
@@ -164,7 +171,8 @@ class TestSetRollClickedUseCase {
             respuestas = respuestas,
             contadorPregunta = contador,
             editable = editable,
-            isEtPregunta = false
+            isEtPregunta = false,
+            ruta
         )
 
         assertEquals(arrayListOf("a"), preguntas)

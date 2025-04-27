@@ -141,7 +141,7 @@ class Activity_RepasarGuia : AppCompatActivity() {
                         ) { _, _ ->
                             binding.lblPregResp.text = "Pregunta"
                             repasarGuiaViewModel.contadorPregunta = 0
-                            val texto = repasarGuiaViewModel.getReinicioGuia(true)
+                            val texto = repasarGuiaViewModel.getReinicioGuia(true, ruta)
                             if (texto.estadoUI.isEtPregunta) {
                                 binding.lblPregResp.text = "Respuesta"
                             } else {
@@ -205,15 +205,15 @@ class Activity_RepasarGuia : AppCompatActivity() {
             }
 
             // Get text
-            repasarGuiaViewModel.onClickRoll(isEtPregunta)
+            repasarGuiaViewModel.onClickRoll(isEtPregunta, ruta)
         }
 
         binding.imgvNext.setOnClickListener {
-            repasarGuiaViewModel.onClickNext()
+            repasarGuiaViewModel.onClickNext(ruta)
         }
 
         binding.imgvPrevious.setOnClickListener {
-            repasarGuiaViewModel.onClickBefore()
+            repasarGuiaViewModel.onClickBefore(ruta)
         }
 
         binding.barraSuperiorRegreso.imgvBack.setOnClickListener { finish() }

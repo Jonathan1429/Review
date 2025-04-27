@@ -24,7 +24,19 @@
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
-      <SelectionState runConfigName="te_regresa_un_editable_sin_colores()">
+      <SelectionState runConfigName="TestSetRollClickedUseCase">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="TestSetClickSiguienteModificandoUseCase">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="TestSetClickRegresarModificandouseCase">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="TestSetClickEliminarUseCase">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="TestGetClickRegresarUseCase">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

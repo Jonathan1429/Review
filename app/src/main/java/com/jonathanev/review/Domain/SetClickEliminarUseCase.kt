@@ -10,14 +10,15 @@ class SetClickEliminarUseCase @Inject constructor(
     operator fun invoke(
         preguntas: ArrayList<String>,
         respuestas: ArrayList<String>,
-        contadorPregunta: Int
+        contadorPregunta: Int,
+        ruta: String
     ): ValidacionesGuiaModel {
         preguntas.removeAtOrNull(contadorPregunta)
         respuestas.removeAtOrNull(contadorPregunta)
 
         return if (contadorPregunta > 0) {
             val validacionesGuiaModel =
-                setPintarTextosUseCase(true, preguntas, respuestas, contadorPregunta - 1)
+                setPintarTextosUseCase(true, preguntas, respuestas, contadorPregunta - 1, ruta)
 
             validacionesGuiaModel.copy(
                 estadoUI = validacionesGuiaModel.estadoUI.copy(

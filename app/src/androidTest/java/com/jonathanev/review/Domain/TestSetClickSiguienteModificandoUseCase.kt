@@ -26,13 +26,15 @@ class TestSetClickSiguienteModificandoUseCase {
         val respuestas = ArrayList<String>()
         val contadorPregunta = 0
         val editable: Editable = Editable.Factory.getInstance().newEditable("")
+        val ruta = ""
 
         val resultado = setClickSiguienteModicandoUseCase(
             preguntas = preguntas,
             respuestas = respuestas,
             contadorPregunta = contadorPregunta,
             editable = editable,
-            isEtPregunta = false
+            isEtPregunta = false,
+            ruta
         )
 
         assertEquals(
@@ -48,6 +50,7 @@ class TestSetClickSiguienteModificandoUseCase {
         val respuestas = arrayListOf("a", "b")
         val contadorPregunta = 0
         val editable = SpannableStringBuilder("x")
+        val ruta = ""
 
         every { setSpanPalabraUseCase.invoke(any()) } returns
                 SpanPalabraModel(
@@ -58,7 +61,7 @@ class TestSetClickSiguienteModificandoUseCase {
         every { setColocarEtiquetasUseCase.invoke(any()) } returns
                 SpannableStringBuilder("x")
 
-        every { setPintarTextosUseCase.invoke(any(), any(), any(), any()) } returns
+        every { setPintarTextosUseCase.invoke(any(), any(), any(), any(), any()) } returns
                 ValidacionesGuiaModel(
                     estadoUI = EstadoUI(
                         isUpdatedAskAns = true,
@@ -73,7 +76,8 @@ class TestSetClickSiguienteModificandoUseCase {
             respuestas = respuestas,
             contadorPregunta = contadorPregunta,
             editable = editable,
-            isEtPregunta = true
+            isEtPregunta = true,
+            ruta
         )
 
         assertEquals(arrayListOf("x", "b"), preguntas)
@@ -101,6 +105,7 @@ class TestSetClickSiguienteModificandoUseCase {
         val respuestas = arrayListOf("a", "b")
         val contadorPregunta = 0
         val editable = SpannableStringBuilder("x")
+        val ruta = ""
 
         every { setSpanPalabraUseCase.invoke(any()) } returns
                 SpanPalabraModel(
@@ -111,7 +116,7 @@ class TestSetClickSiguienteModificandoUseCase {
         every { setColocarEtiquetasUseCase.invoke(any()) } returns
                 SpannableStringBuilder("x")
 
-        every { setPintarTextosUseCase.invoke(any(), any(), any(), any()) } returns
+        every { setPintarTextosUseCase.invoke(any(), any(), any(), any(), any()) } returns
                 ValidacionesGuiaModel(
                     estadoUI = EstadoUI(
                         isUpdatedAskAns = true,
@@ -126,7 +131,8 @@ class TestSetClickSiguienteModificandoUseCase {
             respuestas = respuestas,
             contadorPregunta = contadorPregunta,
             editable = editable,
-            isEtPregunta = false
+            isEtPregunta = false,
+            ruta
         )
 
         assertEquals(arrayListOf("a", "b"), preguntas)
@@ -154,6 +160,7 @@ class TestSetClickSiguienteModificandoUseCase {
         val respuestas = arrayListOf("a")
         val contadorPregunta = 1
         val editable = SpannableStringBuilder("x")
+        val ruta = ""
 
         every { setSpanPalabraUseCase.invoke(any()) } returns
                 SpanPalabraModel(
@@ -164,7 +171,7 @@ class TestSetClickSiguienteModificandoUseCase {
         every { setColocarEtiquetasUseCase.invoke(any()) } returns
                 SpannableStringBuilder("x")
 
-        every { setPintarTextosUseCase.invoke(any(), any(), any(), any()) } returns
+        every { setPintarTextosUseCase.invoke(any(), any(), any(), any(), any()) } returns
                 ValidacionesGuiaModel(
                     estadoUI = EstadoUI(
                         isUpdatedAskAns = true,
@@ -179,7 +186,8 @@ class TestSetClickSiguienteModificandoUseCase {
             respuestas = respuestas,
             contadorPregunta = contadorPregunta,
             editable = editable,
-            isEtPregunta = false
+            isEtPregunta = false,
+            ruta
         )
 
         assertEquals(arrayListOf("a", "b"), preguntas)

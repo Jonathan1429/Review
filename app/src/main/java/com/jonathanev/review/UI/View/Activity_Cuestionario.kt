@@ -58,6 +58,7 @@ class Activity_Cuestionario : AppCompatActivity() {
     private var longCaracteres = 0
     private val activityCuestionarioViewModel by viewModels<ActivityCuestionarioViewModel>()
     private var filename: String = "" // Ruta/imagen.png
+    private var ruta: String = "$file"
 
     // Seleccionar imagen
     /*private val pickMedia =
@@ -121,6 +122,7 @@ class Activity_Cuestionario : AppCompatActivity() {
 
         // Recibimos el nombre del archivo del popupFragment Nueva Guia.
         nombreArchivo = intent.extras!!.getString("nombre_archivo")
+        ruta = "$ruta$nombreArchivo"
 
         // Se cambia el nombre del titulo del toolbar
         binding.barraSuperiorRegreso.tvTituloToolbar.text = "Creando: $nombreArchivo"
@@ -324,7 +326,8 @@ class Activity_Cuestionario : AppCompatActivity() {
             }
             activityCuestionarioViewModel.clickedRoll(
                 editable,
-                isEtPregunta
+                isEtPregunta,
+                ruta
             )
         }
 
@@ -338,7 +341,8 @@ class Activity_Cuestionario : AppCompatActivity() {
 
             activityCuestionarioViewModel.onClickImgvPrevious(
                 editable,
-                isEtPregunta
+                isEtPregunta,
+                ruta
             )
         }
 
@@ -352,7 +356,8 @@ class Activity_Cuestionario : AppCompatActivity() {
 
             activityCuestionarioViewModel.onClickImgvNext(
                 editable,
-                isEtPregunta
+                isEtPregunta,
+                ruta
             )
         }
 
@@ -361,7 +366,7 @@ class Activity_Cuestionario : AppCompatActivity() {
                 .setTitle("¡Atención!")
                 .setMessage("¿Quieres eliminar pregunta/respuesta?")
                 .setPositiveButton("Si") { _, _ ->
-                    activityCuestionarioViewModel.onClickEliminar()
+                    activityCuestionarioViewModel.onClickEliminar(ruta)
                 }.setNegativeButton("Cancelar") { dialog, _ ->
                     dialog.dismiss()
                 }.create().show()
