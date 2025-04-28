@@ -363,7 +363,7 @@ class Activity_Modificar : AppCompatActivity() {
                 val intent = Intent(applicationContext, Activity_RepasarGuia::class.java)
                 intent.putExtra("ruta", uiState.responseGuia.rutaGuiaEstudio)
                 startActivity(intent)
-                copyImages()
+                copyImages(ruta)
                 finish()
             }
         }
@@ -867,28 +867,24 @@ class Activity_Modificar : AppCompatActivity() {
             ) { dialog, _ -> dialog.dismiss() }.create().show()
     }
 
-    private fun copyImages() {
+    private fun copyImages(ruta: String) {
         val images = fileImagesPiv.listFiles()
         // Hacemos un ciclo por cada fichero para extraer el nombre de cada uno.
         if (!images.isNullOrEmpty()) {
-            for (i in images.indices) {
+            for (image in images) {
                 // Sacamos del array files el primer fichero.
-                val archivo: File = images[i]
-                var name = ""
-
-                name = archivo.name
-
-                var rutaImagen = file.toString()
+                var rutaImagen = ruta.replaceAfterLast("/", "")
                 rutaImagen = rutaImagen.replace("guias".toRegex(), "imagenes")
-                val rutaImagPath = File(rutaImagen)
+                val imagen = image.name.replaceBeforeLast("/", "").replace("/", "")
+                //val rutaImagPath = File(rutaImagen)
                 Files.copy(
-                    Paths.get("$fileImagesPiv/$name"),
-                    Paths.get("$rutaImagPath/$name"),
+                    Paths.get("$fileImagesPiv/$imagen"),
+                    Paths.get("$rutaImagen$imagen"),
                     StandardCopyOption.REPLACE_EXISTING
                 )
 
                 // Borrar archivo
-                File(fileImagesPiv, name).delete()
+                File(fileImagesPiv, image.name).delete()
             }
         }
     }

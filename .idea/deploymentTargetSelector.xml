@@ -24,9 +24,6 @@
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
-      <SelectionState runConfigName="TestSetRollClickedUseCase">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
       <SelectionState runConfigName="TestSetClickSiguienteModificandoUseCase">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
@@ -37,6 +34,9 @@
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
       <SelectionState runConfigName="TestGetClickRegresarUseCase">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="das_click_siguiente_si_hay_mas_preguntas_te_va_a_regresar_esa()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>
