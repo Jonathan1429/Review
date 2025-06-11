@@ -71,16 +71,6 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
 
         initUI()
 
-        adaptadorListarGuias =
-            ListarGuiasAdapter { position -> showGuiaOptions(position) }
-
-        binding.lvGuiasEstudio.apply {
-            layoutManager = LinearLayoutManager(requireContext())
-            adapter = adaptadorListarGuias
-            setHasFixedSize(true)
-            itemAnimator = null // Opcional: remueve animaciones que pueden causar lag
-        }
-
         guiasViewModel.guias.observe(viewLifecycleOwner) {
             if (it.isEmpty()) {
                 binding.tvSinGuias.visibility = View.VISIBLE
@@ -98,21 +88,6 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
             binding.progressBar.visibility = View.VISIBLE
             guiasViewModel.getAllUpdatedGuides(it)
         }
-
-        // Agregar un OnScrollListener al RecyclerView para detectar cuando el usuario se desplaza.
-        /*binding.lvGuiasEstudio.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
-                val totalItems = layoutManager.itemCount
-                val ultimoVisible = layoutManager.findLastVisibleItemPosition()
-
-                // Si el último elemento visible es igual al total de elementos menos uno (es decir, estamos cerca del final de la lista).
-                if (ultimoVisible == totalItems - 1) {
-                    cargarElementos(guiaModels)
-                }
-            }
-        })*/
 
         binding.LlFolders.setOnClickListener {
             if (binding.imgvBack.visibility == View.VISIBLE) {
@@ -143,41 +118,16 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
 
     private fun initUI() {
         binding.progressBar.visibility = View.VISIBLE
-        //guiasViewModel.getMainPath()
         guiasViewModel.getAllGuias()
     }
 
     private fun showGuias(guiaModels: List<GuiaModel>) {
-        adaptadorListarGuias.submitList(guiaModels)
-
-        /*val adaptador = ListarGuiasAdapter(guiaModels) { position ->
-            showGuiaOptions(position)
-        }
-        with(binding.lvGuiasEstudio) {
-            layoutManager = LinearLayoutManager(context)
-            setHasFixedSize(true)
-            adapter = adaptador
-        }*/
-
-        /*adaptadorListarGuias =
+        adaptadorListarGuias =
             ListarGuiasAdapter(guiaModels) { position -> showGuiaOptions(position) }
         binding.lvGuiasEstudio.layoutManager = LinearLayoutManager(context)
         binding.lvGuiasEstudio.setHasFixedSize(true)
-        binding.lvGuiasEstudio.adapter = adaptadorListarGuias*/
-        /*cargarElementos(guiaModels)*/
+        binding.lvGuiasEstudio.adapter = adaptadorListarGuias
     }
-
-    /*private fun cargarElementos(guiaModels: List<GuiaModel>) {
-        // Calcula la próxima sección de elementos a cargar
-        val nuevosDatos = guiaModels.subList(numeroElementosCargados, minOf(numeroElementosCargados + elementosPorCarga, guiaModels.size))
-
-        // Agrega los nuevos datos al adaptador
-        adaptadorListarGuias.agregarGuias(nuevosDatos)
-
-        // Incrementa el contador de elementos cargados
-        numeroElementosCargados += nuevosDatos.size
-    }*/
-
 
     @SuppressLint("SdCardPath")
     private fun showGuiaOptions(position: Int) {
