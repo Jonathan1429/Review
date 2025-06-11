@@ -159,11 +159,11 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
             adapter = adaptador
         }*/
 
-        adaptadorListarGuias =
+        /*adaptadorListarGuias =
             ListarGuiasAdapter(guiaModels) { position -> showGuiaOptions(position) }
         binding.lvGuiasEstudio.layoutManager = LinearLayoutManager(context)
         binding.lvGuiasEstudio.setHasFixedSize(true)
-        binding.lvGuiasEstudio.adapter = adaptadorListarGuias
+        binding.lvGuiasEstudio.adapter = adaptadorListarGuias*/
         /*cargarElementos(guiaModels)*/
     }
 
