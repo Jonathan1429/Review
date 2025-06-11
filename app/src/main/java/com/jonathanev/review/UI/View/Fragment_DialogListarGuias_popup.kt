@@ -520,10 +520,20 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
 
     override fun onStart() {
         super.onStart()
-        val dialog = dialog
-        if (dialog != null) {
-            dialog.window!!.setLayout(900, 1200)
-            dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        dialog?.window?.let { window ->
+            val metrics = resources.displayMetrics
+
+            val maxWidth = 900   // en píxeles
+            val maxHeight = 1200 // en píxeles
+
+            val calculatedWidth = (metrics.widthPixels * 0.9).toInt()  // 90% del ancho de pantalla
+            val calculatedHeight = (metrics.heightPixels * 0.8).toInt() // 80% del alto de pantalla
+
+            val finalWidth = minOf(calculatedWidth, maxWidth)
+            val finalHeight = minOf(calculatedHeight, maxHeight)
+
+            window.setLayout(finalWidth, finalHeight)
+            window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         }
     }
 
