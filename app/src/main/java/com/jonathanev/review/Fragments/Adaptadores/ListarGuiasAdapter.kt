@@ -8,6 +8,30 @@ import com.jonathanev.review.Fragments.ViewHolders.ListarGuiasViewHolder
 import com.jonathanev.review.R
 
 class ListarGuiasAdapter(
+    private var guias: List<GuiaModel> = listOf(),
+    private val posClicked: (Int) -> Unit
+) : RecyclerView.Adapter<ListarGuiasViewHolder>() {
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ListarGuiasViewHolder {
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.listar_guias_personalizado, parent, false)
+        return ListarGuiasViewHolder(view)
+    }
+
+    override fun onBindViewHolder(holder: ListarGuiasViewHolder, position: Int) {
+        holder.bind(guias[position], posClicked)
+    }
+
+    override fun getItemCount() = guias.size
+
+    fun submitList(nuevaLista: List<GuiaModel>) {
+        guias = nuevaLista
+        notifyDataSetChanged()
+    }
+}
+
+
+/*class ListarGuiasAdapter(
     private var guias: List<GuiaModel>,
     private val onClick: (Int) -> Unit
 ) : RecyclerView.Adapter<ListarGuiasViewHolder>() {
@@ -23,4 +47,4 @@ class ListarGuiasAdapter(
     }
 
     override fun getItemCount() = guias.size
-}
+}*/

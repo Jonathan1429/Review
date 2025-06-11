@@ -147,8 +147,10 @@ class Activity_Modificar : AppCompatActivity() {
                         if (File(rutaImagen).exists()) {
                             binding.ivImagen.setImage(ImageSource.uri(rutaImagen))
                         } else {
+                            binding.ivImagen.setImage(ImageSource.uri("$fileImagesPiv/$imagen"))
+
                             // Sino se encuentra la ruta especificada
-                            if (rutaImagen.contains("imagenesPivote")) {
+                            /*if (rutaImagen.contains("imagenesPivote")) {
                                 rutaImagen = rutaImagen.replace("imagenesPivote".toRegex(), "imagenes")
 
                                 /*uiState.estadoImagen.textImgUnencrypted =
@@ -166,7 +168,7 @@ class Activity_Modificar : AppCompatActivity() {
                                         "imagenesPivote"
                                     )*/
                                 binding.ivImagen.setImage(ImageSource.uri(rutaImagen))
-                            }
+                            }*/
                         }
                     }
                 }
@@ -204,6 +206,9 @@ class Activity_Modificar : AppCompatActivity() {
             if (uiState.estadoUI.isUpdatedAskAns) {
                 binding.lblPregResp.text = "Pregunta"
 
+                val rutaImagen = File(uiState.estadoImagen.textImgUnencrypted).toString()
+                val imagen = rutaImagen.substringAfterLast("/")
+
                 if (!uiState.estadoUI.isThereMoreAsks) {
                     binding.etPregResp.text?.clear()
                 } else {
@@ -213,6 +218,10 @@ class Activity_Modificar : AppCompatActivity() {
                     } else {
                         // Cuando hay una imagen hay que poner esto
                         binding.etPregResp.setText(uiState.estadoImagen.textImgEcrypted)
+
+                        binding.ivImagen.setImage(ImageSource.uri("$fileImagesPiv/$imagen"))
+
+                        /*binding.etPregResp.setText(uiState.estadoImagen.textImgEcrypted)
 
                         val rutaImagen = File(uiState.estadoImagen.textImgUnencrypted)
                         if (rutaImagen.exists()) {
@@ -234,7 +243,7 @@ class Activity_Modificar : AppCompatActivity() {
                                     )
                                 binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
                             }
-                        }
+                        }*/
                     }
                 }
 
@@ -281,7 +290,10 @@ class Activity_Modificar : AppCompatActivity() {
                             binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
                         } else {
                             // Sino se encuentra la ruta especificada
-                            if (uiState.estadoImagen.textImgUnencrypted.contains("imagenesPivote")) {
+                            val imagen = rutaImagen.toString().substringAfterLast("/")
+                            binding.ivImagen.setImage(ImageSource.uri("$fileImagesPiv/$imagen"))
+
+                            /*if (uiState.estadoImagen.textImgUnencrypted.contains("imagenesPivote")) {
                                 uiState.estadoImagen.textImgUnencrypted =
                                     uiState.estadoImagen.textImgUnencrypted.replace(
                                         "imagenesPivote".toRegex(),
@@ -295,7 +307,7 @@ class Activity_Modificar : AppCompatActivity() {
                                         "imagenesPivote"
                                     )
                                 binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
-                            }
+                            }*/
                         }
                     }
                 }
@@ -451,7 +463,7 @@ class Activity_Modificar : AppCompatActivity() {
     private fun initListeners() {
         binding.barraSuperiorRegreso.imgvBack.setOnClickListener {
             cancelarArchivo()
-            deleteImages()
+            //deleteImages()
         }
 
         binding.imgvPregResp.setOnClickListener {
@@ -472,6 +484,8 @@ class Activity_Modificar : AppCompatActivity() {
         binding.imgvPrevious.setOnClickListener {
             val editable: Editable =
                 Editable.Factory.getInstance().newEditable(binding.etPregResp.text)
+            Log.i("Editable", editable.toString())
+
             var isEtPregunta = false
             if (binding.lblPregResp.text.toString() == "Pregunta") {
                 isEtPregunta = true
@@ -487,6 +501,8 @@ class Activity_Modificar : AppCompatActivity() {
         binding.imgvNext.setOnClickListener {
             val editable: Editable =
                 Editable.Factory.getInstance().newEditable(binding.etPregResp.text)
+            Log.i("Editable", editable.toString())
+
             var isEtPregunta = false
             if (binding.lblPregResp.text.toString() == "Pregunta") {
                 isEtPregunta = true
@@ -722,7 +738,7 @@ class Activity_Modificar : AppCompatActivity() {
                                 3
                             )
                             // "$baseRutaImagen$fileImages/$filename",
-                            // binding.etPregResp.setText(cifrado)
+                            //binding.etPregResp.setText(cifrado)
 
                             binding.tilContenidoPregResp.visibility = View.GONE
                             binding.ivImagen.visibility = View.VISIBLE
@@ -860,6 +876,8 @@ class Activity_Modificar : AppCompatActivity() {
                 } else {
                     Log.d("ArchivoEliminado", "Archivo no eliminado")
                 }
+
+                deleteImages()
                 finish()
             }
             .setNegativeButton(

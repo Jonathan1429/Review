@@ -175,6 +175,10 @@ dependencies {
     // Para que JUnit Platform reconozca y lance JUnit4:
     testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.9.0"
     testRuntimeOnly "org.junit.platform:junit-platform-launcher:1.9.0"
+
+    implementation "com.github.bumptech.glide:glide:4.16.0"
+    //kapt 'com.github.bumptech.glide:compiler:4.16.0' // Si usas anotaciones
+
 }
 
 // Configuración de Jacoco

@@ -71,6 +71,16 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
 
         initUI()
 
+        adaptadorListarGuias =
+            ListarGuiasAdapter { position -> showGuiaOptions(position) }
+
+        binding.lvGuiasEstudio.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = adaptadorListarGuias
+            setHasFixedSize(true)
+            itemAnimator = null // Opcional: remueve animaciones que pueden causar lag
+        }
+
         guiasViewModel.guias.observe(viewLifecycleOwner) {
             if (it.isEmpty()) {
                 binding.tvSinGuias.visibility = View.VISIBLE
@@ -138,19 +148,22 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
     }
 
     private fun showGuias(guiaModels: List<GuiaModel>) {
-        val adaptador = ListarGuiasAdapter(guiaModels) { position ->
+        adaptadorListarGuias.submitList(guiaModels)
+
+        /*val adaptador = ListarGuiasAdapter(guiaModels) { position ->
             showGuiaOptions(position)
         }
         with(binding.lvGuiasEstudio) {
             layoutManager = LinearLayoutManager(context)
             setHasFixedSize(true)
             adapter = adaptador
-        }
-        /*adaptadorListarGuias =
+        }*/
+
+        adaptadorListarGuias =
             ListarGuiasAdapter(guiaModels) { position -> showGuiaOptions(position) }
         binding.lvGuiasEstudio.layoutManager = LinearLayoutManager(context)
         binding.lvGuiasEstudio.setHasFixedSize(true)
-        binding.lvGuiasEstudio.adapter = adaptadorListarGuias*/
+        binding.lvGuiasEstudio.adapter = adaptadorListarGuias
         /*cargarElementos(guiaModels)*/
     }
 

@@ -4,10 +4,10 @@
     <selectionStates>
       <SelectionState runConfigName="app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-04-03T00:30:20.454051200Z">
+        <DropdownSelection timestamp="2025-06-11T01:19:37.556828600Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\jose_\.android\avd\Pixel_6_API_35_N.avd" />
+              <DeviceId pluginId="PhysicalDevice" identifier="serial=R92X70DSGRD" />
             </handle>
           </Target>
         </DropdownSelection>
@@ -24,12 +24,6 @@
         </DropdownSelection>
         <DialogSelection />
       </SelectionState>
-      <SelectionState runConfigName="TestSetClickSiguienteModificandoUseCase">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
-      <SelectionState runConfigName="TestSetClickRegresarModificandouseCase">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
       <SelectionState runConfigName="TestSetClickEliminarUseCase">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
@@ -37,6 +31,9 @@
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
       <SelectionState runConfigName="das_click_siguiente_si_hay_mas_preguntas_te_va_a_regresar_esa()">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
+      <SelectionState runConfigName="TestRepasarGuiaViewModel">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>
