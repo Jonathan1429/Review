@@ -131,7 +131,7 @@ class Activity_Cuestionario : AppCompatActivity() {
         activityCuestionarioViewModel.uiStateBtnRoll.observe(this) { uiState ->
             if (uiState.estadoUI.isUpdatedAskAns) {
                 girarCardView()
-                if (uiState.estadoUI.isEtPregunta) {
+                if (!uiState.estadoUI.isEtPregunta) {
                     binding.lblPregResp.text = "Respuesta"
                 } else {
                     binding.lblPregResp.text = "Pregunta"
@@ -324,6 +324,7 @@ class Activity_Cuestionario : AppCompatActivity() {
             if (binding.lblPregResp.text.toString() == "Pregunta") {
                 isEtPregunta = true
             }
+
             activityCuestionarioViewModel.clickedRoll(
                 editable,
                 isEtPregunta,
