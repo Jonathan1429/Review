@@ -11,15 +11,15 @@ plugins {
 }
 
 android {
-    compileSdk 34
+    compileSdk 35
 
     defaultConfig {
         applicationId "com.jonathanev.review"
         // minSdk 21
         minSdk 26
-        targetSdk 34
+        targetSdk 35
         versionCode 13
-        versionName "2.4"
+        versionName "2.5"
 
         // Con TestRunner personalizado, falta investigar mas este punto
         //testInstrumentationRunner "com.jonathanev.review.CustomTestRunner"
