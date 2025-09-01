@@ -1,16 +1,22 @@
+# Android Studio / IntelliJ
 *.iml
 .gradle
 /local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
+/.idea/*
+# opcional, si quiero compartir estilo de código
+!.idea/codeStyles
+
+# Build outputs
 /build
 /captures
 .externalNativeBuild
 .cxx
-local.properties
-.gitconfig
+*.apk
+*.aab
+
+# Sistema
+.DS_Store
+
+# Para que Git los ignore de verdad necesitas sacarlos del índice pero mantenerlos en tu máquina
+# (Se aplica el siguiente código en gitBash).
+# git rm --cached .idea/deploymentTargetSelector.xml
