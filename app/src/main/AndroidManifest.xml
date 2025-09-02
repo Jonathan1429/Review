@@ -4,7 +4,11 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
-    <!-- BUGS
+    <!-- URGENTE
+         1.- Cuando se ponen colores seguidos o un color sobrepasa otro ocurren errores o cosas inesperadas.
+         Ejemplo: Pos 0-5 al 4-7
+
+         BUGS
          1.- (CREENCIA) Probar copiar un texto de WhatsApp, creo que cuando se copia y se pega en la App
              trae textos extraños.
          NO COMPROBADO AÚN
@@ -21,7 +25,7 @@
 
          3.-Poder cambiarle el nombre a una carpeta
 
-         4.- Implementar un botón que limpie archivos basura (Imagenes)
+         4.- Implementar un botón que limpie archivos basura, esto mas que nada porque cuando eliminas guias y demás las imagenes no se borran (Imagenes)
 
          PRUEBAS
 
