@@ -97,6 +97,9 @@ android {
 }
 
 dependencies {
+    // InstantTaskExecutorRule
+    testImplementation "androidx.arch.core:core-testing:2.2.0"
+
     String daggerHilt = "2.48"
     String mockkVersion = "1.13.12"
 

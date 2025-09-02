@@ -21,7 +21,7 @@ import javax.xml.parsers.DocumentBuilder
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.parsers.ParserConfigurationException
 
-class XmlSerializerFactory @Inject constructor() {
+open class XmlSerializerFactory @Inject constructor() {
     fun create(): XmlSerializer = Xml.newSerializer()
 }
 
@@ -30,8 +30,8 @@ class FileOutputStreamFactory @Inject constructor() {
 }
 
 class GuiaRepository @Inject constructor(
-    val getAllGuiasUseCase: GetAllGuiasUseCase,
-    val guiaProvider: GuiaProvider,
+    private val getAllGuiasUseCase: GetAllGuiasUseCase,
+    private val guiaProvider: GuiaProvider,
     private val xmlSerializerFactory: XmlSerializerFactory,
     private val fileOutputStreamFactory: FileOutputStreamFactory
     //@ApplicationContext private val context: Context
