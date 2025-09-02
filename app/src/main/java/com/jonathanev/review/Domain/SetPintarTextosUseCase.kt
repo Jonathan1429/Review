@@ -5,15 +5,18 @@ import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
 import com.jonathanev.review.Core.Constants.baseRutaImagen
 import com.jonathanev.review.Core.Constants.baseRutaImagenCifrado
+import com.jonathanev.review.Data.Interface.FileHelper
 import com.jonathanev.review.Data.Model.ColorPregModel
 import com.jonathanev.review.Data.Model.EstadoImagen
 import com.jonathanev.review.Data.Model.EstadoUI
+import com.jonathanev.review.Data.Model.FileHelperImpl
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import java.io.File
 import javax.inject.Inject
 
 class SetPintarTextosUseCase @Inject constructor(
-    private val setCifrarRutaImagenUseCase: SetCifrarRutaImagenUseCase
+    private val setCifrarRutaImagenUseCase: SetCifrarRutaImagenUseCase,
+    private val fileHelper: FileHelperImpl
 ) {
     operator fun invoke(
         isEtPregunta: Boolean,
@@ -48,7 +51,7 @@ class SetPintarTextosUseCase @Inject constructor(
             val imagen = texto.replaceBeforeLast("/", "").replace("/", "")
             texto = "$soloRuta$imagen"
 
-            if (!File("" + texto).exists()) {
+            if (!fileHelper.exists("" + texto)) {
                 texto = texto.replace("imagenes".toRegex(), "imagenesPivote")
             }
 
