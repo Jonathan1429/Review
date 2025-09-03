@@ -516,8 +516,8 @@ class Activity_Modificar : AppCompatActivity() {
                     .setPositiveButton(
                         "Si"
                     ) { _, _ ->
-                        modificarViewModel.showMessageMoreQuestions =
-                            !modificarViewModel.showMessageMoreQuestions
+                        // Cambia el valor de la bandera
+                        modificarViewModel.toggleShowMessageMoreQuestions()
 
                         modificarViewModel.onClickImgvNext(
                             editable,

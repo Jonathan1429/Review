@@ -1,0 +1,621 @@
+package com.jonathanev.review.UI.ViewModel
+
+import android.text.Editable
+import android.text.SpannableStringBuilder
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.lifecycle.LiveData
+import com.jonathanev.review.Domain.GetGuiaUseCase
+import com.jonathanev.review.Domain.GetObtenerDatosXMLUseCase
+import com.jonathanev.review.Domain.SetCifrarRutaImagenUseCase
+import com.jonathanev.review.Domain.SetClickEliminarUseCase
+import com.jonathanev.review.Domain.SetClickRegresarModicandoUseCase
+import com.jonathanev.review.Domain.SetClickSaveUseCase
+import com.jonathanev.review.Domain.SetClickSiguienteModificandoUseCase
+import com.jonathanev.review.Domain.SetPintarLetraUseCase
+import com.jonathanev.review.Domain.SetPintarTextosUseCase
+import com.jonathanev.review.Domain.SetRollClickedUseCase
+import androidx.lifecycle.Observer
+import com.jonathanev.review.Data.Model.DataStoreManager
+import com.jonathanev.review.Data.Model.EstadoUI
+import com.jonathanev.review.Data.Model.GuiaModel
+import com.jonathanev.review.Data.Model.PreguntaRespuestaModel
+import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
+import io.kotlintest.TestCase
+import io.mockk.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.*
+import org.junit.After
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
+import org.junit.jupiter.api.Assertions.assertDoesNotThrow
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeoutException
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class ModificarViewModelTest {
+
+    @get:Rule
+    val instantTaskExecutorRule = InstantTaskExecutorRule()
+
+    private val testDispatcher = UnconfinedTestDispatcher() //StandardTestDispatcher()
+
+    private val setRollClickedUseCase = mockk<SetRollClickedUseCase>()
+    private val setClickRegresarModicandoUseCase = mockk<SetClickRegresarModicandoUseCase>()
+    private val setClickSiguienteModicandoUseCase = mockk<SetClickSiguienteModificandoUseCase>()
+    private val setClickEliminarUseCase = mockk<SetClickEliminarUseCase>()
+    private val setClickSaveUseCase = mockk<SetClickSaveUseCase>()
+    private val setCifrarRutaImagenUseCase = mockk<SetCifrarRutaImagenUseCase>()
+    private val setPintarLetraUseCase = mockk<SetPintarLetraUseCase>(relaxed = true)
+    //private val setPintarLetraUseCase = mockk<SetPintarLetraUseCase>()
+    private val getObtenerDatosXMLUseCase = mockk<GetObtenerDatosXMLUseCase>()
+    private val setPintarTextosUseCase = mockk<SetPintarTextosUseCase>()
+    private val getGuiaUseCase = mockk<GetGuiaUseCase>()
+
+    private val dataStore: DataStoreManager = mockk(relaxed = true)
+    private lateinit var viewModel: ModificarViewModel
+
+    // Arrange
+    /*val viewModel = ModificarViewModel(
+        application = mockk(),
+        setRollClickedUseCase = mockk(),
+        setClickRegresarModicandoUseCase = mockk(),
+        setClickSiguienteModicandoUseCase = mockk(),
+        setClickEliminarUseCase = mockk(),
+        setClickSaveUseCase = mockk(),
+        setCifrarRutaImagenUseCase = mockk(),
+        setPintarTextosUseCase = mockk(),
+        setPintarLetraUseCase = mockk(),
+        getObtenerDatosXMLUseCase = mockk(),
+        getGuiaUseCase = mockk()
+    )*/
+
+    @Before
+    fun setup() {
+        Dispatchers.setMain(testDispatcher)
+        //Dispatchers.setIo(StandardTestDispatcher())
+
+        // Configurar el mock de dataStore
+        coEvery { dataStore.getCountImage() } returns flowOf(0)
+        coEvery { dataStore.setIncrementCounter() } just Runs
+        coEvery { dataStore.resetCounter() } just Runs
+
+        viewModel = ModificarViewModel(
+            //mockk(relaxed = true), // application
+            setRollClickedUseCase,
+            setClickRegresarModicandoUseCase,
+            setClickSiguienteModicandoUseCase,
+            setClickEliminarUseCase,
+            setClickSaveUseCase,
+            setCifrarRutaImagenUseCase,
+            setPintarLetraUseCase,
+            getObtenerDatosXMLUseCase,
+            setPintarTextosUseCase,
+            getGuiaUseCase,
+            dataStore,
+            ioDispatcher = testDispatcher,
+            mainDispatcher = testDispatcher
+        )
+
+        //viewModel.dispatcher = testDispatcher
+    }
+
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
+    }
+
+    @Test
+    fun `test contImagenes LiveData emits values`() = runTest {
+        // Mock de dataStore
+        coEvery { dataStore.getCountImage() } returns flowOf(5)
+
+        val observer = mockk<Observer<Int>>(relaxed = true)
+        viewModel.contImagenes.observeForever(observer)
+
+        // Llamamos explícitamente a getCountImage()
+        viewModel.getCountImage()
+        advanceUntilIdle()
+
+        // Verificar que se emitió el valor
+        verify { observer.onChanged(5) }
+
+        // Limpiar
+        viewModel.contImagenes.removeObserver(observer)
+    }
+
+    // TEST 1: Verificar el getter de LiveData
+    @Test
+    fun `test textoImagenCorrutina LiveData getter returns correct LiveData`() {
+        // Act
+        val result = viewModel.textoImagenCorrutina
+
+        // Assert
+        assertNotNull(result)
+        assertTrue(result is LiveData<String>)
+    }
+
+    // TEST 3: Probar llamaCorruIncremento() - ESTE ES EL MÁS IMPORTANTE
+    @Test
+    fun `test llamaCorruIncremento sets LiveData and calls increment`() = runTest {
+        // Arrange
+        val testCifrado = "test_encrypted_string"
+        val observer = mockk<Observer<String>>(relaxed = true)
+
+        // Observar el LiveData
+        viewModel.textoImagenCorrutina.observeForever(observer)
+
+        // Act
+        viewModel.llamaCorruIncremento(testCifrado)
+
+        // Assert
+        // Verificar que se llama setIncrementCounter
+        coVerify(exactly = 1) { dataStore.setIncrementCounter() }
+
+        // Verificar que se actualiza el LiveData
+        verify { observer.onChanged(testCifrado) }
+
+        // Cleanup
+        viewModel.textoImagenCorrutina.removeObserver(observer)
+    }
+
+    // TEST 4: Probar resetCounter()
+    @Test
+    fun `test resetCounter calls dataStore resetCounter`() = runTest {
+        // Act
+        viewModel.resetCounter()
+
+        // Assert
+        coVerify(exactly = 1) { dataStore.resetCounter() }
+    }
+
+    // TEST 5: Probar setIncrementCounter() indirectamente a través de llamaCorruIncremento
+    @Test
+    fun `test setIncrementCounter is called with IO dispatcher`() = runTest {
+        // Arrange
+        val testCifrado = "test"
+
+        // Act
+        viewModel.llamaCorruIncremento(testCifrado)
+
+        // Assert - setIncrementCounter se llama internamente
+        coVerify(exactly = 1) { dataStore.setIncrementCounter() }
+    }
+
+
+
+    // ======= Test para getGuia =======
+    @Test
+    fun `getGuia actualiza guiaModel`() {
+        val ruta = "ruta/falsa"
+        val guiaMock = mockk<GuiaModel>()
+        every { getGuiaUseCase(ruta) } returns guiaMock
+
+        val observer = mockk<Observer<GuiaModel>>(relaxed = true)
+        viewModel.guiaModel.observeForever(observer)
+
+        viewModel.getGuia(ruta)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        verify { observer.onChanged(guiaMock) }
+    }
+
+    // ======= Test para getObtenerDatosXML =======
+    // Dos test juntos (Abajo los puse separados - Igual este funciona)
+    /*@Test
+    fun `getObtenerDatosXML maneja correctamente isThereMoreAsks`() = runBlocking {
+        // ======= Caso 1: Solo una pregunta =======
+        val pregunta1 = mockk<PreguntaRespuestaModel> {
+            every { pregunta } returns "Pregunta 1"
+            every { respuesta } returns "Respuesta 1"
+        }
+
+        val preguntasCaso1 = listOf(pregunta1)
+        every { getObtenerDatosXMLUseCase("archivo.xml", "/ruta/falsa") } returns preguntasCaso1
+
+
+        val estadoUICaso1 = EstadoUI(
+            isThereMoreAsks = true, // Es true porque inicialmente apenas mostrarás la primer pregunta.
+            isUpdatedAskAns = false
+        )
+
+        val validacionesCaso1 = ValidacionesGuiaModel(
+            estadoUI = estadoUICaso1
+        )
+
+        every {
+            setPintarTextosUseCase(
+                isEtPregunta = true,
+                preguntas = any(),
+                respuestas = any(),
+                contadorPregunta = any(),
+                ruta = any()
+            )
+        } returns validacionesCaso1
+
+        val resultadoCaso1 = viewModel.getObtenerDatosXML("archivo.xml", "/ruta/falsa")
+
+        assertEquals(validacionesCaso1, resultadoCaso1)
+        assertEquals(listOf("Pregunta 1"), viewModel.preguntas)
+        assertEquals(listOf("Respuesta 1"), viewModel.respuestas)
+
+        // ======= Caso 2: Varias preguntas =======
+        // Se debe limpiar el ViewModel para tener el segundo caso desde cero
+        viewModel.preguntas.clear()
+        viewModel.respuestas.clear()
+
+        val pregunta2 = mockk<PreguntaRespuestaModel> {
+            every { pregunta } returns "Pregunta 2"
+            every { respuesta } returns "Respuesta 2"
+        }
+
+        val preguntasCaso2 = listOf(pregunta1, pregunta2)
+        every { getObtenerDatosXMLUseCase("archivo.xml", "/ruta/falsa") } returns preguntasCaso2
+
+        val estadoUICaso2 = EstadoUI(
+            isThereMoreAsks = true, // hay más de una pregunta
+            isUpdatedAskAns = false
+        )
+
+        val validacionesCaso2 = ValidacionesGuiaModel(
+            estadoUI = estadoUICaso2
+        )
+
+        every {
+            setPintarTextosUseCase(
+                isEtPregunta = true,
+                preguntas = any(),
+                respuestas = any(),
+                contadorPregunta = any(),
+                ruta = any()
+            )
+        } returns validacionesCaso2
+
+        val resultadoCaso2 = viewModel.getObtenerDatosXML("archivo.xml", "/ruta/falsa")
+
+        assertEquals(validacionesCaso2, resultadoCaso2)
+        assertEquals(listOf("Pregunta 1", "Pregunta 2"), viewModel.preguntas)
+        assertEquals(listOf("Respuesta 1", "Respuesta 2"), viewModel.respuestas)
+    }*/
+
+    @Test
+    fun `getObtenerDatosXML maneja correctamente una sola pregunta`() = runBlocking {
+        val pregunta1 = mockk<PreguntaRespuestaModel> {
+            every { pregunta } returns "Pregunta 1"
+            every { respuesta } returns "Respuesta 1"
+        }
+        val preguntas = listOf(pregunta1)
+        every { getObtenerDatosXMLUseCase("archivo.xml", "/ruta/falsa") } returns preguntas
+
+        val estadoUI = EstadoUI(isThereMoreAsks = true, isUpdatedAskAns = false)
+        val validaciones = ValidacionesGuiaModel(estadoUI = estadoUI)
+
+        every {
+            setPintarTextosUseCase(
+                isEtPregunta = true,
+                preguntas = any(),
+                respuestas = any(),
+                contadorPregunta = any(),
+                ruta = any()
+            )
+        } returns validaciones
+
+        val resultado = viewModel.getObtenerDatosXML("archivo.xml", "/ruta/falsa")
+
+        assertEquals(validaciones, resultado)
+        assertEquals(listOf("Pregunta 1"), viewModel.preguntas)
+        assertEquals(listOf("Respuesta 1"), viewModel.respuestas)
+    }
+
+    @Test
+    fun `getObtenerDatosXML maneja correctamente varias preguntas`() = runBlocking {
+        val pregunta1 = mockk<PreguntaRespuestaModel> {
+            every { pregunta } returns "Pregunta 1"
+            every { respuesta } returns "Respuesta 1"
+        }
+        val pregunta2 = mockk<PreguntaRespuestaModel> {
+            every { pregunta } returns "Pregunta 2"
+            every { respuesta } returns "Respuesta 2"
+        }
+        val preguntas = listOf(pregunta1, pregunta2)
+        every { getObtenerDatosXMLUseCase("archivo.xml", "/ruta/falsa") } returns preguntas
+
+        val estadoUI = EstadoUI(isThereMoreAsks = true, isUpdatedAskAns = false)
+        val validaciones = ValidacionesGuiaModel(estadoUI = estadoUI)
+
+        every {
+            setPintarTextosUseCase(
+                isEtPregunta = true,
+                preguntas = any(),
+                respuestas = any(),
+                contadorPregunta = any(),
+                ruta = any()
+            )
+        } returns validaciones
+
+        val resultado = viewModel.getObtenerDatosXML("archivo.xml", "/ruta/falsa")
+
+        assertEquals(validaciones, resultado)
+        assertEquals(listOf("Pregunta 1", "Pregunta 2"), viewModel.preguntas)
+        assertEquals(listOf("Respuesta 1", "Respuesta 2"), viewModel.respuestas)
+    }
+
+    // ======= Test para getUrlImagenCifrada =======
+    @Test
+    fun `getUrlImagenCifrada retorna ruta cifrada`() {
+        val url = "url.png"
+        val cifrado = "cifrado"
+        every { setCifrarRutaImagenUseCase(url, 1) } returns cifrado
+
+        val result = viewModel.getUrlImagenCifrada(url, 1)
+        assertEquals(cifrado, result)
+    }
+
+    // ======= Test para onClickImgvPrevious =======
+    @Test
+    fun `onClickImgvPrevious actualiza contadorPregunta y LiveData`() {
+        val editable = mockk<Editable>(relaxed = true)
+        val ruta = "ruta"
+        val response = ValidacionesGuiaModel("ok", estadoUI = EstadoUI(isUpdatedAskAns = true))
+        every { setClickRegresarModicandoUseCase(any(), any(), any(), editable, any(), ruta) } returns response
+
+        val observer = mockk<Observer<ValidacionesGuiaModel>>(relaxed = true)
+        viewModel.uiStateBtnBack.observeForever(observer)
+
+        viewModel.onClickImgvPrevious(editable, true, ruta)
+
+        assertEquals(-1, viewModel.contadorPregunta) // decrementa porque isUpdatedAskAns = true
+        verify { observer.onChanged(response) }
+    }
+
+    @Test
+    fun `onClickImgvPrevious actualiza contadorPregunta, LiveData y no guarda el valor`() {
+        val editable = mockk<Editable>(relaxed = true)
+        val ruta = "ruta"
+        val response = ValidacionesGuiaModel("ok", estadoUI = EstadoUI(isUpdatedAskAns = false))
+        every { setClickRegresarModicandoUseCase(any(), any(), any(), editable, any(), ruta) } returns response
+
+        val observer = mockk<Observer<ValidacionesGuiaModel>>(relaxed = true)
+        viewModel.uiStateBtnBack.observeForever(observer)
+
+        viewModel.onClickImgvPrevious(editable, true, ruta)
+
+        assertEquals(0, viewModel.contadorPregunta) // no decrementa porque isUpdatedAskAns = false
+        verify { observer.onChanged(response) }
+    }
+
+    // ======= Test para setPintarLetra =======
+    @Test
+    fun `setPintarLetra llama a useCase`() {
+        val editable = mockk<Editable>(relaxed = true)
+        viewModel.setPintarLetra(editable, 0, 0)
+        verify { setPintarLetraUseCase(editable, 0, 0) }
+    }
+
+    @Test
+    fun `toggleShowMessageMoreQuestions cambia el valor`() {
+        // Act & Assert
+        // Valor inicial (llama al getter)
+        assertTrue(viewModel.showMessageMoreQuestions)
+
+        // Cambiamos el estado (llama al setter interno)
+        viewModel.toggleShowMessageMoreQuestions()
+
+        // Verificamos que el getter refleja el cambio
+        assertFalse(viewModel.showMessageMoreQuestions)
+
+        // Lo volvemos a cambiar
+        viewModel.toggleShowMessageMoreQuestions()
+
+        // Otra vez debería estar en true
+        assertTrue(viewModel.showMessageMoreQuestions)
+    }
+
+    @Test
+    fun `actualizacion de eventos MutableLiveData y contadorPregunta - cobertura completa`() = runTest {
+        val expected = ValidacionesGuiaModel()
+        val observer = mockk<Observer<ValidacionesGuiaModel>>(relaxed = true)
+        val editable: Editable = SpannableStringBuilder("Texto prueba")
+
+        // --- Roll ---
+        every { setRollClickedUseCase(any(), any(), any(), any(), any(), any()) } returns expected
+        testLiveDataAction(observer, viewModel.uiStateBtnRoll, {
+            viewModel.clickedRoll(editable, isEtPregunta = true, ruta = "rutaPrueba")
+            expected
+        }, expected)
+
+        // --- Next con incremento de contadorPregunta ---
+        viewModel.setContadorPreguntaTest(0)
+        every { setClickSiguienteModicandoUseCase(any(), any(), any(), any(), any(), any()) } returns mockk {
+            every { estadoUI } returns mockk {
+                every { isUpdatedAskAns } returns true
+                every { isThereMoreAsks } returns true
+            }
+        }
+        testLiveDataAction(observer, viewModel.uiStateBtnNext, {
+            viewModel.onClickImgvNext(editable, isEtPregunta = true, ruta = "rutaPrueba")
+            expected
+        }, expected)
+        assertEquals(1, viewModel.contadorPregunta) // incremento ejecutado
+
+        // --- Next sin incremento (isUpdatedAskAns = false) ---
+        viewModel.setContadorPreguntaTest(1)
+        every { setClickSiguienteModicandoUseCase(any(), any(), any(), any(), any(), any()) } returns mockk {
+            every { estadoUI } returns mockk {
+                every { isUpdatedAskAns } returns false
+                every { isThereMoreAsks } returns true
+            }
+        }
+        viewModel.onClickImgvNext(editable, isEtPregunta = true, ruta = "rutaPrueba")
+        assertEquals(1, viewModel.contadorPregunta) // contador no cambia
+
+        // --- Eliminar con decremento de contadorPregunta ---
+        viewModel.setContadorPreguntaTest(1)
+        every { setClickEliminarUseCase(any(), any(), any(), any()) } returns expected
+        testLiveDataAction(observer, viewModel.uiStateBtnEliminar, {
+            viewModel.onClickEliminar("rutaPrueba")
+            expected
+        }, expected)
+        assertEquals(0, viewModel.contadorPregunta) // decremento ejecutado
+
+        // --- Eliminar sin decremento (contadorPregunta <= 0) ---
+        viewModel.setContadorPreguntaTest(0)
+        viewModel.onClickEliminar("rutaPrueba")
+        assertEquals(0, viewModel.contadorPregunta) // no decrementa
+
+        // --- Save ---
+        every { setClickSaveUseCase(any(), any(), any(), any(), any(), any(), any(), any()) } returns expected
+        testLiveDataAction(observer, viewModel.uiStateBtnSave, {
+            viewModel.onClickImgvSave(
+                editable,
+                nombreArchivo = "archivo.xml",
+                isEtPregunta = true,
+                didTheGuideAlreadyExist = false,
+                ruta = "rutaPrueba"
+            )
+            expected
+        }, expected)
+    }
+
+    /*@Test
+    fun `actualizacion de eventos MutableLiveData y contadorPregunta`() = runTest {
+        val expected = ValidacionesGuiaModel()
+        val observer = mockk<Observer<ValidacionesGuiaModel>>(relaxed = true)
+        val editable: Editable = SpannableStringBuilder("Texto prueba")
+
+        // --- Roll ---
+        every { setRollClickedUseCase(any(), any(), any(), any(), any(), any()) } returns expected
+        testLiveDataAction(observer, viewModel.uiStateBtnRoll, {
+            viewModel.clickedRoll(editable, isEtPregunta = true, ruta = "rutaPrueba")
+            expected
+        }, expected)
+
+        // --- Next con incremento de contadorPregunta ---
+        // Inicializamos contador en 0
+        viewModel.setContadorPreguntaTest(0)
+
+        every { setClickSiguienteModicandoUseCase(any(), any(), any(), any(), any(), any()) } returns mockk {
+            every { estadoUI } returns mockk {
+                every { isUpdatedAskAns } returns true
+                every { isThereMoreAsks } returns true
+            }
+        }
+
+        testLiveDataAction(observer, viewModel.uiStateBtnNext, {
+            viewModel.onClickImgvNext(editable, isEtPregunta = true, ruta = "rutaPrueba")
+            expected
+        }, expected)
+
+        // Verificamos incremento del contador
+        assertEquals(1, viewModel.contadorPregunta)
+
+        // --- Eliminar con decremento de contadorPregunta ---
+        // Simulamos que el contador es > 0 para que se ejecute el decremento
+        viewModel.setContadorPreguntaTest(1)
+
+        every { setClickEliminarUseCase(any(), any(), any(), any()) } returns expected
+        testLiveDataAction(observer, viewModel.uiStateBtnEliminar, {
+            viewModel.onClickEliminar("rutaPrueba")
+            expected
+        }, expected)
+
+        // Verificamos decremento del contador
+        assertEquals(0, viewModel.contadorPregunta)
+
+        // --- Save ---
+        every { setClickSaveUseCase(any(), any(), any(), any(), any(), any(), any(), any()) } returns expected
+        testLiveDataAction(observer, viewModel.uiStateBtnSave, {
+            viewModel.onClickImgvSave(
+                editable,
+                nombreArchivo = "archivo.xml",
+                isEtPregunta = true,
+                didTheGuideAlreadyExist = false,
+                ruta = "rutaPrueba"
+            )
+            expected
+        }, expected)
+    }*/
+
+    /*@Test
+    fun `actualizacion de eventos MutableLiveData`() {
+        val expected = ValidacionesGuiaModel()
+        val observer = mockk<Observer<ValidacionesGuiaModel>>(relaxed = true)
+        val editable: Editable = SpannableStringBuilder("Texto prueba")
+
+        // Roll
+        every { setRollClickedUseCase(any(), any(), any(), any(), any(), any()) } returns expected
+        testLiveDataAction(observer, viewModel.uiStateBtnRoll, {
+            viewModel.clickedRoll(editable, isEtPregunta = true, ruta = "rutaPrueba")
+            expected
+        }, expected)
+
+        // Next
+        every { setClickSiguienteModicandoUseCase(any(), any(), any(), any(), any(), any()) } returns expected
+        testLiveDataAction(observer, viewModel.uiStateBtnNext, {
+            viewModel.onClickImgvNext(editable, isEtPregunta = true, ruta = "rutaPrueba")
+            expected
+        }, expected)
+
+        // Eliminar
+        every { setClickEliminarUseCase(any(), any(), any(), any()) } returns expected
+        testLiveDataAction(observer, viewModel.uiStateBtnEliminar, {
+            viewModel.onClickEliminar("rutaPrueba")
+            expected
+        }, expected)
+
+        // Save
+        every { setClickSaveUseCase(any(), any(), any(), any(), any(), any(), any(), any()) } returns expected
+        testLiveDataAction(observer, viewModel.uiStateBtnSave, {
+            viewModel.onClickImgvSave(
+                editable,
+                nombreArchivo = "archivo.xml",
+                isEtPregunta = true,
+                didTheGuideAlreadyExist = false,
+                ruta = "rutaPrueba"
+            )
+            expected
+        }, expected)
+    }*/
+
+    /*@Test
+    fun `activacion del test para cobertura publica del contador de imagenes`() {
+        val observer = mockk<Observer<Int>>(relaxed = true)
+        viewModel.contImagenes.observeForever(observer)
+    }*/
+
+
+    /*@Test
+    fun `getCountImage invoca dataStore getCountImage`() = runTest {
+        viewModel.getCountImage()
+        advanceUntilIdle()
+
+        coVerify { dataStore.getCountImage() }
+    }
+
+    @Test
+    fun `resetCounter invoca dataStore resetCounter`() = runTest {
+        viewModel.resetCounter()
+
+        coVerify { dataStore.resetCounter() }
+    }*/
+
+    private fun <T> testLiveDataAction(
+        observer: Observer<T>,
+        liveData: LiveData<T>,
+        action: () -> T,
+        expected: T
+    ) {
+        liveData.observeForever(observer)
+        action()
+        verify { observer.onChanged(expected) }
+        liveData.removeObserver(observer)
+    }
+}
