@@ -1,11 +1,10 @@
 package com.jonathanev.review.UI.ViewModel
 
-import android.app.Application
 import android.text.Editable
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.DI.IoDispatcher
 import com.jonathanev.review.DI.MainDispatcher
@@ -24,11 +23,9 @@ import com.jonathanev.review.Domain.SetPintarTextosUseCase
 import com.jonathanev.review.Domain.SetRollClickedUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import androidx.annotation.VisibleForTesting
 
 @HiltViewModel
 class ModificarViewModel @Inject constructor(
@@ -43,13 +40,7 @@ class ModificarViewModel @Inject constructor(
     private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
     private val setPintarTextosUseCase: SetPintarTextosUseCase,
     private val getGuiaUseCase: GetGuiaUseCase,
-    // Se pusieron aquí para facilitar las pruebas.
-    // Solo para tests
-    /*internal var dataStore: DataStoreManager? = null,
-    internal var dispatcher: CoroutineDispatcher = Dispatchers.Main*/
-    //private val dataStore: DataStoreManager = DataStoreManager.getInstance(application)
     private val dataStore: DataStoreManager,
-    //private val dispatcher: CoroutineDispatcher = Dispatchers.Main
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     @MainDispatcher private val mainDispatcher: CoroutineDispatcher
 ) : ViewModel() {
@@ -65,11 +56,6 @@ class ModificarViewModel @Inject constructor(
     private var _showMessageMoreQuestions = true
     val showMessageMoreQuestions: Boolean get() = _showMessageMoreQuestions
 
-    /*private var preguntas: ArrayList<String> = ArrayList()
-    private var respuestas: ArrayList<String> = ArrayList()
-    private var contadorPregunta: Int = 0
-    private var showMessageMoreQuestions: Boolean = true*/
-
     // Click events
     private val _uiStateBtnRoll = MutableLiveData<ValidacionesGuiaModel>()
     val uiStateBtnRoll: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnRoll
@@ -82,30 +68,14 @@ class ModificarViewModel @Inject constructor(
     private val _uiStateBtnSave = MutableLiveData<ValidacionesGuiaModel>()
     val uiStateBtnSave: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnSave
 
-    // para DataStore
-    //private val dataStore = DataStoreManager.getInstance(application)
-    //private val _contImagenes = dataStore.getCountImage().asLiveData()
-    /*private val _contImagenes = dataStore.getCountImage().asLiveData()
-    val contImagenes: LiveData<Int> get() = _contImagenes*/
-
     private val _contImagenes = MutableLiveData<Int>()
     val contImagenes: LiveData<Int> get() = _contImagenes
 
     // para GuiaModel
     private val _guiaModel = MutableLiveData<GuiaModel>()
     val guiaModel: LiveData<GuiaModel> get() = _guiaModel
-
-    // Solo para tests
-    //internal var dispatcher: CoroutineDispatcher = Dispatchers.Main
-
-    /*val contImagenes = dataStore.getCountImage().asLiveData()
-    val guiaModel = MutableLiveData<GuiaModel>()*/
-
     private val _textoImagenCorrutina = MutableLiveData<String>()
     val textoImagenCorrutina: LiveData<String> get() = _textoImagenCorrutina
-
-    // var saveClicked = MutableLiveData<Boolean>().apply { value = false }
-    // var rollClicked = MutableLiveData<Boolean>().apply { value = false }
 
     // Data Store
     fun getCountImage() {
@@ -147,22 +117,24 @@ class ModificarViewModel @Inject constructor(
 
     fun getObtenerDatosXML(nombreArchivo: String, ruta: String): ValidacionesGuiaModel {
         //if (respuestas.isEmpty()) {
-            _preguntas.clear()
-            _respuestas.clear()
+        _preguntas.clear()
+        _respuestas.clear()
 
-            val datos = getObtenerDatosXMLUseCase(nombreArchivo, ruta)
-            datos.forEach { preguntaRespuesta ->
-                _preguntas.add(preguntaRespuesta.pregunta)
-                _respuestas.add(preguntaRespuesta.respuesta)
-            }
+        val datos = getObtenerDatosXMLUseCase(nombreArchivo, ruta)
+        datos.forEach { preguntaRespuesta ->
+            _preguntas.add(preguntaRespuesta.pregunta)
+            _respuestas.add(preguntaRespuesta.respuesta)
+        }
         //}
 
         // Pinta la primer pregunta después de recuperar los datos
-        val textoPregunta = setPintarTextosUseCase(isEtPregunta = true,
+        val textoPregunta = setPintarTextosUseCase(
+            isEtPregunta = true,
             preguntas = _preguntas,
             respuestas = _respuestas,
             contadorPregunta = contadorPregunta,
-            ruta = ruta)
+            ruta = ruta
+        )
         val responseValGuiaModel: ValidacionesGuiaModel =
             textoPregunta.copy(
                 estadoUI = textoPregunta.estadoUI.copy(isThereMoreAsks = true)
@@ -228,7 +200,14 @@ class ModificarViewModel @Inject constructor(
         ruta: String
     ) {
         val responseRollClickedUseCase =
-            setRollClickedUseCase(_preguntas, _respuestas, contadorPregunta, editable, isEtPregunta, ruta)
+            setRollClickedUseCase(
+                _preguntas,
+                _respuestas,
+                contadorPregunta,
+                editable,
+                isEtPregunta,
+                ruta
+            )
         _uiStateBtnRoll.value = responseRollClickedUseCase
     }
 
