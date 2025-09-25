@@ -15,7 +15,7 @@ import com.jonathanev.review.Domain.GetGuiaUseCase
 import com.jonathanev.review.Domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.Domain.SetCifrarRutaImagenUseCase
 import com.jonathanev.review.Domain.SetClickEliminarUseCase
-import com.jonathanev.review.Domain.SetClickRegresarModicandoUseCase
+import com.jonathanev.review.Domain.SetClickRegresarModificandoUseCase
 import com.jonathanev.review.Domain.SetClickSaveUseCase
 import com.jonathanev.review.Domain.SetClickSiguienteModificandoUseCase
 import com.jonathanev.review.Domain.SetPintarLetraUseCase
@@ -31,7 +31,7 @@ import javax.inject.Inject
 class ModificarViewModel @Inject constructor(
     //application: Application,
     private val setRollClickedUseCase: SetRollClickedUseCase,
-    private val setClickRegresarModicandoUseCase: SetClickRegresarModicandoUseCase,
+    private val setClickRegresarModificandoUseCase: SetClickRegresarModificandoUseCase,
     private val setClickSiguienteModicandoUseCase: SetClickSiguienteModificandoUseCase,
     private val setClickEliminarUseCase: SetClickEliminarUseCase,
     private val setClickSaveUseCase: SetClickSaveUseCase,
@@ -157,7 +157,7 @@ class ModificarViewModel @Inject constructor(
         isEtPregunta: Boolean,
         ruta: String
     ) {
-        val responseRegresarUseCase = setClickRegresarModicandoUseCase(
+        val responseRegresarUseCase = setClickRegresarModificandoUseCase(
             _preguntas,
             _respuestas,
             contadorPregunta,

@@ -552,7 +552,7 @@ class Activity_Cuestionario : AppCompatActivity() {
                         )
                         binding.etPregResp.setText(cifrado)
 
-                        activityCuestionarioViewModel.llamaCorruIncremento()
+                        activityCuestionarioViewModel.llamaCorruIncremento(cifrado)
                     }
                     .setNegativeButton(
                         "Cancelar"
@@ -583,7 +583,7 @@ class Activity_Cuestionario : AppCompatActivity() {
                 )
                 binding.etPregResp.setText(cifrado)
 
-                activityCuestionarioViewModel.llamaCorruIncremento()
+                activityCuestionarioViewModel.llamaCorruIncremento(cifrado)
             }
         } catch (e: Exception) {
             e.printStackTrace()

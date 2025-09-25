@@ -2,33 +2,38 @@ package com.jonathanev.review.UI.ViewModel
 
 import android.app.Application
 import android.text.Editable
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.Core.Constants.file
+import com.jonathanev.review.DI.IoDispatcher
+import com.jonathanev.review.DI.MainDispatcher
 import com.jonathanev.review.Data.GuiaRepository
 import com.jonathanev.review.Data.Model.DataStoreManager
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import com.jonathanev.review.Domain.SetCifrarRutaImagenUseCase
 import com.jonathanev.review.Domain.SetClickEliminarUseCase
-import com.jonathanev.review.Domain.SetClickRegresarModicandoUseCase
+import com.jonathanev.review.Domain.SetClickRegresarModificandoUseCase
 import com.jonathanev.review.Domain.SetClickSaveUseCase
 import com.jonathanev.review.Domain.SetClickSiguienteModificandoUseCase
 import com.jonathanev.review.Domain.SetCopyImagesUseCase
 import com.jonathanev.review.Domain.SetPintarLetraUseCase
 import com.jonathanev.review.Domain.SetRollClickedUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
 class ActivityCuestionarioViewModel @Inject constructor(
     private val guiaRepository: GuiaRepository,
-    private val setClickRegresarModicandoUseCase: SetClickRegresarModicandoUseCase,
+    private val setClickRegresarModificandoUseCase: SetClickRegresarModificandoUseCase,
     private val setClickSiguienteModicandoUseCase: SetClickSiguienteModificandoUseCase,
     private val setRollClickedUseCase: SetRollClickedUseCase,
     private val setClickSaveUseCase: SetClickSaveUseCase,
@@ -36,15 +41,23 @@ class ActivityCuestionarioViewModel @Inject constructor(
     private val setCopyImagesUseCase: SetCopyImagesUseCase,
     private val setCifrarRutaImagenUseCase: SetCifrarRutaImagenUseCase,
     private val setPintarLetraUseCase: SetPintarLetraUseCase,
-    application: Application
+    private val dataStore: DataStoreManager,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+    @MainDispatcher private val mainDispatcher: CoroutineDispatcher
+    //application: Application
 ) : ViewModel() {
-    private var preguntas: ArrayList<String> = ArrayList()
-    private var respuestas: ArrayList<String> = ArrayList()
-    private var contadorPregunta: Int = 0
+    private var _preguntas: ArrayList<String> = ArrayList()
+    val preguntas: ArrayList<String> get() = _preguntas
 
-    var guias = MutableLiveData<List<GuiaModel>>()
-    // var saveClicked = MutableLiveData<Boolean>().apply { value = false }
-    // var rollClicked = MutableLiveData<Boolean>().apply { value = false }
+    private var _respuestas: ArrayList<String> = ArrayList()
+    val respuestas: ArrayList<String> get() = _respuestas
+
+    private var _contadorPregunta: Int = 0
+    val contadorPregunta: Int get() = _contadorPregunta
+
+    //var guias = MutableLiveData<List<GuiaModel>>()
+    private val _guias = MutableLiveData<List<GuiaModel>>()
+    val guias: LiveData<List<GuiaModel>> get() = _guias
 
     // Click events
     private val _uiStateBtnNext = MutableLiveData<ValidacionesGuiaModel>()
@@ -59,8 +72,14 @@ class ActivityCuestionarioViewModel @Inject constructor(
     val uiStateBtnEliminar: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnEliminar
 
     // Data Store
-    private val dataStore = DataStoreManager.getInstance(application)
-    val contImagenes = dataStore.getCountImage().asLiveData()
+    //private val dataStore = DataStoreManager.getInstance(application)
+    private val _contImagenes = MutableLiveData<Int>()
+    val contImagenes: LiveData<Int> get() = _contImagenes
+
+    private val _textoImagenCorrutina = MutableLiveData<String>()
+    val textoImagenCorrutina: LiveData<String> get() = _textoImagenCorrutina
+
+    //val contImagenes = dataStore.getCountImage().asLiveData()
 
     fun procesoActualizacion() {
         getAllUpdatedGuides(file)
@@ -68,7 +87,7 @@ class ActivityCuestionarioViewModel @Inject constructor(
     }
 
     private fun getAllUpdatedGuides(file: File) {
-        guias.postValue(guiaRepository.getGuias(file))
+        _guias.postValue(guiaRepository.getGuias(file))
     }
 
     private fun copyImages() {
@@ -88,17 +107,27 @@ class ActivityCuestionarioViewModel @Inject constructor(
 
     // Data Store
     fun getCountImage() {
-        dataStore.getCountImage()
+        viewModelScope.launch {
+            dataStore.getCountImage().collect { count ->
+                _contImagenes.value = count
+            }
+        }
     }
 
-    fun llamaCorruIncremento() {
-        viewModelScope.launch {
+    fun llamaCorruIncremento(cifrado: String) {
+        //viewModelScope.launch(Dispatchers.Main) {
+        viewModelScope.launch(mainDispatcher) {
             setIncrementCounter()
+
+            //_textoImagenCorrutina.value = cifrado
+            _textoImagenCorrutina.postValue(cifrado)
         }
     }
 
     private suspend fun setIncrementCounter() {
-        dataStore.setIncrementCounter()
+        withContext(ioDispatcher) {
+            dataStore.setIncrementCounter()
+        }
     }
 
     suspend fun resetCounter() {
@@ -119,7 +148,7 @@ class ActivityCuestionarioViewModel @Inject constructor(
         isEtPregunta: Boolean,
         ruta: String
     ) {
-        val responseRegresarUseCase = setClickRegresarModicandoUseCase(
+        val responseRegresarUseCase = setClickRegresarModificandoUseCase(
             preguntas,
             respuestas,
             contadorPregunta,
@@ -129,7 +158,7 @@ class ActivityCuestionarioViewModel @Inject constructor(
         )
 
         if (responseRegresarUseCase.estadoUI.isUpdatedAskAns) {
-            contadorPregunta--
+            _contadorPregunta--
         }
 
         _uiStateBtnBack.value = responseRegresarUseCase
@@ -150,7 +179,7 @@ class ActivityCuestionarioViewModel @Inject constructor(
         )
 
         if (responseSiguienteUseCase.estadoUI.isUpdatedAskAns) {
-            contadorPregunta++
+            _contadorPregunta++
         }
 
         _uiStateBtnNext.value = responseSiguienteUseCase
@@ -181,9 +210,14 @@ class ActivityCuestionarioViewModel @Inject constructor(
             setClickEliminarUseCase(preguntas, respuestas, contadorPregunta, ruta)
 
         if (contadorPregunta > 0) {
-            contadorPregunta--
+            _contadorPregunta--
         }
 
         _uiStateBtnEliminar.value = responseRegresarUseCase
+    }
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal fun setContadorPreguntaTest(value: Int) {
+        _contadorPregunta = value
     }
 }

@@ -14,7 +14,7 @@ import com.jonathanev.review.Domain.GetGuiaUseCase
 import com.jonathanev.review.Domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.Domain.SetCifrarRutaImagenUseCase
 import com.jonathanev.review.Domain.SetClickEliminarUseCase
-import com.jonathanev.review.Domain.SetClickRegresarModicandoUseCase
+import com.jonathanev.review.Domain.SetClickRegresarModificandoUseCase
 import com.jonathanev.review.Domain.SetClickSaveUseCase
 import com.jonathanev.review.Domain.SetClickSiguienteModificandoUseCase
 import com.jonathanev.review.Domain.SetPintarLetraUseCase
@@ -53,7 +53,7 @@ class ModificarViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher() //StandardTestDispatcher()
     private val setRollClickedUseCase = mockk<SetRollClickedUseCase>()
-    private val setClickRegresarModicandoUseCase = mockk<SetClickRegresarModicandoUseCase>()
+    private val setClickRegresarModificandoUseCase = mockk<SetClickRegresarModificandoUseCase>()
     private val setClickSiguienteModicandoUseCase = mockk<SetClickSiguienteModificandoUseCase>()
     private val setClickEliminarUseCase = mockk<SetClickEliminarUseCase>()
     private val setClickSaveUseCase = mockk<SetClickSaveUseCase>()
@@ -77,7 +77,7 @@ class ModificarViewModelTest {
 
         viewModel = ModificarViewModel(
             setRollClickedUseCase,
-            setClickRegresarModicandoUseCase,
+            setClickRegresarModificandoUseCase,
             setClickSiguienteModicandoUseCase,
             setClickEliminarUseCase,
             setClickSaveUseCase,
@@ -269,7 +269,7 @@ class ModificarViewModelTest {
         val ruta = "ruta"
         val response = ValidacionesGuiaModel("ok", estadoUI = EstadoUI(isUpdatedAskAns = true))
         every {
-            setClickRegresarModicandoUseCase(
+            setClickRegresarModificandoUseCase(
                 any(),
                 any(),
                 any(),
@@ -294,7 +294,7 @@ class ModificarViewModelTest {
         val ruta = "ruta"
         val response = ValidacionesGuiaModel("ok", estadoUI = EstadoUI(isUpdatedAskAns = false))
         every {
-            setClickRegresarModicandoUseCase(
+            setClickRegresarModificandoUseCase(
                 any(),
                 any(),
                 any(),

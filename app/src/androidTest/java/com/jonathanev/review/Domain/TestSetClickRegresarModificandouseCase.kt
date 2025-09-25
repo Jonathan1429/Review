@@ -13,7 +13,7 @@ class TestSetClickRegresarModificandouseCase {
     private val setSpanPalabraUseCase = mockk<SetSpanPalabraUseCase>()
     private val setColocarEtiquetasUseCase = mockk<SetColocarEtiquetasUseCase>()
     private val setPintarTextosUseCase = mockk<SetPintarTextosUseCase>()
-    private val setClickRegresarModicandoUseCase = SetClickRegresarModicandoUseCase(
+    private val setClickRegresarModificandoUseCase = SetClickRegresarModificandoUseCase(
         setSpanPalabraUseCase,
         setColocarEtiquetasUseCase,
         setPintarTextosUseCase
@@ -28,7 +28,7 @@ class TestSetClickRegresarModificandouseCase {
         val isEtPregunta = false
         val ruta = ""
 
-        val respuesta = setClickRegresarModicandoUseCase(
+        val respuesta = setClickRegresarModificandoUseCase(
             preguntas,
             respuestas,
             contador,
@@ -54,7 +54,7 @@ class TestSetClickRegresarModificandouseCase {
         val isEtPregunta = false
         val ruta = ""
 
-        val respuesta = setClickRegresarModicandoUseCase(
+        val respuesta = setClickRegresarModificandoUseCase(
             preguntas,
             respuestas,
             contador,
@@ -104,7 +104,7 @@ class TestSetClickRegresarModificandouseCase {
         val isEtPregunta = true
         val ruta = ""
 
-        val respuesta = setClickRegresarModicandoUseCase(
+        val respuesta = setClickRegresarModificandoUseCase(
             preguntas,
             respuestas,
             contador,
@@ -156,7 +156,7 @@ class TestSetClickRegresarModificandouseCase {
         )
 
         // Ejecutar el método con los parámetros necesarios
-        val resultado = setClickRegresarModicandoUseCase(
+        val resultado = setClickRegresarModificandoUseCase(
             preguntas,
             respuestas,
             contador,
@@ -200,7 +200,7 @@ class TestSetClickRegresarModificandouseCase {
                     builder = SpannableStringBuilder("c"),
                 )
 
-        val respuesta = setClickRegresarModicandoUseCase(
+        val respuesta = setClickRegresarModificandoUseCase(
             preguntas,
             respuestas,
             contador,
@@ -256,7 +256,7 @@ class TestSetClickRegresarModificandouseCase {
                     builder = SpannableStringBuilder("a"),
                 )
 
-        val respuesta = setClickRegresarModicandoUseCase(
+        val respuesta = setClickRegresarModificandoUseCase(
             preguntas,
             respuestas,
             contador,
@@ -313,7 +313,7 @@ class TestSetClickRegresarModificandouseCase {
                     builder = SpannableStringBuilder("b"),
                 )
 
-        val respuesta = setClickRegresarModicandoUseCase(
+        val respuesta = setClickRegresarModificandoUseCase(
             preguntas,
             respuestas,
             contador,
@@ -370,7 +370,7 @@ class TestSetClickRegresarModificandouseCase {
                     builder = SpannableStringBuilder("b"),
                 )
 
-        val respuesta = setClickRegresarModicandoUseCase(
+        val respuesta = setClickRegresarModificandoUseCase(
             preguntas,
             respuestas,
             contador,
@@ -427,7 +427,7 @@ class TestSetClickRegresarModificandouseCase {
                     builder = SpannableStringBuilder("b"),
                 )
 
-        val respuesta = setClickRegresarModicandoUseCase(
+        val respuesta = setClickRegresarModificandoUseCase(
             preguntas,
             respuestas,
             contador,
