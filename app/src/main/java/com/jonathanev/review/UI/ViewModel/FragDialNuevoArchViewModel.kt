@@ -12,9 +12,10 @@ import javax.inject.Inject
 class FragDialNuevoArchViewModel @Inject constructor(
     private val guiaRepository: GuiaRepository
 ) : ViewModel() {
-    var guias = MutableLiveData<List<GuiaModel>>()
+    private var _guias = MutableLiveData<List<GuiaModel>>()
+    val guias: MutableLiveData<List<GuiaModel>> get() = _guias
 
     fun getAllUpdatedGuides(file: File) {
-        guias.postValue(guiaRepository.getGuias(file))
+        _guias.postValue(guiaRepository.getGuias(file))
     }
 }
