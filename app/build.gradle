@@ -188,6 +188,7 @@ dependencies {
     // Robolectric
     testImplementation "org.robolectric:robolectric:4.13" // versión actual a 2025
     testImplementation "androidx.test:core:1.7.0"
+    testImplementation "androidx.arch.core:core-testing:2.2.0" // LiveData test
     testImplementation "junit:junit:4.13.2"
 }
 
