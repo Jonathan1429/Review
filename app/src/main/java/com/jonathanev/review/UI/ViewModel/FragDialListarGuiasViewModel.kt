@@ -17,23 +17,26 @@ class FragDialListarGuiasViewModel @Inject constructor(
     private val guiaProvider: GuiaProvider,
     private val getGuiaPosicionUseCase: GetGuiaPosicionUseCase,
 ) : ViewModel() {
-    var guias = MutableLiveData<List<GuiaModel>>()
-    var file = MutableLiveData<File>()
+    private var _guias = MutableLiveData<List<GuiaModel>>()
+    val guias: MutableLiveData<List<GuiaModel>> get() = _guias
+
+    private var _file = MutableLiveData<File>()
+    val file: MutableLiveData<File> get() = _file
 
     fun getAllGuias() {
-        guias.postValue(guiaProvider.guias)
+        _guias.postValue(guiaProvider.guias)
     }
 
     fun getAllUpdatedGuides(file: File) {
-        guias.postValue(guiaRepository.getGuias(file))
+        _guias.postValue(guiaRepository.getGuias(file))
     }
 
     fun changeFilePath(folderName: String) {
-        file.postValue(File("${Constants.file}/$folderName"))
+        _file.postValue(File("${Constants.file}/$folderName"))
     }
 
     fun getMainPath() {
-        file.postValue(Constants.file)
+        _file.postValue(Constants.file)
     }
 
     fun getGuia(position: Int): GuiaModel = getGuiaPosicionUseCase(position)
