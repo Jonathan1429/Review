@@ -8,7 +8,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class Fragment_DialogColoresMod_popupViewModel @Inject constructor() : ViewModel() {
+class Fragment_DialogColores_popupViewModel @Inject constructor(): ViewModel() {
     // LiveData que almacena el color seleccionado
     private val _colorSeleccionado = MutableLiveData<Int>()
     val colorSeleccionado: LiveData<Int> get() = _colorSeleccionado

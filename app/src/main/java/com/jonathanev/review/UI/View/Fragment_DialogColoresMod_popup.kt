@@ -22,7 +22,6 @@ class Fragment_DialogColoresMod_popup : DialogFragment() {
     private lateinit var binding: FragmentColoresBinding
     private val viewModel: Fragment_DialogColoresMod_popupViewModel by viewModels() // Inyección de Hilt
 
-    //private var colorActual = 0
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -48,12 +47,8 @@ class Fragment_DialogColoresMod_popup : DialogFragment() {
         // Evento del ColorPicker
         binding.colorPickerView.setColorListener(ColorListener { color, _ ->
             viewModel.setColor(color)
-            //setLayoutColor(color)
-            /*val activityModificar = activity as Activity_Modificar?
-            activityModificar!!.setColor(color)*/
         })
 
-        //val fragment: Fragment = this
         binding.btnContinuar.setOnClickListener {
             dismiss()
             //requireActivity().supportFragmentManager.beginTransaction().remove(fragment).commit()
@@ -88,7 +83,6 @@ class Fragment_DialogColoresMod_popup : DialogFragment() {
         val dialog = dialog
         if (dialog != null) {
             dialog.window!!.setLayout(700, 1000)
-            //dialog.window!!.setLayout(300, 600)
             dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         }
     }

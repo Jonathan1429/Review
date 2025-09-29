@@ -11,21 +11,26 @@ import android.view.ViewGroup
 import android.view.Window
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.jonathanev.review.UI.View.Activity_Cuestionario
+import com.jonathanev.review.UI.View.Activity_Modificar
+import com.jonathanev.review.UI.ViewModel.Fragment_DialogColoresMod_popupViewModel
+import com.jonathanev.review.UI.ViewModel.Fragment_DialogColores_popupViewModel
 import com.jonathanev.review.databinding.FragmentColoresBinding
 import com.skydoves.colorpickerview.flag.BubbleFlag
 import com.skydoves.colorpickerview.flag.FlagMode
 import com.skydoves.colorpickerview.listeners.ColorListener
 class Fragment_DialogColores_popup : DialogFragment() {
-    private var binding: FragmentColoresBinding? = null
-    private var colorActual = 0
+    private lateinit var binding: FragmentColoresBinding
+    private val viewModel: Fragment_DialogColores_popupViewModel by viewModels()
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
-        binding = FragmentColoresBinding.inflate(layoutInflater)
-        return binding!!.root
+        binding = FragmentColoresBinding.inflate(layoutInflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -34,32 +39,37 @@ class Fragment_DialogColores_popup : DialogFragment() {
         // Animación cuando se esté seleccionando un color.
         val bubbleFlag = BubbleFlag(context)
         bubbleFlag.flagMode = FlagMode.FADE
-        binding!!.colorPickerView.flagView = bubbleFlag
-        binding!!.colorPickerView.setColorListener(ColorListener { color, fromUser ->
+        binding.colorPickerView.flagView = bubbleFlag
+
+        // Observamos cambios de color desde el ViewModel
+        viewModel.colorSeleccionado.observe(viewLifecycleOwner) { color ->
             setLayoutColor(color)
-            val activityCuestionario = activity as Activity_Cuestionario?
-            activityCuestionario!!.setColor(color)
+            (activity as? Activity_Modificar)?.setColor(color)
+        }
+
+        binding.colorPickerView.setColorListener(ColorListener { color, _ ->
+            viewModel.setColor(color)
         })
 
-        val fragment: Fragment = this
-        binding!!.btnContinuar.setOnClickListener {
-            requireActivity().supportFragmentManager.beginTransaction().remove(fragment).commit()
+        binding.btnContinuar.setOnClickListener {
+            dismiss()
         }
-        binding!!.btnDefault.setOnClickListener {
-            requireActivity().supportFragmentManager.beginTransaction().remove(fragment).commit()
-            (activity as? Activity_Cuestionario)?.setColor(Color.BLACK)
+
+        binding.btnDefault.setOnClickListener {
+            viewModel.resetColor()
+            dismiss()
         }
     }
 
     @SuppressLint("SetTextI18n")
     private fun setLayoutColor(color: Int) {
-        binding!!.colorHexadecimal.text = "#" + binding!!.colorPickerView.colorEnvelope.hexCode
-        if (binding!!.colorHexadecimal.text.toString() == "#FF000000") {
-            binding!!.btnContinuar.setTextColor(Color.WHITE)
+        binding.colorHexadecimal.text = "#" + binding.colorPickerView.colorEnvelope.hexCode
+        if (binding.colorHexadecimal.text.toString() == "#FF000000") {
+            binding.btnContinuar.setTextColor(Color.WHITE)
         } else {
-            binding!!.btnContinuar.setTextColor(Color.BLACK)
+            binding.btnContinuar.setTextColor(Color.BLACK)
         }
-        binding!!.btnContinuar.setBackgroundColor(color)
+        binding.btnContinuar.setBackgroundColor(color)
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
