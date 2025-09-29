@@ -15,7 +15,7 @@ import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
-import com.jonathanev.review.UI.ViewModel.RepasarGuiaViewModel
+import com.jonathanev.review.UI.ViewModel.ActivityRepasarGuiaViewModel
 import com.jonathanev.review.databinding.ActivityRepasarGuiaBinding
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -24,7 +24,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class Activity_RepasarGuia : AppCompatActivity() {
     private lateinit var binding: ActivityRepasarGuiaBinding
     private var nombreArchivo: String = ""
-    private val repasarGuiaViewModel: RepasarGuiaViewModel by viewModels()
+    private val activityRepasarGuiaViewModel: ActivityRepasarGuiaViewModel by viewModels()
     private var ruta: String = ""
 
     @SuppressLint("SetTextI18n")
@@ -41,7 +41,7 @@ class Activity_RepasarGuia : AppCompatActivity() {
 
         initUI(ruta)
         initListeners()
-        repasarGuiaViewModel.guiaModel.observe(this) {
+        activityRepasarGuiaViewModel.guiaModel.observe(this) {
             nombreArchivo = it.nombreGuia
 
             // Guardo el nombre del archivo enviado desde el popupFragmentListarGuias.
@@ -53,7 +53,7 @@ class Activity_RepasarGuia : AppCompatActivity() {
             nombreArchivo = "${it.nombreGuia}.xml"
 
             // Obtenemos los datos del XML y los guardamos en su respectivo ArrayList.
-            val texto = repasarGuiaViewModel.getObtenerDatosXML(nombreArchivo, ruta)
+            val texto = activityRepasarGuiaViewModel.getObtenerDatosXML(nombreArchivo, ruta)
 
             // Agregar el texto en el et cuando hay un builder
             if (!texto.estadoUI.isShowImage) {
@@ -70,7 +70,7 @@ class Activity_RepasarGuia : AppCompatActivity() {
                 if (texto.estadoUI.isShowImage) View.VISIBLE else View.GONE
         }
 
-        repasarGuiaViewModel.uiStateBtnRoll.observe(this) { uiState ->
+        activityRepasarGuiaViewModel.uiStateBtnRoll.observe(this) { uiState ->
             if (uiState.estadoUI.isUpdatedAskAns) {
                 girarCardView()
 
@@ -108,7 +108,7 @@ class Activity_RepasarGuia : AppCompatActivity() {
             }
         }
 
-        repasarGuiaViewModel.uiStateBtnNext
+        activityRepasarGuiaViewModel.uiStateBtnNext
             .observe(this) { uiState ->
                 if (uiState.estadoUI.isUpdatedAskAns) {
                     binding.lblPregResp.text = "Pregunta"
@@ -140,8 +140,8 @@ class Activity_RepasarGuia : AppCompatActivity() {
                             "Si"
                         ) { _, _ ->
                             binding.lblPregResp.text = "Pregunta"
-                            repasarGuiaViewModel.contadorPregunta = 0
-                            val texto = repasarGuiaViewModel.getReinicioGuia(true, ruta)
+                            activityRepasarGuiaViewModel.contadorPregunta = 0
+                            val texto = activityRepasarGuiaViewModel.getReinicioGuia(true, ruta)
                             if (texto.estadoUI.isEtPregunta) {
                                 binding.lblPregResp.text = "Respuesta"
                             } else {
@@ -167,7 +167,7 @@ class Activity_RepasarGuia : AppCompatActivity() {
                 }
             }
 
-        repasarGuiaViewModel.uiStateBtnBack.observe(this) { uiState ->
+        activityRepasarGuiaViewModel.uiStateBtnBack.observe(this) { uiState ->
             if (uiState.estadoUI.isUpdatedAskAns) {
                 binding.lblPregResp.text = "Pregunta"
 
@@ -205,15 +205,15 @@ class Activity_RepasarGuia : AppCompatActivity() {
             }
 
             // Get text
-            repasarGuiaViewModel.onClickRoll(isEtPregunta, ruta)
+            activityRepasarGuiaViewModel.onClickRoll(isEtPregunta, ruta)
         }
 
         binding.imgvNext.setOnClickListener {
-            repasarGuiaViewModel.onClickNext(ruta)
+            activityRepasarGuiaViewModel.onClickNext(ruta)
         }
 
         binding.imgvPrevious.setOnClickListener {
-            repasarGuiaViewModel.onClickBefore(ruta)
+            activityRepasarGuiaViewModel.onClickBefore(ruta)
         }
 
         binding.barraSuperiorRegreso.imgvBack.setOnClickListener { finish() }
@@ -231,7 +231,7 @@ class Activity_RepasarGuia : AppCompatActivity() {
     }
 
     private fun initUI(ruta: String) {
-        repasarGuiaViewModel.getGuia(ruta)
+        activityRepasarGuiaViewModel.getGuia(ruta)
     }
 
     private fun initLoadAds() {
