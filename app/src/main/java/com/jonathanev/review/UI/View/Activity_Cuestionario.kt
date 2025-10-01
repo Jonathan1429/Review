@@ -38,7 +38,7 @@ import com.jonathanev.review.Core.Constants.file
 import com.jonathanev.review.Core.Constants.fileImages
 import com.jonathanev.review.Core.Constants.fileImagesPiv
 import com.jonathanev.review.Core.Constants.rutaPrin
-import com.jonathanev.review.Fragments.Fragment_DialogColores_popup
+import com.jonathanev.review.UI.View.Fragments.Fragment_DialogColores_popup
 import com.jonathanev.review.UI.ViewModel.ActivityCuestionarioViewModel
 import com.jonathanev.review.databinding.ActivityCuestionarioBinding
 import dagger.hilt.android.AndroidEntryPoint

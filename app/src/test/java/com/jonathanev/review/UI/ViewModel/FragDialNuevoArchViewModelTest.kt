@@ -2,7 +2,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
 import com.jonathanev.review.Data.GuiaRepository
 import com.jonathanev.review.Data.Model.GuiaModel
-import com.jonathanev.review.UI.ViewModel.FragDialNuevoArchViewModel
+import com.jonathanev.review.UI.ViewModel.Fragments.FragDialNuevoArchViewModel
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify

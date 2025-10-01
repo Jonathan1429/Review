@@ -1,5 +1,6 @@
 package com.jonathanev.review.UI.ViewModel
 
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -21,11 +22,17 @@ class ActivityRepasarGuiaViewModel @Inject constructor(
     private val getClickRegresarUseCase: GetClickRegresarUseCase,
     private val getClickSiguienteUseCase: GetClickSiguienteUseCase
 ) : ViewModel() {
-    var preguntas: ArrayList<String> = ArrayList()
-    private var respuestas: ArrayList<String> = ArrayList()
-    var contadorPregunta: Int = 0
+    private var _preguntas: ArrayList<String> = ArrayList()
+    val preguntas: ArrayList<String> get() = _preguntas
 
-    val guiaModel = MutableLiveData<GuiaModel>()
+    private var _respuestas: ArrayList<String> = ArrayList()
+    val respuestas: ArrayList<String> get() = _respuestas
+
+    private var _contadorPregunta: Int = 0
+    val contadorPregunta: Int get() = _contadorPregunta
+
+    private var _guiaModel = MutableLiveData<GuiaModel>()
+    val guiaModel: MutableLiveData<GuiaModel> get() = _guiaModel
 
     private val _uiStateBtnBack = MutableLiveData<ValidacionesGuiaModel>()
     val uiStateBtnBack: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnBack
@@ -40,13 +47,13 @@ class ActivityRepasarGuiaViewModel @Inject constructor(
 
     fun getObtenerDatosXML(nombreArchivo: String, ruta: String): ValidacionesGuiaModel {
         if (respuestas.isEmpty()) {
-            preguntas.clear()
-            respuestas.clear()
+            _preguntas.clear()
+            _respuestas.clear()
 
             val datos = getObtenerDatosXMLUseCase(nombreArchivo, ruta)
             datos.forEach { preguntaRespuesta ->
-                preguntas.add(preguntaRespuesta.pregunta)
-                respuestas.add(preguntaRespuesta.respuesta)
+                _preguntas.add(preguntaRespuesta.pregunta)
+                _respuestas.add(preguntaRespuesta.respuesta)
             }
         }
 
@@ -88,7 +95,7 @@ class ActivityRepasarGuiaViewModel @Inject constructor(
         val responseSiguiente = getClickSiguienteUseCase(contadorPregunta, preguntas, respuestas, ruta)
 
         if (responseSiguiente.estadoUI.isUpdatedAskAns) {
-            contadorPregunta++
+            _contadorPregunta++
         }
 
         _uiStateBtnNext.value = responseSiguiente
@@ -98,9 +105,23 @@ class ActivityRepasarGuiaViewModel @Inject constructor(
         val responseRegresar = getClickRegresarUseCase(contadorPregunta, preguntas, respuestas, ruta)
 
         if (responseRegresar.estadoUI.isUpdatedAskAns) {
-            contadorPregunta--
+            _contadorPregunta--
         }
 
         _uiStateBtnBack.value = responseRegresar
+    }
+
+    fun onResetContadorPreg(){
+        _contadorPregunta = 0
+    }
+
+    /*@VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal fun setContadorPreguntaTest(value: Int) {
+        _contadorPregunta = value
+    }*/
+
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal fun setRespuestas(value: ArrayList<String>) {
+        _respuestas = value
     }
 }

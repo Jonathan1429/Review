@@ -140,7 +140,7 @@ class Activity_RepasarGuia : AppCompatActivity() {
                             "Si"
                         ) { _, _ ->
                             binding.lblPregResp.text = "Pregunta"
-                            activityRepasarGuiaViewModel.contadorPregunta = 0
+                            activityRepasarGuiaViewModel.onResetContadorPreg()
                             val texto = activityRepasarGuiaViewModel.getReinicioGuia(true, ruta)
                             if (texto.estadoUI.isEtPregunta) {
                                 binding.lblPregResp.text = "Respuesta"

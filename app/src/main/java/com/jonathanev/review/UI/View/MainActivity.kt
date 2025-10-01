@@ -9,10 +9,11 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.jonathanev.review.Core.Constants
 import com.jonathanev.review.Core.Constants.file
 import com.jonathanev.review.Core.Constants.fileImages
 import com.jonathanev.review.Core.Constants.fileImagesPiv
+import com.jonathanev.review.UI.View.Fragments.Fragment_DialogListarGuias_popup
+import com.jonathanev.review.UI.View.Fragments.Fragment_DialogNuevoArchivo_popu
 import com.jonathanev.review.UI.ViewModel.MainActivityViewModel
 import com.jonathanev.review.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint

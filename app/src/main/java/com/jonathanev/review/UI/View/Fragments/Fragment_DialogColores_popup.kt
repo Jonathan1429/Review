@@ -1,4 +1,4 @@
-package com.jonathanev.review.UI.View
+package com.jonathanev.review.UI.View.Fragments
 
 import android.annotation.SuppressLint
 import android.app.Dialog
@@ -10,17 +10,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.jonathanev.review.UI.ViewModel.Fragment_DialogColoresMod_popupViewModel
+import com.jonathanev.review.UI.View.Activity_Modificar
+import com.jonathanev.review.UI.ViewModel.Fragments.Fragment_DialogColores_popupViewModel
 import com.jonathanev.review.databinding.FragmentColoresBinding
 import com.skydoves.colorpickerview.flag.BubbleFlag
 import com.skydoves.colorpickerview.flag.FlagMode
 import com.skydoves.colorpickerview.listeners.ColorListener
-
-class Fragment_DialogColoresMod_popup : DialogFragment() {
+class Fragment_DialogColores_popup : DialogFragment() {
     private lateinit var binding: FragmentColoresBinding
-    private val viewModel: Fragment_DialogColoresMod_popupViewModel by viewModels() // Inyección de Hilt
+    private val viewModel: Fragment_DialogColores_popupViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -34,6 +33,7 @@ class Fragment_DialogColoresMod_popup : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Animación cuando se esté seleccionando un color.
         val bubbleFlag = BubbleFlag(context)
         bubbleFlag.flagMode = FlagMode.FADE
         binding.colorPickerView.flagView = bubbleFlag
@@ -44,20 +44,17 @@ class Fragment_DialogColoresMod_popup : DialogFragment() {
             (activity as? Activity_Modificar)?.setColor(color)
         }
 
-        // Evento del ColorPicker
         binding.colorPickerView.setColorListener(ColorListener { color, _ ->
             viewModel.setColor(color)
         })
 
         binding.btnContinuar.setOnClickListener {
             dismiss()
-            //requireActivity().supportFragmentManager.beginTransaction().remove(fragment).commit()
         }
+
         binding.btnDefault.setOnClickListener {
             viewModel.resetColor()
             dismiss()
-            /*requireActivity().supportFragmentManager.beginTransaction().remove(fragment).commit()
-            (activity as? Activity_Modificar)?.setColor(Color.BLACK)*/
         }
     }
 

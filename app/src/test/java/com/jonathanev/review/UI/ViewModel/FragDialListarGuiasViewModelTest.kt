@@ -4,15 +4,13 @@ import com.jonathanev.review.Data.GuiaRepository
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.Model.GuiaProvider
 import com.jonathanev.review.Domain.GetGuiaPosicionUseCase
-import com.jonathanev.review.UI.ViewModel.FragDialListarGuiasViewModel
+import com.jonathanev.review.UI.ViewModel.Fragments.FragDialListarGuiasViewModel
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import java.io.File
 
 //@RunWith(RobolectricTestRunner::class)
