@@ -1,6 +1,6 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
-    ext.kotlin_version = '2.0.20' //version funcional, pero warnings en kapt.
+    //ext.kotlin_version = '2.0.20' //version funcional, pero warnings en kapt.
     //ext.kotlin_version = '1.9.22'
 
     repositories {
@@ -11,15 +11,15 @@ buildscript {
 
     dependencies {
         classpath 'com.android.tools.build:gradle:8.5.2'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "com.google.dagger:hilt-android-gradle-plugin:2.48"
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.20'
+        classpath 'com.google.dagger:hilt-android-gradle-plugin:2.48'
+        classpath 'org.jacoco:org.jacoco.core:0.8.12'
     }
 }
 
 plugins {
     id 'com.google.dagger.hilt.android' version '2.48' apply false
+    //id 'org.jetbrains.kotlinx.kover' version '0.9.2'
 }
 
-/*task clean(type: Delete) {
-    delete rootProject.layout.buildDirectory
-}*/
+//apply plugin: 'org.jetbrains.kotlinx.kover'
