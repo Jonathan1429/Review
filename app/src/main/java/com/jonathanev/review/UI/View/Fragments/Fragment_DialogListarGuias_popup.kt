@@ -17,13 +17,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.jonathanev.review.Core.Constants.file
-import com.jonathanev.review.Core.Constants.fileImages
-import com.jonathanev.review.Core.Constants.path
+import com.jonathanev.review.Data.Model.FilePathsProvider
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Fragments.Adaptadores.ListarGuiasAdapter
 import com.jonathanev.review.R
-import com.jonathanev.review.UI.View.Activity_Modificar
+import com.jonathanev.review.UI.View.ActivityModificar
 import com.jonathanev.review.UI.View.Activity_RepasarGuia
 import com.jonathanev.review.UI.View.Fragments.Fragment_DialogNuevoArchivo_popu.DialogListener
 import com.jonathanev.review.UI.ViewModel.Fragments.FragDialListarGuiasViewModel
@@ -39,6 +37,7 @@ import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
+import javax.inject.Inject
 import javax.xml.parsers.DocumentBuilder
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.parsers.ParserConfigurationException
@@ -52,6 +51,9 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
     private lateinit var adaptadorListarGuias: ListarGuiasAdapter
     private val elementosPorCarga = 10 // Cantidad de elementos a cargar por cada carga adicional
     private var numeroElementosCargados = 0 // Número actual de elementos cargados
+
+    @Inject
+    lateinit var filePathsProvider: FilePathsProvider
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -135,7 +137,10 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
     private fun showGuiaOptions(position: Int) {
         val guia = guiasViewModel.getGuia(position)
 
-        var fileClickeado: File = file
+        var fileClickeado: File = filePathsProvider.fileGuides
+
+        val originPath = filePathsProvider.buildFile(filePathsProvider.rutaPrin, guia.nombreGuia)
+        val copiedPath = filePathsProvider.buildFile(filePathsProvider.fileImagesPiv, guia.nombreGuia)
 
         guiasViewModel.file.value?.let {
             fileClickeado = it
@@ -183,7 +188,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                                             Toast.LENGTH_SHORT
                                         ).show()
 
-                                        guiasViewModel.getAllUpdatedGuides(file)
+                                        guiasViewModel.getAllUpdatedGuides(filePathsProvider.fileGuides)
                                     } else {
                                         Toast.makeText(
                                             context,
@@ -275,11 +280,11 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
 
                     1 -> {
                         // Si entra al segundo es para modificar la guía de estudio
-                        val intentModificarGuia =
-                            Intent(activity, Activity_Modificar::class.java)
+                        val intentACTIVITYModificarGuia =
+                            Intent(activity, ActivityModificar::class.java)
                         //intentModificarGuia.putExtra("nombre_archivo", guia.nombreGuia)
-                        intentModificarGuia.putExtra("ruta", ruta)
-                        startActivity(intentModificarGuia)
+                        intentACTIVITYModificarGuia.putExtra("ruta", ruta)
+                        startActivity(intentACTIVITYModificarGuia)
                         // Recuperamos el dialogo abierto actualmente
                         // (Fragment_DialogListarGuias.java) y lo cerramos.
                         val dialogoModificarGuia = getDialog()
@@ -296,7 +301,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                             )
                             .setPositiveButton("Si") { _, _ ->
                                 // Si entra al tercero es para eliminar la guia exitosamente
-                                if (file.exists()) {
+                                if (filePathsProvider.fileGuides.exists()) {
                                     File(ruta).delete()
                                     Toast.makeText(
                                         context,
@@ -304,7 +309,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                                         Toast.LENGTH_SHORT
                                     ).show()
 
-                                    guiasViewModel.getAllUpdatedGuides(file)
+                                    guiasViewModel.getAllUpdatedGuides(filePathsProvider.fileGuides)
 
                                     // Recuperamos el dialogo abierto actualmente
                                     // (Fragment_DialogListarGuias_popup.java)
@@ -324,7 +329,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
 
                     3 -> {
                         // Se ejecuta cuando quiere cambiar el nombre de la guía
-                        if (file.exists()) {
+                        if (filePathsProvider.fileGuides.exists()) {
                             // Creamos las preferencias y dentro de ellas guardamos el arreglo item
                             val preferencias: SharedPreferences =
                                 requireContext().getSharedPreferences(
@@ -349,8 +354,8 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
 
                         var rutaSinArchivo = ruta.substringBeforeLast("/")
 
-                        if (rutaSinArchivo == path) {
-                            val listaCarpetas = file.listFiles { file -> file.isDirectory }
+                        if (rutaSinArchivo == filePathsProvider.fileGuides.toString()) {
+                            val listaCarpetas = filePathsProvider.fileGuides.listFiles { file -> file.isDirectory }
 
                             if (listaCarpetas != null) {
                                 // Método 1: Usando copyOf()
@@ -365,8 +370,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                                         // Copiar el archivo
                                         val guia = guiasViewModel.getGuia(position)
 
-                                        val archivoEnCarpeta =
-                                            File("" + file + "/" + selectedFolder + "/" + guia.nombreGuia + ".xml")
+                                        val archivoEnCarpeta = filePathsProvider.buildFileFolder(filePathsProvider.fileGuides, selectedFolder, "${guia.nombreGuia}.xml")
                                         if (archivoEnCarpeta.exists()) {
                                             AlertDialog.Builder(context)
                                                 .setTitle("¡Atención!")
@@ -381,15 +385,21 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                                                     moverImagenes(ruta, selectedFolder)
 
                                                     Files.copy(
-                                                        Paths.get("" + file + "/" + guia.nombreGuia + ".xml"),
-                                                        Paths.get("" + file + "/" + selectedFolder + "/" + guia.nombreGuia + ".xml"),
+                                                        Paths.get(originPath.toString()),
+                                                        Paths.get(copiedPath.toString()),
+                                                        StandardCopyOption.REPLACE_EXISTING
+                                                    )
+
+                                                    Files.copy(
+                                                        Paths.get("${filePathsProvider.buildFile(filePathsProvider.fileGuides, guia.nombreGuia)}.xml"),
+                                                        Paths.get("${filePathsProvider.buildFileFolder(filePathsProvider.fileGuides, selectedFolder, guia.nombreGuia)}.xml"),
                                                         StandardCopyOption.REPLACE_EXISTING
                                                     )
 
                                                     // Borrar archivo
-                                                    File(file, guia.nombreGuia + ".xml").delete()
+                                                    File(filePathsProvider.fileGuides, guia.nombreGuia + ".xml").delete()
 
-                                                    guiasViewModel.getAllUpdatedGuides(file)
+                                                    guiasViewModel.getAllUpdatedGuides(filePathsProvider.fileGuides)
                                                     /*val dialogoEliminarGuia = getDialog()
                                                     dialogoEliminarGuia!!.dismiss()*/
 
@@ -406,15 +416,15 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                                             moverImagenes(ruta, selectedFolder)
 
                                             Files.copy(
-                                                Paths.get("" + file + "/" + guia.nombreGuia + ".xml"),
-                                                Paths.get("" + file + "/" + selectedFolder + "/" + guia.nombreGuia + ".xml"),
+                                                Paths.get("${filePathsProvider.buildFile(filePathsProvider.fileGuides, guia.nombreGuia)}.xml"),
+                                                Paths.get("${filePathsProvider.buildFileFolder(filePathsProvider.fileGuides, selectedFolder, guia.nombreGuia)}.xml"),
                                                 StandardCopyOption.REPLACE_EXISTING
                                             )
 
                                             // Borrar archivo
-                                            File(file, guia.nombreGuia + ".xml").delete()
+                                            File(filePathsProvider.fileGuides, guia.nombreGuia + ".xml").delete()
 
-                                            guiasViewModel.getAllUpdatedGuides(file)
+                                            guiasViewModel.getAllUpdatedGuides(filePathsProvider.fileGuides)
                                             /*val dialogoEliminarGuia = getDialog()
                                             dialogoEliminarGuia!!.dismiss()*/
 
@@ -449,7 +459,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
 
                                             Files.copy(
                                                 Paths.get("$fileClickeado.xml"),
-                                                Paths.get(path + "/" + guia.nombreGuia + ".xml"),
+                                                Paths.get("${filePathsProvider.buildFile(filePathsProvider.fileGuides, guia.nombreGuia)}.xml"),
                                                 StandardCopyOption.REPLACE_EXISTING
                                             )
 
@@ -461,7 +471,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                                             dialogoEliminarGuia!!.dismiss()*/
 
                                             guiasViewModel.getMainPath()
-                                            guiasViewModel.getAllUpdatedGuides(file)
+                                            guiasViewModel.getAllUpdatedGuides(filePathsProvider.fileGuides)
 
                                             binding.imgvFolder.visibility = View.VISIBLE
                                             binding.tvNuevaCarpeta.visibility = View.VISIBLE
@@ -565,9 +575,9 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                     val rutaActual = "$rutaImagen/$imagen"
 
                     if (selectedFolder != "Principal") {
-                        rutaImagen = "$rutaImagen/$selectedFolder/$imagen"
+                        rutaImagen = "${filePathsProvider.buildFileFolder(filePathsProvider.fileImages, selectedFolder, imagen)}"
                     } else {
-                        rutaImagen = "$fileImages/$imagen"
+                        rutaImagen = "${filePathsProvider.buildFile(filePathsProvider.fileImages, imagen)}"
                     }
 
                     Files.copy(
@@ -587,9 +597,9 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                     val rutaActual = "$rutaImagen/$imagen"
 
                     if (selectedFolder != "Principal") {
-                        rutaImagen = "$rutaImagen/$selectedFolder/$imagen"
+                        rutaImagen = "${filePathsProvider.buildFileFolder(filePathsProvider.fileImages, selectedFolder, imagen)}"
                     } else {
-                        rutaImagen = "$fileImages/$imagen"
+                        rutaImagen = "${filePathsProvider.buildFile(filePathsProvider.fileImages, imagen)}"
                     }
 
                     Files.copy(

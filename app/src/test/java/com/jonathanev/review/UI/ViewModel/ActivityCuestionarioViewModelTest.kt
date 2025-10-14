@@ -7,6 +7,7 @@ import androidx.lifecycle.Observer
 import com.jonathanev.review.Data.GuiaRepository
 import com.jonathanev.review.Data.Model.DataStoreManager
 import com.jonathanev.review.Data.Model.EstadoUI
+import com.jonathanev.review.Data.Model.FilePathsProvider
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import com.jonathanev.review.Domain.*
@@ -46,6 +47,7 @@ class ActivityCuestionarioViewModelTest {
     private val setCopyImagesUseCase: SetCopyImagesUseCase = mockk()
     private val setCifrarRutaImagenUseCase: SetCifrarRutaImagenUseCase = mockk()
     private val setPintarLetraUseCase: SetPintarLetraUseCase = mockk()
+    private val filePathsProvider: FilePathsProvider = mockk()
 
     @Before
     fun setup() {
@@ -66,6 +68,7 @@ class ActivityCuestionarioViewModelTest {
             setCopyImagesUseCase,
             setCifrarRutaImagenUseCase,
             setPintarLetraUseCase,
+            filePathsProvider,
             dataStore,
             ioDispatcher = testDispatcher,
             mainDispatcher = testDispatcher

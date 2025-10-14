@@ -9,15 +9,14 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.jonathanev.review.Core.Constants.file
-import com.jonathanev.review.Core.Constants.fileImages
-import com.jonathanev.review.Core.Constants.fileImagesPiv
+import com.jonathanev.review.Data.Model.FilePathsProvider
 import com.jonathanev.review.UI.View.Fragments.Fragment_DialogListarGuias_popup
 import com.jonathanev.review.UI.View.Fragments.Fragment_DialogNuevoArchivo_popu
 import com.jonathanev.review.UI.ViewModel.MainActivityViewModel
 import com.jonathanev.review.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -28,6 +27,9 @@ class MainActivity : AppCompatActivity() {
     private var binding: ActivityMainBinding? = null
     private val mainActivityViewModel: MainActivityViewModel by viewModels()
     private var carpetasImagenes = mutableListOf<String>()
+
+    @Inject
+    lateinit var filePathsProvider: FilePathsProvider
 
     // Array TEXTO donde guardaremos los nombres de los ficheros.
     var item: ArrayList<String> = ArrayList()
@@ -73,7 +75,7 @@ class MainActivity : AppCompatActivity() {
         binding!!.btnAbrirGuiaEstudioHabilitado.setOnClickListener {
             if (createFolders()) {
                 // Cuando lo abres cargas el repositorio principal
-                mainActivityViewModel.getAllGuias(file)
+                mainActivityViewModel.getAllGuias(filePathsProvider.fileGuides)
 
                 val dialogo = Fragment_DialogListarGuias_popup()
                 dialogo.show(supportFragmentManager, "Fragment")
@@ -85,20 +87,20 @@ class MainActivity : AppCompatActivity() {
     private fun createFolders(): Boolean {
         var foldersCreated = false
 
-        if (!file.exists()) {
-            file.mkdir()
+        if (!filePathsProvider.fileGuides.exists()) {
+            filePathsProvider.fileGuides.mkdir()
         }
 
         // Crear carpeta de imagenes
-        if (!fileImages.exists()) {
-            fileImages.mkdirs()
+        if (!filePathsProvider.fileImages.exists()) {
+            filePathsProvider.fileImages.mkdirs()
         }
 
-        if (!fileImagesPiv.exists()) {
-            fileImagesPiv.mkdirs()
+        if (!filePathsProvider.fileImagesPiv.exists()) {
+            filePathsProvider.fileImagesPiv.mkdirs()
         }
 
-        if (!file.exists() || !fileImagesPiv.exists() || !fileImages.exists()) {
+        if (!filePathsProvider.fileGuides.exists() || !filePathsProvider.fileImagesPiv.exists() || !filePathsProvider.fileImages.exists()) {
             val builder = AlertDialog.Builder(this)
             builder.setTitle("Error")
             builder.setMessage("No se pudieron crear los ficheros correctamente")
@@ -123,7 +125,7 @@ class MainActivity : AppCompatActivity() {
 
             // Crear subcarpetas para las imagenes
             for (subCarpeta in carpetasImagenes) {
-                var rutaSubcarpeta = File("$fileImages/$subCarpeta")
+                val rutaSubcarpeta = filePathsProvider.buildFolder(filePathsProvider.fileImages, subCarpeta)
 
                 // Vas creando y verificando que las carpetas se crean correctamente
                 if (!rutaSubcarpeta.exists()) {
@@ -145,7 +147,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun initUI() {
         if (createFolders()) {
-            mainActivityViewModel.getAllGuias(file)
+            mainActivityViewModel.getAllGuias(filePathsProvider.fileGuides)
         }
     }
 

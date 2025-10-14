@@ -1,5 +1,7 @@
 package com.jonathanev.review.Domain
 
+import com.jonathanev.review.Data.Model.FilePathsProvider
+import io.mockk.mockk
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -11,13 +13,14 @@ import org.junit.rules.TemporaryFolder
 import java.io.File
 
 class SetCopyImagesUseCaseTest {
+    private val filePathsProvider = FilePathsProvider(mockk())
 
     @get:Rule
     val tempFolder = TemporaryFolder()
 
     private lateinit var sourceDir: File
     private lateinit var destDir: File
-    private val useCase = SetCopyImagesUseCase()
+    private val useCase = SetCopyImagesUseCase(filePathsProvider)
 
     @Before
     fun setUp() {

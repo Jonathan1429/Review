@@ -51,7 +51,7 @@
 
         <!-- El WindowSoft... es para que no se muevan los componentes cuando se habra el teclado -->
         <activity
-            android:name="com.jonathanev.review.UI.View.Activity_Modificar"
+            android:name="com.jonathanev.review.UI.View.ActivityModificar"
             android:exported="false"
             android:windowSoftInputMode="adjustPan"
             android:configChanges="screenSize|smallestScreenSize|orientation"/>

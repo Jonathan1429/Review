@@ -1,6 +1,7 @@
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.jonathanev.review.Core.Constants
 import com.jonathanev.review.Data.GuiaRepository
+import com.jonathanev.review.Data.Model.FilePathsProvider
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.Model.GuiaProvider
 import com.jonathanev.review.Domain.GetGuiaPosicionUseCase
@@ -24,13 +25,15 @@ class FragDialListarGuiasViewModelTest {
     private val guiaRepository: GuiaRepository = mockk()
     private val guiaProvider: GuiaProvider = mockk()
     private val getGuiaPosicionUseCase: GetGuiaPosicionUseCase = mockk()
+    private val filePathsProvider: FilePathsProvider = mockk()
 
     @Before
     fun setup() {
         viewModel = FragDialListarGuiasViewModel(
             guiaRepository,
             guiaProvider,
-            getGuiaPosicionUseCase
+            getGuiaPosicionUseCase,
+            filePathsProvider
         )
     }
 
@@ -80,6 +83,6 @@ class FragDialListarGuiasViewModelTest {
         viewModel.getMainPath()
 
         // Assert
-        assertEquals(Constants.file, viewModel.file.value)
+        assertEquals(filePathsProvider.fileGuides, viewModel.file.value)
     }
 }

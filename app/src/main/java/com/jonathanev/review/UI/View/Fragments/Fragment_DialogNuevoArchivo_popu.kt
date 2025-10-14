@@ -15,22 +15,25 @@ import android.view.Window
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
-import com.jonathanev.review.Core.Constants.cons_dataStore
-import com.jonathanev.review.Core.Constants.cons_guias
-import com.jonathanev.review.Core.Constants.cons_imagenes
-import com.jonathanev.review.Core.Constants.cons_imagenesPiv
-import com.jonathanev.review.Core.Constants.file
-import com.jonathanev.review.Core.Constants.fileImages
+import com.jonathanev.review.Core.Constants.DATASTORE
+import com.jonathanev.review.Core.Constants.GUIAS
+import com.jonathanev.review.Core.Constants.IMAGENES
+import com.jonathanev.review.Core.Constants.IMAGENESPIVOTE
+import com.jonathanev.review.Data.Model.FilePathsProvider
 import com.jonathanev.review.UI.View.Activity_Cuestionario
 import com.jonathanev.review.UI.ViewModel.Fragments.FragDialNuevoArchViewModel
 import com.jonathanev.review.databinding.FragmentNuevoArchivoBinding
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
     private var binding: FragmentNuevoArchivoBinding? = null
     private val fragDialNuevoArchViewModel by viewModels<FragDialNuevoArchViewModel>()
+
+    @Inject
+    lateinit var filePathsProvider: FilePathsProvider
 
     interface DialogListener {
         fun onDialogClosed()
@@ -111,10 +114,10 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
                     context, "No puede haber / en el nombre",
                     Toast.LENGTH_SHORT
                 ).show()
-            } else if (binding!!.etNombreArchivo.text!!.equals(cons_dataStore) ||
-                binding!!.etNombreArchivo.text!!.equals(cons_guias) ||
-                binding!!.etNombreArchivo.text!!.equals(cons_imagenes) ||
-                binding!!.etNombreArchivo.text!!.equals(cons_imagenesPiv)
+            } else if (binding!!.etNombreArchivo.text!!.equals(DATASTORE) ||
+                binding!!.etNombreArchivo.text!!.equals(GUIAS) ||
+                binding!!.etNombreArchivo.text!!.equals(IMAGENES) ||
+                binding!!.etNombreArchivo.text!!.equals(IMAGENESPIVOTE)
             ) {
                 Toast.makeText(
                     context, "Palabra reservada, escribe otro nombre",
@@ -131,7 +134,7 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
                         // Defino la ruta donde busco los ficheros.
                         var archivoExiste = false
                         // Creo el array de tipo File con el contenido de la carpeta.
-                        val files = file.listFiles()
+                        val files = filePathsProvider.fileGuides.listFiles()
                         var archivos: File? = null
 
                         // Hacemos un ciclo por cada fichero para extraer el nombre uno a uno.
@@ -172,7 +175,7 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
                                             Toast.LENGTH_SHORT
                                         ).show()
 
-                                        fragDialNuevoArchViewModel.getAllUpdatedGuides(file)
+                                        fragDialNuevoArchViewModel.getAllUpdatedGuides(filePathsProvider.fileGuides)
 
                                         // restoreMainFilePath()
                                         cerrarTodosDialogos()
@@ -196,7 +199,7 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
                             // Renombrar archivo
                             if (rutaRenombrar.renameTo(nuevoArchivo)) {
                                 // restoreMainFilePath()
-                                fragDialNuevoArchViewModel.getAllUpdatedGuides(file)
+                                fragDialNuevoArchViewModel.getAllUpdatedGuides(filePathsProvider.fileGuides)
 
                                 Toast.makeText(
                                     context, "Archivo renombrado exitosamente",
@@ -211,12 +214,12 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
                     val folderName = binding!!.etNombreArchivo.text!!.trim()
 
                     // Concatenar el directorio absoluto con el nombre de la carpeta
-                    val rutaGuias = "${file.absolutePath}/$folderName/"
-                    val rutaImagenes = "${fileImages.absolutePath}/$folderName/"
+                    val rutaGuias = filePathsProvider.buildFolder(filePathsProvider.rutaPrin, folderName.toString())
+                    val rutaImagenes = filePathsProvider.buildFolder(filePathsProvider.fileImages, folderName.toString())
 
                     // Crear un objeto File con la ruta completa de la carpeta
-                    val folder = File(rutaGuias)
-                    val images = File(rutaImagenes)
+                    val folder = File(rutaGuias.toString())
+                    val images = File(rutaImagenes.toString())
 
                     if (!folder.exists()) {
                         val created = folder.mkdirs()
@@ -227,7 +230,7 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
                             ).show()
                             //cerrarDialogo()
                             cerrarTodosDialogos()
-                            fragDialNuevoArchViewModel.getAllUpdatedGuides(file)
+                            fragDialNuevoArchViewModel.getAllUpdatedGuides(filePathsProvider.fileGuides)
                         } else {
                             Toast.makeText(
                                 context, "No se pudo crear la carpeta exitosamente",
@@ -251,7 +254,7 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
                             ).show()
                             //cerrarDialogo()
                             cerrarTodosDialogos()
-                            fragDialNuevoArchViewModel.getAllUpdatedGuides(file)
+                            fragDialNuevoArchViewModel.getAllUpdatedGuides(filePathsProvider.fileGuides)
                         } else {
                             Toast.makeText(
                                 context, "No se pudo crear la carpeta exitosamente",
@@ -270,12 +273,12 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
                     var item = ""
                     // Defino la ruta donde busco los ficheros.
                     var archivoExiste = false
-                    if (file.exists()) {
+                    if (filePathsProvider.fileGuides.exists()) {
                         var item = ""
                         // Defino la ruta donde busco los ficheros.
                         var archivoExiste = false
                         // Creo el array de tipo File con el contenido de la carpeta.
-                        val files = file.listFiles()
+                        val files = filePathsProvider.fileGuides.listFiles()
                         var archivos: File? = null
 
                         // Hacemos un ciclo por cada fichero para extraer el nombre uno a uno.

@@ -223,7 +223,7 @@ class Activity_RepasarGuia : AppCompatActivity() {
             // val preferences = getSharedPreferences("MiPref", MODE_PRIVATE)
             // val nombreArchivo = preferences.getString("nombre_archivo", "")
 
-            val intent: Intent = Intent(applicationContext, Activity_Modificar::class.java)
+            val intent: Intent = Intent(applicationContext, ActivityModificar::class.java)
             intent.putExtra("ruta", ruta)
             startActivity(intent)
             finish()

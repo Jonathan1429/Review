@@ -4,6 +4,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.jonathanev.review.Core.Constants
 import com.jonathanev.review.Data.GuiaRepository
+import com.jonathanev.review.Data.Model.FilePathsProvider
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.Model.GuiaProvider
 import com.jonathanev.review.Domain.GetGuiaPosicionUseCase
@@ -16,6 +17,7 @@ class FragDialListarGuiasViewModel @Inject constructor(
     private val guiaRepository: GuiaRepository,
     private val guiaProvider: GuiaProvider,
     private val getGuiaPosicionUseCase: GetGuiaPosicionUseCase,
+    private val filePathsProvider: FilePathsProvider
 ) : ViewModel() {
     private var _guias = MutableLiveData<List<GuiaModel>>()
     val guias: MutableLiveData<List<GuiaModel>> get() = _guias
@@ -32,11 +34,11 @@ class FragDialListarGuiasViewModel @Inject constructor(
     }
 
     fun changeFilePath(folderName: String) {
-        _file.postValue(File("${Constants.file}/$folderName"))
+        _file.postValue(filePathsProvider.buildFolder(filePathsProvider.fileGuides, folderName))
     }
 
     fun getMainPath() {
-        _file.postValue(Constants.file)
+        _file.postValue(filePathsProvider.fileGuides)
     }
 
     fun getGuia(position: Int): GuiaModel = getGuiaPosicionUseCase(position)

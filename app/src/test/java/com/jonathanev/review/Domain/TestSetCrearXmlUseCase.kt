@@ -2,6 +2,7 @@ package com.jonathanev.review.Domain
 
 import com.jonathanev.review.Data.FileOutputStreamFactory
 import com.jonathanev.review.Data.GuiaRepository
+import com.jonathanev.review.Data.Model.FilePathsProvider
 import com.jonathanev.review.Data.Model.GuiaProvider
 import com.jonathanev.review.Data.Model.ResponseGuia
 import com.jonathanev.review.Data.XmlSerializerFactory
@@ -22,12 +23,14 @@ class TestSetCrearXmlUseCase {
     private val fosFactory         = mockk<FileOutputStreamFactory>()
     private val serializer         = mockk<XmlSerializer>(relaxed = true)
     private val fos                = mockk<FileOutputStream>(relaxed = true)
+    private val filePathsProvider = FilePathsProvider(mockk())
 
     private val repo = GuiaRepository(
         getAllGuiasUseCase,
         guiaProvider,
         serializerFactory,
-        fosFactory
+        fosFactory,
+        filePathsProvider
     )
     private val useCase = SetCrearXmlUseCase(repo)
 

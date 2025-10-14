@@ -11,7 +11,7 @@ import android.view.ViewGroup
 import android.view.Window
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
-import com.jonathanev.review.UI.View.Activity_Modificar
+import com.jonathanev.review.UI.View.ActivityModificar
 import com.jonathanev.review.UI.ViewModel.Fragments.Fragment_DialogColoresMod_popupViewModel
 import com.jonathanev.review.databinding.FragmentColoresBinding
 import com.skydoves.colorpickerview.flag.BubbleFlag
@@ -41,7 +41,7 @@ class Fragment_DialogColoresMod_popup : DialogFragment() {
         // Observamos cambios de color desde el ViewModel
         viewModel.colorSeleccionado.observe(viewLifecycleOwner) { color ->
             setLayoutColor(color)
-            (activity as? Activity_Modificar)?.setColor(color)
+            (activity as? ActivityModificar)?.setColor(color)
         }
 
         // Evento del ColorPicker

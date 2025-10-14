@@ -31,13 +31,10 @@ import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
+import com.jonathanev.review.Core.Constants.BASERUTA_IMG
+import com.jonathanev.review.Core.Constants.BASERUTA_IMG_CIFRADO
 import com.jonathanev.review.Core.Constants.PICK_IMAGE_REQUEST
-import com.jonathanev.review.Core.Constants.baseRutaImagen
-import com.jonathanev.review.Core.Constants.baseRutaImagenCifrado
-import com.jonathanev.review.Core.Constants.file
-import com.jonathanev.review.Core.Constants.fileImages
-import com.jonathanev.review.Core.Constants.fileImagesPiv
-import com.jonathanev.review.Core.Constants.rutaPrin
+import com.jonathanev.review.Data.Model.FilePathsProvider
 import com.jonathanev.review.UI.View.Fragments.Fragment_DialogColores_popup
 import com.jonathanev.review.UI.ViewModel.ActivityCuestionarioViewModel
 import com.jonathanev.review.databinding.ActivityCuestionarioBinding
@@ -48,17 +45,22 @@ import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class Activity_Cuestionario : AppCompatActivity() {
     private lateinit var binding: ActivityCuestionarioBinding
-    private var nombreArchivo: String? = null
+    private lateinit var nombreArchivo: String
     private var colorActual: Int = 0
     private var contadorImagen = 0
     private var longCaracteres = 0
-    private val activityCuestionarioViewModel by viewModels<ActivityCuestionarioViewModel>()
+    private val viewModel by viewModels<ActivityCuestionarioViewModel>()
     private var filename: String = "" // Ruta/imagen.png
-    private var ruta: String = "$file"
+    private val route = filePathsProvider.buildFile(filePathsProvider.fileGuides, nombreArchivo)
+    //private var ruta: String = "$fileGuias"
+
+    @Inject
+    lateinit var filePathsProvider: FilePathsProvider
 
     // Seleccionar imagen
     /*private val pickMedia =
@@ -121,14 +123,14 @@ class Activity_Cuestionario : AppCompatActivity() {
         initListeners()
 
         // Recibimos el nombre del archivo del popupFragment Nueva Guia.
-        nombreArchivo = intent.extras!!.getString("nombre_archivo")
-        ruta = "$ruta$nombreArchivo"
+        nombreArchivo = intent.extras!!.getString("nombre_archivo") ?: ""
+        //ruta = "$ruta$nombreArchivo"
 
         // Se cambia el nombre del titulo del toolbar
         binding.barraSuperiorRegreso.tvTituloToolbar.text = "Creando: $nombreArchivo"
         colorActual = Color.BLACK
 
-        activityCuestionarioViewModel.uiStateBtnRoll.observe(this) { uiState ->
+        viewModel.uiStateBtnRoll.observe(this) { uiState ->
             if (uiState.estadoUI.isUpdatedAskAns) {
                 girarCardView()
                 if (!uiState.estadoUI.isEtPregunta) {
@@ -177,7 +179,7 @@ class Activity_Cuestionario : AppCompatActivity() {
             }
         }
 
-        activityCuestionarioViewModel.uiStateBtnBack.observe(this) { uiState ->
+        viewModel.uiStateBtnBack.observe(this) { uiState ->
             if (uiState.estadoUI.isUpdatedAskAns) {
                 binding.lblPregResp.text = "Pregunta"
 
@@ -218,7 +220,7 @@ class Activity_Cuestionario : AppCompatActivity() {
             }
         }
 
-        activityCuestionarioViewModel.uiStateBtnNext.observe(this) { uiState ->
+        viewModel.uiStateBtnNext.observe(this) { uiState ->
             if (uiState.estadoUI.isUpdatedAskAns) {
                 binding.lblPregResp.text = "Pregunta"
                 // val posPregFin = preguntas.size - 1
@@ -259,7 +261,7 @@ class Activity_Cuestionario : AppCompatActivity() {
             }
         }
 
-        activityCuestionarioViewModel.uiStateBtnEliminar.observe(this) { uiState ->
+        viewModel.uiStateBtnEliminar.observe(this) { uiState ->
             binding.lblPregResp.text = "Pregunta"
 
             if (!uiState.estadoUI.isThereMoreAsks) {
@@ -287,7 +289,7 @@ class Activity_Cuestionario : AppCompatActivity() {
                 if (uiState.estadoUI.isShowSelColor) View.VISIBLE else View.GONE
         }
 
-        activityCuestionarioViewModel.uiStateBtnSave.observe(this) { uiState ->
+        viewModel.uiStateBtnSave.observe(this) { uiState ->
             Toast.makeText(
                 applicationContext,
                 uiState.message,
@@ -298,13 +300,13 @@ class Activity_Cuestionario : AppCompatActivity() {
                 val intent = Intent(applicationContext, Activity_RepasarGuia::class.java)
                 intent.putExtra("ruta", uiState.responseGuia.rutaGuiaEstudio)
                 startActivity(intent)
-                activityCuestionarioViewModel.procesoActualizacion()
+                viewModel.procesoActualizacion()
                 copyImages()
                 finish()
             }
         }
 
-        activityCuestionarioViewModel.contImagenes.observe(this) { contImagen ->
+        viewModel.contImagenes.observe(this) { contImagen ->
             contadorImagen = contImagen
             filename = "$contadorImagen.png"
         }
@@ -325,10 +327,10 @@ class Activity_Cuestionario : AppCompatActivity() {
                 isEtPregunta = true
             }
 
-            activityCuestionarioViewModel.clickedRoll(
+            viewModel.clickedRoll(
                 editable,
                 isEtPregunta,
-                ruta
+                route.toString()
             )
         }
 
@@ -340,10 +342,11 @@ class Activity_Cuestionario : AppCompatActivity() {
                 isEtPregunta = true
             }
 
-            activityCuestionarioViewModel.onClickImgvPrevious(
+            val route = filePathsProvider.buildFile(filePathsProvider.fileGuides, nombreArchivo)
+            viewModel.onClickImgvPrevious(
                 editable,
                 isEtPregunta,
-                ruta
+                route.toString()
             )
         }
 
@@ -355,10 +358,10 @@ class Activity_Cuestionario : AppCompatActivity() {
                 isEtPregunta = true
             }
 
-            activityCuestionarioViewModel.onClickImgvNext(
+            viewModel.onClickImgvNext(
                 editable,
                 isEtPregunta,
-                ruta
+                route.toString()
             )
         }
 
@@ -367,7 +370,7 @@ class Activity_Cuestionario : AppCompatActivity() {
                 .setTitle("¡Atención!")
                 .setMessage("¿Quieres eliminar pregunta/respuesta?")
                 .setPositiveButton("Si") { _, _ ->
-                    activityCuestionarioViewModel.onClickEliminar(ruta)
+                    viewModel.onClickEliminar(route.toString())
                 }.setNegativeButton("Cancelar") { dialog, _ ->
                     dialog.dismiss()
                 }.create().show()
@@ -381,11 +384,12 @@ class Activity_Cuestionario : AppCompatActivity() {
                 isEtPregunta = true
             }
 
-            activityCuestionarioViewModel.onClickImgvSave(
+            viewModel.onClickImgvSave(
                 editable,
                 "$nombreArchivo.xml",
                 isEtPregunta,
-                "${file.absolutePath}/$nombreArchivo.xml"
+                ruta = "$route.xml"
+                //"${fileGuias.absolutePath}/$nombreArchivo.xml"
             )
         }
 
@@ -455,12 +459,12 @@ class Activity_Cuestionario : AppCompatActivity() {
 
             override fun afterTextChanged(texto: Editable?) {
                 if (!texto.toString()
-                        .contains(baseRutaImagenCifrado) && (binding.etPregResp.length() - longCaracteres) == 1
+                        .contains(BASERUTA_IMG_CIFRADO) && (binding.etPregResp.length() - longCaracteres) == 1
                 ) {
                     // Si hay un salto de linea o es color negro no se pinta nada
                     if (colorActual != -16777216 && !seAgregoSaltoDeLinea) {
                         val cursorPosition = binding.etPregResp.selectionStart
-                        activityCuestionarioViewModel.setPintarLetra(
+                        viewModel.setPintarLetra(
                             texto!!,
                             cursorPosition,
                             colorActual
@@ -472,13 +476,13 @@ class Activity_Cuestionario : AppCompatActivity() {
     }
 
     private fun deleteImages() {
-        if (fileImagesPiv.exists()) {
+        if (filePathsProvider.fileImagesPiv.exists()) {
             borrarContenidoEnPiv()
         }
     }
 
     private fun borrarContenidoEnPiv() {
-        val files = fileImagesPiv.listFiles()
+        val files = filePathsProvider.fileImagesPiv.listFiles()
         if (files != null) {
             for (subFile in files) {
                 subFile.delete()
@@ -487,7 +491,7 @@ class Activity_Cuestionario : AppCompatActivity() {
     }
 
     private fun initUI() {
-        activityCuestionarioViewModel.getCountImage()
+        viewModel.getCountImage()
     }
 
     private fun openSomeActivityForResult() {
@@ -522,9 +526,11 @@ class Activity_Cuestionario : AppCompatActivity() {
         try {
             fos = openFileOutput(filename, MODE_PRIVATE)
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
+            val originPath = filePathsProvider.buildFile(filePathsProvider.rutaPrin, filename)
+            val copiedPath = filePathsProvider.buildFile(filePathsProvider.fileImagesPiv, filename)
 
             if (binding.etPregResp.text!!.isNotEmpty() && !binding.etPregResp.text!!.contains(
-                    baseRutaImagen
+                    BASERUTA_IMG
                 )
             ) {
                 AlertDialog.Builder(this@Activity_Cuestionario)
@@ -535,24 +541,35 @@ class Activity_Cuestionario : AppCompatActivity() {
                         "Si"
                     ) { _, _ ->
                         Files.copy(
-                            Paths.get("$rutaPrin/$filename"),
-                            Paths.get("$fileImagesPiv/$filename"),
+                            Paths.get(originPath.toString()),
+                            Paths.get(copiedPath.toString()),
                             StandardCopyOption.REPLACE_EXISTING
                         )
 
                         // Borrar archivo
-                        File(rutaPrin, filename).delete()
+                        File(filePathsProvider.rutaPrin, filename).delete()
 
-                        binding.ivImagen.setImage(ImageSource.uri("$fileImagesPiv/$filename")) //setImageURI(uri)
+                        binding.ivImagen.setImage(
+                            ImageSource.uri(
+                                filePathsProvider.buildFile(
+                                    filePathsProvider.fileImagesPiv,
+                                    filename
+                                ).toString()
+                            )
+                        )//setImageURI(uri)
                         binding.tilContenidoPregResp.visibility = View.GONE
                         binding.ivImagen.visibility = View.VISIBLE
-                        val cifrado = activityCuestionarioViewModel.getUrlImagenCifrada(
-                            "$baseRutaImagen$fileImages/$filename",
+                        val cifrado = viewModel.getUrlImagenCifrada(
+                            filePathsProvider.buildFileFolder(
+                                filePathsProvider.rutaPrinImgCifrado,
+                                filePathsProvider.fileImages.toString(),
+                                filename
+                            ).toString(),
                             3
                         )
                         binding.etPregResp.setText(cifrado)
 
-                        activityCuestionarioViewModel.llamaCorruIncremento(cifrado)
+                        viewModel.llamaCorruIncremento(cifrado)
                     }
                     .setNegativeButton(
                         "Cancelar"
@@ -565,25 +582,36 @@ class Activity_Cuestionario : AppCompatActivity() {
                     }.create().show()
             } else {
                 Files.copy(
-                    Paths.get("$rutaPrin/$filename"),
-                    Paths.get("$fileImagesPiv/$filename"),
+                    Paths.get(originPath.toString()),
+                    Paths.get(copiedPath.toString()),
                     StandardCopyOption.REPLACE_EXISTING
                 )
 
                 // Borrar archivo
-                File(rutaPrin, filename).delete()
+                filePathsProvider.buildFile(filePathsProvider.rutaPrin, filename).delete()
 
-                binding.ivImagen.setImage(ImageSource.uri("$fileImagesPiv/$filename")) //setImageURI(uri)
+                binding.ivImagen.setImage(
+                    ImageSource.uri(
+                        filePathsProvider.buildFile(
+                            filePathsProvider.fileImagesPiv,
+                            filename
+                        ).toString()
+                    )
+                ) //setImageURI(uri)
                 binding.tilContenidoPregResp.visibility = View.GONE
                 binding.ivImagen.visibility = View.VISIBLE
 
-                val cifrado = activityCuestionarioViewModel.getUrlImagenCifrada(
-                    "$baseRutaImagen$fileImages/$filename",
+                val cifrado = viewModel.getUrlImagenCifrada(
+                    filePathsProvider.buildFileFolder(
+                        filePathsProvider.rutaPrinImg,
+                        filename,
+                        filename
+                    ).toString(),
                     3
                 )
                 binding.etPregResp.setText(cifrado)
 
-                activityCuestionarioViewModel.llamaCorruIncremento(cifrado)
+                viewModel.llamaCorruIncremento(cifrado)
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -677,8 +705,8 @@ class Activity_Cuestionario : AppCompatActivity() {
             .setPositiveButton(
                 "Continuar"
             ) { _, _ -> // Si el archivo se creó y existe, se elimina y te informa en consola
-                if (file.exists()) {
-                    File(file, "$nombreArchivo.xml").delete()
+                if (filePathsProvider.fileGuides.exists()) {
+                    File(filePathsProvider.fileGuides, "$nombreArchivo.xml").delete()
                     Log.d("ArchivoEliminado", "Archivo eliminado")
                 } else {
                     Log.d("ArchivoEliminado", "Archivo no eliminado")
@@ -691,7 +719,7 @@ class Activity_Cuestionario : AppCompatActivity() {
     }
 
     private fun copyImages() {
-        val images = fileImagesPiv.listFiles()
+        val images = filePathsProvider.fileImagesPiv.listFiles()
         // Hacemos un ciclo por cada fichero para extraer el nombre de cada uno.
         if (!images.isNullOrEmpty()) {
             for (i in images.indices) {
@@ -702,13 +730,18 @@ class Activity_Cuestionario : AppCompatActivity() {
                 name = archivo.name
 
                 Files.copy(
-                    Paths.get("$fileImagesPiv/$name"),
-                    Paths.get("$fileImages/$name"),
+                    Paths.get(
+                        filePathsProvider.buildFile(filePathsProvider.fileImagesPiv, name)
+                            .toString()
+                    ),
+                    Paths.get(
+                        filePathsProvider.buildFile(filePathsProvider.fileImages, name).toString()
+                    ),
                     StandardCopyOption.REPLACE_EXISTING
                 )
 
                 // Borrar archivo
-                File(fileImagesPiv, name).delete()
+                File(filePathsProvider.fileImagesPiv, name).delete()
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.jonathanev.review.Data
 
+import com.jonathanev.review.Data.Model.FilePathsProvider
 import com.jonathanev.review.Data.Model.GuiaProvider
 import com.jonathanev.review.Data.Model.PreguntaRespuestaModel
 import com.jonathanev.review.Domain.GetAllGuiasUseCase
@@ -17,12 +18,14 @@ class GuiaRepositoryIntegrationTest() {
     private val guiaProvider = GuiaProvider()
     private val xmlSerializerFactory = XmlSerializerFactory()
     private val fileOutputStreamFactory = FileOutputStreamFactory()
+    private val filePathsProvider = FilePathsProvider(mockk())
 
     private val repository = GuiaRepository(
         getAllGuiasUseCase,
         guiaProvider,
         xmlSerializerFactory,
-        fileOutputStreamFactory
+        fileOutputStreamFactory,
+        filePathsProvider
     )
 
     @Test

@@ -1,14 +1,15 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.Core.Constants.fileImages
-import com.jonathanev.review.Core.Constants.fileImagesPiv
+import com.jonathanev.review.Data.Model.FilePathsProvider
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import javax.inject.Inject
 
-class SetCopyImagesUseCase @Inject constructor() {
-    operator fun invoke(imgPiv: File = fileImagesPiv, imagenes: File = fileImages) {
+class SetCopyImagesUseCase @Inject constructor(
+    private val filePathsProvider: FilePathsProvider
+) {
+    operator fun invoke(imgPiv: File = filePathsProvider.fileImagesPiv, imagenes: File = filePathsProvider.fileImages) {
         val images = imgPiv.listFiles()
         if (images != null) {
             for (archivo in images) {

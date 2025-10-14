@@ -1,8 +1,8 @@
 package com.jonathanev.review.Data
 
 import android.util.Xml
-import com.jonathanev.review.Core.Constants.file
 import com.jonathanev.review.Data.Model.EstadoUI
+import com.jonathanev.review.Data.Model.FilePathsProvider
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.Model.GuiaProvider
 import com.jonathanev.review.Data.Model.PreguntaRespuestaModel
@@ -33,7 +33,8 @@ class GuiaRepository @Inject constructor(
     private val getAllGuiasUseCase: GetAllGuiasUseCase,
     private val guiaProvider: GuiaProvider,
     private val xmlSerializerFactory: XmlSerializerFactory,
-    private val fileOutputStreamFactory: FileOutputStreamFactory
+    private val fileOutputStreamFactory: FileOutputStreamFactory,
+    private val filePathsProvider: FilePathsProvider
     //@ApplicationContext private val context: Context
 ) {
     fun getGuias(file: File): List<GuiaModel> {
@@ -107,7 +108,7 @@ class GuiaRepository @Inject constructor(
         try {
             db = dbf.newDocumentBuilder()
             val filePath: File = if (ruta == "null") {
-                File(file, nombreArchivo)
+                File(filePathsProvider.fileGuides, nombreArchivo)
             } else {
                 File(ruta)
             }

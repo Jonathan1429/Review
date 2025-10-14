@@ -3,15 +3,13 @@ package com.jonathanev.review.Domain
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
-import com.jonathanev.review.Core.Constants.baseRutaImagen
-import com.jonathanev.review.Core.Constants.baseRutaImagenCifrado
-import com.jonathanev.review.Data.Interface.FileHelper
+import com.jonathanev.review.Core.Constants.BASERUTA_IMG
+import com.jonathanev.review.Core.Constants.BASERUTA_IMG_CIFRADO
 import com.jonathanev.review.Data.Model.ColorPregModel
 import com.jonathanev.review.Data.Model.EstadoImagen
 import com.jonathanev.review.Data.Model.EstadoUI
 import com.jonathanev.review.Data.Model.FileHelperImpl
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
-import java.io.File
 import javax.inject.Inject
 
 class SetPintarTextosUseCase @Inject constructor(
@@ -42,10 +40,10 @@ class SetPintarTextosUseCase @Inject constructor(
             // uri = texto.toUri()
         }
 
-        return if (texto.contains(baseRutaImagenCifrado)) {
+        return if (texto.contains(BASERUTA_IMG_CIFRADO)) {
             val descifrado = setCifrarRutaImagenUseCase(texto, 26 - 3)// cifrar(texto, 26 - 3)
             val cifrado = texto
-            texto = descifrado.replace(baseRutaImagen.toRegex(), "")
+            texto = descifrado.replace(BASERUTA_IMG.toRegex(), "")
             var soloRuta = ruta.replaceAfterLast("/", "")
             soloRuta = soloRuta.replaceFirst("guias", "imagenes")
             val imagen = texto.replaceBeforeLast("/", "").replace("/", "")

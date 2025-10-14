@@ -1,18 +1,16 @@
 package com.jonathanev.review.UI.ViewModel
 
-import android.app.Application
 import android.text.Editable
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
-import com.jonathanev.review.Core.Constants.file
 import com.jonathanev.review.DI.IoDispatcher
 import com.jonathanev.review.DI.MainDispatcher
 import com.jonathanev.review.Data.GuiaRepository
 import com.jonathanev.review.Data.Model.DataStoreManager
+import com.jonathanev.review.Data.Model.FilePathsProvider
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import com.jonathanev.review.Domain.SetCifrarRutaImagenUseCase
@@ -41,6 +39,7 @@ class ActivityCuestionarioViewModel @Inject constructor(
     private val setCopyImagesUseCase: SetCopyImagesUseCase,
     private val setCifrarRutaImagenUseCase: SetCifrarRutaImagenUseCase,
     private val setPintarLetraUseCase: SetPintarLetraUseCase,
+    private val filePathsProvider: FilePathsProvider,
     private val dataStore: DataStoreManager,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     @MainDispatcher private val mainDispatcher: CoroutineDispatcher
@@ -82,7 +81,7 @@ class ActivityCuestionarioViewModel @Inject constructor(
     //val contImagenes = dataStore.getCountImage().asLiveData()
 
     fun procesoActualizacion() {
-        getAllUpdatedGuides(file)
+        getAllUpdatedGuides(filePathsProvider.fileGuides)
         copyImages()
     }
 

@@ -1,5 +1,6 @@
 package com.jonathanev.review.Data
 
+import com.jonathanev.review.Data.Model.FilePathsProvider
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.Model.GuiaProvider
 import com.jonathanev.review.Data.Model.PreguntaRespuestaModel
@@ -21,12 +22,14 @@ class GuiaRepositoryUnitTest {
     private val guiaProvider = GuiaProvider()
     private val xmlSerializerFactory = mockk<XmlSerializerFactory>()
     private val fileOutputStreamFactory = mockk<FileOutputStreamFactory>()
+    private val filePathsProvider = FilePathsProvider(mockk())
 
     private val repository = GuiaRepository(
         getAllGuiasUseCase,
         guiaProvider,
         xmlSerializerFactory,
-        fileOutputStreamFactory
+        fileOutputStreamFactory,
+        filePathsProvider
     )
 
     // ======= getGuias branch
@@ -144,6 +147,7 @@ class GuiaRepositoryUnitTest {
         val repo = GuiaRepository(
             mockk(relaxed = true),
             GuiaProvider(),
+            mockk(),
             mockk(),
             mockk()
         )
