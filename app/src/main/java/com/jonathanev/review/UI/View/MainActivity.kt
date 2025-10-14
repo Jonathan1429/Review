@@ -10,12 +10,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.jonathanev.review.Data.Model.FilePathsProvider
+import com.jonathanev.review.R
 import com.jonathanev.review.UI.View.Fragments.Fragment_DialogListarGuias_popup
 import com.jonathanev.review.UI.View.Fragments.Fragment_DialogNuevoArchivo_popu
 import com.jonathanev.review.UI.ViewModel.MainActivityViewModel
 import com.jonathanev.review.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
-import java.io.File
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -24,8 +24,8 @@ class MainActivity : AppCompatActivity() {
         private const val REQUEST_PERMISSION_CODE = 123
     }
 
-    private var binding: ActivityMainBinding? = null
-    private val mainActivityViewModel: MainActivityViewModel by viewModels()
+    private lateinit var binding: ActivityMainBinding
+    private val viewModel: MainActivityViewModel by viewModels()
     private var carpetasImagenes = mutableListOf<String>()
 
     @Inject
@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding!!.root)
+        setContentView(binding.root)
 
         initUI()
 
@@ -46,9 +46,10 @@ class MainActivity : AppCompatActivity() {
         checkAndRequestPermissions()
 
         // Utilizamos un botón que es reutilizado, unicamente le cambiamos el texto.
-        binding!!.btnAbrirGuiaEstudioHabilitado.text = "Abrir Guia"
-        binding!!.btnNuevaGuiaEstudio.setOnClickListener { // Unicamente abrimos el dialogo y lo mostramos en la pantalla.
-            if (createFolders()) {
+        binding.btnAbrirGuiaEstudioHabilitado.text = resources.getText(R.string.btnAbrirGuia)
+
+        binding.btnNuevaGuiaEstudio.setOnClickListener { // Unicamente abrimos el dialogo y lo mostramos en la pantalla.
+            if (viewModel.getFoldersCreated()) {
                 val dialogo: Fragment_DialogNuevoArchivo_popu = Fragment_DialogNuevoArchivo_popu()
                 dialogo.show(supportFragmentManager, "Fragment_nuevo")
 
@@ -72,10 +73,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        binding!!.btnAbrirGuiaEstudioHabilitado.setOnClickListener {
-            if (createFolders()) {
+        binding.btnAbrirGuiaEstudioHabilitado.setOnClickListener {
+            if (viewModel.getFoldersCreated()) {
                 // Cuando lo abres cargas el repositorio principal
-                mainActivityViewModel.getAllGuias(filePathsProvider.fileGuides)
+                viewModel.getAllGuias(filePathsProvider.fileGuides)
 
                 val dialogo = Fragment_DialogListarGuias_popup()
                 dialogo.show(supportFragmentManager, "Fragment")
@@ -83,72 +84,57 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Create and validate folders
-    private fun createFolders(): Boolean {
-        var foldersCreated = false
+    private fun initUI() {
+        val foldersCreated = foldersGuides()
 
-        if (!filePathsProvider.fileGuides.exists()) {
-            filePathsProvider.fileGuides.mkdir()
-        }
-
-        // Crear carpeta de imagenes
-        if (!filePathsProvider.fileImages.exists()) {
-            filePathsProvider.fileImages.mkdirs()
-        }
-
-        if (!filePathsProvider.fileImagesPiv.exists()) {
-            filePathsProvider.fileImagesPiv.mkdirs()
-        }
-
-        if (!filePathsProvider.fileGuides.exists() || !filePathsProvider.fileImagesPiv.exists() || !filePathsProvider.fileImages.exists()) {
-            val builder = AlertDialog.Builder(this)
-            builder.setTitle("Error")
-            builder.setMessage("No se pudieron crear los ficheros correctamente")
-
-            // Agregar un botón para cerrar el diálogo
-            builder.setPositiveButton("Reintentar") { dialog, _ ->
-                createFolders()
-                dialog.dismiss() // Cerrar el diálogo
-            }
-
-            builder.setNegativeButton("Cancelar") { dialog, _ ->
-                dialog.dismiss()
-            }
-
-            // Evitar que el diálogo se cierre al tocar fuera de él o presionar el botón de atrás
-            builder.setCancelable(false)
-
-            val dialog: AlertDialog = builder.create()
-            dialog.show()
-        } else {
-            foldersCreated = true
-
-            // Crear subcarpetas para las imagenes
+        // Crear subcarpetas para las imagenes
+        if (foldersCreated) {
             for (subCarpeta in carpetasImagenes) {
-                val rutaSubcarpeta = filePathsProvider.buildFolder(filePathsProvider.fileImages, subCarpeta)
+                val rutaSubcarpeta =
+                    filePathsProvider.buildFolder(filePathsProvider.fileImages, subCarpeta)
 
                 // Vas creando y verificando que las carpetas se crean correctamente
                 if (!rutaSubcarpeta.exists()) {
                     rutaSubcarpeta.mkdirs()
-                    if (!rutaSubcarpeta.exists()) {
-                        foldersCreated = false
-                        break
-                    } else {
-                        foldersCreated = true
-                    }
-                } else {
-                    foldersCreated = true
                 }
             }
+
+            viewModel.getAllGuias(filePathsProvider.fileGuides)
+        }
+
+        viewModel.foldersCreated(foldersCreated)
+    }
+
+    private fun foldersGuides(): Boolean{
+        val foldersCreated = viewModel.createFolders()
+
+        if (!foldersCreated) {
+            alertWithoutFolders()
         }
 
         return foldersCreated
     }
 
-    private fun initUI() {
-        if (createFolders()) {
-            mainActivityViewModel.getAllGuias(filePathsProvider.fileGuides)
+    private fun alertWithoutFolders() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Error")
+        builder.setMessage("No se pudieron crear los ficheros correctamente")
+
+        // Agregar un botón para cerrar el diálogo
+        builder.setPositiveButton("Reintentar") { dialog, _ ->
+            foldersGuides()
+            dialog.dismiss() // Cerrar el diálogo
         }
+
+        builder.setNegativeButton("Cancelar") { dialog, _ ->
+            dialog.dismiss()
+        }
+
+        // Evitar que el diálogo se cierre al tocar fuera de él o presionar el botón de atrás
+        builder.setCancelable(false)
+
+        val dialog: AlertDialog = builder.create()
+        dialog.show()
     }
 
     private fun checkAndRequestPermissions() {

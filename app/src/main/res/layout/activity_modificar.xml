@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.jonathanev.review.UI.View.Activity_Cuestionario">
+    tools:context="com.jonathanev.review.UI.View.ActivityCuestionario">
 
     <include
         android:id="@+id/barra_superior_regreso"

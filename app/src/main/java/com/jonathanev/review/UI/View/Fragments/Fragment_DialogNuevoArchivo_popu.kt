@@ -20,7 +20,7 @@ import com.jonathanev.review.Core.Constants.GUIAS
 import com.jonathanev.review.Core.Constants.IMAGENES
 import com.jonathanev.review.Core.Constants.IMAGENESPIVOTE
 import com.jonathanev.review.Data.Model.FilePathsProvider
-import com.jonathanev.review.UI.View.Activity_Cuestionario
+import com.jonathanev.review.UI.View.ActivityCuestionario
 import com.jonathanev.review.UI.ViewModel.Fragments.FragDialNuevoArchViewModel
 import com.jonathanev.review.databinding.FragmentNuevoArchivoBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -323,7 +323,7 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
                                 ) { _, _ -> // Si hay un valor dentro del campo enviamos el nombre del archivo a
                                     // Activity_Cuestionario.
                                     val intent =
-                                        Intent(activity, Activity_Cuestionario::class.java)
+                                        Intent(activity, ActivityCuestionario::class.java)
                                     intent.putExtra(
                                         "nombre_archivo",
                                         binding!!.etNombreArchivo.text.toString().trim()
@@ -339,7 +339,7 @@ class Fragment_DialogNuevoArchivo_popu() : DialogFragment() {
                                     "Cancelar"
                                 ) { dialog, _ -> dialog.dismiss() }.create().show()
                         } else { // Sino hay un archivo existente entra aquí
-                            val intent = Intent(activity, Activity_Cuestionario::class.java)
+                            val intent = Intent(activity, ActivityCuestionario::class.java)
                             intent.putExtra(
                                 "nombre_archivo",
                                 binding!!.etNombreArchivo.text.toString().trim()
