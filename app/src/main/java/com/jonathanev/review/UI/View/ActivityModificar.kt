@@ -62,7 +62,7 @@ class ActivityModificar : AppCompatActivity() {
     lateinit var filePathsProvider: FilePathsProvider
 
     // Seleccionar imagen
-    private val pickMedia =
+    /*private val pickMedia =
         registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
             if (uri != null) {
                 // Toma permisos de persistencia para la URI
@@ -99,7 +99,7 @@ class ActivityModificar : AppCompatActivity() {
                 binding.imgvQuitColor.visibility = View.VISIBLE
                 binding.imgvSelColor.visibility = View.VISIBLE
             }
-        }
+        }*/
 
     private val modificarViewModel: ModificarViewModel by viewModels()
 
@@ -118,19 +118,15 @@ class ActivityModificar : AppCompatActivity() {
         modificarViewModel.uiStateBtnRoll.observe(this) { uiState ->
             if (uiState.estadoUI.isUpdatedAskAns) {
                 girarCardView()
-                if (!uiState.estadoUI.isEtPregunta) {
-                    binding.lblPregResp.text = "Respuesta"
-                } else {
-                    binding.lblPregResp.text = "Pregunta"
-                }
+                binding.lblPregResp.text =
+                    if (binding.lblPregResp.text == "Pregunta") "Respuesta" else "Pregunta"
 
-                if (uiState.estadoUI.isClearText) {
-                    binding.etPregResp.text?.clear()
-                } else {
-                    // Agregar el texto en el et cuando hay un builder
-                    if (!uiState.estadoUI.isShowImage) {
-                        binding.etPregResp.text = uiState.builder
-                    } else {
+                when {
+                    uiState.estadoUI.isClearText -> binding.etPregResp.text?.clear()
+
+                    uiState.estadoUI.isShowImage -> binding.etPregResp.text = uiState.builder
+
+                    else -> {
                         // Cuando hay una imagen hay que poner esto
                         binding.etPregResp.setText(uiState.estadoImagen.textImgEcrypted)
 
@@ -146,32 +142,15 @@ class ActivityModificar : AppCompatActivity() {
                         rutaImagen = "$rutaBase/$imagen"
                         Log.i("Ruta completa: ", rutaImagen)
 
-                        if (File(rutaImagen).exists()) {
-                            binding.ivImagen.setImage(ImageSource.uri(rutaImagen))
+                        val rutaImagenExistente = if (File(rutaImagen).exists()) {
+                            rutaImagen
                         } else {
-                            binding.ivImagen.setImage(ImageSource.uri(filePathsProvider.buildFile(filePathsProvider.fileImagesPiv, imagen).toString()))
-
-                            // Sino se encuentra la ruta especificada
-                            /*if (rutaImagen.contains("imagenesPivote")) {
-                                rutaImagen = rutaImagen.replace("imagenesPivote".toRegex(), "imagenes")
-
-                                /*uiState.estadoImagen.textImgUnencrypted =
-                                    uiState.estadoImagen.textImgUnencrypted.replace(
-                                        "imagenesPivote".toRegex(),
-                                        "imagenes"
-                                    )*/
-                                binding.ivImagen.setImage(ImageSource.uri(rutaImagen))
-                            } else {
-                                rutaImagen = rutaImagen.replace("imagenes".toRegex(), "imagenesPivote")
-
-                                /*uiState.estadoImagen.textImgUnencrypted =
-                                    uiState.estadoImagen.textImgUnencrypted.replace(
-                                        "imagenes".toRegex(),
-                                        "imagenesPivote"
-                                    )*/
-                                binding.ivImagen.setImage(ImageSource.uri(rutaImagen))
-                            }*/
+                            filePathsProvider.buildFile(
+                                filePathsProvider.fileImagesPiv, imagen
+                            ).toString()
                         }
+
+                        binding.ivImagen.setImage(ImageSource.uri(rutaImagenExistente))
                     }
                 }
                 Log.i("Ruta: ", ruta)
@@ -221,7 +200,14 @@ class ActivityModificar : AppCompatActivity() {
                         // Cuando hay una imagen hay que poner esto
                         binding.etPregResp.setText(uiState.estadoImagen.textImgEcrypted)
 
-                        binding.ivImagen.setImage(ImageSource.uri(filePathsProvider.buildFile(filePathsProvider.fileImagesPiv, imagen).toString()))
+                        binding.ivImagen.setImage(
+                            ImageSource.uri(
+                                filePathsProvider.buildFile(
+                                    filePathsProvider.fileImagesPiv,
+                                    imagen
+                                ).toString()
+                            )
+                        )
 
                         /*binding.etPregResp.setText(uiState.estadoImagen.textImgEcrypted)
 
@@ -293,7 +279,14 @@ class ActivityModificar : AppCompatActivity() {
                         } else {
                             // Sino se encuentra la ruta especificada
                             val imagen = rutaImagen.toString().substringAfterLast("/")
-                            binding.ivImagen.setImage(ImageSource.uri(filePathsProvider.buildFile(filePathsProvider.fileImagesPiv, imagen).toString()))
+                            binding.ivImagen.setImage(
+                                ImageSource.uri(
+                                    filePathsProvider.buildFile(
+                                        filePathsProvider.fileImagesPiv,
+                                        imagen
+                                    ).toString()
+                                )
+                            )
 
                             /*if (uiState.estadoImagen.textImgUnencrypted.contains("imagenesPivote")) {
                                 uiState.estadoImagen.textImgUnencrypted =
@@ -647,7 +640,10 @@ class ActivityModificar : AppCompatActivity() {
                         binding.etPregResp.invalidate()
 
                         val metrics = resources.displayMetrics
-                        Log.d("ScreenInfo", "Width: ${metrics.widthPixels}, Height: ${metrics.heightPixels}, Density: ${metrics.density}")
+                        Log.d(
+                            "ScreenInfo",
+                            "Width: ${metrics.widthPixels}, Height: ${metrics.heightPixels}, Density: ${metrics.density}"
+                        )
                     }
                 }
             }
@@ -715,7 +711,8 @@ class ActivityModificar : AppCompatActivity() {
                 var ruta: String = filePathsProvider.fileGuides.toString()
                 ruta = ruta.replace("guias".toRegex(), "imagenes")
                 val originPath = filePathsProvider.buildFile(filePathsProvider.rutaPrin, filename)
-                val copiedPath = filePathsProvider.buildFile(filePathsProvider.fileImagesPiv, filename)
+                val copiedPath =
+                    filePathsProvider.buildFile(filePathsProvider.fileImagesPiv, filename)
 
                 if (binding.etPregResp.text!!.isNotEmpty()
                     && !binding.etPregResp.text!!.contains(BASERUTA_IMG_CIFRADO)
@@ -736,7 +733,14 @@ class ActivityModificar : AppCompatActivity() {
                             // Borrar archivo
                             File(filePathsProvider.rutaPrin, filename).delete()
 
-                            binding.ivImagen.setImage(ImageSource.uri(filePathsProvider.buildFile(filePathsProvider.fileImagesPiv, filename).toString())) //setImageURI(uri)
+                            binding.ivImagen.setImage(
+                                ImageSource.uri(
+                                    filePathsProvider.buildFile(
+                                        filePathsProvider.fileImagesPiv,
+                                        filename
+                                    ).toString()
+                                )
+                            ) //setImageURI(uri)
                             val cifrado = modificarViewModel.getUrlImagenCifrada(
                                 "$BASERUTA_IMG$ruta/$filename",
                                 3
@@ -768,7 +772,14 @@ class ActivityModificar : AppCompatActivity() {
                     // Borrar archivo
                     File(filePathsProvider.rutaPrin, filename).delete()
 
-                    binding.ivImagen.setImage(ImageSource.uri(filePathsProvider.buildFile(filePathsProvider.fileImagesPiv, filename).toString())) //setImageURI(uri)
+                    binding.ivImagen.setImage(
+                        ImageSource.uri(
+                            filePathsProvider.buildFile(
+                                filePathsProvider.fileImagesPiv,
+                                filename
+                            ).toString()
+                        )
+                    ) //setImageURI(uri)
                     binding.tilContenidoPregResp.visibility = View.GONE
                     binding.ivImagen.visibility = View.VISIBLE
 
@@ -900,8 +911,13 @@ class ActivityModificar : AppCompatActivity() {
                 val imagen = image.name.replaceBeforeLast("/", "").replace("/", "")
                 //val rutaImagPath = File(rutaImagen)
                 Files.copy(
-                    Paths.get(filePathsProvider.buildFile(filePathsProvider.fileImagesPiv, filename).toString()),
-                    Paths.get(filePathsProvider.buildFile(filePathsProvider.fileImages, imagen).toString()),
+                    Paths.get(
+                        filePathsProvider.buildFile(filePathsProvider.fileImagesPiv, filename)
+                            .toString()
+                    ),
+                    Paths.get(
+                        filePathsProvider.buildFile(filePathsProvider.fileImages, imagen).toString()
+                    ),
                     StandardCopyOption.REPLACE_EXISTING
                 )
 
