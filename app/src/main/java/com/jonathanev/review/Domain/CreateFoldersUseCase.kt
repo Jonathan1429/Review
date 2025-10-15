@@ -6,27 +6,19 @@ import javax.inject.Inject
 
 class CreateFoldersUseCase @Inject constructor(
     private val filePathsProvider: FilePathsProvider
-)  {
+) {
     operator fun invoke(): Boolean {
-        if (!filePathsProvider.fileGuides.exists())
-        {
-            filePathsProvider.fileGuides.mkdir()
-            return false
-        }
+        val paths = listOf(
+            filePathsProvider.fileGuides,
+            filePathsProvider.fileImages,
+            filePathsProvider.fileImagesPiv
+        )
 
-        // Crear carpeta de imagenes
-        if (!filePathsProvider.fileImages.exists())
-        {
-            filePathsProvider.fileImages.mkdirs()
-            return false
+        for (path in paths){
+            if (!path.exists()){
+                path.mkdir()
+            }
         }
-
-        if (!filePathsProvider.fileImagesPiv.exists())
-        {
-            filePathsProvider.fileImagesPiv.mkdirs()
-            return false
-        }
-
-        return true
+        return !(!paths[0].exists() || !paths[1].exists() || !paths[2].exists())
     }
 }

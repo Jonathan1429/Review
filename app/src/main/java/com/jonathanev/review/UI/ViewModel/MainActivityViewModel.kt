@@ -21,6 +21,8 @@ class MainActivityViewModel @Inject constructor(
     private val _guias = MutableLiveData<List<GuiaModel>>(emptyList())
     val guias: LiveData<List<GuiaModel>> get() = _guias
     private val _createdFolders = MutableLiveData(false)
+    private val _shouldRequestPermission = MutableLiveData<Boolean>()
+    val shouldRequestPermission: LiveData<Boolean> get() = _shouldRequestPermission
 
     fun getAllGuias(file: File) = _guias.postValue(guiaRepository.getGuias(file))
 
@@ -32,5 +34,11 @@ class MainActivityViewModel @Inject constructor(
 
     fun getFoldersCreated(): Boolean{
         return _createdFolders.value == true
+    }
+
+    fun checkIfNeedsPermission(hasPermission: Boolean){
+        if (!hasPermission){
+            _shouldRequestPermission.value = true
+        }
     }
 }

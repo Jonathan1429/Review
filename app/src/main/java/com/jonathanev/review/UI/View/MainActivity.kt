@@ -1,5 +1,6 @@
 package com.jonathanev.review.UI.View
 
+import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -8,6 +9,7 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
 import com.jonathanev.review.Data.Model.FilePathsProvider
 import com.jonathanev.review.R
@@ -40,10 +42,20 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        initUI()
+        // Ejemplo: verificamos si ya tiene permiso
+        val hasPermission = ContextCompat.checkSelfPermission(
+            applicationContext,
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        ) == PackageManager.PERMISSION_GRANTED
 
-        // Revisar permisos
-        checkAndRequestPermissions()
+        viewModel.checkIfNeedsPermission(hasPermission)
+
+        initUI()
+        // Revisar permisos, sino hay se solicitan
+        viewModel.shouldRequestPermission.observe(this){ withoutPermission ->
+            if (withoutPermission) requestReadPermission()
+        }
+
 
         // Utilizamos un botón que es reutilizado, unicamente le cambiamos el texto.
         binding.btnAbrirGuiaEstudioHabilitado.text = resources.getText(R.string.btnAbrirGuia)
@@ -137,19 +149,11 @@ class MainActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    private fun checkAndRequestPermissions() {
-        val permissionReadExternalStorage = ContextCompat.checkSelfPermission(
+    private fun requestReadPermission() {
+        ActivityCompat.requestPermissions(
             this,
-            android.Manifest.permission.READ_EXTERNAL_STORAGE
+            arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+            REQUEST_PERMISSION_CODE
         )
-
-        if (permissionReadExternalStorage != PackageManager.PERMISSION_GRANTED) {
-            // Si no tienes permisos, solicítalos
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),
-                REQUEST_PERMISSION_CODE
-            )
-        }
     }
 }
