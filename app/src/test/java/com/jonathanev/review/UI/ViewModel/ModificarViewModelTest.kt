@@ -12,6 +12,7 @@ import com.jonathanev.review.Data.Model.PreguntaRespuestaModel
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Data.repository.FileRepositoryImpl
+import com.jonathanev.review.Domain.DeleteContentInPiv
 import com.jonathanev.review.Domain.GetGuiaUseCase
 import com.jonathanev.review.Domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.Domain.SetCifrarRutaImagenUseCase
@@ -19,6 +20,7 @@ import com.jonathanev.review.Domain.SetClickEliminarUseCase
 import com.jonathanev.review.Domain.SetClickRegresarModificandoUseCase
 import com.jonathanev.review.Domain.SetClickSaveUseCase
 import com.jonathanev.review.Domain.SetClickSiguienteModificandoUseCase
+import com.jonathanev.review.Domain.SetCopyImagesUseCase
 import com.jonathanev.review.Domain.SetPintarLetraUseCase
 import com.jonathanev.review.Domain.SetPintarTextosUseCase
 import com.jonathanev.review.Domain.SetRollClickedUseCase
@@ -63,9 +65,10 @@ class ModificarViewModelTest {
     private val setPintarLetraUseCase = mockk<SetPintarLetraUseCase>(relaxed = true)
     private val getObtenerDatosXMLUseCase = mockk<GetObtenerDatosXMLUseCase>()
     private val setPintarTextosUseCase = mockk<SetPintarTextosUseCase>()
+    private val setCopyImagesUseCase = mockk<SetCopyImagesUseCase>()
     private val getGuiaUseCase = mockk<GetGuiaUseCase>()
     private val filePathsProvider = mockk<FilePathsProvider>()
-
+    private val deleteContentInPiv = mockk<DeleteContentInPiv>()
     private val dataStore: DataStoreManager = mockk(relaxed = true)
     private val fileRepositoryImpl = mockk<FileRepositoryImpl>()
     private lateinit var viewModel: ModificarViewModel
@@ -89,7 +92,9 @@ class ModificarViewModelTest {
             setPintarLetraUseCase,
             getObtenerDatosXMLUseCase,
             setPintarTextosUseCase,
+            setCopyImagesUseCase,
             getGuiaUseCase,
+            deleteContentInPiv,
             dataStore,
             fileRepositoryImpl,
             filePathsProvider,

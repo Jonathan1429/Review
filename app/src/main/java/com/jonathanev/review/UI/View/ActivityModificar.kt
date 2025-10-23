@@ -693,7 +693,7 @@ class ActivityModificar : AppCompatActivity() {
     // Método que se ejecuta cuando el back del telefono es presionado.
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.action == KeyEvent.ACTION_DOWN) {
-            viewModel.deleteContentInPiv()
+            viewModel.deleteContentInPiv(nombreArchivo)
             cancelarArchivo()
             return true
         }
@@ -712,14 +712,7 @@ class ActivityModificar : AppCompatActivity() {
             .setPositiveButton(
                 "Continuar"
             ) { _, _ -> // Si el archivo se creó y existe, se elimina y te informa en consola
-                if (filePathsProvider.fileGuides.exists()) {
-                    File(filePathsProvider.fileGuides, "$nombreArchivo.xml").delete()
-                    Log.d("ArchivoEliminado", "Archivo eliminado")
-                } else {
-                    Log.d("ArchivoEliminado", "Archivo no eliminado")
-                }
-
-                viewModel.deleteContentInPiv()
+                viewModel.deleteContentInPiv(nombreArchivo)
                 finish()
             }
             .setNegativeButton(

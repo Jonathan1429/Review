@@ -57,51 +57,11 @@ class ActivityCuestionario : AppCompatActivity() {
     private var longCaracteres = 0
     private val viewModel by viewModels<ActivityCuestionarioViewModel>()
     private var filename: String = "" // Ruta/imagen.png
-    private val route = filePathsProvider.buildFile(filePathsProvider.fileGuides, nombreArchivo)
+    //private val route = filePathsProvider.buildFile(filePathsProvider.fileGuides, nombreArchivo)
     //private var ruta: String = "$fileGuias"
 
     @Inject
     lateinit var filePathsProvider: FilePathsProvider
-
-    // Seleccionar imagen
-    /*private val pickMedia =
-        registerForActivityResult(PickVisualMedia()) { uri ->
-            if (uri != null) {
-                // Toma permisos de persistencia para la URI
-                takePersistableUriPermission(uri)
-
-                if (binding.etPregResp.text!!.isNotEmpty()) {
-                    AlertDialog.Builder(this@Activity_Cuestionario)
-                        .setTitle("¡Atención!")
-                        .setMessage("Se borrará el texto para agregar la imagen, ¿Quieres continuar?")
-                        .setPositiveButton(
-                            "Si"
-                        ) { _, _ ->
-                            binding.ivImagen.setImage(ImageSource.uri(uri)) //setImageURI(uri)
-                            binding.tilContenidoPregResp.visibility = View.GONE
-
-                            binding.ivImagen.visibility = View.VISIBLE
-                            binding.etPregResp.setText(uri.toString())
-                        }
-                        .setNegativeButton(
-                            "Cancelar"
-                        ) { dialog, _ ->
-                            dialog.dismiss()
-                        }.create().show()
-                } else {
-                    binding.ivImagen.setImage(ImageSource.uri(uri)) //setImageURI(uri)
-                    binding.tilContenidoPregResp.visibility = View.GONE
-
-                    binding.ivImagen.visibility = View.VISIBLE
-                    binding.etPregResp.setText(uri.toString())
-                }
-            } else {
-                binding.imgvCancelar.visibility = View.GONE
-
-                binding.imgvQuitColor.visibility = View.VISIBLE
-                binding.imgvSelColor.visibility = View.VISIBLE
-            }
-        }*/
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -134,19 +94,16 @@ class ActivityCuestionario : AppCompatActivity() {
         viewModel.uiStateBtnRoll.observe(this) { uiState ->
             if (uiState.estadoUI.isUpdatedAskAns) {
                 girarCardView()
-                if (!uiState.estadoUI.isEtPregunta) {
-                    binding.lblPregResp.text = "Respuesta"
-                } else {
-                    binding.lblPregResp.text = "Pregunta"
-                }
+                binding.lblPregResp.text =
+                    if (binding.lblPregResp.text == "Pregunta") "Respuesta" else "Pregunta"
 
-                if (uiState.estadoUI.isClearText) {
-                    binding.etPregResp.text?.clear()
-                } else {
-                    // Agregar el texto en el et cuando hay un builder
-                    if (uiState.estadoUI.typeFile == TypeFile.TEXTO) {
-                        binding.etPregResp.text = uiState.builder
-                    } else {
+                when {
+                    uiState.estadoUI.isClearText -> binding.etPregResp.text?.clear()
+
+                    uiState.estadoUI.typeFile == TypeFile.TEXTO -> binding.etPregResp.text =
+                        uiState.builder
+
+                    else -> {
                         // Cuando hay una imagen hay que poner esto
                         binding.etPregResp.setText(uiState.estadoImagen.textImgEcrypted)
                         binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
@@ -184,13 +141,11 @@ class ActivityCuestionario : AppCompatActivity() {
             if (uiState.estadoUI.isUpdatedAskAns) {
                 binding.lblPregResp.text = "Pregunta"
 
-                if (!uiState.estadoUI.isThereMoreAsks) {
-                    binding.etPregResp.text?.clear()
-                } else {
-                    // Agregar el texto en el et cuando hay un builder
-                    if (uiState.estadoUI.typeFile == TypeFile.TEXTO) {
-                        binding.etPregResp.text = uiState.builder
-                    } else {
+                when {
+                    uiState.estadoUI.typeFile == TypeFile.TEXTO -> binding.etPregResp.text =
+                        uiState.builder
+
+                    else -> {
                         // Cuando hay una imagen hay que poner esto
                         binding.etPregResp.setText(uiState.estadoImagen.textImgEcrypted)
                         binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
@@ -224,14 +179,14 @@ class ActivityCuestionario : AppCompatActivity() {
         viewModel.uiStateBtnNext.observe(this) { uiState ->
             if (uiState.estadoUI.isUpdatedAskAns) {
                 binding.lblPregResp.text = "Pregunta"
-                // val posPregFin = preguntas.size - 1
-                if (!uiState.estadoUI.isThereMoreAsks) {
-                    binding.etPregResp.text?.clear()
-                } else {
-                    // Agregar el texto en el et cuando hay un builder
-                    if (uiState.estadoUI.typeFile == TypeFile.TEXTO) {
-                        binding.etPregResp.text = uiState.builder
-                    } else {
+
+                when {
+                    !uiState.estadoUI.isThereMoreAsks -> binding.etPregResp.text?.clear()
+
+                    uiState.estadoUI.typeFile == TypeFile.TEXTO -> binding.etPregResp.text =
+                        uiState.builder
+
+                    else -> {
                         // Cuando hay una imagen hay que poner esto
                         binding.etPregResp.setText(uiState.estadoImagen.textImgEcrypted)
                         binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
@@ -265,13 +220,13 @@ class ActivityCuestionario : AppCompatActivity() {
         viewModel.uiStateBtnEliminar.observe(this) { uiState ->
             binding.lblPregResp.text = "Pregunta"
 
-            if (!uiState.estadoUI.isThereMoreAsks) {
-                binding.etPregResp.text?.clear()
-            } else {
-                // Agregar el texto en el et cuando hay un builder
-                if (uiState.estadoUI.typeFile == TypeFile.TEXTO) {
-                    binding.etPregResp.text = uiState.builder
-                } else {
+            when {
+                !uiState.estadoUI.isThereMoreAsks -> binding.etPregResp.text?.clear()
+
+                uiState.estadoUI.typeFile == TypeFile.TEXTO -> binding.etPregResp.text =
+                    uiState.builder
+
+                else -> {
                     // Cuando hay una imagen hay que poner esto
                     binding.etPregResp.setText(uiState.estadoImagen.textImgEcrypted)
                     binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
@@ -316,7 +271,7 @@ class ActivityCuestionario : AppCompatActivity() {
     private fun initListeners() {
         binding.barraSuperiorRegreso.imgvBack.setOnClickListener {
             cancelarArchivo()
-            deleteImages()
+            viewModel.deleteContentInPiv(nombreArchivo)
         }
 
         binding.imgvPregResp.setOnClickListener {
@@ -328,10 +283,11 @@ class ActivityCuestionario : AppCompatActivity() {
                 isEtPregunta = true
             }
 
+            val route = filePathsProvider.buildFile(filePathsProvider.fileGuides, nombreArchivo).toString()
             viewModel.clickedRoll(
                 editable,
                 isEtPregunta,
-                route.toString()
+                route
             )
         }
 
@@ -343,11 +299,11 @@ class ActivityCuestionario : AppCompatActivity() {
                 isEtPregunta = true
             }
 
-            val route = filePathsProvider.buildFile(filePathsProvider.fileGuides, nombreArchivo)
+            val route = filePathsProvider.buildFile(filePathsProvider.fileGuides, nombreArchivo).toString()
             viewModel.onClickImgvPrevious(
                 editable,
                 isEtPregunta,
-                route.toString()
+                route
             )
         }
 
@@ -359,10 +315,11 @@ class ActivityCuestionario : AppCompatActivity() {
                 isEtPregunta = true
             }
 
+            val route = filePathsProvider.buildFile(filePathsProvider.fileGuides, nombreArchivo).toString()
             viewModel.onClickImgvNext(
                 editable,
                 isEtPregunta,
-                route.toString()
+                route
             )
         }
 
@@ -371,7 +328,8 @@ class ActivityCuestionario : AppCompatActivity() {
                 .setTitle("¡Atención!")
                 .setMessage("¿Quieres eliminar pregunta/respuesta?")
                 .setPositiveButton("Si") { _, _ ->
-                    viewModel.onClickEliminar(route.toString())
+                    val route = filePathsProvider.buildFile(filePathsProvider.fileGuides, nombreArchivo).toString()
+                    viewModel.onClickEliminar(route)
                 }.setNegativeButton("Cancelar") { dialog, _ ->
                     dialog.dismiss()
                 }.create().show()
@@ -385,12 +343,12 @@ class ActivityCuestionario : AppCompatActivity() {
                 isEtPregunta = true
             }
 
+            val route = filePathsProvider.buildFile(filePathsProvider.fileGuides, nombreArchivo).toString()
             viewModel.onClickImgvSave(
                 editable,
                 "$nombreArchivo.xml",
                 isEtPregunta,
                 ruta = "$route.xml"
-                //"${fileGuias.absolutePath}/$nombreArchivo.xml"
             )
         }
 
@@ -474,21 +432,6 @@ class ActivityCuestionario : AppCompatActivity() {
                 }
             }
         })
-    }
-
-    private fun deleteImages() {
-        if (filePathsProvider.fileImagesPiv.exists()) {
-            borrarContenidoEnPiv()
-        }
-    }
-
-    private fun borrarContenidoEnPiv() {
-        val files = filePathsProvider.fileImagesPiv.listFiles()
-        if (files != null) {
-            for (subFile in files) {
-                subFile.delete()
-            }
-        }
     }
 
     private fun initUI() {
@@ -673,22 +616,11 @@ class ActivityCuestionario : AppCompatActivity() {
         }
     }
 
-    // Toma permisos de persistencia para la URI
-    /*private fun takePersistableUriPermission(uri: Uri) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            contentResolver.takePersistableUriPermission(
-                uri,
-                Intent.FLAG_GRANT_READ_URI_PERMISSION
-                //Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-            )
-        }
-    }*/
-
     // Método que se ejecuta cuando el back del telefono es presionado.
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.action == KeyEvent.ACTION_DOWN) {
             cancelarArchivo()
-            deleteImages()
+            viewModel.deleteContentInPiv(nombreArchivo)
             return true
         }
         return super.onKeyDown(keyCode, event)
@@ -706,12 +638,7 @@ class ActivityCuestionario : AppCompatActivity() {
             .setPositiveButton(
                 "Continuar"
             ) { _, _ -> // Si el archivo se creó y existe, se elimina y te informa en consola
-                if (filePathsProvider.fileGuides.exists()) {
-                    File(filePathsProvider.fileGuides, "$nombreArchivo.xml").delete()
-                    Log.d("ArchivoEliminado", "Archivo eliminado")
-                } else {
-                    Log.d("ArchivoEliminado", "Archivo no eliminado")
-                }
+                viewModel.deleteContentInPiv(nombreArchivo)
                 finish()
             }
             .setNegativeButton(

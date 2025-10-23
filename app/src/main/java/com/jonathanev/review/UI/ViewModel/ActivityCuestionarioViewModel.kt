@@ -13,6 +13,8 @@ import com.jonathanev.review.Data.Model.DataStoreManager
 import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
+import com.jonathanev.review.Data.repository.FileRepositoryImpl
+import com.jonathanev.review.Domain.DeleteContentInPiv
 import com.jonathanev.review.Domain.SetCifrarRutaImagenUseCase
 import com.jonathanev.review.Domain.SetClickEliminarUseCase
 import com.jonathanev.review.Domain.SetClickRegresarModificandoUseCase
@@ -23,6 +25,9 @@ import com.jonathanev.review.Domain.SetPintarLetraUseCase
 import com.jonathanev.review.Domain.SetRollClickedUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -39,7 +44,9 @@ class ActivityCuestionarioViewModel @Inject constructor(
     private val setCopyImagesUseCase: SetCopyImagesUseCase,
     private val setCifrarRutaImagenUseCase: SetCifrarRutaImagenUseCase,
     private val setPintarLetraUseCase: SetPintarLetraUseCase,
+    private val deleteContentInPiv: DeleteContentInPiv,
     private val filePathsProvider: FilePathsProvider,
+    private val fileRepositoryImpl: FileRepositoryImpl,
     private val dataStore: DataStoreManager,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     @MainDispatcher private val mainDispatcher: CoroutineDispatcher
@@ -77,6 +84,14 @@ class ActivityCuestionarioViewModel @Inject constructor(
 
     private val _textoImagenCorrutina = MutableLiveData<String>()
     val textoImagenCorrutina: LiveData<String> get() = _textoImagenCorrutina
+
+    val currentPath: StateFlow<String> = fileRepositoryImpl.currentPathFlow
+        .stateIn(
+            scope = viewModelScope,
+            // WhileSubscribed asegura que solo se recolecte cuando la UI esté activa.
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = fileRepositoryImpl.getCurrentPath() // Valor inicial de la ruta
+        )
 
     //val contImagenes = dataStore.getCountImage().asLiveData()
 
@@ -213,6 +228,10 @@ class ActivityCuestionarioViewModel @Inject constructor(
         }
 
         _uiStateBtnEliminar.value = responseRegresarUseCase
+    }
+
+    fun deleteContentInPiv(nombreArchivo: String) {
+        deleteContentInPiv.invoke(nombreArchivo)
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
