@@ -3,6 +3,7 @@ package com.jonathanev.review.UI.ViewModel
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.jonathanev.review.Data.GuiaRepository
 import com.jonathanev.review.Data.Model.GuiaModel
+import com.jonathanev.review.Domain.CreateFoldersUseCase
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
@@ -18,7 +19,8 @@ class MainActivityViewModelTest {
     fun `getAllGuias actualiza guias correctamente`() {
         // Mocks
         val repository = mockk<GuiaRepository>()
-        val viewModel = MainActivityViewModel(repository)
+        val createFoldersUseCase = mockk<CreateFoldersUseCase>()
+        val viewModel = MainActivityViewModel(repository, createFoldersUseCase)
         val archivoMock = mockk<File>()
         val guiasMock = listOf(
             GuiaModel("Guia1", 1, true),

@@ -1,11 +1,13 @@
 package com.jonathanev.review.Domain
 
 import android.text.style.ForegroundColorSpan
-import com.jonathanev.review.Data.Model.FileHelperImpl
+import com.jonathanev.review.Data.TypeFile
+import com.jonathanev.review.Data.repository.FileHelperImpl
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.*
 import org.junit.Test
+import java.lang.reflect.Type
 
 class TestSetPintarTextosUseCase {
     private val setCifrarRutaImagenUseCase = mockk<SetCifrarRutaImagenUseCase>()
@@ -73,7 +75,7 @@ class TestSetPintarTextosUseCase {
             ruta = rutaOriginal
         )
 
-        assertTrue(result.estadoUI.isShowImage)
+        assertTrue(result.estadoUI.typeFile == TypeFile.IMAGEN)
         //assertNotNull(result.estadoImagen)
         assertEquals("content://media/picker/imagenes/40.png", result.estadoImagen.textImgUnencrypted)
     }
@@ -97,7 +99,7 @@ class TestSetPintarTextosUseCase {
             ruta = rutaOriginal
         )
 
-        assertTrue(result.estadoUI.isShowImage)
+        assertTrue(result.estadoUI.typeFile == TypeFile.IMAGEN)
         assertTrue(result.estadoImagen.textImgUnencrypted.contains("imagenesPivote"))
     }
 

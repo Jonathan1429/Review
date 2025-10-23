@@ -11,6 +11,9 @@ import com.jonathanev.review.DI.MainDispatcher
 import com.jonathanev.review.Data.Model.DataStoreManager
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
+import com.jonathanev.review.Data.provider.FilePathsProvider
+import com.jonathanev.review.Data.repository.FileRepositoryImpl
+import com.jonathanev.review.Domain.DeleteContentInPiv
 import com.jonathanev.review.Domain.GetGuiaUseCase
 import com.jonathanev.review.Domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.Domain.SetCifrarRutaImagenUseCase
@@ -18,11 +21,16 @@ import com.jonathanev.review.Domain.SetClickEliminarUseCase
 import com.jonathanev.review.Domain.SetClickRegresarModificandoUseCase
 import com.jonathanev.review.Domain.SetClickSaveUseCase
 import com.jonathanev.review.Domain.SetClickSiguienteModificandoUseCase
+import com.jonathanev.review.Domain.SetCopyImagesUseCase
 import com.jonathanev.review.Domain.SetPintarLetraUseCase
 import com.jonathanev.review.Domain.SetPintarTextosUseCase
 import com.jonathanev.review.Domain.SetRollClickedUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -39,8 +47,12 @@ class ModificarViewModel @Inject constructor(
     private val setPintarLetraUseCase: SetPintarLetraUseCase,
     private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
     private val setPintarTextosUseCase: SetPintarTextosUseCase,
+    private val setCopyImagesUseCase: SetCopyImagesUseCase,
     private val getGuiaUseCase: GetGuiaUseCase,
+    private val deleteContentInPiv: DeleteContentInPiv,
     private val dataStore: DataStoreManager,
+    private val fileRepositoryImpl: FileRepositoryImpl,
+    private val filePathsProvider: FilePathsProvider,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     @MainDispatcher private val mainDispatcher: CoroutineDispatcher
 ) : ViewModel() {
@@ -55,6 +67,17 @@ class ModificarViewModel @Inject constructor(
 
     private var _showMessageMoreQuestions = true
     val showMessageMoreQuestions: Boolean get() = _showMessageMoreQuestions
+
+    //private var _currentPath = MutableStateFlow(getCurrentPathUseCase())
+    // El StateFlow del VM ahora es una simple copia del Flow del Repositorio.
+    // Usamos 'StateFlow' del repositorio para el estado de la UI del VM.
+    val currentPath: StateFlow<String> = fileRepositoryImpl.currentPathFlow
+        .stateIn(
+            scope = viewModelScope,
+            // WhileSubscribed asegura que solo se recolecte cuando la UI esté activa.
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = fileRepositoryImpl.getCurrentPath() // Valor inicial de la ruta
+        )
 
     // Click events
     private val _uiStateBtnRoll = MutableLiveData<ValidacionesGuiaModel>()
@@ -245,5 +268,31 @@ class ModificarViewModel @Inject constructor(
 
     fun toggleShowMessageMoreQuestions() {
         _showMessageMoreQuestions = !_showMessageMoreQuestions
+    }
+
+    fun imagePathConverted(uiState: ValidacionesGuiaModel): String {
+        val currentFolder = currentPath.value.substringAfterLast("/")
+        val imagen = uiState.estadoImagen.textImgUnencrypted.substringAfterLast("/")
+        val imagePath = filePathsProvider.buildFileFolder(filePathsProvider.fileImages,
+            currentFolder, imagen)
+
+        // Verificar si la imagen se encuentra en ruta Pivote o Imagenes
+        val rutaImagenExistente = if (imagePath.exists()) {
+            imagePath.toString()
+        } else {
+            filePathsProvider.buildFile(
+                filePathsProvider.fileImagesPiv, imagen
+            ).toString()
+        }
+
+        return rutaImagenExistente
+    }
+
+    fun toCopyImages(){
+        setCopyImagesUseCase.invoke()
+    }
+
+    fun deleteContentInPiv(){
+        deleteContentInPiv.invoke()
     }
 }

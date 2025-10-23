@@ -2,8 +2,8 @@ package com.jonathanev.review.Domain
 
 import com.jonathanev.review.Data.FileOutputStreamFactory
 import com.jonathanev.review.Data.GuiaRepository
-import com.jonathanev.review.Data.Model.FilePathsProvider
-import com.jonathanev.review.Data.Model.GuiaProvider
+import com.jonathanev.review.Data.provider.FilePathsProvider
+import com.jonathanev.review.Data.provider.GuiaProvider
 import com.jonathanev.review.Data.Model.ResponseGuia
 import com.jonathanev.review.Data.XmlSerializerFactory
 import io.mockk.every

@@ -10,7 +10,7 @@ import com.jonathanev.review.DI.IoDispatcher
 import com.jonathanev.review.DI.MainDispatcher
 import com.jonathanev.review.Data.GuiaRepository
 import com.jonathanev.review.Data.Model.DataStoreManager
-import com.jonathanev.review.Data.Model.FilePathsProvider
+import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import com.jonathanev.review.Domain.SetCifrarRutaImagenUseCase

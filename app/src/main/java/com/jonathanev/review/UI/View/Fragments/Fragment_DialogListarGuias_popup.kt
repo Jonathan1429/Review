@@ -17,7 +17,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.jonathanev.review.Data.Model.FilePathsProvider
+import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Fragments.Adaptadores.ListarGuiasAdapter
 import com.jonathanev.review.R

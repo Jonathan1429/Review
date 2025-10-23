@@ -1,6 +1,7 @@
 package com.jonathanev.review.Data.Model
 
 import android.text.Editable
+import com.jonathanev.review.Data.TypeFile
 
 data class ValidacionesGuiaModel(
     val message: String = "",
@@ -24,7 +25,7 @@ data class EstadoUI(
     val isUpdatedAskAns: Boolean = false,
     val isCreatedGuia: Boolean = false,
     val isClearText: Boolean = false,
-    val isShowImage: Boolean = false,
+    val typeFile: TypeFile = TypeFile.TEXTO,
     val isShowCancelar: Boolean = false,
     val isShowQuitColor: Boolean = false,
     val isShowSelColor: Boolean = false,

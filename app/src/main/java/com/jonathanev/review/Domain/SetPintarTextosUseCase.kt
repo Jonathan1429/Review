@@ -8,8 +8,9 @@ import com.jonathanev.review.Core.Constants.BASERUTA_IMG_CIFRADO
 import com.jonathanev.review.Data.Model.ColorPregModel
 import com.jonathanev.review.Data.Model.EstadoImagen
 import com.jonathanev.review.Data.Model.EstadoUI
-import com.jonathanev.review.Data.Model.FileHelperImpl
+import com.jonathanev.review.Data.repository.FileHelperImpl
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
+import com.jonathanev.review.Data.TypeFile
 import javax.inject.Inject
 
 class SetPintarTextosUseCase @Inject constructor(
@@ -57,7 +58,7 @@ class SetPintarTextosUseCase @Inject constructor(
             ValidacionesGuiaModel(
                 estadoUI = EstadoUI(
                     isUpdatedAskAns = true,
-                    isShowImage = true,
+                    typeFile = TypeFile.IMAGEN,
                     isShowCancelar = true,
                 ),
                 estadoImagen = EstadoImagen(cifrado, texto),

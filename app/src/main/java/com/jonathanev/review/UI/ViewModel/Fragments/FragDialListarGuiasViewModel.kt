@@ -2,11 +2,11 @@ package com.jonathanev.review.UI.ViewModel.Fragments
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.jonathanev.review.Core.Constants
 import com.jonathanev.review.Data.GuiaRepository
-import com.jonathanev.review.Data.Model.FilePathsProvider
+import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Data.Model.GuiaModel
-import com.jonathanev.review.Data.Model.GuiaProvider
+import com.jonathanev.review.Data.provider.GuiaProvider
+import com.jonathanev.review.Data.repository.FileRepositoryImpl
 import com.jonathanev.review.Domain.GetGuiaPosicionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.io.File
@@ -17,7 +17,8 @@ class FragDialListarGuiasViewModel @Inject constructor(
     private val guiaRepository: GuiaRepository,
     private val guiaProvider: GuiaProvider,
     private val getGuiaPosicionUseCase: GetGuiaPosicionUseCase,
-    private val filePathsProvider: FilePathsProvider
+    private val filePathsProvider: FilePathsProvider,
+    private val fileRepositoryImpl: FileRepositoryImpl
 ) : ViewModel() {
     private var _guias = MutableLiveData<List<GuiaModel>>()
     val guias: MutableLiveData<List<GuiaModel>> get() = _guias
@@ -34,7 +35,9 @@ class FragDialListarGuiasViewModel @Inject constructor(
     }
 
     fun changeFilePath(folderName: String) {
-        _file.postValue(filePathsProvider.buildFolder(filePathsProvider.fileGuides, folderName))
+        val lastPath = filePathsProvider.buildFolder(filePathsProvider.fileGuides, folderName)
+        _file.postValue(lastPath)
+        fileRepositoryImpl.setCurrentPath(lastPath.path)
     }
 
     fun getMainPath() {

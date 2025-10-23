@@ -1,7 +1,6 @@
 package com.jonathanev.review.Domain
 
-import androidx.appcompat.app.AlertDialog
-import com.jonathanev.review.Data.Model.FilePathsProvider
+import com.jonathanev.review.Data.provider.FilePathsProvider
 import javax.inject.Inject
 
 class CreateFoldersUseCase @Inject constructor(

@@ -15,6 +15,7 @@ import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
+import com.jonathanev.review.Data.TypeFile
 import com.jonathanev.review.UI.ViewModel.ActivityRepasarGuiaViewModel
 import com.jonathanev.review.databinding.ActivityRepasarGuiaBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -56,7 +57,7 @@ class Activity_RepasarGuia : AppCompatActivity() {
             val texto = activityRepasarGuiaViewModel.getObtenerDatosXML(nombreArchivo, ruta)
 
             // Agregar el texto en el et cuando hay un builder
-            if (!texto.estadoUI.isShowImage) {
+            if (texto.estadoUI.typeFile == TypeFile.TEXTO) {
                 binding.etPregResp.text = texto.builder
             } else {
                 // Cuando hay una imagen hay que poner esto
@@ -65,9 +66,9 @@ class Activity_RepasarGuia : AppCompatActivity() {
             }
 
             binding.tilContenidoPregResp.visibility =
-                if (texto.estadoUI.isShowImage) View.GONE else View.VISIBLE
+                if (texto.estadoUI.typeFile == TypeFile.IMAGEN) View.GONE else View.VISIBLE
             binding.ivImagen.visibility =
-                if (texto.estadoUI.isShowImage) View.VISIBLE else View.GONE
+                if (texto.estadoUI.typeFile == TypeFile.IMAGEN) View.VISIBLE else View.GONE
         }
 
         activityRepasarGuiaViewModel.uiStateBtnRoll.observe(this) { uiState ->
@@ -84,7 +85,7 @@ class Activity_RepasarGuia : AppCompatActivity() {
                     binding.etPregResp.text?.clear()
                 } else {
                     // Agregar el texto en el et cuando hay un builder
-                    if (!uiState.estadoUI.isShowImage) {
+                    if (uiState.estadoUI.typeFile == TypeFile.TEXTO) {
                         binding.etPregResp.text = uiState.builder
                     } else {
                         // Cuando hay una imagen hay que poner esto
@@ -100,9 +101,9 @@ class Activity_RepasarGuia : AppCompatActivity() {
                 }
 
                 binding.tilContenidoPregResp.visibility =
-                    if (uiState.estadoUI.isShowImage) View.GONE else View.VISIBLE
+                    if (uiState.estadoUI.typeFile == TypeFile.IMAGEN) View.GONE else View.VISIBLE
                 binding.ivImagen.visibility =
-                    if (uiState.estadoUI.isShowImage) View.VISIBLE else View.GONE
+                    if (uiState.estadoUI.typeFile == TypeFile.IMAGEN) View.VISIBLE else View.GONE
             } else {
                 Toast.makeText(applicationContext, uiState.message, Toast.LENGTH_SHORT).show()
             }
@@ -114,7 +115,7 @@ class Activity_RepasarGuia : AppCompatActivity() {
                     binding.lblPregResp.text = "Pregunta"
 
                     // Agregar el texto en el et cuando hay un builder
-                    if (!uiState.estadoUI.isShowImage) {
+                    if (uiState.estadoUI.typeFile == TypeFile.TEXTO) {
                         binding.etPregResp.text = uiState.builder
                     } else {
                         // Cuando hay una imagen hay que poner esto
@@ -129,9 +130,9 @@ class Activity_RepasarGuia : AppCompatActivity() {
                     }
 
                     binding.tilContenidoPregResp.visibility =
-                        if (uiState.estadoUI.isShowImage) View.GONE else View.VISIBLE
+                        if (uiState.estadoUI.typeFile == TypeFile.IMAGEN) View.GONE else View.VISIBLE
                     binding.ivImagen.visibility =
-                        if (uiState.estadoUI.isShowImage) View.VISIBLE else View.GONE
+                        if (uiState.estadoUI.typeFile == TypeFile.IMAGEN) View.VISIBLE else View.GONE
                 } else {
                     AlertDialog.Builder(this@Activity_RepasarGuia)
                         .setTitle("¡Atención!")
@@ -152,7 +153,7 @@ class Activity_RepasarGuia : AppCompatActivity() {
                                 binding.etPregResp.text?.clear()
                             } else {
                                 // Agregar el texto en el et cuando hay un builder
-                                if (!texto.estadoUI.isShowImage) {
+                                if (texto.estadoUI.typeFile == TypeFile.TEXTO) {
                                     binding.etPregResp.text = texto.builder
                                 } else {
                                     // Cuando hay una imagen hay que poner esto
@@ -172,7 +173,7 @@ class Activity_RepasarGuia : AppCompatActivity() {
                 binding.lblPregResp.text = "Pregunta"
 
                 // Agregar el texto en el et cuando hay un builder
-                if (!uiState.estadoUI.isShowImage) {
+                if (uiState.estadoUI.typeFile == TypeFile.TEXTO) {
                     binding.etPregResp.text = uiState.builder
                 } else {
                     // Cuando hay una imagen hay que poner esto
@@ -187,9 +188,9 @@ class Activity_RepasarGuia : AppCompatActivity() {
                 }
 
                 binding.tilContenidoPregResp.visibility =
-                    if (uiState.estadoUI.isShowImage) View.GONE else View.VISIBLE
+                    if (uiState.estadoUI.typeFile == TypeFile.IMAGEN) View.GONE else View.VISIBLE
                 binding.ivImagen.visibility =
-                    if (uiState.estadoUI.isShowImage) View.VISIBLE else View.GONE
+                    if (uiState.estadoUI.typeFile == TypeFile.IMAGEN) View.VISIBLE else View.GONE
             } else {
                 Toast.makeText(applicationContext, uiState.message, Toast.LENGTH_SHORT).show()
             }

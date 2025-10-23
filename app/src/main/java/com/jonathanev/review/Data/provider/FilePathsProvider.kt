@@ -1,4 +1,4 @@
-package com.jonathanev.review.Data.Model
+package com.jonathanev.review.Data.provider
 
 import android.content.Context
 import com.jonathanev.review.Core.Constants.GUIAS

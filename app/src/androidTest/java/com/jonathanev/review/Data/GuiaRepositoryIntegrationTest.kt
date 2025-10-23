@@ -1,17 +1,14 @@
 package com.jonathanev.review.Data
 
-import com.jonathanev.review.Data.Model.FilePathsProvider
-import com.jonathanev.review.Data.Model.GuiaProvider
+import com.jonathanev.review.Data.provider.FilePathsProvider
+import com.jonathanev.review.Data.provider.GuiaProvider
 import com.jonathanev.review.Data.Model.PreguntaRespuestaModel
 import com.jonathanev.review.Domain.GetAllGuiasUseCase
-import io.mockk.every
 import io.mockk.mockk
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
 import java.io.File
 import junit.framework.TestCase.assertTrue
-import org.xmlpull.v1.XmlSerializer
-import java.io.FileOutputStream
 
 class GuiaRepositoryIntegrationTest() {
     private val getAllGuiasUseCase = GetAllGuiasUseCase(mockk(relaxed = true))

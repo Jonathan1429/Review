@@ -9,9 +9,8 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
-import com.jonathanev.review.Data.Model.FilePathsProvider
+import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.R
 import com.jonathanev.review.UI.View.Fragments.Fragment_DialogListarGuias_popup
 import com.jonathanev.review.UI.View.Fragments.Fragment_DialogNuevoArchivo_popu

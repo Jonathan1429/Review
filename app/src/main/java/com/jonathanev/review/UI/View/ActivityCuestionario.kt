@@ -34,7 +34,8 @@ import com.google.android.gms.ads.MobileAds
 import com.jonathanev.review.Core.Constants.BASERUTA_IMG
 import com.jonathanev.review.Core.Constants.BASERUTA_IMG_CIFRADO
 import com.jonathanev.review.Core.Constants.PICK_IMAGE_REQUEST
-import com.jonathanev.review.Data.Model.FilePathsProvider
+import com.jonathanev.review.Data.TypeFile
+import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.UI.View.Fragments.Fragment_DialogColores_popup
 import com.jonathanev.review.UI.ViewModel.ActivityCuestionarioViewModel
 import com.jonathanev.review.databinding.ActivityCuestionarioBinding
@@ -143,7 +144,7 @@ class ActivityCuestionario : AppCompatActivity() {
                     binding.etPregResp.text?.clear()
                 } else {
                     // Agregar el texto en el et cuando hay un builder
-                    if (!uiState.estadoUI.isShowImage) {
+                    if (uiState.estadoUI.typeFile == TypeFile.TEXTO) {
                         binding.etPregResp.text = uiState.builder
                     } else {
                         // Cuando hay una imagen hay que poner esto
@@ -153,9 +154,9 @@ class ActivityCuestionario : AppCompatActivity() {
                 }
 
                 binding.tilContenidoPregResp.visibility =
-                    if (uiState.estadoUI.isShowImage) View.GONE else View.VISIBLE
+                    if (uiState.estadoUI.typeFile == TypeFile.IMAGEN) View.GONE else View.VISIBLE
                 binding.ivImagen.visibility =
-                    if (uiState.estadoUI.isShowImage) View.VISIBLE else View.GONE
+                    if (uiState.estadoUI.typeFile == TypeFile.IMAGEN) View.VISIBLE else View.GONE
                 binding.imgvCancelar.visibility =
                     if (uiState.estadoUI.isShowCancelar) View.VISIBLE else View.GONE
                 binding.imgvQuitColor.visibility =
@@ -187,7 +188,7 @@ class ActivityCuestionario : AppCompatActivity() {
                     binding.etPregResp.text?.clear()
                 } else {
                     // Agregar el texto en el et cuando hay un builder
-                    if (!uiState.estadoUI.isShowImage) {
+                    if (uiState.estadoUI.typeFile == TypeFile.TEXTO) {
                         binding.etPregResp.text = uiState.builder
                     } else {
                         // Cuando hay una imagen hay que poner esto
@@ -197,9 +198,9 @@ class ActivityCuestionario : AppCompatActivity() {
                 }
 
                 binding.tilContenidoPregResp.visibility =
-                    if (uiState.estadoUI.isShowImage) View.GONE else View.VISIBLE
+                    if (uiState.estadoUI.typeFile == TypeFile.IMAGEN) View.GONE else View.VISIBLE
                 binding.ivImagen.visibility =
-                    if (uiState.estadoUI.isShowImage) View.VISIBLE else View.GONE
+                    if (uiState.estadoUI.typeFile == TypeFile.IMAGEN) View.VISIBLE else View.GONE
                 binding.imgvCancelar.visibility =
                     if (uiState.estadoUI.isShowCancelar) View.VISIBLE else View.GONE
                 binding.imgvQuitColor.visibility =
@@ -228,7 +229,7 @@ class ActivityCuestionario : AppCompatActivity() {
                     binding.etPregResp.text?.clear()
                 } else {
                     // Agregar el texto en el et cuando hay un builder
-                    if (!uiState.estadoUI.isShowImage) {
+                    if (uiState.estadoUI.typeFile == TypeFile.TEXTO) {
                         binding.etPregResp.text = uiState.builder
                     } else {
                         // Cuando hay una imagen hay que poner esto
@@ -238,9 +239,9 @@ class ActivityCuestionario : AppCompatActivity() {
                 }
 
                 binding.tilContenidoPregResp.visibility =
-                    if (uiState.estadoUI.isShowImage) View.GONE else View.VISIBLE
+                    if (uiState.estadoUI.typeFile == TypeFile.IMAGEN) View.GONE else View.VISIBLE
                 binding.ivImagen.visibility =
-                    if (uiState.estadoUI.isShowImage) View.VISIBLE else View.GONE
+                    if (uiState.estadoUI.typeFile == TypeFile.IMAGEN) View.VISIBLE else View.GONE
                 binding.imgvCancelar.visibility =
                     if (uiState.estadoUI.isShowCancelar) View.VISIBLE else View.GONE
                 binding.imgvQuitColor.visibility =
@@ -268,7 +269,7 @@ class ActivityCuestionario : AppCompatActivity() {
                 binding.etPregResp.text?.clear()
             } else {
                 // Agregar el texto en el et cuando hay un builder
-                if (!uiState.estadoUI.isShowImage) {
+                if (uiState.estadoUI.typeFile == TypeFile.TEXTO) {
                     binding.etPregResp.text = uiState.builder
                 } else {
                     // Cuando hay una imagen hay que poner esto
@@ -278,9 +279,9 @@ class ActivityCuestionario : AppCompatActivity() {
             }
 
             binding.tilContenidoPregResp.visibility =
-                if (uiState.estadoUI.isShowImage) View.GONE else View.VISIBLE
+                if (uiState.estadoUI.typeFile == TypeFile.IMAGEN) View.GONE else View.VISIBLE
             binding.ivImagen.visibility =
-                if (uiState.estadoUI.isShowImage) View.VISIBLE else View.GONE
+                if (uiState.estadoUI.typeFile == TypeFile.IMAGEN) View.VISIBLE else View.GONE
             binding.imgvCancelar.visibility =
                 if (uiState.estadoUI.isShowCancelar) View.VISIBLE else View.GONE
             binding.imgvQuitColor.visibility =

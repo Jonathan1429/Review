@@ -1,4 +1,3 @@
-import android.app.Application
 import android.text.Editable
 import android.text.SpannableStringBuilder
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
@@ -7,7 +6,7 @@ import androidx.lifecycle.Observer
 import com.jonathanev.review.Data.GuiaRepository
 import com.jonathanev.review.Data.Model.DataStoreManager
 import com.jonathanev.review.Data.Model.EstadoUI
-import com.jonathanev.review.Data.Model.FilePathsProvider
+import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import com.jonathanev.review.Domain.*
