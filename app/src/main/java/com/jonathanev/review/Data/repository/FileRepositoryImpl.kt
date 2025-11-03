@@ -1,6 +1,8 @@
 package com.jonathanev.review.Data.repository
 
+import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.provider.FilePathsProvider
+import com.jonathanev.review.Domain.GetAllGuiasUseCase
 import com.jonathanev.review.Domain.repository.FileRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -11,7 +13,8 @@ import javax.inject.Singleton
 
 @Singleton
 class FileRepositoryImpl @Inject constructor(
-    private val filePathsProvider: FilePathsProvider
+    private val filePathsProvider: FilePathsProvider,
+    //private val getAllGuiasUseCase: GetAllGuiasUseCase
 ): FileRepository {
     // 1. Crear el StateFlow privado y Mutable
     private val _currentPathFlow = MutableStateFlow(
@@ -21,13 +24,18 @@ class FileRepositoryImpl @Inject constructor(
     // 2. Exponer un StateFlow público e inmutable para la lectura
     val currentPathFlow: StateFlow<String> = _currentPathFlow.asStateFlow()
 
-    // La variable simple 'currentPath' ya no es necesaria.
-
-    override fun getFilesInCurrentPath(): List<File> {
-        // Usar el valor actual del Flow para obtener los archivos
-        val directory = File(currentPathFlow.value)
-        return directory.listFiles()?.toList() ?: emptyList()
+    /*// 1. Crear el StateFlow privado y Mutable
+    private val _currentFilesFlow = MutableStateFlow(
+        emptyList<GuiaModel>()
+    )
+    // 2. Exponer un StateFlow público e inmutable para la lectura
+    private val currentFilesFlow: StateFlow<List<GuiaModel>> = _currentFilesFlow.asStateFlow()
+    override fun setFilesInCurrentPath() {
+        val guides = getAllGuiasUseCase.invoke(File(currentPathFlow.value))
+        _currentFilesFlow.value = guides
     }
+
+    override fun getFilesInCurrentPath(): List<GuiaModel> = currentFilesFlow.value*/
 
     override fun setCurrentPath(path: String) {
         // 3. Actualizar el valor del MutableStateFlow para notificar a todos los escuchas

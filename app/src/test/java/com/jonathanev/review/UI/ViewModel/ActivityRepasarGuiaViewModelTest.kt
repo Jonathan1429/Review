@@ -7,6 +7,8 @@ import com.google.android.gms.common.internal.Asserts
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.Model.PreguntaRespuestaModel
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
+import com.jonathanev.review.Data.provider.GuiaProvider
+import com.jonathanev.review.Data.repository.FileRepositoryImpl
 import com.jonathanev.review.Domain.GetClickRegresarUseCase
 import com.jonathanev.review.Domain.GetClickSiguienteUseCase
 import com.jonathanev.review.Domain.GetGuiaUseCase
@@ -35,6 +37,8 @@ class ActivityRepasarGuiaViewModelTest {
     private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase = mockk()
     private val getClickRegresarUseCase: GetClickRegresarUseCase = mockk()
     private val getClickSiguienteUseCase: GetClickSiguienteUseCase = mockk()
+    private val fileRepositoryImpl: FileRepositoryImpl = mockk()
+    private val guiaProvider: GuiaProvider = mockk()
 
     @Before
     fun setup() {
@@ -43,7 +47,9 @@ class ActivityRepasarGuiaViewModelTest {
             getGuiaUseCase,
             getObtenerDatosXMLUseCase,
             getClickRegresarUseCase,
-            getClickSiguienteUseCase
+            getClickSiguienteUseCase,
+            fileRepositoryImpl,
+            guiaProvider
         )
     }
 
@@ -73,12 +79,12 @@ class ActivityRepasarGuiaViewModelTest {
             )
         val valGuiaModel = ValidacionesGuiaModel()
 
-        every { getObtenerDatosXMLUseCase(any(), any()) } returns modelPregResp
+        every { getObtenerDatosXMLUseCase(any()) } returns modelPregResp
         every { setPintarTextosUseCase(any(), any(), any(), any(), any()) } returns valGuiaModel
 
-        viewModel.getObtenerDatosXML("nombre", "ruta")
+        viewModel.getObtenerDatosXML()
 
-        verify { getObtenerDatosXMLUseCase.invoke(any(), any()) }
+        verify { getObtenerDatosXMLUseCase.invoke(any()) }
         verify { setPintarTextosUseCase.invoke(any(), any(), any(), any(), any()) }
 
         // No entra al if
@@ -86,7 +92,7 @@ class ActivityRepasarGuiaViewModelTest {
         respuestas.add("prueba")
 
         viewModel.setRespuestas(respuestas)
-        viewModel.getObtenerDatosXML("nombre", "ruta")
+        viewModel.getObtenerDatosXML()
 
         every { setPintarTextosUseCase(any(), any(), any(), any(), any()) } returns valGuiaModel
 

@@ -7,7 +7,7 @@ import javax.inject.Inject
 class GetObtenerDatosXMLUseCase @Inject constructor(
     private val guiaRepository: GuiaRepository
 ){
-    operator fun invoke(nombreArchivo: String, ruta: String): List<PreguntaRespuestaModel>{
-        return guiaRepository.obtenerDatosXML(nombreArchivo, ruta)
+    operator fun invoke(ruta: String): List<PreguntaRespuestaModel>{
+        return guiaRepository.obtenerDatosXML(ruta)
     }
 }

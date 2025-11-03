@@ -57,7 +57,7 @@
             android:configChanges="screenSize|smallestScreenSize|orientation"/>
 
         <activity
-            android:name="com.jonathanev.review.UI.View.Activity_RepasarGuia"
+            android:name="com.jonathanev.review.UI.View.ActivityRepasarGuia"
             android:exported="false"
             android:configChanges="screenSize|smallestScreenSize|orientation"/>
 

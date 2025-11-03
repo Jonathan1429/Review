@@ -46,7 +46,7 @@ class GuiaRepositoryIntegrationTest() {
         assertTrue(tempFile.exists())
 
         // Leer archivo
-        val resultado = repository.obtenerDatosXML("archivo.xml", ruta)
+        val resultado = repository.obtenerDatosXML(ruta)
         val esperado = listOf(
             PreguntaRespuestaModel("Pregunta1", "Respuesta1"),
             PreguntaRespuestaModel("Pregunta2", "Respuesta2")

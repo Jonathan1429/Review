@@ -12,7 +12,7 @@ import com.jonathanev.review.Data.Model.PreguntaRespuestaModel
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Data.repository.FileRepositoryImpl
-import com.jonathanev.review.Domain.DeleteContentInPiv
+import com.jonathanev.review.Domain.DeleteContentInPivUseCase
 import com.jonathanev.review.Domain.GetGuiaUseCase
 import com.jonathanev.review.Domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.Domain.SetCifrarRutaImagenUseCase
@@ -50,7 +50,7 @@ import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class ModificarViewModelTest {
+class ActivityModificarViewModelTest {
 
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
@@ -68,10 +68,10 @@ class ModificarViewModelTest {
     private val setCopyImagesUseCase = mockk<SetCopyImagesUseCase>()
     private val getGuiaUseCase = mockk<GetGuiaUseCase>()
     private val filePathsProvider = mockk<FilePathsProvider>()
-    private val deleteContentInPiv = mockk<DeleteContentInPiv>()
+    private val deleteContentInPivUseCase = mockk<DeleteContentInPivUseCase>()
     private val dataStore: DataStoreManager = mockk(relaxed = true)
     private val fileRepositoryImpl = mockk<FileRepositoryImpl>()
-    private lateinit var viewModel: ModificarViewModel
+    private lateinit var viewModel: ActivityModificarViewModel
 
     @Before
     fun setup() {
@@ -82,7 +82,7 @@ class ModificarViewModelTest {
         coEvery { dataStore.setIncrementCounter() } just Runs
         coEvery { dataStore.resetCounter() } just Runs
 
-        viewModel = ModificarViewModel(
+        viewModel = ActivityModificarViewModel(
             setRollClickedUseCase,
             setClickRegresarModificandoUseCase,
             setClickSiguienteModicandoUseCase,
@@ -94,7 +94,7 @@ class ModificarViewModelTest {
             setPintarTextosUseCase,
             setCopyImagesUseCase,
             getGuiaUseCase,
-            deleteContentInPiv,
+            deleteContentInPivUseCase,
             dataStore,
             fileRepositoryImpl,
             filePathsProvider,
@@ -207,7 +207,7 @@ class ModificarViewModelTest {
             every { respuesta } returns "Respuesta 1"
         }
         val preguntas = listOf(pregunta1)
-        every { getObtenerDatosXMLUseCase("archivo.xml", "/ruta/falsa") } returns preguntas
+        every { getObtenerDatosXMLUseCase("/ruta/falsa") } returns preguntas
 
         val estadoUI = EstadoUI(isThereMoreAsks = true, isUpdatedAskAns = false)
         val validaciones = ValidacionesGuiaModel(estadoUI = estadoUI)
@@ -222,7 +222,7 @@ class ModificarViewModelTest {
             )
         } returns validaciones
 
-        val resultado = viewModel.getObtenerDatosXML("archivo.xml", "/ruta/falsa")
+        val resultado = viewModel.getObtenerDatosXML()
 
         assertEquals(validaciones, resultado)
         assertEquals(listOf("Pregunta 1"), viewModel.preguntas)
@@ -240,7 +240,7 @@ class ModificarViewModelTest {
             every { respuesta } returns "Respuesta 2"
         }
         val preguntas = listOf(pregunta1, pregunta2)
-        every { getObtenerDatosXMLUseCase("archivo.xml", "/ruta/falsa") } returns preguntas
+        every { getObtenerDatosXMLUseCase("/ruta/falsa") } returns preguntas
 
         val estadoUI = EstadoUI(isThereMoreAsks = true, isUpdatedAskAns = false)
         val validaciones = ValidacionesGuiaModel(estadoUI = estadoUI)
@@ -255,7 +255,7 @@ class ModificarViewModelTest {
             )
         } returns validaciones
 
-        val resultado = viewModel.getObtenerDatosXML("archivo.xml", "/ruta/falsa")
+        val resultado = viewModel.getObtenerDatosXML()
 
         assertEquals(validaciones, resultado)
         assertEquals(listOf("Pregunta 1", "Pregunta 2"), viewModel.preguntas)

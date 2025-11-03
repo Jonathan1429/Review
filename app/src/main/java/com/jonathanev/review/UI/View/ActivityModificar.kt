@@ -35,7 +35,7 @@ import com.jonathanev.review.Core.Constants.BASERUTA_IMG_CIFRADO
 import com.jonathanev.review.Data.TypeFile
 import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.UI.View.Fragments.Fragment_DialogColoresMod_popup
-import com.jonathanev.review.UI.ViewModel.ModificarViewModel
+import com.jonathanev.review.UI.ViewModel.ActivityModificarViewModel
 import com.jonathanev.review.databinding.ActivityModificarBinding
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
@@ -56,7 +56,7 @@ class ActivityModificar : AppCompatActivity() {
     private var imagenPiv = 0
     private var longCaracteres = 0
     private var filename: String = ""
-    private val viewModel: ModificarViewModel by viewModels()
+    private val viewModel: ActivityModificarViewModel by viewModels()
 
     @Inject
     lateinit var filePathsProvider: FilePathsProvider
@@ -249,7 +249,7 @@ class ActivityModificar : AppCompatActivity() {
             ).show()
 
             if (uiState.estadoUI.isCreatedGuia) {
-                val intent = Intent(applicationContext, Activity_RepasarGuia::class.java)
+                val intent = Intent(applicationContext, ActivityRepasarGuia::class.java)
                 intent.putExtra("ruta", uiState.responseGuia.rutaGuiaEstudio)
                 startActivity(intent)
                 viewModel.toCopyImages()
@@ -270,10 +270,7 @@ class ActivityModificar : AppCompatActivity() {
         // Get review
         viewModel.guiaModel.observe(this) {
             // Obtenemos los datos del XML y los guardamos en su respectivo ArrayList.
-            val texto = viewModel.getObtenerDatosXML(
-                nombreArchivo,
-                viewModel.currentPath.value
-            )
+            val texto = viewModel.getObtenerDatosXML()
 
             nombreArchivo = nombreArchivo.replace(".xml".toRegex(), "")
 

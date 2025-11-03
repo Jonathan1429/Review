@@ -101,14 +101,14 @@ class GuiaRepository @Inject constructor(
         }
     }
 
-    fun obtenerDatosXML(nombreArchivo: String, ruta: String): List<PreguntaRespuestaModel> {
+    fun obtenerDatosXML(ruta: String): List<PreguntaRespuestaModel> {
         val preguntasRespuestas = mutableListOf<PreguntaRespuestaModel>()
         val dbf: DocumentBuilderFactory = DocumentBuilderFactory.newInstance()
         val db: DocumentBuilder
         try {
             db = dbf.newDocumentBuilder()
             val filePath: File = if (ruta == "null") {
-                File(filePathsProvider.fileGuides, nombreArchivo)
+                File(filePathsProvider.fileGuides.toString())
             } else {
                 File(ruta)
             }

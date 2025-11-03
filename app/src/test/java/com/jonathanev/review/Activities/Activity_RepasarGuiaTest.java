@@ -2,7 +2,7 @@ package com.jonathanev.review.Activities;
 
 import android.annotation.SuppressLint;
 
-import com.jonathanev.review.UI.View.Activity_RepasarGuia;
+import com.jonathanev.review.UI.View.ActivityRepasarGuia;
 
 import java.io.File;
 
@@ -11,7 +11,7 @@ class Activity_RepasarGuiaTest {
     public void test1(){
         @SuppressLint("SdCardPath") File file = new File("/data/data/com.jonathanev.review/files/A.-C++.xml");
 
-        Activity_RepasarGuia activity_repasarGuia = new Activity_RepasarGuia();
+        ActivityRepasarGuia activity_repasarGuia = new ActivityRepasarGuia();
         //activity_repasarGuia.obtenerDatosXML();
 
         //Assertions.fail();

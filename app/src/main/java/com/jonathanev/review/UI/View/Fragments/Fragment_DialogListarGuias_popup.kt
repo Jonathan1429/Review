@@ -8,6 +8,7 @@ import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,17 +18,21 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.jonathanev.review.Core.Constants.BASERUTA_IMG_CIFRADO
+import com.jonathanev.review.Core.Constants.GUIAS
+import com.jonathanev.review.Core.Constants.IMAGENES
+import com.jonathanev.review.Core.Constants.PRINCIPAL
+import com.jonathanev.review.Data.GuiaResult
 import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Fragments.Adaptadores.ListarGuiasAdapter
 import com.jonathanev.review.R
 import com.jonathanev.review.UI.View.ActivityModificar
-import com.jonathanev.review.UI.View.Activity_RepasarGuia
+import com.jonathanev.review.UI.View.ActivityRepasarGuia
 import com.jonathanev.review.UI.View.Fragments.Fragment_DialogNuevoArchivo_popu.DialogListener
 import com.jonathanev.review.UI.ViewModel.Fragments.FragDialListarGuiasViewModel
 import com.jonathanev.review.databinding.FragmentListarGuiasBinding
 import dagger.hilt.android.AndroidEntryPoint
-import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.NodeList
 import org.xml.sax.SAXException
@@ -49,8 +54,6 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
 
     private val guiasViewModel by viewModels<FragDialListarGuiasViewModel>()
     private lateinit var adaptadorListarGuias: ListarGuiasAdapter
-    private val elementosPorCarga = 10 // Cantidad de elementos a cargar por cada carga adicional
-    private var numeroElementosCargados = 0 // Número actual de elementos cargados
 
     @Inject
     lateinit var filePathsProvider: FilePathsProvider
@@ -90,7 +93,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
 
         guiasViewModel.file.observe(this) {
             binding.progressBar.visibility = View.VISIBLE
-            guiasViewModel.getAllUpdatedGuides(it)
+            //guiasViewModel.getAllUpdatedGuides(it)
         }
 
         binding.LlFolders.setOnClickListener {
@@ -100,7 +103,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                 binding.imgvBack.visibility = View.GONE
                 binding.tvRegresar.visibility = View.GONE
 
-                guiasViewModel.getMainPath()
+                guiasViewModel.getFirstPath()
             } else {
                 // Creamos las preferencias y dentro de ellas guardamos el arreglo item
                 val preferencias: SharedPreferences =
@@ -122,6 +125,7 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
 
     private fun initUI() {
         binding.progressBar.visibility = View.VISIBLE
+        //guiasViewModel.getAllGuides()
         guiasViewModel.getAllGuias()
     }
 
@@ -135,343 +139,218 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
 
     @SuppressLint("SdCardPath")
     private fun showGuiaOptions(position: Int) {
-        val guia = guiasViewModel.getGuia(position)
+        val guiaResult = guiasViewModel.getGuia(position)
+        //val a = guiasViewModel.guias.value
+        //var fileClickeado: File = filePathsProvider.fileGuides
 
-        var fileClickeado: File = filePathsProvider.fileGuides
+        when (guiaResult) {
+            GuiaResult.Empty -> Log.i("Vacio", "Vacio")
+            is GuiaResult.Error -> Log.i("Error", "Error")
+            is GuiaResult.Success -> {
+                if (guiaResult.guia.carpeta) { // fileClickeado.isDirectory
+                    val builder = AlertDialog.Builder(context)
+                    builder.setIcon(R.drawable.ic_advertencia)
+                    builder.setTitle("¿Qué acción deseas realizar?")
+                    builder.setItems(
+                        arrayOf<CharSequence>(
+                            "Abrir",
+                            "Eliminar",
+                            "Cancelar"
+                        )
+                    ) { dialog, which ->
+                        when (which) {
+                            0 -> {
+                                guiasViewModel.changeFilePath(guiaResult.guia.nombreGuia)
 
-        val originPath = filePathsProvider.buildFile(filePathsProvider.rutaPrin, guia.nombreGuia)
-        val copiedPath = filePathsProvider.buildFile(filePathsProvider.fileImagesPiv, guia.nombreGuia)
+                                binding.imgvFolder.visibility = View.GONE
+                                binding.tvNuevaCarpeta.visibility = View.GONE
+                                binding.imgvBack.visibility = View.VISIBLE
+                                binding.tvRegresar.visibility = View.VISIBLE
+                            }
 
-        guiasViewModel.file.value?.let {
-            fileClickeado = it
-        }
-
-        fileClickeado = File("" + fileClickeado + "/" + guia.nombreGuia)
-
-        if (guia.carpeta) { // fileClickeado.isDirectory
-            val builder = AlertDialog.Builder(context)
-            builder.setIcon(R.drawable.ic_advertencia)
-            builder.setTitle("¿Qué acción deseas realizar?")
-            builder.setItems(
-                arrayOf<CharSequence>(
-                    "Abrir",
-                    "Eliminar",
-                    "Cancelar"
-                )
-            ) { dialog, which ->
-                //guiasViewModel.getMainPath()
-                when (which) {
-                    0 -> {
-                        changePath(guia.nombreGuia)
-
-                        binding.imgvFolder.visibility = View.GONE
-                        binding.tvNuevaCarpeta.visibility = View.GONE
-                        binding.imgvBack.visibility = View.VISIBLE
-                        binding.tvRegresar.visibility = View.VISIBLE
-                    }
-
-                    1 -> {
-                        // Se ejecuta cuando quiere eliminar la guía.
-                        AlertDialog.Builder(context)
-                            .setTitle("¡Atención!")
-                            .setMessage(
-                                "¿Estás seguro que deseas eliminar la carpeta y su contenido?"
-                            )
-                            .setPositiveButton("Si") { _, _ ->
-                                // Si entra al tercero es para eliminar la guia exitosamente
-                                if (fileClickeado!!.exists()) {
-                                    val exito = deleteFolder(fileClickeado!!)
-                                    if (exito) {
-                                        Toast.makeText(
-                                            context,
-                                            "¡Carpeta eliminada exitosamente!",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-
-                                        guiasViewModel.getAllUpdatedGuides(filePathsProvider.fileGuides)
-                                    } else {
-                                        Toast.makeText(
-                                            context,
-                                            "Error al eliminar la carpeta",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
+                            1 -> {
+                                // Se ejecuta cuando quiere eliminar la guía.
+                                AlertDialog.Builder(context)
+                                    .setTitle("¡Atención!")
+                                    .setMessage(
+                                        "¿Estás seguro que deseas eliminar la carpeta y su contenido?"
+                                    )
+                                    .setPositiveButton("Si") { _, _ ->
+                                        deleteFiles(guiaResult.guia)
                                     }
-
-
-                                    // Recuperamos el dialogo abierto actualmente
-                                    // (Fragment_DialogListarGuias_popup.java)
-                                    // y lo cerramos.
-                                    val dialogoEliminarGuia = getDialog()
-                                    dialogoEliminarGuia?.dismiss()
-
-                                } else {
-                                    Toast.makeText(
-                                        context, "La ruta para eliminar el " +
-                                                "archivo actualmente no existe.",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
+                                    .setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
+                                    .create().show()
                             }
-                            .setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
-                            .create().show()
-                    }
-                    /*2 ->
-                        // Se ejecuta cuando quiere cambiar el nombre de la carpeta
-                        if (fileClickeado.exists()) {
-                            // Creamos las preferencias y dentro de ellas guardamos el arreglo item
-                            val preferencias: SharedPreferences =
-                                requireContext().getSharedPreferences(
-                                    "crear_folder",
-                                    AppCompatActivity.MODE_PRIVATE
-                                )
 
-                            val editor = preferencias.edit()
-                            editor.putString("crear_folder", "cambiar_nom_folder")
-                            editor.apply()
-
-                            // Unicamente abrimos el dialogo y lo mostramos en la pantalla.
-                            val dialogo = Fragment_DialogNuevoArchivo_popu()
-                            dialogo.show(childFragmentManager, "Fragment")
-                        } else {
-                            Toast.makeText(
-                                context, "La ruta para cambiar " +
-                                        "el nombre del archivo actualmente no existe.",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }*/
-                    2 -> {
-                        // Cuando cancela se ejecuta esta acción
-                        dialog.dismiss()
-                        Toast.makeText(context, "Cancelaste la acción", Toast.LENGTH_SHORT)
-                            .show()
-                    }
-                }
-            }
-            builder.create().show()
-        } else {
-            // Creo una alerta donde me saldrán una lista de items
-            val builder = AlertDialog.Builder(context)
-            builder.setIcon(R.drawable.ic_advertencia)
-            builder.setTitle("¿Qué acción deseas realizar?")
-            builder.setItems(
-                arrayOf<CharSequence>(
-                    "Abrir",
-                    "Modificar",
-                    "Eliminar",
-                    "Cambiar nombre",
-                    "Mover a",
-                    "Cancelar"
-                )
-            ) { dialog, which ->
-                val ruta = "$fileClickeado.xml"
-                when (which) {
-                    0 -> {
-                        // Si entra al primer item se abre la guía a review
-                        val intentAbrirGuia = Intent(activity, Activity_RepasarGuia::class.java)
-                        //intentAbrirGuia.putExtra("nombre_archivo", guia.nombreGuia)
-                        intentAbrirGuia.putExtra("ruta", ruta)
-                        startActivity(intentAbrirGuia)
-
-                        // Recuperamos el dialogo abierto actualmente
-                        // (Fragment_DialogListarGuias.java) y lo cerramos.
-                        val dialogoAbrirGuia = getDialog()
-                        dialogoAbrirGuia!!.dismiss()
-                    }
-
-                    1 -> {
-                        // Si entra al segundo es para modificar la guía de estudio
-                        val intentACTIVITYModificarGuia =
-                            Intent(activity, ActivityModificar::class.java)
-                        //intentModificarGuia.putExtra("nombre_archivo", guia.nombreGuia)
-                        intentACTIVITYModificarGuia.putExtra("ruta", ruta)
-                        startActivity(intentACTIVITYModificarGuia)
-                        // Recuperamos el dialogo abierto actualmente
-                        // (Fragment_DialogListarGuias.java) y lo cerramos.
-                        val dialogoModificarGuia = getDialog()
-                        dialogoModificarGuia!!.dismiss()
-                    }
-
-                    2 ->
-                        // Se ejecuta cuando quiere eliminar la guía.
-                        AlertDialog.Builder(context)
-                            .setTitle("¡Atención!")
-                            .setMessage(
-                                "¿Estás seguro que deseas eliminar la" +
-                                        " guia?"
-                            )
-                            .setPositiveButton("Si") { _, _ ->
-                                // Si entra al tercero es para eliminar la guia exitosamente
-                                if (filePathsProvider.fileGuides.exists()) {
-                                    File(ruta).delete()
-                                    Toast.makeText(
-                                        context,
-                                        "¡Archivo eliminado exitosamente!",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-
-                                    guiasViewModel.getAllUpdatedGuides(filePathsProvider.fileGuides)
-
-                                    // Recuperamos el dialogo abierto actualmente
-                                    // (Fragment_DialogListarGuias_popup.java)
-                                    // y lo cerramos.
-                                    val dialogoEliminarGuia = getDialog()
-                                    dialogoEliminarGuia!!.dismiss()
-                                } else {
-                                    Toast.makeText(
-                                        context, "La ruta para eliminar el " +
-                                                "archivo actualmente no existe.",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
+                            2 -> {
+                                // Cuando cancela se ejecuta esta acción
+                                dialog.dismiss()
+                                Toast.makeText(context, "Cancelaste la acción", Toast.LENGTH_SHORT)
+                                    .show()
                             }
-                            .setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
-                            .create().show()
-
-                    3 -> {
-                        // Se ejecuta cuando quiere cambiar el nombre de la guía
-                        if (filePathsProvider.fileGuides.exists()) {
-                            // Creamos las preferencias y dentro de ellas guardamos el arreglo item
-                            val preferencias: SharedPreferences =
-                                requireContext().getSharedPreferences(
-                                    "crear_folder",
-                                    AppCompatActivity.MODE_PRIVATE
-                                )
-
-                            val editor = preferencias.edit()
-                            editor.putString("crear_folder", "cambiando_nombre")
-                            editor.putString("ruta", ruta)
-                            editor.apply()
-
-                            // Unicamente abrimos el dialogo y lo mostramos en la pantalla.
-                            val dialogo = Fragment_DialogNuevoArchivo_popu()
-                            dialogo.show(childFragmentManager, "Fragment")
                         }
                     }
+                    builder.create().show()
+                } else {
+                    // Creo una alerta donde me saldrán una lista de items
+                    val builder = AlertDialog.Builder(context)
+                    builder.setIcon(R.drawable.ic_advertencia)
+                    builder.setTitle("¿Qué acción deseas realizar?")
+                    builder.setItems(
+                        arrayOf<CharSequence>(
+                            "Abrir",
+                            "Modificar",
+                            "Eliminar",
+                            "Cambiar nombre",
+                            "Mover a",
+                            "Cancelar"
+                        )
+                    ) { dialog, which ->
+                        //val ruta = "$fileClickeado.xml"
+                        when (which) {
+                            0 -> {
+                                guiasViewModel.changeFilePath(guiaResult.guia.nombreGuia)
 
-                    4 -> {
-                        val subMenuBuilder = AlertDialog.Builder(context)
-                        subMenuBuilder.setTitle("Mover a...")
+                                // Si entra al primer item se abre la guía a review
+                                val intentAbrirGuia =
+                                    Intent(activity, ActivityRepasarGuia::class.java)
+                                //intentAbrirGuia.putExtra("nombre_archivo", guia.nombreGuia)
+                                //intentAbrirGuia.putExtra("ruta", ruta)
+                                startActivity(intentAbrirGuia)
 
-                        var rutaSinArchivo = ruta.substringBeforeLast("/")
+                                // Recuperamos el dialogo abierto actualmente
+                                // (Fragment_DialogListarGuias.java) y lo cerramos.
+                                val dialogoAbrirGuia = getDialog()
+                                dialogoAbrirGuia!!.dismiss()
+                            }
 
-                        if (rutaSinArchivo == filePathsProvider.fileGuides.toString()) {
-                            val listaCarpetas = filePathsProvider.fileGuides.listFiles { file -> file.isDirectory }
+                            1 -> {
+                                // Si entra al segundo es para modificar la guía de estudio
+                                guiasViewModel.changeFilePath(guiaResult.guia.nombreGuia)
 
-                            if (listaCarpetas != null) {
-                                // Método 1: Usando copyOf()
-                                val nombresCarpetas = listaCarpetas.map { it.name }.toTypedArray()
+                                val intentActivityModificarGuia =
+                                    Intent(activity, ActivityModificar::class.java)
+                                //intentModificarGuia.putExtra("nombre_archivo", guia.nombreGuia)
+                                //intentActivityModificarGuia.putExtra("ruta", ruta)
+                                startActivity(intentActivityModificarGuia)
+                                // Recuperamos el dialogo abierto actualmente
+                                // (Fragment_DialogListarGuias.java) y lo cerramos.
+                                val dialogoModificarGuia = getDialog()
+                                dialogoModificarGuia!!.dismiss()
+                            }
 
-                                subMenuBuilder.setItems(nombresCarpetas) { _, subWhich ->
+                            2 ->
+                                // Se ejecuta cuando quiere eliminar la guía.
+                                AlertDialog.Builder(context)
+                                    .setTitle("¡Atención!")
+                                    .setMessage(
+                                        "¿Estás seguro que deseas eliminar la" +
+                                                " guia?"
+                                    )
+                                    .setPositiveButton("Si") { _, _ ->
+                                        deleteFiles(guiaResult.guia)
+
+                                        //guiasViewModel.changeFilePath(guiaResult.guia.nombreGuia)
+                                        //val route = guiasViewModel.getCurrentPath()
+                                        // Si entra al tercero es para eliminar la guia exitosamente
+                                        /*if (filePathsProvider.fileGuides.exists()) {
+                                            File(route).delete()
+                                            Toast.makeText(
+                                                context,
+                                                "¡Archivo eliminado exitosamente!",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+
+                                            //guiasViewModel.getAllUpdatedGuides(filePathsProvider.fileGuides)
+
+                                            // Recuperamos el dialogo abierto actualmente
+                                            // (Fragment_DialogListarGuias_popup.java)
+                                            // y lo cerramos.
+                                            val dialogoEliminarGuia = getDialog()
+                                            dialogoEliminarGuia!!.dismiss()
+                                        } else {
+                                            Toast.makeText(
+                                                context, "La ruta para eliminar el " +
+                                                        "archivo actualmente no existe.",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }*/
+                                    }
+                                    .setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
+                                    .create().show()
+
+                            3 -> {
+                                // PENDIENTEEEEEEE
+                                // Se ejecuta cuando quiere cambiar el nombre de la guía
+                                guiasViewModel.changeFilePath(guiaResult.guia.nombreGuia)
+                                val route = guiasViewModel.getCurrentPath()
+                                if (File(route).exists()) {
+                                    // Creamos las preferencias y dentro de ellas guardamos el arreglo item
+                                    /*val preferencias: SharedPreferences =
+                                        requireContext().getSharedPreferences(
+                                            "crear_folder",
+                                            AppCompatActivity.MODE_PRIVATE
+                                        )
+
+                                    val editor = preferencias.edit()
+                                    editor.putString("crear_folder", "cambiando_nombre")
+                                    editor.putString("ruta", ruta)
+                                    editor.apply()*/
+
+                                    // Unicamente abrimos el dialogo y lo mostramos en la pantalla.
+                                    val dialogo = Fragment_DialogNuevoArchivo_popu()
+                                    dialogo.show(childFragmentManager, "Fragment")
+                                }
+                            }
+
+                            4 -> {
+                                val subMenuBuilder = AlertDialog.Builder(context)
+                                subMenuBuilder.setTitle("Mover a...")
+
+                                val foldersCreated = guiasViewModel.getFoldersCreated()
+                                val currentPath = guiasViewModel.getCurrentPath()
+
+                                subMenuBuilder.setItems(foldersCreated) { _, subWhich ->
                                     // Manejar la selección de la carpeta dentro del submenú
-                                    val selectedFolder = nombresCarpetas[subWhich]
+                                    val selectedFolder = foldersCreated[subWhich]
 
                                     // Mover a la carpeta seleccionada
                                     try {
-                                        // Copiar el archivo
-                                        val guia = guiasViewModel.getGuia(position)
+                                        /*// Copiar el archivo
+                                        val guia = guiasViewModel.getGuia(position)*/
 
-                                        val archivoEnCarpeta = filePathsProvider.buildFileFolder(filePathsProvider.fileGuides, selectedFolder, "${guia.nombreGuia}.xml")
-                                        if (archivoEnCarpeta.exists()) {
-                                            AlertDialog.Builder(context)
-                                                .setTitle("¡Atención!")
-                                                .setMessage(
-                                                    ("Ya tienes una guía con el mismo nombre, " +
-                                                            "si continuas se va a sobreescribir la guia, " +
-                                                            "¿seguro deseas continuar?")
-                                                )
-                                                .setPositiveButton(
-                                                    "Continuar"
-                                                ) { _, _ ->
-                                                    moverImagenes(ruta, selectedFolder)
+                                        // Updated path
+                                        val fileName = "${guiaResult.guia.nombreGuia}.xml"
+                                        val archivoEnCarpeta = filePathsProvider.buildFileFolder(
+                                            File(filePathsProvider.fileGuides.toString()),
+                                            selectedFolder,
+                                            fileName
+                                        )
+                                        var creatingFile = false
+                                        existingFile(archivoEnCarpeta) { creatingFile = it }
 
-                                                    Files.copy(
-                                                        Paths.get(originPath.toString()),
-                                                        Paths.get(copiedPath.toString()),
-                                                        StandardCopyOption.REPLACE_EXISTING
-                                                    )
-
-                                                    Files.copy(
-                                                        Paths.get("${filePathsProvider.buildFile(filePathsProvider.fileGuides, guia.nombreGuia)}.xml"),
-                                                        Paths.get("${filePathsProvider.buildFileFolder(filePathsProvider.fileGuides, selectedFolder, guia.nombreGuia)}.xml"),
-                                                        StandardCopyOption.REPLACE_EXISTING
-                                                    )
-
-                                                    // Borrar archivo
-                                                    File(filePathsProvider.fileGuides, guia.nombreGuia + ".xml").delete()
-
-                                                    guiasViewModel.getAllUpdatedGuides(filePathsProvider.fileGuides)
-                                                    /*val dialogoEliminarGuia = getDialog()
-                                                    dialogoEliminarGuia!!.dismiss()*/
-
-                                                    Toast.makeText(
-                                                        context,
-                                                        "El archivo se movió correctamente",
-                                                        Toast.LENGTH_SHORT
-                                                    ).show()
-                                                }
-                                                .setNegativeButton(
-                                                    "Cancelar"
-                                                ) { dialog, _ -> dialog.dismiss() }.create().show()
-                                        } else {
-                                            moverImagenes(ruta, selectedFolder)
-
-                                            Files.copy(
-                                                Paths.get("${filePathsProvider.buildFile(filePathsProvider.fileGuides, guia.nombreGuia)}.xml"),
-                                                Paths.get("${filePathsProvider.buildFileFolder(filePathsProvider.fileGuides, selectedFolder, guia.nombreGuia)}.xml"),
-                                                StandardCopyOption.REPLACE_EXISTING
-                                            )
-
-                                            // Borrar archivo
-                                            File(filePathsProvider.fileGuides, guia.nombreGuia + ".xml").delete()
-
-                                            guiasViewModel.getAllUpdatedGuides(filePathsProvider.fileGuides)
-                                            /*val dialogoEliminarGuia = getDialog()
-                                            dialogoEliminarGuia!!.dismiss()*/
-
-
-                                            Toast.makeText(
-                                                context, "El archivo se movió correctamente",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                        }
-
-                                    } catch (e: Exception) {
-                                        println("Error al copiar el archivo: ${e.message}")
-                                    }
-                                }
-                            }
-                        } else {
-                            subMenuBuilder.setItems(
-                                arrayOf<CharSequence>(
-                                    "Principal",
-                                )
-                            ) { _, subWhich ->
-                                // Manejar la selección de la carpeta dentro del submenú
-                                when (subWhich) {
-                                    0 -> {
-                                        // Mover a la carpeta seleccionada
                                         try {
-                                            // Copiar el archivo
-                                            val guia = guiasViewModel.getGuia(position)
+                                            val newPathWithoutFile: String =
+                                                archivoEnCarpeta.toString().substringBeforeLast("/")
+                                            var newPath: File = File(newPathWithoutFile)
+                                            if (selectedFolder == PRINCIPAL) {
+                                                newPath = filePathsProvider.fileGuides
+                                            }
 
-                                            val selectedFolder = "Principal"
-                                            moverImagenes(ruta, selectedFolder)
+                                            if (creatingFile) {
+                                                relocateGuideWithImages(
+                                                    currentPath,
+                                                    newPath,
+                                                    fileName,
+                                                    guiaResult,
+                                                    newPathWithoutFile
+                                                )
+                                            }
 
-                                            Files.copy(
-                                                Paths.get("$fileClickeado.xml"),
-                                                Paths.get("${filePathsProvider.buildFile(filePathsProvider.fileGuides, guia.nombreGuia)}.xml"),
-                                                StandardCopyOption.REPLACE_EXISTING
-                                            )
-
-                                            // Borrar archivo
-                                            val rutaPrincipal = "$fileClickeado.xml"
-                                            File(rutaPrincipal).delete()
-                                            // guiasViewModel.getAllUpdatedGuides(file)
-                                            /*val dialogoEliminarGuia = getDialog()
-                                            dialogoEliminarGuia!!.dismiss()*/
-
-                                            guiasViewModel.getMainPath()
-                                            guiasViewModel.getAllUpdatedGuides(filePathsProvider.fileGuides)
+                                            /*guiasViewModel.getFirstPath()
+                                            guiasViewModel.getAllUpdatedGuides(
+                                                filePathsProvider.fileGuides
+                                            )*/
 
                                             binding.imgvFolder.visibility = View.VISIBLE
                                             binding.tvNuevaCarpeta.visibility = View.VISIBLE
@@ -479,49 +358,103 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
                                             binding.tvRegresar.visibility = View.GONE
 
                                             Toast.makeText(
-                                                context, "El archivo se movió correctamente",
+                                                context,
+                                                "El archivo se movió correctamente",
                                                 Toast.LENGTH_SHORT
                                             ).show()
                                         } catch (e: Exception) {
                                             println("Error al copiar el archivo: ${e.message}")
                                         }
+
+                                    } catch (e: Exception) {
+                                        println("Error al copiar el archivo: ${e.message}")
                                     }
                                 }
+
+                                subMenuBuilder.show()
+                            }
+
+                            5 -> {
+                                // Cuando cancela se ejecuta esta acción
+                                dialog.dismiss()
+                                Toast.makeText(context, "Cancelaste la acción", Toast.LENGTH_SHORT)
+                                    .show()
                             }
                         }
-
-                        subMenuBuilder.show()
                     }
-
-                    5 -> {
-                        // Cuando cancela se ejecuta esta acción
-                        dialog.dismiss()
-                        Toast.makeText(context, "Cancelaste la acción", Toast.LENGTH_SHORT)
-                            .show()
-                    }
-                }
-            }
-            builder.create().show()
-        }
-    }
-
-    private fun changePath(folder: String) {
-        guiasViewModel.changeFilePath(folder)
-    }
-
-    private fun deleteFolder(fileClickeado: File): Boolean {
-        if (fileClickeado.isDirectory) {
-            val children = fileClickeado.listFiles()
-            if (children != null) {
-                for (child in children) {
-                    val success = deleteFolder(child)
-                    if (!success) {
-                        return false
-                    }
+                    builder.create().show()
                 }
             }
         }
-        return fileClickeado.delete()
+    }
+
+    // Creating file if it's possible
+    private fun existingFile(archivoEnCarpeta: File, onResult: (Boolean) -> Unit) {
+        if (!archivoEnCarpeta.exists()) {
+            return onResult(true)
+        }
+
+        AlertDialog.Builder(context)
+            .setTitle("¡Atención!")
+            .setMessage(
+                ("Ya tienes una guía con el mismo nombre, " +
+                        "si continuas se va a sobreescribir la guia, " +
+                        "¿seguro deseas continuar?")
+            )
+            .setPositiveButton(
+                "Continuar"
+            ) { _, _ ->
+                onResult(true)
+            }
+            .setNegativeButton(
+                "Cancelar"
+            ) { dialog, _ ->
+                dialog.dismiss()
+                onResult(false)
+            }.create().show()
+    }
+
+    private fun relocateGuideWithImages(
+        currentPath: String,
+        newCurrentPath: File,
+        fileName: String,
+        guiaResult: GuiaResult.Success,
+        newPathWithoutFile: String
+    ) {
+        moverImagenes(File(currentPath), fileName, newPathWithoutFile)
+        val currentPathWithFile = "${filePathsProvider.buildFile(File(currentPath), guiaResult.guia.nombreGuia)}.xml"
+
+        Files.copy(
+            Paths.get(currentPathWithFile),
+            Paths.get(newCurrentPath.toString()),
+            StandardCopyOption.REPLACE_EXISTING
+        )
+
+        // Borrar archivo
+        File(currentPathWithFile).delete()
+        //guiasViewModel.getAllUpdatedGuides(filePathsProvider.fileGuides)
+        guiasViewModel.getFirstPath()
+
+        Toast.makeText(
+            context,
+            "El archivo se movió correctamente",
+            Toast.LENGTH_SHORT
+        ).show()
+    }
+
+    private fun deleteFiles(guiaResult: GuiaModel) {
+        if (!guiasViewModel.existFolder(guiaResult.nombreGuia)) {
+            Toast.makeText(
+                context,
+                "La ruta para eliminar el archivo actualmente no existe.",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
+        val message = guiasViewModel.deleteFiles(guiaResult)
+
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -549,66 +482,46 @@ class Fragment_DialogListarGuias_popup : DialogFragment(), DialogListener {
         }
     }
 
-    private fun moverImagenes(fileClickeado: String, selectedFolder: String) {
+    private fun moverImagenes(currentPath: File, fileName: String, newPathWithoutFile: String) {
         //obtenerDatosXML(fileClickeado, selectedFolder)
-        var doc: Document? = null
+        //var doc: Document? = null
         val dbf: DocumentBuilderFactory = DocumentBuilderFactory.newInstance()
         val db: DocumentBuilder
+
         try {
             db = dbf.newDocumentBuilder()
-            var filePath: File = File(fileClickeado)
+            val filePath: File = File(currentPath.toString() + fileName)
             val fis = FileInputStream(filePath)
 
-            doc = db.parse(fis)
+            val doc = db.parse(fis)
 
             // Buscamos los Nodos Interrogante y accedemos a lo que se encuentre dentro.
             val cuestionario: NodeList = doc.getElementsByTagName("Interrogante")
             for (i in 0 until cuestionario.length) {
                 // Accedes a los elementos de dicho nodo
                 val e: Element = cuestionario.item(i) as Element
-                if (e.getAttribute("pregunta").contains("frqwhqw://phgld/slfnhu/")) {
-                    var descifrado = cifrar(e.getAttribute("pregunta"), 26 - 3)
-                    // descifrado = descifrado.replace("content://media/picker/".toRegex(), "")
-                    val imagen = descifrado.substringAfterLast("/")
-                    val ruta = fileClickeado.substringBeforeLast("/")
-                    var rutaImagen = ruta.replace("guias", "imagenes")
-                    val rutaActual = "$rutaImagen/$imagen"
 
-                    if (selectedFolder != "Principal") {
-                        rutaImagen = "${filePathsProvider.buildFileFolder(filePathsProvider.fileImages, selectedFolder, imagen)}"
-                    } else {
-                        rutaImagen = "${filePathsProvider.buildFile(filePathsProvider.fileImages, imagen)}"
+                val value = mapOf(
+                    "respuesta" to e.getAttribute("respuesta"),
+                    "pregunta" to e.getAttribute("pregunta")
+                ).filterValues { it.contains(BASERUTA_IMG_CIFRADO) }
+
+                if (value.isNotEmpty()) {
+                    value.keys.forEach { pathImage ->
+                        //var descifrado = cifrar(pathImage, 26 - 3)
+                        // descifrado = descifrado.replace("content://media/picker/".toRegex(), "")
+                        val image = pathImage.substringAfterLast("/")
+                        val ruta = currentPath.toString().replace(GUIAS, IMAGENES)
+                        val pathImage = "$newPathWithoutFile/$image"
+
+                        Files.copy(
+                            Paths.get(ruta + image),
+                            Paths.get("" + pathImage),
+                            StandardCopyOption.REPLACE_EXISTING
+                        )
+
+                        File(ruta + image).delete()
                     }
-
-                    Files.copy(
-                        Paths.get("" + rutaActual),
-                        Paths.get("" + rutaImagen),
-                        StandardCopyOption.REPLACE_EXISTING
-                    )
-
-                    File(rutaActual).delete()
-                }
-
-                if (e.getAttribute("respuesta").contains("frqwhqw://phgld/slfnhu/")) {
-                    var descifrado = cifrar(e.getAttribute("respuesta"), 26 - 3)
-                    val imagen = descifrado.substringAfterLast("/")
-                    val ruta = fileClickeado.substringBeforeLast("/")
-                    var rutaImagen = ruta.replace("guias", "imagenes")
-                    val rutaActual = "$rutaImagen/$imagen"
-
-                    if (selectedFolder != "Principal") {
-                        rutaImagen = "${filePathsProvider.buildFileFolder(filePathsProvider.fileImages, selectedFolder, imagen)}"
-                    } else {
-                        rutaImagen = "${filePathsProvider.buildFile(filePathsProvider.fileImages, imagen)}"
-                    }
-
-                    Files.copy(
-                        Paths.get("" + rutaActual),
-                        Paths.get("" + rutaImagen),
-                        StandardCopyOption.REPLACE_EXISTING
-                    )
-
-                    File(rutaActual).delete()
                 }
             }
         } catch (e: ParserConfigurationException) {

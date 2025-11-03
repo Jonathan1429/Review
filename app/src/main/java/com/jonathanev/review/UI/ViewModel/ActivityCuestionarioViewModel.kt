@@ -14,7 +14,7 @@ import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import com.jonathanev.review.Data.repository.FileRepositoryImpl
-import com.jonathanev.review.Domain.DeleteContentInPiv
+import com.jonathanev.review.Domain.DeleteContentInPivUseCase
 import com.jonathanev.review.Domain.SetCifrarRutaImagenUseCase
 import com.jonathanev.review.Domain.SetClickEliminarUseCase
 import com.jonathanev.review.Domain.SetClickRegresarModificandoUseCase
@@ -44,7 +44,7 @@ class ActivityCuestionarioViewModel @Inject constructor(
     private val setCopyImagesUseCase: SetCopyImagesUseCase,
     private val setCifrarRutaImagenUseCase: SetCifrarRutaImagenUseCase,
     private val setPintarLetraUseCase: SetPintarLetraUseCase,
-    private val deleteContentInPiv: DeleteContentInPiv,
+    private val deleteContentInPivUseCase: DeleteContentInPivUseCase,
     private val filePathsProvider: FilePathsProvider,
     private val fileRepositoryImpl: FileRepositoryImpl,
     private val dataStore: DataStoreManager,
@@ -85,6 +85,9 @@ class ActivityCuestionarioViewModel @Inject constructor(
     private val _textoImagenCorrutina = MutableLiveData<String>()
     val textoImagenCorrutina: LiveData<String> get() = _textoImagenCorrutina
 
+    //private var _currentPath = MutableStateFlow(getCurrentPathUseCase())
+    // El StateFlow del VM ahora es una simple copia del Flow del Repositorio.
+    // Usamos 'StateFlow' del repositorio para el estado de la UI del VM.
     val currentPath: StateFlow<String> = fileRepositoryImpl.currentPathFlow
         .stateIn(
             scope = viewModelScope,
@@ -231,7 +234,7 @@ class ActivityCuestionarioViewModel @Inject constructor(
     }
 
     fun deleteContentInPiv(nombreArchivo: String) {
-        deleteContentInPiv.invoke(nombreArchivo)
+        deleteContentInPivUseCase.invoke(nombreArchivo)
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)

@@ -26,11 +26,10 @@ class TestGetObtenerDatosXMLUseCase {
         every {
             guiaRepository.obtenerDatosXML(
                 nombreArchivo,
-                ruta
             )
         } returns preguntasRespuestasEsperadas
 
-        val resultado = getObtenerDatosXMLUseCase(nombreArchivo, ruta)
+        val resultado = getObtenerDatosXMLUseCase(nombreArchivo)
 
         // Assert
         assertEquals(preguntasRespuestasEsperadas, resultado)
@@ -44,11 +43,10 @@ class TestGetObtenerDatosXMLUseCase {
         every {
             guiaRepository.obtenerDatosXML(
                 nombreArchivo,
-                ruta
             )
         } returns emptyList()
 
-        val resultado = getObtenerDatosXMLUseCase(nombreArchivo, ruta)
+        val resultado = getObtenerDatosXMLUseCase(nombreArchivo)
 
         // Assert
         assertTrue(resultado.isEmpty())

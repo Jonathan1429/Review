@@ -253,7 +253,7 @@ class ActivityCuestionario : AppCompatActivity() {
             ).show()
 
             if (uiState.estadoUI.isCreatedGuia) {
-                val intent = Intent(applicationContext, Activity_RepasarGuia::class.java)
+                val intent = Intent(applicationContext, ActivityRepasarGuia::class.java)
                 intent.putExtra("ruta", uiState.responseGuia.rutaGuiaEstudio)
                 startActivity(intent)
                 viewModel.procesoActualizacion()

@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
@@ -17,6 +18,7 @@ import com.jonathanev.review.UI.View.Fragments.Fragment_DialogNuevoArchivo_popu
 import com.jonathanev.review.UI.ViewModel.MainActivityViewModel
 import com.jonathanev.review.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
+import java.io.File
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -87,11 +89,17 @@ class MainActivity : AppCompatActivity() {
         binding.btnAbrirGuiaEstudioHabilitado.setOnClickListener {
             if (viewModel.getFoldersCreated()) {
                 // Cuando lo abres cargas el repositorio principal
-                viewModel.getAllGuias(filePathsProvider.fileGuides)
+                viewModel.setCurrentPath()
+                viewModel.getAllGuias(File(viewModel.getCurrentPath()))
 
                 val dialogo = Fragment_DialogListarGuias_popup()
                 dialogo.show(supportFragmentManager, "Fragment")
             }
+        }
+
+        viewModel.guias.observe(this){
+            val a = it
+            Log.i("a", it.toString())
         }
     }
 
@@ -110,7 +118,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            viewModel.getAllGuias(filePathsProvider.fileGuides)
+            //viewModel.setGuiasInProvider()
         }
 
         viewModel.foldersCreated(foldersCreated)

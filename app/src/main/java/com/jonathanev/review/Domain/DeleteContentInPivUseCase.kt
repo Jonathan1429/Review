@@ -4,7 +4,7 @@ import com.jonathanev.review.Data.provider.FilePathsProvider
 import java.io.File
 import javax.inject.Inject
 
-class DeleteContentInPiv @Inject constructor(
+class DeleteContentInPivUseCase @Inject constructor(
     private val filePathsProvider: FilePathsProvider
 ) {
     operator fun invoke(nombreArchivo: String) {

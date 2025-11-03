@@ -14,4 +14,5 @@ object Constants {
     const val GUIAS = "guias"
     const val IMAGENES = "imagenes"
     const val IMAGENESPIVOTE = "imagenesPivote"
+    const val PRINCIPAL = "Principal"
 }

@@ -47,7 +47,7 @@ class ActivityCuestionarioViewModelTest {
     private val setCopyImagesUseCase: SetCopyImagesUseCase = mockk()
     private val setCifrarRutaImagenUseCase: SetCifrarRutaImagenUseCase = mockk()
     private val setPintarLetraUseCase: SetPintarLetraUseCase = mockk()
-    private val deleteContentInPiv: DeleteContentInPiv = mockk()
+    private val deleteContentInPivUseCase: DeleteContentInPivUseCase = mockk()
     private val filePathsProvider: FilePathsProvider = mockk()
     private val fileRepositoryImpl: FileRepositoryImpl = mockk()
 
@@ -70,7 +70,7 @@ class ActivityCuestionarioViewModelTest {
             setCopyImagesUseCase,
             setCifrarRutaImagenUseCase,
             setPintarLetraUseCase,
-            deleteContentInPiv,
+            deleteContentInPivUseCase,
             filePathsProvider,
             fileRepositoryImpl,
             dataStore,
