@@ -36,7 +36,7 @@ import com.jonathanev.review.Core.Constants.BASERUTA_IMG_CIFRADO
 import com.jonathanev.review.Core.Constants.PICK_IMAGE_REQUEST
 import com.jonathanev.review.Data.TypeFile
 import com.jonathanev.review.Data.provider.FilePathsProvider
-import com.jonathanev.review.UI.View.Fragments.Fragment_DialogColores_popup
+import com.jonathanev.review.UI.View.Fragments.FragmentDialogColoresPopup
 import com.jonathanev.review.UI.ViewModel.ActivityCuestionarioViewModel
 import com.jonathanev.review.databinding.ActivityCuestionarioBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -355,7 +355,7 @@ class ActivityCuestionario : AppCompatActivity() {
         // Visualización del DialogFragment de selección de colores.
         binding.imgvSelColor.setOnClickListener {
             // Unicamente abrimos el dialogo y lo mostramos en la pantalla.
-            val dialogo: Fragment_DialogColores_popup = Fragment_DialogColores_popup()
+            val dialogo: FragmentDialogColoresPopup = FragmentDialogColoresPopup()
             //=====================================================================================================================
             dialogo.show(supportFragmentManager, "FragmentColor")
         }

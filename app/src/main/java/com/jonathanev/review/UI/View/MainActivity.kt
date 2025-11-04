@@ -11,10 +11,11 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.jonathanev.review.Data.FolderAction
 import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.R
-import com.jonathanev.review.UI.View.Fragments.Fragment_DialogListarGuias_popup
-import com.jonathanev.review.UI.View.Fragments.Fragment_DialogNuevoArchivo_popu
+import com.jonathanev.review.UI.View.Fragments.FragmentDialogListarGuiasPopup
+import com.jonathanev.review.UI.View.Fragments.FragmentDialogNuevoArchivoPopu
 import com.jonathanev.review.UI.ViewModel.MainActivityViewModel
 import com.jonathanev.review.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -53,7 +54,7 @@ class MainActivity : AppCompatActivity() {
 
         initUI()
         // Revisar permisos, sino hay se solicitan
-        viewModel.shouldRequestPermission.observe(this){ withoutPermission ->
+        viewModel.shouldRequestPermission.observe(this) { withoutPermission ->
             if (withoutPermission) requestReadPermission()
         }
 
@@ -63,7 +64,13 @@ class MainActivity : AppCompatActivity() {
 
         binding.btnNuevaGuiaEstudio.setOnClickListener { // Unicamente abrimos el dialogo y lo mostramos en la pantalla.
             if (viewModel.getFoldersCreated()) {
-                val dialogo: Fragment_DialogNuevoArchivo_popu = Fragment_DialogNuevoArchivo_popu()
+                val dialog = FragmentDialogNuevoArchivoPopu.newInstance(
+                    mode = FolderAction.CREATING_GUIDE
+                )
+
+                dialog.show(supportFragmentManager, "Fragment_nuevo")
+
+                /*val dialogo: FragmentDialogNuevoArchivoPopu = FragmentDialogNuevoArchivoPopu()
                 dialogo.show(supportFragmentManager, "Fragment_nuevo")
 
                 // Creamos las preferencias y dentro de ellas guardamos el arreglo item
@@ -82,7 +89,7 @@ class MainActivity : AppCompatActivity() {
 
                 editor = preferencias.edit()
                 editor.putString("crear_folder", "no existe")
-                editor.apply()
+                editor.apply()*/
             }
         }
 
@@ -92,12 +99,12 @@ class MainActivity : AppCompatActivity() {
                 viewModel.setCurrentPath()
                 viewModel.getAllGuias(File(viewModel.getCurrentPath()))
 
-                val dialogo = Fragment_DialogListarGuias_popup()
+                val dialogo = FragmentDialogListarGuiasPopup()
                 dialogo.show(supportFragmentManager, "Fragment")
             }
         }
 
-        viewModel.guias.observe(this){
+        viewModel.guias.observe(this) {
             val a = it
             Log.i("a", it.toString())
         }
@@ -124,7 +131,7 @@ class MainActivity : AppCompatActivity() {
         viewModel.foldersCreated(foldersCreated)
     }
 
-    private fun foldersGuides(): Boolean{
+    private fun foldersGuides(): Boolean {
         val foldersCreated = viewModel.createFolders()
 
         if (!foldersCreated) {
