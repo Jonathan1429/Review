@@ -23,6 +23,7 @@ import com.jonathanev.review.Core.Constants.PRINCIPAL
 import com.jonathanev.review.Data.FileAction
 import com.jonathanev.review.Data.FolderAction
 import com.jonathanev.review.Data.provider.FilePathsProvider
+import com.jonathanev.review.R
 import com.jonathanev.review.UI.View.ActivityCuestionario
 import com.jonathanev.review.UI.ViewModel.Fragments.FragDialNuevoArchViewModel
 import com.jonathanev.review.databinding.FragmentNuevoArchivoBinding
@@ -103,32 +104,26 @@ class FragmentDialogNuevoArchivoPopu() : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        /*val prefs = requireActivity()
-            .getSharedPreferences("crear_folder", Context.MODE_PRIVATE)
-        val actionString = prefs.getString("folder_action", FolderAction.CREATING_GUIDE.name)
-        //val action = FolderAction.valueOf(actionString!!)
-
-        val mode = fragDialNuevoArchViewModel.getScreenMode()*/
 
         when (action) {
             FolderAction.CREATING_FOLDER -> {
-                binding.tilNombreArchivo.hint = "Nombre de la carpeta"
-                binding.btnGuardarGuiaEstudio.text = "Crear carpeta"
+                binding.tilNombreArchivo.hint = getString(R.string.etNombreCarpeta)
+                binding.btnGuardarGuiaEstudio.text = getString(R.string.btnCrearCarpeta)
             }
 
             FolderAction.RENAMING_FILE -> {
-                binding.tilNombreArchivo.hint = "Nombre del archivo"
-                binding.btnGuardarGuiaEstudio.text = "Crear archivo"
+                binding.tilNombreArchivo.hint = getString(R.string.etNombreArchivo)
+                binding.btnGuardarGuiaEstudio.text = getString(R.string.btnCrearArchivo)
             }
 
             FolderAction.RENAMING_FOLDER -> {
-                binding.tilNombreArchivo.hint = "Nombre de la carpeta"
-                binding.btnGuardarGuiaEstudio.text = "Crear carpeta"
+                binding.tilNombreArchivo.hint = getString(R.string.etNombreCarpeta)
+                binding.btnGuardarGuiaEstudio.text = getString(R.string.btnCrearCarpeta)
             }
 
             FolderAction.CREATING_GUIDE -> {
-                binding.tilNombreArchivo.hint = "Nombre del archivo"
-                binding.btnGuardarGuiaEstudio.text = "Crear archivo"
+                binding.tilNombreArchivo.hint = getString(R.string.etNombreArchivo)
+                binding.btnGuardarGuiaEstudio.text = getString(R.string.btnCrearArchivo)
             }
 
             FolderAction.NONE -> {
@@ -148,107 +143,22 @@ class FragmentDialogNuevoArchivoPopu() : DialogFragment() {
                 FolderAction.CREATING_FOLDER -> creatingFolder(fileName)
                 FolderAction.RENAMING_FILE -> renamingFile(fileName)
                 FolderAction.RENAMING_FOLDER -> TODO()
-                FolderAction.CREATING_GUIDE -> creatingGuide()
+                FolderAction.CREATING_GUIDE -> creatingGuide(fileName)
                 FolderAction.NONE -> Unit
-            }
-
-            val archivo = binding.etNombreArchivo.text.toString().trim()
-
-            if (lv_folder.equals("cambiando_nombre")) {
-
-            } else if (lv_folder.equals("creando_folder")) {
-
-            } else {
-                @SuppressLint("SdCardPath")
-                var item = ""
-                // Defino la ruta donde busco los ficheros.
-                var archivoExiste = false
-                if (filePathsProvider.fileGuides.exists()) {
-                    var item = ""
-                    // Defino la ruta donde busco los ficheros.
-                    var archivoExiste = false
-                    // Creo el array de tipo File con el contenido de la carpeta.
-                    val files = filePathsProvider.fileGuides.listFiles()
-                    var archivos: File? = null
-
-                    // Hacemos un ciclo por cada fichero para extraer el nombre uno a uno.
-                    if (!files.isNullOrEmpty()) {
-                        for (i in files.indices) {
-                            // Sacamos del array files el nombre recuperandolo por posición.
-                            archivos = files[i]
-                            if (!archivos.isDirectory) {
-                                item = archivos.name.replace(".xml".toRegex(), "")
-                                // Comparamos el texto ingresado en la App con el recuperado.
-                                if ((archivo == item)) {
-                                    archivoExiste = true
-                                    break
-                                }
-                            }
-                        }
-                    }
-                    // Hacemos un ciclo por cada fichero para extraer el nombre uno a uno.
-                    /*for (i in files.indices) {
-                        // Sacamos del array files el nombre recuperandolo por posición.
-                        archivo = files[i]
-                        item = archivo.name.replace(".xml".toRegex(), "")
-                        // Comparamos el texto ingresado en la App con el recuperado.
-                        if ((binding!!.etNombreArchivo.text.toString().trim() == item)) {
-                            archivoExiste = true
-                            break
-                        }
-                    }*/
-
-                    // Si hay un archivo existente entra
-                    if (archivoExiste) {
-                        // Se ejecuta cuando se regresa sin guardar.
-                        AlertDialog.Builder(context)
-                            .setTitle("¡Atención!")
-                            .setMessage(
-                                ("Ya tienes una guía con el mismo nombre, " +
-                                        "si continuas se va a sobreescribir el archivo, " +
-                                        "¿seguro deseas continuar?")
-                            )
-                            .setPositiveButton(
-                                "Continuar"
-                            ) { _, _ -> // Si hay un valor dentro del campo enviamos el nombre del archivo a
-                                // Activity_Cuestionario.
-                                val intent =
-                                    Intent(activity, ActivityCuestionario::class.java)
-                                intent.putExtra(
-                                    "nombre_archivo",
-                                    binding.etNombreArchivo.text.toString().trim()
-                                )
-                                // Recuperamos el dialogo abierto actualmente
-                                // (Fragment_DialogNuevoArchivo.java) y lo cerramos.
-                                val dialogActual = dialog
-                                dialogActual!!.dismiss()
-
-                                startActivity(intent)
-                            }
-                            .setNegativeButton(
-                                "Cancelar"
-                            ) { dialog, _ -> dialog.dismiss() }.create().show()
-                    } else { // Sino hay un archivo existente entra aquí
-                        val intent = Intent(activity, ActivityCuestionario::class.java)
-                        intent.putExtra(
-                            "nombre_archivo",
-                            binding.etNombreArchivo.text.toString().trim()
-                        )
-
-                        // Recuperamos el dialogo abierto actualmente
-                        // (Fragment_DialogNuevoArchivo.java) y lo cerramos.
-                        val dialogActual = dialog
-                        dialogActual!!.dismiss()
-
-                        startActivity(intent)
-                    }
-                }
             }
         }
     }
 
-    private fun creatingGuide() {
+    private fun creatingGuide(fileName: String) {
+        var creatingFile = true
+        if (viewModel.exist(fileName)) {
+            alertDialog { creatingFile = it }
+        }
 
+        if (creatingFile){
+            val intent = Intent(activity, ActivityCuestionario::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun creatingFolder(fileName: String) {
@@ -257,7 +167,7 @@ class FragmentDialogNuevoArchivoPopu() : DialogFragment() {
 
     private fun renamingFile(fileName: String) {
         var renamingFile = true
-        if (viewModel.exist()) {
+        if (viewModel.exist(fileName)) {
             alertDialog { renamingFile = it }
         }
 

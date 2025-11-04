@@ -32,8 +32,10 @@ class FragDialNuevoArchViewModel @Inject constructor(
         return setRenamingUseCase.invoke(fileName)
     }
 
-    fun exist(): Boolean {
-        return fileHelperImpl.exists(fileRepositoryImpl.getCurrentPath())
+    fun exist(fileName: String): Boolean {
+        val path = fileRepositoryImpl.getCurrentPath().substringBeforeLast("/")
+        val newPath = "$path/$fileName.xml"
+        return fileHelperImpl.exists(newPath)
     }
 
     fun creatingFolder(fileName: String) {

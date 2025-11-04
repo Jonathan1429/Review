@@ -7,6 +7,7 @@
 
     <!-- Pop up cuando le das Nuevo archivo -->
     <string name="etNombreArchivo">Nombre del archivo</string>
+    <string name="etNombreCarpeta">Nombre de la carpeta</string>
     <string name="btnGuardarGuia">Guardar</string>
     <string name="btnLimpiarArchivo">Limpiar</string>
 
@@ -36,4 +37,7 @@
 
     <!-- Crear guias y modficarla -->
     <string name="lblCuestionario">Escribe aquí</string>
+
+    <string name="btnCrearCarpeta"> Crear carpeta</string>
+    <string name="btnCrearArchivo"> Crear archivo</string>
 </resources>
