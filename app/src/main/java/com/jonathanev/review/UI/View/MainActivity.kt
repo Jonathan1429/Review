@@ -67,7 +67,6 @@ class MainActivity : AppCompatActivity() {
                 val dialog = FragmentDialogNuevoArchivoPopu.newInstance(
                     mode = FolderAction.CREATING_GUIDE
                 )
-
                 dialog.show(supportFragmentManager, "Fragment_nuevo")
 
                 /*val dialogo: FragmentDialogNuevoArchivoPopu = FragmentDialogNuevoArchivoPopu()

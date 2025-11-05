@@ -1,6 +1,5 @@
 package com.jonathanev.review.UI.View.Fragments
 
-import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
@@ -28,7 +27,6 @@ import com.jonathanev.review.UI.View.ActivityCuestionario
 import com.jonathanev.review.UI.ViewModel.Fragments.FragDialNuevoArchViewModel
 import com.jonathanev.review.databinding.FragmentNuevoArchivoBinding
 import dagger.hilt.android.AndroidEntryPoint
-import java.io.File
 import javax.inject.Inject
 
 @AndroidEntryPoint

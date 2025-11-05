@@ -22,9 +22,10 @@ import com.jonathanev.review.Core.Constants.BASERUTA_IMG_CIFRADO
 import com.jonathanev.review.Core.Constants.GUIAS
 import com.jonathanev.review.Core.Constants.IMAGENES
 import com.jonathanev.review.Core.Constants.PRINCIPAL
+import com.jonathanev.review.Data.FolderAction
 import com.jonathanev.review.Data.GuiaResult
-import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Data.Model.GuiaModel
+import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Fragments.Adaptadores.ListarGuiasAdapter
 import com.jonathanev.review.R
 import com.jonathanev.review.UI.View.ActivityModificar
@@ -280,27 +281,28 @@ class FragmentDialogListarGuiasPopup : DialogFragment(), DialogListener {
                                     .create().show()
 
                             3 -> {
-                                // PENDIENTEEEEEEE
                                 // Se ejecuta cuando quiere cambiar el nombre de la guía
                                 viewModel.changeFilePath(guiaResult.guia.nombreGuia)
-                                val route = viewModel.getCurrentPath()
-                                if (File(route).exists()) {
-                                    // Creamos las preferencias y dentro de ellas guardamos el arreglo item
-                                    /*val preferencias: SharedPreferences =
-                                        requireContext().getSharedPreferences(
-                                            "crear_folder",
-                                            AppCompatActivity.MODE_PRIVATE
-                                        )
+                                val dialogo = FragmentDialogNuevoArchivoPopu.newInstance(
+                                    mode = FolderAction.RENAMING_FILE
+                                )
+                                dialogo.show(childFragmentManager, "Fragment_nuevo")
 
-                                    val editor = preferencias.edit()
-                                    editor.putString("crear_folder", "cambiando_nombre")
-                                    editor.putString("ruta", ruta)
-                                    editor.apply()*/
+                                // Creamos las preferencias y dentro de ellas guardamos el arreglo item
+                                /*val preferencias: SharedPreferences =
+                                    requireContext().getSharedPreferences(
+                                        "crear_folder",
+                                        AppCompatActivity.MODE_PRIVATE
+                                    )
 
-                                    // Unicamente abrimos el dialogo y lo mostramos en la pantalla.
-                                    val dialogo = FragmentDialogNuevoArchivoPopu()
-                                    dialogo.show(childFragmentManager, "Fragment")
-                                }
+                                val editor = preferencias.edit()
+                                editor.putString("crear_folder", "cambiando_nombre")
+                                editor.putString("ruta", ruta)
+                                editor.apply()*/
+
+                                // Unicamente abrimos el dialogo y lo mostramos en la pantalla.
+                                //val dialogo = FragmentDialogNuevoArchivoPopu()
+                                //dialog.show(childFragmentManager, "Fragment")
                             }
 
                             4 -> {
@@ -422,7 +424,8 @@ class FragmentDialogListarGuiasPopup : DialogFragment(), DialogListener {
         newPathWithoutFile: String
     ) {
         moverImagenes(File(currentPath), fileName, newPathWithoutFile)
-        val currentPathWithFile = "${filePathsProvider.buildFile(File(currentPath), guiaResult.guia.nombreGuia)}.xml"
+        val currentPathWithFile =
+            "${filePathsProvider.buildFile(File(currentPath), guiaResult.guia.nombreGuia)}.xml"
 
         Files.copy(
             Paths.get(currentPathWithFile),

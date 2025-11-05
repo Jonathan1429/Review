@@ -35,8 +35,4 @@ class FilePathsProvider @Inject constructor(
     fun buildFolder(base: File, folder: String): File {
         return File("$base/$folder")
     }
-
-    fun backLastFolder(base: String): File{
-        return File(base.substringBeforeLast("/"))
-    }
 }

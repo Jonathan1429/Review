@@ -2,12 +2,12 @@ package com.jonathanev.review.Data
 
 import android.util.Xml
 import com.jonathanev.review.Data.Model.EstadoUI
-import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Data.Model.GuiaModel
-import com.jonathanev.review.Data.provider.GuiaProvider
 import com.jonathanev.review.Data.Model.PreguntaRespuestaModel
 import com.jonathanev.review.Data.Model.ResponseGuia
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
+import com.jonathanev.review.Data.provider.FilePathsProvider
+import com.jonathanev.review.Data.provider.GuiaProvider
 import com.jonathanev.review.Domain.GetAllGuiasUseCase
 import org.w3c.dom.Element
 import org.w3c.dom.NodeList

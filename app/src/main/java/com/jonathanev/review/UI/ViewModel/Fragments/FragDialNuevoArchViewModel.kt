@@ -8,7 +8,7 @@ import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.repository.FileHelperImpl
 import com.jonathanev.review.Data.repository.FileRepositoryImpl
 import com.jonathanev.review.Domain.SetRenamingUseCase
-import com.jonathanev.review.Domain.repository.CreatingFolderUseCase
+import com.jonathanev.review.Domain.CreatingFolderUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.io.File
 import javax.inject.Inject

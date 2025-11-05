@@ -25,7 +25,7 @@ class DataStoreManager @Inject constructor(
     private val dataStore = context.dataStore
 
     companion object {
-        @SuppressLint("StaticFieldLeak")
+        /*@SuppressLint("StaticFieldLeak")
         private var INSTANCE: DataStoreManager? = null
         private val LOCK = Any()
 
@@ -35,7 +35,7 @@ class DataStoreManager @Inject constructor(
                     INSTANCE = it
                 }
             }
-        }
+        }*/
 
         val contador_imagenes_key = intPreferencesKey("CONTADOR_IMAGENES_KEY")
     }
