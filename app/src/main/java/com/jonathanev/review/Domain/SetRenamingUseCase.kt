@@ -11,7 +11,13 @@ class SetRenamingUseCase @Inject constructor(
     operator fun invoke(newFileName: String): FileAction {
         // Ruta + nombre del archivo.
         val routeWithoutFile = fileRepositoryImpl.getCurrentPath().substringBeforeLast("/")
-        val response = File(fileRepositoryImpl.getCurrentPath()).renameTo(File("$routeWithoutFile/$newFileName"))
+        val newPathFile = File("$routeWithoutFile/$newFileName")
+
+        if (newPathFile.exists()){
+            return FileAction.EXIST
+        }
+
+        val response = File(fileRepositoryImpl.getCurrentPath()).renameTo(newPathFile)
         return if (response) FileAction.SUCCESS else FileAction.ERROR
     }
 }

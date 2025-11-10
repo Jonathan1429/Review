@@ -14,6 +14,6 @@ class SetCrearXmlUseCase @Inject constructor(
         didTheGuideAlreadyExist: Boolean,
         ruta: String
     ): ValidacionesGuiaModel {
-        return guiaRepository.saveFile(nombreArchivo, preguntas, respuestas, didTheGuideAlreadyExist, ruta)
+        return guiaRepository.saveFileV1(nombreArchivo, preguntas, respuestas, didTheGuideAlreadyExist, ruta)
     }
 }

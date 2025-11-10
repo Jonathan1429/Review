@@ -15,4 +15,7 @@ object Constants {
     const val IMAGENES = "imagenes"
     const val IMAGENESPIVOTE = "imagenesPivote"
     const val PRINCIPAL = "Principal"
+    const val PREGUNTA = "pregunta"
+    const val RESPUESTA = "respuesta"
+    const val INTERROGANTE = "Interrogante"
 }

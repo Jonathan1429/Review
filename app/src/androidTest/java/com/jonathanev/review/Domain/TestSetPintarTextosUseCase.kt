@@ -1,7 +1,6 @@
 package com.jonathanev.review.Domain
 
 import android.text.style.ForegroundColorSpan
-import com.jonathanev.review.Data.TypeFile
 import com.jonathanev.review.Data.repository.FileHelperImpl
 import io.mockk.every
 import io.mockk.mockk

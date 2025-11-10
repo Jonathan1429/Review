@@ -10,8 +10,10 @@ import com.jonathanev.review.DI.IoDispatcher
 import com.jonathanev.review.DI.MainDispatcher
 import com.jonathanev.review.Data.GuiaRepository
 import com.jonathanev.review.Data.Model.DataStoreManager
+import com.jonathanev.review.Data.Model.EstadoUI
 import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Data.Model.GuiaModel
+import com.jonathanev.review.Data.Model.prueba.QuestionItem
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import com.jonathanev.review.Data.repository.FileRepositoryImpl
 import com.jonathanev.review.Domain.DeleteContentInPivUseCase
@@ -22,6 +24,7 @@ import com.jonathanev.review.Domain.SetClickSaveUseCase
 import com.jonathanev.review.Domain.SetClickSiguienteModificandoUseCase
 import com.jonathanev.review.Domain.SetCopyImagesUseCase
 import com.jonathanev.review.Domain.SetPintarLetraUseCase
+import com.jonathanev.review.Domain.SetPintarTextosUseCase
 import com.jonathanev.review.Domain.SetRollClickedUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -43,6 +46,7 @@ class ActivityCuestionarioViewModel @Inject constructor(
     private val setClickEliminarUseCase: SetClickEliminarUseCase,
     private val setCopyImagesUseCase: SetCopyImagesUseCase,
     private val setCifrarRutaImagenUseCase: SetCifrarRutaImagenUseCase,
+    private val setPintarTextosUseCase: SetPintarTextosUseCase,
     private val setPintarLetraUseCase: SetPintarLetraUseCase,
     private val deleteContentInPivUseCase: DeleteContentInPivUseCase,
     private val filePathsProvider: FilePathsProvider,
@@ -52,11 +56,11 @@ class ActivityCuestionarioViewModel @Inject constructor(
     @MainDispatcher private val mainDispatcher: CoroutineDispatcher
     //application: Application
 ) : ViewModel() {
-    private var _preguntas: ArrayList<String> = ArrayList()
-    val preguntas: ArrayList<String> get() = _preguntas
+    private lateinit var _preguntas: MutableList<QuestionItem>
+    val preguntas: MutableList<QuestionItem> get() = _preguntas
 
-    private var _respuestas: ArrayList<String> = ArrayList()
-    val respuestas: ArrayList<String> get() = _respuestas
+    private lateinit var _respuestas: MutableList<QuestionItem>
+    val respuestas: MutableList<QuestionItem> get() = _respuestas
 
     private var _contadorPregunta: Int = 0
     val contadorPregunta: Int get() = _contadorPregunta
@@ -223,11 +227,49 @@ class ActivityCuestionarioViewModel @Inject constructor(
     }
 
     fun onClickEliminar(ruta: String) {
-        val responseRegresarUseCase =
-            setClickEliminarUseCase(preguntas, respuestas, contadorPregunta, ruta)
+        val (newPreguntas, newRespuestas) =
+            setClickEliminarUseCase(preguntas, respuestas, contadorPregunta)
+
+        _preguntas.clear()
+        _preguntas.addAll(newPreguntas)
+
+        _respuestas.clear()
+        _respuestas.addAll(newRespuestas)
 
         if (contadorPregunta > 0) {
             _contadorPregunta--
+
+            setPintarTextosUseCase(true, preguntas, respuestas, ruta)
+
+            _uiStateBtnEliminar.value = ValidacionesGuiaModel(
+                estadoUI = EstadoUI(
+                    isUpdatedAskAns = true,
+                    isShowQuitColor = true,
+                    isShowSelColor = true,
+                ),
+                builder = builder,
+            )
+        }
+
+        return if (contadorPregunta > 0) {
+            val validacionesGuiaModel =
+                //setPintarTextosUseCase(true, preguntas, respuestas, contadorPregunta - 1, ruta)
+                setPintarTextosUseCase(true, preguntas, respuestas, ruta)
+
+            validacionesGuiaModel.copy(
+                estadoUI = validacionesGuiaModel.estadoUI.copy(
+                    isThereMoreAsks = true
+                )
+            )
+        } else {
+            ValidacionesGuiaModel(
+                estadoUI = EstadoUI(
+                    isUpdatedAskAns = true,
+                    isClearText = true,
+                    isShowQuitColor = true,
+                    isShowSelColor = true
+                )
+            )
         }
 
         _uiStateBtnEliminar.value = responseRegresarUseCase

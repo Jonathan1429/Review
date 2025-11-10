@@ -41,8 +41,8 @@ class SetRollClickedUseCase @Inject constructor(
         if (contadorPregunta <= pintarLista.lastIndex) {
             val responsePintarTextos = setPintarTextosUseCase(
                 isEtPregunta = !isEtPregunta, // Pintas lo opuesto
-                preguntas = preguntas,
-                respuestas = respuestas,
+                question = preguntas,
+                answer = respuestas,
                 contadorPregunta = contadorPregunta,
                 ruta
             )

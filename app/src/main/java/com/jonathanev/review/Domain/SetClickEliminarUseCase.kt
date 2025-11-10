@@ -1,24 +1,28 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.Data.Model.EstadoUI
-import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
+import com.jonathanev.review.Data.Model.prueba.QuestionItem
 import javax.inject.Inject
 
 class SetClickEliminarUseCase @Inject constructor(
     private val setPintarTextosUseCase: SetPintarTextosUseCase
 ) {
     operator fun invoke(
-        preguntas: ArrayList<String>,
-        respuestas: ArrayList<String>,
+        preguntas: MutableList<QuestionItem>,
+        respuestas: MutableList<QuestionItem>,
         contadorPregunta: Int,
-        ruta: String
-    ): ValidacionesGuiaModel {
-        preguntas.removeAtOrNull(contadorPregunta)
+        //ruta: String
+    ): Pair<MutableList<QuestionItem>, MutableList<QuestionItem>> {
+        if (contadorPregunta in preguntas.indices) preguntas.removeAt(contadorPregunta)
+        if (contadorPregunta in respuestas.indices) respuestas.removeAt(contadorPregunta)
+
+        return Pair(preguntas, respuestas)
+        /*preguntas.removeAtOrNull(contadorPregunta)
         respuestas.removeAtOrNull(contadorPregunta)
 
         return if (contadorPregunta > 0) {
             val validacionesGuiaModel =
-                setPintarTextosUseCase(true, preguntas, respuestas, contadorPregunta - 1, ruta)
+                //setPintarTextosUseCase(true, preguntas, respuestas, contadorPregunta - 1, ruta)
+                setPintarTextosUseCase(true, preguntas, respuestas, ruta)
 
             validacionesGuiaModel.copy(
                 estadoUI = validacionesGuiaModel.estadoUI.copy(
@@ -34,10 +38,10 @@ class SetClickEliminarUseCase @Inject constructor(
                     isShowSelColor = true
                 )
             )
-        }
+        }*/
     }
 
-    private fun ArrayList<String>.removeAtOrNull(index: Int) {
+    /*private fun ArrayList<String>.removeAtOrNull(index: Int) {
         if (index in indices) removeAt(index)
-    }
+    }*/
 }

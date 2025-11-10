@@ -1,16 +1,9 @@
 package com.jonathanev.review.Domain
 
-import android.text.Spannable
-import android.text.SpannableStringBuilder
-import android.text.style.ForegroundColorSpan
 import com.jonathanev.review.Core.Constants.BASERUTA_IMG
-import com.jonathanev.review.Core.Constants.BASERUTA_IMG_CIFRADO
-import com.jonathanev.review.Data.Model.ColorPregModel
-import com.jonathanev.review.Data.Model.EstadoImagen
-import com.jonathanev.review.Data.Model.EstadoUI
+import com.jonathanev.review.Data.Model.prueba.ColorRange
+import com.jonathanev.review.Data.Model.prueba.QuestionContent
 import com.jonathanev.review.Data.repository.FileHelperImpl
-import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
-import com.jonathanev.review.Data.TypeFile
 import javax.inject.Inject
 
 class SetPintarTextosUseCase @Inject constructor(
@@ -18,98 +11,57 @@ class SetPintarTextosUseCase @Inject constructor(
     private val fileHelper: FileHelperImpl
 ) {
     operator fun invoke(
-        isEtPregunta: Boolean,
-        preguntas: ArrayList<String>,
-        respuestas: ArrayList<String>,
-        contadorPregunta: Int,
-        ruta: String
-    ): ValidacionesGuiaModel {
+        item: QuestionContent,
+        ruta: String,
+    ): QuestionContent {
+        val colorRange: List<ColorRange> = mutableListOf()
         var contColorPreg: Int = 0
-        var inicio: Int = 0
-        var fin: Int = 0
-        var colorPregModel: ColorPregModel? = null
-        var texto: String = ""
-        val preguntasColor: ArrayList<ColorPregModel> = ArrayList()
-        val respuestasColor: ArrayList<ColorPregModel> = ArrayList()
-        var builder: SpannableStringBuilder? = null
+        var text: String = ""
 
-        texto = if (isEtPregunta) {
-            preguntas[contadorPregunta]
-            // uri = texto.toUri()
-        } else {
-            respuestas[contadorPregunta]
-            // uri = texto.toUri()
-        }
+        return when(item){
+            is QuestionContent.Image -> {
+                var descifrado = setCifrarRutaImagenUseCase(item.encodedPath, 26 - 3)// cifrar(texto, 26 - 3)
+                //val cifrado = item.url
+                descifrado = descifrado.replace(BASERUTA_IMG.toRegex(), "")
+                var soloRuta = ruta.replaceAfterLast("/", "")
+                soloRuta = soloRuta.replaceFirst("guias", "imagenes")
+                val imagen = descifrado.replaceBeforeLast("/", "").replace("/", "")
+                descifrado = "$soloRuta$imagen"
 
-        return if (texto.contains(BASERUTA_IMG_CIFRADO)) {
-            val descifrado = setCifrarRutaImagenUseCase(texto, 26 - 3)// cifrar(texto, 26 - 3)
-            val cifrado = texto
-            texto = descifrado.replace(BASERUTA_IMG.toRegex(), "")
-            var soloRuta = ruta.replaceAfterLast("/", "")
-            soloRuta = soloRuta.replaceFirst("guias", "imagenes")
-            val imagen = texto.replaceBeforeLast("/", "").replace("/", "")
-            texto = "$soloRuta$imagen"
-
-            if (!fileHelper.exists("" + texto)) {
-                texto = texto.replace("imagenes".toRegex(), "imagenesPivote")
-            }
-
-            // Cuando lo que se va a mostrar es una imagen
-            ValidacionesGuiaModel(
-                estadoUI = EstadoUI(
-                    isUpdatedAskAns = true,
-                    typeFile = TypeFile.IMAGEN,
-                    isShowCancelar = true,
-                ),
-                estadoImagen = EstadoImagen(cifrado, texto),
-            )
-        } else {
-            while (texto.contains("«")) {
-                inicio = texto.indexOf("«") + 1
-                fin = texto.indexOf("»")
-                val color: String = texto.substring(inicio, fin)
-                val longColor: Int = color.length
-                val colEntero: Int = color.toInt()
-                inicio = fin + 1
-                fin = texto.indexOf("«", inicio)
-                colorPregModel =
-                    ColorPregModel((inicio - longColor - 2), (fin - longColor - 2), colEntero)
-
-                if (isEtPregunta) {
-                    preguntasColor.add(contColorPreg, colorPregModel)
-                } else {
-                    respuestasColor.add(contColorPreg, colorPregModel)
+                if (!fileHelper.exists(descifrado)) {
+                    descifrado = descifrado.replace("imagenes".toRegex(), "imagenesPivote")
                 }
 
-                // Eliminar la primera etiqueta y su contenido
-                texto = texto.replaceFirst("«.*?»".toRegex(), "")
+                QuestionContent.Image(descifrado, item.encodedPath)
+            }
+            is QuestionContent.Text -> {
+                val originalText = item.text
+                text = originalText
 
-                // Eliminar la segunda etiqueta y su contenido
-                texto = texto.replaceFirst("«.*?»".toRegex(), "")
-                contColorPreg++
+                while (text.contains("«")) {
+                    var startTag = text.indexOf("«")
+                    val endTag = text.indexOf("»")
+                    val color: Int = text.substring(startTag + 1, endTag).toInt()
+                    //val longColor: Int = color.length
+                    //val colEntero: Int = color.toInt()
+                    startTag = endTag//fin + 1
+                    val startText = endTag + 1
+                    val endText = text.indexOf("«", startText)
+
+                    colorRange.plus(ColorRange(startText, endText, color))
+
+                    // Eliminar la primera etiqueta y su contenido
+                    text = text.replaceFirst("«.*?»".toRegex(), "")
+
+                    // Eliminar la segunda etiqueta y su contenido
+                    text = text.replaceFirst("«.*?»".toRegex(), "")
+                    contColorPreg++
+                }
+
+                QuestionContent.Text(text, colorRange)
             }
 
-
-            builder = SpannableStringBuilder(texto)
-            for (coloresPreguntas: ColorPregModel in if (isEtPregunta) preguntasColor else respuestasColor) {
-                val colorSpan: ForegroundColorSpan = ForegroundColorSpan(coloresPreguntas.color)
-                builder.setSpan(
-                    colorSpan,
-                    coloresPreguntas.inicioColor,
-                    coloresPreguntas.finColor,
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
-            }
-
-            // Cuando lo que se va a pintar es texto
-            ValidacionesGuiaModel(
-                estadoUI = EstadoUI(
-                    isUpdatedAskAns = true,
-                    isShowQuitColor = true,
-                    isShowSelColor = true,
-                ),
-                builder = builder,
-            )
+            QuestionContent.None -> QuestionContent.None
         }
     }
 }

@@ -1,10 +1,17 @@
 package com.jonathanev.review.Data
 
 import android.util.Xml
+import com.jonathanev.review.Core.Constants.BASERUTA_IMG_CIFRADO
+import com.jonathanev.review.Core.Constants.INTERROGANTE
+import com.jonathanev.review.Core.Constants.PREGUNTA
+import com.jonathanev.review.Core.Constants.RESPUESTA
 import com.jonathanev.review.Data.Model.EstadoUI
 import com.jonathanev.review.Data.Model.GuiaModel
-import com.jonathanev.review.Data.Model.PreguntaRespuestaModel
+import com.jonathanev.review.Data.Model.QAItem
+import com.jonathanev.review.Data.Model.prueba.QuestionItem
+import com.jonathanev.review.Data.Model.QuestionModel
 import com.jonathanev.review.Data.Model.ResponseGuia
+import com.jonathanev.review.Data.Model.TypeFile
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Data.provider.GuiaProvider
@@ -42,7 +49,66 @@ class GuiaRepository @Inject constructor(
         return guiaProvider.guias
     }
 
-    fun saveFile(
+    fun saveFileV2(
+        nombreArchivo: String,
+        preguntas: ArrayList<String>,
+        respuestas: ArrayList<String>,
+        didTheGuideAlreadyExist: Boolean,
+        ruta: String
+    ): ValidacionesGuiaModel {
+        // Eliminamos el archivo anteriormente creado
+        if (didTheGuideAlreadyExist) {
+            File(ruta).delete()
+            //Log.d("ArchivoEliminado", "Archivo eliminado")
+        }
+
+        //Vamos a crear el archivo que acabamos de eliminar pero con el nuevo cuestionario
+        return try {
+            val serializer = xmlSerializerFactory.create()
+            val fos = fileOutputStreamFactory.create(ruta)
+            // fos = openFileOutput(nombreArchivo, MODE_PRIVATE) // Guarda el archivo en la raiz
+            serializer.setOutput(fos, "UTF-8")
+            serializer.startDocument(null, java.lang.Boolean.valueOf(true))
+            serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true)
+            serializer.startTag("", "GuiaEstudio")
+            serializer.attribute("", "version", "2.0")
+            serializer.startTag("", "Cuestionario")
+            serializer.attribute("", "nombreGuia", nombreArchivo)
+
+            // Creo la etiqueta interrogante con su respectiva pregunta
+            for (i in preguntas.indices) {
+                serializer.startTag("", "Interrogante")
+                serializer.attribute("", "tipo", "textos")
+                serializer.attribute("", "respuesta", respuestas[i])
+                serializer.endTag("", "Interrogante")
+            }
+
+            // Si los campos estan vacios simplemente cierro las etiquetas y directamente
+            // guardo el documento en el teléfono.
+            serializer.endTag("", "Cuestionario")
+            serializer.endTag("", "GuiaEstudio")
+            serializer.endDocument()
+            serializer.flush()
+            fos.close()
+
+            // val rutaActualizada = "$file/$nombreArchivo"
+            ValidacionesGuiaModel(
+                message = "Guia de estudio creada exitosamente",
+                responseGuia = ResponseGuia(ruta),
+                estadoUI = EstadoUI(
+                    isCreatedGuia = true,
+                )
+            )
+        } catch (e: IOException) {
+            e.printStackTrace()
+
+            ValidacionesGuiaModel(
+                message = "Guia de estudio no se creó correctamente",
+            )
+        }
+    }
+
+    fun saveFileV1(
         nombreArchivo: String,
         preguntas: ArrayList<String>,
         respuestas: ArrayList<String>,
@@ -101,29 +167,42 @@ class GuiaRepository @Inject constructor(
         }
     }
 
-    fun obtenerDatosXML(ruta: String): List<PreguntaRespuestaModel> {
-        val preguntasRespuestas = mutableListOf<PreguntaRespuestaModel>()
+    fun obtenerDatosXMLV1(ruta: String): QAItem {
+        //val qaItem = mutableListOf<QAItem>()
+        val questions = mutableListOf<QuestionModel>()
+        val answers = mutableListOf<QuestionModel>()
+        val questionItem = mutableListOf<QuestionItem>()
+        val answerItem = mutableListOf<QuestionItem>()
+
         val dbf: DocumentBuilderFactory = DocumentBuilderFactory.newInstance()
         val db: DocumentBuilder
         try {
             db = dbf.newDocumentBuilder()
-            val filePath: File = if (ruta == "null") {
+            /*val filePath: File = if (ruta == "null") {
                 File(filePathsProvider.fileGuides.toString())
             } else {
                 File(ruta)
-            }
+            }*/
+            val filePath: File = File(ruta)
             val doc = db.parse(filePath)
 
             // Buscamos los Nodos Interrogante y accedemos a lo que se encuentre dentro.
-            val cuestionario: NodeList = doc.getElementsByTagName("Interrogante")
-            for (i in 0 until cuestionario.length) {
+            val cuestionario: NodeList = doc.getElementsByTagName(INTERROGANTE)
+            for (noItem in 0 until cuestionario.length) {
+                questions.clear()
+                answers.clear()
                 // Accedes a los elmentos de dicho nodo
-                val e: Element = cuestionario.item(i) as Element
+                val e: Element = cuestionario.item(noItem) as Element
 
                 // Guardo cada uno de los valores en su respectivo arreglo.
-                val pregunta = e.getAttribute("pregunta")
-                val respuesta = e.getAttribute("respuesta")
-                preguntasRespuestas.add(PreguntaRespuestaModel(pregunta, respuesta))
+                val question = e.getAttribute(PREGUNTA)
+                val answer = e.getAttribute(RESPUESTA)
+
+                questions.add(QuestionModel(typeItem(question), question))
+                questionItem.add(QuestionItem(questions))
+
+                answers.add(QuestionModel(typeItem(answer), answer))
+                answerItem.add(QuestionItem(answers))
             }
         } catch (e: ParserConfigurationException) {
             e.printStackTrace()
@@ -133,6 +212,11 @@ class GuiaRepository @Inject constructor(
             e.printStackTrace()
         }
 
-        return preguntasRespuestas
+        return QAItem(questionItem, answerItem)
+    }
+
+    private fun typeItem(question: String): TypeFile{
+        return if (question.contains(BASERUTA_IMG_CIFRADO))
+            TypeFile.IMAGEN else TypeFile.TEXTO
     }
 }

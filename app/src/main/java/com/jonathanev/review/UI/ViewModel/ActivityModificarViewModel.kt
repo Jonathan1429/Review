@@ -152,8 +152,8 @@ class ActivityModificarViewModel @Inject constructor(
         // Pinta la primer pregunta después de recuperar los datos
         val textoPregunta = setPintarTextosUseCase(
             isEtPregunta = true,
-            preguntas = _preguntas,
-            respuestas = _respuestas,
+            question = _preguntas,
+            answer = _respuestas,
             contadorPregunta = contadorPregunta,
             ruta = getCurrentPath()
         )

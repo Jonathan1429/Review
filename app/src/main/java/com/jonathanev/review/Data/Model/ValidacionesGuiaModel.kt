@@ -1,34 +1,34 @@
 package com.jonathanev.review.Data.Model
 
-import android.text.Editable
-import com.jonathanev.review.Data.TypeFile
+import com.jonathanev.review.Data.Model.prueba.QuestionContent
 
 data class ValidacionesGuiaModel(
-    val message: String = "",
     val responseSpanPalabra: SpanPalabraModel? = null,
-    val estadoImagen: EstadoImagen = EstadoImagen(),
     val estadoUI: EstadoUI = EstadoUI(),
     val responseGuia: ResponseGuia = ResponseGuia(),
-    val builder: Editable? = null
 )
 
 data class ResponseGuia(
     val rutaGuiaEstudio: String = ""
 )
 
-data class EstadoImagen(
-    val textImgEcrypted: String = "",
-    var textImgUnencrypted: String = ""
-)
-
 data class EstadoUI(
-    val isUpdatedAskAns: Boolean = false,
+    val shouldFlip: Boolean = false,
+    val message: String = "",
+    val content: QuestionContent = QuestionContent.None,
+    val internalRules: InternalRules = InternalRules(),
+){
+    val showImage get() = content is QuestionContent.Image
+    val showTextInput get() = content is QuestionContent.Text
+}
+
+data class InternalRules(
+    //val isUpdatedAskAns: Boolean = false,
     val isCreatedGuia: Boolean = false,
     val isClearText: Boolean = false,
-    val typeFile: TypeFile = TypeFile.TEXTO,
     val isShowCancelar: Boolean = false,
     val isShowQuitColor: Boolean = false,
     val isShowSelColor: Boolean = false,
-    val isThereMoreAsks: Boolean = false,
+    val isThereMoreAsks: Boolean = true,
     val isEtPregunta: Boolean = false
 )

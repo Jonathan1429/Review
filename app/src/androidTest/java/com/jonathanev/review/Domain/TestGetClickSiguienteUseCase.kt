@@ -38,8 +38,8 @@ class TestGetClickSiguienteUseCase {
         every {
             setPintarTextosUseCase.invoke(
                 isEtPregunta = true,
-                preguntas = preguntas,
-                respuestas = respuestas,
+                question = preguntas,
+                answer = respuestas,
                 contadorPregunta = contadorPregunta + 1, // Pregunta que pintará = c
                 ruta = ruta
             )

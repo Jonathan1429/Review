@@ -2,28 +2,37 @@ package com.jonathanev.review.UI.View
 
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
-import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
+import android.text.Spannable
+import android.text.SpannableStringBuilder
+import android.text.style.ForegroundColorSpan
 import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.animation.doOnEnd
+import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import com.davemorrissey.labs.subscaleview.ImageSource
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
-import com.jonathanev.review.Data.TypeFile
+import com.jonathanev.review.Core.Constants.PREGUNTA
+import com.jonathanev.review.Core.Constants.RESPUESTA
+import com.jonathanev.review.Data.Model.prueba.ColorRange
+import com.jonathanev.review.Data.Model.prueba.QuestionContent
 import com.jonathanev.review.UI.ViewModel.ActivityRepasarGuiaViewModel
 import com.jonathanev.review.databinding.ActivityRepasarGuiaBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 
 @AndroidEntryPoint
 class ActivityRepasarGuia : AppCompatActivity() {
     private lateinit var binding: ActivityRepasarGuiaBinding
+
     //private var nombreArchivo: String = ""
     private val viewModel: ActivityRepasarGuiaViewModel by viewModels()
     //private var ruta: String = ""
@@ -38,172 +47,65 @@ class ActivityRepasarGuia : AppCompatActivity() {
         initLoadAds()
 
         binding.barraSuperiorRegreso.imgvSave.visibility = View.GONE
-        initUI(viewModel.getCurrentPath())
+        initUI()
         initListeners()
 
+        lifecycleScope.launch {
+            viewModel.uiState.collect { uiState ->
+                if (!uiState.internalRules.isThereMoreAsks){
+                    Toast.makeText(
+                        applicationContext,
+                        uiState.message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                    return@collect
+                }
+
+                when (uiState.content) {
+                    is QuestionContent.Image -> {
+                        binding.etPregResp.setText(uiState.content.encodedPath)
+                        binding.ivImagen.setImage(ImageSource.uri(uiState.content.decodedPath))
+
+                        binding.tilContenidoPregResp.isVisible = uiState.showImage
+                    }
+
+                    is QuestionContent.Text -> {
+                        val builder = uiState.content.toSpannable(
+                            uiState.content.text,
+                            uiState.content.colorRanges
+                        )
+                        binding.etPregResp.text = builder
+
+                        binding.ivImagen.isVisible = uiState.showTextInput
+                    }
+
+                    is QuestionContent.None -> Toast.makeText(
+                        applicationContext,
+                        "No fue posible cargar una guia",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+
         viewModel.guiaModel.observe(this) {
-            val texto = viewModel.getObtenerDatosXML()
+            viewModel.getObtenerDatosXML()
             binding.barraSuperiorRegreso.tvTituloToolbar.text = "Guia: ${it.nombreGuia}"
-
-            // Agregar el texto en el et cuando hay un builder
-            if (texto.estadoUI.typeFile == TypeFile.TEXTO) {
-                binding.etPregResp.text = texto.builder
-            } else {
-                // Cuando hay una imagen hay que poner esto
-                binding.etPregResp.setText(texto.estadoImagen.textImgEcrypted)
-                binding.ivImagen.setImage(ImageSource.uri(texto.estadoImagen.textImgUnencrypted))
-            }
-
-            binding.tilContenidoPregResp.visibility =
-                if (texto.estadoUI.typeFile == TypeFile.IMAGEN) View.GONE else View.VISIBLE
-            binding.ivImagen.visibility =
-                if (texto.estadoUI.typeFile == TypeFile.IMAGEN) View.VISIBLE else View.GONE
-        }
-
-        viewModel.uiStateBtnRoll.observe(this) { uiState ->
-            if (uiState.estadoUI.isUpdatedAskAns) {
-                girarCardView()
-
-                if (binding.lblPregResp.text == "Respuesta"){
-                    binding.lblPregResp.text = "Pregunta"
-                } else {
-                    binding.lblPregResp.text = "Respuesta"
-                }
-
-                if (uiState.estadoUI.isClearText) {
-                    binding.etPregResp.text?.clear()
-                } else {
-                    // Agregar el texto en el et cuando hay un builder
-                    if (uiState.estadoUI.typeFile == TypeFile.TEXTO) {
-                        binding.etPregResp.text = uiState.builder
-                    } else {
-                        // Cuando hay una imagen hay que poner esto
-                        // Se realizan estos cambios porque la ruta guardada en el et no es
-                        // totalmente la correcta (solo la ruta se guarda hasta imagenes)
-                        val imagen = uiState.estadoImagen.textImgUnencrypted.substringAfterLast("/")
-                        val carpetaImagen = viewModel.getCurrentPath().substringBeforeLast("/")
-                        var ruta = "$carpetaImagen/$imagen"
-                        ruta = ruta.replace("guias", "imagenes")
-                        binding.etPregResp.setText(uiState.estadoImagen.textImgEcrypted)
-                        binding.ivImagen.setImage(ImageSource.uri(ruta))
-                    }
-                }
-
-                binding.tilContenidoPregResp.visibility =
-                    if (uiState.estadoUI.typeFile == TypeFile.IMAGEN) View.GONE else View.VISIBLE
-                binding.ivImagen.visibility =
-                    if (uiState.estadoUI.typeFile == TypeFile.IMAGEN) View.VISIBLE else View.GONE
-            } else {
-                Toast.makeText(applicationContext, uiState.message, Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        viewModel.uiStateBtnNext
-            .observe(this) { uiState ->
-                if (uiState.estadoUI.isUpdatedAskAns) {
-                    binding.lblPregResp.text = "Pregunta"
-
-                    // Agregar el texto en el et cuando hay un builder
-                    if (uiState.estadoUI.typeFile == TypeFile.TEXTO) {
-                        binding.etPregResp.text = uiState.builder
-                    } else {
-                        // Cuando hay una imagen hay que poner esto
-                        // Se realizan estos cambios porque la ruta guardada en el et no es
-                        // totalmente la correcta (solo la ruta se guarda hasta imagenes)
-                        val imagen = uiState.estadoImagen.textImgUnencrypted.substringAfterLast("/")
-                        val carpetaImagen = viewModel.getCurrentPath().substringBeforeLast("/")
-                        var ruta = "$carpetaImagen/$imagen"
-                        ruta = ruta.replace("guias", "imagenes")
-                        binding.etPregResp.setText(uiState.estadoImagen.textImgEcrypted)
-                        binding.ivImagen.setImage(ImageSource.uri(ruta))
-                    }
-
-                    binding.tilContenidoPregResp.visibility =
-                        if (uiState.estadoUI.typeFile == TypeFile.IMAGEN) View.GONE else View.VISIBLE
-                    binding.ivImagen.visibility =
-                        if (uiState.estadoUI.typeFile == TypeFile.IMAGEN) View.VISIBLE else View.GONE
-                } else {
-                    AlertDialog.Builder(this@ActivityRepasarGuia)
-                        .setTitle("¡Atención!")
-                        .setMessage(uiState.message)
-                        .setPositiveButton(
-                            "Si"
-                        ) { _, _ ->
-                            binding.lblPregResp.text = "Pregunta"
-                            viewModel.onResetContadorPreg()
-                            val texto = viewModel.getReinicioGuia(true, viewModel.getCurrentPath())
-                            if (texto.estadoUI.isEtPregunta) {
-                                binding.lblPregResp.text = "Respuesta"
-                            } else {
-                                binding.lblPregResp.text = "Pregunta"
-                            }
-
-                            if (texto.estadoUI.isClearText) {
-                                binding.etPregResp.text?.clear()
-                            } else {
-                                // Agregar el texto en el et cuando hay un builder
-                                if (texto.estadoUI.typeFile == TypeFile.TEXTO) {
-                                    binding.etPregResp.text = texto.builder
-                                } else {
-                                    // Cuando hay una imagen hay que poner esto
-                                    binding.etPregResp.setText(texto.estadoImagen.textImgEcrypted)
-                                    binding.ivImagen.setImage(ImageSource.uri(texto.estadoImagen.textImgUnencrypted))
-                                }
-                            }
-                        }
-                        .setNegativeButton(
-                            "Cancelar"
-                        ) { dialog, _ -> dialog.dismiss() }.create().show()
-                }
-            }
-
-        viewModel.uiStateBtnBack.observe(this) { uiState ->
-            if (uiState.estadoUI.isUpdatedAskAns) {
-                binding.lblPregResp.text = "Pregunta"
-
-                // Agregar el texto en el et cuando hay un builder
-                if (uiState.estadoUI.typeFile == TypeFile.TEXTO) {
-                    binding.etPregResp.text = uiState.builder
-                } else {
-                    // Cuando hay una imagen hay que poner esto
-                    // Se realizan estos cambios porque la ruta guardada en el et no es
-                    // totalmente la correcta (solo la ruta se guarda hasta imagenes)
-                    val imagen = uiState.estadoImagen.textImgUnencrypted.substringAfterLast("/")
-                    val carpetaImagen = viewModel.getCurrentPath().substringBeforeLast("/")
-                    var ruta = "$carpetaImagen/$imagen"
-                    ruta = ruta.replace("guias", "imagenes")
-                    binding.etPregResp.setText(uiState.estadoImagen.textImgEcrypted)
-                    binding.ivImagen.setImage(ImageSource.uri(ruta))
-                }
-
-                binding.tilContenidoPregResp.visibility =
-                    if (uiState.estadoUI.typeFile == TypeFile.IMAGEN) View.GONE else View.VISIBLE
-                binding.ivImagen.visibility =
-                    if (uiState.estadoUI.typeFile == TypeFile.IMAGEN) View.VISIBLE else View.GONE
-            } else {
-                Toast.makeText(applicationContext, uiState.message, Toast.LENGTH_SHORT).show()
-            }
         }
     }
 
     private fun initListeners() {
         binding.imgvPregResp.setOnClickListener {
-            var isEtPregunta = true
-            if (binding.lblPregResp.text.toString() == "Pregunta") {
-                //Get Respuesta
-                isEtPregunta = false
-            }
-
-            // Get text
-            viewModel.onClickRoll(isEtPregunta, viewModel.getCurrentPath())
+            viewModel.onClickRoll()
         }
 
         binding.imgvNext.setOnClickListener {
-            viewModel.onClickNext(viewModel.getCurrentPath())
+            viewModel.onClickNext()
         }
 
         binding.imgvPrevious.setOnClickListener {
-            viewModel.onClickBefore(viewModel.getCurrentPath())
+            viewModel.onClickBefore()
         }
 
         binding.barraSuperiorRegreso.imgvBack.setOnClickListener { finish() }
@@ -220,8 +122,8 @@ class ActivityRepasarGuia : AppCompatActivity() {
         }
     }
 
-    private fun initUI(ruta: String) {
-        viewModel.getGuia(ruta)
+    private fun initUI() {
+        viewModel.getGuia()
     }
 
     private fun initLoadAds() {
@@ -267,5 +169,24 @@ class ActivityRepasarGuia : AppCompatActivity() {
             flipAnimator.duration = 1000 // Duración de la animación en milisegundos
             flipAnimator.start()
         }
+    }
+
+    private fun QuestionContent.Text.toSpannable(
+        text: String,
+        colorRanges: List<ColorRange>
+    ): SpannableStringBuilder {
+        val builder = SpannableStringBuilder(text)
+
+        for (colorRange in colorRanges) {
+            val colorSpan = ForegroundColorSpan(colorRange.color)
+            builder.setSpan(
+                colorSpan,
+                colorRange.start,
+                colorRange.end,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+        }
+
+        return builder
     }
 }

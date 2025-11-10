@@ -8,7 +8,6 @@ import androidx.lifecycle.Observer
 import com.jonathanev.review.Data.Model.DataStoreManager
 import com.jonathanev.review.Data.Model.EstadoUI
 import com.jonathanev.review.Data.Model.GuiaModel
-import com.jonathanev.review.Data.Model.PreguntaRespuestaModel
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Data.repository.FileRepositoryImpl
@@ -202,7 +201,7 @@ class ActivityModificarViewModelTest {
 
     @Test
     fun `getObtenerDatosXML maneja correctamente una sola pregunta`() = runBlocking {
-        val pregunta1 = mockk<PreguntaRespuestaModel> {
+        val pregunta1 = mockk<QuestionAnswerModel> {
             every { pregunta } returns "Pregunta 1"
             every { respuesta } returns "Respuesta 1"
         }
@@ -231,11 +230,11 @@ class ActivityModificarViewModelTest {
 
     @Test
     fun `getObtenerDatosXML maneja correctamente varias preguntas`() = runBlocking {
-        val pregunta1 = mockk<PreguntaRespuestaModel> {
+        val pregunta1 = mockk<QuestionAnswerModel> {
             every { pregunta } returns "Pregunta 1"
             every { respuesta } returns "Respuesta 1"
         }
-        val pregunta2 = mockk<PreguntaRespuestaModel> {
+        val pregunta2 = mockk<QuestionAnswerModel> {
             every { pregunta } returns "Pregunta 2"
             every { respuesta } returns "Respuesta 2"
         }

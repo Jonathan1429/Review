@@ -3,21 +3,16 @@ package com.jonathanev.review.UI.ViewModel
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
-import com.google.android.gms.common.internal.Asserts
 import com.jonathanev.review.Data.Model.GuiaModel
-import com.jonathanev.review.Data.Model.PreguntaRespuestaModel
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import com.jonathanev.review.Data.provider.GuiaProvider
 import com.jonathanev.review.Data.repository.FileRepositoryImpl
-import com.jonathanev.review.Domain.GetClickRegresarUseCase
-import com.jonathanev.review.Domain.GetClickSiguienteUseCase
 import com.jonathanev.review.Domain.GetGuiaUseCase
 import com.jonathanev.review.Domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.Domain.SetPintarTextosUseCase
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -72,10 +67,10 @@ class ActivityRepasarGuiaViewModelTest {
     @Test
     fun `obtener los datos de la guia a objetos`() {
         // Inicialmente entra al if
-        val modelPregResp: List<PreguntaRespuestaModel> =
+        val modelPregResp: List<QuestionAnswerModel> =
             listOf(
-                PreguntaRespuestaModel("p", "r"),
-                PreguntaRespuestaModel("pre", "res")
+                QuestionAnswerModel("p", "r"),
+                QuestionAnswerModel("pre", "res")
             )
         val valGuiaModel = ValidacionesGuiaModel()
 
@@ -110,11 +105,11 @@ class ActivityRepasarGuiaViewModelTest {
 
        // Se simula un cambio al LiveData
        testLiveDataAction(observer, viewModel.uiStateBtnRoll, {
-           viewModel.onClickRoll(isEtPregunta = true, ruta = "rutaPrueba")
+           viewModel.onClickRoll(isEtPregunta = true)
            expected
        }, expected)
 
-       viewModel.onClickRoll(true, "ruta")
+       viewModel.onClickRoll(true)
 
        verify { setPintarTextosUseCase.invoke(any(), any(), any(), any(), any()) }
    }

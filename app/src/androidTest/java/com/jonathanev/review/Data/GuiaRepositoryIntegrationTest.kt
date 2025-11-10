@@ -2,7 +2,6 @@ package com.jonathanev.review.Data
 
 import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Data.provider.GuiaProvider
-import com.jonathanev.review.Data.Model.PreguntaRespuestaModel
 import com.jonathanev.review.Domain.GetAllGuiasUseCase
 import io.mockk.mockk
 import junit.framework.TestCase.assertEquals
@@ -34,7 +33,7 @@ class GuiaRepositoryIntegrationTest() {
         val ruta = tempFile.absolutePath
 
         // Guardar archivo
-        val validacion = repository.saveFile(
+        val validacion = repository.saveFileV1(
             "archivo.xml",
             preguntas,
             respuestas,
@@ -46,10 +45,10 @@ class GuiaRepositoryIntegrationTest() {
         assertTrue(tempFile.exists())
 
         // Leer archivo
-        val resultado = repository.obtenerDatosXML(ruta)
+        val resultado = repository.obtenerDatosXMLV1(ruta)
         val esperado = listOf(
-            PreguntaRespuestaModel("Pregunta1", "Respuesta1"),
-            PreguntaRespuestaModel("Pregunta2", "Respuesta2")
+            QuestionAnswerModel("Pregunta1", "Respuesta1"),
+            QuestionAnswerModel("Pregunta2", "Respuesta2")
         )
 
         assertEquals(esperado, resultado)

@@ -34,7 +34,7 @@ import com.google.android.gms.ads.MobileAds
 import com.jonathanev.review.Core.Constants.BASERUTA_IMG
 import com.jonathanev.review.Core.Constants.BASERUTA_IMG_CIFRADO
 import com.jonathanev.review.Core.Constants.PICK_IMAGE_REQUEST
-import com.jonathanev.review.Data.TypeFile
+import com.jonathanev.review.Data.Model.TypeFile
 import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.UI.View.Fragments.FragmentDialogColoresPopup
 import com.jonathanev.review.UI.ViewModel.ActivityCuestionarioViewModel

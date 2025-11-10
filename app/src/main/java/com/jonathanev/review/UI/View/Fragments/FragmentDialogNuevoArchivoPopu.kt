@@ -160,29 +160,29 @@ class FragmentDialogNuevoArchivoPopu() : DialogFragment() {
     }
 
     private fun creatingFolder(fileName: String) {
-        viewModel.creatingFolder(fileName)
+        val response = viewModel.creatingFolder(fileName)
+
+        val message = when(response){
+            FileAction.SUCCESS -> "Carpeta creada exitosamente"
+            FileAction.EXIST -> "Ya tienes una carpeta con el mismo nombre"
+            FileAction.ERROR -> "No se pudo crear la carpeta"
+        }
+
+        Toast.makeText(context, message,Toast.LENGTH_SHORT).show()
+        cerrarTodosDialogos()
     }
 
     private fun renamingFile(fileName: String) {
-        var renamingFile = true
-        if (viewModel.exist(fileName)) {
-            alertDialog { renamingFile = it }
+        val response = viewModel.renamingFile(fileName)
+
+        val message = when (response) {
+            FileAction.SUCCESS -> "Se renombró exitosamente"
+            FileAction.EXIST -> "Ya tienes una guia con el mismo nombre"
+            FileAction.ERROR -> "No se pudo renombrar el archivo"
         }
 
-        if (renamingFile){
-            val response = viewModel.renamingFile(fileName)
-            if (response == FileAction.SUCCESS){
-                viewModel.getAllUpdatedGuides(filePathsProvider.fileGuides)
-            }
-
-            val message = when (response) {
-                FileAction.SUCCESS -> "Se renombró exitosamente"
-                FileAction.ERROR -> "No se pudo renombrar el archivo"
-            }
-
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-            cerrarTodosDialogos()
-        }
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        cerrarTodosDialogos()
     }
 
     private fun alertDialog(onResult:(Boolean) -> Unit) {

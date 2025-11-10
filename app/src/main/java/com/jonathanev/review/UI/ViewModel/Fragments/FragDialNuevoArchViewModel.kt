@@ -38,7 +38,7 @@ class FragDialNuevoArchViewModel @Inject constructor(
         return fileHelperImpl.exists(newPath)
     }
 
-    fun creatingFolder(fileName: String) {
-        creatingFolderUseCase.invoke(fileName)
+    fun creatingFolder(fileName: String): FileAction {
+        return creatingFolderUseCase.invoke(fileName)
     }
 }

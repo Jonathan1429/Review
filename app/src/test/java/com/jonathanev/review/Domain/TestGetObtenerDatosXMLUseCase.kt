@@ -1,10 +1,8 @@
 package com.jonathanev.review.Domain
 
 import com.jonathanev.review.Data.GuiaRepository
-import com.jonathanev.review.Data.Model.PreguntaRespuestaModel
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
 import org.junit.Test
@@ -19,12 +17,12 @@ class TestGetObtenerDatosXMLUseCase {
         val nombreArchivo = "A.xml"
         val ruta = "storage/"
         val preguntasRespuestasEsperadas = listOf(
-            PreguntaRespuestaModel("¿Qué es Kotlin?", "Un lenguaje de programación"),
-            PreguntaRespuestaModel("¿Qué es Android?", "Un sistema operativo")
+            QuestionAnswerModel("¿Qué es Kotlin?", "Un lenguaje de programación"),
+            QuestionAnswerModel("¿Qué es Android?", "Un sistema operativo")
         )
 
         every {
-            guiaRepository.obtenerDatosXML(
+            guiaRepository.obtenerDatosXMLV1(
                 nombreArchivo,
             )
         } returns preguntasRespuestasEsperadas
@@ -41,7 +39,7 @@ class TestGetObtenerDatosXMLUseCase {
         val ruta = "storage/"
 
         every {
-            guiaRepository.obtenerDatosXML(
+            guiaRepository.obtenerDatosXMLV1(
                 nombreArchivo,
             )
         } returns emptyList()

@@ -3,14 +3,12 @@ package com.jonathanev.review.Data
 import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.provider.GuiaProvider
-import com.jonathanev.review.Data.Model.PreguntaRespuestaModel
 import com.jonathanev.review.Domain.GetAllGuiasUseCase
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
@@ -47,10 +45,10 @@ class GuiaRepositoryUnitTest {
 
     // ======= saveFile branch: IOException
     @Test
-    fun saveFile_captura_IOException_y_retorna_error() {
+    fun saveFile_V1_captura_IOException_y_retorna_error() {
         every { xmlSerializerFactory.create() } throws java.io.IOException("error")
 
-        val resultado = repository.saveFile(
+        val resultado = repository.saveFileV1(
             "archivo.xml",
             arrayListOf(),
             arrayListOf(),
@@ -63,7 +61,7 @@ class GuiaRepositoryUnitTest {
 
     // ======= saveFile branch: archivo previo eliminado
     @Test
-    fun saveFile_elimina_archivo_existente_antes_de_crear() {
+    fun saveFile_V1_elimina_archivo_existente_antes_de_crear() {
         val tempFile = File.createTempFile("guia_test", ".xml")
         tempFile.writeText("algo")
 
@@ -73,7 +71,7 @@ class GuiaRepositoryUnitTest {
         every { xmlSerializerFactory.create() } returns serializerMock
         every { fileOutputStreamFactory.create(tempFile.absolutePath) } returns fosMock
 
-        val resultado = repository.saveFile(
+        val resultado = repository.saveFileV1(
             "archivo.xml",
             arrayListOf("P1"),
             arrayListOf("R1"),
@@ -86,7 +84,7 @@ class GuiaRepositoryUnitTest {
 
     // ======= obtenerDatosXML branch: ruta == "null" y excepciones
     @Test
-    fun obtenerDatosXML_rutaNull_y_captura_excepciones() {
+    fun obtenerDatosXMLV1_rutaNull_y_captura_excepciones() {
         val nombreArchivo = "archivo.xml"
 
         // Forzamos que el archivo no exista y que se lance IOException al parsear
@@ -112,7 +110,7 @@ class GuiaRepositoryUnitTest {
     }*/
 
     @Test
-    fun obtenerDatosXML_captura_ParserConfigurationException() {
+    fun obtenerDatosXMLV1_captura_ParserConfigurationException() {
         mockkStatic(DocumentBuilderFactory::class)
         val dbfMock = mockk<DocumentBuilderFactory>()
         every { DocumentBuilderFactory.newInstance() } returns dbfMock

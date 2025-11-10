@@ -15,7 +15,7 @@ class CreatingFolderUseCase @Inject constructor(
         val pathImages = File(fileRepositoryImpl.getCurrentPath(), fileName).toString().replace(Constants.GUIAS, IMAGENES)
 
         if (path.exists()){
-            return FileAction.ERROR
+            return FileAction.EXIST
         }
 
         val createdImages = File(pathImages).mkdirs()
