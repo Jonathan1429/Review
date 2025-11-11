@@ -13,8 +13,10 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.text.Editable
+import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.TextWatcher
+import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
@@ -24,7 +26,9 @@ import androidx.activity.viewModels
 import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.animation.doOnEnd
+import androidx.core.view.isVisible
 import androidx.core.widget.ImageViewCompat
+import androidx.lifecycle.lifecycleScope
 import com.davemorrissey.labs.subscaleview.ImageSource
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
@@ -32,11 +36,14 @@ import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
 import com.jonathanev.review.Core.Constants.BASERUTA_IMG
 import com.jonathanev.review.Core.Constants.BASERUTA_IMG_CIFRADO
+import com.jonathanev.review.Data.Model.prueba.ColorRange
+import com.jonathanev.review.Data.Model.prueba.QuestionContent
 import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.UI.View.Fragments.FragmentDialogColoresModPopup
 import com.jonathanev.review.UI.ViewModel.ActivityModificarViewModel
 import com.jonathanev.review.databinding.ActivityModificarBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -70,7 +77,7 @@ class ActivityModificar : AppCompatActivity() {
         initUI()
         initListeners()
 
-        viewModel.uiStateBtnRoll.observe(this) { uiState ->
+        /*viewModel.uiStateBtnRoll.observe(this) { uiState ->
             if (uiState.estadoUI.isUpdatedAskAns) {
                 girarCardView()
                 binding.lblPregResp.text =
@@ -119,9 +126,9 @@ class ActivityModificar : AppCompatActivity() {
                     Toast.LENGTH_SHORT
                 ).show()
             }
-        }
+        }*/
 
-        viewModel.uiStateBtnBack.observe(this) { uiState ->
+        /*viewModel.uiStateBtnBack.observe(this) { uiState ->
             if (uiState.estadoUI.isUpdatedAskAns) {
                 binding.lblPregResp.text = "Pregunta"
 
@@ -163,9 +170,9 @@ class ActivityModificar : AppCompatActivity() {
             } else {
                 Toast.makeText(applicationContext, uiState.message, Toast.LENGTH_SHORT).show()
             }
-        }
+        }*/
 
-        viewModel.uiStateBtnNext.observe(this) { uiState ->
+        /*viewModel.uiStateBtnNext.observe(this) { uiState ->
             if (uiState.estadoUI.isUpdatedAskAns) {
                 binding.lblPregResp.text = "Pregunta"
 
@@ -207,9 +214,9 @@ class ActivityModificar : AppCompatActivity() {
             } else {
                 Toast.makeText(applicationContext, uiState.message, Toast.LENGTH_SHORT).show()
             }
-        }
+        }*/
 
-        viewModel.uiStateBtnEliminar.observe(this) { uiState ->
+        /*viewModel.uiStateBtnEliminar.observe(this) { uiState ->
             binding.lblPregResp.text = "Pregunta"
 
             when {
@@ -238,9 +245,9 @@ class ActivityModificar : AppCompatActivity() {
                 if (uiState.estadoUI.isShowQuitColor) View.VISIBLE else View.GONE
             binding.imgvSelColor.visibility =
                 if (uiState.estadoUI.isShowSelColor) View.VISIBLE else View.GONE
-        }
+        }*/
 
-        viewModel.uiStateBtnSave.observe(this) { uiState ->
+        /*viewModel.uiStateBtnSave.observe(this) { uiState ->
             Toast.makeText(
                 applicationContext,
                 uiState.message,
@@ -254,7 +261,7 @@ class ActivityModificar : AppCompatActivity() {
                 viewModel.toCopyImages()
                 finish()
             }
-        }
+        }*/
 
         // Get image count
         viewModel.contImagenes.observe(this@ActivityModificar) { contImagen ->
@@ -266,10 +273,63 @@ class ActivityModificar : AppCompatActivity() {
             filename = "$contadorImagen.png"
         }
 
+        lifecycleScope.launch {
+            viewModel.uiState.collect { uiState ->
+                if (!uiState.internalRules.isThereMoreAsks){
+                    Toast.makeText(
+                        applicationContext,
+                        uiState.message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                    return@collect
+                }
+
+                when (uiState.content) {
+                    is QuestionContent.Image -> {
+                        binding.etPregResp.setText(uiState.content.encodedPath)
+                        binding.ivImagen.setImage(ImageSource.uri(uiState.content.decodedPath))
+
+                        binding.tilContenidoPregResp.isVisible = uiState.showImage
+                    }
+
+                    is QuestionContent.Text -> {
+                        val builder = uiState.content.toSpannable(
+                            uiState.content.text,
+                            uiState.content.colorRanges
+                        )
+                        binding.etPregResp.text = builder
+
+                        binding.ivImagen.isVisible = uiState.showTextInput
+                    }
+
+                    is QuestionContent.None -> Toast.makeText(
+                        applicationContext,
+                        "No fue posible cargar una guia",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+                if (uiState.shouldFlip) {
+                    girarCardView()
+                }
+
+                binding.imgvCancelar.visibility =
+                    if (uiState.internalRules.isShowCancelar) View.VISIBLE else View.GONE
+                binding.imgvQuitColor.visibility =
+                    if (uiState.internalRules.isShowQuitColor) View.VISIBLE else View.GONE
+                binding.imgvSelColor.visibility =
+                    if (uiState.internalRules.isShowSelColor) View.VISIBLE else View.GONE
+            }
+        }
+
         // Get review
         viewModel.guiaModel.observe(this) {
+            viewModel.getObtenerDatosXML()
+            binding.barraSuperiorRegreso.tvTituloToolbar.text = "Guia: ${it.nombreGuia}"
+
             // Obtenemos los datos del XML y los guardamos en su respectivo ArrayList.
-            val texto = viewModel.getObtenerDatosXML()
+            /*val texto = viewModel.getObtenerDatosXML()
 
             nombreArchivo = nombreArchivo.replace(".xml".toRegex(), "")
 
@@ -296,7 +356,7 @@ class ActivityModificar : AppCompatActivity() {
             binding.imgvQuitColor.visibility =
                 if (texto.estadoUI.isShowQuitColor) View.VISIBLE else View.GONE
             binding.imgvSelColor.visibility =
-                if (texto.estadoUI.isShowSelColor) View.VISIBLE else View.GONE
+                if (texto.estadoUI.isShowSelColor) View.VISIBLE else View.GONE*/
         }
 
         viewModel.textoImagenCorrutina.observe(this) { texto ->
@@ -504,7 +564,7 @@ class ActivityModificar : AppCompatActivity() {
 
     private fun initUI() {
         viewModel.getCountImage()
-        viewModel.getGuia(viewModel.currentPath.value)
+        viewModel.getGuia()
     }
 
     private fun openSomeActivityForResult() {
@@ -726,5 +786,24 @@ class ActivityModificar : AppCompatActivity() {
         ImageViewCompat.setImageTintList(binding.imgvSelColor, ColorStateList.valueOf(color))
         colorActual = color
         inicioColor = binding.etPregResp.selectionStart
+    }
+
+    private fun QuestionContent.Text.toSpannable(
+        text: String,
+        colorRanges: List<ColorRange>
+    ): SpannableStringBuilder {
+        val builder = SpannableStringBuilder(text)
+
+        for (colorRange in colorRanges) {
+            val colorSpan = ForegroundColorSpan(colorRange.color)
+            builder.setSpan(
+                colorSpan,
+                colorRange.start,
+                colorRange.end,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+        }
+
+        return builder
     }
 }

@@ -86,6 +86,10 @@ class ActivityRepasarGuia : AppCompatActivity() {
                         Toast.LENGTH_SHORT
                     ).show()
                 }
+
+                if (uiState.shouldFlip) {
+                    girarCardView()
+                }
             }
         }
 

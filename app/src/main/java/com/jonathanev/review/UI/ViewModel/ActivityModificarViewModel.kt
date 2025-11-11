@@ -9,8 +9,12 @@ import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.DI.IoDispatcher
 import com.jonathanev.review.DI.MainDispatcher
 import com.jonathanev.review.Data.Model.DataStoreManager
+import com.jonathanev.review.Data.Model.EstadoUI
 import com.jonathanev.review.Data.Model.GuiaModel
+import com.jonathanev.review.Data.Model.InternalRules
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
+import com.jonathanev.review.Data.Model.prueba.QuestionContent
+import com.jonathanev.review.Data.Model.prueba.TypeContent
 import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Data.repository.FileRepositoryImpl
 import com.jonathanev.review.Domain.DeleteContentInPivUseCase
@@ -27,8 +31,10 @@ import com.jonathanev.review.Domain.SetPintarTextosUseCase
 import com.jonathanev.review.Domain.SetRollClickedUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -37,13 +43,13 @@ import javax.inject.Inject
 @HiltViewModel
 class ActivityModificarViewModel @Inject constructor(
     //application: Application,
-    private val setRollClickedUseCase: SetRollClickedUseCase,
+    /*private val setRollClickedUseCase: SetRollClickedUseCase,
     private val setClickRegresarModificandoUseCase: SetClickRegresarModificandoUseCase,
     private val setClickSiguienteModicandoUseCase: SetClickSiguienteModificandoUseCase,
     private val setClickEliminarUseCase: SetClickEliminarUseCase,
     private val setClickSaveUseCase: SetClickSaveUseCase,
     private val setCifrarRutaImagenUseCase: SetCifrarRutaImagenUseCase,
-    private val setPintarLetraUseCase: SetPintarLetraUseCase,
+    private val setPintarLetraUseCase: SetPintarLetraUseCase,*/
     private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
     private val setPintarTextosUseCase: SetPintarTextosUseCase,
     private val setCopyImagesUseCase: SetCopyImagesUseCase,
@@ -78,8 +84,11 @@ class ActivityModificarViewModel @Inject constructor(
             initialValue = fileRepositoryImpl.getCurrentPath() // Valor inicial de la ruta
         )
 
+    private val _uiState = MutableStateFlow(EstadoUI())
+    val uiState = _uiState.asStateFlow()
+
     // Click events
-    private val _uiStateBtnRoll = MutableLiveData<ValidacionesGuiaModel>()
+    /*private val _uiStateBtnRoll = MutableLiveData<ValidacionesGuiaModel>()
     val uiStateBtnRoll: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnRoll
     private val _uiStateBtnBack = MutableLiveData<ValidacionesGuiaModel>()
     val uiStateBtnBack: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnBack
@@ -88,7 +97,7 @@ class ActivityModificarViewModel @Inject constructor(
     private val _uiStateBtnEliminar = MutableLiveData<ValidacionesGuiaModel>()
     val uiStateBtnEliminar: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnEliminar
     private val _uiStateBtnSave = MutableLiveData<ValidacionesGuiaModel>()
-    val uiStateBtnSave: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnSave
+    val uiStateBtnSave: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnSave*/
 
     private val _contImagenes = MutableLiveData<Int>()
     val contImagenes: LiveData<Int> get() = _contImagenes
@@ -133,7 +142,114 @@ class ActivityModificarViewModel @Inject constructor(
         dataStore.resetCounter()
     }
 
-    fun getGuia(ruta: String) {
+    fun getGuia() {
+        _guiaModel.postValue(getGuiaUseCase(ruta = fileRepositoryImpl.getCurrentPath()))
+    }
+
+    fun getObtenerDatosXML() {
+        if (respuestas.isEmpty()) {
+            val datos = getObtenerDatosXMLUseCase.invoke(ruta = getCurrentPath())
+
+            _preguntas = datos.preguntas
+            _respuestas = datos.respuestas
+        }
+
+        cargarPregunta(typeContent)
+    }
+
+    fun onClickRoll() {
+        typeContent =
+            if (typeContent == TypeContent.QUESTION) TypeContent.ANSWER else TypeContent.QUESTION
+
+        cargarPregunta(typeContent)
+    }
+
+    fun getReinicioGuia() {
+        onResetContadorPreg()
+        typeContent = TypeContent.QUESTION
+
+        cargarPregunta(typeContent)
+    }
+
+    fun onClickNext() {
+        val posPregFin = preguntas.size - 1
+        val contador = contadorPregunta + 1
+
+        if (contador <= posPregFin) {
+            _contadorPregunta++
+            typeContent = TypeContent.QUESTION
+
+            cargarPregunta(typeContent = typeContent, shouldFlip = true)
+        } else {
+            _uiState.value = EstadoUI(
+                message = "Se acabaron las preguntas, ¿Quieres repetir la guia?",
+                internalRules = InternalRules(
+                    isThereMoreAsks = false
+                )
+            )
+        }
+    }
+
+    fun onClickBefore() {
+        val contador = contadorPregunta - 1
+
+        if (contador >= 0) {
+            _contadorPregunta--
+            typeContent = TypeContent.QUESTION
+
+            cargarPregunta(typeContent)
+        } else {
+            _uiState.value = EstadoUI(
+                message = "Ya no tienes preguntas anteriores",
+                internalRules = InternalRules(
+                    isThereMoreAsks = false
+                )
+            )
+        }
+    }
+
+    fun onResetContadorPreg() {
+        _contadorPregunta = 0
+    }
+
+    fun getCurrentPath() = fileRepositoryImpl.getCurrentPath()
+
+    private fun cargarPregunta(typeContent: TypeContent, shouldFlip: Boolean = false) {
+        val contentList = getQuestionContentsUseCase(
+            if (typeContent == TypeContent.QUESTION) preguntas else respuestas,
+            contadorPregunta
+        )
+
+        contentList.forEach { item ->
+            when (val result = setPintarTextosUseCase(item, getCurrentPath())) {
+
+                is QuestionContent.Image -> {
+                    _uiState.value = EstadoUI(
+                        shouldFlip = shouldFlip,
+                        internalRules = InternalRules(isShowCancelar = true),
+                        content = result
+                    )
+                }
+
+                is QuestionContent.Text -> {
+                    _uiState.value = EstadoUI(
+                        shouldFlip = shouldFlip,
+                        internalRules = InternalRules(
+                            isShowQuitColor = true,
+                            isShowSelColor = true
+                        ),
+                        content = result
+                    )
+                }
+
+                QuestionContent.None -> _uiState.value = EstadoUI()
+            }
+        }
+    }
+
+
+
+    /*fun getGuia(ruta: String) {
         _guiaModel.postValue(getGuiaUseCase(ruta))
     }
 
@@ -295,5 +411,5 @@ class ActivityModificarViewModel @Inject constructor(
         deleteContentInPivUseCase.invoke(nombreArchivo)
     }
 
-    fun getCurrentPath() = fileRepositoryImpl.getCurrentPath()
+    fun getCurrentPath() = fileRepositoryImpl.getCurrentPath()*/
 }
