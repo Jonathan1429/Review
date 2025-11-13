@@ -15,9 +15,8 @@ import com.jonathanev.review.Domain.DeleteContentInPivUseCase
 import com.jonathanev.review.Domain.GetGuiaUseCase
 import com.jonathanev.review.Domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.Domain.SetCifrarRutaImagenUseCase
-import com.jonathanev.review.Domain.SetClickEliminarUseCase
+import com.jonathanev.review.Domain.DeleteCurrentQuestionUseCase
 import com.jonathanev.review.Domain.SetClickRegresarModificandoUseCase
-import com.jonathanev.review.Domain.SetClickSaveUseCase
 import com.jonathanev.review.Domain.SetClickSiguienteModificandoUseCase
 import com.jonathanev.review.Domain.SetCopyImagesUseCase
 import com.jonathanev.review.Domain.SetPintarLetraUseCase
@@ -58,7 +57,7 @@ class ActivityModificarViewModelTest {
     private val setRollClickedUseCase = mockk<SetRollClickedUseCase>()
     private val setClickRegresarModificandoUseCase = mockk<SetClickRegresarModificandoUseCase>()
     private val setClickSiguienteModicandoUseCase = mockk<SetClickSiguienteModificandoUseCase>()
-    private val setClickEliminarUseCase = mockk<SetClickEliminarUseCase>()
+    private val deleteCurrentQuestionUseCase = mockk<DeleteCurrentQuestionUseCase>()
     private val setClickSaveUseCase = mockk<SetClickSaveUseCase>()
     private val setCifrarRutaImagenUseCase = mockk<SetCifrarRutaImagenUseCase>()
     private val setPintarLetraUseCase = mockk<SetPintarLetraUseCase>(relaxed = true)
@@ -85,7 +84,7 @@ class ActivityModificarViewModelTest {
             setRollClickedUseCase,
             setClickRegresarModificandoUseCase,
             setClickSiguienteModicandoUseCase,
-            setClickEliminarUseCase,
+            deleteCurrentQuestionUseCase,
             setClickSaveUseCase,
             setCifrarRutaImagenUseCase,
             setPintarLetraUseCase,
@@ -418,7 +417,7 @@ class ActivityModificarViewModelTest {
 
             // --- Eliminar con decremento de contadorPregunta ---
             viewModel.setContadorPreguntaTest(1)
-            every { setClickEliminarUseCase(any(), any(), any(), any()) } returns expected
+            every { deleteCurrentQuestionUseCase(any(), any(), any(), any()) } returns expected
             testLiveDataAction(observer, viewModel.uiStateBtnEliminar, {
                 viewModel.onClickEliminar("rutaPrueba")
                 expected

@@ -7,8 +7,9 @@ import com.jonathanev.review.Data.Model.SpanPalabraModel
 import javax.inject.Inject
 
 class SetSpanPalabraUseCase @Inject constructor() {
-    operator fun invoke(editable: Editable): SpanPalabraModel {
-        val colorSpans: Array<ForegroundColorSpan> =
+    operator fun invoke(text: String): SpanPalabraModel {
+
+        /*val colorSpans: Array<ForegroundColorSpan> =
             editable.getSpans(0, editable.length, ForegroundColorSpan::class.java)
         val oldEditable = editable
         val sortedSpans = colorSpans.sortedBy { editable.getSpanStart(it) }
@@ -128,6 +129,6 @@ class SetSpanPalabraUseCase @Inject constructor() {
                 editable = editable,
                 message = "",
             )
-        }
+        }*/
     }
 }

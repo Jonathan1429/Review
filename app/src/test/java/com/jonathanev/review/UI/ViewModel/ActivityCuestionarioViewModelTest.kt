@@ -43,7 +43,7 @@ class ActivityCuestionarioViewModelTest {
     private val setClickSiguienteModificandoUseCase: SetClickSiguienteModificandoUseCase = mockk()
     private val setRollClickedUseCase: SetRollClickedUseCase = mockk()
     private val setClickSaveUseCase: SetClickSaveUseCase = mockk()
-    private val setClickEliminarUseCase: SetClickEliminarUseCase = mockk()
+    private val deleteCurrentQuestionUseCase: DeleteCurrentQuestionUseCase = mockk()
     private val setCopyImagesUseCase: SetCopyImagesUseCase = mockk()
     private val setCifrarRutaImagenUseCase: SetCifrarRutaImagenUseCase = mockk()
     private val setPintarLetraUseCase: SetPintarLetraUseCase = mockk()
@@ -66,7 +66,7 @@ class ActivityCuestionarioViewModelTest {
             setClickSiguienteModificandoUseCase,
             setRollClickedUseCase,
             setClickSaveUseCase,
-            setClickEliminarUseCase,
+            deleteCurrentQuestionUseCase,
             setCopyImagesUseCase,
             setCifrarRutaImagenUseCase,
             setPintarLetraUseCase,
@@ -328,7 +328,7 @@ class ActivityCuestionarioViewModelTest {
 
             // --- Eliminar con decremento de contadorPregunta ---
             viewModel.setContadorPreguntaTest(1)
-            every { setClickEliminarUseCase(any(), any(), any(), any()) } returns expected
+            every { deleteCurrentQuestionUseCase(any(), any(), any(), any()) } returns expected
             testLiveDataAction(observer, viewModel.uiStateBtnEliminar, {
                 viewModel.onClickEliminar("rutaPrueba")
                 expected

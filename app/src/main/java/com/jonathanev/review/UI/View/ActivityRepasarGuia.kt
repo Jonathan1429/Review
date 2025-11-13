@@ -10,6 +10,7 @@ import android.text.style.ForegroundColorSpan
 import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.animation.doOnEnd
 import androidx.core.view.isVisible
@@ -19,8 +20,6 @@ import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
-import com.jonathanev.review.Core.Constants.PREGUNTA
-import com.jonathanev.review.Core.Constants.RESPUESTA
 import com.jonathanev.review.Data.Model.prueba.ColorRange
 import com.jonathanev.review.Data.Model.prueba.QuestionContent
 import com.jonathanev.review.UI.ViewModel.ActivityRepasarGuiaViewModel
@@ -53,11 +52,31 @@ class ActivityRepasarGuia : AppCompatActivity() {
         lifecycleScope.launch {
             viewModel.uiState.collect { uiState ->
                 if (!uiState.internalRules.isThereMoreAsks){
-                    Toast.makeText(
+                    AlertDialog.Builder(this@ActivityRepasarGuia)
+                        .setTitle("¡Atención!")
+                        .setMessage(uiState.message)
+                        .setPositiveButton(
+                            "Si"
+                        ) { _, _ ->
+                            viewModel.getReinicioGuia()
+
+                            Toast.makeText(
+                                applicationContext, "Guia reiniciada", Toast.LENGTH_LONG
+                            ).show()
+                        }
+                        .setNegativeButton(
+                            "Cancelar"
+                        ) { dialog, _ ->
+                            dialog.dismiss()
+                        }.setOnCancelListener {
+
+                        }.create().show()
+
+                    /*Toast.makeText(
                         applicationContext,
                         uiState.message,
                         Toast.LENGTH_SHORT
-                    ).show()
+                    ).show()*/
 
                     return@collect
                 }
@@ -104,12 +123,12 @@ class ActivityRepasarGuia : AppCompatActivity() {
             viewModel.onClickRoll()
         }
 
-        binding.imgvNext.setOnClickListener {
-            viewModel.onClickNext()
-        }
-
         binding.imgvPrevious.setOnClickListener {
             viewModel.onClickBefore()
+        }
+
+        binding.imgvNext.setOnClickListener {
+            viewModel.onClickNext()
         }
 
         binding.barraSuperiorRegreso.imgvBack.setOnClickListener { finish() }

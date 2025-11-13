@@ -31,7 +31,6 @@ class ActivityRepasarGuiaViewModel @Inject constructor(
     private val setPintarTextosUseCase: SetPintarTextosUseCase,
     private val getGuiaUseCase: GetGuiaUseCase,
     private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
-    //private val getClickRegresarUseCase: GetClickRegresarUseCase,
     private val getQuestionContentsUseCase: GetQuestionContentsUseCase,
     private val fileRepositoryImpl: FileRepositoryImpl,
     private val guiaProvider: GuiaProvider

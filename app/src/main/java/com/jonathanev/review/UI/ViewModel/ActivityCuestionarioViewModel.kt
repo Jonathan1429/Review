@@ -18,9 +18,8 @@ import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import com.jonathanev.review.Data.repository.FileRepositoryImpl
 import com.jonathanev.review.Domain.DeleteContentInPivUseCase
 import com.jonathanev.review.Domain.SetCifrarRutaImagenUseCase
-import com.jonathanev.review.Domain.SetClickEliminarUseCase
+import com.jonathanev.review.Domain.DeleteCurrentQuestionUseCase
 import com.jonathanev.review.Domain.SetClickRegresarModificandoUseCase
-import com.jonathanev.review.Domain.SetClickSaveUseCase
 import com.jonathanev.review.Domain.SetClickSiguienteModificandoUseCase
 import com.jonathanev.review.Domain.SetCopyImagesUseCase
 import com.jonathanev.review.Domain.SetPintarLetraUseCase
@@ -43,7 +42,7 @@ class ActivityCuestionarioViewModel @Inject constructor(
     private val setClickSiguienteModicandoUseCase: SetClickSiguienteModificandoUseCase,
     private val setRollClickedUseCase: SetRollClickedUseCase,
     private val setClickSaveUseCase: SetClickSaveUseCase,
-    private val setClickEliminarUseCase: SetClickEliminarUseCase,
+    private val deleteCurrentQuestionUseCase: DeleteCurrentQuestionUseCase,
     private val setCopyImagesUseCase: SetCopyImagesUseCase,
     private val setCifrarRutaImagenUseCase: SetCifrarRutaImagenUseCase,
     private val setPintarTextosUseCase: SetPintarTextosUseCase,
@@ -228,7 +227,7 @@ class ActivityCuestionarioViewModel @Inject constructor(
 
     fun onClickEliminar(ruta: String) {
         val (newPreguntas, newRespuestas) =
-            setClickEliminarUseCase(preguntas, respuestas, contadorPregunta)
+            deleteCurrentQuestionUseCase(preguntas, respuestas, contadorPregunta)
 
         _preguntas.clear()
         _preguntas.addAll(newPreguntas)

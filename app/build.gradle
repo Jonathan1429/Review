@@ -9,6 +9,9 @@ plugins {
     // Test con jacoco - Reporte
     id 'jacoco'
 
+    // @Parcelize
+    id 'kotlin-parcelize'
+
     // 🔑 CLAVE: Aplicar el plugin aquí.
     //id 'org.jetbrains.kotlinx.kover'
 }

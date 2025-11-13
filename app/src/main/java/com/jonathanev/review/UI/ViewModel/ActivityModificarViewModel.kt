@@ -12,44 +12,50 @@ import com.jonathanev.review.Data.Model.DataStoreManager
 import com.jonathanev.review.Data.Model.EstadoUI
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.Model.InternalRules
-import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
+import com.jonathanev.review.Data.Model.MessageActions
+import com.jonathanev.review.Data.Model.prueba.ColorRange
+import com.jonathanev.review.Data.Model.prueba.QAUiItem
 import com.jonathanev.review.Data.Model.prueba.QuestionContent
+import com.jonathanev.review.Data.Model.prueba.QuestionItem
 import com.jonathanev.review.Data.Model.prueba.TypeContent
 import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Data.repository.FileRepositoryImpl
 import com.jonathanev.review.Domain.DeleteContentInPivUseCase
+import com.jonathanev.review.Domain.DeleteCurrentQuestionUseCase
 import com.jonathanev.review.Domain.GetGuiaUseCase
 import com.jonathanev.review.Domain.GetObtenerDatosXMLUseCase
+import com.jonathanev.review.Domain.GetQuestionContentsUseCase
 import com.jonathanev.review.Domain.SetCifrarRutaImagenUseCase
-import com.jonathanev.review.Domain.SetClickEliminarUseCase
-import com.jonathanev.review.Domain.SetClickRegresarModificandoUseCase
-import com.jonathanev.review.Domain.SetClickSaveUseCase
-import com.jonathanev.review.Domain.SetClickSiguienteModificandoUseCase
+import com.jonathanev.review.Domain.SetColocarEtiquetasUseCase
 import com.jonathanev.review.Domain.SetCopyImagesUseCase
+import com.jonathanev.review.Domain.SetCrearXmlUseCase
+import com.jonathanev.review.Domain.SetCreatePivImage
 import com.jonathanev.review.Domain.SetPintarLetraUseCase
 import com.jonathanev.review.Domain.SetPintarTextosUseCase
-import com.jonathanev.review.Domain.SetRollClickedUseCase
+import com.jonathanev.review.UI.Utils.toUi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
 class ActivityModificarViewModel @Inject constructor(
     //application: Application,
-    /*private val setRollClickedUseCase: SetRollClickedUseCase,
-    private val setClickRegresarModificandoUseCase: SetClickRegresarModificandoUseCase,
-    private val setClickSiguienteModicandoUseCase: SetClickSiguienteModificandoUseCase,
-    private val setClickEliminarUseCase: SetClickEliminarUseCase,
-    private val setClickSaveUseCase: SetClickSaveUseCase,
+    private val setColocarEtiquetasUseCase: SetColocarEtiquetasUseCase,
     private val setCifrarRutaImagenUseCase: SetCifrarRutaImagenUseCase,
-    private val setPintarLetraUseCase: SetPintarLetraUseCase,*/
+    private val setCreatePivImage: SetCreatePivImage,
+    private val setCrearXmlUseCase: SetCrearXmlUseCase,
+    private val deleteCurrentQuestionUseCase: DeleteCurrentQuestionUseCase,
+    private val getQuestionContentsUseCase: GetQuestionContentsUseCase,
     private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
     private val setPintarTextosUseCase: SetPintarTextosUseCase,
     private val setCopyImagesUseCase: SetCopyImagesUseCase,
@@ -61,17 +67,26 @@ class ActivityModificarViewModel @Inject constructor(
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     @MainDispatcher private val mainDispatcher: CoroutineDispatcher
 ) : ViewModel() {
-    private var _preguntas: ArrayList<String> = ArrayList()
-    val preguntas: List<String> get() = _preguntas
+    private var _preguntas = mutableListOf<QuestionItem>()
+    val preguntas: MutableList<QuestionItem> get() = _preguntas
 
-    private var _respuestas: ArrayList<String> = ArrayList()
-    val respuestas: List<String> get() = _respuestas
+    private var _respuestas = mutableListOf<QuestionItem>()
+    val respuestas: MutableList<QuestionItem> get() = _respuestas
 
     private var _contadorPregunta: Int = 0
     val contadorPregunta: Int get() = _contadorPregunta
 
+    private var _typeContent = TypeContent.QUESTION
+    private val typeContent get() = _typeContent
+
     private var _showMessageMoreQuestions = true
     val showMessageMoreQuestions: Boolean get() = _showMessageMoreQuestions
+
+    private val _navigateToNext = MutableSharedFlow<QAUiItem>()
+    val navigateToNext = _navigateToNext.asSharedFlow()
+
+    /*private val _uiEvent = MutableLiveData<UiEvent>()
+    val uiEvent get() = _uiEvent*/
 
     //private var _currentPath = MutableStateFlow(getCurrentPathUseCase())
     // El StateFlow del VM ahora es una simple copia del Flow del Repositorio.
@@ -108,6 +123,20 @@ class ActivityModificarViewModel @Inject constructor(
     private val _textoImagenCorrutina = MutableLiveData<String>()
     val textoImagenCorrutina: LiveData<String> get() = _textoImagenCorrutina
 
+    private var currentContent: QuestionContent = QuestionContent.None
+    private var previousContent: QuestionContent = QuestionContent.None
+
+    fun setContent(newContent: QuestionContent) {
+        previousContent = currentContent
+        currentContent = newContent
+    }
+
+    fun shouldWarnImageReplace(): Boolean {
+        return previousContent is QuestionContent.Image && currentContent is QuestionContent.Image
+    }
+
+    //fun getCurrentContent(): QuestionContent = currentContent
+
     // Data Store
     fun getCountImage() {
         viewModelScope.launch {
@@ -142,6 +171,27 @@ class ActivityModificarViewModel @Inject constructor(
         dataStore.resetCounter()
     }
 
+    fun setPlusCountQuestion() {
+        _contadorPregunta++
+    }
+
+    fun setMinusCountQuestion() {
+        _contadorPregunta--
+    }
+
+    fun setCrearXML() {
+        val isSuccess = setCrearXmlUseCase.invoke(getCurrentPath(), preguntas, respuestas)
+
+        if (isSuccess) {
+            val qaItem = QAUiItem(
+                preguntas = preguntas.map { it.toUi() },
+                respuestas = respuestas.map { it.toUi() }
+            )
+
+            viewModelScope.launch { _navigateToNext.emit(qaItem) }
+        }
+    }
+
     fun getGuia() {
         _guiaModel.postValue(getGuiaUseCase(ruta = fileRepositoryImpl.getCurrentPath()))
     }
@@ -157,65 +207,114 @@ class ActivityModificarViewModel @Inject constructor(
         cargarPregunta(typeContent)
     }
 
-    fun onClickRoll() {
-        typeContent =
-            if (typeContent == TypeContent.QUESTION) TypeContent.ANSWER else TypeContent.QUESTION
+    fun onClickRoll(text: String): MessageActions {
+        if (text.isEmpty()) {
+            return MessageActions.FieldEmpty
+        }
 
-        cargarPregunta(typeContent)
+        return MessageActions.Continue
     }
 
-    fun getReinicioGuia() {
-        onResetContadorPreg()
-        typeContent = TypeContent.QUESTION
+    fun onClickBefore(text: String): MessageActions {
+        val contador = contadorPregunta - 1
 
-        cargarPregunta(typeContent)
+        if (contador < 0) {
+            return MessageActions.WithoutQuestionsBefore
+        }
+
+        if (text.isEmpty()) {
+            return MessageActions.FieldEmpty
+        }
+
+        return MessageActions.Continue
     }
 
-    fun onClickNext() {
+    fun onClickNext(text: String): MessageActions {
         val posPregFin = preguntas.size - 1
         val contador = contadorPregunta + 1
 
-        if (contador <= posPregFin) {
-            _contadorPregunta++
-            typeContent = TypeContent.QUESTION
+        if (text.isEmpty()) {
+            return MessageActions.FieldEmpty
+        }
 
-            cargarPregunta(typeContent = typeContent, shouldFlip = true)
-        } else {
+        // Don't show alert
+        if (!showMessageMoreQuestions) {
+            return MessageActions.Continue
+        }
+
+        if (contador > posPregFin) {
+            MessageActions.AddMoreQuestions
+        }
+
+        return MessageActions.Continue
+    }
+
+    fun onClickEliminar(): MessageActions {
+        if (contadorPregunta == 0) {
             _uiState.value = EstadoUI(
-                message = "Se acabaron las preguntas, ¿Quieres repetir la guia?",
                 internalRules = InternalRules(
-                    isThereMoreAsks = false
-                )
+                    isUpdatedAskAns = true,
+                    isClearText = true,
+                    isShowQuitColor = true,
+                    isShowSelColor = true
+                ),
             )
+            return MessageActions.WithoutQuestionsBefore
+        }
+
+        return MessageActions.Continue
+    }
+
+    fun onClickImgvSave(text: String): MessageActions {
+        val posRespFin = respuestas.size - 1
+
+        if (text.isEmpty() && (contadorPregunta <= posRespFin || typeContent == TypeContent.QUESTION)) {
+            return MessageActions.FieldEmpty
+        }
+
+        return MessageActions.Continue
+    }
+
+    fun deleteCurrentQuestion() {
+        deleteCurrentQuestionUseCase.invoke(_preguntas, _respuestas, contadorPregunta)
+    }
+
+    fun updateQuestion(textWithLabels: String, listSpans: List<ColorRange>) {
+        // La lista no crea una copia sino que apunta al mismo punto de referencia.
+        // Esto hace que cuando se modifique algo afecta _preguntas o _respuestas
+        val mutableRefList = if (typeContent == TypeContent.QUESTION) _preguntas else _respuestas
+        val posTotales = mutableRefList.lastIndex
+        setContent(QuestionContent.Text(textWithLabels, listSpans))
+        val currentItem = QuestionItem(mutableListOf(currentContent))
+
+        if (contadorPregunta <= posTotales) {
+            mutableRefList[contadorPregunta] = currentItem
+        } else {
+            mutableRefList.add(contadorPregunta, currentItem)
         }
     }
 
-    fun onClickBefore() {
-        val contador = contadorPregunta - 1
-
-        if (contador >= 0) {
-            _contadorPregunta--
-            typeContent = TypeContent.QUESTION
-
-            cargarPregunta(typeContent)
-        } else {
-            _uiState.value = EstadoUI(
-                message = "Ya no tienes preguntas anteriores",
-                internalRules = InternalRules(
-                    isThereMoreAsks = false
-                )
-            )
-        }
-    }
-
-    fun onResetContadorPreg() {
-        _contadorPregunta = 0
+    fun setColocarEtiquetas(text: String, listSpans: List<ColorRange>): String {
+        return setColocarEtiquetasUseCase.invoke(text, listSpans)
     }
 
     fun getCurrentPath() = fileRepositoryImpl.getCurrentPath()
 
-    private fun cargarPregunta(typeContent: TypeContent, shouldFlip: Boolean = false) {
-        val contentList = getQuestionContentsUseCase(
+    fun swapTypeContent() {
+        _typeContent =
+            if (typeContent == TypeContent.QUESTION) TypeContent.ANSWER else TypeContent.QUESTION
+    }
+
+    fun setTypeContent(value: TypeContent) {
+        _typeContent = value
+    }
+
+    fun getTypeContent(): TypeContent {
+        return typeContent
+    }
+
+    fun cargarPregunta(typeContent: TypeContent, shouldFlip: Boolean = false) {
+        val contentList = getQuestionContentsUseCase.invoke(
             if (typeContent == TypeContent.QUESTION) preguntas else respuestas,
             contadorPregunta
         )
@@ -247,7 +346,26 @@ class ActivityModificarViewModel @Inject constructor(
         }
     }
 
+    fun deleteContentInPiv() {
+        val fileSelected = getCurrentPath().substringAfterLast("/")
+        deleteContentInPivUseCase.invoke(fileSelected)
+    }
 
+    fun getUrlImagenCifrada(urlImagen: String, noCifrado: Int): String {
+        return setCifrarRutaImagenUseCase.invoke(urlImagen, noCifrado)
+    }
+
+    fun setCreatePivImage(originPath: File, copiedPath: File, noImage: String) {
+        setCreatePivImage.invoke(originPath, copiedPath, noImage)
+    }
+
+    fun toggleShowMessageMoreQuestions() {
+        _showMessageMoreQuestions = !_showMessageMoreQuestions
+    }
+
+    /*fun setPintarLetra(texto: Editable, cursorPosition: Int, colorActual: Int) {
+        setPintarLetraUseCase.invoke(texto, cursorPosition, colorActual)
+    }*/
 
     /*fun getGuia(ruta: String) {
         _guiaModel.postValue(getGuiaUseCase(ruta))

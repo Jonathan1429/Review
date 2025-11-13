@@ -23,12 +23,13 @@ data class EstadoUI(
 }
 
 data class InternalRules(
-    //val isUpdatedAskAns: Boolean = false,
+    val isUpdatedAskAns: Boolean = false,
     val isCreatedGuia: Boolean = false,
     val isClearText: Boolean = false,
     val isShowCancelar: Boolean = false,
     val isShowQuitColor: Boolean = false,
     val isShowSelColor: Boolean = false,
     val isThereMoreAsks: Boolean = true,
-    val isEtPregunta: Boolean = false
+    val isEtPregunta: Boolean = false,
+    val addMoreQuestions: Boolean = false
 )

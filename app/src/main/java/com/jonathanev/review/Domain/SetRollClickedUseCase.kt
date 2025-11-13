@@ -18,14 +18,14 @@ class SetRollClickedUseCase @Inject constructor(
         isEtPregunta: Boolean,
         ruta: String
     ): ValidacionesGuiaModel {
-        if (editable.isEmpty()) {
+        /*if (editable.isEmpty()) {
             return ValidacionesGuiaModel(
                 message = "Asegurate de llenar pregunta y respuesta"
             )
-        }
+        }*/
 
-        val responseSpanPalabra = setSpanPalabraUseCase(editable)
-        val responseEtiquetaEditable = setColocarEtiquetasUseCase(responseSpanPalabra.editable)
+        /*val responseSpanPalabra = setSpanPalabraUseCase.invoke(editable)
+        val responseEtiquetaEditable = setColocarEtiquetasUseCase.invoke(responseSpanPalabra.editable)*/
 
         val listaDestino = if (isEtPregunta) preguntas else respuestas
         val pintarLista = if (!isEtPregunta) preguntas else respuestas

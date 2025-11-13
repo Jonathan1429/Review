@@ -2,18 +2,19 @@ package com.jonathanev.review.Domain
 
 import com.jonathanev.review.Data.GuiaRepository
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
+import com.jonathanev.review.Data.Model.prueba.QuestionItem
 import javax.inject.Inject
 
 class SetCrearXmlUseCase @Inject constructor(
     private val guiaRepository: GuiaRepository
 ) {
     operator fun invoke(
-        nombreArchivo: String,
-        preguntas: ArrayList<String>,
-        respuestas: ArrayList<String>,
-        didTheGuideAlreadyExist: Boolean,
-        ruta: String
-    ): ValidacionesGuiaModel {
-        return guiaRepository.saveFileV1(nombreArchivo, preguntas, respuestas, didTheGuideAlreadyExist, ruta)
+        currentPath: String,
+        preguntas: MutableList<QuestionItem>,
+        respuestas: MutableList<QuestionItem>,
+        /*didTheGuideAlreadyExist: Boolean,
+        ruta: String*/
+    ): Boolean {
+        return guiaRepository.saveFileV2(currentPath, preguntas, respuestas)
     }
 }
