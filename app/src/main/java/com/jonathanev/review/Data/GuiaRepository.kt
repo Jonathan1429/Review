@@ -1,9 +1,8 @@
 package com.jonathanev.review.Data
 
-import android.content.Intent
 import android.util.Log
 import android.util.Xml
-import androidx.core.content.ContextCompat.startActivity
+import com.jonathanev.review.Core.Constants
 import com.jonathanev.review.Core.Constants.ANSWER
 import com.jonathanev.review.Core.Constants.BASERUTA_IMG_CIFRADO
 import com.jonathanev.review.Core.Constants.CUESTIONARIO
@@ -13,26 +12,21 @@ import com.jonathanev.review.Core.Constants.GUIAESTUDIO
 import com.jonathanev.review.Core.Constants.IMAGEN
 import com.jonathanev.review.Core.Constants.INTERROGANTE
 import com.jonathanev.review.Core.Constants.NOMBREGUIA
-import com.jonathanev.review.Core.Constants.NOQUESTION
-import com.jonathanev.review.Core.Constants.POSQUESTION
 import com.jonathanev.review.Core.Constants.PREGUNTA
 import com.jonathanev.review.Core.Constants.QUESTION
 import com.jonathanev.review.Core.Constants.RESPUESTA
 import com.jonathanev.review.Core.Constants.TEXTO
 import com.jonathanev.review.Core.Constants.VERSION
-import com.jonathanev.review.Data.Model.EstadoUI
 import com.jonathanev.review.Data.Model.GuiaModel
-import com.jonathanev.review.Data.Model.prueba.QuestionItem
-import com.jonathanev.review.Data.Model.ResponseGuia
-import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import com.jonathanev.review.Data.Model.prueba.QAItem
 import com.jonathanev.review.Data.Model.prueba.QuestionContent
+import com.jonathanev.review.Data.Model.prueba.QuestionItem
 import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Data.provider.GuiaProvider
 import com.jonathanev.review.Domain.GetAllGuiasUseCase
 import com.jonathanev.review.Domain.GetColorRanges
 import com.jonathanev.review.Domain.SetCifrarRutaImagenUseCase
-import com.jonathanev.review.UI.View.ActivityRepasarGuia
+import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.NodeList
 import org.xml.sax.SAXException
@@ -145,70 +139,60 @@ class GuiaRepository @Inject constructor(
         }
     }
 
-    fun saveFileV1(
-        currentPath: String,
-        preguntas: MutableList<QuestionItem>,
-        respuestas: MutableList<QuestionItem>,
-        /*didTheGuideAlreadyExist: Boolean,
-        ruta: String*/
-    ): ValidacionesGuiaModel {
-        val nombreArchivo = currentPath.substringAfterLast("/")
-        val file = File(currentPath)
+    fun obtenerDatosXMLV2(ruta: String): QAItem {
+        val questionItems = mutableListOf<QuestionItem>()
+        val answerItems = mutableListOf<QuestionItem>()
 
-        // Eliminamos el archivo anteriormente creado
-        if (file.exists()) {
-            file.delete()
-            Log.d("ArchivoEliminado", "Archivo eliminado")
-        }
+        val db = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+        val file = File(ruta)
+        val doc = db.parse(file)
 
-        //Vamos a crear el archivo que acabamos de eliminar pero con el nuevo cuestionario
-        return try {
-            val serializer = xmlSerializerFactory.create()
-            val fos = fileOutputStreamFactory.create(currentPath)
-            // fos = openFileOutput(nombreArchivo, MODE_PRIVATE) // Guarda el archivo en la raiz
-            serializer.setOutput(fos, "UTF-8")
-            serializer.startDocument(null, java.lang.Boolean.valueOf(true))
-            serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true)
-            serializer.startTag("", "GuiaEstudio")
-            serializer.attribute("", "version", "1.0")
-            serializer.startTag("", "Cuestionario")
-            serializer.attribute("", "nombreGuia", nombreArchivo)
+        questionItems.addAll(getQAXML(doc, QUESTION))
+        answerItems.addAll(getQAXML(doc, ANSWER))
 
-            // Creo la etiqueta interrogante con su respectiva pregunta
-            for (i in preguntas.indices) {
-                serializer.startTag("", "Interrogante")
-                serializer.attribute("", "pregunta", preguntas[i])
-                serializer.attribute("", "respuesta", respuestas[i])
-                serializer.endTag("", "Interrogante")
+        return QAItem(questionItems, answerItems)
+    }
+
+    private fun getQAXML(doc: Document, typeContent: String): MutableList<QuestionItem> {
+        val items = mutableListOf<QuestionItem>()
+
+        // Leer Questions
+        val questionsNode = doc.getElementsByTagName(typeContent) //Question/Answer
+        for (i in 0 until questionsNode.length) {
+            val element = questionsNode.item(i) as Element
+            val contentList = mutableListOf<QuestionContent>()
+
+            val texts = element.getElementsByTagName(TEXTO)
+            for (j in 0 until texts.length) {
+                val t = texts.item(j) as Element
+                val textValue = t.getAttribute(TEXTO)
+                val qcText = getColorRanges.invoke(textValue)
+
+                contentList.add(
+                    QuestionContent.Text(
+                        text = qcText.text,
+                        colorRanges = qcText.colorRanges // tu lógica aquí
+                    )
+                )
             }
 
-            // Si los campos estan vacios simplemente cierro las etiquetas y directamente
-            // guardo el documento en el teléfono.
-            serializer.endTag("", "Cuestionario")
-            serializer.endTag("", "GuiaEstudio")
-            serializer.endDocument()
-            serializer.flush()
-            fos.close()
-
-            // val rutaActualizada = "$file/$nombreArchivo"
-            ValidacionesGuiaModel(
-                message = "Guia de estudio creada exitosamente",
-                responseGuia = ResponseGuia(ruta),
-                estadoUI = EstadoUI(
-                    isCreatedGuia = true,
+            val images = element.getElementsByTagName(IMAGEN)
+            for (j in 0 until images.length) {
+                val img = images.item(j) as Element
+                val decoded = img.getAttribute(DECODED)
+                val encoded = img.getAttribute(ENCODED)
+                contentList.add(
+                    QuestionContent.Image(decoded, encoded)
                 )
-            )
-        } catch (e: IOException) {
-            e.printStackTrace()
+            }
 
-            ValidacionesGuiaModel(
-                message = "Guia de estudio no se creó correctamente",
-            )
+            items.add(QuestionItem(contentList))
         }
+
+        return items
     }
 
     fun obtenerDatosXMLV1(ruta: String): QAItem {
-        //val qaItem = mutableListOf<QAItem>()
         val questions = mutableListOf<QuestionContent>()
         val answers = mutableListOf<QuestionContent>()
         val questionItem = mutableListOf<QuestionItem>()
@@ -218,11 +202,6 @@ class GuiaRepository @Inject constructor(
         val db: DocumentBuilder
         try {
             db = dbf.newDocumentBuilder()
-            /*val filePath: File = if (ruta == "null") {
-                File(filePathsProvider.fileGuides.toString())
-            } else {
-                File(ruta)
-            }*/
             val filePath: File = File(ruta)
             val doc = db.parse(filePath)
 
@@ -264,8 +243,15 @@ class GuiaRepository @Inject constructor(
         return QAItem(questionItem, answerItem)
     }
 
-    /*private fun typeItem(question: String): TypeFile{
-        return if (question.contains(BASERUTA_IMG_CIFRADO))
-            TypeFile.IMAGEN else TypeFile.TEXTO
-    }*/
+    fun getXMLVersion(ruta: String): QAItem {
+        val db = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+        val file = File(ruta)
+        val doc = db.parse(file)
+
+        val versionNode = doc.getElementsByTagName(GUIAESTUDIO)
+        val element = versionNode.item(0) as Element
+        val textValue = element.getAttribute(VERSION)
+
+        return if(textValue == "1.0") obtenerDatosXMLV1(ruta) else obtenerDatosXMLV2(ruta)
+    }
 }

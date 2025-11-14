@@ -8,6 +8,6 @@ class GetObtenerDatosXMLUseCase @Inject constructor(
     private val guiaRepository: GuiaRepository
 ){
     operator fun invoke(ruta: String): QAItem {
-        return guiaRepository.obtenerDatosXMLV1(ruta)
+        return guiaRepository.getXMLVersion(ruta)
     }
 }
