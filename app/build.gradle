@@ -99,6 +99,7 @@ android {
 dependencies {
     String daggerHilt = "2.48"
     String mockkVersion = "1.13.12"
+    String navVersion = "2.9.6"
 
     // Cargar imágenes en el activity.
     implementation("androidx.activity:activity-ktx:1.8.2")
@@ -152,6 +153,10 @@ dependencies {
     // DataStore
     implementation 'androidx.datastore:datastore-preferences:1.1.1'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
+
+    //NavComponent
+    implementation("androidx.navigation:navigation-fragment-ktx:$navVersion")
+    implementation("androidx.navigation:navigation-ui-ktx:$navVersion")
 
     // UnitTesting
     testImplementation 'junit:junit:4.13.2'

@@ -12,23 +12,37 @@ import com.jonathanev.review.Data.GuiaRepository
 import com.jonathanev.review.Data.Model.DataStoreManager
 import com.jonathanev.review.Data.Model.EstadoUI
 import com.jonathanev.review.Data.Model.GuiaModel
+import com.jonathanev.review.Data.Model.InternalRules
+import com.jonathanev.review.Data.Model.MessageActions
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
+import com.jonathanev.review.Data.Model.prueba.ColorRange
+import com.jonathanev.review.Data.Model.prueba.QAUiItem
+import com.jonathanev.review.Data.Model.prueba.QuestionContent
 import com.jonathanev.review.Data.Model.prueba.QuestionItem
+import com.jonathanev.review.Data.Model.prueba.TypeContent
 import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Data.repository.FileRepositoryImpl
 import com.jonathanev.review.Domain.DeleteContentInPivUseCase
 import com.jonathanev.review.Domain.DeleteCurrentQuestionUseCase
+import com.jonathanev.review.Domain.GetQuestionContentsUseCase
 import com.jonathanev.review.Domain.SetCifrarRutaImagenUseCase
 import com.jonathanev.review.Domain.SetClickRegresarModificandoUseCase
 import com.jonathanev.review.Domain.SetClickSiguienteModificandoUseCase
+import com.jonathanev.review.Domain.SetColocarEtiquetasUseCase
 import com.jonathanev.review.Domain.SetCopyImagesUseCase
+import com.jonathanev.review.Domain.SetCrearXmlUseCase
 import com.jonathanev.review.Domain.SetPintarLetraUseCase
 import com.jonathanev.review.Domain.SetPintarTextosUseCase
 import com.jonathanev.review.Domain.SetRollClickedUseCase
+import com.jonathanev.review.UI.Utils.toUi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -38,9 +52,12 @@ import javax.inject.Inject
 @HiltViewModel
 class ActivityCuestionarioViewModel @Inject constructor(
     private val guiaRepository: GuiaRepository,
+    private val getQuestionContentsUseCase: GetQuestionContentsUseCase,
+    private val setCrearXmlUseCase: SetCrearXmlUseCase,
     private val setClickRegresarModificandoUseCase: SetClickRegresarModificandoUseCase,
     private val setClickSiguienteModicandoUseCase: SetClickSiguienteModificandoUseCase,
     private val setRollClickedUseCase: SetRollClickedUseCase,
+    private val setColocarEtiquetasUseCase: SetColocarEtiquetasUseCase,
     private val deleteCurrentQuestionUseCase: DeleteCurrentQuestionUseCase,
     private val setCopyImagesUseCase: SetCopyImagesUseCase,
     private val setCifrarRutaImagenUseCase: SetCifrarRutaImagenUseCase,
@@ -63,11 +80,17 @@ class ActivityCuestionarioViewModel @Inject constructor(
     private var _contadorPregunta: Int = 0
     val contadorPregunta: Int get() = _contadorPregunta
 
+    private var _showMessageMoreQuestions = true
+    val showMessageMoreQuestions: Boolean get() = _showMessageMoreQuestions
+
+    private val _navigateToNext = MutableSharedFlow<QAUiItem>()
+    val navigateToNext = _navigateToNext.asSharedFlow()
+
     //var guias = MutableLiveData<List<GuiaModel>>()
     private val _guias = MutableLiveData<List<GuiaModel>>()
     val guias: LiveData<List<GuiaModel>> get() = _guias
 
-    // Click events
+    /*// Click events
     private val _uiStateBtnNext = MutableLiveData<ValidacionesGuiaModel>()
     val uiStateBtnNext: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnNext
     private val _uiStateBtnBack = MutableLiveData<ValidacionesGuiaModel>()
@@ -77,15 +100,24 @@ class ActivityCuestionarioViewModel @Inject constructor(
     private val _uiStateBtnRoll = MutableLiveData<ValidacionesGuiaModel>()
     val uiStateBtnRoll: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnRoll
     private val _uiStateBtnEliminar = MutableLiveData<ValidacionesGuiaModel>()
-    val uiStateBtnEliminar: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnEliminar
+    val uiStateBtnEliminar: LiveData<ValidacionesGuiaModel> get() = _uiStateBtnEliminar*/
 
     // Data Store
     //private val dataStore = DataStoreManager.getInstance(application)
     private val _contImagenes = MutableLiveData<Int>()
     val contImagenes: LiveData<Int> get() = _contImagenes
 
+    private var _typeContent = TypeContent.QUESTION
+    private val typeContent get() = _typeContent
+
     private val _textoImagenCorrutina = MutableLiveData<String>()
     val textoImagenCorrutina: LiveData<String> get() = _textoImagenCorrutina
+
+    private var currentContent: QuestionContent = QuestionContent.None
+    private var previousContent: QuestionContent = QuestionContent.None
+
+    private val _uiState = MutableStateFlow(EstadoUI())
+    val uiState = _uiState.asStateFlow()
 
     //private var _currentPath = MutableStateFlow(getCurrentPathUseCase())
     // El StateFlow del VM ahora es una simple copia del Flow del Repositorio.
@@ -111,24 +143,6 @@ class ActivityCuestionarioViewModel @Inject constructor(
 
     private fun copyImages() {
         setCopyImagesUseCase()
-    }
-
-
-    fun clickedRoll(
-        editable: Editable,
-        isEtPregunta: Boolean,
-        ruta: String
-    ) {
-        val responseRollClickedUseCase =
-            setRollClickedUseCase(
-                preguntas,
-                respuestas,
-                contadorPregunta,
-                editable,
-                isEtPregunta,
-                ruta
-            )
-        _uiStateBtnRoll.value = responseRollClickedUseCase
     }
 
     // Data Store
@@ -168,116 +182,24 @@ class ActivityCuestionarioViewModel @Inject constructor(
         setPintarLetraUseCase(texto, cursorPosition, colorActual)
     }
 
-    // Click events
-    fun onClickImgvPrevious(
-        editable: Editable,
-        isEtPregunta: Boolean,
-        ruta: String
-    ) {
-        val responseRegresarUseCase = setClickRegresarModificandoUseCase(
-            preguntas,
-            respuestas,
-            contadorPregunta,
-            editable,
-            isEtPregunta,
-            ruta
-        )
+    fun onClickNext(text: String): MessageActions {
+        val posPregFin = preguntas.size - 1
+        val contador = contadorPregunta + 1
 
-        if (responseRegresarUseCase.estadoUI.isUpdatedAskAns) {
-            _contadorPregunta--
+        if (text.isEmpty()) {
+            return MessageActions.FieldEmpty
         }
 
-        _uiStateBtnBack.value = responseRegresarUseCase
-    }
-
-    fun onClickImgvNext(
-        editable: Editable,
-        isEtPregunta: Boolean,
-        ruta: String
-    ) {
-        val responseSiguienteUseCase = setClickSiguienteModicandoUseCase(
-            preguntas,
-            respuestas,
-            contadorPregunta,
-            editable,
-            isEtPregunta,
-            ruta
-        )
-
-        if (responseSiguienteUseCase.estadoUI.isUpdatedAskAns) {
-            _contadorPregunta++
+        // Don't show alert
+        if (!showMessageMoreQuestions) {
+            return MessageActions.Continue
         }
 
-        _uiStateBtnNext.value = responseSiguienteUseCase
-    }
-
-    fun onClickImgvSave(
-        editable: Editable,
-        nombreArchivo: String,
-        isEtPregunta: Boolean,
-        ruta: String
-    ) {
-        val setClickSaveUseCase = setClickSaveUseCase(
-            preguntas,
-            respuestas,
-            contadorPregunta,
-            editable,
-            nombreArchivo,
-            isEtPregunta,
-            false,
-            ruta
-        )
-
-        _uiStateBtnSave.value = setClickSaveUseCase
-    }
-
-    fun onClickEliminar(ruta: String) {
-        val (newPreguntas, newRespuestas) =
-            deleteCurrentQuestionUseCase(preguntas, respuestas, contadorPregunta)
-
-        _preguntas.clear()
-        _preguntas.addAll(newPreguntas)
-
-        _respuestas.clear()
-        _respuestas.addAll(newRespuestas)
-
-        if (contadorPregunta > 0) {
-            _contadorPregunta--
-
-            setPintarTextosUseCase(true, preguntas, respuestas, ruta)
-
-            _uiStateBtnEliminar.value = ValidacionesGuiaModel(
-                estadoUI = EstadoUI(
-                    isUpdatedAskAns = true,
-                    isShowQuitColor = true,
-                    isShowSelColor = true,
-                ),
-                builder = builder,
-            )
+        if (contador > posPregFin) {
+            MessageActions.AddMoreQuestions
         }
 
-        return if (contadorPregunta > 0) {
-            val validacionesGuiaModel =
-                //setPintarTextosUseCase(true, preguntas, respuestas, contadorPregunta - 1, ruta)
-                setPintarTextosUseCase(true, preguntas, respuestas, ruta)
-
-            validacionesGuiaModel.copy(
-                estadoUI = validacionesGuiaModel.estadoUI.copy(
-                    isThereMoreAsks = true
-                )
-            )
-        } else {
-            ValidacionesGuiaModel(
-                estadoUI = EstadoUI(
-                    isUpdatedAskAns = true,
-                    isClearText = true,
-                    isShowQuitColor = true,
-                    isShowSelColor = true
-                )
-            )
-        }
-
-        _uiStateBtnEliminar.value = responseRegresarUseCase
+        return MessageActions.Continue
     }
 
     fun deleteContentInPiv(nombreArchivo: String) {
@@ -287,5 +209,144 @@ class ActivityCuestionarioViewModel @Inject constructor(
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
     internal fun setContadorPreguntaTest(value: Int) {
         _contadorPregunta = value
+    }
+
+    fun onClickRoll(text: String): Any {
+        if (text.isEmpty()) {
+            return MessageActions.FieldEmpty
+        }
+
+        return MessageActions.Continue
+    }
+
+    fun swapTypeContent() {
+        _typeContent =
+            if (typeContent == TypeContent.QUESTION) TypeContent.ANSWER else TypeContent.QUESTION
+    }
+
+    fun setColocarEtiquetas(text: String, listSpans: List<ColorRange>): String {
+        return setColocarEtiquetasUseCase.invoke(text, listSpans)
+    }
+
+    fun updateQuestion(textWithLabels: String, listSpans: List<ColorRange>) {
+        // La lista no crea una copia sino que apunta al mismo punto de referencia.
+        // Esto hace que cuando se modifique algo afecta _preguntas o _respuestas
+        val mutableRefList = if (typeContent == TypeContent.QUESTION) _preguntas else _respuestas
+        val posTotales = mutableRefList.lastIndex
+        setContent(QuestionContent.Text(textWithLabels, listSpans))
+        val currentItem = QuestionItem(mutableListOf(currentContent))
+
+        if (contadorPregunta <= posTotales) {
+            mutableRefList[contadorPregunta] = currentItem
+        } else {
+            mutableRefList.add(contadorPregunta, currentItem)
+        }
+    }
+
+    fun setContent(newContent: QuestionContent) {
+        previousContent = currentContent
+        currentContent = newContent
+    }
+
+    fun getTypeContent(): TypeContent {
+        return typeContent
+    }
+
+    fun getCurrentPath() = fileRepositoryImpl.getCurrentPath()
+
+    fun cargarPregunta(typeContent: TypeContent, shouldFlip: Boolean = false) {
+        val contentList = getQuestionContentsUseCase.invoke(
+            if (typeContent == TypeContent.QUESTION) preguntas else respuestas,
+            contadorPregunta
+        )
+
+        contentList.forEach { item ->
+            when (val result = setPintarTextosUseCase(item, getCurrentPath())) {
+
+                is QuestionContent.Image -> {
+                    _uiState.value = EstadoUI(
+                        shouldFlip = shouldFlip,
+                        internalRules = InternalRules(isShowCancelar = true),
+                        content = result
+                    )
+                }
+
+                is QuestionContent.Text -> {
+                    _uiState.value = EstadoUI(
+                        shouldFlip = shouldFlip,
+                        internalRules = InternalRules(
+                            isShowQuitColor = true,
+                            isShowSelColor = true
+                        ),
+                        content = result
+                    )
+                }
+
+                QuestionContent.None -> _uiState.value = EstadoUI()
+            }
+        }
+    }
+
+    fun onClickBefore(text: String): MessageActions {
+        val contador = contadorPregunta - 1
+
+        if (contador < 0) {
+            return MessageActions.WithoutQuestionsBefore
+        }
+
+        if (text.isEmpty()) {
+            return MessageActions.FieldEmpty
+        }
+
+        return MessageActions.Continue
+    }
+
+    fun setMinusCountQuestion() {
+        _contadorPregunta--
+    }
+
+    fun setPlusCountQuestion() {
+        _contadorPregunta++
+    }
+
+    fun setTypeContent(value: TypeContent) {
+        _typeContent = value
+    }
+
+    fun toggleShowMessageMoreQuestions() {
+        _showMessageMoreQuestions = !_showMessageMoreQuestions
+    }
+
+    fun onClickEliminar(): MessageActions {
+        if (contadorPregunta == 0) {
+            _uiState.value = EstadoUI(
+                internalRules = InternalRules(
+                    isUpdatedAskAns = true,
+                    isClearText = true,
+                    isShowQuitColor = true,
+                    isShowSelColor = true
+                ),
+            )
+            return MessageActions.WithoutQuestionsBefore
+        }
+
+        return MessageActions.Continue
+    }
+
+    fun deleteCurrentQuestion() {
+        deleteCurrentQuestionUseCase.invoke(_preguntas, _respuestas, contadorPregunta)
+    }
+
+    fun setCrearXML() {
+        val isSuccess = setCrearXmlUseCase.invoke(getCurrentPath(), preguntas, respuestas)
+
+        if (isSuccess) {
+            val qaItem = QAUiItem(
+                preguntas = preguntas.map { it.toUi() },
+                respuestas = respuestas.map { it.toUi() }
+            )
+
+            viewModelScope.launch { _navigateToNext.emit(qaItem) }
+        }
     }
 }

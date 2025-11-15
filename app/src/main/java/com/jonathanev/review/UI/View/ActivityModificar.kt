@@ -7,6 +7,7 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.graphics.PorterDuff
 import android.net.Uri
 import android.os.Bundle
@@ -511,22 +512,6 @@ class ActivityModificar : AppCompatActivity() {
                     Log.w("ViewAction", "No debería entrar en WithoutQuestionsBefore")
                 }
             }
-
-            /*val editable: Editable =
-                Editable.Factory.getInstance().newEditable(binding.etPregResp.text)
-            var isEtPregunta = false
-            if (binding.lblPregResp.text.toString() == "Pregunta") {
-                isEtPregunta = true
-            }
-            val didTheGuideAlreadyExist = true
-
-            viewModel.onClickImgvSave(
-                editable,
-                nombreArchivo,
-                isEtPregunta,
-                didTheGuideAlreadyExist,
-                viewModel.currentPath.value
-            )*/
         }
 
         // Visualización del DialogFragment de selección de colores.
@@ -556,6 +541,9 @@ class ActivityModificar : AppCompatActivity() {
             spannableStringBuilder.clearSpans()
 
             binding.etPregResp.text = spannableStringBuilder
+
+            colorActual = Color.BLACK
+            setColor(colorActual)
         }
 
         binding.imgvImage.setOnClickListener {

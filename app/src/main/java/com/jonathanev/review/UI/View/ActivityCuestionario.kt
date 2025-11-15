@@ -13,8 +13,10 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.text.Editable
+import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.TextWatcher
+import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
@@ -25,7 +27,11 @@ import androidx.annotation.ColorInt
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.animation.doOnEnd
 import androidx.core.app.ActivityCompat
+import androidx.core.view.isVisible
 import androidx.core.widget.ImageViewCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.davemorrissey.labs.subscaleview.ImageSource
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
@@ -34,12 +40,17 @@ import com.google.android.gms.ads.MobileAds
 import com.jonathanev.review.Core.Constants.BASERUTA_IMG
 import com.jonathanev.review.Core.Constants.BASERUTA_IMG_CIFRADO
 import com.jonathanev.review.Core.Constants.PICK_IMAGE_REQUEST
-import com.jonathanev.review.Data.Model.TypeFile
+import com.jonathanev.review.Data.Model.MessageActions
+import com.jonathanev.review.Data.Model.SpanPalabraModel
+import com.jonathanev.review.Data.Model.prueba.ColorRange
+import com.jonathanev.review.Data.Model.prueba.QuestionContent
+import com.jonathanev.review.Data.Model.prueba.TypeContent
 import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.UI.View.Fragments.FragmentDialogColoresPopup
 import com.jonathanev.review.UI.ViewModel.ActivityCuestionarioViewModel
 import com.jonathanev.review.databinding.ActivityCuestionarioBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -84,187 +95,81 @@ class ActivityCuestionario : AppCompatActivity() {
         initListeners()
 
         // Recibimos el nombre del archivo del popupFragment Nueva Guia.
-        nombreArchivo = intent.extras!!.getString("nombre_archivo") ?: ""
-        //ruta = "$ruta$nombreArchivo"
+        // ruta = "$ruta$nombreArchivo"
 
         // Se cambia el nombre del titulo del toolbar
+        nombreArchivo = intent.extras!!.getString("nombre_archivo") ?: ""
         binding.barraSuperiorRegreso.tvTituloToolbar.text = "Creando: $nombreArchivo"
-        colorActual = Color.BLACK
-
-        viewModel.uiStateBtnRoll.observe(this) { uiState ->
-            if (uiState.estadoUI.isUpdatedAskAns) {
-                girarCardView()
-                binding.lblPregResp.text =
-                    if (binding.lblPregResp.text == "Pregunta") "Respuesta" else "Pregunta"
-
-                when {
-                    uiState.estadoUI.isClearText -> binding.etPregResp.text?.clear()
-
-                    uiState.estadoUI.typeFile == TypeFile.TEXTO -> binding.etPregResp.text =
-                        uiState.builder
-
-                    else -> {
-                        // Cuando hay una imagen hay que poner esto
-                        binding.etPregResp.setText(uiState.estadoImagen.textImgEcrypted)
-                        binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
-                    }
-                }
-
-                binding.tilContenidoPregResp.visibility =
-                    if (uiState.estadoUI.typeFile == TypeFile.IMAGEN) View.GONE else View.VISIBLE
-                binding.ivImagen.visibility =
-                    if (uiState.estadoUI.typeFile == TypeFile.IMAGEN) View.VISIBLE else View.GONE
-                binding.imgvCancelar.visibility =
-                    if (uiState.estadoUI.isShowCancelar) View.VISIBLE else View.GONE
-                binding.imgvQuitColor.visibility =
-                    if (uiState.estadoUI.isShowQuitColor) View.VISIBLE else View.GONE
-                binding.imgvSelColor.visibility =
-                    if (uiState.estadoUI.isShowSelColor) View.VISIBLE else View.GONE
-
-                if (uiState.responseSpanPalabra?.isDoubleColors == true) {
-                    Toast.makeText(
-                        applicationContext,
-                        uiState.responseSpanPalabra.message,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            } else {
-                Toast.makeText(
-                    applicationContext,
-                    uiState.message,
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
-
-        viewModel.uiStateBtnBack.observe(this) { uiState ->
-            if (uiState.estadoUI.isUpdatedAskAns) {
-                binding.lblPregResp.text = "Pregunta"
-
-                when {
-                    uiState.estadoUI.typeFile == TypeFile.TEXTO -> binding.etPregResp.text =
-                        uiState.builder
-
-                    else -> {
-                        // Cuando hay una imagen hay que poner esto
-                        binding.etPregResp.setText(uiState.estadoImagen.textImgEcrypted)
-                        binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
-                    }
-                }
-
-                binding.tilContenidoPregResp.visibility =
-                    if (uiState.estadoUI.typeFile == TypeFile.IMAGEN) View.GONE else View.VISIBLE
-                binding.ivImagen.visibility =
-                    if (uiState.estadoUI.typeFile == TypeFile.IMAGEN) View.VISIBLE else View.GONE
-                binding.imgvCancelar.visibility =
-                    if (uiState.estadoUI.isShowCancelar) View.VISIBLE else View.GONE
-                binding.imgvQuitColor.visibility =
-                    if (uiState.estadoUI.isShowQuitColor) View.VISIBLE else View.GONE
-                binding.imgvSelColor.visibility =
-                    if (uiState.estadoUI.isShowSelColor) View.VISIBLE else View.GONE
-
-                if (uiState.responseSpanPalabra?.isDoubleColors == true) {
-                    Log.i("Sobreponen palabras", uiState.responseSpanPalabra.message)
-                    Toast.makeText(
-                        applicationContext,
-                        uiState.responseSpanPalabra.message,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            } else {
-                Toast.makeText(applicationContext, uiState.message, Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        viewModel.uiStateBtnNext.observe(this) { uiState ->
-            if (uiState.estadoUI.isUpdatedAskAns) {
-                binding.lblPregResp.text = "Pregunta"
-
-                when {
-                    !uiState.estadoUI.isThereMoreAsks -> binding.etPregResp.text?.clear()
-
-                    uiState.estadoUI.typeFile == TypeFile.TEXTO -> binding.etPregResp.text =
-                        uiState.builder
-
-                    else -> {
-                        // Cuando hay una imagen hay que poner esto
-                        binding.etPregResp.setText(uiState.estadoImagen.textImgEcrypted)
-                        binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
-                    }
-                }
-
-                binding.tilContenidoPregResp.visibility =
-                    if (uiState.estadoUI.typeFile == TypeFile.IMAGEN) View.GONE else View.VISIBLE
-                binding.ivImagen.visibility =
-                    if (uiState.estadoUI.typeFile == TypeFile.IMAGEN) View.VISIBLE else View.GONE
-                binding.imgvCancelar.visibility =
-                    if (uiState.estadoUI.isShowCancelar) View.VISIBLE else View.GONE
-                binding.imgvQuitColor.visibility =
-                    if (uiState.estadoUI.isShowQuitColor) View.VISIBLE else View.GONE
-                binding.imgvSelColor.visibility =
-                    if (uiState.estadoUI.isShowSelColor) View.VISIBLE else View.GONE
-
-                if (uiState.responseSpanPalabra?.isDoubleColors == true) {
-                    Log.i("Sobreponen palabras", uiState.responseSpanPalabra.message)
-                    Toast.makeText(
-                        applicationContext,
-                        uiState.responseSpanPalabra.message,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            } else {
-                Toast.makeText(applicationContext, uiState.message, Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        viewModel.uiStateBtnEliminar.observe(this) { uiState ->
-            binding.lblPregResp.text = "Pregunta"
-
-            when {
-                !uiState.estadoUI.isThereMoreAsks -> binding.etPregResp.text?.clear()
-
-                uiState.estadoUI.typeFile == TypeFile.TEXTO -> binding.etPregResp.text =
-                    uiState.builder
-
-                else -> {
-                    // Cuando hay una imagen hay que poner esto
-                    binding.etPregResp.setText(uiState.estadoImagen.textImgEcrypted)
-                    binding.ivImagen.setImage(ImageSource.uri(uiState.estadoImagen.textImgUnencrypted))
-                }
-            }
-
-            binding.tilContenidoPregResp.visibility =
-                if (uiState.estadoUI.typeFile == TypeFile.IMAGEN) View.GONE else View.VISIBLE
-            binding.ivImagen.visibility =
-                if (uiState.estadoUI.typeFile == TypeFile.IMAGEN) View.VISIBLE else View.GONE
-            binding.imgvCancelar.visibility =
-                if (uiState.estadoUI.isShowCancelar) View.VISIBLE else View.GONE
-            binding.imgvQuitColor.visibility =
-                if (uiState.estadoUI.isShowQuitColor) View.VISIBLE else View.GONE
-            binding.imgvSelColor.visibility =
-                if (uiState.estadoUI.isShowSelColor) View.VISIBLE else View.GONE
-        }
-
-        viewModel.uiStateBtnSave.observe(this) { uiState ->
-            Toast.makeText(
-                applicationContext,
-                uiState.message,
-                Toast.LENGTH_SHORT
-            ).show()
-
-            if (uiState.estadoUI.isCreatedGuia) {
-                val intent = Intent(applicationContext, ActivityRepasarGuia::class.java)
-                intent.putExtra("ruta", uiState.responseGuia.rutaGuiaEstudio)
-                startActivity(intent)
-                viewModel.procesoActualizacion()
-                copyImages()
-                finish()
-            }
-        }
+        //colorActual = Color.BLACK
 
         viewModel.contImagenes.observe(this) { contImagen ->
             contadorImagen = contImagen
             filename = "$contadorImagen.png"
+        }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uiState.collect { uiState ->
+                    if (!uiState.internalRules.isThereMoreAsks || !uiState.internalRules.isUpdatedAskAns) {
+                        Toast.makeText(
+                            applicationContext,
+                            uiState.message,
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                        return@collect
+                    }
+
+                    when (uiState.content) {
+                        is QuestionContent.Image -> {
+                            binding.etPregResp.setText(uiState.content.encodedPath)
+                            binding.ivImagen.setImage(ImageSource.uri(uiState.content.decodedPath))
+
+                            binding.tilContenidoPregResp.isVisible = uiState.showImage
+                        }
+
+                        is QuestionContent.Text -> {
+                            val builder = uiState.content.toSpannable(
+                                uiState.content.text,
+                                uiState.content.colorRanges
+                            )
+                            binding.etPregResp.text = builder
+
+                            binding.ivImagen.isVisible = uiState.showTextInput
+                        }
+
+                        is QuestionContent.None -> Toast.makeText(
+                            applicationContext,
+                            "No fue posible cargar una guia",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+
+                    if (uiState.shouldFlip) {
+                        girarCardView()
+                    }
+
+                    binding.imgvCancelar.visibility =
+                        if (uiState.internalRules.isShowCancelar) View.VISIBLE else View.GONE
+                    binding.imgvQuitColor.visibility =
+                        if (uiState.internalRules.isShowQuitColor) View.VISIBLE else View.GONE
+                    binding.imgvSelColor.visibility =
+                        if (uiState.internalRules.isShowSelColor) View.VISIBLE else View.GONE
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            // 1. Especifica el estado (STARTED)
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                // 2. Mueve la recolección del Flow aquí
+                viewModel.navigateToNext.collect { qaUiItem ->
+                    val intent = Intent(this@ActivityCuestionario, ActivityRepasarGuia::class.java)
+                    // Asegúrate de que tu clase qaUiItem es Serializable/Parcelable
+                    intent.putExtra("qa_data", qaUiItem)
+                    startActivity(intent)
+                }
+            }
         }
     }
 
@@ -275,7 +180,40 @@ class ActivityCuestionario : AppCompatActivity() {
         }
 
         binding.imgvPregResp.setOnClickListener {
-            val editable: Editable =
+            val text = binding.etPregResp.text.toString()
+            val response = viewModel.onClickRoll(text)
+
+            when (response) {
+                MessageActions.FieldEmpty -> {
+                    Toast.makeText(
+                        /* context = */ applicationContext,
+                        /* text = */ "Asegurate de llenar los campos correspondientes",
+                        /* duration = */ Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+                MessageActions.Continue -> {
+                    viewModel.swapTypeContent()
+                    val saveCurrentQuestion = saveCurrentQuestion()
+
+                    if (saveCurrentQuestion.isDoubleColors) {
+                        Toast.makeText(this, saveCurrentQuestion.message, Toast.LENGTH_LONG).show()
+                    }
+
+                    val currentQuestion = viewModel.getTypeContent()
+                    viewModel.cargarPregunta(currentQuestion)
+                }
+
+                MessageActions.AddMoreQuestions -> {
+                    Log.w("ViewAction", "No debería entrar en AddMoreQuestions")
+                }
+
+                MessageActions.WithoutQuestionsBefore -> /* Puedes regresar solo este valor Unit*/ {
+                    Log.w("ViewAction", "No debería entrar en WithoutQuestionsBefore")
+                }
+            }
+
+            /*val editable: Editable =
                 Editable.Factory.getInstance().newEditable(binding.etPregResp.text)
 
             var isEtPregunta = false
@@ -288,68 +226,179 @@ class ActivityCuestionario : AppCompatActivity() {
                 editable,
                 isEtPregunta,
                 route
-            )
+            )*/
         }
 
         binding.imgvPrevious.setOnClickListener {
-            val editable: Editable =
-                Editable.Factory.getInstance().newEditable(binding.etPregResp.text)
-            var isEtPregunta = false
-            if (binding.lblPregResp.text.toString() == "Pregunta") {
-                isEtPregunta = true
-            }
+            val text = binding.etPregResp.text.toString()
+            val response = viewModel.onClickBefore(text)
 
-            val route = filePathsProvider.buildFile(filePathsProvider.fileGuides, nombreArchivo).toString()
-            viewModel.onClickImgvPrevious(
-                editable,
-                isEtPregunta,
-                route
-            )
+            when (response) {
+                MessageActions.FieldEmpty -> {
+                    Toast.makeText(
+                        /* context = */ applicationContext,
+                        /* text = */ "Asegurate de llenar los campos correspondientes",
+                        /* duration = */ Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+                MessageActions.Continue -> {
+                    val saveCurrentQuestion = saveCurrentQuestion()
+
+                    if (saveCurrentQuestion.isDoubleColors) {
+                        Toast.makeText(this, saveCurrentQuestion.message, Toast.LENGTH_LONG).show()
+                    }
+
+
+                    viewModel.setMinusCountQuestion()
+                    viewModel.setTypeContent(TypeContent.QUESTION)
+                    val currentQuestion = viewModel.getTypeContent()
+                    viewModel.cargarPregunta(currentQuestion)
+                }
+
+                MessageActions.AddMoreQuestions -> {
+                    Log.w("ViewAction", "No debería entrar en AddMoreQuestions")
+                }
+
+                MessageActions.WithoutQuestionsBefore -> /* Puedes regresar solo este valor Unit*/ {
+                    Toast.makeText(
+                        /* context = */ applicationContext,
+                        /* text = */ "Asegurate de llenar los campos correspondientes",
+                        /* duration = */ Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+            }
         }
 
         binding.imgvNext.setOnClickListener {
-            val editable: Editable =
-                Editable.Factory.getInstance().newEditable(binding.etPregResp.text)
-            var isEtPregunta = false
-            if (binding.lblPregResp.text.toString() == "Pregunta") {
-                isEtPregunta = true
-            }
+            val text = binding.etPregResp.text.toString()
+            val response = viewModel.onClickNext(text)
 
-            val route = filePathsProvider.buildFile(filePathsProvider.fileGuides, nombreArchivo).toString()
-            viewModel.onClickImgvNext(
-                editable,
-                isEtPregunta,
-                route
-            )
+            when (response) {
+                MessageActions.FieldEmpty -> {
+                    Toast.makeText(
+                        /* context = */ applicationContext,
+                        /* text = */ "Asegurate de llenar los campos correspondientes",
+                        /* duration = */ Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+                MessageActions.Continue -> {
+                    val saveCurrentQuestion = saveCurrentQuestion()
+
+                    if (saveCurrentQuestion.isDoubleColors) {
+                        Toast.makeText(this, saveCurrentQuestion.message, Toast.LENGTH_LONG).show()
+                    }
+                    viewModel.setPlusCountQuestion()
+                    viewModel.setTypeContent(TypeContent.QUESTION)
+                    val currentQuestion = viewModel.getTypeContent()
+                    viewModel.cargarPregunta(currentQuestion)
+                }
+
+                MessageActions.AddMoreQuestions -> {
+                    AlertDialog.Builder(this@ActivityCuestionario)
+                        .setTitle("¡Atención!")
+                        .setMessage("Se acabaron las preguntas, ¿Quieres agregar más?")
+                        .setPositiveButton(
+                            "Si"
+                        ) { _, _ ->
+                            val saveCurrentQuestion = saveCurrentQuestion()
+
+                            if (saveCurrentQuestion.isDoubleColors) {
+                                Toast.makeText(this, saveCurrentQuestion.message, Toast.LENGTH_LONG)
+                                    .show()
+                            }
+                            viewModel.setPlusCountQuestion()
+                            viewModel.toggleShowMessageMoreQuestions()
+                            viewModel.setTypeContent(TypeContent.QUESTION)
+                            val currentQuestion = viewModel.getTypeContent()
+                            viewModel.cargarPregunta(currentQuestion)
+
+                            Toast.makeText(
+                                applicationContext, "Ya puedes agregar " +
+                                        "mas preguntas", Toast.LENGTH_LONG
+                            ).show()
+                        }
+                        .setNegativeButton(
+                            "Cancelar"
+                        ) { dialog, _ ->
+                            dialog.dismiss()
+                        }.setOnCancelListener {
+
+                        }.create().show()
+                }
+
+                MessageActions.WithoutQuestionsBefore -> /* Puedes regresar solo este valor Unit*/ {
+                    Log.w("ViewAction", "No debería entrar en WithoutQuestionsBefore")
+                }
+            }
         }
 
         binding.imgvEliminar.setOnClickListener {
-            AlertDialog.Builder(this@ActivityCuestionario)
-                .setTitle("¡Atención!")
-                .setMessage("¿Quieres eliminar pregunta/respuesta?")
-                .setPositiveButton("Si") { _, _ ->
-                    val route = filePathsProvider.buildFile(filePathsProvider.fileGuides, nombreArchivo).toString()
-                    viewModel.onClickEliminar(route)
-                }.setNegativeButton("Cancelar") { dialog, _ ->
-                    dialog.dismiss()
-                }.create().show()
+            val response = viewModel.onClickEliminar()
+
+            when (response) {
+                MessageActions.FieldEmpty -> {
+                    Log.w("ViewAction", "No debería entrar en FieldEmpty")
+                }
+
+                MessageActions.Continue -> {
+                    AlertDialog.Builder(this@ActivityCuestionario)
+                        .setTitle("¡Atención!")
+                        .setMessage("Se eliminará pregunta y respuestas, ¿Quieres continuar?")
+                        .setPositiveButton("Si") { _, _ ->
+                            viewModel.deleteCurrentQuestion()
+                            viewModel.setMinusCountQuestion()
+                            viewModel.setTypeContent(TypeContent.QUESTION)
+                            val currentQuestion = viewModel.getTypeContent()
+                            viewModel.cargarPregunta(currentQuestion)
+                        }.setNegativeButton("Cancelar") { dialog, _ ->
+                            dialog.dismiss()
+                        }.create().show()
+                }
+
+                MessageActions.AddMoreQuestions -> {
+                    Log.w("ViewAction", "No debería entrar en AddMoreQuestions")
+                }
+
+                MessageActions.WithoutQuestionsBefore -> /* Puedes regresar solo este valor Unit*/ {
+                    Log.w("ViewAction", "No debería entrar en WithoutQuestionsBefore")
+                }
+            }
         }
 
         binding.barraSuperiorRegreso.imgvSave.setOnClickListener {
-            val editable: Editable =
-                Editable.Factory.getInstance().newEditable(binding.etPregResp.text)
-            var isEtPregunta = false
-            if (binding.lblPregResp.text.toString() == "Pregunta") {
-                isEtPregunta = true
-            }
+            val text = binding.etPregResp.text.toString()
+            val response = viewModel.onClickNext(text)
 
-            val route = filePathsProvider.buildFile(filePathsProvider.fileGuides, nombreArchivo).toString()
-            viewModel.onClickImgvSave(
-                editable,
-                "$nombreArchivo.xml",
-                isEtPregunta,
-                ruta = "$route.xml"
-            )
+            when (response) {
+                MessageActions.AddMoreQuestions -> {
+                    Log.w("ViewAction", "No debería entrar en AddMoreQuestions")
+                }
+
+                MessageActions.Continue -> {
+                    val saveCurrentQuestion = saveCurrentQuestion()
+
+                    if (saveCurrentQuestion.isDoubleColors) {
+                        Toast.makeText(this, saveCurrentQuestion.message, Toast.LENGTH_LONG).show()
+                    }
+
+                    viewModel.setCrearXML()
+                }
+
+                MessageActions.FieldEmpty -> {
+                    Toast.makeText(
+                        /* context = */ applicationContext,
+                        /* text = */ "Asegurate de llenar los campos correspondientes",
+                        /* duration = */ Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+                MessageActions.WithoutQuestionsBefore -> {
+                    Log.w("ViewAction", "No debería entrar en WithoutQuestionsBefore")
+                }
+            }
         }
 
         // Visualización del DialogFragment de selección de colores.
@@ -358,6 +407,18 @@ class ActivityCuestionario : AppCompatActivity() {
             val dialogo: FragmentDialogColoresPopup = FragmentDialogColoresPopup()
             //=====================================================================================================================
             dialogo.show(supportFragmentManager, "FragmentColor")
+        }
+
+        // Cambio de botones visibles
+        binding.imgvCancelar.setOnClickListener {
+            binding.imgvSelColor.visibility = View.VISIBLE
+            binding.imgvQuitColor.visibility = View.VISIBLE
+            binding.tilContenidoPregResp.visibility = View.VISIBLE
+
+            binding.ivImagen.visibility = View.GONE
+            binding.imgvCancelar.visibility = View.GONE
+
+            binding.etPregResp.setText("")
         }
 
         // Eliminar textos con colores
@@ -380,18 +441,6 @@ class ActivityCuestionario : AppCompatActivity() {
 
             // pickMedia.launch(PickVisualMediaRequest(PickVisualMedia.ImageOnly))
             openSomeActivityForResult()
-        }
-
-        // Cambio de botones visibles
-        binding.imgvCancelar.setOnClickListener {
-            binding.imgvSelColor.visibility = View.VISIBLE
-            binding.imgvQuitColor.visibility = View.VISIBLE
-            binding.tilContenidoPregResp.visibility = View.VISIBLE
-
-            binding.ivImagen.visibility = View.GONE
-            binding.imgvCancelar.visibility = View.GONE
-
-            binding.etPregResp.setText("")
         }
 
         binding.etPregResp.addTextChangedListener(object : TextWatcher {
@@ -432,6 +481,142 @@ class ActivityCuestionario : AppCompatActivity() {
                 }
             }
         })
+    }
+
+    private fun saveCurrentQuestion(): SpanPalabraModel {
+        val editable = binding.etPregResp.text
+
+        val colorSpans: Array<ForegroundColorSpan> =
+            editable!!.getSpans(0, editable.length, ForegroundColorSpan::class.java)
+        val oldEditable = editable
+        val sortedSpans = colorSpans.sortedBy { editable.getSpanStart(it) }
+
+        var start = -1
+        var end = 0
+        var endAnterior = 0
+        var isColNuevo = false
+        var colorAnterior = 0
+        var colorNuevo = 0
+        var isDoubleColors = false
+        var toCleaningColors = false
+
+        for (colorSpan: ForegroundColorSpan in sortedSpans) {
+            if (start == -1) {
+                start = editable.getSpanStart(colorSpan)
+            }
+
+            if (end > editable.getSpanStart(colorSpan)) {
+                isDoubleColors = true
+                toCleaningColors = true
+            }
+
+            end = editable.getSpanEnd(colorSpan)
+            colorNuevo = colorSpan.foregroundColor
+
+            if (colorAnterior != colorNuevo) {
+                if (colorAnterior == 0) {
+                    isColNuevo = false
+                    colorAnterior = colorNuevo
+                    endAnterior = end - 1
+                } else {
+                    isColNuevo = true
+                }
+            }
+
+            //if ((end - endAnterior) != 1) {
+            // Limpiar colores encimados
+            if (toCleaningColors) {
+                // Obtener los spans dentro del rango especificado
+                val spansToRemove = oldEditable.getSpans(
+                    start,
+                    endAnterior,
+                    ForegroundColorSpan::class.java
+                )
+
+                for (span in spansToRemove) {
+                    if (span.foregroundColor == colorAnterior) {
+                        editable.removeSpan(span)
+                    }
+                }
+
+                start = editable.getSpanStart(colorSpan)
+                endAnterior = end
+
+                colorAnterior = colorNuevo
+                isColNuevo = false
+                toCleaningColors = false
+            } else if (isColNuevo || (end - endAnterior) != 1) {
+                // Obtener los spans dentro del rango especificado
+                val spansToRemove = oldEditable.getSpans(
+                    start,
+                    endAnterior,
+                    ForegroundColorSpan::class.java
+                )
+
+                for (span in spansToRemove) {
+                    if (span.foregroundColor == colorAnterior) {
+                        editable.removeSpan(span)
+                    }
+                }
+
+                editable.setSpan(
+                    ForegroundColorSpan(colorAnterior),
+                    start,
+                    endAnterior,
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+
+                start = editable.getSpanStart(colorSpan)
+                endAnterior = end
+
+                colorAnterior = colorNuevo
+                isColNuevo = false
+                // toCleaningColors = false
+            } else {
+                endAnterior = end
+            }
+        }
+
+        // Remove old spans
+        if (colorSpans.isNotEmpty()) {
+            val spansToRemove =
+                oldEditable.getSpans(start, endAnterior, ForegroundColorSpan::class.java)
+
+            for (span in spansToRemove) {
+                if (span.foregroundColor == colorAnterior) {
+                    editable.removeSpan(span)
+                }
+            }
+
+            editable.setSpan(
+                ForegroundColorSpan(colorAnterior),
+                start,
+                endAnterior,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+        }
+
+        val listSpans = binding.etPregResp.text!!.getSpans(
+            0, editable.length, ForegroundColorSpan::class.java
+        ).map { span ->
+            ColorRange(
+                start = editable.getSpanStart(span),
+                end = editable.getSpanEnd(span),
+                color = span.foregroundColor
+            )
+        }
+
+        val resColocarEtiquetas = viewModel.setColocarEtiquetas(editable.toString(), listSpans)
+        viewModel.updateQuestion(resColocarEtiquetas, listSpans)
+
+        return if (isDoubleColors) {
+            SpanPalabraModel(
+                message = "Sobreescribiste colores y mantuvimos los últimos seleccionados",
+                isDoubleColors = true
+            )
+        } else {
+            SpanPalabraModel()
+        }
     }
 
     private fun initUI() {
@@ -682,5 +867,24 @@ class ActivityCuestionario : AppCompatActivity() {
         ImageViewCompat.setImageTintMode(binding.imgvSelColor, PorterDuff.Mode.SRC_ATOP)
         ImageViewCompat.setImageTintList(binding.imgvSelColor, ColorStateList.valueOf(color))
         colorActual = color
+    }
+
+    private fun QuestionContent.Text.toSpannable(
+        text: String,
+        colorRanges: List<ColorRange>
+    ): SpannableStringBuilder {
+        val builder = SpannableStringBuilder(text)
+
+        for (colorRange in colorRanges) {
+            val colorSpan = ForegroundColorSpan(colorRange.color)
+            builder.setSpan(
+                colorSpan,
+                colorRange.start,
+                colorRange.end,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+        }
+
+        return builder
     }
 }
