@@ -13,6 +13,12 @@ fun QuestionItem.toUi(): QuestionUiItem {
     )
 }
 
+fun QuestionUiItem.toDomain(): QuestionItem {
+    return QuestionItem(
+        content = content.map { it.toDomain() }
+    )
+}
+
 fun QuestionContent.toUi(): QuestionContentUi {
     return when (this) {
         is QuestionContent.None -> QuestionContentUi.None
@@ -28,6 +34,25 @@ fun QuestionContent.toUi(): QuestionContentUi {
     }
 }
 
+fun QuestionContentUi.toDomain(): QuestionContent {
+    return when (this) {
+        is QuestionContentUi.None -> QuestionContent.None
+        is QuestionContentUi.Text -> QuestionContent.Text(
+            text = this.text,
+            colorRanges = this.colorRanges.map { it.toDomain() }
+        )
+
+        is QuestionContentUi.Image -> QuestionContent.Image(
+            decodedPath = this.decodedPath,
+            encodedPath = this.encodedPath
+        )
+    }
+}
+
 fun ColorRange.toUi(): ColorRangeUi {
     return ColorRangeUi(start = start, end = end, color = color)
+}
+
+fun ColorRangeUi.toDomain(): ColorRange {
+    return ColorRange(start = start, end = end, color = color)
 }

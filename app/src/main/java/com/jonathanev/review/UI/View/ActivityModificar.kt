@@ -87,52 +87,67 @@ class ActivityModificar : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            viewModel.uiState.collect { uiState ->
-                if (!uiState.internalRules.isThereMoreAsks || !uiState.internalRules.isUpdatedAskAns) {
-                    Toast.makeText(
-                        applicationContext,
-                        uiState.message,
-                        Toast.LENGTH_SHORT
-                    ).show()
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uiState.collect { uiState ->
+                    if (!uiState.internalRules.isThereMoreAsks || !uiState.internalRules.isUpdatedAskAns) {
+                        Toast.makeText(
+                            applicationContext,
+                            uiState.message,
+                            Toast.LENGTH_SHORT
+                        ).show()
 
-                    return@collect
-                }
-
-                when (uiState.content) {
-                    is QuestionContent.Image -> {
-                        binding.etPregResp.setText(uiState.content.encodedPath)
-                        binding.ivImagen.setImage(ImageSource.uri(uiState.content.decodedPath))
-
-                        binding.tilContenidoPregResp.isVisible = uiState.showImage
+                        return@collect
                     }
 
-                    is QuestionContent.Text -> {
-                        val builder = uiState.content.toSpannable(
-                            uiState.content.text,
-                            uiState.content.colorRanges
-                        )
-                        binding.etPregResp.text = builder
+                    when (uiState.content) {
+                        is QuestionContent.Image -> {
+                            binding.etPregResp.setText(uiState.content.encodedPath)
+                            binding.ivImagen.setImage(ImageSource.uri(uiState.content.decodedPath))
 
-                        binding.ivImagen.isVisible = uiState.showTextInput
+                            binding.tilContenidoPregResp.isVisible = uiState.showImage
+                        }
+
+                        is QuestionContent.Text -> {
+                            val builder = uiState.content.toSpannable(
+                                uiState.content.text,
+                                uiState.content.colorRanges
+                            )
+                            binding.etPregResp.text = builder
+
+                            binding.ivImagen.isVisible = uiState.showTextInput
+                        }
+
+                        is QuestionContent.None -> Toast.makeText(
+                            applicationContext,
+                            "No fue posible cargar una guia",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
 
-                    is QuestionContent.None -> Toast.makeText(
-                        applicationContext,
-                        "No fue posible cargar una guia",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
+                    if (uiState.shouldFlip) {
+                        girarCardView()
+                    }
 
-                if (uiState.shouldFlip) {
-                    girarCardView()
+                    binding.imgvCancelar.visibility =
+                        if (uiState.internalRules.isShowCancelar) View.VISIBLE else View.GONE
+                    binding.imgvQuitColor.visibility =
+                        if (uiState.internalRules.isShowQuitColor) View.VISIBLE else View.GONE
+                    binding.imgvSelColor.visibility =
+                        if (uiState.internalRules.isShowSelColor) View.VISIBLE else View.GONE
                 }
+            }
+        }
 
-                binding.imgvCancelar.visibility =
-                    if (uiState.internalRules.isShowCancelar) View.VISIBLE else View.GONE
-                binding.imgvQuitColor.visibility =
-                    if (uiState.internalRules.isShowQuitColor) View.VISIBLE else View.GONE
-                binding.imgvSelColor.visibility =
-                    if (uiState.internalRules.isShowSelColor) View.VISIBLE else View.GONE
+        lifecycleScope.launch {
+            // 1. Especifica el estado (STARTED)
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                // 2. Mueve la recolección del Flow aquí
+                viewModel.navigateToNext.collect { qaUiItem ->
+                    val intent = Intent(this@ActivityModificar, ActivityRepasarGuia::class.java)
+                    // Asegúrate de que tu clase qaUiItem es Serializable/Parcelable
+                    intent.putExtra("qa_data", qaUiItem)
+                    startActivity(intent)
+                }
             }
         }
 
@@ -146,19 +161,6 @@ class ActivityModificar : AppCompatActivity() {
                 setText("")
                 post {
                     setText(texto)
-                }
-            }
-        }
-
-        lifecycleScope.launch {
-            // 1. Especifica el estado (STARTED)
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                // 2. Mueve la recolección del Flow aquí
-                viewModel.navigateToNext.collect { qaUiItem ->
-                    val intent = Intent(this@ActivityModificar, ActivityModificar::class.java)
-                    // Asegúrate de que tu clase qaUiItem es Serializable/Parcelable
-                    intent.putExtra("qa_data", qaUiItem)
-                    startActivity(intent)
                 }
             }
         }

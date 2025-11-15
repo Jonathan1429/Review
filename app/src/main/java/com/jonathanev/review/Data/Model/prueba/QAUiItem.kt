@@ -26,6 +26,8 @@ sealed class QuestionContentUi : Parcelable {
     data class Image(val decodedPath: String, val encodedPath: String) : QuestionContentUi()
 }
 
+
+
 // Si ColorRange también existe:
 @Parcelize
 data class ColorRangeUi(val start: Int, val end: Int, val color: Int) : Parcelable

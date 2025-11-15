@@ -11,14 +11,14 @@ import com.jonathanev.review.DI.MainDispatcher
 import com.jonathanev.review.Data.GuiaRepository
 import com.jonathanev.review.Data.Model.DataStoreManager
 import com.jonathanev.review.Data.Model.EstadoUI
-import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Data.Model.GuiaModel
-import com.jonathanev.review.Data.Model.prueba.QuestionItem
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
+import com.jonathanev.review.Data.Model.prueba.QuestionItem
+import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Data.repository.FileRepositoryImpl
 import com.jonathanev.review.Domain.DeleteContentInPivUseCase
-import com.jonathanev.review.Domain.SetCifrarRutaImagenUseCase
 import com.jonathanev.review.Domain.DeleteCurrentQuestionUseCase
+import com.jonathanev.review.Domain.SetCifrarRutaImagenUseCase
 import com.jonathanev.review.Domain.SetClickRegresarModificandoUseCase
 import com.jonathanev.review.Domain.SetClickSiguienteModificandoUseCase
 import com.jonathanev.review.Domain.SetCopyImagesUseCase
@@ -41,7 +41,6 @@ class ActivityCuestionarioViewModel @Inject constructor(
     private val setClickRegresarModificandoUseCase: SetClickRegresarModificandoUseCase,
     private val setClickSiguienteModicandoUseCase: SetClickSiguienteModificandoUseCase,
     private val setRollClickedUseCase: SetRollClickedUseCase,
-    private val setClickSaveUseCase: SetClickSaveUseCase,
     private val deleteCurrentQuestionUseCase: DeleteCurrentQuestionUseCase,
     private val setCopyImagesUseCase: SetCopyImagesUseCase,
     private val setCifrarRutaImagenUseCase: SetCifrarRutaImagenUseCase,
@@ -121,7 +120,14 @@ class ActivityCuestionarioViewModel @Inject constructor(
         ruta: String
     ) {
         val responseRollClickedUseCase =
-            setRollClickedUseCase(preguntas, respuestas, contadorPregunta, editable, isEtPregunta, ruta)
+            setRollClickedUseCase(
+                preguntas,
+                respuestas,
+                contadorPregunta,
+                editable,
+                isEtPregunta,
+                ruta
+            )
         _uiStateBtnRoll.value = responseRollClickedUseCase
     }
 

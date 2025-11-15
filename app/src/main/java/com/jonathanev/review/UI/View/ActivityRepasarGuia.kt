@@ -21,6 +21,7 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
 import com.jonathanev.review.Data.Model.prueba.ColorRange
+import com.jonathanev.review.Data.Model.prueba.QAUiItem
 import com.jonathanev.review.Data.Model.prueba.QuestionContent
 import com.jonathanev.review.UI.ViewModel.ActivityRepasarGuiaViewModel
 import com.jonathanev.review.databinding.ActivityRepasarGuiaBinding
@@ -36,11 +37,20 @@ class ActivityRepasarGuia : AppCompatActivity() {
     private val viewModel: ActivityRepasarGuiaViewModel by viewModels()
     //private var ruta: String = ""
 
-    @SuppressLint("SetTextI18n")
+    @SuppressLint("SetTextI18n", "NewApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityRepasarGuiaBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // Recuperamos el dato enviado
+        // Esto es para API 33+ (Android 13)
+        val qaItem = intent.getParcelableExtra("qa_data", QAUiItem::class.java)
+
+        qaItem?.let {
+            // Tu lógica para pasarlo al ViewModel
+            viewModel.setQAItem(it)
+        }
 
         // Sección de anuncios
         initLoadAds()
@@ -146,7 +156,9 @@ class ActivityRepasarGuia : AppCompatActivity() {
     }
 
     private fun initUI() {
-        viewModel.getGuia()
+        if (viewModel.preguntas.isEmpty()){
+            viewModel.getGuia()
+        }
     }
 
     private fun initLoadAds() {

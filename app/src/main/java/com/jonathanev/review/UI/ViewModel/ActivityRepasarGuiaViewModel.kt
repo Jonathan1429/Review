@@ -10,6 +10,7 @@ import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.Model.InternalRules
 import com.jonathanev.review.Data.Model.prueba.QuestionItem
 import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
+import com.jonathanev.review.Data.Model.prueba.QAUiItem
 import com.jonathanev.review.Data.Model.prueba.QuestionContent
 import com.jonathanev.review.Data.Model.prueba.TypeContent
 import com.jonathanev.review.Data.provider.GuiaProvider
@@ -18,6 +19,7 @@ import com.jonathanev.review.Domain.GetGuiaUseCase
 import com.jonathanev.review.Domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.Domain.GetQuestionContentsUseCase
 import com.jonathanev.review.Domain.SetPintarTextosUseCase
+import com.jonathanev.review.UI.Utils.toDomain
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -78,8 +80,8 @@ class ActivityRepasarGuiaViewModel @Inject constructor(
         if (respuestas.isEmpty()) {
             val datos = getObtenerDatosXMLUseCase.invoke(ruta = getCurrentPath())
 
-            _preguntas = datos.preguntas
-            _respuestas = datos.respuestas
+            _preguntas = datos.preguntas.toMutableList()
+            _respuestas = datos.respuestas.toMutableList()
         }
 
         cargarPregunta(typeContent)
@@ -182,5 +184,15 @@ class ActivityRepasarGuiaViewModel @Inject constructor(
 
     fun prueba(): List<GuiaModel> {
         return guiaProvider.guias
+    }
+
+    fun setQAItem(it: QAUiItem) {
+        _preguntas = it.preguntas.map {
+            it.toDomain()
+        }.toMutableList()
+
+        _respuestas = it.respuestas.map {
+            it.toDomain()
+        }.toMutableList()
     }
 }
