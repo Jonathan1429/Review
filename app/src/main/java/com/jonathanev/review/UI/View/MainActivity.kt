@@ -4,11 +4,11 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.jonathanev.review.Data.FolderAction
@@ -43,6 +43,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
 
         // Ejemplo: verificamos si ya tiene permiso
         val hasPermission = ContextCompat.checkSelfPermission(
@@ -103,10 +105,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        viewModel.guias.observe(this) {
+        /*viewModel.guias.observe(this) {
             val a = it
             Log.i("a", it.toString())
-        }
+        }*/
     }
 
     private fun initUI() {

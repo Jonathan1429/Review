@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_app"
+    android:theme="@style/Theme.TextMain"
+    tools:context=".UI.View.Fragments.FragmentMainActivity">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/contWithoutFolders"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            android:background="@drawable/contents"
+            android:padding="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/circleWithoutFolders"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@drawable/circle_content_svg"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/imgvWithoutFolders"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:src="@drawable/ic_folder_off"
+                app:layout_constraintBottom_toBottomOf="@id/circleWithoutFolders"
+                app:layout_constraintEnd_toEndOf="@id/circleWithoutFolders"
+                app:layout_constraintStart_toStartOf="@+id/circleWithoutFolders"
+                app:layout_constraintTop_toTopOf="@+id/circleWithoutFolders" />
+
+            <TextView
+                android:id="@+id/lblNoFolders"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:fontFamily="@font/inter"
+                android:text="@string/lblWithoutFolders"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/circleWithoutFolders" />
+
+            <TextView
+                android:id="@+id/noFoldersDescription"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/lblWithoutFoldersDes"
+                android:textColor="@color/text_gray"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/lblNoFolders" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/stepOne"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            android:background="@drawable/contents_with_border"
+            android:padding="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/contWithoutFolders">
+
+            <ImageView
+                android:id="@+id/circleStepOne"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@drawable/rectangle_content_svg"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/ic_plus_step_one"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:src="@drawable/ic_plus_circle_outline"
+                app:layout_constraintBottom_toBottomOf="@id/circleStepOne"
+                app:layout_constraintEnd_toEndOf="@id/circleStepOne"
+                app:layout_constraintStart_toStartOf="@id/circleStepOne"
+                app:layout_constraintTop_toTopOf="@id/circleStepOne" />
+
+            <TextView
+                android:id="@+id/lblTitleStepOne"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:fontFamily="@font/inter"
+                android:text="@string/lblTitleStepOne"
+                android:textColor="@color/white"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toEndOf="@id/circleStepOne"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/lblDescriptionStepOne"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:justificationMode="inter_word"
+                android:text="@string/lblDescStepOne"
+                android:textColor="@color/text_gray"
+                android:textSize="11sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@id/stepOne"
+                app:layout_constraintStart_toStartOf="@+id/lblTitleStepOne"
+                app:layout_constraintTop_toBottomOf="@+id/lblTitleStepOne" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/stepTwo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            android:background="@drawable/contents_with_border"
+            android:padding="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/stepOne">
+
+            <ImageView
+                android:id="@+id/circleStepTwo"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@drawable/rectangle_content_svg"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/ic_plus_step_two"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:src="@drawable/ic_palette"
+                app:layout_constraintBottom_toBottomOf="@id/circleStepTwo"
+                app:layout_constraintEnd_toEndOf="@id/circleStepTwo"
+                app:layout_constraintStart_toStartOf="@id/circleStepTwo"
+                app:layout_constraintTop_toTopOf="@id/circleStepTwo"
+                app:tint="#06DECB" />
+
+            <TextView
+                android:id="@+id/lblTitleStepTwo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:fontFamily="@font/inter"
+                android:text="@string/lblTitleStepTwo"
+                android:textColor="@color/white"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toEndOf="@id/circleStepTwo"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/lblDescriptionStepTwo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:justificationMode="inter_word"
+                android:text="@string/lblDescStepTwo"
+                android:textColor="@color/text_gray"
+                android:textSize="11sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@id/stepTwo"
+                app:layout_constraintStart_toStartOf="@+id/lblTitleStepTwo"
+                app:layout_constraintTop_toBottomOf="@+id/lblTitleStepTwo" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/stepThree"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            android:background="@drawable/contents_with_border"
+            android:padding="20dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/stepTwo">
+
+            <ImageView
+                android:id="@+id/circleStepThree"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@drawable/rectangle_content_svg"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/ic_plus_step_three"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:src="@drawable/ic_folder_move_outline"
+                app:layout_constraintBottom_toBottomOf="@id/circleStepThree"
+                app:layout_constraintEnd_toEndOf="@id/circleStepThree"
+                app:layout_constraintStart_toStartOf="@id/circleStepThree"
+                app:layout_constraintTop_toTopOf="@id/circleStepThree" />
+
+            <TextView
+                android:id="@+id/lblTitleStepThree"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:fontFamily="@font/inter"
+                android:text="@string/lblTitleStepThree"
+                android:textColor="@color/white"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toEndOf="@id/circleStepThree"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/lblDescriptionStepThree"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:justificationMode="inter_word"
+                android:text="@string/lblDescStepThree"
+                android:textColor="@color/text_gray"
+                android:textSize="11sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@id/stepThree"
+                app:layout_constraintStart_toStartOf="@+id/lblTitleStepThree"
+                app:layout_constraintTop_toBottomOf="@+id/lblTitleStepThree" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnCreateFolder"
+        style="@style/btnCrearGuia"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="15dp"
+        android:layout_marginBottom="15dp"
+        android:background="@drawable/ic_filter_state_crear_guia"
+        android:layoutDirection="ltr"
+        android:text="@string/btnCrearCarpeta"
+        app:backgroundTint="@null"
+        app:icon="@drawable/plus"
+        app:iconPadding="5dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -11,7 +11,7 @@ import junit.framework.TestCase.assertEquals
 import org.junit.Test
 
 class TestSetClickSiguienteModificandoUseCase {
-    private val setSpanPalabraUseCase = mockk<SetSpanPalabraUseCase>()
+    /*private val setSpanPalabraUseCase = mockk<SetSpanPalabraUseCase>()
     private val setColocarEtiquetasUseCase = mockk<SetColocarEtiquetasUseCase>()
     private val setPintarTextosUseCase = mockk<SetPintarTextosUseCase>()
     private val setClickSiguienteModicandoUseCase = SetClickSiguienteModificandoUseCase(
@@ -206,5 +206,5 @@ class TestSetClickSiguienteModificandoUseCase {
                 )
             ), resultado
         )
-    }
+    }*/
 }

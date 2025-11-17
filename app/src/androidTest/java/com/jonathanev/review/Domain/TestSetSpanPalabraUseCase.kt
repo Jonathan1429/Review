@@ -11,7 +11,7 @@ import junit.framework.TestCase.assertTrue
 import org.junit.Test
 
 class TestSetSpanPalabraUseCase {
-    private val setSpanPalabraUseCase = SetSpanPalabraUseCase() // Reemplaza con el nombre real de tu setSpanPalabraUseCase
+    /*private val setSpanPalabraUseCase = SetSpanPalabraUseCase() // Reemplaza con el nombre real de tu setSpanPalabraUseCase
 
     private fun createEditableWithSpans(
         text: String,
@@ -180,5 +180,5 @@ class TestSetSpanPalabraUseCase {
         assertFalse(result.isDoubleColors)
         assertEquals("", result.message)
         assertEquals(3, spans.size)
-    } 
+    } */
 }

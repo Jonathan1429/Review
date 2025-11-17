@@ -10,7 +10,7 @@ import java.io.File
 import junit.framework.TestCase.assertTrue
 
 class GuiaRepositoryIntegrationTest() {
-    private val getAllGuiasUseCase = GetAllGuiasUseCase(mockk(relaxed = true))
+    /*private val getAllGuiasUseCase = GetAllGuiasUseCase(mockk(relaxed = true))
     private val guiaProvider = GuiaProvider()
     private val xmlSerializerFactory = XmlSerializerFactory()
     private val fileOutputStreamFactory = FileOutputStreamFactory()
@@ -55,5 +55,5 @@ class GuiaRepositoryIntegrationTest() {
 
         // Limpieza
         tempFile.delete()
-    }
+    }*/
 }

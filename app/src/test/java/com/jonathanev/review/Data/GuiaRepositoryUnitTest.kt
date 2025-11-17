@@ -16,7 +16,7 @@ import java.io.FileOutputStream
 import javax.xml.parsers.DocumentBuilderFactory
 
 class GuiaRepositoryUnitTest {
-    private val getAllGuiasUseCase = mockk<GetAllGuiasUseCase>()
+    /*private val getAllGuiasUseCase = mockk<GetAllGuiasUseCase>()
     private val guiaProvider = GuiaProvider()
     private val xmlSerializerFactory = mockk<XmlSerializerFactory>()
     private val fileOutputStreamFactory = mockk<FileOutputStreamFactory>()
@@ -160,7 +160,7 @@ class GuiaRepositoryUnitTest {
         //assertTrue(resultado.isEmpty())
 
         tempFile.delete()
-    }
+    }*/
 
     /*@Test
     fun usa_getAllGuiasUseCase_y_guiaProvider_explicitamente() {

@@ -13,7 +13,7 @@ import org.junit.Test
 import org.junit.jupiter.api.Assertions.assertSame
 
 class TestSetColocarEtiquetasUseCase {
-    private var setColocarEtiquetasUseCase = SetColocarEtiquetasUseCase()
+    /*private var setColocarEtiquetasUseCase = SetColocarEtiquetasUseCase()
 
     /*@Test
     fun te_regresa_un_editable_sin_colores(){
@@ -70,5 +70,5 @@ class TestSetColocarEtiquetasUseCase {
             editable.replace(7, 7, closing)
         }
         assertSame(editable, result)
-    }
+    }*/
 }

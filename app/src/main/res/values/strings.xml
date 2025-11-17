@@ -40,4 +40,22 @@
 
     <string name="btnCrearCarpeta"> Crear carpeta</string>
     <string name="btnCrearArchivo"> Crear archivo</string>
+
+    <string name="lblCarpetas">Mis carpetas</string>
+
+    <string name="lblWithoutFolders">Sin folders aún</string>
+    <string name="lblWithoutFoldersDes">Vamos a ayudarte a ser organizado! Aqui aprender a crear tu primer folder.</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="lblNameYourFolder">1. Nombra tu carpeta</string>
+    <string name="lblSelectIcon">2. Selecciona un icono</string>
+    <string name="lblPickColor">3. Selecciona el color de la carpeta</string>
+
+    <string name="lblTitleStepOne">Paso 1: Crear</string>
+    <string name="lblDescStepOne">Presiona el botón crear carpeta para crear guias dentro de la misma.</string>
+    <string name="lblTitleStepTwo">Paso 2: Personalizar</string>
+    <string name="lblDescStepTwo">Ingresa el nombre de la carpeta, seleccionar un icono y un color para identificar mas fácilmente.</string>
+    <string name="lblTitleStepThree">Paso 3: Organizar</string>
+    <string name="lblDescStepThree">Agrega valores a la guia para guardar el archivo en el nuevo folder creado</string>
+    <string name="lblMyFolder">Mi carpeta</string>
+    <string name="btnAplicar">Aplicar</string>
 </resources>

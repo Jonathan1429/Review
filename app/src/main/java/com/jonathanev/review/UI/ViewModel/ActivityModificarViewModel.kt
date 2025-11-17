@@ -1,6 +1,5 @@
 package com.jonathanev.review.UI.ViewModel
 
-import android.text.Editable
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -30,7 +29,6 @@ import com.jonathanev.review.Domain.SetColocarEtiquetasUseCase
 import com.jonathanev.review.Domain.SetCopyImagesUseCase
 import com.jonathanev.review.Domain.SetCrearXmlUseCase
 import com.jonathanev.review.Domain.SetCreatePivImage
-import com.jonathanev.review.Domain.SetPintarLetraUseCase
 import com.jonathanev.review.Domain.SetPintarTextosUseCase
 import com.jonathanev.review.UI.Utils.toUi
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -76,8 +74,10 @@ class ActivityModificarViewModel @Inject constructor(
     private var _contadorPregunta: Int = 0
     val contadorPregunta: Int get() = _contadorPregunta
 
-    private var _typeContent = TypeContent.QUESTION
-    private val typeContent get() = _typeContent
+    // Dentro de FragCreateFolderViewModel, FragMainActivity, etc.
+    private val _typeContent = MutableStateFlow(TypeContent.QUESTION)
+    // Exponemos el flujo observable (la Vista lo lee)
+    val typeContent: StateFlow<TypeContent> = _typeContent.asStateFlow()
 
     private var _showMessageMoreQuestions = true
     val showMessageMoreQuestions: Boolean get() = _showMessageMoreQuestions
@@ -204,7 +204,7 @@ class ActivityModificarViewModel @Inject constructor(
             _respuestas = datos.respuestas.toMutableList()
         }
 
-        cargarPregunta(typeContent)
+        cargarPregunta(typeContent.value)
     }
 
     fun onClickRoll(text: String): MessageActions {
@@ -265,15 +265,15 @@ class ActivityModificarViewModel @Inject constructor(
         return MessageActions.Continue
     }
 
-    fun onClickImgvSave(text: String): MessageActions {
+    /*fun onClickImgvSave(text: String): MessageActions {
         val posRespFin = respuestas.size - 1
 
-        if (text.isEmpty() && (contadorPregunta <= posRespFin || typeContent == TypeContent.QUESTION)) {
+        if (text.isEmpty() && (contadorPregunta <= posRespFin || _typeContent == TypeContent.QUESTION)) {
             return MessageActions.FieldEmpty
         }
 
         return MessageActions.Continue
-    }
+    }*/
 
     fun deleteCurrentQuestion() {
         deleteCurrentQuestionUseCase.invoke(_preguntas, _respuestas, contadorPregunta)
@@ -282,7 +282,7 @@ class ActivityModificarViewModel @Inject constructor(
     fun updateQuestion(textWithLabels: String, listSpans: List<ColorRange>) {
         // La lista no crea una copia sino que apunta al mismo punto de referencia.
         // Esto hace que cuando se modifique algo afecta _preguntas o _respuestas
-        val mutableRefList = if (typeContent == TypeContent.QUESTION) _preguntas else _respuestas
+        val mutableRefList = if (typeContent.value == TypeContent.QUESTION) _preguntas else _respuestas
         val posTotales = mutableRefList.lastIndex
         setContent(QuestionContent.Text(textWithLabels, listSpans))
         val currentItem = QuestionItem(mutableListOf(currentContent))
@@ -301,17 +301,17 @@ class ActivityModificarViewModel @Inject constructor(
     fun getCurrentPath() = fileRepositoryImpl.getCurrentPath()
 
     fun swapTypeContent() {
-        _typeContent =
-            if (typeContent == TypeContent.QUESTION) TypeContent.ANSWER else TypeContent.QUESTION
+        _typeContent.value =
+            if (typeContent.value == TypeContent.QUESTION) TypeContent.ANSWER else TypeContent.QUESTION
     }
 
     fun setTypeContent(value: TypeContent) {
-        _typeContent = value
+        _typeContent.value = value
     }
 
-    fun getTypeContent(): TypeContent {
-        return typeContent
-    }
+    /*fun getTypeContent(): TypeContent {
+        return _typeContent
+    }*/
 
     fun cargarPregunta(typeContent: TypeContent, shouldFlip: Boolean = false) {
         val contentList = getQuestionContentsUseCase.invoke(

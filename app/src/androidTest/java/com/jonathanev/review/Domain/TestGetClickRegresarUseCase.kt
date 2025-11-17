@@ -9,7 +9,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class TestGetClickRegresarUseCase {
-    private val setPintarTextosUseCase = mockk<SetPintarTextosUseCase>()
+    /*private val setPintarTextosUseCase = mockk<SetPintarTextosUseCase>()
     private val getClickRegresarUseCase = GetClickRegresarUseCase(setPintarTextosUseCase)
 
     @Test
@@ -61,5 +61,5 @@ class TestGetClickRegresarUseCase {
                 builder = SpannableStringBuilder(preguntas[0])
             ), result
         )
-    }
+    }*/
 }

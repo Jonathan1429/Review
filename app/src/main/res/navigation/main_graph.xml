@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_graph"
+    app:startDestination="@id/fragmentCreateFolder">
+
+    <fragment
+        android:id="@+id/fragmentMainActivity"
+        android:name="com.jonathanev.review.UI.View.Fragments.FragmentMainActivity"
+        android:label="fragment_main_activity"
+        tools:layout="@layout/fragment_main_activity" >
+        <action
+            android:id="@+id/action_fragmentMainActivity_to_fragmentCreateFolder2"
+            app:destination="@id/fragmentCreateFolder"
+            app:enterAnim="@anim/fade_in_colorpickerview_skydoves" />
+    </fragment>
+    <fragment
+        android:id="@+id/fragmentCreateFolder"
+        android:name="com.jonathanev.review.UI.View.Fragments.FragmentCreateFolder"
+        android:label="fragment_create_folder"
+        tools:layout="@layout/fragment_create_folder" />
+</navigation>

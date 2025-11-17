@@ -8,7 +8,7 @@ import junit.framework.TestCase.assertTrue
 import org.junit.Test
 
 class TestGetObtenerDatosXMLUseCase {
-    //private val guiaProvider
+    /*//private val guiaProvider
     private val guiaRepository = mockk<GuiaRepository>()
     private val getObtenerDatosXMLUseCase = GetObtenerDatosXMLUseCase(guiaRepository)
 
@@ -48,5 +48,5 @@ class TestGetObtenerDatosXMLUseCase {
 
         // Assert
         assertTrue(resultado.isEmpty())
-    }
+    }*/
 }

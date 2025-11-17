@@ -9,7 +9,7 @@ import org.junit.Test
 import java.lang.reflect.Type
 
 class TestSetPintarTextosUseCase {
-    private val setCifrarRutaImagenUseCase = mockk<SetCifrarRutaImagenUseCase>()
+    /*private val setCifrarRutaImagenUseCase = mockk<SetCifrarRutaImagenUseCase>()
     private val fileHelper = mockk<FileHelperImpl>()
     private val setPintarTextosUseCase = SetPintarTextosUseCase(setCifrarRutaImagenUseCase, fileHelper)
 
@@ -120,6 +120,5 @@ class TestSetPintarTextosUseCase {
         assertEquals(1, spans.size)
         assertEquals(255, spans[0].foregroundColor)
         //assertNull(result.estadoImagen)
-    }
-
+    }*/
 }

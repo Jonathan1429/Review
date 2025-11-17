@@ -17,6 +17,9 @@ import com.jonathanev.review.databinding.FragmentColoresBinding
 import com.skydoves.colorpickerview.flag.BubbleFlag
 import com.skydoves.colorpickerview.flag.FlagMode
 import com.skydoves.colorpickerview.listeners.ColorListener
+import dagger.hilt.android.AndroidEntryPoint
+
+@AndroidEntryPoint
 class FragmentDialogColoresPopup : DialogFragment() {
     private lateinit var binding: FragmentColoresBinding
     private val viewModel: Fragment_DialogColores_popupViewModel by viewModels()

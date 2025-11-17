@@ -26,14 +26,11 @@ import com.jonathanev.review.Domain.DeleteContentInPivUseCase
 import com.jonathanev.review.Domain.DeleteCurrentQuestionUseCase
 import com.jonathanev.review.Domain.GetQuestionContentsUseCase
 import com.jonathanev.review.Domain.SetCifrarRutaImagenUseCase
-import com.jonathanev.review.Domain.SetClickRegresarModificandoUseCase
-import com.jonathanev.review.Domain.SetClickSiguienteModificandoUseCase
 import com.jonathanev.review.Domain.SetColocarEtiquetasUseCase
 import com.jonathanev.review.Domain.SetCopyImagesUseCase
 import com.jonathanev.review.Domain.SetCrearXmlUseCase
 import com.jonathanev.review.Domain.SetPintarLetraUseCase
 import com.jonathanev.review.Domain.SetPintarTextosUseCase
-import com.jonathanev.review.Domain.SetRollClickedUseCase
 import com.jonathanev.review.UI.Utils.toUi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -54,9 +51,6 @@ class ActivityCuestionarioViewModel @Inject constructor(
     private val guiaRepository: GuiaRepository,
     private val getQuestionContentsUseCase: GetQuestionContentsUseCase,
     private val setCrearXmlUseCase: SetCrearXmlUseCase,
-    private val setClickRegresarModificandoUseCase: SetClickRegresarModificandoUseCase,
-    private val setClickSiguienteModicandoUseCase: SetClickSiguienteModificandoUseCase,
-    private val setRollClickedUseCase: SetRollClickedUseCase,
     private val setColocarEtiquetasUseCase: SetColocarEtiquetasUseCase,
     private val deleteCurrentQuestionUseCase: DeleteCurrentQuestionUseCase,
     private val setCopyImagesUseCase: SetCopyImagesUseCase,
@@ -107,8 +101,10 @@ class ActivityCuestionarioViewModel @Inject constructor(
     private val _contImagenes = MutableLiveData<Int>()
     val contImagenes: LiveData<Int> get() = _contImagenes
 
-    private var _typeContent = TypeContent.QUESTION
-    private val typeContent get() = _typeContent
+    // Dentro de FragCreateFolderViewModel, FragMainActivity, etc.
+    private val _typeContent = MutableStateFlow(TypeContent.QUESTION)
+    // Exponemos el flujo observable (la Vista lo lee)
+    val typeContent: StateFlow<TypeContent> = _typeContent.asStateFlow()
 
     private val _textoImagenCorrutina = MutableLiveData<String>()
     val textoImagenCorrutina: LiveData<String> get() = _textoImagenCorrutina
@@ -220,8 +216,8 @@ class ActivityCuestionarioViewModel @Inject constructor(
     }
 
     fun swapTypeContent() {
-        _typeContent =
-            if (typeContent == TypeContent.QUESTION) TypeContent.ANSWER else TypeContent.QUESTION
+        _typeContent.value =
+            if (typeContent.value == TypeContent.QUESTION) TypeContent.ANSWER else TypeContent.QUESTION
     }
 
     fun setColocarEtiquetas(text: String, listSpans: List<ColorRange>): String {
@@ -231,7 +227,7 @@ class ActivityCuestionarioViewModel @Inject constructor(
     fun updateQuestion(textWithLabels: String, listSpans: List<ColorRange>) {
         // La lista no crea una copia sino que apunta al mismo punto de referencia.
         // Esto hace que cuando se modifique algo afecta _preguntas o _respuestas
-        val mutableRefList = if (typeContent == TypeContent.QUESTION) _preguntas else _respuestas
+        val mutableRefList = if (typeContent.value == TypeContent.QUESTION) _preguntas else _respuestas
         val posTotales = mutableRefList.lastIndex
         setContent(QuestionContent.Text(textWithLabels, listSpans))
         val currentItem = QuestionItem(mutableListOf(currentContent))
@@ -248,9 +244,9 @@ class ActivityCuestionarioViewModel @Inject constructor(
         currentContent = newContent
     }
 
-    fun getTypeContent(): TypeContent {
-        return typeContent
-    }
+    /*fun getTypeContent(): TypeContent {
+        return _typeContent
+    }*/
 
     fun getCurrentPath() = fileRepositoryImpl.getCurrentPath()
 
@@ -310,7 +306,7 @@ class ActivityCuestionarioViewModel @Inject constructor(
     }
 
     fun setTypeContent(value: TypeContent) {
-        _typeContent = value
+        _typeContent.value = value
     }
 
     fun toggleShowMessageMoreQuestions() {

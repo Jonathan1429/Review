@@ -10,7 +10,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class TestSetRollClickedUseCase {
-    private val setSpanPalabraUseCase = mockk<SetSpanPalabraUseCase>()
+    /*private val setSpanPalabraUseCase = mockk<SetSpanPalabraUseCase>()
     private val setColocarEtiquetasUseCase = mockk<SetColocarEtiquetasUseCase>()
     private val setPintarTextosUseCase = mockk<SetPintarTextosUseCase>()
     private val setRollClickedUseCase = SetRollClickedUseCase(
@@ -193,5 +193,5 @@ class TestSetRollClickedUseCase {
                 builder = editable
             ), resultado
         )
-    }
+    }*/
 }

@@ -22,4 +22,13 @@
 
     <!-- Color rojo para el mensaje *Requerido -->
     <color name="red">#FF0000</color>
+
+
+
+    <color name="background_app">#111922</color>
+    <color name="contents">#18222C</color>
+    <color name="circle_content_svg">#049689</color>
+    <color name="text_gray">#90979E</color>
+
+    <color name="bg_edittext">#1E293B</color>
 </resources>

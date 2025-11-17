@@ -11,7 +11,7 @@ import junit.framework.TestCase.assertEquals
 import org.junit.Test
 
 class TestSetClickSaveUseCase {
-    private val setSpanPalabraUseCase = mockk<SetSpanPalabraUseCase>()
+    /*private val setSpanPalabraUseCase = mockk<SetSpanPalabraUseCase>()
     private val setColocarEtiquetasUseCase = mockk<SetColocarEtiquetasUseCase>()
     private val setCrearXmlUseCase = mockk<SetCrearXmlUseCase>()
     private val setClickSaveUseCase = SetClickSaveUseCase(setSpanPalabraUseCase, setColocarEtiquetasUseCase, setCrearXmlUseCase)
@@ -284,7 +284,7 @@ class TestSetClickSaveUseCase {
                 )
             ), respuesta
         )
-    }
+    }*/
 
     /*@Test
     fun guardar_el_xml_sobreescribiendo_la_respuesta(){

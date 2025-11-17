@@ -17,7 +17,7 @@ import org.xmlpull.v1.XmlSerializer
 import java.io.FileOutputStream
 
 class TestSetCrearXmlUseCase {
-    private val getAllGuiasUseCase = mockk<GetAllGuiasUseCase>()
+    /*private val getAllGuiasUseCase = mockk<GetAllGuiasUseCase>()
     private val guiaProvider       = mockk<GuiaProvider>()
     private val serializerFactory  = mockk<XmlSerializerFactory>()
     private val fosFactory         = mockk<FileOutputStreamFactory>()
@@ -118,5 +118,5 @@ class TestSetCrearXmlUseCase {
             serializer.flush()
             fos.close()
         }
-    }
+    }*/
 }

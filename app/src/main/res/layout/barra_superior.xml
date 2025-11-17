@@ -3,14 +3,15 @@
     android:id="@+id/barrasuperior"
     android:layout_width="match_parent"
     android:layout_height="?attr/actionBarSize"
-    android:background="@color/azul_claro"
+    android:background="@color/contents"
     android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="30dp"
-        android:text="@string/app_name"
+        android:text="@string/lblCarpetas"
+        android:textColor="@color/white"
         android:textSize="@dimen/texto"
         android:fontFamily="sans-serif-black"
         android:textStyle="bold"/>

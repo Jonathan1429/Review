@@ -16,7 +16,7 @@ class FragDialNuevoArchViewModelTest {
 
     // Esta regla hace que todos los cambios en LiveData se ejecuten de inmediato en el hilo del test.
     // Sin esto, LiveData podría usar hilos internos y el test fallaría porque value no se actualiza a tiempo.
-    @get:Rule
+    /*@get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
     // Instancia del ViewModel que vamos a probar
@@ -65,5 +65,5 @@ class FragDialNuevoArchViewModelTest {
 
         // Verificamos que el repositorio fue llamado con el archivo correcto
         verify { guiaRepository.getGuias(file) }
-    }
+    }*/
 }

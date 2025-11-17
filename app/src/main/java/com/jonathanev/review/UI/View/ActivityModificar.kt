@@ -329,7 +329,7 @@ class ActivityModificar : AppCompatActivity() {
                         Toast.makeText(this, saveCurrentQuestion.message, Toast.LENGTH_LONG).show()
                     }
 
-                    val currentQuestion = viewModel.getTypeContent()
+                    val currentQuestion = viewModel.typeContent.value
                     viewModel.cargarPregunta(currentQuestion)
                 }
 
@@ -366,7 +366,7 @@ class ActivityModificar : AppCompatActivity() {
 
                     viewModel.setMinusCountQuestion()
                     viewModel.setTypeContent(TypeContent.QUESTION)
-                    val currentQuestion = viewModel.getTypeContent()
+                    val currentQuestion = viewModel.typeContent.value
                     viewModel.cargarPregunta(currentQuestion)
                 }
 
@@ -405,7 +405,7 @@ class ActivityModificar : AppCompatActivity() {
                     }
                     viewModel.setPlusCountQuestion()
                     viewModel.setTypeContent(TypeContent.QUESTION)
-                    val currentQuestion = viewModel.getTypeContent()
+                    val currentQuestion = viewModel.typeContent.value
                     viewModel.cargarPregunta(currentQuestion)
                 }
 
@@ -425,7 +425,7 @@ class ActivityModificar : AppCompatActivity() {
                             viewModel.setPlusCountQuestion()
                             viewModel.toggleShowMessageMoreQuestions()
                             viewModel.setTypeContent(TypeContent.QUESTION)
-                            val currentQuestion = viewModel.getTypeContent()
+                            val currentQuestion = viewModel.typeContent.value
                             viewModel.cargarPregunta(currentQuestion)
 
                             Toast.makeText(
@@ -464,7 +464,7 @@ class ActivityModificar : AppCompatActivity() {
                             viewModel.deleteCurrentQuestion()
                             viewModel.setMinusCountQuestion()
                             viewModel.setTypeContent(TypeContent.QUESTION)
-                            val currentQuestion = viewModel.getTypeContent()
+                            val currentQuestion = viewModel.typeContent.value
                             viewModel.cargarPregunta(currentQuestion)
                         }.setNegativeButton("Cancelar") { dialog, _ ->
                             dialog.dismiss()

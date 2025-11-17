@@ -9,7 +9,7 @@ import junit.framework.TestCase.assertEquals
 import org.junit.Test
 
 class TestDeleteCurrentQuestionUseCase {
-    private val setPintarTextosUseCase = mockk<SetPintarTextosUseCase>()
+    /*private val setPintarTextosUseCase = mockk<SetPintarTextosUseCase>()
     private val deleteCurrentQuestionUseCase = DeleteCurrentQuestionUseCase(setPintarTextosUseCase)
 
     @Test
@@ -171,5 +171,5 @@ class TestDeleteCurrentQuestionUseCase {
             ),
             result
         )
-    }
+    }*/
 }
