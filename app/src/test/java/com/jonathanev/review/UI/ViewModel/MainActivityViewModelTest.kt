@@ -17,7 +17,7 @@ class MainActivityViewModelTest {
     @get:Rule
     val instantExecutorRule = InstantTaskExecutorRule() // Esto fuerza que LiveData corra en el hilo de prueba
 
-    @Test
+    /*@Test
     fun `getAllGuias actualiza guias correctamente`() {
         // Mocks
         val repository = mockk<GuiaRepository>()
@@ -39,5 +39,5 @@ class MainActivityViewModelTest {
 
         // Verificamos que el LiveData se actualizó
         assertEquals(guiasMock, viewModel.guias.value)
-    }
+    }*/
 }

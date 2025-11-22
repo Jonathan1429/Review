@@ -245,7 +245,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnCreateFolder"
+        android:id="@+id/btnApply"
         style="@style/btnCrearGuia"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

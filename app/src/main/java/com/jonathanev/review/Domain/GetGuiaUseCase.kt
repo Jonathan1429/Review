@@ -12,6 +12,9 @@ class GetGuiaUseCase @Inject constructor(
 
         return guiaProvider.guias
             .firstOrNull { "${it.nombreGuia}.xml" == fileSelected }
-            ?.let { GuiaModel(it.nombreGuia, 0) } ?: GuiaModel("", 0)
+            ?.let { GuiaModel(
+                it.nombreGuia,
+                imgGuia = 0,
+            ) } ?: GuiaModel("", imgGuia = 0)
     }
 }

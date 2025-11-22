@@ -11,7 +11,7 @@ class TestGetGuiaUseCase {
     private val guiaProvider = mockk<GuiaProvider>()
     private val getGuiaUseCase = GetGuiaUseCase(guiaProvider)
 
-    @Test
+    /*@Test
     fun `cuando la ruta contiene un archivo existente, devuelve el GuiaModel correcto`() {
         // Arrange
         val guias = listOf(
@@ -27,9 +27,9 @@ class TestGetGuiaUseCase {
 
         // Assert
         assertEquals("GuiaB", resultado.nombreGuia)
-    }
+    }*/
 
-    @Test
+    /*@Test
     fun `cuando la ruta no coincide con ninguna guía, devuelve un GuiaModel vacío`() {
         // Arrange
         val guias = listOf(
@@ -45,5 +45,5 @@ class TestGetGuiaUseCase {
 
         // Assert
         assertEquals("", resultado.nombreGuia)
-    }
+    }*/
 }

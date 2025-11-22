@@ -2,7 +2,6 @@ package com.jonathanev.review.Data
 
 import android.util.Log
 import android.util.Xml
-import com.jonathanev.review.Core.Constants
 import com.jonathanev.review.Core.Constants.ANSWER
 import com.jonathanev.review.Core.Constants.BASERUTA_IMG_CIFRADO
 import com.jonathanev.review.Core.Constants.CUESTIONARIO
@@ -26,6 +25,7 @@ import com.jonathanev.review.Data.provider.GuiaProvider
 import com.jonathanev.review.Domain.GetAllGuiasUseCase
 import com.jonathanev.review.Domain.GetColorRanges
 import com.jonathanev.review.Domain.SetCifrarRutaImagenUseCase
+import com.jonathanev.review.Domain.MoveNonFolderFilesToOtrosUseCase
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.NodeList
@@ -58,7 +58,7 @@ class GuiaRepository @Inject constructor(
     //@ApplicationContext private val context: Context
 ) {
     fun getGuias(file: File): List<GuiaModel> {
-        guiaProvider.guias = getAllGuiasUseCase(file)
+        guiaProvider.guias = getAllGuiasUseCase.invoke(file)
         return guiaProvider.guias
     }
 

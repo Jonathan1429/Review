@@ -1,9 +1,13 @@
 package com.jonathanev.review.Data
 
-enum class FolderAction {
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
+enum class FolderAction: Parcelable {
     CREATING_FOLDER,
     RENAMING_FILE,
     RENAMING_FOLDER,
-    CREATING_GUIDE,
+    CREATING_FILE,
     NONE
 }

@@ -119,7 +119,7 @@ class FragmentDialogNuevoArchivoPopu() : DialogFragment() {
                 binding.btnGuardarGuiaEstudio.text = getString(R.string.btnCrearCarpeta)
             }
 
-            FolderAction.CREATING_GUIDE -> {
+            FolderAction.CREATING_FILE -> {
                 binding.tilNombreArchivo.hint = getString(R.string.etNombreArchivo)
                 binding.btnGuardarGuiaEstudio.text = getString(R.string.btnCrearArchivo)
             }
@@ -141,7 +141,7 @@ class FragmentDialogNuevoArchivoPopu() : DialogFragment() {
                 FolderAction.CREATING_FOLDER -> creatingFolder(fileName)
                 FolderAction.RENAMING_FILE -> renamingFile(fileName)
                 FolderAction.RENAMING_FOLDER -> TODO()
-                FolderAction.CREATING_GUIDE -> creatingGuide(fileName)
+                FolderAction.CREATING_FILE -> creatingGuide(fileName)
                 FolderAction.NONE -> Unit
             }
         }

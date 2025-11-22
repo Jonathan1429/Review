@@ -1,11 +1,64 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@drawable/contents"
     android:orientation="horizontal"
-    android:padding="10dp">
+    android:padding="10dp"
+    android:layout_margin="5dp">
+
+    <ImageView
+        android:id="@+id/ivStudyGuide"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:padding="10dp"
+        android:scaleType="centerCrop"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/contentDescTitle"
+        tools:srcCompat="@drawable/ic_lightbulb_solid_full" />
+
+    <LinearLayout
+        android:id="@+id/contentDescTitle"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:layout_constraintStart_toEndOf="@id/ivStudyGuide"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/tvGuideTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="25dp"
+            android:layout_marginStart="5dp"
+            android:layout_weight="1"
+            android:textSize="18sp"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:fontFamily="@font/inter"
+            tools:text="Álgebra Lineal" />
+
+        <TextView
+            android:id="@+id/tvGuideDescription"
+            android:layout_width="wrap_content"
+            android:layout_height="20dp"
+            android:layout_marginStart="5dp"
+            android:layout_weight="1"
+            android:textColor="@color/text_gray"
+            android:fontFamily="@font/inter"
+            android:text="@string/lblWithoutDescription" />
+    </LinearLayout>
+
+
+
+
+
+
+
 
 
     <ImageView
@@ -14,26 +67,36 @@
         android:layout_height="80dp"
         android:padding="10dp"
         android:scaleType="centerCrop"
-        tools:srcCompat="@tools:sample/avatars"
-        tools:ignore="ContentDescription" />
+        android:visibility="gone"
+        app:tint="@color/white"
+        tools:ignore="ContentDescription"
+        tools:srcCompat="@drawable/ic_archivo"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
     <TextView
         android:id="@+id/tvTituloGuia"
         android:layout_width="0dp"
-        android:layout_weight="1"
         android:layout_height="80dp"
         android:layout_marginStart="5dp"
+        android:layout_weight="1"
         android:gravity="left|center_vertical"
+        android:textSize="15sp"
         android:textStyle="bold"
-        android:textSize="15sp"/>
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
     <ImageView
         android:id="@+id/imgvBack"
         android:layout_width="20dp"
         android:layout_height="20dp"
-        android:src="@drawable/ic_back"
-        android:rotation="180"
         android:layout_gravity="center_vertical"
         android:background="?android:attr/selectableItemBackgroundBorderless"
-        tools:ignore="ContentDescription" />
-</LinearLayout>
+        android:rotation="180"
+        android:src="@drawable/ic_back"
+        android:visibility="gone"
+        tools:ignore="ContentDescription"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

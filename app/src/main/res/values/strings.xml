@@ -46,9 +46,10 @@
     <string name="lblWithoutFolders">Sin folders aún</string>
     <string name="lblWithoutFoldersDes">Vamos a ayudarte a ser organizado! Aqui aprender a crear tu primer folder.</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="lblNameYourFolder">1. Nombra tu carpeta</string>
-    <string name="lblSelectIcon">2. Selecciona un icono</string>
-    <string name="lblPickColor">3. Selecciona el color de la carpeta</string>
+    <string name="lblNameYourFolder">Nombra tu carpeta</string>
+    <string name="lblNameYourFile">Nombra tu guia</string>
+    <string name="lblSelectIcon">Selecciona un icono</string>
+    <string name="lblPickColor">Selecciona el color de la carpeta</string>
 
     <string name="lblTitleStepOne">Paso 1: Crear</string>
     <string name="lblDescStepOne">Presiona el botón crear carpeta para crear guias dentro de la misma.</string>
@@ -58,4 +59,15 @@
     <string name="lblDescStepThree">Agrega valores a la guia para guardar el archivo en el nuevo folder creado</string>
     <string name="lblMyFolder">Mi carpeta</string>
     <string name="btnAplicar">Aplicar</string>
+    <string name="icon_plus">Icono mas</string>
+    <string name="lblPreview">Previsualización:</string>
+    <string name="preview_folder">Visualización carpeta</string>
+    <string name="lblDescription">Descripción (Opcional)</string>
+    <string name="icon">3. Icono</string>
+    <string name="lblIcon">Icono</string>
+    <string name="lblWithoutGuides">Aún no tienes guias aquí</string>
+    <string name="lblDescWithoutGuides">Toca el botón para crear tu primera guía y empezar a estudiar</string>
+    <string name="btnAddGuide">Agregar nueva guia</string>
+    <string name="lblWithoutDescription">Sin descripción</string>
+    <string name="lblGuides">Guias</string>
 </resources>

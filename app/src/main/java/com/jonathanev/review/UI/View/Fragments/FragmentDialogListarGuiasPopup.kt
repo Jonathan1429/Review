@@ -15,9 +15,12 @@ import android.view.ViewGroup
 import android.view.Window
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.os.bundleOf
+import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.GridLayoutManager
 import com.jonathanev.review.Core.Constants.BASERUTA_IMG_CIFRADO
 import com.jonathanev.review.Core.Constants.GUIAS
 import com.jonathanev.review.Core.Constants.IMAGENES
@@ -26,7 +29,7 @@ import com.jonathanev.review.Data.FolderAction
 import com.jonathanev.review.Data.GuiaResult
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.provider.FilePathsProvider
-import com.jonathanev.review.Fragments.Adaptadores.ListarGuiasAdapter
+import com.jonathanev.review.Fragments.Adaptadores.AdapterListFolders
 import com.jonathanev.review.R
 import com.jonathanev.review.UI.View.ActivityModificar
 import com.jonathanev.review.UI.View.ActivityRepasarGuia
@@ -54,7 +57,7 @@ class FragmentDialogListarGuiasPopup : DialogFragment(), DialogListener {
     private val binding get() = _binding!!
 
     private val viewModel by viewModels<FragDialListarGuiasViewModel>()
-    private lateinit var adaptadorListarGuias: ListarGuiasAdapter
+    private lateinit var adaptadorListarGuias: AdapterListFolders
 
     @Inject
     lateinit var filePathsProvider: FilePathsProvider
@@ -79,17 +82,15 @@ class FragmentDialogListarGuiasPopup : DialogFragment(), DialogListener {
 
         initUI()
 
-        viewModel.guias.observe(viewLifecycleOwner) {
-            if (it.isEmpty()) {
-                binding.tvSinGuias.visibility = View.VISIBLE
-                binding.lvGuiasEstudio.visibility = View.INVISIBLE
-            } else {
-                binding.tvSinGuias.visibility = View.INVISIBLE
-                binding.lvGuiasEstudio.visibility = View.VISIBLE
-                showGuias(it)
+        viewModel.foldersUiState.observe(viewLifecycleOwner) { state ->
+            //adaptadorListarGuias.setUiState()
+            binding.progressBar.isVisible = state.isLoading
+
+            if (state.error != null) {
+                Toast.makeText(requireContext(), state.error, Toast.LENGTH_LONG).show()
             }
 
-            binding.progressBar.visibility = View.INVISIBLE
+            adaptadorListarGuias.submitList(state.folders)
         }
 
         viewModel.file.observe(this) {
@@ -97,7 +98,7 @@ class FragmentDialogListarGuiasPopup : DialogFragment(), DialogListener {
             //guiasViewModel.getAllUpdatedGuides(it)
         }
 
-        binding.LlFolders.setOnClickListener {
+        /*binding.LlFolders.setOnClickListener {
             if (binding.imgvBack.visibility == View.VISIBLE) {
                 binding.imgvFolder.visibility = View.VISIBLE
                 binding.tvNuevaCarpeta.visibility = View.VISIBLE
@@ -121,22 +122,35 @@ class FragmentDialogListarGuiasPopup : DialogFragment(), DialogListener {
                 val dialogo = FragmentDialogNuevoArchivoPopu()
                 dialogo.show(parentFragmentManager, "Fragment_nuevo")
             }
+        }*/
+
+        binding.btnCreateGuide.setOnClickListener {
+            findNavController().navigate(
+                R.id. action_fragmentDialogListarGuiasPopup_to_fragmentCreateFiles,
+                bundleOf("mode" to FolderAction.CREATING_FOLDER)
+            )
         }
     }
 
     private fun initUI() {
         binding.progressBar.visibility = View.VISIBLE
         //guiasViewModel.getAllGuides()
+        //viewModel.getAllFolders()
         viewModel.getAllGuias()
+
+        adaptadorListarGuias = AdapterListFolders { position -> showGuiaOptions(position) }
+        binding.lvGuiasEstudioNew.layoutManager = GridLayoutManager(context, 2)
+        binding.lvGuiasEstudioNew.setHasFixedSize(true)
+        binding.lvGuiasEstudioNew.adapter = adaptadorListarGuias
     }
 
-    private fun showGuias(guiaModels: List<GuiaModel>) {
-        adaptadorListarGuias =
+    /*private fun showGuias(guiaModels: List<GuiaModel>) {
+        /*adaptadorListarGuias =
             ListarGuiasAdapter(guiaModels) { position -> showGuiaOptions(position) }
         binding.lvGuiasEstudio.layoutManager = LinearLayoutManager(context)
         binding.lvGuiasEstudio.setHasFixedSize(true)
-        binding.lvGuiasEstudio.adapter = adaptadorListarGuias
-    }
+        binding.lvGuiasEstudio.adapter = adaptadorListarGuias*/
+    }*/
 
     @SuppressLint("SdCardPath")
     private fun showGuiaOptions(position: Int) {
@@ -145,7 +159,7 @@ class FragmentDialogListarGuiasPopup : DialogFragment(), DialogListener {
         //var fileClickeado: File = filePathsProvider.fileGuides
 
         when (guiaResult) {
-            GuiaResult.Empty -> Log.i("Vacio", "Vacio")
+            //GuiaResult.Empty -> Log.i("Vacio", "Vacio")
             is GuiaResult.Error -> Log.i("Error", "Error")
             is GuiaResult.Success -> {
                 if (guiaResult.guia.carpeta) { // fileClickeado.isDirectory

@@ -3,21 +3,52 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_graph"
-    app:startDestination="@id/fragmentCreateFolder">
+    app:startDestination="@id/fragmentsContent">
 
     <fragment
         android:id="@+id/fragmentMainActivity"
         android:name="com.jonathanev.review.UI.View.Fragments.FragmentMainActivity"
         android:label="fragment_main_activity"
-        tools:layout="@layout/fragment_main_activity" >
+        tools:layout="@layout/fragment_main_activity">
         <action
-            android:id="@+id/action_fragmentMainActivity_to_fragmentCreateFolder2"
-            app:destination="@id/fragmentCreateFolder"
-            app:enterAnim="@anim/fade_in_colorpickerview_skydoves" />
+            android:id="@+id/action_fragmentMainActivity_to_fragmentCreateFiles"
+            app:destination="@id/fragmentCreateFiles" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/fragmentCreateFiles"
+        android:name="com.jonathanev.review.UI.View.Fragments.FragmentCreatingFiles"
+        android:label="fragment_create_files"
+        tools:layout="@layout/fragment_create_files">
+
+        <argument
+            android:name="mode"
+            app:argType="com.jonathanev.review.Data.FolderAction"
+            app:nullable="true" />
     </fragment>
     <fragment
-        android:id="@+id/fragmentCreateFolder"
-        android:name="com.jonathanev.review.UI.View.Fragments.FragmentCreateFolder"
-        android:label="fragment_create_folder"
-        tools:layout="@layout/fragment_create_folder" />
+        android:id="@+id/fragmentsContent"
+        android:name="com.jonathanev.review.FragmentsContent"
+        android:label="fragment_fragments_content"
+        tools:layout="@layout/fragment_fragments_content">
+        <action
+            android:id="@+id/action_fragmentsContent_to_fragmentMainActivity"
+            app:destination="@id/fragmentMainActivity" />
+        <action
+            android:id="@+id/action_fragmentsContent_to_fragmentDialogListarGuiasPopup"
+            app:destination="@id/fragmentDialogListarGuiasPopup" />
+    </fragment>
+    <fragment
+        android:id="@+id/fragmentDialogListarGuiasPopup"
+        android:name="com.jonathanev.review.UI.View.Fragments.FragmentDialogListarGuiasPopup"
+        android:label="fragment_listar_guias"
+        tools:layout="@layout/fragment_listar_guias">
+        <action
+            android:id="@+id/action_fragmentDialogListarGuiasPopup_to_fragmentCreateFiles"
+            app:destination="@id/fragmentCreateFiles" />
+        <argument
+            android:name="mode"
+            app:argType="com.jonathanev.review.Data.FolderAction"
+            app:nullable="true" />
+    </fragment>
 </navigation>

@@ -1,18 +1,26 @@
 package com.jonathanev.review.UI.ViewModel.Fragments
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.Data.GuiaRepository
 import com.jonathanev.review.Data.GuiaResult
+import com.jonathanev.review.Data.Model.FoldersUiState
 import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Data.provider.GuiaProvider
 import com.jonathanev.review.Data.repository.FileHelperImpl
 import com.jonathanev.review.Data.repository.FileRepositoryImpl
 import com.jonathanev.review.Domain.DeleteContentGuidesUseCase
+import com.jonathanev.review.Domain.GetAllFoldersUseCase
 import com.jonathanev.review.Domain.GetGuiaPosicionUseCase
 import com.jonathanev.review.Domain.GetFoldersCreatedUseCase
+import com.jonathanev.review.Domain.GetNumGuidesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
 
@@ -21,14 +29,16 @@ class FragDialListarGuiasViewModel @Inject constructor(
     private val guiaRepository: GuiaRepository,
     private val guiaProvider: GuiaProvider,
     private val getGuiaPosicionUseCase: GetGuiaPosicionUseCase,
+    private val getAllFoldersUseCase: GetAllFoldersUseCase,
     private val filePathsProvider: FilePathsProvider,
     private val fileRepositoryImpl: FileRepositoryImpl,
     private val getFoldersCreatedUseCase: GetFoldersCreatedUseCase,
+    private val getNumGuidesUseCase: GetNumGuidesUseCase,
     private val deleteContentGuidesUseCase: DeleteContentGuidesUseCase,
     private val fileHelperImpl: FileHelperImpl,
 ) : ViewModel() {
-    private var _guias = MutableLiveData<List<GuiaModel>>()
-    val guias: MutableLiveData<List<GuiaModel>> get() = _guias
+    private var _foldersUiState = MutableLiveData(FoldersUiState())
+    val foldersUiState: LiveData<FoldersUiState> get() = _foldersUiState
 
     private var _file = MutableLiveData<File>()
     val file: MutableLiveData<File> get() = _file
@@ -37,12 +47,54 @@ class FragDialListarGuiasViewModel @Inject constructor(
         _guias.postValue(fileRepositoryImpl.getFilesInCurrentPath())
     }*/
 
-    fun getAllGuias() {
-        _guias.postValue(guiaProvider.guias)
+    /*fun getAllFolders(): List<String>{
+        val currentPath = File(getCurrentPath())
+        return getAllFoldersUseCase.invoke(currentPath)
     }
 
+    private fun getNumGuides(){
+        getNumGuidesUseCase.invoke()
+    }*/
+
+    fun getAllGuias() {
+        //_guias.postValue(guiaProvider.guias)
+        _foldersUiState.value = _foldersUiState.value?.copy(
+            isLoading = true,
+            error = null
+        )
+
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val guias = guiaProvider.guias
+                val nums = getNumGuidesUseCase.invoke()
+
+                val uiList = guias.mapIndexed { index, guia ->
+                    val num = nums.getOrNull(index) ?: 0
+                    guia.copy(num = num)
+                }
+
+                _foldersUiState.postValue(
+                    _foldersUiState.value?.copy(
+                        isLoading = false,
+                        folders = uiList
+                    )
+                )
+            } catch (e: Exception) {
+                _foldersUiState.postValue(
+                    _foldersUiState.value?.copy(
+                        isLoading = false,
+                        error = e.message ?: "Error desconocido"
+                    )
+                )
+            }
+        }
+    }
+
+    // Actualizar todas las guias tampoco me convence VER ESTE MÉTODO
     private fun getAllUpdatedGuides(file: File) {
-        _guias.postValue(guiaRepository.getGuias(file))
+        guiaRepository.getGuias(file)
+        //_guias.postValue()
+        getAllGuias()
     }
 
     fun changeFilePath(folderName: String) {
@@ -70,7 +122,7 @@ class FragDialListarGuiasViewModel @Inject constructor(
     }
 
     fun getGuia(position: Int): GuiaResult {
-        return getGuiaPosicionUseCase.invoke(position, _guias)
+        return getGuiaPosicionUseCase.invoke(position, guiaProvider.guias)
     }
 
     fun getFoldersCreated(): Array<String> {

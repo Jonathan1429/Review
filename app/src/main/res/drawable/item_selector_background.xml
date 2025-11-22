@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_selected="true">
+        <layer-list>
+
+            <item>
+                <shape android:shape="rectangle">
+                    <corners android:radius="8dp" />
+                    <solid android:color="@color/item_icon" /> </shape>
+            </item>
+
+            <item android:left="2dp" android:right="2dp" android:top="2dp" android:bottom="2dp">
+                <shape android:shape="rectangle">
+                    <corners android:radius="7dp" />
+                    <solid android:color="@color/bg_edittext" /> </shape>
+            </item>
+
+            <item android:left="4dp" android:right="4dp" android:top="4dp" android:bottom="4dp">
+                <shape android:shape="rectangle">
+                    <corners android:radius="6dp" />
+                    <solid android:color="@color/item_icon" /> </shape>
+            </item>
+        </layer-list>
+    </item>
+
+    <item android:drawable="@drawable/bg_edittext_create_folder"/>
+</selector>

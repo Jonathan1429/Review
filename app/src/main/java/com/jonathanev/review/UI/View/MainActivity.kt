@@ -11,6 +11,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.fragment.findNavController
 import com.jonathanev.review.Data.FolderAction
 import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.R
@@ -59,77 +62,14 @@ class MainActivity : AppCompatActivity() {
         viewModel.shouldRequestPermission.observe(this) { withoutPermission ->
             if (withoutPermission) requestReadPermission()
         }
-
-
-        // Utilizamos un botón que es reutilizado, unicamente le cambiamos el texto.
-        binding.btnAbrirGuiaEstudioHabilitado.text = resources.getText(R.string.btnAbrirGuia)
-
-        binding.btnNuevaGuiaEstudio.setOnClickListener { // Unicamente abrimos el dialogo y lo mostramos en la pantalla.
-            if (viewModel.getFoldersCreated()) {
-                val dialog = FragmentDialogNuevoArchivoPopu.newInstance(
-                    mode = FolderAction.CREATING_GUIDE
-                )
-                dialog.show(supportFragmentManager, "Fragment_nuevo")
-
-                /*val dialogo: FragmentDialogNuevoArchivoPopu = FragmentDialogNuevoArchivoPopu()
-                dialogo.show(supportFragmentManager, "Fragment_nuevo")
-
-                // Creamos las preferencias y dentro de ellas guardamos el arreglo item
-                var preferencias =
-                    applicationContext.getSharedPreferences("cambiar_nombre", MODE_PRIVATE)
-                var editor = preferencias.edit()
-                editor.putString("cambiar_nombre", "no existe")
-                editor.apply()
-
-                // Creamos las preferencias y dentro de ellas guardamos el arreglo item
-                preferencias =
-                    applicationContext.getSharedPreferences(
-                        "crear_folder",
-                        MODE_PRIVATE
-                    )
-
-                editor = preferencias.edit()
-                editor.putString("crear_folder", "no existe")
-                editor.apply()*/
-            }
-        }
-
-        binding.btnAbrirGuiaEstudioHabilitado.setOnClickListener {
-            if (viewModel.getFoldersCreated()) {
-                // Cuando lo abres cargas el repositorio principal
-                viewModel.setCurrentPath()
-                viewModel.getAllGuias(File(viewModel.getCurrentPath()))
-
-                val dialogo = FragmentDialogListarGuiasPopup()
-                dialogo.show(supportFragmentManager, "Fragment")
-            }
-        }
-
-        /*viewModel.guias.observe(this) {
-            val a = it
-            Log.i("a", it.toString())
-        }*/
     }
 
     private fun initUI() {
         val foldersCreated = foldersGuides()
 
-        // Crear subcarpetas para las imagenes
         if (foldersCreated) {
-            for (subCarpeta in carpetasImagenes) {
-                val rutaSubcarpeta =
-                    filePathsProvider.buildFolder(filePathsProvider.fileImages, subCarpeta)
-
-                // Vas creando y verificando que las carpetas se crean correctamente
-                if (!rutaSubcarpeta.exists()) {
-                    rutaSubcarpeta.mkdirs()
-                }
-            }
-
-            //viewModel.setGuiasInProvider()
+            viewModel.getAllGuias()
         }
-
-        viewModel.foldersCreated(foldersCreated)
     }
 
     private fun foldersGuides(): Boolean {

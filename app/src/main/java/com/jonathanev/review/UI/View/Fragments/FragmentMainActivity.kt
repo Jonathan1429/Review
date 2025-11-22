@@ -5,7 +5,9 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.navigation.fragment.findNavController
+import com.jonathanev.review.Data.FolderAction
 import com.jonathanev.review.R
 import com.jonathanev.review.databinding.FragmentMainActivityBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -26,8 +28,11 @@ class FragmentMainActivity : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.btnCreateFolder.setOnClickListener {
-            findNavController().navigate(R.id.action_fragmentMainActivity_to_fragmentCreateFolder2)
+        binding.btnApply.setOnClickListener {
+            /*findNavController().navigate(
+                R.id.action_fragmentMainActivity_to_fragmentCreateFolder2,
+                bundleOf("mode" to FolderAction.CREATING_FILE)
+            )*/
         }
     }
 }

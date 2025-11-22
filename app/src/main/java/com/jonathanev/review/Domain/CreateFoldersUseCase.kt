@@ -10,7 +10,7 @@ class CreateFoldersUseCase @Inject constructor(
         val paths = listOf(
             filePathsProvider.fileGuides,
             filePathsProvider.fileImages,
-            filePathsProvider.fileImagesPiv
+            filePathsProvider.fileImagesPiv,
         )
 
         for (path in paths){

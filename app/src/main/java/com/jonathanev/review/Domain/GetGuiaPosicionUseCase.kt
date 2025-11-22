@@ -7,8 +7,8 @@ import com.jonathanev.review.Data.provider.GuiaProvider
 import javax.inject.Inject
 
 class GetGuiaPosicionUseCase @Inject constructor(){
-    operator fun invoke(position: Int, guias: MutableLiveData<List<GuiaModel>>): GuiaResult {
-        val lista = guias.value ?: return GuiaResult.Empty
+    operator fun invoke(position: Int, guias: List<GuiaModel>): GuiaResult {
+        val lista = guias//.value ?: return GuiaResult.Empty
         return lista.getOrNull(position)?.let { GuiaResult.Success(it) }
             ?: GuiaResult.Error("No se encontró la guía en la posición $position")
     }
