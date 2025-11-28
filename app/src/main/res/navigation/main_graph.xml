@@ -13,19 +13,18 @@
         <action
             android:id="@+id/action_fragmentMainActivity_to_fragmentCreateFiles"
             app:destination="@id/fragmentCreateFiles" />
+        <argument
+            android:name="mode"
+            app:argType="com.jonathanev.review.Data.FolderAction"
+            app:nullable="true" />
     </fragment>
 
     <fragment
         android:id="@+id/fragmentCreateFiles"
         android:name="com.jonathanev.review.UI.View.Fragments.FragmentCreatingFiles"
         android:label="fragment_create_files"
-        tools:layout="@layout/fragment_create_files">
+        tools:layout="@layout/fragment_create_files"/>
 
-        <argument
-            android:name="mode"
-            app:argType="com.jonathanev.review.Data.FolderAction"
-            app:nullable="true" />
-    </fragment>
     <fragment
         android:id="@+id/fragmentsContent"
         android:name="com.jonathanev.review.FragmentsContent"
@@ -36,13 +35,13 @@
             app:destination="@id/fragmentMainActivity" />
         <action
             android:id="@+id/action_fragmentsContent_to_fragmentDialogListarGuiasPopup"
-            app:destination="@id/fragmentDialogListarGuiasPopup" />
+            app:destination="@id/fragmentListFolders" />
     </fragment>
     <fragment
-        android:id="@+id/fragmentDialogListarGuiasPopup"
-        android:name="com.jonathanev.review.UI.View.Fragments.FragmentDialogListarGuiasPopup"
-        android:label="fragment_listar_guias"
-        tools:layout="@layout/fragment_listar_guias">
+        android:id="@+id/fragmentListFolders"
+        android:name="com.jonathanev.review.UI.View.Fragments.FragmentListFolders"
+        android:label="fragment_listar_folders"
+        tools:layout="@layout/fragment_list_folders">
         <action
             android:id="@+id/action_fragmentDialogListarGuiasPopup_to_fragmentCreateFiles"
             app:destination="@id/fragmentCreateFiles" />
@@ -50,5 +49,40 @@
             android:name="mode"
             app:argType="com.jonathanev.review.Data.FolderAction"
             app:nullable="true" />
+        <action
+            android:id="@+id/action_fragmentDialogListarGuiasPopup_to_fragmentWithoutFiles"
+            app:destination="@id/fragmentWithoutFiles" />
+        <action
+            android:id="@+id/action_fragmentListFolders_to_fragmentListGuides"
+            app:destination="@id/fragmentListGuides" />
     </fragment>
+
+    <fragment
+        android:id="@+id/fragmentWithoutFiles"
+        android:name="com.jonathanev.review.UI.View.Fragments.FragmentWithoutFiles"
+        android:label="FragmentWithoutFiles"
+        tools:layout="@layout/fragment_without_files">
+
+        <argument
+            android:name="mode"
+            app:argType="com.jonathanev.review.Data.FolderAction"
+            app:nullable="true" />
+        <action
+            android:id="@+id/action_fragmentWithoutFiles_to_fragmentCreateFiles"
+            app:destination="@id/fragmentCreateFiles" />
+    </fragment>
+    <fragment
+        android:id="@+id/fragmentListGuides"
+        android:name="com.jonathanev.review.UI.View.Fragments.FragmentListGuides"
+        android:label="fragment_list_guides"
+        tools:layout="@layout/fragment_list_guides" >
+        <action
+            android:id="@+id/action_fragmentListGuides_to_fragmentPreviewQuestions"
+            app:destination="@id/fragmentPreviewQuestions" />
+    </fragment>
+    <fragment
+        android:id="@+id/fragmentPreviewQuestions"
+        android:name="com.jonathanev.review.UI.View.Fragments.FragmentPreviewQuestions"
+        android:label="fragment_preview_questions"
+        tools:layout="@layout/fragment_preview_questions" />
 </navigation>

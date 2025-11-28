@@ -1,15 +1,13 @@
 package com.jonathanev.review.UI.ViewModel
 
 import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.Data.Model.EstadoUI
-import com.jonathanev.review.Data.Model.GuiaModel
+import com.jonathanev.review.Data.Model.GuideModel
 import com.jonathanev.review.Data.Model.InternalRules
 import com.jonathanev.review.Data.Model.prueba.QuestionItem
-import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import com.jonathanev.review.Data.Model.prueba.QAUiItem
 import com.jonathanev.review.Data.Model.prueba.QuestionContent
 import com.jonathanev.review.Data.Model.prueba.TypeContent
@@ -46,8 +44,8 @@ class ActivityRepasarGuiaViewModel @Inject constructor(
     private var _contadorPregunta: Int = 0
     val contadorPregunta: Int get() = _contadorPregunta
 
-    private var _guiaModel = MutableLiveData<GuiaModel>()
-    val guiaModel: MutableLiveData<GuiaModel> get() = _guiaModel
+    private var _guideModel = MutableLiveData<GuideModel>()
+    val guideModel: MutableLiveData<GuideModel> get() = _guideModel
 
     private var typeContent = TypeContent.QUESTION
 
@@ -73,7 +71,7 @@ class ActivityRepasarGuiaViewModel @Inject constructor(
     val uiState = _uiState.asStateFlow()
 
     fun getGuia() {
-        _guiaModel.postValue(getGuiaUseCase(ruta = fileRepositoryImpl.getCurrentPath()))
+        _guideModel.postValue(getGuiaUseCase(ruta = fileRepositoryImpl.getCurrentPath()))
     }
 
     fun getObtenerDatosXML() {
@@ -182,9 +180,9 @@ class ActivityRepasarGuiaViewModel @Inject constructor(
         _respuestas = value
     }
 
-    fun prueba(): List<GuiaModel> {
+    /*fun prueba(): List<GuideModel> {
         return guiaProvider.guias
-    }
+    }*/
 
     fun setQAItem(it: QAUiItem) {
         _preguntas = it.preguntas.map {

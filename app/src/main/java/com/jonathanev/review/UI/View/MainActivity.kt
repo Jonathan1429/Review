@@ -11,18 +11,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.os.bundleOf
-import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.fragment.findNavController
-import com.jonathanev.review.Data.FolderAction
 import com.jonathanev.review.Data.provider.FilePathsProvider
-import com.jonathanev.review.R
-import com.jonathanev.review.UI.View.Fragments.FragmentDialogListarGuiasPopup
-import com.jonathanev.review.UI.View.Fragments.FragmentDialogNuevoArchivoPopu
 import com.jonathanev.review.UI.ViewModel.MainActivityViewModel
 import com.jonathanev.review.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
-import java.io.File
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -33,13 +25,9 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private val viewModel: MainActivityViewModel by viewModels()
-    private var carpetasImagenes = mutableListOf<String>()
 
     @Inject
     lateinit var filePathsProvider: FilePathsProvider
-
-    // Array TEXTO donde guardaremos los nombres de los ficheros.
-    var item: ArrayList<String> = ArrayList()
 
     @RequiresApi(api = Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,7 +56,7 @@ class MainActivity : AppCompatActivity() {
         val foldersCreated = foldersGuides()
 
         if (foldersCreated) {
-            viewModel.getAllGuias()
+            viewModel.getAllFolders()
         }
     }
 

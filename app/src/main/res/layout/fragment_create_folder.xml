@@ -37,7 +37,7 @@
 
     <include
         android:id="@+id/fragment_components_file"
-        layout="@layout/fragment_create_file"
+        layout="@layout/description_component"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"

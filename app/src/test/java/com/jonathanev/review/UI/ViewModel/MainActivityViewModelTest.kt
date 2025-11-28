@@ -1,17 +1,7 @@
 package com.jonathanev.review.UI.ViewModel
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.jonathanev.review.Data.GuiaRepository
-import com.jonathanev.review.Data.Model.GuiaModel
-import com.jonathanev.review.Data.provider.FilePathsProvider
-import com.jonathanev.review.Data.repository.FileRepositoryImpl
-import com.jonathanev.review.Domain.CreateFoldersUseCase
-import io.mockk.every
-import io.mockk.mockk
-import org.junit.Assert.assertEquals
 import org.junit.Rule
-import org.junit.Test
-import java.io.File
 
 class MainActivityViewModelTest {
     @get:Rule

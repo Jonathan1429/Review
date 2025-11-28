@@ -122,9 +122,9 @@ class ActivityRepasarGuia : AppCompatActivity() {
             }
         }
 
-        viewModel.guiaModel.observe(this) {
+        viewModel.guideModel.observe(this) {
             viewModel.getObtenerDatosXML()
-            binding.barraSuperiorRegreso.tvTituloToolbar.text = "Guia: ${it.nombreGuia}"
+            binding.barraSuperiorRegreso.tvTituloToolbar.text = "Guia: ${it.nameGuide}"
         }
     }
 

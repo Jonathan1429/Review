@@ -1,30 +1,4 @@
-import android.text.Editable
-import android.text.SpannableStringBuilder
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
-import com.jonathanev.review.Data.GuiaRepository
-import com.jonathanev.review.Data.Model.DataStoreManager
-import com.jonathanev.review.Data.Model.EstadoUI
-import com.jonathanev.review.Data.provider.FilePathsProvider
-import com.jonathanev.review.Data.Model.GuiaModel
-import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
-import com.jonathanev.review.Data.repository.FileRepositoryImpl
-import com.jonathanev.review.Domain.*
-import com.jonathanev.review.UI.ViewModel.ActivityCuestionarioViewModel
-import io.mockk.*
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import java.util.ArrayList
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ActivityCuestionarioViewModelTest {

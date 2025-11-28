@@ -1,15 +1,11 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.provider.GuiaProvider
-import io.mockk.every
 import io.mockk.mockk
-import junit.framework.TestCase.assertEquals
-import org.junit.Test
 
 class TestGetGuiaPosicionUseCase {
     private val guiaProvider = mockk<GuiaProvider>()
-    private var getGuiaPosicionUseCase = GetGuiaPosicionUseCase()
+    private var getFolderPosicionUseCase = GetFolderPosicionUseCase()
 
     /*@Test
     fun `te regresa la guia en la posicion enviada que se encuentra en el provider`() {

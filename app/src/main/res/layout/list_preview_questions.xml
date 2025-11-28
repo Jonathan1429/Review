@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/contents"
+    android:layout_margin="8dp">
+
+    <ImageView
+        android:id="@+id/iconPlay"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_margin="8dp"
+        android:contentDescription="Icono reproducir"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_edit"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/color_icon" />
+
+    <ImageView
+        android:id="@+id/iconEdit"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_margin="8dp"
+        android:contentDescription="Icono editar"
+        android:padding="10dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_circle_play_solid_full"
+        app:layout_constraintEnd_toStartOf="@+id/iconPlay"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/color_icon" />
+
+    <TextView
+        android:id="@+id/previewQuestion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="15dp"
+        android:ellipsize="end"
+        android:gravity="start"
+        android:maxLines="2"
+        android:textColor="@color/text_gray"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/iconEdit"
+        tools:text="asdfljas asdfjklasdf " />
+
+    <ImageView
+        android:id="@+id/iconImages"
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:layout_margin="8dp"
+        android:contentDescription="Icono imagenes"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_image_regular_full"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/previewQuestion"
+        app:tint="@color/color_icon" />
+
+    <TextView
+        android:id="@+id/noImages"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="2dp"
+        android:textColor="@color/text_gray"
+        android:textSize="13sp"
+        app:layout_constraintStart_toEndOf="@id/iconImages"
+        app:layout_constraintBottom_toBottomOf="@id/iconImages"
+        app:layout_constraintTop_toTopOf="@id/iconImages"
+        tools:text="1" />
+</androidx.constraintlayout.widget.ConstraintLayout>

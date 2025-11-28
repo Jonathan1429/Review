@@ -11,10 +11,9 @@ import com.jonathanev.review.DI.MainDispatcher
 import com.jonathanev.review.Data.GuiaRepository
 import com.jonathanev.review.Data.Model.DataStoreManager
 import com.jonathanev.review.Data.Model.EstadoUI
-import com.jonathanev.review.Data.Model.GuiaModel
+import com.jonathanev.review.Data.Model.GuideModel
 import com.jonathanev.review.Data.Model.InternalRules
 import com.jonathanev.review.Data.Model.MessageActions
-import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
 import com.jonathanev.review.Data.Model.prueba.ColorRange
 import com.jonathanev.review.Data.Model.prueba.QAUiItem
 import com.jonathanev.review.Data.Model.prueba.QuestionContent
@@ -43,7 +42,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -81,8 +79,8 @@ class ActivityCuestionarioViewModel @Inject constructor(
     val navigateToNext = _navigateToNext.asSharedFlow()
 
     //var guias = MutableLiveData<List<GuiaModel>>()
-    private val _guias = MutableLiveData<List<GuiaModel>>()
-    val guias: LiveData<List<GuiaModel>> get() = _guias
+    private val _guias = MutableLiveData<List<GuideModel>>()
+    val guias: LiveData<List<GuideModel>> get() = _guias
 
     /*// Click events
     private val _uiStateBtnNext = MutableLiveData<ValidacionesGuiaModel>()
@@ -128,14 +126,14 @@ class ActivityCuestionarioViewModel @Inject constructor(
 
     //val contImagenes = dataStore.getCountImage().asLiveData()
 
-    fun procesoActualizacion() {
+    /*fun procesoActualizacion() {
         getAllUpdatedGuides(filePathsProvider.fileGuides)
         copyImages()
-    }
+    }*/
 
-    private fun getAllUpdatedGuides(file: File) {
+    /*private fun getAllUpdatedGuides(file: File) {
         _guias.postValue(guiaRepository.getGuias(file))
-    }
+    }*/
 
     private fun copyImages() {
         setCopyImagesUseCase()

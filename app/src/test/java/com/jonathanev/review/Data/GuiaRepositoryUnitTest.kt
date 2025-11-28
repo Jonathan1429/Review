@@ -1,20 +1,5 @@
 package com.jonathanev.review.Data
 
-import com.jonathanev.review.Data.provider.FilePathsProvider
-import com.jonathanev.review.Data.Model.GuiaModel
-import com.jonathanev.review.Data.provider.GuiaProvider
-import com.jonathanev.review.Domain.GetAllGuiasUseCase
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.mockkStatic
-import io.mockk.unmockkStatic
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Test
-import org.xmlpull.v1.XmlSerializer
-import java.io.File
-import java.io.FileOutputStream
-import javax.xml.parsers.DocumentBuilderFactory
-
 class GuiaRepositoryUnitTest {
     /*private val getAllGuiasUseCase = mockk<GetAllGuiasUseCase>()
     private val guiaProvider = GuiaProvider()

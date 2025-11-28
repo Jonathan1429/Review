@@ -1,0 +1,65 @@
+package com.jonathanev.review.Domain
+
+import com.jonathanev.review.Data.Model.PreviewQuestion
+import com.jonathanev.review.Data.Model.prueba.QAItem
+import com.jonathanev.review.Data.Model.prueba.QuestionContent
+import com.jonathanev.review.Data.repository.FileRepositoryImpl
+import javax.inject.Inject
+
+class GetPreviewQuestionsUseCase @Inject constructor(
+    private val fileRepositoryImpl: FileRepositoryImpl,
+    private val setPintarTextosUseCase: SetPintarTextosUseCase
+) {
+    operator fun invoke(qaItems: List<QAItem>): MutableList<PreviewQuestion> {
+        val previewQuestion = mutableListOf<PreviewQuestion>()
+        val currentPath = fileRepositoryImpl.getCurrentPath()
+
+        qaItems.forEach { qa ->
+
+            // ----------------------------
+            //   PREGUNTA
+            // ----------------------------
+            var primerTextoPregunta: QuestionContent = QuestionContent.None
+            var totalImgsPregunta = 0
+
+            qa.question.content.forEach { item ->
+                when (val result = setPintarTextosUseCase.invoke(item, currentPath)) {
+                    is QuestionContent.Image -> totalImgsPregunta++
+
+                    is QuestionContent.Text -> {
+                        if (primerTextoPregunta == QuestionContent.None) {
+                            primerTextoPregunta = QuestionContent.Text(
+                                result.text,
+                                result.colorRanges
+                            )
+                        }
+                    }
+
+                    QuestionContent.None -> Unit
+                }
+            }
+
+            // ----------------------------
+            //   RESPUESTA
+            // ----------------------------
+            var totalImgsRespuesta = 0
+
+            qa.answer.content.forEach { item ->
+                val result = setPintarTextosUseCase.invoke(item, currentPath)
+
+                if (result is QuestionContent.Image) {
+                    totalImgsRespuesta++
+                }
+            }
+
+            previewQuestion.add(
+                PreviewQuestion(
+                    question = primerTextoPregunta,
+                    noImages = (totalImgsPregunta + totalImgsRespuesta).toString()
+                )
+            )
+        }
+
+        return previewQuestion
+    }
+}

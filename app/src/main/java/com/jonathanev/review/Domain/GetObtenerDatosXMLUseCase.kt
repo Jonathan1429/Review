@@ -7,7 +7,7 @@ import javax.inject.Inject
 class GetObtenerDatosXMLUseCase @Inject constructor(
     private val guiaRepository: GuiaRepository
 ){
-    operator fun invoke(ruta: String): QAItem {
+    operator fun invoke(ruta: String): List<QAItem> {
         return guiaRepository.getXMLVersion(ruta)
     }
 }

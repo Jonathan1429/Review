@@ -1,25 +1,5 @@
 package com.jonathanev.review.UI.ViewModel
 
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
-import com.jonathanev.review.Data.Model.GuiaModel
-import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
-import com.jonathanev.review.Data.provider.GuiaProvider
-import com.jonathanev.review.Data.repository.FileRepositoryImpl
-import com.jonathanev.review.Domain.GetGuiaUseCase
-import com.jonathanev.review.Domain.GetObtenerDatosXMLUseCase
-import com.jonathanev.review.Domain.SetPintarTextosUseCase
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-
 class ActivityRepasarGuiaViewModelTest {
     /*@get:Rule
     val instantExecutorRule = InstantTaskExecutorRule()

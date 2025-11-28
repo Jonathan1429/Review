@@ -1,20 +1,17 @@
 package com.jonathanev.review.UI.ViewModel
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.Data.GuiaRepository
 import com.jonathanev.review.Data.Model.FoldersUiState
-import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Data.repository.FileRepositoryImpl
 import com.jonathanev.review.Domain.CreateFoldersUseCase
 import com.jonathanev.review.Domain.MoveNonFolderFilesToOtrosUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -31,7 +28,7 @@ class MainActivityViewModel @Inject constructor(
     private var _foldersUiState = MutableLiveData(FoldersUiState())
     val foldersUiState: LiveData<FoldersUiState> get() = _foldersUiState
 
-    fun getAllGuias() {
+    fun getAllFolders() {
         //return fileRepositoryImpl.getFilesInCurrentPath()
         /*val a = fileRepositoryImpl.getFilesInCurrentPath()
         Log.i("a", a.toString())
@@ -41,8 +38,7 @@ class MainActivityViewModel @Inject constructor(
             // Mover archivos (espera a que termine)
             moveNonFolderFilesToOtrosUseCase.invoke()
 
-            val currentPath = File(getCurrentPath())
-            guiaRepository.getGuias(currentPath)
+            guiaRepository.getFolders()
         }
     }
 

@@ -19,7 +19,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/contentDescTitle"
-        tools:srcCompat="@drawable/ic_lightbulb_solid_full" />
+        app:srcCompat="@drawable/ic_lightbulb_solid_full" />
 
     <LinearLayout
         android:id="@+id/contentDescTitle"

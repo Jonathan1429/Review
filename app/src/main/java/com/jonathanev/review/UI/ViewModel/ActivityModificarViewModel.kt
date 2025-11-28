@@ -9,7 +9,7 @@ import com.jonathanev.review.DI.IoDispatcher
 import com.jonathanev.review.DI.MainDispatcher
 import com.jonathanev.review.Data.Model.DataStoreManager
 import com.jonathanev.review.Data.Model.EstadoUI
-import com.jonathanev.review.Data.Model.GuiaModel
+import com.jonathanev.review.Data.Model.GuideModel
 import com.jonathanev.review.Data.Model.InternalRules
 import com.jonathanev.review.Data.Model.MessageActions
 import com.jonathanev.review.Data.Model.prueba.ColorRange
@@ -118,8 +118,8 @@ class ActivityModificarViewModel @Inject constructor(
     val contImagenes: LiveData<Int> get() = _contImagenes
 
     // para GuiaModel
-    private val _guiaModel = MutableLiveData<GuiaModel>()
-    val guiaModel: LiveData<GuiaModel> get() = _guiaModel
+    private val _guideModel = MutableLiveData<GuideModel>()
+    val guideModel: LiveData<GuideModel> get() = _guideModel
     private val _textoImagenCorrutina = MutableLiveData<String>()
     val textoImagenCorrutina: LiveData<String> get() = _textoImagenCorrutina
 
@@ -193,7 +193,7 @@ class ActivityModificarViewModel @Inject constructor(
     }
 
     fun getGuia() {
-        _guiaModel.postValue(getGuiaUseCase(ruta = fileRepositoryImpl.getCurrentPath()))
+        _guideModel.postValue(getGuiaUseCase(ruta = fileRepositoryImpl.getCurrentPath()))
     }
 
     fun getObtenerDatosXML() {

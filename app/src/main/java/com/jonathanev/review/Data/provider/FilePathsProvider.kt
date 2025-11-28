@@ -35,4 +35,9 @@ class FilePathsProvider @Inject constructor(
     fun buildFolder(base: File, folder: String): File {
         return File("$base/$folder")
     }
+
+    fun beforePath(base: File): File {
+        val beforePath = File(base.path.substringBeforeLast("/"))
+        return beforePath
+    }
 }

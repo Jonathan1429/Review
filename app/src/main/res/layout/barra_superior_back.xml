@@ -5,7 +5,7 @@
     android:id="@+id/barrasuperior"
     android:layout_width="match_parent"
     android:layout_height="?attr/actionBarSize"
-    android:background="@color/azul_claro"
+    android:background="@color/contents"
     android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
     <androidx.constraintlayout.widget.ConstraintLayout

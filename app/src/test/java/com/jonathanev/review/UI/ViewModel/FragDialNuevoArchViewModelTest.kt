@@ -1,17 +1,3 @@
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.Observer
-import com.jonathanev.review.Data.GuiaRepository
-import com.jonathanev.review.Data.Model.GuiaModel
-import com.jonathanev.review.UI.ViewModel.Fragments.FragDialNuevoArchViewModel
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import java.io.File
-
 class FragDialNuevoArchViewModelTest {
 
     // Esta regla hace que todos los cambios en LiveData se ejecuten de inmediato en el hilo del test.

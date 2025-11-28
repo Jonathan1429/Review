@@ -1,11 +1,10 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.Data.Model.GuiaModel
+import com.jonathanev.review.Data.Model.GuideModel
 import com.jonathanev.review.R
 import io.mockk.every
 import io.mockk.mockk
 import junit.framework.TestCase.assertEquals
-import junit.framework.TestCase.assertNotNull
 import org.junit.Test
 import java.io.File
 
@@ -130,7 +129,7 @@ class TestGetAllGuiasUseCase {
         every { ruta.listFiles() } returns null
 
         val resultado = getAllGuiasUseCase(ruta)
-        assertEquals(emptyList<GuiaModel>(), resultado)
+        assertEquals(emptyList<GuideModel>(), resultado)
         // Así verificas que la injección es correcta, jamás vendrá null esta parte
         // a menos que la syntax de la injección se hiciera mal
         //assertNotNull(getAllGuiasUseCase.getRandomGuiaImageUseCase)

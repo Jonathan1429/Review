@@ -29,7 +29,7 @@
     <color name="contents">#18222C</color>
     <color name="circle_content_svg">#049689</color>
     <color name="text_gray">#90979E</color>
-
+    <color name="color_icon">#06DECB</color>
     <color name="bg_edittext">#1E293B</color>
     <color name="item_icon">#1A73E8</color>
 </resources>

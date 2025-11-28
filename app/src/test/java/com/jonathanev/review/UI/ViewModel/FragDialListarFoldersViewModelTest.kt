@@ -1,37 +1,34 @@
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.jonathanev.review.Data.GuiaRepository
 import com.jonathanev.review.Data.provider.FilePathsProvider
-import com.jonathanev.review.Data.Model.GuiaModel
 import com.jonathanev.review.Data.provider.GuiaProvider
 import com.jonathanev.review.Data.repository.FileHelperImpl
 import com.jonathanev.review.Data.repository.FileRepositoryImpl
 import com.jonathanev.review.Domain.DeleteContentGuidesUseCase
 import com.jonathanev.review.Domain.GetAllFoldersUseCase
 import com.jonathanev.review.Domain.GetFoldersCreatedUseCase
-import com.jonathanev.review.Domain.GetGuiaPosicionUseCase
-import com.jonathanev.review.Domain.GetNumGuidesUseCase
-import com.jonathanev.review.UI.ViewModel.Fragments.FragDialListarGuiasViewModel
-import io.mockk.every
+import com.jonathanev.review.Domain.GetFolderPosicionUseCase
+import com.jonathanev.review.Domain.GetFoldersWithNumGuidesUseCase
+import com.jonathanev.review.UI.ViewModel.Fragments.FragDialListarFoldersViewModel
 import io.mockk.mockk
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import java.io.File
 
 //@RunWith(RobolectricTestRunner::class)
-class FragDialListarGuiasViewModelTest {
+class FragDialListarFoldersViewModelTest {
 
     // Necesario para que LiveData ejecute sincrónicamente
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
-    private lateinit var viewModel: FragDialListarGuiasViewModel
+    private lateinit var viewModel: FragDialListarFoldersViewModel
     private val guiaRepository: GuiaRepository = mockk()
     private val guiaProvider: GuiaProvider = mockk()
-    private val getGuiaPosicionUseCase: GetGuiaPosicionUseCase = mockk()
+    private val getFolderPosicionUseCase: GetFolderPosicionUseCase = mockk()
     private val getAllFoldersUseCase: GetAllFoldersUseCase = mockk()
-    private val getNumGuidesUseCase: GetNumGuidesUseCase = mockk()
+    private val getFoldersWithNumGuidesUseCase: GetFoldersWithNumGuidesUseCase = mockk()
     private val filePathsProvider: FilePathsProvider = mockk()
     private val fileRepositoryImpl: FileRepositoryImpl = mockk()
     private val getFoldersCreatedUseCase: GetFoldersCreatedUseCase = mockk()
@@ -40,15 +37,15 @@ class FragDialListarGuiasViewModelTest {
 
     @Before
     fun setup() {
-        viewModel = FragDialListarGuiasViewModel(
+        viewModel = FragDialListarFoldersViewModel(
             guiaRepository,
             guiaProvider,
-            getGuiaPosicionUseCase,
+            getFolderPosicionUseCase,
             getAllFoldersUseCase,
             filePathsProvider,
             fileRepositoryImpl,
             getFoldersCreatedUseCase,
-            getNumGuidesUseCase,
+            getFoldersWithNumGuidesUseCase,
             deleteContentGuidesUseCase,
             fileHelperImpl
         )

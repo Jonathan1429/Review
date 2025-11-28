@@ -5,15 +5,10 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.viewModels
-import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import com.jonathanev.review.Data.FolderAction
 import com.jonathanev.review.UI.ViewModel.FragmentsContentViewModel
-import com.jonathanev.review.UI.ViewModel.MainActivityViewModel
 import com.jonathanev.review.databinding.FragmentFragmentsContentBinding
-import com.jonathanev.review.databinding.FragmentMainActivityBinding
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -33,8 +28,9 @@ class FragmentsContent : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.guias.observe(viewLifecycleOwner){ guides ->
-            if (guides.isEmpty()){
+        viewModel.folders.observe(viewLifecycleOwner){ folders ->
+            //if (1==1){
+            if (folders.isEmpty()){
                 findNavController().navigate(
                     R.id.action_fragmentsContent_to_fragmentMainActivity
                 )
@@ -49,6 +45,6 @@ class FragmentsContent : Fragment() {
     }
 
     private fun initUI() {
-        viewModel.getAllGuias()
+        viewModel.getAllFolders()
     }
 }

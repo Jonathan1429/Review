@@ -1,48 +1,6 @@
 package com.jonathanev.review.UI.ViewModel
 
-import android.text.Editable
-import android.text.SpannableStringBuilder
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.Observer
-import com.jonathanev.review.Data.Model.DataStoreManager
-import com.jonathanev.review.Data.Model.EstadoUI
-import com.jonathanev.review.Data.Model.GuiaModel
-import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
-import com.jonathanev.review.Data.provider.FilePathsProvider
-import com.jonathanev.review.Data.repository.FileRepositoryImpl
-import com.jonathanev.review.Domain.DeleteContentInPivUseCase
-import com.jonathanev.review.Domain.GetGuiaUseCase
-import com.jonathanev.review.Domain.GetObtenerDatosXMLUseCase
-import com.jonathanev.review.Domain.SetCifrarRutaImagenUseCase
-import com.jonathanev.review.Domain.DeleteCurrentQuestionUseCase
-import com.jonathanev.review.Domain.SetCopyImagesUseCase
-import com.jonathanev.review.Domain.SetPintarLetraUseCase
-import com.jonathanev.review.Domain.SetPintarTextosUseCase
-import io.mockk.Runs
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.every
-import io.mockk.just
-import io.mockk.mockk
-import io.mockk.verify
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ActivityModificarViewModelTest {

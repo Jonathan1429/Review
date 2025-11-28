@@ -29,10 +29,10 @@ class FragmentMainActivity : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.btnApply.setOnClickListener {
-            /*findNavController().navigate(
-                R.id.action_fragmentMainActivity_to_fragmentCreateFolder2,
-                bundleOf("mode" to FolderAction.CREATING_FILE)
-            )*/
+            findNavController().navigate(
+                R.id.action_fragmentMainActivity_to_fragmentCreateFiles,
+                bundleOf("mode" to FolderAction.CREATING_FOLDER)
+            )
         }
     }
 }

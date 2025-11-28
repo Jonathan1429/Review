@@ -16,28 +16,26 @@ import com.jonathanev.review.Core.Constants.QUESTION
 import com.jonathanev.review.Core.Constants.RESPUESTA
 import com.jonathanev.review.Core.Constants.TEXTO
 import com.jonathanev.review.Core.Constants.VERSION
-import com.jonathanev.review.Data.Model.GuiaModel
+import com.jonathanev.review.Data.Model.GuideModel
+import com.jonathanev.review.Data.Model.prueba.FolderModel
 import com.jonathanev.review.Data.Model.prueba.QAItem
 import com.jonathanev.review.Data.Model.prueba.QuestionContent
 import com.jonathanev.review.Data.Model.prueba.QuestionItem
 import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Data.provider.GuiaProvider
+import com.jonathanev.review.Domain.GetAllFoldersUseCase
 import com.jonathanev.review.Domain.GetAllGuiasUseCase
 import com.jonathanev.review.Domain.GetColorRanges
 import com.jonathanev.review.Domain.SetCifrarRutaImagenUseCase
-import com.jonathanev.review.Domain.MoveNonFolderFilesToOtrosUseCase
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.NodeList
-import org.xml.sax.SAXException
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import javax.inject.Inject
-import javax.xml.parsers.DocumentBuilder
 import javax.xml.parsers.DocumentBuilderFactory
-import javax.xml.parsers.ParserConfigurationException
 
 open class XmlSerializerFactory @Inject constructor() {
     fun create(): XmlSerializer = Xml.newSerializer()
@@ -50,6 +48,7 @@ class FileOutputStreamFactory @Inject constructor() {
 class GuiaRepository @Inject constructor(
     private val getAllGuiasUseCase: GetAllGuiasUseCase,
     private val getColorRanges: GetColorRanges,
+    private val getAllFoldersUseCase: GetAllFoldersUseCase,
     private val setCifrarRutaImagenUseCase: SetCifrarRutaImagenUseCase,
     private val guiaProvider: GuiaProvider,
     private val xmlSerializerFactory: XmlSerializerFactory,
@@ -57,10 +56,22 @@ class GuiaRepository @Inject constructor(
     private val filePathsProvider: FilePathsProvider
     //@ApplicationContext private val context: Context
 ) {
-    fun getGuias(file: File): List<GuiaModel> {
+    /*fun getGuias(file: File): List<com.jonathanev.review.Data.Model.GuideModel> {
         guiaProvider.guias = getAllGuiasUseCase.invoke(file)
         return guiaProvider.guias
+    }*/
+
+    fun getFolders(): List<FolderModel>{
+        return guiaProvider.loadFoldersFromDevice()
     }
+
+    fun getGuides(): List<GuideModel>{
+        return guiaProvider.loadGuidesFromDevice()
+    }
+
+    /*fun updateNumGuidesInFolders(listFolders: List<FolderModel>){
+        guiaProvider.folders = listFolders
+    }*/
 
     fun saveFileV2(
         currentPath: String,
@@ -139,7 +150,7 @@ class GuiaRepository @Inject constructor(
         }
     }
 
-    fun obtenerDatosXMLV2(ruta: String): QAItem {
+    /*fun obtenerDatosXMLV2(ruta: String): QAItem {
         val questionItems = mutableListOf<QuestionItem>()
         val answerItems = mutableListOf<QuestionItem>()
 
@@ -151,7 +162,7 @@ class GuiaRepository @Inject constructor(
         answerItems.addAll(getQAXML(doc, ANSWER))
 
         return QAItem(questionItems, answerItems)
-    }
+    }*/
 
     private fun getQAXML(doc: Document, typeContent: String): MutableList<QuestionItem> {
         val items = mutableListOf<QuestionItem>()
@@ -192,58 +203,71 @@ class GuiaRepository @Inject constructor(
         return items
     }
 
-    fun obtenerDatosXMLV1(ruta: String): QAItem {
-        val questions = mutableListOf<QuestionContent>()
-        val answers = mutableListOf<QuestionContent>()
-        val questionItem = mutableListOf<QuestionItem>()
-        val answerItem = mutableListOf<QuestionItem>()
+    fun obtenerDatosXMLV1(ruta: String): List<QAItem> {
 
-        val dbf: DocumentBuilderFactory = DocumentBuilderFactory.newInstance()
-        val db: DocumentBuilder
+        val listaQA = mutableListOf<QAItem>()
+
+        val dbf = DocumentBuilderFactory.newInstance()
+
         try {
-            db = dbf.newDocumentBuilder()
-            val filePath: File = File(ruta)
+            val db = dbf.newDocumentBuilder()
+            val filePath = File(ruta)
             val doc = db.parse(filePath)
 
-            // Buscamos los Nodos Interrogante y accedemos a lo que se encuentre dentro.
             val cuestionario: NodeList = doc.getElementsByTagName(INTERROGANTE)
-            for (noItem in 0 until cuestionario.length) {
-                // Accedes a los elmentos de dicho nodo
-                val e: Element = cuestionario.item(noItem) as Element
 
-                // Guardo cada uno de los valores en su respectivo arreglo.
-                val question = e.getAttribute(PREGUNTA)
-                val answer = e.getAttribute(RESPUESTA)
+            for (i in 0 until cuestionario.length) {
 
-                var textDecoded = ""
-                if (question.contains(BASERUTA_IMG_CIFRADO)){
-                    textDecoded = setCifrarRutaImagenUseCase.invoke(question, 26 - 3)
-                    questions.add(QuestionContent.Image(textDecoded,question))
+                val e = cuestionario.item(i) as Element
+
+                val ques = e.getAttribute(PREGUNTA)
+                val ans  = e.getAttribute(RESPUESTA)
+
+                // ---- PREGUNTA ----
+                val preguntaContent = mutableListOf<QuestionContent>()
+
+                val preguntaProcesada = if (ques.contains(BASERUTA_IMG_CIFRADO)) {
+                    val decoded = setCifrarRutaImagenUseCase.invoke(ques, 26 - 3)
+                    QuestionContent.Image(decoded, ques)
                 } else {
-                    questions.add(getColorRanges.invoke(question))
+                    getColorRanges.invoke(ques)
                 }
-                questionItem.add(QuestionItem(questions))
 
-                if (answer.contains(BASERUTA_IMG_CIFRADO)){
-                    textDecoded = setCifrarRutaImagenUseCase.invoke(answer, 26 - 3)
-                    answers.add(QuestionContent.Image(textDecoded,answer))
+                preguntaContent.add(preguntaProcesada)
+                val preguntaItem = QuestionItem(preguntaContent.toList())
+
+
+                // ---- RESPUESTA ----
+                val respuestaContent = mutableListOf<QuestionContent>()
+
+                val respuestaProcesada = if (ans.contains(BASERUTA_IMG_CIFRADO)) {
+                    val decoded = setCifrarRutaImagenUseCase.invoke(ans, 26 - 3)
+                    QuestionContent.Image(decoded, ans)
                 } else {
-                    answers.add(getColorRanges.invoke(answer))
+                    getColorRanges.invoke(ans)
                 }
-                answerItem.add(QuestionItem(answers))
+
+                respuestaContent.add(respuestaProcesada)
+                val respuestaItem = QuestionItem(respuestaContent.toList())
+
+
+                // ---- Agregar al resultado ----
+                listaQA.add(
+                    QAItem(
+                        question = preguntaItem,
+                        answer = respuestaItem
+                    )
+                )
             }
-        } catch (e: ParserConfigurationException) {
-            e.printStackTrace()
-        } catch (e: SAXException) {
-            e.printStackTrace()
-        } catch (e: IOException) {
+
+        } catch (e: Exception) {
             e.printStackTrace()
         }
 
-        return QAItem(questionItem, answerItem)
+        return listaQA
     }
 
-    fun getXMLVersion(ruta: String): QAItem {
+    fun getXMLVersion(ruta: String): List<QAItem> {
         val db = DocumentBuilderFactory.newInstance().newDocumentBuilder()
         val file = File(ruta)
         val doc = db.parse(file)
@@ -252,6 +276,7 @@ class GuiaRepository @Inject constructor(
         val element = versionNode.item(0) as Element
         val textValue = element.getAttribute(VERSION)
 
-        return if(textValue == "1.0") obtenerDatosXMLV1(ruta) else obtenerDatosXMLV2(ruta)
+        return obtenerDatosXMLV1(ruta)
+        //return if(textValue == "1.0") obtenerDatosXMLV1(ruta) else obtenerDatosXMLV2(ruta)
     }
 }

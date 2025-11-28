@@ -39,7 +39,9 @@
     <string name="lblCuestionario">Escribe aquí</string>
 
     <string name="btnCrearCarpeta"> Crear carpeta</string>
-    <string name="btnCrearArchivo"> Crear archivo</string>
+    <string name="btnCrearArchivo"> Crear guia</string>
+    <string name="btnAddGuide">Agregar nueva guia</string>
+    <string name="btnAddQuestions">Agregar pregunta</string>
 
     <string name="lblCarpetas">Mis carpetas</string>
 
@@ -67,7 +69,6 @@
     <string name="lblIcon">Icono</string>
     <string name="lblWithoutGuides">Aún no tienes guias aquí</string>
     <string name="lblDescWithoutGuides">Toca el botón para crear tu primera guía y empezar a estudiar</string>
-    <string name="btnAddGuide">Agregar nueva guia</string>
     <string name="lblWithoutDescription">Sin descripción</string>
     <string name="lblGuides">Guias</string>
 </resources>
