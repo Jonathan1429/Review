@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_graph"
-    app:startDestination="@id/fragmentsContent">
+    app:startDestination="@id/fragmentListFolders">
 
     <fragment
         android:id="@+id/fragmentMainActivity"
@@ -84,5 +84,14 @@
         android:id="@+id/fragmentPreviewQuestions"
         android:name="com.jonathanev.review.UI.View.Fragments.FragmentPreviewQuestions"
         android:label="fragment_preview_questions"
-        tools:layout="@layout/fragment_preview_questions" />
+        tools:layout="@layout/fragment_preview_questions" >
+        <action
+            android:id="@+id/action_fragmentPreviewQuestions_to_fragmentRepasar"
+            app:destination="@id/fragmentRepasar" />
+    </fragment>
+    <fragment
+        android:id="@+id/fragmentRepasar"
+        android:name="com.jonathanev.review.UI.View.Fragments.FragmentRepasar"
+        android:label="fragment_repasar"
+        tools:layout="@layout/fragment_repasar" />
 </navigation>

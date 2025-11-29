@@ -46,7 +46,7 @@
                 app:layout_constraintTop_toTopOf="@+id/circleWithoutFolders" />
 
             <TextView
-                android:id="@+id/lblNoFolders"
+                android:id="@+id/lblTextos"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
@@ -68,7 +68,7 @@
                 android:textColor="@color/text_gray"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/lblNoFolders" />
+                app:layout_constraintTop_toBottomOf="@+id/lblTextos" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
