@@ -8,7 +8,7 @@
     android:layout_margin="8dp">
 
     <ImageView
-        android:id="@+id/iconPlay"
+        android:id="@+id/iconEdit"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_margin="8dp"
@@ -21,7 +21,7 @@
         app:tint="@color/color_icon" />
 
     <ImageView
-        android:id="@+id/iconEdit"
+        android:id="@+id/iconPlay"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_margin="8dp"
@@ -29,7 +29,7 @@
         android:padding="10dp"
         android:scaleType="fitCenter"
         android:src="@drawable/ic_circle_play_solid_full"
-        app:layout_constraintEnd_toStartOf="@+id/iconPlay"
+        app:layout_constraintEnd_toStartOf="@+id/iconEdit"
         app:layout_constraintTop_toTopOf="parent"
         app:tint="@color/color_icon" />
 

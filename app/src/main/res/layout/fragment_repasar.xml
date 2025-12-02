@@ -104,23 +104,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/lblPregResp" />
 
-    <FrameLayout
-        android:id="@+id/contTextos"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerTextos"
         android:layout_width="match_parent"
         android:layout_height="230dp"
         android:layout_margin="8dp"
-        android:background="@drawable/contents"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:orientation="horizontal"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/lblTextos">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerTextos"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="8dp"
-            android:orientation="horizontal" />
-    </FrameLayout>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lblTextos"/>
 
     <TextView
         android:id="@+id/lblImagenes"
@@ -133,23 +125,15 @@
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/contTextos" />
+        app:layout_constraintTop_toBottomOf="@id/recyclerTextos" />
 
-    <FrameLayout
-        android:id="@+id/contWithoutFolders"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/lvGuiasEstudioNew"
         android:layout_width="match_parent"
         android:layout_height="230dp"
         android:layout_margin="8dp"
-        android:background="@drawable/contents"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:orientation="horizontal"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/lblImagenes">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/lvGuiasEstudioNew"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="8dp"
-            android:orientation="horizontal" />
-    </FrameLayout>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/lblImagenes"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

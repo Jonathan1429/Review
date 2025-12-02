@@ -15,7 +15,9 @@ data class ResponseGuia(
 data class EstadoUI(
     val shouldFlip: Boolean = false,
     val message: String = "",
-    val content: QuestionContent = QuestionContent.None,
+    val content: QuestionContent = QuestionContent.None, // Este se tiene que quitar de aquí
+    val textList: List<QuestionContent.Text> = emptyList(),
+    val imageList: List<QuestionContent.Image> = emptyList(),
     val internalRules: InternalRules = InternalRules(),
 ){
     val showImage get() = content is QuestionContent.Image

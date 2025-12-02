@@ -5,12 +5,12 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import com.jonathanev.review.Data.Model.PreviewQuestion
 import com.jonathanev.review.Data.Model.PreviewQuestionDiffCallback
-import com.jonathanev.review.Data.Model.StateUIPreviewQuestion
 import com.jonathanev.review.Fragments.ViewHolders.ListPreviewQuestionsViewHolder
 import com.jonathanev.review.databinding.ListPreviewQuestionsBinding
 
 class ListPreviewQuestionsAdapter(
-    private val posClicked: (Int) -> Unit
+    private val clickedPlay: () -> Unit,
+    private val clickedEdit: () -> Unit
 ): ListAdapter<PreviewQuestion, ListPreviewQuestionsViewHolder>(PreviewQuestionDiffCallback()) {
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -18,7 +18,7 @@ class ListPreviewQuestionsAdapter(
     ): ListPreviewQuestionsViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         val binding = ListPreviewQuestionsBinding.inflate(inflater, parent, false)
-        return ListPreviewQuestionsViewHolder(binding, posClicked)
+        return ListPreviewQuestionsViewHolder(binding, clickedPlay, clickedEdit)
     }
 
     override fun onBindViewHolder(holder: ListPreviewQuestionsViewHolder, position: Int) {

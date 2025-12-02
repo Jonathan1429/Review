@@ -28,7 +28,7 @@ class FragmentCreatingFiles : Fragment() {
     private val viewModel: FragCreateFilesViewModel by viewModels()
     private var mode: FolderAction = FolderAction.NONE
 
-    companion object {
+    /*companion object {
         fun newInstance(mode: FolderAction): FragmentDialogNuevoArchivoPopu {
             val args = Bundle().apply {
                 putString("dialog_mode", mode.name)
@@ -37,7 +37,7 @@ class FragmentCreatingFiles : Fragment() {
                 arguments = args
             }
         }
-    }
+    }*/
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_graph"
-    app:startDestination="@id/fragmentListFolders">
+    app:startDestination="@id/fragmentsContent">
 
     <fragment
         android:id="@+id/fragmentMainActivity"
@@ -93,5 +93,19 @@
         android:id="@+id/fragmentRepasar"
         android:name="com.jonathanev.review.UI.View.Fragments.FragmentRepasar"
         android:label="fragment_repasar"
-        tools:layout="@layout/fragment_repasar" />
+        tools:layout="@layout/fragment_repasar" >
+        <action
+            android:id="@+id/action_fragmentRepasar_to_fragmentVisorTexto"
+            app:destination="@id/fragmentVisorTexto" />
+    </fragment>
+    <fragment
+        android:id="@+id/fragmentVisorTexto"
+        android:name="com.jonathanev.review.UI.ViewModel.Fragments.FragmentVisorTexto"
+        android:label="fragment_visor_texto"
+        tools:layout="@layout/fragment_visor_texto">
+        <argument
+            android:name="questionText"
+            app:argType="com.jonathanev.review.Data.Model.prueba.QuestionContent$Text"
+            app:nullable="false" />
+    </fragment>
 </navigation>

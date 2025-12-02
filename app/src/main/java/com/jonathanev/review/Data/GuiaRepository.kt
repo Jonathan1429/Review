@@ -236,7 +236,6 @@ class GuiaRepository @Inject constructor(
                 preguntaContent.add(preguntaProcesada)
                 val preguntaItem = QuestionItem(preguntaContent.toList())
 
-
                 // ---- RESPUESTA ----
                 val respuestaContent = mutableListOf<QuestionContent>()
 
@@ -251,7 +250,6 @@ class GuiaRepository @Inject constructor(
                 val respuestaItem = QuestionItem(respuestaContent.toList())
 
 
-                // ---- Agregar al resultado ----
                 listaQA.add(
                     QAItem(
                         question = preguntaItem,

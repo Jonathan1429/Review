@@ -200,8 +200,8 @@ class ActivityModificarViewModel @Inject constructor(
         if (respuestas.isEmpty()) {
             val datos = getObtenerDatosXMLUseCase.invoke(ruta = getCurrentPath())
 
-            _preguntas = datos.preguntas.toMutableList()
-            _respuestas = datos.respuestas.toMutableList()
+            _preguntas = datos.map { it.question }.toMutableList()
+            _respuestas = datos.map { it.answer }.toMutableList()
         }
 
         cargarPregunta(typeContent.value)
