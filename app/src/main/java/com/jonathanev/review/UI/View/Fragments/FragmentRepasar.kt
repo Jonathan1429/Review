@@ -5,14 +5,19 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.core.animation.doOnEnd
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jonathanev.review.Data.Model.prueba.TypeContent
+import com.jonathanev.review.Data.Model.prueba.UiStopEvent
 import com.jonathanev.review.Fragments.Adaptadores.ListItemPintarImagenesAdapter
 import com.jonathanev.review.Fragments.Adaptadores.ListItemPintarTextosAdapter
 import com.jonathanev.review.R
@@ -47,6 +52,39 @@ class FragmentRepasar : Fragment() {
 
 
         initUI(positionContent)
+        listeners()
+
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.eventsMessages.collect { event ->
+                    when (event) {
+                        is UiStopEvent.ShowMessage -> {
+                            AlertDialog.Builder(requireContext())
+                                .setTitle("¡Atención!")
+                                .setMessage(event.text)
+                                .setPositiveButton(
+                                    "Si"
+                                ) { _, _ ->
+                                    viewModel.restartReview()
+
+                                    Toast.makeText(
+                                        requireContext(), "Guia reiniciada", Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                                .setNegativeButton(
+                                    "Cancelar"
+                                ) { dialog, _ ->
+                                    dialog.dismiss()
+                                }.setOnCancelListener {
+
+                                }.create().show()
+
+                            return@collect
+                        }
+                    }
+                }
+            }
+        }
 
         lifecycleScope.launch {
             viewModel.uiState.collect { uiState ->
@@ -63,9 +101,15 @@ class FragmentRepasar : Fragment() {
             binding.lblPregResp.text =
                 if (typeContent == TypeContent.QUESTION) "Pregunta" else "Respuesta"
         }
+    }
 
+    private fun listeners() {
         binding.imgvPregResp.setOnClickListener {
             viewModel.swapTypeContent()
+        }
+
+        binding.imgvNext.setOnClickListener {
+            viewModel.nextQuestion()
         }
     }
 

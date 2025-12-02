@@ -2,28 +2,30 @@ package com.jonathanev.review.UI.ViewModel.Fragments
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.Data.Model.EstadoUI
 import com.jonathanev.review.Data.Model.InternalRules
 import com.jonathanev.review.Data.Model.prueba.QuestionContent
 import com.jonathanev.review.Data.Model.prueba.QuestionItem
 import com.jonathanev.review.Data.Model.prueba.TypeContent
+import com.jonathanev.review.Data.Model.prueba.UiStopEvent
 import com.jonathanev.review.Data.repository.FileRepositoryImpl
 import com.jonathanev.review.Domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.Domain.GetQuestionContentsUseCase
-import com.jonathanev.review.Domain.SetPintarTextosUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class FragmentRepasarViewModel @Inject constructor(
     private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
     private val getQuestionContentsUseCase: GetQuestionContentsUseCase,
-    private val fileRepositoryImpl: FileRepositoryImpl,
-    private val setPintarTextosUseCase: SetPintarTextosUseCase
+    private val fileRepositoryImpl: FileRepositoryImpl
 ) : ViewModel() {
     private var _preguntas: MutableList<QuestionItem> = mutableListOf()
     val preguntas: MutableList<QuestionItem> get() = _preguntas
@@ -39,6 +41,25 @@ class FragmentRepasarViewModel @Inject constructor(
 
     private val _typeContent = MutableLiveData(TypeContent.QUESTION)
     val typeContent get() = _typeContent
+
+    private val _eventsMessages = MutableSharedFlow<UiStopEvent>()
+    val eventsMessages = _eventsMessages.asSharedFlow()
+
+    private fun addOneCount() {
+        _contadorPregunta++
+    }
+
+    private fun getCount() = contadorPregunta
+
+    private fun setCountZero(){
+        _contadorPregunta = 0
+    }
+
+    fun restartReview(){
+        setCountZero()
+        resetContentLists()
+        uploadQuestion()
+    }
 
     fun getObtenerDatosXML(positionContent: Int) {
         setContadorPregunta(positionContent)
@@ -65,13 +86,34 @@ class FragmentRepasarViewModel @Inject constructor(
         uploadQuestion(shouldFlip = true)
     }
 
+    fun nextQuestion(){
+        val count = getCount()
+        val totalQuestions = respuestas.size - 1
+
+        if (count == totalQuestions){
+            viewModelScope.launch {
+                _eventsMessages.emit(
+                    UiStopEvent.ShowMessage("Se acabaron las preguntas, ¿Quieres repetir la guía?")
+                )
+            }
+        } else {
+            addOneCount()
+            setQuestionInTypeContent()
+            resetContentLists()
+            uploadQuestion()
+        }
+    }
+
+    private fun setQuestionInTypeContent(){
+        _typeContent.value = TypeContent.QUESTION
+    }
+
     private fun resetContentLists() = _uiState.update { state ->
         state.copy(
             imageList = emptyList(),
             textList = emptyList()
         )
     }
-
 
     private fun uploadQuestion(shouldFlip: Boolean = false) {
         val contentList = getQuestionContentsUseCase.invoke(
