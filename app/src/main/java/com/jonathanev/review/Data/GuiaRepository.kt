@@ -23,10 +23,12 @@ import com.jonathanev.review.Data.Model.prueba.QuestionContent
 import com.jonathanev.review.Data.Model.prueba.QuestionItem
 import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Data.provider.GuiaProvider
+import com.jonathanev.review.Data.repository.FileRepositoryImpl
 import com.jonathanev.review.Domain.GetAllFoldersUseCase
 import com.jonathanev.review.Domain.GetAllGuiasUseCase
 import com.jonathanev.review.Domain.GetColorRanges
 import com.jonathanev.review.Domain.SetCifrarRutaImagenUseCase
+import com.jonathanev.review.Domain.SetSubstringPathUseCase
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.NodeList
@@ -49,7 +51,9 @@ class GuiaRepository @Inject constructor(
     private val getAllGuiasUseCase: GetAllGuiasUseCase,
     private val getColorRanges: GetColorRanges,
     private val getAllFoldersUseCase: GetAllFoldersUseCase,
+    private val fileRepositoryImpl: FileRepositoryImpl,
     private val setCifrarRutaImagenUseCase: SetCifrarRutaImagenUseCase,
+    private val setSubstringPathUseCase: SetSubstringPathUseCase,
     private val guiaProvider: GuiaProvider,
     private val xmlSerializerFactory: XmlSerializerFactory,
     private val fileOutputStreamFactory: FileOutputStreamFactory,
@@ -149,7 +153,6 @@ class GuiaRepository @Inject constructor(
             serializer.endTag("", type)
         }
     }
-
     /*fun obtenerDatosXMLV2(ruta: String): QAItem {
         val questionItems = mutableListOf<QuestionItem>()
         val answerItems = mutableListOf<QuestionItem>()
@@ -227,7 +230,8 @@ class GuiaRepository @Inject constructor(
                 val preguntaContent = mutableListOf<QuestionContent>()
 
                 val preguntaProcesada = if (ques.contains(BASERUTA_IMG_CIFRADO)) {
-                    val decoded = setCifrarRutaImagenUseCase.invoke(ques, 26 - 3)
+                    var decoded = setCifrarRutaImagenUseCase.invoke(ques, 26 - 3)
+                    decoded = setSubstringPathUseCase.invoke(ruta, decoded)
                     QuestionContent.Image(decoded, ques)
                 } else {
                     getColorRanges.invoke(ques)

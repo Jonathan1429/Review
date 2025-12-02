@@ -64,7 +64,7 @@ class FragmentPreviewQuestions : Fragment() {
 
     private fun initUI() {
         adaptListPreviewQuestion = ListPreviewQuestionsAdapter(
-            clickedPlay = { goReview() },
+            clickedPlay = { position -> goReview(position) },
             clickedEdit = { goEdit() })
         binding.reciclerPreviewQuestions.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         binding.reciclerPreviewQuestions.setHasFixedSize(true)
@@ -77,9 +77,14 @@ class FragmentPreviewQuestions : Fragment() {
         Log.i("Click", "Edit")
     }
 
-    private fun goReview() {
+    private fun goReview(position: Int) {
+        val bundle = Bundle().apply {
+            putInt("posContent", position)
+        }
+
         findNavController().navigate(
             R.id.action_fragmentPreviewQuestions_to_fragmentRepasar,
+            bundle
         )
     }
 }

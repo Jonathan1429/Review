@@ -9,7 +9,7 @@ import com.jonathanev.review.Fragments.ViewHolders.ListPreviewQuestionsViewHolde
 import com.jonathanev.review.databinding.ListPreviewQuestionsBinding
 
 class ListPreviewQuestionsAdapter(
-    private val clickedPlay: () -> Unit,
+    private val clickedPlay: (Int) -> Unit,
     private val clickedEdit: () -> Unit
 ): ListAdapter<PreviewQuestion, ListPreviewQuestionsViewHolder>(PreviewQuestionDiffCallback()) {
     override fun onCreateViewHolder(

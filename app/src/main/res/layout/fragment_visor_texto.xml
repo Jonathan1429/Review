@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="@color/background_app"
     android:padding="8dp"
-    tools:context=".UI.ViewModel.Fragments.FragmentVisorTexto">
+    tools:context=".UI.View.Fragments.FragmentVisorTexto">
 
     <TextView
         android:id="@+id/lblText"

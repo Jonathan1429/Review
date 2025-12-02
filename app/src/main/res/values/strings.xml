@@ -71,4 +71,5 @@
     <string name="lblDescWithoutGuides">Toca el botón para crear tu primera guía y empezar a estudiar</string>
     <string name="lblWithoutDescription">Sin descripción</string>
     <string name="lblGuides">Guias</string>
+    <string name="withoutPreviewQuestion">No hay texto a visualizar para la pregunta actual</string>
 </resources>

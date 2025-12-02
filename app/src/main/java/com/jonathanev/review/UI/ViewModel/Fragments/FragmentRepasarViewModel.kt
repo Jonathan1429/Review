@@ -37,7 +37,9 @@ class FragmentRepasarViewModel @Inject constructor(
 
     private var typeContent = TypeContent.QUESTION
 
-    fun getObtenerDatosXML() {
+    fun getObtenerDatosXML(positionContent: Int) {
+        setContadorPregunta(positionContent)
+
         if (respuestas.isEmpty()) {
             val datos = getObtenerDatosXMLUseCase.invoke(ruta = getCurrentPath())
 
@@ -46,6 +48,10 @@ class FragmentRepasarViewModel @Inject constructor(
 
             uploadQuestion(typeContent)
         }
+    }
+
+    private fun setContadorPregunta(positionContent: Int) {
+        _contadorPregunta = positionContent
     }
 
     private fun uploadQuestion(typeContent: TypeContent, shouldFlip: Boolean = false) {

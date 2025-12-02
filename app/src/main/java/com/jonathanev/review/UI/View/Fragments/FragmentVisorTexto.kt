@@ -1,4 +1,4 @@
-package com.jonathanev.review.UI.ViewModel.Fragments
+package com.jonathanev.review.UI.View.Fragments
 
 import android.annotation.SuppressLint
 import android.os.Bundle

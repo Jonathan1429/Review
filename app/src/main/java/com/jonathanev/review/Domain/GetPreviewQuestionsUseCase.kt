@@ -24,7 +24,9 @@ class GetPreviewQuestionsUseCase @Inject constructor(
 
             qa.question.content.forEach { item ->
                 when (val result = setPintarTextosUseCase.invoke(item, currentPath)) {
-                    is QuestionContent.Image -> totalImgsPregunta++
+                    is QuestionContent.Image -> {
+                        totalImgsPregunta++
+                    }
 
                     is QuestionContent.Text -> {
                         if (primerTextoPregunta == QuestionContent.None) {

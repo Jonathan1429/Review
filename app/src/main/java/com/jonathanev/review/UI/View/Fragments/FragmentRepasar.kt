@@ -10,6 +10,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.jonathanev.review.Fragments.Adaptadores.ListItemPintarImagenesAdapter
 import com.jonathanev.review.Fragments.Adaptadores.ListItemPintarTextosAdapter
 import com.jonathanev.review.R
 import com.jonathanev.review.UI.ViewModel.Fragments.FragmentRepasarViewModel
@@ -24,6 +25,7 @@ class FragmentRepasar : Fragment() {
     private val viewModel by viewModels<FragmentRepasarViewModel>()
 
     private lateinit var adaptListPintarTextos: ListItemPintarTextosAdapter
+    private lateinit var adaptListPintarImagenes: ListItemPintarImagenesAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -36,33 +38,46 @@ class FragmentRepasar : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initUI()
+        val positionContent = arguments?.getInt(
+            "posContent"
+        ) ?: 0
+
+
+        initUI(positionContent)
 
         lifecycleScope.launch {
             viewModel.uiState.collect { uiState ->
                 adaptListPintarTextos.submitList(uiState.textList)
+                adaptListPintarImagenes.submitList(uiState.imageList)
             }
         }
     }
 
-    private fun initUI() {
-        adaptListPintarTextos = ListItemPintarTextosAdapter { position -> goVisor(position) }
+    private fun initUI(positionContent: Int) {
+        adaptListPintarTextos = ListItemPintarTextosAdapter { position -> goVisorTexto(position) }
         binding.recyclerTextos.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         binding.recyclerTextos.setHasFixedSize(true)
         binding.recyclerTextos.adapter = adaptListPintarTextos
 
-        viewModel.getObtenerDatosXML()
+        adaptListPintarImagenes = ListItemPintarImagenesAdapter { position -> goVisorImagen(position) }
+        binding.recyclerImagenes.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        binding.recyclerImagenes.setHasFixedSize(true)
+        binding.recyclerImagenes.adapter = adaptListPintarImagenes
+        //viewModel.setContadorPregunta(positionContent)
+        viewModel.getObtenerDatosXML(positionContent)
     }
 
-    private fun goVisor(position: Int) {
+    private fun goVisorTexto(position: Int) {
         findNavController().navigate(
             R.id.action_fragmentRepasar_to_fragmentVisorTexto,
             bundleOf("questionText" to viewModel.uiState.value.textList[position])
         )
+    }
 
-        /*findNavController().navigate(
-            R.id.action_fragmentMainActivity_to_fragmentCreateFiles,
-            bundleOf("mode" to FolderAction.CREATING_FOLDER)
-        )*/
+    private fun goVisorImagen(position: Int) {
+        findNavController().navigate(
+            R.id.action_fragmentRepasar_to_fragmentVisorImagen,
+            bundleOf("questionImage" to viewModel.uiState.value.imageList[position])
+        )
     }
 }
