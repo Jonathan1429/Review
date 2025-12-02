@@ -1,15 +1,18 @@
 package com.jonathanev.review.UI.View.Fragments
 
+import android.animation.ObjectAnimator
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.animation.doOnEnd
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.jonathanev.review.Data.Model.prueba.TypeContent
 import com.jonathanev.review.Fragments.Adaptadores.ListItemPintarImagenesAdapter
 import com.jonathanev.review.Fragments.Adaptadores.ListItemPintarTextosAdapter
 import com.jonathanev.review.R
@@ -47,20 +50,36 @@ class FragmentRepasar : Fragment() {
 
         lifecycleScope.launch {
             viewModel.uiState.collect { uiState ->
+                if (uiState.shouldFlip) {
+                    girarCardView()
+                }
+
                 adaptListPintarTextos.submitList(uiState.textList)
                 adaptListPintarImagenes.submitList(uiState.imageList)
             }
+        }
+
+        viewModel.typeContent.observe(viewLifecycleOwner) { typeContent ->
+            binding.lblPregResp.text =
+                if (typeContent == TypeContent.QUESTION) "Pregunta" else "Respuesta"
+        }
+
+        binding.imgvPregResp.setOnClickListener {
+            viewModel.swapTypeContent()
         }
     }
 
     private fun initUI(positionContent: Int) {
         adaptListPintarTextos = ListItemPintarTextosAdapter { position -> goVisorTexto(position) }
-        binding.recyclerTextos.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        binding.recyclerTextos.layoutManager =
+            LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         binding.recyclerTextos.setHasFixedSize(true)
         binding.recyclerTextos.adapter = adaptListPintarTextos
 
-        adaptListPintarImagenes = ListItemPintarImagenesAdapter { position -> goVisorImagen(position) }
-        binding.recyclerImagenes.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        adaptListPintarImagenes =
+            ListItemPintarImagenesAdapter { position -> goVisorImagen(position) }
+        binding.recyclerImagenes.layoutManager =
+            LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         binding.recyclerImagenes.setHasFixedSize(true)
         binding.recyclerImagenes.adapter = adaptListPintarImagenes
         //viewModel.setContadorPregunta(positionContent)
@@ -79,5 +98,31 @@ class FragmentRepasar : Fragment() {
             R.id.action_fragmentRepasar_to_fragmentVisorImagen,
             bundleOf("questionImage" to viewModel.uiState.value.imageList[position])
         )
+    }
+
+    private fun girarCardView() {
+        var flipAnimatorTexts =
+            ObjectAnimator.ofFloat(binding.flContTexts, "rotationY", 0f, 180f)
+        flipAnimatorTexts.duration = 0 // Duración de la animación en milisegundos
+        flipAnimatorTexts.start()
+        flipAnimatorTexts.doOnEnd {
+            //showImageOrText()
+            flipAnimatorTexts =
+                ObjectAnimator.ofFloat(binding.flContTexts, "rotationY", 180f, 0f)
+            flipAnimatorTexts.duration = 1000 // Duración de la animación en milisegundos
+            flipAnimatorTexts.start()
+        }
+
+        var flipAnimatorImages =
+            ObjectAnimator.ofFloat(binding.flContImages, "rotationY", 0f, 180f)
+        flipAnimatorImages.duration = 0 // Duración de la animación en milisegundos
+        flipAnimatorImages.start()
+        flipAnimatorImages.doOnEnd {
+            //showImageOrText()
+            flipAnimatorImages =
+                ObjectAnimator.ofFloat(binding.flContImages, "rotationY", 180f, 0f)
+            flipAnimatorImages.duration = 1000 // Duración de la animación en milisegundos
+            flipAnimatorImages.start()
+        }
     }
 }

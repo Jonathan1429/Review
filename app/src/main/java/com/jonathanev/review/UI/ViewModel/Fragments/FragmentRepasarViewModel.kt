@@ -1,5 +1,6 @@
 package com.jonathanev.review.UI.ViewModel.Fragments
 
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.jonathanev.review.Data.Model.EstadoUI
 import com.jonathanev.review.Data.Model.InternalRules
@@ -12,6 +13,7 @@ import com.jonathanev.review.Domain.GetQuestionContentsUseCase
 import com.jonathanev.review.Domain.SetPintarTextosUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
@@ -35,7 +37,8 @@ class FragmentRepasarViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(EstadoUI())
     val uiState = _uiState.asStateFlow()
 
-    private var typeContent = TypeContent.QUESTION
+    private val _typeContent = MutableLiveData(TypeContent.QUESTION)
+    val typeContent get() = _typeContent
 
     fun getObtenerDatosXML(positionContent: Int) {
         setContadorPregunta(positionContent)
@@ -46,7 +49,7 @@ class FragmentRepasarViewModel @Inject constructor(
             _preguntas = datos.map { it.question }.toMutableList()
             _respuestas = datos.map { it.answer }.toMutableList()
 
-            uploadQuestion(typeContent)
+            uploadQuestion()
         }
     }
 
@@ -54,14 +57,30 @@ class FragmentRepasarViewModel @Inject constructor(
         _contadorPregunta = positionContent
     }
 
-    private fun uploadQuestion(typeContent: TypeContent, shouldFlip: Boolean = false) {
+    fun swapTypeContent() {
+        _typeContent.value =
+            if (typeContent.value == TypeContent.QUESTION) TypeContent.ANSWER else TypeContent.QUESTION
+
+        resetContentLists()
+        uploadQuestion(shouldFlip = true)
+    }
+
+    private fun resetContentLists() = _uiState.update { state ->
+        state.copy(
+            imageList = emptyList(),
+            textList = emptyList()
+        )
+    }
+
+
+    private fun uploadQuestion(shouldFlip: Boolean = false) {
         val contentList = getQuestionContentsUseCase.invoke(
-            if (typeContent == TypeContent.QUESTION) preguntas else respuestas,
+            if (typeContent.value == TypeContent.QUESTION) preguntas else respuestas,
             contadorPregunta
         )
 
         contentList.forEach { item ->
-            when (item){//val result = setPintarTextosUseCase.invoke(item, getCurrentPath())) {
+            when (item) {//val result = setPintarTextosUseCase.invoke(item, getCurrentPath())) {
 
                 is QuestionContent.Image -> {
                     _uiState.update { state ->
