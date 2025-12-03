@@ -79,6 +79,13 @@
         <action
             android:id="@+id/action_fragmentListGuides_to_fragmentPreviewQuestions"
             app:destination="@id/fragmentPreviewQuestions" />
+        <action
+            android:id="@+id/action_fragmentListGuides_to_fragmentCreateFiles2"
+            app:destination="@id/fragmentCreateFiles" />
+        <argument
+            android:name="mode"
+            app:argType="com.jonathanev.review.Data.FolderAction"
+            app:nullable="false" />
     </fragment>
     <fragment
         android:id="@+id/fragmentPreviewQuestions"

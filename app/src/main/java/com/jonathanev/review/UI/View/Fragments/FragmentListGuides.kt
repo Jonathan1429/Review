@@ -8,10 +8,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.jonathanev.review.Data.FolderAction
 import com.jonathanev.review.Data.Model.GuideResult
 import com.jonathanev.review.Fragments.Adaptadores.ListGuidesAdapter
 import com.jonathanev.review.R
@@ -39,6 +41,7 @@ class FragmentListGuides : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         initUI()
+        initListeners()
 
         val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -57,6 +60,15 @@ class FragmentListGuides : Fragment() {
 
         viewModel.guides.observe(viewLifecycleOwner){ guides ->
             adaptListGuides.submitList(guides)
+        }
+    }
+
+    private fun initListeners() {
+        binding.btnCreateGuide.setOnClickListener {
+            findNavController().navigate(
+                R.id.action_fragmentListGuides_to_fragmentCreateFiles2,
+                bundleOf("mode" to FolderAction.CREATING_FILE)
+            )
         }
     }
 

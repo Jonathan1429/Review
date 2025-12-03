@@ -18,7 +18,7 @@ class FragCreateFilesViewModel @Inject constructor() : ViewModel() {
 
     fun loadIconsFor(action: FolderAction) {
         val icons = when(action) {
-            FolderAction.CREATING_FILE -> listOf(R.drawable.ic_archivo)
+            FolderAction.CREATING_FILE -> listOf(R.drawable.ic_lightbulb_solid_full)
             FolderAction.CREATING_FOLDER -> listOf(
                 R.drawable.ic_anchor_solid_full,
                 R.drawable.ic_angellist_brands_solid_full,
