@@ -100,12 +100,13 @@ class FragmentRepasarViewModel @Inject constructor(
                     UiStopEvent.ShowMessage("Se acabaron las preguntas, ¿Quieres repetir la guía?")
                 )
             }
-        } else {
-            addOneCount()
-            setQuestionInTypeContent()
-            resetContentLists()
-            uploadQuestion()
+            return
         }
+        
+        addOneCount()
+        setQuestionInTypeContent()
+        resetContentLists()
+        uploadQuestion()
     }
 
     fun beforeQuestion(){
