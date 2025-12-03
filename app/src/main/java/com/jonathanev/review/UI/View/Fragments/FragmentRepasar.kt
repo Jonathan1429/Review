@@ -92,9 +92,9 @@ class FragmentRepasar : Fragment() {
 
         lifecycleScope.launch {
             viewModel.uiState.collect { uiState ->
-                if (uiState.shouldFlip) {
+                /*if (uiState.shouldFlip) {
                     girarCardView()
-                }
+                }*/
 
                 adaptListPintarTextos.submitList(uiState.textList)
                 adaptListPintarImagenes.submitList(uiState.imageList)
