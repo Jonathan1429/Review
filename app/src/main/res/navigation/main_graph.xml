@@ -23,7 +23,11 @@
         android:id="@+id/fragmentCreateFiles"
         android:name="com.jonathanev.review.UI.View.Fragments.FragmentCreatingFiles"
         android:label="fragment_create_files"
-        tools:layout="@layout/fragment_create_files"/>
+        tools:layout="@layout/fragment_create_files">
+        <action
+            android:id="@+id/action_fragmentCreateFiles_to_fragmentCreateFile2"
+            app:destination="@id/fragmentCreateFile2" />
+    </fragment>
 
     <fragment
         android:id="@+id/fragmentsContent"
@@ -132,4 +136,9 @@
             app:argType="com.jonathanev.review.Data.Model.prueba.QuestionContent$Image"
             app:nullable="false" />
     </fragment>
+    <fragment
+        android:id="@+id/fragmentCreateFile2"
+        android:name="com.jonathanev.review.UI.View.Fragments.FragmentCreateFile"
+        android:label="fragment_create_file"
+        tools:layout="@layout/fragment_create_file" />
 </navigation>
