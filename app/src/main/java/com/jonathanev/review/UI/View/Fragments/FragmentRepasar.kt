@@ -81,6 +81,10 @@ class FragmentRepasar : Fragment() {
 
                             return@collect
                         }
+
+                        is UiStopEvent.NotQuestionBefore -> {
+                            Toast.makeText(context, event.text, Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
             }
@@ -110,6 +114,10 @@ class FragmentRepasar : Fragment() {
 
         binding.imgvNext.setOnClickListener {
             viewModel.nextQuestion()
+        }
+
+        binding.imgvPrevious.setOnClickListener {
+            viewModel.beforeQuestion()
         }
     }
 

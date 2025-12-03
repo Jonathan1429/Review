@@ -49,10 +49,18 @@ class FragmentRepasarViewModel @Inject constructor(
         _contadorPregunta++
     }
 
+    private fun minusOneCount(){
+        _contadorPregunta--
+    }
+
     private fun getCount() = contadorPregunta
 
     private fun setCountZero(){
         _contadorPregunta = 0
+    }
+
+    private fun setContadorPregunta(positionContent: Int) {
+        _contadorPregunta = positionContent
     }
 
     fun restartReview(){
@@ -72,10 +80,6 @@ class FragmentRepasarViewModel @Inject constructor(
 
             uploadQuestion()
         }
-    }
-
-    private fun setContadorPregunta(positionContent: Int) {
-        _contadorPregunta = positionContent
     }
 
     fun swapTypeContent() {
@@ -102,6 +106,24 @@ class FragmentRepasarViewModel @Inject constructor(
             resetContentLists()
             uploadQuestion()
         }
+    }
+
+    fun beforeQuestion(){
+        val count = getCount()
+
+        if (count == 0){
+            viewModelScope.launch {
+                _eventsMessages.emit(
+                    UiStopEvent.NotQuestionBefore("Ya no tienes preguntas anteriores")
+                )
+            }
+            return
+        }
+
+        resetContentLists()
+        minusOneCount()
+        setQuestionInTypeContent()
+        uploadQuestion()
     }
 
     private fun setQuestionInTypeContent(){
