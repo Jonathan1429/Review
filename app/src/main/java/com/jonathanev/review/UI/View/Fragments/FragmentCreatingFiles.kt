@@ -126,13 +126,15 @@ class FragmentCreatingFiles : Fragment() {
             color = state.color
         )
 
-        findNavController().navigate(
-            R.id.action_fragmentCreateFiles_to_fragmentCreateFile2,
-            bundleOf(
-                "mode" to mode,
-                "screenData" to data
+        if (mode == FolderAction.CREATING_FILE){
+            findNavController().navigate(
+                R.id.action_fragmentCreateFiles_to_fragmentCreateFile2,
+                bundleOf(
+                    "mode" to mode,
+                    "screenData" to data
+                )
             )
-        )
+        }
     }
 
     private fun initUI() {
