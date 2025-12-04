@@ -148,5 +148,14 @@
         android:id="@+id/fragmentCreateFile2"
         android:name="com.jonathanev.review.UI.View.Fragments.FragmentCreateFile"
         android:label="fragment_create_file"
-        tools:layout="@layout/fragment_create_file" />
+        tools:layout="@layout/fragment_create_file" >
+        <action
+            android:id="@+id/action_fragmentCreateFile2_to_fragmentCreateText"
+            app:destination="@id/fragmentCreateText" />
+    </fragment>
+    <fragment
+        android:id="@+id/fragmentCreateText"
+        android:name="com.jonathanev.review.UI.View.Fragments.FragmentCreateText"
+        android:label="fragment_create_text"
+        tools:layout="@layout/fragment_create_text" />
 </navigation>

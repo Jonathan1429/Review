@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.navigation.fragment.findNavController
 import com.jonathanev.review.R
 import com.jonathanev.review.databinding.FragmentCreateFilesBinding
 import com.jonathanev.review.databinding.FragmentCreateTextBinding

@@ -6,8 +6,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.BundleCompat
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.jonathanev.review.Data.FolderAction
 import com.jonathanev.review.Data.Model.ScreenData
+import com.jonathanev.review.R
 import com.jonathanev.review.databinding.FragmentCreateFileBinding
 
 class FragmentCreateFile : Fragment() {
@@ -32,8 +34,12 @@ class FragmentCreateFile : Fragment() {
             requireArguments(), "screenData", ScreenData::class.java
         ) ?: ScreenData("", "", 0, 0)
 
-        if (1 == 1){
+        initListeners()
+    }
 
-        }
+    private fun initListeners() {
+        findNavController().navigate(
+            R.id.action_fragmentCreateFile2_to_fragmentCreateText
+        )
     }
 }
