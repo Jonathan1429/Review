@@ -72,4 +72,6 @@
     <string name="lblWithoutDescription">Sin descripción</string>
     <string name="lblGuides">Guias</string>
     <string name="withoutPreviewQuestion">No hay texto a visualizar para la pregunta actual</string>
+    <string name="add_text">Añadir texto</string>
+    <string name="add_image">Añadir Imagen</string>
 </resources>
