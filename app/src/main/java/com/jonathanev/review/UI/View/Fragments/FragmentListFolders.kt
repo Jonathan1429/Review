@@ -11,10 +11,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
+import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -32,6 +35,7 @@ import com.jonathanev.review.Fragments.Adaptadores.ListFoldersAdapter
 import com.jonathanev.review.R
 import com.jonathanev.review.UI.View.Fragments.FragmentDialogNuevoArchivoPopu.DialogListener
 import com.jonathanev.review.UI.ViewModel.Fragments.FragDialListarFoldersViewModel
+import com.jonathanev.review.UI.ViewModel.Fragments.MainToolbarViewModel
 import com.jonathanev.review.databinding.FragmentListFoldersBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -55,6 +59,7 @@ class FragmentListFolders : DialogFragment(), DialogListener {
     private val binding get() = _binding!!
 
     private val viewModel by viewModels<FragDialListarFoldersViewModel>()
+    private val viewModelToolbar: MainToolbarViewModel by activityViewModels()
     private lateinit var adaptListFolders: ListFoldersAdapter
 
     @Inject
@@ -108,6 +113,8 @@ class FragmentListFolders : DialogFragment(), DialogListener {
     }
 
     private fun initUI() {
+        viewModelToolbar.changeTitle("Carpetas")
+
         binding.progressBar.visibility = View.VISIBLE
 
         adaptListFolders = ListFoldersAdapter { position -> showFolderOptions(position) }

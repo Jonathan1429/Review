@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.jonathanev.review.Data.provider.FilePathsProvider
+import com.jonathanev.review.UI.ViewModel.Fragments.MainToolbarViewModel
 import com.jonathanev.review.UI.ViewModel.MainActivityViewModel
 import com.jonathanev.review.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -25,6 +26,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private val viewModel: MainActivityViewModel by viewModels()
+    private val viewModelToolbar: MainToolbarViewModel by viewModels()
 
     @Inject
     lateinit var filePathsProvider: FilePathsProvider
@@ -50,9 +52,23 @@ class MainActivity : AppCompatActivity() {
         viewModel.shouldRequestPermission.observe(this) { withoutPermission ->
             if (withoutPermission) requestReadPermission()
         }
+
+        viewModelToolbar.title.observe(this){ title ->
+            binding.barraSuperiorBack.tvTituloToolbar.text = title
+        }
+
+        viewModelToolbar.isSaveVisible.observe(this){ isVisibleBtnSave ->
+            binding.barraSuperiorBack.imgvSave.visibility = isVisibleBtnSave
+        }
+
+        viewModelToolbar.isBackVisible.observe(this){ isVisibleBtnBack ->
+            binding.barraSuperiorBack.imgvBack.visibility = isVisibleBtnBack
+        }
     }
 
     private fun initUI() {
+        viewModelToolbar.init()
+
         val foldersCreated = foldersGuides()
 
         if (foldersCreated) {

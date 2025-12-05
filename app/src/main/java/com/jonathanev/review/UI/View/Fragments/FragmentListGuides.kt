@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -18,6 +19,7 @@ import com.jonathanev.review.Data.Model.GuideResult
 import com.jonathanev.review.Fragments.Adaptadores.ListGuidesAdapter
 import com.jonathanev.review.R
 import com.jonathanev.review.UI.ViewModel.Fragments.FragmentListGuidesViewModel
+import com.jonathanev.review.UI.ViewModel.Fragments.MainToolbarViewModel
 import com.jonathanev.review.databinding.FragmentListGuidesBinding
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -27,6 +29,7 @@ class FragmentListGuides : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel by viewModels<FragmentListGuidesViewModel>()
+    private val viewModelToolbar: MainToolbarViewModel by activityViewModels()
     private lateinit var adaptListGuides: ListGuidesAdapter
 
     override fun onCreateView(
@@ -73,6 +76,8 @@ class FragmentListGuides : Fragment() {
     }
 
     private fun initUI() {
+        viewModelToolbar.changeTitle("Guias")
+
         adaptListGuides = ListGuidesAdapter { position -> showGuideOptions(position) }
         binding.lvGuiasEstudioNew.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         binding.lvGuiasEstudioNew.setHasFixedSize(true)

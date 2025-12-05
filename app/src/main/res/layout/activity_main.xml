@@ -7,7 +7,7 @@
     android:fitsSystemWindows="true">
 
     <include
-        android:id="@+id/barra_superior"
+        android:id="@+id/barra_superior_back"
         layout="@layout/barra_superior_back"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
@@ -21,7 +21,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/barra_superior"
+        app:layout_constraintTop_toBottomOf="@+id/barra_superior_back"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:defaultNavHost="true"

@@ -13,11 +13,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.ColorInt
 import androidx.core.widget.ImageViewCompat
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.jonathanev.review.Core.Constants.BASERUTA_IMG_CIFRADO
 import com.jonathanev.review.R
 import com.jonathanev.review.UI.ViewModel.Fragments.FragmentCreateTextViewModel
+import com.jonathanev.review.UI.ViewModel.Fragments.MainToolbarViewModel
 import com.jonathanev.review.databinding.FragmentCreateFilesBinding
 import com.jonathanev.review.databinding.FragmentCreateTextBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -26,6 +28,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class FragmentCreateText : Fragment() {
     private var _binding: FragmentCreateTextBinding? = null
     private val binding get() = _binding!!
+    private val viewModelToolbar: MainToolbarViewModel by activityViewModels()
 
     private var colorActual: Int = 0
     private var longCaracteres = 0
@@ -49,6 +52,9 @@ class FragmentCreateText : Fragment() {
 
     private fun initUI() {
         setColor(Color.WHITE)
+        viewModelToolbar.changeTitle("")
+        viewModelToolbar.isBtnBackVisible(View.VISIBLE)
+        viewModelToolbar.isSaveVisible(View.VISIBLE)
     }
 
     private fun initListeners() {
@@ -112,8 +118,6 @@ class FragmentCreateText : Fragment() {
             val color = bundle.getInt("color")
             setColor(color)
         }
-
-        binding.
     }
 
     fun setColor(@ColorInt color: Int?) {
