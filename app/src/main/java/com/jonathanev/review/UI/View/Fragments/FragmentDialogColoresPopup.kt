@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import android.view.Window
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.jonathanev.review.UI.View.ActivityModificar
 import com.jonathanev.review.UI.ViewModel.Fragments.Fragment_DialogColores_popupViewModel
 import com.jonathanev.review.databinding.FragmentColoresBinding
@@ -44,7 +45,13 @@ class FragmentDialogColoresPopup : DialogFragment() {
         // Observamos cambios de color desde el ViewModel
         viewModel.colorSeleccionado.observe(viewLifecycleOwner) { color ->
             setLayoutColor(color)
-            (activity as? ActivityModificar)?.setColor(color)
+            val result = Bundle().apply {
+                putInt("color", color)
+            }
+
+            parentFragmentManager.setFragmentResult("colorKey", result)
+            //findNavController().navigateUp() // regresar al fragment anterior
+            //(activity as? ActivityModificar)?.setColor(color)
         }
 
         binding.colorPickerView.setColorListener(ColorListener { color, _ ->

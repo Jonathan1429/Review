@@ -20,6 +20,6 @@ class Fragment_DialogColores_popupViewModel @Inject constructor(): ViewModel() {
 
     // Método para resetear al color por defecto
     fun resetColor() {
-        _colorSeleccionado.value = Color.BLACK
+        _colorSeleccionado.value = Color.WHITE
     }
 }

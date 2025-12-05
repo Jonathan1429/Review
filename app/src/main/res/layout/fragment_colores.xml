@@ -4,7 +4,7 @@
     android:layout_height="350dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_gravity="center"
-    android:background="@drawable/contorno_ventana_popup">
+    android:background="@drawable/contents">
 
     <com.skydoves.colorpickerview.ColorPickerView
         android:id="@+id/colorPickerView"
@@ -16,27 +16,35 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/btnContinuar"/>
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnContinuar"
+        style="@style/btnCrearGuia"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginBottom="15dp"
+        android:background="@drawable/ic_filter_state_crear_guia"
+        android:layoutDirection="ltr"
         android:text="@string/btnContinuar"
+        android:textStyle="bold"
+        app:backgroundTint="@null"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/btnDefault"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/colorPickerView"/>
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnDefault"
+        style="@style/btnCrearGuia"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginEnd="15dp"
+        android:layout_marginBottom="15dp"
+        android:background="@drawable/ic_filter_state_crear_guia"
+        android:layoutDirection="ltr"
         android:text="@string/btnDefault"
-        app:layout_constraintStart_toEndOf="@+id/btnContinuar"
+        android:textStyle="bold"
+        app:backgroundTint="@null"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/colorPickerView"/>
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
     <TextView
         android:id="@+id/color_hexadecimal"

@@ -43,7 +43,12 @@ class FragmentCreateText : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        initUI()
         initListeners()
+    }
+
+    private fun initUI() {
+        setColor(Color.WHITE)
     }
 
     private fun initListeners() {
@@ -60,7 +65,7 @@ class FragmentCreateText : Fragment() {
 
             binding.etPregResp.text = spannableStringBuilder
 
-            colorActual = Color.BLACK
+            colorActual = Color.WHITE
             setColor(colorActual)
         }
 
@@ -102,6 +107,13 @@ class FragmentCreateText : Fragment() {
                 }
             }
         })
+
+        parentFragmentManager.setFragmentResultListener("colorKey", this) { _, bundle ->
+            val color = bundle.getInt("color")
+            setColor(color)
+        }
+
+        binding.
     }
 
     fun setColor(@ColorInt color: Int?) {
