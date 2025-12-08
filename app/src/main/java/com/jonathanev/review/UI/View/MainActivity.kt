@@ -48,6 +48,17 @@ class MainActivity : AppCompatActivity() {
         viewModel.checkIfNeedsPermission(hasPermission)
 
         initUI()
+        observers()
+        initListeners()
+    }
+
+    private fun initListeners() {
+        binding.barraSuperiorBack.imgvSave.setOnClickListener {
+            viewModelToolbar.btnSaveText()
+        }
+    }
+
+    private fun observers() {
         // Revisar permisos, sino hay se solicitan
         viewModel.shouldRequestPermission.observe(this) { withoutPermission ->
             if (withoutPermission) requestReadPermission()

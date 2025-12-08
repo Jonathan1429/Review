@@ -4,7 +4,11 @@ import android.view.View
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -17,6 +21,9 @@ class MainToolbarViewModel @Inject constructor(): ViewModel() {
 
     private val _isSaveVisible = MutableLiveData<Int>()
     val isSaveVisible: LiveData<Int> get() = _isSaveVisible
+
+    private val _onSave = MutableSharedFlow<Unit>(replay = 0)
+    val onSave = _onSave.asSharedFlow()
 
     fun changeTitle(title: String){
         _title.value = title
@@ -34,5 +41,11 @@ class MainToolbarViewModel @Inject constructor(): ViewModel() {
         changeTitle("Review")
         isBtnBackVisible(View.GONE)
         isSaveVisible(View.GONE)
+    }
+
+    fun btnSaveText(){
+        viewModelScope.launch {
+            _onSave.emit(Unit)
+        }
     }
 }

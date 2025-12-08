@@ -87,7 +87,7 @@
         android:id="@+id/fragmentListGuides"
         android:name="com.jonathanev.review.UI.View.Fragments.FragmentListGuides"
         android:label="fragment_list_guides"
-        tools:layout="@layout/fragment_list_guides" >
+        tools:layout="@layout/fragment_list_guides">
         <action
             android:id="@+id/action_fragmentListGuides_to_fragmentPreviewQuestions"
             app:destination="@id/fragmentPreviewQuestions" />
@@ -103,7 +103,7 @@
         android:id="@+id/fragmentPreviewQuestions"
         android:name="com.jonathanev.review.UI.View.Fragments.FragmentPreviewQuestions"
         android:label="fragment_preview_questions"
-        tools:layout="@layout/fragment_preview_questions" >
+        tools:layout="@layout/fragment_preview_questions">
         <action
             android:id="@+id/action_fragmentPreviewQuestions_to_fragmentRepasar"
             app:destination="@id/fragmentRepasar" />
@@ -116,7 +116,7 @@
         android:id="@+id/fragmentRepasar"
         android:name="com.jonathanev.review.UI.View.Fragments.FragmentRepasar"
         android:label="fragment_repasar"
-        tools:layout="@layout/fragment_repasar" >
+        tools:layout="@layout/fragment_repasar">
         <action
             android:id="@+id/action_fragmentRepasar_to_fragmentVisorTexto"
             app:destination="@id/fragmentVisorTexto" />
@@ -148,7 +148,7 @@
         android:id="@+id/fragmentCreateFile2"
         android:name="com.jonathanev.review.UI.View.Fragments.FragmentCreateFile"
         android:label="fragment_create_file"
-        tools:layout="@layout/fragment_create_file" >
+        tools:layout="@layout/fragment_create_file">
         <action
             android:id="@+id/action_fragmentCreateFile2_to_fragmentCreateText"
             app:destination="@id/fragmentCreateText" />
@@ -157,5 +157,10 @@
         android:id="@+id/fragmentCreateText"
         android:name="com.jonathanev.review.UI.View.Fragments.FragmentCreateText"
         android:label="fragment_create_text"
-        tools:layout="@layout/fragment_create_text" />
+        tools:layout="@layout/fragment_create_text">
+        <argument
+            android:name="questionText"
+            app:argType="com.jonathanev.review.Data.Model.prueba.QuestionContent$Text"
+            app:nullable="false" />
+    </fragment>
 </navigation>
