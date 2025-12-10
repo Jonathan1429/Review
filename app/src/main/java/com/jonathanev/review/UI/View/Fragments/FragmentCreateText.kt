@@ -69,14 +69,23 @@ class FragmentCreateText : Fragment() {
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModelToolbar.onSave.collect {
-                    val response = saveCurrentQuestion()
-                    if (response.isDoubleColors) {
-                        Toast.makeText(requireContext(), response.message, Toast.LENGTH_LONG).show()
-                    }
-                    findNavController().navigateUp()
+                    saveProcess()
                 }
             }
         }
+    }
+
+    private fun saveProcess() {
+        if (binding.etPregResp.text.toString().isEmpty()) {
+            Toast.makeText(requireContext(), "Debes asignar un texto", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        val response = saveCurrentQuestion()
+        if (response.isDoubleColors) {
+            Toast.makeText(requireContext(), response.message, Toast.LENGTH_LONG).show()
+        }
+        findNavController().navigateUp()
     }
 
     @SuppressLint("NewApi")
@@ -94,7 +103,7 @@ class FragmentCreateText : Fragment() {
         setColor(Color.WHITE)
         viewModelToolbar.changeTitle("")
         viewModelToolbar.isBtnBackVisible(View.VISIBLE)
-        viewModelToolbar.isSaveVisible(View.VISIBLE)
+        viewModelToolbar.isBtnSaveVisible(View.VISIBLE)
     }
 
     private fun initListeners() {

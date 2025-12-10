@@ -15,6 +15,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jonathanev.review.Data.FolderAction
 import com.jonathanev.review.Data.Model.ScreenData
+import com.jonathanev.review.Fragments.Adaptadores.ListCreateImagesAdapter
 import com.jonathanev.review.Fragments.Adaptadores.ListCreateTextsAdapter
 import com.jonathanev.review.R
 import com.jonathanev.review.UI.ViewModel.Fragments.SharedFragmentCreateFileViewModel
@@ -27,7 +28,9 @@ class FragmentCreateFile : Fragment() {
     private var _binding: FragmentCreateFileBinding? = null
     private val binding get() = _binding!!
     private val viewModel: SharedFragmentCreateFileViewModel by activityViewModels()
+
     private lateinit var adaptListCreateTexts: ListCreateTextsAdapter
+    private lateinit var adaptListCreateImages: ListCreateImagesAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -54,7 +57,7 @@ class FragmentCreateFile : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { uiState ->
                     adaptListCreateTexts.submitList(uiState.textList)
-                    //adaptListPintarImagenes.submitList(uiState.imageList)
+                    adaptListCreateImages.submitList(uiState.imageList)
                 }
             }
         }
@@ -66,6 +69,23 @@ class FragmentCreateFile : Fragment() {
             LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         binding.recyclerTextos.setHasFixedSize(true)
         binding.recyclerTextos.adapter = adaptListCreateTexts
+
+        adaptListCreateImages = ListCreateImagesAdapter { position -> goEditImage(position) }
+        binding.recyclerImagenes.layoutManager =
+            LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        binding.recyclerImagenes.setHasFixedSize(true)
+        binding.recyclerImagenes.adapter = adaptListCreateImages
+    }
+
+    private fun goEditImage(position: Int) {
+        val bundle = Bundle().apply {
+            putInt("posImage", position)
+        }
+
+        findNavController().navigate(
+            R.id.action_fragmentCreateFile2_to_fragmentCreateImages,
+            bundle
+        )
     }
 
     private fun goEditText(position: Int) {
@@ -81,6 +101,17 @@ class FragmentCreateFile : Fragment() {
         binding.btnAddText.setOnClickListener {
             findNavController().navigate(
                 R.id.action_fragmentCreateFile2_to_fragmentCreateText
+            )
+        }
+
+        binding.btnAddImages.setOnClickListener {
+            val bundle = Bundle().apply {
+                putInt("posImage", -1)
+            }
+
+            findNavController().navigate(
+                R.id.action_fragmentCreateFile2_to_fragmentCreateImages,
+                bundle
             )
         }
     }

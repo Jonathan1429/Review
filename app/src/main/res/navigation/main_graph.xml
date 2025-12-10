@@ -152,6 +152,9 @@
         <action
             android:id="@+id/action_fragmentCreateFile2_to_fragmentCreateText"
             app:destination="@id/fragmentCreateText" />
+        <action
+            android:id="@+id/action_fragmentCreateFile2_to_fragmentCreateImages"
+            app:destination="@id/fragmentCreateImages" />
     </fragment>
     <fragment
         android:id="@+id/fragmentCreateText"
@@ -162,5 +165,16 @@
             android:name="questionText"
             app:argType="com.jonathanev.review.Data.Model.prueba.QuestionContent$Text"
             app:nullable="false" />
+    </fragment>
+    <fragment
+        android:id="@+id/fragmentCreateImages"
+        android:name="com.jonathanev.review.UI.View.Fragments.FragmentCreateImages"
+        android:label="fragment_create_images"
+        tools:layout="@layout/fragment_create_images">
+        <argument
+            android:name="posImage"
+            app:argType="integer"
+            app:nullable="false" />
+
     </fragment>
 </navigation>

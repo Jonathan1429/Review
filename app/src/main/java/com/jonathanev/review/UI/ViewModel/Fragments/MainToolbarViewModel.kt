@@ -33,14 +33,14 @@ class MainToolbarViewModel @Inject constructor(): ViewModel() {
         _isBackVisible.value = visible
     }
 
-    fun isSaveVisible(visible: Int){
+    fun isBtnSaveVisible(visible: Int){
         _isSaveVisible.value = visible
     }
 
     fun init() {
         changeTitle("Review")
         isBtnBackVisible(View.GONE)
-        isSaveVisible(View.GONE)
+        isBtnSaveVisible(View.GONE)
     }
 
     fun btnSaveText(){
