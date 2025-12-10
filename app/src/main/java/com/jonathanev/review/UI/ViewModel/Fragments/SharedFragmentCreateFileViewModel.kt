@@ -176,11 +176,9 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         val newContent = QuestionContent.Image(uri.toString(), encoded)
 
         if (mutableRefList.isEmpty()) {
-
             // Caso inicial: solo agregas directamente
             val newItem = QuestionItem(content = listOf(newContent))
             mutableRefList.add(newItem)
-
         } else {
 
             val oldItem = mutableRefList[contadorPregunta]
@@ -207,21 +205,35 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         }
     }
 
-    fun replaceUriImages(uri: Uri, posImage: Int) {
+    fun replaceUriImages(uri: Uri, posImageFiltered: Int) {
         val encoded = setCifrarRutaImagenUseCase(uri.toString(), 26 - 3)
         val newContent = QuestionContent.Image(uri.toString(), encoded)
 
         val mutableRefList =
             if (typeContent.value == TypeContent.QUESTION) _preguntas else _respuestas
-        // Crear una NUEVA lista reemplazando el elemento
-        val newContentList = mutableRefList[contadorPregunta].content.toMutableList().apply {
-            this[posImage] = newContent
-        }.toList() // vuelve a convertir a List inmutable (opcional)
 
-        // Crear un nuevo QuestionItem con esa lista
-        val updatedItem = mutableRefList[contadorPregunta].copy(content = newContentList)
+        val oldItem = mutableRefList[contadorPregunta]
 
-        // Reemplazar el item en la lista principal
+        // 1️⃣ Mapeamos TODA la lista con su índice real
+        val wrappers = oldItem.content.mapIndexed { index, content ->
+            ContentWrapper(
+                originalIndex = index,
+                content = content
+            )
+        }
+
+        // 2️⃣ Filtramos SOLO imágenes respetando su índice real
+        val imageWrappers = wrappers.filter { it.content is QuestionContent.Image }
+
+        // 3️⃣ Convertimos la posición DEL RECYCLER → posición REAL
+        val realIndex = imageWrappers[posImageFiltered].originalIndex
+
+        // 4️⃣ Reemplazamos usando el índice REAL
+        val newContentList = oldItem.content.toMutableList().apply {
+            this[realIndex] = newContent
+        }.toList()
+
+        val updatedItem = oldItem.copy(content = newContentList)
         mutableRefList[contadorPregunta] = updatedItem
 
         resetContentLists()
@@ -236,5 +248,39 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
     fun getActualList(): MutableList<QuestionItem> {
         return if (typeContent.value == TypeContent.QUESTION) preguntas else respuestas
+    }
+
+    fun deleteImage(posImageFiltered: Int) {
+        val mutableRefList =
+            if (typeContent.value == TypeContent.QUESTION) _preguntas else _respuestas
+
+        val oldItem = mutableRefList[contadorPregunta]
+
+        // 1️⃣ Envolvemos todos los contenidos con su índice real
+        val wrappers = oldItem.content.mapIndexed { index, content ->
+            ContentWrapper(
+                originalIndex = index,
+                content = content
+            )
+        }
+
+        // 2️⃣ Filtramos solo imágenes (pero conservando su índice real)
+        val imageWrappers = wrappers.filter { it.content is QuestionContent.Image }
+
+        // 3️⃣ Convertimos la posición filtrada → posición real
+        val realIndex = imageWrappers[posImageFiltered].originalIndex
+
+        // 4️⃣ Eliminamos de la lista REAL
+        val newContentList = oldItem.content.toMutableList().apply {
+            removeAt(realIndex)
+        }.toList()
+
+        // 5️⃣ Actualizamos el item
+        val updatedItem = oldItem.copy(content = newContentList)
+        mutableRefList[contadorPregunta] = updatedItem
+
+        // Refrescar UI
+        resetContentLists()
+        updateQuestions()
     }
 }

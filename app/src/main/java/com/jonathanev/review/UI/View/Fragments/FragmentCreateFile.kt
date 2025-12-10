@@ -70,11 +70,19 @@ class FragmentCreateFile : Fragment() {
         binding.recyclerTextos.setHasFixedSize(true)
         binding.recyclerTextos.adapter = adaptListCreateTexts
 
-        adaptListCreateImages = ListCreateImagesAdapter { position -> goEditImage(position) }
+        adaptListCreateImages =
+            ListCreateImagesAdapter(
+                onEditClicked = { position -> goEditImage(position) },
+                onDeleteClicked = { position -> goDeleteImage(position) }
+            )
         binding.recyclerImagenes.layoutManager =
             LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         binding.recyclerImagenes.setHasFixedSize(true)
         binding.recyclerImagenes.adapter = adaptListCreateImages
+    }
+
+    private fun goDeleteImage(position: Int) {
+       viewModel.deleteImage(position)
     }
 
     private fun goEditImage(position: Int) {

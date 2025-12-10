@@ -7,13 +7,18 @@ import com.jonathanev.review.databinding.ListCreateImagesBinding
 
 class ListCreateImagesViewHolder(
     private val binding: ListCreateImagesBinding,
-    private val posClicked: (Int) -> Unit
+    private val onEditClicked: (Int) -> Unit,
+    private val onDeleteClicked: (Int) -> Unit
 ): RecyclerView.ViewHolder(binding.root) {
     fun bind(image: QuestionContent.Image) {
         binding.ivImagen.setImage(ImageSource.uri(image.decodedPath))
 
         binding.btnEdit.setOnClickListener {
-            posClicked(layoutPosition)
+            onEditClicked(layoutPosition)
+        }
+
+        binding.btnCancel.setOnClickListener {
+            onDeleteClicked(layoutPosition)
         }
     }
 }

@@ -9,12 +9,13 @@ import com.jonathanev.review.Fragments.ViewHolders.ListCreateImagesViewHolder
 import com.jonathanev.review.databinding.ListCreateImagesBinding
 
 class ListCreateImagesAdapter(
-    private val posClicked:(Int) -> Unit
+    private val onEditClicked:(Int) -> Unit,
+    private val onDeleteClicked: (Int) -> Unit
 ): ListAdapter<QuestionContent.Image, ListCreateImagesViewHolder>(QuestionImageDiffCallback()) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ListCreateImagesViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         val binding = ListCreateImagesBinding.inflate(inflater, parent, false)
-        return ListCreateImagesViewHolder(binding, posClicked)
+        return ListCreateImagesViewHolder(binding, onEditClicked, onDeleteClicked)
     }
 
     override fun onBindViewHolder(holder: ListCreateImagesViewHolder, position: Int) {
