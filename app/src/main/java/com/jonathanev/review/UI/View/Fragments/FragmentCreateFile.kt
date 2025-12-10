@@ -64,7 +64,10 @@ class FragmentCreateFile : Fragment() {
     }
 
     private fun initUI() {
-        adaptListCreateTexts = ListCreateTextsAdapter { position -> goEditText(position) }
+        adaptListCreateTexts = ListCreateTextsAdapter(
+            onEditClicked = { position -> goEditText(position) },
+            onDeleteClicked = { position -> goDeleteText(position) }
+        )
         binding.recyclerTextos.layoutManager =
             LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         binding.recyclerTextos.setHasFixedSize(true)
@@ -81,18 +84,23 @@ class FragmentCreateFile : Fragment() {
         binding.recyclerImagenes.adapter = adaptListCreateImages
     }
 
+    private fun goDeleteText(position: Int) {
+        viewModel.deleteText(position)
+    }
+
     private fun goDeleteImage(position: Int) {
        viewModel.deleteImage(position)
     }
 
     private fun goEditImage(position: Int) {
-        val bundle = Bundle().apply {
+        /*val bundle = Bundle().apply {
             putInt("posImage", position)
-        }
+        }*/
+        viewModel.setEditingMode(true, position)
 
         findNavController().navigate(
             R.id.action_fragmentCreateFile2_to_fragmentCreateImages,
-            bundle
+            bundleOf("questionImage" to viewModel.uiState.value.imageList[position])
         )
     }
 

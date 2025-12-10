@@ -6,13 +6,18 @@ import com.jonathanev.review.databinding.ListCreateTextsBinding
 
 class ListCreateTextsViewHolder(
     private val binding: ListCreateTextsBinding,
-    private val posClicked: (Int) -> Unit
+    private val onEditClicked: (Int) -> Unit,
+    private val onDeleteClicked: (Int) -> Unit
 ) : RecyclerView.ViewHolder(binding.root) {
     fun bind(content: QuestionContent.Text) {
         binding.lblText.text = content.text
 
         binding.btnEdit.setOnClickListener {
-            posClicked(layoutPosition)
+            onEditClicked(layoutPosition)
+        }
+
+        binding.btnCancel.setOnClickListener {
+            onDeleteClicked(layoutPosition)
         }
     }
 }

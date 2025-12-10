@@ -41,19 +41,13 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
     private var contadorContenido: Int = -1
 
-    private val uriImages: MutableList<Uri> = mutableListOf()
-
     private lateinit var actualUri: Uri
 
-    // Dentro de FragCreateFolderViewModel, FragMainActivity, etc.
     private val _typeContent = MutableStateFlow(TypeContent.QUESTION)
-
     // Exponemos el flujo observable (la Vista lo lee)
     val typeContent: StateFlow<TypeContent> = _typeContent.asStateFlow()
 
     private var isEditingMode: Boolean = false
-
-    fun getCount() = contadorPregunta
 
     fun setColocarEtiquetas(text: String, listSpans: List<ColorRange>): String {
         return setColocarEtiquetasUseCase.invoke(text, listSpans)
@@ -64,43 +58,50 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         contadorContenido = position
     }
 
+    private fun resetEditingMode() {
+        isEditingMode = false
+        contadorContenido = -1
+    }
+
     fun addTextContent(textWithLabels: String, listSpans: List<ColorRange>) {
         val mutablePivRefList =
             if (typeContent.value == TypeContent.QUESTION) _preguntas else _respuestas
 
         val newContent = QuestionContent.Text(textWithLabels, listSpans)
 
-        // Lista original
+        // Si la lista está vacía y no estamos editando, creamos un nuevo item con el contenido.
+        if (mutablePivRefList.isEmpty()) {
+            mutablePivRefList.add(QuestionItem(content = listOf(newContent)))
+            resetEditingMode()
+            resetContentLists()
+            updateQuestions()
+            return
+        }
+
+        // Validar contadorPregunta dentro de rango
+        if (contadorPregunta !in 0 until mutablePivRefList.size) return
+
         val originalItem = mutablePivRefList[contadorPregunta]
         val originalContent = originalItem.content.toMutableList()
 
-        // Lista filtrada con índices reales
         val textWrappers = originalItem.content.mapIndexedNotNull { index, item ->
-            if (item is QuestionContent.Text)
-                ContentWrapper(index, item)
-            else null
+            if (item is QuestionContent.Text) ContentWrapper(index, item) else null
         }
 
         if (isEditingMode) {
-            // wrapper seleccionado por posición en el recycler
+            // Validar que el wrapper exista
+            if (contadorContenido !in 0 until textWrappers.size) return
+
             val selectedWrapper = textWrappers[contadorContenido]
-
             val originalIndex = selectedWrapper.originalIndex
-
-            // reemplazar en lista original
             originalContent[originalIndex] = newContent
-
         } else {
-            // agregar un texto nuevo
             originalContent.add(newContent)
         }
 
-        // guardar cambios en QuestionItem
-        mutablePivRefList[contadorPregunta] = originalItem.copy(
-            content = originalContent.toList()
-        )
+        mutablePivRefList[contadorPregunta] = originalItem.copy(content = originalContent.toList())
 
-        isEditingMode = false
+        resetEditingMode()
         resetContentLists()
         updateQuestions()
     }
@@ -161,126 +162,93 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         )
     }
 
-    fun addUriImagesSelected(uri: Uri) {
+    fun processImage() {
         val mutableRefList =
             if (typeContent.value == TypeContent.QUESTION) _preguntas else _respuestas
 
-        processImage(mutableRefList, uri)
-        resetContentLists()
-        updateQuestions()
-    }
+        val actualUri = getActualUri().toString()
+        val encoded = setCifrarRutaImagenUseCase(actualUri, 26 - 3)
+        val newContent = QuestionContent.Image(actualUri, encoded)
 
-    private fun processImage(mutableRefList: MutableList<QuestionItem>, uri: Uri) {
-
-        val encoded = setCifrarRutaImagenUseCase(uri.toString(), 26 - 3)
-        val newContent = QuestionContent.Image(uri.toString(), encoded)
-
+        // Si la lista está vacía y no estamos editando -> crear nuevo item
         if (mutableRefList.isEmpty()) {
-            // Caso inicial: solo agregas directamente
-            val newItem = QuestionItem(content = listOf(newContent))
-            mutableRefList.add(newItem)
-        } else {
-
-            val oldItem = mutableRefList[contadorPregunta]
-
-            // 🔹 Mapeo a wrappers para NO perder los índices originales
-            val wrappers = oldItem.content.mapIndexed { index, content ->
-                ContentWrapper(index, content)
-            }.toMutableList()
-
-            // 🔹 Agregar el nuevo contenido SIN romper índices anteriores
-            wrappers.add(
-                ContentWrapper(
-                    originalIndex = wrappers.size, // el índice real nuevo
-                    content = newContent
-                )
-            )
-
-            // 🔹 Volver a una lista normal de QuestionContent
-            val newContentList = wrappers.map { it.content }
-
-            // 🔹 Actualizar item
-            val updatedItem = oldItem.copy(content = newContentList)
-            mutableRefList[contadorPregunta] = updatedItem
+            mutableRefList.add(QuestionItem(content = listOf(newContent)))
+            resetEditingMode()
+            resetContentLists()
+            updateQuestions()
+            return
         }
-    }
-
-    fun replaceUriImages(uri: Uri, posImageFiltered: Int) {
-        val encoded = setCifrarRutaImagenUseCase(uri.toString(), 26 - 3)
-        val newContent = QuestionContent.Image(uri.toString(), encoded)
-
-        val mutableRefList =
-            if (typeContent.value == TypeContent.QUESTION) _preguntas else _respuestas
 
         val oldItem = mutableRefList[contadorPregunta]
+        val originalContent = oldItem.content.toMutableList()
 
-        // 1️⃣ Mapeamos TODA la lista con su índice real
-        val wrappers = oldItem.content.mapIndexed { index, content ->
-            ContentWrapper(
-                originalIndex = index,
-                content = content
-            )
+        // Filtrar índices reales de imágenes
+        val imageWrappers = oldItem.content.mapIndexedNotNull { index, content ->
+            if (content is QuestionContent.Image) ContentWrapper(index, content) else null
         }
 
-        // 2️⃣ Filtramos SOLO imágenes respetando su índice real
-        val imageWrappers = wrappers.filter { it.content is QuestionContent.Image }
+        if (isEditingMode) {
+            val realIndex = imageWrappers[contadorContenido].originalIndex
+            originalContent[realIndex] = newContent
+        } else {
+            originalContent.add(newContent)
+        }
 
-        // 3️⃣ Convertimos la posición DEL RECYCLER → posición REAL
-        val realIndex = imageWrappers[posImageFiltered].originalIndex
+        mutableRefList[contadorPregunta] = oldItem.copy(content = originalContent.toList())
 
-        // 4️⃣ Reemplazamos usando el índice REAL
-        val newContentList = oldItem.content.toMutableList().apply {
-            this[realIndex] = newContent
-        }.toList()
-
-        val updatedItem = oldItem.copy(content = newContentList)
-        mutableRefList[contadorPregunta] = updatedItem
-
+        resetEditingMode()
         resetContentLists()
         updateQuestions()
     }
 
-    fun getActualUri() = actualUri
+    private fun getActualUri() = actualUri
 
     fun setActualUri(uri: Uri) {
         actualUri = uri
     }
 
-    fun getActualList(): MutableList<QuestionItem> {
-        return if (typeContent.value == TypeContent.QUESTION) preguntas else respuestas
+    fun deleteImage(position: Int) {
+        deleteFilteredContent(position, QuestionContent.Image::class.java)
+
+        // Refrescar UI
+        resetContentLists()
+        updateQuestions()
     }
 
-    fun deleteImage(posImageFiltered: Int) {
+    fun deleteText(position: Int) {
+        deleteFilteredContent(position, QuestionContent.Text::class.java)
+
+        // Refrescar UI
+        resetContentLists()
+        updateQuestions()
+    }
+
+    private fun deleteFilteredContent(
+        posFiltered: Int,
+        filterType: Class<out QuestionContent>
+    ) {
         val mutableRefList =
             if (typeContent.value == TypeContent.QUESTION) _preguntas else _respuestas
 
         val oldItem = mutableRefList[contadorPregunta]
 
-        // 1️⃣ Envolvemos todos los contenidos con su índice real
+        // 1) Envolver con índice real
         val wrappers = oldItem.content.mapIndexed { index, content ->
-            ContentWrapper(
-                originalIndex = index,
-                content = content
-            )
+            ContentWrapper(index, content)
         }
 
-        // 2️⃣ Filtramos solo imágenes (pero conservando su índice real)
-        val imageWrappers = wrappers.filter { it.content is QuestionContent.Image }
+        // 2) Filtrar por tipo (texto o imagen)
+        val filtered = wrappers.filter { filterType.isInstance(it.content) }
 
-        // 3️⃣ Convertimos la posición filtrada → posición real
-        val realIndex = imageWrappers[posImageFiltered].originalIndex
+        // 3) Obtener índice real
+        val realIndex = filtered[posFiltered].originalIndex
 
-        // 4️⃣ Eliminamos de la lista REAL
+        // 4) Eliminar
         val newContentList = oldItem.content.toMutableList().apply {
             removeAt(realIndex)
         }.toList()
 
-        // 5️⃣ Actualizamos el item
-        val updatedItem = oldItem.copy(content = newContentList)
-        mutableRefList[contadorPregunta] = updatedItem
-
-        // Refrescar UI
-        resetContentLists()
-        updateQuestions()
+        // 5) Guardar cambios
+        mutableRefList[contadorPregunta] = oldItem.copy(content = newContentList)
     }
 }

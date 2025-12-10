@@ -172,8 +172,8 @@
         android:label="fragment_create_images"
         tools:layout="@layout/fragment_create_images">
         <argument
-            android:name="posImage"
-            app:argType="integer"
+            android:name="questionText"
+            app:argType="com.jonathanev.review.Data.Model.prueba.QuestionContent$Image"
             app:nullable="false" />
 
     </fragment>

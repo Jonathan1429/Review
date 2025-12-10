@@ -1,5 +1,6 @@
 package com.jonathanev.review.UI.View.Fragments
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
@@ -40,47 +41,41 @@ class FragmentCreateImages : Fragment() {
         return binding.root
     }
 
+    @SuppressLint("NewApi")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val posImage = arguments?.getInt(
-            "posImage"
-        ) ?: -1
+        val data = arguments?.getParcelable(
+            "questionImage",
+            QuestionContent.Image::class.java
+        ) ?: QuestionContent.None
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 sharedToolbarViewModel.onSave.collect {
-                    saveProcess(posImage)
+                    saveProcess()
                 }
             }
         }
 
-        initUI(posImage)
+        initUI(data)
         initListeners()
     }
 
-    private fun saveProcess(posImage: Int) {
+    private fun saveProcess() {
         if (!binding.ivImagen.isImageLoaded) {
             Toast.makeText(requireContext(), "Debes asignar una Imagen", Toast.LENGTH_LONG).show()
             return
         }
 
-        val uri = sharedViewModel.getActualUri()
-        processImage(uri, posImage)
+        processImage()
 
         findNavController().navigateUp()
     }
 
-    private fun initUI(posImage: Int) {
-        if (posImage != -1) {
-            val mutableRefList = sharedViewModel.getActualList()
-            val count = sharedViewModel.getCount()
-
-            when (val actualItem = mutableRefList[count].content[posImage]) {
-                is QuestionContent.Image -> binding.ivImagen.setImage(ImageSource.uri(actualItem.decodedPath))
-                QuestionContent.None -> Unit
-                is QuestionContent.Text -> Unit
-            }
+    private fun initUI(item: QuestionContent) {
+        if (item is QuestionContent.Image){
+            binding.ivImagen.setImage(ImageSource.uri(item.decodedPath))
         }
 
         sharedToolbarViewModel.isBtnSaveVisible(View.VISIBLE)
@@ -115,12 +110,9 @@ class FragmentCreateImages : Fragment() {
         //processImage(uri)
     }
 
-    private fun processImage(uri: Uri, posImage: Int) {
-        if (posImage != -1) {
-            sharedViewModel.replaceUriImages(uri, posImage)
-            return
-        }
-        sharedViewModel.addUriImagesSelected(uri)
+    private fun processImage() {
+        // Editing
+        sharedViewModel.processImage()
     }
 
     fun guardarTemporalmente() {
