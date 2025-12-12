@@ -15,7 +15,7 @@ import com.jonathanev.review.Data.provider.GuiaProvider
 import com.jonathanev.review.Data.repository.FileRepositoryImpl
 import com.jonathanev.review.Domain.GetGuiaUseCase
 import com.jonathanev.review.Domain.GetObtenerDatosXMLUseCase
-import com.jonathanev.review.Domain.GetQuestionContentsUseCase
+import com.jonathanev.review.Domain.GetContentItemsUseCase
 import com.jonathanev.review.Domain.SetPintarTextosUseCase
 import com.jonathanev.review.UI.Utils.toDomain
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,7 +31,7 @@ class ActivityRepasarGuiaViewModel @Inject constructor(
     private val setPintarTextosUseCase: SetPintarTextosUseCase,
     private val getGuiaUseCase: GetGuiaUseCase,
     private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
-    private val getQuestionContentsUseCase: GetQuestionContentsUseCase,
+    private val getContentItemsUseCase: GetContentItemsUseCase,
     private val fileRepositoryImpl: FileRepositoryImpl,
     private val guiaProvider: GuiaProvider
 ) : ViewModel() {
@@ -143,7 +143,7 @@ class ActivityRepasarGuiaViewModel @Inject constructor(
     fun getCurrentPath() = fileRepositoryImpl.getCurrentPath()
 
     private fun cargarPregunta(typeContent: TypeContent, shouldFlip: Boolean = false) {
-        val contentList = getQuestionContentsUseCase(
+        /*val contentList = getContentItemsUseCase(
             if (typeContent == TypeContent.QUESTION) preguntas else respuestas,
             contadorPregunta
         )
@@ -172,7 +172,7 @@ class ActivityRepasarGuiaViewModel @Inject constructor(
 
                 QuestionContent.None -> _uiState.value = EstadoUI()
             }
-        }
+        }*/
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)

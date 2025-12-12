@@ -23,7 +23,7 @@ import com.jonathanev.review.Domain.DeleteContentInPivUseCase
 import com.jonathanev.review.Domain.DeleteCurrentQuestionUseCase
 import com.jonathanev.review.Domain.GetGuiaUseCase
 import com.jonathanev.review.Domain.GetObtenerDatosXMLUseCase
-import com.jonathanev.review.Domain.GetQuestionContentsUseCase
+import com.jonathanev.review.Domain.GetContentItemsUseCase
 import com.jonathanev.review.Domain.SetCifrarRutaImagenUseCase
 import com.jonathanev.review.Domain.SetColocarEtiquetasUseCase
 import com.jonathanev.review.Domain.SetCopyImagesUseCase
@@ -53,7 +53,7 @@ class ActivityModificarViewModel @Inject constructor(
     private val setCreatePivImage: SetCreatePivImage,
     private val setCrearXmlUseCase: SetCrearXmlUseCase,
     private val deleteCurrentQuestionUseCase: DeleteCurrentQuestionUseCase,
-    private val getQuestionContentsUseCase: GetQuestionContentsUseCase,
+    private val getContentItemsUseCase: GetContentItemsUseCase,
     private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
     private val setPintarTextosUseCase: SetPintarTextosUseCase,
     private val setCopyImagesUseCase: SetCopyImagesUseCase,
@@ -314,7 +314,7 @@ class ActivityModificarViewModel @Inject constructor(
     }*/
 
     fun cargarPregunta(typeContent: TypeContent, shouldFlip: Boolean = false) {
-        val contentList = getQuestionContentsUseCase.invoke(
+        /*val contentList = getContentItemsUseCase.invoke(
             if (typeContent == TypeContent.QUESTION) preguntas else respuestas,
             contadorPregunta
         )
@@ -343,7 +343,7 @@ class ActivityModificarViewModel @Inject constructor(
 
                 QuestionContent.None -> _uiState.value = EstadoUI()
             }
-        }
+        }*/
     }
 
     fun deleteContentInPiv() {

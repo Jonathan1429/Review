@@ -23,7 +23,7 @@ import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Data.repository.FileRepositoryImpl
 import com.jonathanev.review.Domain.DeleteContentInPivUseCase
 import com.jonathanev.review.Domain.DeleteCurrentQuestionUseCase
-import com.jonathanev.review.Domain.GetQuestionContentsUseCase
+import com.jonathanev.review.Domain.GetContentItemsUseCase
 import com.jonathanev.review.Domain.SetCifrarRutaImagenUseCase
 import com.jonathanev.review.Domain.SetColocarEtiquetasUseCase
 import com.jonathanev.review.Domain.SetCopyImagesUseCase
@@ -47,7 +47,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ActivityCuestionarioViewModel @Inject constructor(
     private val guiaRepository: GuiaRepository,
-    private val getQuestionContentsUseCase: GetQuestionContentsUseCase,
+    private val getContentItemsUseCase: GetContentItemsUseCase,
     private val setCrearXmlUseCase: SetCrearXmlUseCase,
     private val setColocarEtiquetasUseCase: SetColocarEtiquetasUseCase,
     private val deleteCurrentQuestionUseCase: DeleteCurrentQuestionUseCase,
@@ -249,7 +249,7 @@ class ActivityCuestionarioViewModel @Inject constructor(
     fun getCurrentPath() = fileRepositoryImpl.getCurrentPath()
 
     fun cargarPregunta(typeContent: TypeContent, shouldFlip: Boolean = false) {
-        val contentList = getQuestionContentsUseCase.invoke(
+        /*val contentList = getContentItemsUseCase.invoke(
             if (typeContent == TypeContent.QUESTION) preguntas else respuestas,
             contadorPregunta
         )
@@ -278,7 +278,7 @@ class ActivityCuestionarioViewModel @Inject constructor(
 
                 QuestionContent.None -> _uiState.value = EstadoUI()
             }
-        }
+        }*/
     }
 
     fun onClickBefore(text: String): MessageActions {

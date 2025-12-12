@@ -10,8 +10,6 @@ import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Data.repository.FileRepositoryImpl
 import com.jonathanev.review.Domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.Domain.GetPreviewQuestionsUseCase
-import com.jonathanev.review.Domain.GetQuestionContentsUseCase
-import com.jonathanev.review.Domain.SetPintarTextosUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

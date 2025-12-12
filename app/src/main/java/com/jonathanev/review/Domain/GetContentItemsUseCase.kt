@@ -1,0 +1,34 @@
+package com.jonathanev.review.Domain
+
+import com.jonathanev.review.Data.Model.EstadoUI
+import com.jonathanev.review.Data.Model.InternalRules
+import com.jonathanev.review.Data.Model.prueba.QuestionContent
+import com.jonathanev.review.Data.Model.prueba.QuestionItem
+import kotlinx.coroutines.flow.update
+import javax.inject.Inject
+
+class GetContentItemsUseCase @Inject constructor() {
+    operator fun invoke(
+        contentList: MutableList<QuestionItem>,
+        contadorPregunta: Int
+    ): Pair<List<QuestionContent.Text>, List<QuestionContent.Image>> {
+        val listTexts: MutableList<QuestionContent.Text> = mutableListOf()
+        val listImages: MutableList<QuestionContent.Image> = mutableListOf()
+
+        contentList[contadorPregunta].content.forEach { item ->
+            when (item) {
+                is QuestionContent.Image -> {
+                    listImages.add(item)
+                }
+
+                is QuestionContent.Text -> {
+                    listTexts.add(item)
+                }
+
+                QuestionContent.None -> Unit
+            }
+        }
+
+        return Pair(listTexts, listImages)
+    }
+}

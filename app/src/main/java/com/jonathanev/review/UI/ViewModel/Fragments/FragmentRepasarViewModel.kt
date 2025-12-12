@@ -11,7 +11,7 @@ import com.jonathanev.review.Data.Model.prueba.TypeContent
 import com.jonathanev.review.Data.Model.prueba.UiStopEvent
 import com.jonathanev.review.Data.repository.FileRepositoryImpl
 import com.jonathanev.review.Domain.GetObtenerDatosXMLUseCase
-import com.jonathanev.review.Domain.GetQuestionContentsUseCase
+import com.jonathanev.review.Domain.GetContentItemsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,7 +24,7 @@ import javax.inject.Inject
 @HiltViewModel
 class FragmentRepasarViewModel @Inject constructor(
     private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
-    private val getQuestionContentsUseCase: GetQuestionContentsUseCase,
+    private val getContentItemsUseCase: GetContentItemsUseCase,
     private val fileRepositoryImpl: FileRepositoryImpl
 ) : ViewModel() {
     private var _preguntas: MutableList<QuestionItem> = mutableListOf()
@@ -66,7 +66,7 @@ class FragmentRepasarViewModel @Inject constructor(
     fun restartReview(){
         setCountZero()
         resetContentLists()
-        uploadQuestion()
+        showContents()
     }
 
     fun getObtenerDatosXML(positionContent: Int) {
@@ -78,7 +78,7 @@ class FragmentRepasarViewModel @Inject constructor(
             _preguntas = datos.map { it.question }.toMutableList()
             _respuestas = datos.map { it.answer }.toMutableList()
 
-            uploadQuestion()
+            showContents()
         }
     }
 
@@ -87,7 +87,7 @@ class FragmentRepasarViewModel @Inject constructor(
             if (typeContent.value == TypeContent.QUESTION) TypeContent.ANSWER else TypeContent.QUESTION
 
         resetContentLists()
-        uploadQuestion(shouldFlip = true)
+        showContents()
     }
 
     fun nextQuestion(){
@@ -106,7 +106,7 @@ class FragmentRepasarViewModel @Inject constructor(
         addOneCount()
         setQuestionInTypeContent()
         resetContentLists()
-        uploadQuestion()
+        showContents()
     }
 
     fun beforeQuestion(){
@@ -124,7 +124,7 @@ class FragmentRepasarViewModel @Inject constructor(
         resetContentLists()
         minusOneCount()
         setQuestionInTypeContent()
-        uploadQuestion()
+        showContents()
     }
 
     private fun setQuestionInTypeContent(){
@@ -138,39 +138,18 @@ class FragmentRepasarViewModel @Inject constructor(
         )
     }
 
-    private fun uploadQuestion(shouldFlip: Boolean = false) {
-        val contentList = getQuestionContentsUseCase.invoke(
-            if (typeContent.value == TypeContent.QUESTION) preguntas else respuestas,
-            contadorPregunta
-        )
+    private fun showContents() {
+        val contentList =
+            if (typeContent.value == TypeContent.QUESTION) _preguntas else _respuestas
 
-        contentList.forEach { item ->
-            when (item) {//val result = setPintarTextosUseCase.invoke(item, getCurrentPath())) {
+        if (contentList.isNotEmpty()) {
+            val responseContent = getContentItemsUseCase.invoke(contentList, contadorPregunta)
 
-                is QuestionContent.Image -> {
-                    _uiState.update { state ->
-                        state.copy(
-                            shouldFlip = shouldFlip,
-                            internalRules = InternalRules(isShowCancelar = true),
-                            imageList = state.imageList + item,
-                        )
-                    }
-                }
-
-                is QuestionContent.Text -> {
-                    _uiState.update { state ->
-                        state.copy(
-                            shouldFlip = shouldFlip,
-                            internalRules = InternalRules(
-                                isShowQuitColor = true,
-                                isShowSelColor = true
-                            ),
-                            textList = state.textList + item,
-                        )
-                    }
-                }
-
-                QuestionContent.None -> _uiState.value = EstadoUI()
+            _uiState.update { state ->
+                state.copy(
+                    textList = responseContent.first,
+                    imageList = responseContent.second
+                )
             }
         }
     }

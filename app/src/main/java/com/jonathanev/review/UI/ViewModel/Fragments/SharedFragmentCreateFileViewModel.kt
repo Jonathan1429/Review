@@ -13,7 +13,7 @@ import com.jonathanev.review.Data.Model.prueba.QuestionContent
 import com.jonathanev.review.Data.Model.prueba.QuestionItem
 import com.jonathanev.review.Data.Model.prueba.TypeContent
 import com.jonathanev.review.Data.Model.prueba.UiStopEvent
-import com.jonathanev.review.Domain.GetQuestionContentsUseCase
+import com.jonathanev.review.Domain.GetContentItemsUseCase
 import com.jonathanev.review.Domain.GetTextWithoutLabelsUseCase
 import com.jonathanev.review.Domain.SetCifrarRutaImagenUseCase
 import com.jonathanev.review.Domain.SetColocarEtiquetasUseCase
@@ -24,14 +24,13 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.lang.reflect.Type
 import javax.inject.Inject
 
 @HiltViewModel
 class SharedFragmentCreateFileViewModel @Inject constructor(
     private val setColocarEtiquetasUseCase: SetColocarEtiquetasUseCase,
     private val setCifrarRutaImagenUseCase: SetCifrarRutaImagenUseCase,
-    private val getQuestionContentsUseCase: GetQuestionContentsUseCase,
+    private val getContentItemsUseCase: GetContentItemsUseCase,
     private val getTextWithoutLabelsUseCase: GetTextWithoutLabelsUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(EstadoUI())
@@ -74,32 +73,13 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             if (typeContent.value == TypeContent.QUESTION) _preguntas else _respuestas
 
         if (contentList.isNotEmpty()) {
-            contentList[contadorPregunta].content.forEach { item ->
-                when (item) {//val result = setPintarTextosUseCase.invoke(item, getCurrentPath())) {
+            val responseContent = getContentItemsUseCase.invoke(contentList, contadorPregunta)
 
-                    is QuestionContent.Image -> {
-                        _uiState.update { state ->
-                            state.copy(
-                                internalRules = InternalRules(isShowCancelar = true),
-                                imageList = state.imageList + item,
-                            )
-                        }
-                    }
-
-                    is QuestionContent.Text -> {
-                        _uiState.update { state ->
-                            state.copy(
-                                internalRules = InternalRules(
-                                    isShowQuitColor = true,
-                                    isShowSelColor = true
-                                ),
-                                textList = state.textList + item,
-                            )
-                        }
-                    }
-
-                    QuestionContent.None -> _uiState.value = EstadoUI()
-                }
+            _uiState.update { state ->
+                state.copy(
+                    textList = responseContent.first,
+                    imageList = responseContent.second
+                )
             }
         }
     }
@@ -129,7 +109,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             mutablePivRefList.add(QuestionItem(content = listOf(newContent)))
             resetEditingMode()
             resetContentLists()
-            updateQuestions()
+            showContents()
             return
         }
 
@@ -158,56 +138,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
         resetEditingMode()
         resetContentLists()
-        updateQuestions()
-    }
-
-    private fun updateQuestions(shouldFlip: Boolean = false) {
-        val contentList = getQuestionContentsUseCase.invoke(
-            if (typeContent.value == TypeContent.QUESTION) preguntas else respuestas,
-            contadorPregunta
-        )
-
-        val newImages = mutableListOf<QuestionContent.Image>()
-        val newTexts = mutableListOf<QuestionContent.Text>() // usa tu modelo de texto formateado
-        var internalRules = InternalRules()
-
-        contentList.forEach { item ->
-            when (item) {
-                is QuestionContent.Image -> {
-                    newImages.add(item)
-                    internalRules = internalRules.copy(
-                        isShowCancelar = true
-                    )
-                }
-
-                is QuestionContent.Text -> {
-                    var response = getTextWithoutLabelsUseCase.invoke(item.text)
-                    response = response.copy(colorRanges = item.colorRanges)
-                    newTexts.add(response)
-
-                    internalRules = internalRules.copy(
-                        isShowQuitColor = true,
-                        isShowSelColor = true
-                    )
-                }
-
-                QuestionContent.None -> {
-                    // Reinicias todo
-                    _uiState.value = EstadoUI()
-                    return
-                }
-            }
-        }
-
-        // Solo 1 actualización de estado
-        _uiState.update { state ->
-            state.copy(
-                shouldFlip = shouldFlip,
-                internalRules = internalRules,
-                imageList = state.imageList + newImages,
-                textList = state.textList + newTexts
-            )
-        }
+        showContents()
     }
 
     private fun resetContentLists() = _uiState.update { state ->
@@ -230,7 +161,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             mutableRefList.add(QuestionItem(content = listOf(newContent)))
             resetEditingMode()
             resetContentLists()
-            updateQuestions()
+            showContents()
             return
         }
 
@@ -253,7 +184,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
         resetEditingMode()
         resetContentLists()
-        updateQuestions()
+        showContents()
     }
 
     private fun getActualUri() = actualUri
@@ -267,7 +198,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
         // Refrescar UI
         resetContentLists()
-        updateQuestions()
+        showContents()
     }
 
     fun deleteText(position: Int) {
@@ -275,7 +206,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
         // Refrescar UI
         resetContentLists()
-        updateQuestions()
+        showContents()
     }
 
     private fun deleteFilteredContent(
