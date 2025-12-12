@@ -4,11 +4,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.Data.Model.EstadoUI
-import com.jonathanev.review.Data.Model.InternalRules
-import com.jonathanev.review.Data.Model.prueba.QuestionContent
 import com.jonathanev.review.Data.Model.prueba.QuestionItem
 import com.jonathanev.review.Data.Model.prueba.TypeContent
-import com.jonathanev.review.Data.Model.prueba.UiStopEvent
+import com.jonathanev.review.Data.Model.prueba.UIStopEvent
 import com.jonathanev.review.Data.repository.FileRepositoryImpl
 import com.jonathanev.review.Domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.Domain.GetContentItemsUseCase
@@ -42,7 +40,7 @@ class FragmentRepasarViewModel @Inject constructor(
     private val _typeContent = MutableLiveData(TypeContent.QUESTION)
     val typeContent get() = _typeContent
 
-    private val _eventsMessages = MutableSharedFlow<UiStopEvent>()
+    private val _eventsMessages = MutableSharedFlow<UIStopEvent>()
     val eventsMessages = _eventsMessages.asSharedFlow()
 
     private fun addOneCount() {
@@ -97,7 +95,7 @@ class FragmentRepasarViewModel @Inject constructor(
         if (count == totalQuestions){
             viewModelScope.launch {
                 _eventsMessages.emit(
-                    UiStopEvent.ShowMessage("Se acabaron las preguntas, ¿Quieres repetir la guía?")
+                    UIStopEvent.ShowMessage("Se acabaron las preguntas, ¿Quieres repetir la guía?")
                 )
             }
             return
@@ -115,7 +113,7 @@ class FragmentRepasarViewModel @Inject constructor(
         if (count == 0){
             viewModelScope.launch {
                 _eventsMessages.emit(
-                    UiStopEvent.NotQuestionBefore("Ya no tienes preguntas anteriores")
+                    UIStopEvent.NotQuestionBefore("Ya no tienes preguntas anteriores")
                 )
             }
             return

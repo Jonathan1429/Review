@@ -11,7 +11,7 @@ import com.jonathanev.review.Data.Model.prueba.ColorRange
 import com.jonathanev.review.Data.Model.prueba.QuestionContent
 import com.jonathanev.review.Data.Model.prueba.QuestionItem
 import com.jonathanev.review.Data.Model.prueba.TypeContent
-import com.jonathanev.review.Data.Model.prueba.UiStopEvent
+import com.jonathanev.review.Data.Model.prueba.UIStopEvent
 import com.jonathanev.review.Domain.GetContentItemsUseCase
 import com.jonathanev.review.Domain.GetTextWithoutLabelsUseCase
 import com.jonathanev.review.Domain.SetCifrarRutaImagenUseCase
@@ -37,8 +37,8 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(EstadoUI())
     val uiState = _uiState.asStateFlow()
 
-    private val _uiStopEvent = MutableSharedFlow<UiStopEvent>()
-    val uiStopEvent = _uiStopEvent.asSharedFlow()
+    private val _UIStopEvent = MutableSharedFlow<UIStopEvent>()
+    val uiStopEvent = _UIStopEvent.asSharedFlow()
 
     private var _preguntas = mutableListOf<QuestionItem>()
     val preguntas: MutableList<QuestionItem> get() = _preguntas
@@ -56,8 +56,12 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
     private var isEditingMode: Boolean = false
 
-    private fun countSubtractCount(){
+    private fun subtractCount() {
         _contadorPregunta--
+    }
+
+    private fun plusCount() {
+        _contadorPregunta++
     }
 
     private fun swapTypeContent() {
@@ -65,15 +69,17 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             if (typeContent.value == TypeContent.QUESTION) TypeContent.ANSWER else TypeContent.QUESTION
     }
 
-    private fun setTypeContentWithQuestion(){
+    private fun setTypeContentWithQuestion() {
         _typeContent.value = TypeContent.QUESTION
     }
 
     private fun showContents() {
         val contentList =
             if (typeContent.value == TypeContent.QUESTION) _preguntas else _respuestas
+        val noContent = contentList.lastIndex
 
-        if (contentList.isNotEmpty()) {
+        //if (contentList.isNotEmpty()) {
+        if (contadorPregunta <= noContent) {
             val responseContent = getContentItemsUseCase.invoke(contentList, contadorPregunta)
 
             _uiState.update { state ->
@@ -109,11 +115,12 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     fun addTextContent(textWithLabels: String, listSpans: List<ColorRange>) {
         val mutablePivRefList =
             if (typeContent.value == TypeContent.QUESTION) _preguntas else _respuestas
-
+        val noContent = mutablePivRefList.lastIndex
         val newContent = QuestionContent.Text(textWithLabels, listSpans)
 
         // Si la lista está vacía y no estamos editando, creamos un nuevo item con el contenido.
-        if (mutablePivRefList.isEmpty()) {
+        //if (mutablePivRefList.isEmpty()) {
+        if (noContent < contadorPregunta) {
             mutablePivRefList.add(QuestionItem(content = listOf(newContent)))
             resetEditingMode()
             resetContentLists()
@@ -121,7 +128,14 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             return
         }
 
-        setContentUseCase.invoke(newContent, mutablePivRefList, contadorPregunta, contadorContenido, isEditingMode, QuestionContent.Text::class.java)
+        setContentUseCase.invoke(
+            newContent,
+            mutablePivRefList,
+            contadorPregunta,
+            contadorContenido,
+            isEditingMode,
+            QuestionContent.Text::class.java
+        )
 
         resetEditingMode()
         resetContentLists()
@@ -135,9 +149,11 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         val actualUri = getActualUri().toString()
         val encoded = setCifrarRutaImagenUseCase(actualUri, 26 - 3)
         val newContent = QuestionContent.Image(actualUri, encoded)
+        val noContent = mutableRefList.lastIndex
 
         // Si la lista está vacía y no estamos editando -> crear nuevo item
-        if (mutableRefList.isEmpty()) {
+        //if (mutableRefList.isEmpty()) {
+        if (noContent < contadorPregunta) {
             mutableRefList.add(QuestionItem(content = listOf(newContent)))
             resetEditingMode()
             resetContentLists()
@@ -145,7 +161,14 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             return
         }
 
-        setContentUseCase.invoke(newContent, mutableRefList, contadorPregunta, contadorContenido, isEditingMode, QuestionContent.Image::class.java)
+        setContentUseCase.invoke(
+            newContent,
+            mutableRefList,
+            contadorPregunta,
+            contadorContenido,
+            isEditingMode,
+            QuestionContent.Image::class.java
+        )
 
         resetEditingMode()
         resetContentLists()
@@ -204,11 +227,11 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     }
 
     fun rollPregResp() {
-        val noTexts = uiState.value.textList.size
-        if (noTexts == 0) {
+        if (uiState.value.textList.isEmpty()) {
             viewModelScope.launch {
-                _uiStopEvent.emit(UiStopEvent.ShowMessage("Debes tener al menos un texto"))
+                _UIStopEvent.emit(UIStopEvent.ShowMessage("Debes tener al menos un texto"))
             }
+
             return
         }
 
@@ -218,16 +241,88 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     }
 
     fun previousQuestion() {
-        if (contadorPregunta == 0){
+        if (contadorPregunta == 0) {
             viewModelScope.launch {
-                _uiStopEvent.emit(UiStopEvent.ShowMessage("Ya no hay preguntas anteriores"))
+                _UIStopEvent.emit(UIStopEvent.NotQuestionBefore("Ya no hay preguntas anteriores"))
             }
+
+            return
+        }
+
+        // Revisa que haya un texto actualmente en pregunta/respuesta
+        if (uiState.value.textList.isEmpty()) {
+            viewModelScope.launch {
+                _UIStopEvent.emit(UIStopEvent.ShowMessage("Debes tener al menos un texto"))
+            }
+
+            return
+        }
+
+        // Revisa que haya un texto en la misma posición para pregunta/respuesta
+        val mutablePivRefList =
+            if (typeContent.value == TypeContent.QUESTION) respuestas else preguntas
+        val noContent = mutablePivRefList.lastIndex
+
+        if (noContent < contadorPregunta) {
+            emitShowMessage()
+            return
+        }
+
+        val noTexts =
+            mutablePivRefList[contadorPregunta].content
+                .filterIsInstance<QuestionContent.Text>()
+                .count()
+
+        if (noTexts == 0) {
+            emitShowMessage()
             return
         }
 
         setTypeContentWithQuestion()
-        countSubtractCount()
+        subtractCount()
         resetContentLists()
         showContents()
+    }
+
+    fun nextQuestion() {
+        // Revisa que haya un texto actualmente en pregunta/respuesta
+        if (uiState.value.textList.isEmpty()) {
+            viewModelScope.launch {
+                _UIStopEvent.emit(UIStopEvent.ShowMessage("Debes tener al menos un texto"))
+            }
+
+            return
+        }
+
+        // Revisa que haya un texto en la misma posición para pregunta/respuesta
+        val mutablePivRefList =
+            if (typeContent.value == TypeContent.QUESTION) respuestas else preguntas
+        val noContent = mutablePivRefList.lastIndex
+
+        if (noContent < contadorPregunta) {
+            emitShowMessage()
+            return
+        }
+
+        val noTexts =
+            mutablePivRefList[contadorPregunta].content
+                .filterIsInstance<QuestionContent.Text>()
+                .count()
+
+        if (noTexts == 0) {
+            emitShowMessage()
+            return
+        }
+
+        setTypeContentWithQuestion()
+        plusCount()
+        resetContentLists()
+        showContents()
+    }
+
+    private fun emitShowMessage(){
+        viewModelScope.launch {
+            _UIStopEvent.emit(UIStopEvent.ShowMessage("Debes tener al menos un texto en pregunta/respuesta"))
+        }
     }
 }

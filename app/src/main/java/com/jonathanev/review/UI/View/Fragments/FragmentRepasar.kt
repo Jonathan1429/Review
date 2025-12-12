@@ -17,7 +17,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jonathanev.review.Data.Model.prueba.TypeContent
-import com.jonathanev.review.Data.Model.prueba.UiStopEvent
+import com.jonathanev.review.Data.Model.prueba.UIStopEvent
 import com.jonathanev.review.Fragments.Adaptadores.ListItemPintarImagenesAdapter
 import com.jonathanev.review.Fragments.Adaptadores.ListItemPintarTextosAdapter
 import com.jonathanev.review.R
@@ -57,34 +57,30 @@ class FragmentRepasar : Fragment() {
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.eventsMessages.collect { event ->
-                    when (event) {
-                        is UiStopEvent.ShowMessage -> {
-                            AlertDialog.Builder(requireContext())
-                                .setTitle("¡Atención!")
-                                .setMessage(event.text)
-                                .setPositiveButton(
-                                    "Si"
-                                ) { _, _ ->
-                                    viewModel.restartReview()
+                    if (event is UIStopEvent.RestartGuide){
+                        AlertDialog.Builder(requireContext())
+                            .setTitle("¡Atención!")
+                            .setMessage(event.text)
+                            .setPositiveButton(
+                                "Si"
+                            ) { _, _ ->
+                                viewModel.restartReview()
 
-                                    Toast.makeText(
-                                        requireContext(), "Guia reiniciada", Toast.LENGTH_LONG
-                                    ).show()
-                                }
-                                .setNegativeButton(
-                                    "Cancelar"
-                                ) { dialog, _ ->
-                                    dialog.dismiss()
-                                }.setOnCancelListener {
+                                Toast.makeText(
+                                    requireContext(), "Guia reiniciada", Toast.LENGTH_LONG
+                                ).show()
+                            }
+                            .setNegativeButton(
+                                "Cancelar"
+                            ) { dialog, _ ->
+                                dialog.dismiss()
+                            }.setOnCancelListener {
 
-                                }.create().show()
+                            }.create().show()
+                    }
 
-                            return@collect
-                        }
-
-                        is UiStopEvent.NotQuestionBefore -> {
-                            Toast.makeText(context, event.text, Toast.LENGTH_SHORT).show()
-                        }
+                    if (event is UIStopEvent.NotQuestionBefore){
+                        Toast.makeText(context, event.text, Toast.LENGTH_SHORT).show()
                     }
                 }
             }

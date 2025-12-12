@@ -17,7 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.jonathanev.review.Data.FolderAction
 import com.jonathanev.review.Data.Model.ScreenData
 import com.jonathanev.review.Data.Model.prueba.TypeContent
-import com.jonathanev.review.Data.Model.prueba.UiStopEvent
+import com.jonathanev.review.Data.Model.prueba.UIStopEvent
 import com.jonathanev.review.Fragments.Adaptadores.ListCreateImagesAdapter
 import com.jonathanev.review.Fragments.Adaptadores.ListCreateTextsAdapter
 import com.jonathanev.review.R
@@ -60,7 +60,15 @@ class FragmentCreateFile : Fragment() {
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiStopEvent.collect { uiStopEvent ->
-                    if (uiStopEvent is UiStopEvent.ShowMessage) {
+                    if (uiStopEvent is UIStopEvent.NotQuestionBefore){
+                        Toast.makeText(
+                            requireContext(),
+                            uiStopEvent.text,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+
+                    if (uiStopEvent is UIStopEvent.ShowMessage){
                         Toast.makeText(
                             requireContext(),
                             uiStopEvent.text,
@@ -160,6 +168,10 @@ class FragmentCreateFile : Fragment() {
 
         binding.btnPrevious.setOnClickListener {
             viewModel.previousQuestion()
+        }
+
+        binding.btnNext.setOnClickListener {
+            viewModel.nextQuestion()
         }
     }
 }
