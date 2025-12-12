@@ -74,7 +74,7 @@
                             tools:ignore="ContentDescription" />
 
                         <ImageView
-                            android:id="@+id/imgvPregResp"
+                            android:id="@+id/btnPregResp"
                             android:layout_width="34dp"
                             android:layout_height="34dp"
                             android:layout_margin="10dp"

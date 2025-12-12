@@ -129,15 +129,15 @@ class ActivityRepasarGuia : AppCompatActivity() {
     }
 
     private fun initListeners() {
-        binding.imgvPregResp.setOnClickListener {
+        binding.btnPregResp.setOnClickListener {
             viewModel.onClickRoll()
         }
 
-        binding.imgvPrevious.setOnClickListener {
+        binding.btnPrevious.setOnClickListener {
             viewModel.onClickBefore()
         }
 
-        binding.imgvNext.setOnClickListener {
+        binding.btnNext.setOnClickListener {
             viewModel.onClickNext()
         }
 

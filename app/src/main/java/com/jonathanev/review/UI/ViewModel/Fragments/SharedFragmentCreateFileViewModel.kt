@@ -1,7 +1,10 @@
 package com.jonathanev.review.UI.ViewModel.Fragments
 
 import android.net.Uri
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.Data.Model.ContentWrapper
 import com.jonathanev.review.Data.Model.EstadoUI
 import com.jonathanev.review.Data.Model.InternalRules
@@ -9,15 +12,18 @@ import com.jonathanev.review.Data.Model.prueba.ColorRange
 import com.jonathanev.review.Data.Model.prueba.QuestionContent
 import com.jonathanev.review.Data.Model.prueba.QuestionItem
 import com.jonathanev.review.Data.Model.prueba.TypeContent
+import com.jonathanev.review.Data.Model.prueba.UiStopEvent
 import com.jonathanev.review.Domain.GetQuestionContentsUseCase
 import com.jonathanev.review.Domain.GetTextWithoutLabelsUseCase
 import com.jonathanev.review.Domain.SetCifrarRutaImagenUseCase
 import com.jonathanev.review.Domain.SetColocarEtiquetasUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -30,6 +36,9 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(EstadoUI())
     val uiState = _uiState.asStateFlow()
 
+    private val _uiStopEvent = MutableSharedFlow<UiStopEvent>()
+    val uiStopEvent = _uiStopEvent.asSharedFlow()
+
     private var _preguntas = mutableListOf<QuestionItem>()
     val preguntas: MutableList<QuestionItem> get() = _preguntas
 
@@ -40,14 +49,51 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     val contadorPregunta: Int get() = _contadorPregunta
 
     private var contadorContenido: Int = -1
-
     private lateinit var actualUri: Uri
-
-    private val _typeContent = MutableStateFlow(TypeContent.QUESTION)
-    // Exponemos el flujo observable (la Vista lo lee)
-    val typeContent: StateFlow<TypeContent> = _typeContent.asStateFlow()
+    private var _typeContent: MutableLiveData<TypeContent> = MutableLiveData(TypeContent.QUESTION)
+    val typeContent: LiveData<TypeContent> get() = _typeContent
 
     private var isEditingMode: Boolean = false
+
+    private fun swapTypeContent() {
+        _typeContent.value =
+            if (typeContent.value == TypeContent.QUESTION) TypeContent.ANSWER else TypeContent.QUESTION
+    }
+
+    private fun showContents() {
+        val contentList =
+            if (typeContent.value == TypeContent.QUESTION) _preguntas else _respuestas
+
+        if (contentList.isNotEmpty()) {
+            contentList[contadorPregunta].content.forEach { item ->
+                when (item) {//val result = setPintarTextosUseCase.invoke(item, getCurrentPath())) {
+
+                    is QuestionContent.Image -> {
+                        _uiState.update { state ->
+                            state.copy(
+                                internalRules = InternalRules(isShowCancelar = true),
+                                imageList = state.imageList + item,
+                            )
+                        }
+                    }
+
+                    is QuestionContent.Text -> {
+                        _uiState.update { state ->
+                            state.copy(
+                                internalRules = InternalRules(
+                                    isShowQuitColor = true,
+                                    isShowSelColor = true
+                                ),
+                                textList = state.textList + item,
+                            )
+                        }
+                    }
+
+                    QuestionContent.None -> _uiState.value = EstadoUI()
+                }
+            }
+        }
+    }
 
     fun setColocarEtiquetas(text: String, listSpans: List<ColorRange>): String {
         return setColocarEtiquetasUseCase.invoke(text, listSpans)
@@ -250,5 +296,19 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
         // 5) Guardar cambios
         mutableRefList[contadorPregunta] = oldItem.copy(content = newContentList)
+    }
+
+    fun rollPregResp() {
+        val noTexts = uiState.value.textList.size
+        if (noTexts == 0) {
+            viewModelScope.launch {
+                _uiStopEvent.emit(UiStopEvent.ShowMessage("Debes tener al menos un texto"))
+            }
+            return
+        }
+
+        swapTypeContent()
+        resetContentLists()
+        showContents()
     }
 }

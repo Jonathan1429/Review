@@ -308,7 +308,7 @@ class ActivityModificar : AppCompatActivity() {
             cancelarArchivo()
         }
 
-        binding.imgvPregResp.setOnClickListener {
+        binding.btnPregResp.setOnClickListener {
             val text = binding.etPregResp.text.toString()
             val response = viewModel.onClickRoll(text)
 
@@ -343,7 +343,7 @@ class ActivityModificar : AppCompatActivity() {
             }
         }
 
-        binding.imgvPrevious.setOnClickListener {
+        binding.btnPrevious.setOnClickListener {
             val text = binding.etPregResp.text.toString()
             val response = viewModel.onClickBefore(text)
 
@@ -384,7 +384,7 @@ class ActivityModificar : AppCompatActivity() {
             }
         }
 
-        binding.imgvNext.setOnClickListener {
+        binding.btnNext.setOnClickListener {
             val text = binding.etPregResp.text.toString()
             val response = viewModel.onClickNext(text)
 

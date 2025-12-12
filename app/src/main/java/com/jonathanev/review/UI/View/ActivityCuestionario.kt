@@ -179,7 +179,7 @@ class ActivityCuestionario : AppCompatActivity() {
             viewModel.deleteContentInPiv(nombreArchivo)
         }
 
-        binding.imgvPregResp.setOnClickListener {
+        binding.btnPregResp.setOnClickListener {
             val text = binding.etPregResp.text.toString()
             val response = viewModel.onClickRoll(text)
 
@@ -229,7 +229,7 @@ class ActivityCuestionario : AppCompatActivity() {
             )*/
         }
 
-        binding.imgvPrevious.setOnClickListener {
+        binding.btnPrevious.setOnClickListener {
             val text = binding.etPregResp.text.toString()
             val response = viewModel.onClickBefore(text)
 
@@ -271,7 +271,7 @@ class ActivityCuestionario : AppCompatActivity() {
             }
         }
 
-        binding.imgvNext.setOnClickListener {
+        binding.btnNext.setOnClickListener {
             val text = binding.etPregResp.text.toString()
             val response = viewModel.onClickNext(text)
 

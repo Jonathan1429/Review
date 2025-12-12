@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -15,6 +16,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jonathanev.review.Data.FolderAction
 import com.jonathanev.review.Data.Model.ScreenData
+import com.jonathanev.review.Data.Model.prueba.TypeContent
+import com.jonathanev.review.Data.Model.prueba.UiStopEvent
 import com.jonathanev.review.Fragments.Adaptadores.ListCreateImagesAdapter
 import com.jonathanev.review.Fragments.Adaptadores.ListCreateTextsAdapter
 import com.jonathanev.review.R
@@ -52,6 +55,21 @@ class FragmentCreateFile : Fragment() {
 
         initUI()
         initListeners()
+        observers()
+
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uiStopEvent.collect { uiStopEvent ->
+                    if (uiStopEvent is UiStopEvent.ShowMessage) {
+                        Toast.makeText(
+                            requireContext(),
+                            uiStopEvent.text,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
+        }
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -60,6 +78,14 @@ class FragmentCreateFile : Fragment() {
                     adaptListCreateImages.submitList(uiState.imageList)
                 }
             }
+        }
+    }
+
+    private fun observers() {
+        viewModel.typeContent.observe(viewLifecycleOwner) {
+            binding.lblPregResp.text =
+                if (it == TypeContent.QUESTION) getString(R.string.etPregunta)
+                else getString(R.string.etRespuesta)
         }
     }
 
@@ -89,13 +115,10 @@ class FragmentCreateFile : Fragment() {
     }
 
     private fun goDeleteImage(position: Int) {
-       viewModel.deleteImage(position)
+        viewModel.deleteImage(position)
     }
 
     private fun goEditImage(position: Int) {
-        /*val bundle = Bundle().apply {
-            putInt("posImage", position)
-        }*/
         viewModel.setEditingMode(true, position)
 
         findNavController().navigate(
@@ -129,6 +152,10 @@ class FragmentCreateFile : Fragment() {
                 R.id.action_fragmentCreateFile2_to_fragmentCreateImages,
                 bundle
             )
+        }
+
+        binding.btnPregResp.setOnClickListener {
+            viewModel.rollPregResp()
         }
     }
 }

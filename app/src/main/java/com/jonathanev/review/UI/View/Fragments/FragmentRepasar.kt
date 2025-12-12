@@ -108,15 +108,15 @@ class FragmentRepasar : Fragment() {
     }
 
     private fun listeners() {
-        binding.imgvPregResp.setOnClickListener {
+        binding.btnPregResp.setOnClickListener {
             viewModel.swapTypeContent()
         }
 
-        binding.imgvNext.setOnClickListener {
+        binding.btnNext.setOnClickListener {
             viewModel.nextQuestion()
         }
 
-        binding.imgvPrevious.setOnClickListener {
+        binding.btnPrevious.setOnClickListener {
             viewModel.beforeQuestion()
         }
     }
