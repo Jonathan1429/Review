@@ -157,5 +157,9 @@ class FragmentCreateFile : Fragment() {
         binding.btnPregResp.setOnClickListener {
             viewModel.rollPregResp()
         }
+
+        binding.btnPrevious.setOnClickListener {
+            viewModel.previousQuestion()
+        }
     }
 }

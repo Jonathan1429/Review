@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.lang.reflect.Type
 import javax.inject.Inject
 
 @HiltViewModel
@@ -55,9 +56,17 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
     private var isEditingMode: Boolean = false
 
+    private fun countSubtractCount(){
+        _contadorPregunta--
+    }
+
     private fun swapTypeContent() {
         _typeContent.value =
             if (typeContent.value == TypeContent.QUESTION) TypeContent.ANSWER else TypeContent.QUESTION
+    }
+
+    private fun setTypeContentWithQuestion(){
+        _typeContent.value = TypeContent.QUESTION
     }
 
     private fun showContents() {
@@ -308,6 +317,20 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         }
 
         swapTypeContent()
+        resetContentLists()
+        showContents()
+    }
+
+    fun previousQuestion() {
+        if (contadorPregunta == 0){
+            viewModelScope.launch {
+                _uiStopEvent.emit(UiStopEvent.ShowMessage("Ya no hay preguntas anteriores"))
+            }
+            return
+        }
+
+        setTypeContentWithQuestion()
+        countSubtractCount()
         resetContentLists()
         showContents()
     }
