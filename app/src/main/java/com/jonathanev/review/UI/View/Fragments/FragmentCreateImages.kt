@@ -112,7 +112,7 @@ class FragmentCreateImages : Fragment() {
 
     private fun processImage() {
         // Editing
-        sharedViewModel.processImage()
+        sharedViewModel.addImageContent()
     }
 
     fun guardarTemporalmente() {

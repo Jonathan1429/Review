@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.Data.Model.ContentWrapper
 import com.jonathanev.review.Data.Model.EstadoUI
-import com.jonathanev.review.Data.Model.InternalRules
 import com.jonathanev.review.Data.Model.prueba.ColorRange
 import com.jonathanev.review.Data.Model.prueba.QuestionContent
 import com.jonathanev.review.Data.Model.prueba.QuestionItem
@@ -17,6 +16,7 @@ import com.jonathanev.review.Domain.GetContentItemsUseCase
 import com.jonathanev.review.Domain.GetTextWithoutLabelsUseCase
 import com.jonathanev.review.Domain.SetCifrarRutaImagenUseCase
 import com.jonathanev.review.Domain.SetColocarEtiquetasUseCase
+import com.jonathanev.review.Domain.SetContentUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,6 +30,7 @@ import javax.inject.Inject
 class SharedFragmentCreateFileViewModel @Inject constructor(
     private val setColocarEtiquetasUseCase: SetColocarEtiquetasUseCase,
     private val setCifrarRutaImagenUseCase: SetCifrarRutaImagenUseCase,
+    private val setContentUseCase: SetContentUseCase,
     private val getContentItemsUseCase: GetContentItemsUseCase,
     private val getTextWithoutLabelsUseCase: GetTextWithoutLabelsUseCase
 ) : ViewModel() {
@@ -98,6 +99,13 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         contadorContenido = -1
     }
 
+    private fun resetContentLists() = _uiState.update { state ->
+        state.copy(
+            imageList = emptyList(),
+            textList = emptyList()
+        )
+    }
+
     fun addTextContent(textWithLabels: String, listSpans: List<ColorRange>) {
         val mutablePivRefList =
             if (typeContent.value == TypeContent.QUESTION) _preguntas else _respuestas
@@ -113,42 +121,14 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             return
         }
 
-        // Validar contadorPregunta dentro de rango
-        if (contadorPregunta !in 0 until mutablePivRefList.size) return
-
-        val originalItem = mutablePivRefList[contadorPregunta]
-        val originalContent = originalItem.content.toMutableList()
-
-        val textWrappers = originalItem.content.mapIndexedNotNull { index, item ->
-            if (item is QuestionContent.Text) ContentWrapper(index, item) else null
-        }
-
-        if (isEditingMode) {
-            // Validar que el wrapper exista
-            if (contadorContenido !in 0 until textWrappers.size) return
-
-            val selectedWrapper = textWrappers[contadorContenido]
-            val originalIndex = selectedWrapper.originalIndex
-            originalContent[originalIndex] = newContent
-        } else {
-            originalContent.add(newContent)
-        }
-
-        mutablePivRefList[contadorPregunta] = originalItem.copy(content = originalContent.toList())
+        setContentUseCase.invoke(newContent, mutablePivRefList, contadorPregunta, contadorContenido, isEditingMode, QuestionContent.Text::class.java)
 
         resetEditingMode()
         resetContentLists()
         showContents()
     }
 
-    private fun resetContentLists() = _uiState.update { state ->
-        state.copy(
-            imageList = emptyList(),
-            textList = emptyList()
-        )
-    }
-
-    fun processImage() {
+    fun addImageContent() {
         val mutableRefList =
             if (typeContent.value == TypeContent.QUESTION) _preguntas else _respuestas
 
@@ -165,22 +145,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             return
         }
 
-        val oldItem = mutableRefList[contadorPregunta]
-        val originalContent = oldItem.content.toMutableList()
-
-        // Filtrar índices reales de imágenes
-        val imageWrappers = oldItem.content.mapIndexedNotNull { index, content ->
-            if (content is QuestionContent.Image) ContentWrapper(index, content) else null
-        }
-
-        if (isEditingMode) {
-            val realIndex = imageWrappers[contadorContenido].originalIndex
-            originalContent[realIndex] = newContent
-        } else {
-            originalContent.add(newContent)
-        }
-
-        mutableRefList[contadorPregunta] = oldItem.copy(content = originalContent.toList())
+        setContentUseCase.invoke(newContent, mutableRefList, contadorPregunta, contadorContenido, isEditingMode, QuestionContent.Image::class.java)
 
         resetEditingMode()
         resetContentLists()
