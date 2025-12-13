@@ -1,15 +1,25 @@
 package com.jonathanev.review.Data.provider
 
 import android.graphics.Color
+import androidx.lifecycle.viewModelScope
+import com.jonathanev.review.DI.IoDispatcher
+import com.jonathanev.review.DI.MainDispatcher
+import com.jonathanev.review.Data.Model.DataStoreManager
 import com.jonathanev.review.Data.Model.GuideModel
 import com.jonathanev.review.Data.Model.prueba.FolderModel
+import com.jonathanev.review.Data.Model.prueba.QuestionContent
 import com.jonathanev.review.Data.repository.FileRepositoryImpl
+import com.jonathanev.review.Domain.repository.FileRepository
 import com.jonathanev.review.R
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import javax.inject.Inject
 
 class GuiaProvider @Inject constructor(
-    private val fileRepositoryImpl: FileRepositoryImpl
+    private val fileRepositoryImpl: FileRepositoryImpl,
+    private val fileRepository: FileRepository,
 ) {
     fun loadFoldersFromDevice(): List<FolderModel> {
         val currentPath = File(fileRepositoryImpl.getCurrentPath())
@@ -41,6 +51,11 @@ class GuiaProvider @Inject constructor(
             }
     }
 
+    suspend fun saveImagesInDevice(images: List<QuestionContent.Image>, imagesPath: File) {
+        images.map { image ->
+            fileRepository.saveImage(image, imagesPath)
+        }
+    }
     /*var folders: List<FolderModel> = emptyList()
     var guias: List<GuideModel> = emptyList()*/
 }

@@ -6,7 +6,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jonathanev.review.DI.IoDispatcher
+import com.jonathanev.review.DI.MainDispatcher
 import com.jonathanev.review.Data.Model.ContentWrapper
+import com.jonathanev.review.Data.Model.DataStoreManager
 import com.jonathanev.review.Data.Model.EstadoUI
 import com.jonathanev.review.Data.Model.prueba.ColorRange
 import com.jonathanev.review.Data.Model.prueba.QuestionContent
@@ -14,6 +17,7 @@ import com.jonathanev.review.Data.Model.prueba.QuestionItem
 import com.jonathanev.review.Data.Model.prueba.TypeContent
 import com.jonathanev.review.Data.Model.prueba.UIStopEvent
 import com.jonathanev.review.Data.provider.FilePathsProvider
+import com.jonathanev.review.Data.provider.GuiaProvider
 import com.jonathanev.review.Data.repository.FileRepositoryImpl
 import com.jonathanev.review.Domain.GetContentItemsUseCase
 import com.jonathanev.review.Domain.GetTextWithoutLabelsUseCase
@@ -22,12 +26,15 @@ import com.jonathanev.review.Domain.SetColocarEtiquetasUseCase
 import com.jonathanev.review.Domain.SetContentUseCase
 import com.jonathanev.review.Domain.SetCrearXmlUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import javax.inject.Inject
 
@@ -40,6 +47,10 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     private val getContentItemsUseCase: GetContentItemsUseCase,
     private val fileRepositoryImpl: FileRepositoryImpl,
     private val filePathsProvider: FilePathsProvider,
+    private val dataStore: DataStoreManager,
+    private val guiaProvider: GuiaProvider,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+    @MainDispatcher private val mainDispatcher: CoroutineDispatcher,
     private val getTextWithoutLabelsUseCase: GetTextWithoutLabelsUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(EstadoUI())
@@ -56,6 +67,12 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
     private var _contadorPregunta: Int = 0
     val contadorPregunta: Int get() = _contadorPregunta
+
+    private var _saveImages = MutableLiveData<List<QuestionContent.Image>>()
+    val saveImages: LiveData<List<QuestionContent.Image>> get() = _saveImages
+
+    private val _fileName = MutableLiveData<String>()
+    val fileName: LiveData<String> get() = _fileName
 
     private var contadorContenido: Int = -1
     private lateinit var actualUri: Uri
@@ -381,6 +398,8 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         }
 
         val currentPath = filePathsProvider.buildFile(File(getCurrentPath()), "$nameGuide.xml")
+        val imagesPath = filePathsProvider.buildFile(File(getCurrentPath()), nameGuide)
+
         val isSuccess = setCrearXmlUseCase.invoke(
             nameGuide,
             description,
@@ -388,6 +407,29 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             preguntas,
             respuestas
         )
+
+        val images = File(imagesPath.toString().replace("guias", "imagenes"))
+        if (!images.exists()){
+            images.mkdirs()
+        }
+
+        val a = mutableListOf<QuestionContent.Image>()
+
+        preguntas.forEach { item ->
+            item.content.filterIsInstance<QuestionContent.Image>().forEach { image ->
+                a.add(image)
+            }
+        }
+
+        respuestas.forEach { item ->
+            item.content.filterIsInstance<QuestionContent.Image>().forEach { image ->
+                a.add(image)
+            }
+        }
+
+        viewModelScope.launch {
+            guiaProvider.saveImagesInDevice(a.toList(), images)
+        }
 
         Log.i("Guardado", isSuccess.toString())
     }

@@ -1,6 +1,12 @@
 package com.jonathanev.review.UI.View.Fragments
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,6 +31,7 @@ import com.jonathanev.review.UI.ViewModel.Fragments.SharedFragmentCreateFileView
 import com.jonathanev.review.databinding.FragmentCreateFileBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import java.io.File
 
 @AndroidEntryPoint
 class FragmentCreateFile : Fragment() {
@@ -177,5 +184,23 @@ class FragmentCreateFile : Fragment() {
         binding.btnSaveGuide.setOnClickListener {
             viewModel.saveGuide(screenData.name, screenData.description)
         }
+    }
+
+    fun copyImageToInternalStorage(
+        context: Context,
+        sourceUri: Uri,
+        fileName: String
+    ): File {
+
+        val bitmap = MediaStore.Images.Media.getBitmap(
+            context.contentResolver,
+            sourceUri
+        )
+
+        context.openFileOutput(fileName, Context.MODE_PRIVATE).use { fos ->
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
+        }
+
+        return File(context.filesDir, fileName)
     }
 }
