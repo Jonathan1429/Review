@@ -6,7 +6,7 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class ScreenData(
     val name: String,
-    val description: String? = null,
+    val description: String = "",
     val icon: Int? = null,
     val color: Int? = null
 ): Parcelable

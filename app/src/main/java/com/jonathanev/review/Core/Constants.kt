@@ -23,6 +23,7 @@ object Constants {
     const val CUESTIONARIO = "Cuestionario"
     const val GUIAESTUDIO = "GuiaEstudio"
     const val VERSION = "version"
+    const val DESCRIPCION = "Descripcion"
     const val NOMBREGUIA = "nombreGuia"
     const val QUESTION = "Question"
     const val ANSWER = "Answer"

@@ -180,9 +180,9 @@ class ActivityModificarViewModel @Inject constructor(
     }
 
     fun setCrearXML() {
-        val isSuccess = setCrearXmlUseCase.invoke(getCurrentPath(), preguntas, respuestas)
+        //val isSuccess = setCrearXmlUseCase.invoke(getCurrentPath(), preguntas, respuestas)
 
-        if (isSuccess) {
+        if (true) {
             val qaItem = QAUiItem(
                 preguntas = preguntas.map { it.toUi() },
                 respuestas = respuestas.map { it.toUi() }

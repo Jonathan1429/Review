@@ -54,7 +54,7 @@ class FragmentCreateFile : Fragment() {
         ) ?: ScreenData("", "", 0, 0)
 
         initUI()
-        initListeners()
+        initListeners(screenData)
         observers()
 
         lifecycleScope.launch {
@@ -144,7 +144,7 @@ class FragmentCreateFile : Fragment() {
         )
     }
 
-    private fun initListeners() {
+    private fun initListeners(screenData: ScreenData) {
         binding.btnAddText.setOnClickListener {
             findNavController().navigate(
                 R.id.action_fragmentCreateFile2_to_fragmentCreateText
@@ -172,6 +172,10 @@ class FragmentCreateFile : Fragment() {
 
         binding.btnNext.setOnClickListener {
             viewModel.nextQuestion()
+        }
+
+        binding.btnSaveGuide.setOnClickListener {
+            viewModel.saveGuide(screenData.name, screenData.description)
         }
     }
 }

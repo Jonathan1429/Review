@@ -6,6 +6,7 @@ import com.jonathanev.review.Core.Constants.ANSWER
 import com.jonathanev.review.Core.Constants.BASERUTA_IMG_CIFRADO
 import com.jonathanev.review.Core.Constants.CUESTIONARIO
 import com.jonathanev.review.Core.Constants.DECODED
+import com.jonathanev.review.Core.Constants.DESCRIPCION
 import com.jonathanev.review.Core.Constants.ENCODED
 import com.jonathanev.review.Core.Constants.GUIAESTUDIO
 import com.jonathanev.review.Core.Constants.IMAGEN
@@ -78,11 +79,12 @@ class GuiaRepository @Inject constructor(
     }*/
 
     fun saveFileV2(
+        nameGuide: String,
+        description: String,
         currentPath: String,
         preguntas: MutableList<QuestionItem>,
         respuestas: MutableList<QuestionItem>,
     ): Boolean {
-        val nombreArchivo = currentPath.substringAfterLast("/")
         val file = File(currentPath)
 
         // Eliminamos el archivo anteriormente creado
@@ -100,9 +102,10 @@ class GuiaRepository @Inject constructor(
             serializer.startDocument(null, java.lang.Boolean.valueOf(true))
             serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true)
             serializer.startTag("", GUIAESTUDIO)
-            serializer.attribute("", VERSION, "2.0")
+            serializer.attribute("", DESCRIPCION, description)
             serializer.startTag("", CUESTIONARIO)
-            serializer.attribute("", NOMBREGUIA, nombreArchivo)
+            serializer.attribute("", NOMBREGUIA, nameGuide)
+            serializer.attribute("", VERSION, "2.0")
 
             writeQuestionsAnswers(serializer, preguntas, QUESTION)
             writeQuestionsAnswers(serializer, respuestas, ANSWER)

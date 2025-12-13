@@ -1,6 +1,7 @@
 package com.jonathanev.review.UI.ViewModel.Fragments
 
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -12,11 +13,14 @@ import com.jonathanev.review.Data.Model.prueba.QuestionContent
 import com.jonathanev.review.Data.Model.prueba.QuestionItem
 import com.jonathanev.review.Data.Model.prueba.TypeContent
 import com.jonathanev.review.Data.Model.prueba.UIStopEvent
+import com.jonathanev.review.Data.provider.FilePathsProvider
+import com.jonathanev.review.Data.repository.FileRepositoryImpl
 import com.jonathanev.review.Domain.GetContentItemsUseCase
 import com.jonathanev.review.Domain.GetTextWithoutLabelsUseCase
 import com.jonathanev.review.Domain.SetCifrarRutaImagenUseCase
 import com.jonathanev.review.Domain.SetColocarEtiquetasUseCase
 import com.jonathanev.review.Domain.SetContentUseCase
+import com.jonathanev.review.Domain.SetCrearXmlUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,6 +28,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -31,7 +36,10 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     private val setColocarEtiquetasUseCase: SetColocarEtiquetasUseCase,
     private val setCifrarRutaImagenUseCase: SetCifrarRutaImagenUseCase,
     private val setContentUseCase: SetContentUseCase,
+    private val setCrearXmlUseCase: SetCrearXmlUseCase,
     private val getContentItemsUseCase: GetContentItemsUseCase,
+    private val fileRepositoryImpl: FileRepositoryImpl,
+    private val filePathsProvider: FilePathsProvider,
     private val getTextWithoutLabelsUseCase: GetTextWithoutLabelsUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(EstadoUI())
@@ -320,9 +328,67 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         showContents()
     }
 
-    private fun emitShowMessage(){
+    private fun emitShowMessage() {
         viewModelScope.launch {
             _UIStopEvent.emit(UIStopEvent.ShowMessage("Debes tener al menos un texto en pregunta/respuesta"))
         }
+    }
+
+    fun getCurrentPath() = fileRepositoryImpl.getCurrentPath()
+
+    fun saveGuide(nameGuide: String, description: String) {
+        // Revisa que haya un texto en la misma posición para pregunta/respuesta
+        val questionExist =
+            preguntas.getOrNull(0)
+                ?.content
+                ?.filterIsInstance<QuestionContent.Text>()
+        val answerExist =
+            respuestas.getOrNull(0)
+                ?.content
+                ?.filterIsInstance<QuestionContent.Text>()
+
+        if (questionExist == null || answerExist == null) {
+            viewModelScope.launch {
+                _UIStopEvent.emit(UIStopEvent.ShowMessage("Debes tener como minimo una pregunta y respuesta"))
+            }
+
+            return
+        }
+
+        val qNoTexts =
+            preguntas.getOrNull(contadorPregunta)
+                ?.content
+                ?.filterIsInstance<QuestionContent.Text>()
+                ?.count()
+        val rNoTexts =
+            respuestas.getOrNull(contadorPregunta)
+                ?.content
+                ?.filterIsInstance<QuestionContent.Text>()
+                ?.count()
+
+        if (qNoTexts == null || rNoTexts == null) {
+            viewModelScope.launch {
+                _UIStopEvent.emit(UIStopEvent.ShowMessage("Asegurate de completar una pregunta y una respuesta"))
+            }
+
+            return
+        }
+
+        if (qNoTexts == 0 || rNoTexts == 0) {
+            emitShowMessage()
+
+            return
+        }
+
+        val currentPath = filePathsProvider.buildFile(File(getCurrentPath()), "$nameGuide.xml")
+        val isSuccess = setCrearXmlUseCase.invoke(
+            nameGuide,
+            description,
+            currentPath.path,
+            preguntas,
+            respuestas
+        )
+
+        Log.i("Guardado", isSuccess.toString())
     }
 }
