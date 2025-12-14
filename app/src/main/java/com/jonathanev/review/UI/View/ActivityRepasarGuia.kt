@@ -93,8 +93,8 @@ class ActivityRepasarGuia : AppCompatActivity() {
 
                 when (uiState.content) {
                     is QuestionContent.Image -> {
-                        binding.etPregResp.setText(uiState.content.encodedPath)
-                        binding.ivImagen.setImage(ImageSource.uri(uiState.content.decodedPath))
+                        binding.etPregResp.setText(uiState.content.nameFile)
+                        binding.ivImagen.setImage(ImageSource.uri(uiState.content.uri))
 
                         binding.tilContenidoPregResp.isVisible = uiState.showImage
                     }

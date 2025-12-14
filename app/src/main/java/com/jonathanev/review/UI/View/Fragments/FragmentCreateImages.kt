@@ -75,7 +75,7 @@ class FragmentCreateImages : Fragment() {
 
     private fun initUI(item: QuestionContent) {
         if (item is QuestionContent.Image){
-            binding.ivImagen.setImage(ImageSource.uri(item.decodedPath))
+            binding.ivImagen.setImage(ImageSource.uri(item.uri))
         }
 
         sharedToolbarViewModel.isBtnSaveVisible(View.VISIBLE)

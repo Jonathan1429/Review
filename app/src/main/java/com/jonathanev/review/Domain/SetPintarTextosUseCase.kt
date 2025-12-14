@@ -1,7 +1,6 @@
 package com.jonathanev.review.Domain
 
 import com.jonathanev.review.Core.Constants.BASERUTA_IMG
-import com.jonathanev.review.Data.Model.prueba.ColorRange
 import com.jonathanev.review.Data.Model.prueba.QuestionContent
 import com.jonathanev.review.Data.repository.FileHelperImpl
 import javax.inject.Inject
@@ -17,7 +16,7 @@ class SetPintarTextosUseCase @Inject constructor(
     ): QuestionContent {
         return when(item){
             is QuestionContent.Image -> {
-                var descifrado = setCifrarRutaImagenUseCase(item.encodedPath, 26 - 3)// cifrar(texto, 26 - 3)
+                var descifrado = setCifrarRutaImagenUseCase(item.nameFile, 26 - 3)// cifrar(texto, 26 - 3)
                 //val cifrado = item.url
                 descifrado = descifrado.replace(BASERUTA_IMG.toRegex(), "")
                 var soloRuta = ruta.replaceAfterLast("/", "")
@@ -29,7 +28,7 @@ class SetPintarTextosUseCase @Inject constructor(
                     descifrado = descifrado.replace("imagenes".toRegex(), "imagenesPivote")
                 }
 
-                QuestionContent.Image(descifrado, item.encodedPath)
+                QuestionContent.Image(descifrado, item.nameFile)
             }
             is QuestionContent.Text -> {
                 getColorRanges.invoke(item.text)

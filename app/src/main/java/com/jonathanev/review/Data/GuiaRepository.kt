@@ -82,6 +82,7 @@ class GuiaRepository @Inject constructor(
         nameGuide: String,
         description: String,
         currentPath: String,
+        imagesPath: File,
         preguntas: MutableList<QuestionItem>,
         respuestas: MutableList<QuestionItem>,
     ): Boolean {
@@ -90,6 +91,9 @@ class GuiaRepository @Inject constructor(
         // Eliminamos el archivo anteriormente creado
         if (file.exists()) {
             file.delete()
+
+            // Delete images from guide
+            //imagesPath.delete()
             Log.d("ArchivoEliminado", "Archivo eliminado")
         }
 
@@ -102,9 +106,9 @@ class GuiaRepository @Inject constructor(
             serializer.startDocument(null, java.lang.Boolean.valueOf(true))
             serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true)
             serializer.startTag("", GUIAESTUDIO)
+            serializer.attribute("", NOMBREGUIA, nameGuide)
             serializer.attribute("", DESCRIPCION, description)
             serializer.startTag("", CUESTIONARIO)
-            serializer.attribute("", NOMBREGUIA, nameGuide)
             serializer.attribute("", VERSION, "2.0")
 
             writeQuestionsAnswers(serializer, preguntas, QUESTION)
@@ -138,8 +142,8 @@ class GuiaRepository @Inject constructor(
                 when(content){
                     is QuestionContent.Image -> {
                         serializer.startTag("", IMAGEN)
-                        serializer.attribute("", DECODED, content.decodedPath)
-                        serializer.attribute("", ENCODED, content.encodedPath)
+                        serializer.attribute("", DECODED, content.uri)
+                        serializer.attribute("", ENCODED, content.nameFile)
                         serializer.endTag("", IMAGEN)
                     }
 

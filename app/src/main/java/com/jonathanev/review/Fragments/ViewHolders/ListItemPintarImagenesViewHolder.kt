@@ -10,7 +10,7 @@ class ListItemPintarImagenesViewHolder(
     private val posClicked: (Int) -> Unit
 ): RecyclerView.ViewHolder(binding.root) {
     fun bind(image: QuestionContent.Image){
-        binding.ivImagen.setImage(ImageSource.uri(image.decodedPath))
+        binding.ivImagen.setImage(ImageSource.uri(image.uri))
 
         binding.titleVisor.setOnClickListener {
             posClicked(layoutPosition)

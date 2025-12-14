@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import androidx.annotation.RequiresApi
 import com.davemorrissey.labs.subscaleview.ImageSource
 import com.jonathanev.review.Data.Model.prueba.QuestionContent
-import com.jonathanev.review.R
 import com.jonathanev.review.databinding.FragmentVisorImagenBinding
 
 class FragmentVisorImagen : Fragment() {
@@ -39,7 +38,7 @@ class FragmentVisorImagen : Fragment() {
     private fun initUI(questionContent: QuestionContent) {
         when(questionContent){
             is QuestionContent.Image -> {
-                binding.ivImagen.setImage(ImageSource.uri(questionContent.decodedPath))
+                binding.ivImagen.setImage(ImageSource.uri(questionContent.uri))
             }
             QuestionContent.None -> Unit
             is QuestionContent.Text -> Unit

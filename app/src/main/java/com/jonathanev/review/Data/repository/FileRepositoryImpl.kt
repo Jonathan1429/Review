@@ -10,7 +10,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -37,10 +36,10 @@ class FileRepositoryImpl @Inject constructor(
     override fun getCurrentPath(): String = currentPathFlow.value
 
     override suspend fun saveImage(image: QuestionContent.Image, imagesPath: File) {
-        val uri = Uri.parse(image.decodedPath)
+        val uri = Uri.parse(image.uri)
 
-        val count = dataStore.getCountImage().first()
-        val fileName = "$count.png"
+        //val count = dataStore.getCountImage().first()
+        val fileName = image.nameFile
 
         if (!imagesPath.exists()) {
             imagesPath.mkdirs()
@@ -53,7 +52,5 @@ class FileRepositoryImpl @Inject constructor(
                 input.copyTo(output)
             }
         } ?: throw IllegalStateException("No se pudo abrir imagen")
-
-        dataStore.setIncrementCounter()
     }
 }

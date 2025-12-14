@@ -11,7 +11,7 @@ class ListCreateImagesViewHolder(
     private val onDeleteClicked: (Int) -> Unit
 ): RecyclerView.ViewHolder(binding.root) {
     fun bind(image: QuestionContent.Image) {
-        binding.ivImagen.setImage(ImageSource.uri(image.decodedPath))
+        binding.ivImagen.setImage(ImageSource.uri(image.uri))
 
         binding.btnEdit.setOnClickListener {
             onEditClicked(layoutPosition)

@@ -28,8 +28,8 @@ fun QuestionContent.toUi(): QuestionContentUi {
         )
 
         is QuestionContent.Image -> QuestionContentUi.Image(
-            decodedPath = this.decodedPath,
-            encodedPath = this.encodedPath
+            decodedPath = this.uri,
+            encodedPath = this.nameFile
         )
     }
 }
@@ -43,8 +43,8 @@ fun QuestionContentUi.toDomain(): QuestionContent {
         )
 
         is QuestionContentUi.Image -> QuestionContent.Image(
-            decodedPath = this.decodedPath,
-            encodedPath = this.encodedPath
+            uri = this.decodedPath,
+            nameFile = this.encodedPath
         )
     }
 }

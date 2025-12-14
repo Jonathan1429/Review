@@ -7,7 +7,7 @@ class QuestionImageDiffCallback : DiffUtil.ItemCallback<QuestionContent.Image>()
     override fun areItemsTheSame(
         oldItem: QuestionContent.Image,
         newItem: QuestionContent.Image
-    ) = oldItem.decodedPath == newItem.decodedPath && oldItem.encodedPath == newItem.encodedPath
+    ) = oldItem.uri == newItem.uri && oldItem.nameFile == newItem.nameFile
 
     override fun areContentsTheSame(
         oldItem: QuestionContent.Image,

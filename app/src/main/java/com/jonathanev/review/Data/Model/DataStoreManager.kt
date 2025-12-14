@@ -65,4 +65,10 @@ class DataStoreManager @Inject constructor(
             pref[contador_imagenes_key] = 0
         }
     }
+
+    suspend fun setCounter(count: Int){
+        dataStore.edit { pref ->
+            pref[contador_imagenes_key] = count
+        }
+    }
 }

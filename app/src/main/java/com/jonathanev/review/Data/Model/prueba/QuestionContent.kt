@@ -10,7 +10,7 @@ sealed class QuestionContent: Parcelable {
     @Parcelize
     data class Text(val text: String, val colorRanges:List<ColorRange>): QuestionContent()
     @Parcelize
-    data class Image(val decodedPath: String, val encodedPath: String): QuestionContent()
+    data class Image(val uri: String, val nameFile: String): QuestionContent()
 }
 
 @Parcelize
