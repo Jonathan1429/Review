@@ -1,0 +1,19 @@
+package com.jonathanev.review.Domain
+
+import com.jonathanev.review.Data.provider.FilePathsProvider
+import com.jonathanev.review.Domain.repository.FileRepository
+import java.io.File
+import javax.inject.Inject
+
+class ChangeGuidePathBuildFileUseCase @Inject constructor(
+    private val filePathsProvider: FilePathsProvider,
+    private val fileRepository: FileRepository
+) {
+    operator fun invoke(nameGuide: String) {
+        val newPath = filePathsProvider
+            .buildFile(File(fileRepository.getCurrentPath()), nameGuide)
+            .path
+
+        fileRepository.setCurrentPath(newPath)
+    }
+}
