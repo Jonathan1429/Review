@@ -31,4 +31,6 @@ object Constants {
     const val ENCODED = "encoded"*/
     const val URI = "Uri"
     const val NAMEFILE = "NameFile"
+    const val VERSION1 = "1.0"
+    const val VERSION2 = "2.0"
 }

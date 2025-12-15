@@ -8,9 +8,9 @@ import com.jonathanev.review.Data.Model.prueba.AnswerState
 import com.jonathanev.review.Data.Model.prueba.QuestionItem
 import com.jonathanev.review.Data.Model.prueba.TypeContent
 import com.jonathanev.review.Data.Model.prueba.UIStopEvent
-import com.jonathanev.review.Data.repository.FileRepositoryImpl
-import com.jonathanev.review.Domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.Domain.GetContentItemsUseCase
+import com.jonathanev.review.Domain.GetObtenerDatosXMLUseCase
+import com.jonathanev.review.Domain.repository.FileRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,7 +24,7 @@ import javax.inject.Inject
 class FragmentRepasarViewModel @Inject constructor(
     private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
     private val getContentItemsUseCase: GetContentItemsUseCase,
-    private val fileRepositoryImpl: FileRepositoryImpl
+    private val fileRepository: FileRepository
 ) : ViewModel() {
     private var _preguntas: MutableList<QuestionItem> = mutableListOf()
     val preguntas: MutableList<QuestionItem> get() = _preguntas
@@ -72,6 +72,7 @@ class FragmentRepasarViewModel @Inject constructor(
         setContadorPregunta(positionContent)
 
         if (respuestas.isEmpty()) {
+            //Revisar como se obtienen los datos aqui, porque no se visualiza la imagen
             val datos = getObtenerDatosXMLUseCase.invoke(ruta = getCurrentPath())
 
             _preguntas = datos.map { it.question }.toMutableList()
@@ -153,5 +154,5 @@ class FragmentRepasarViewModel @Inject constructor(
         }
     }
 
-    private fun getCurrentPath() = fileRepositoryImpl.getCurrentPath()
+    private fun getCurrentPath() = fileRepository.getCurrentPath()
 }

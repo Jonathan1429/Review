@@ -6,9 +6,7 @@ import android.util.Xml
 import com.jonathanev.review.Core.Constants.ANSWER
 import com.jonathanev.review.Core.Constants.BASERUTA_IMG_CIFRADO
 import com.jonathanev.review.Core.Constants.CUESTIONARIO
-import com.jonathanev.review.Core.Constants.DECODED
 import com.jonathanev.review.Core.Constants.DESCRIPCION
-import com.jonathanev.review.Core.Constants.ENCODED
 import com.jonathanev.review.Core.Constants.GUIAESTUDIO
 import com.jonathanev.review.Core.Constants.IMAGEN
 import com.jonathanev.review.Core.Constants.INTERROGANTE
@@ -20,6 +18,7 @@ import com.jonathanev.review.Core.Constants.RESPUESTA
 import com.jonathanev.review.Core.Constants.TEXTO
 import com.jonathanev.review.Core.Constants.URI
 import com.jonathanev.review.Core.Constants.VERSION
+import com.jonathanev.review.Core.Constants.VERSION1
 import com.jonathanev.review.Data.Model.GuideModel
 import com.jonathanev.review.Data.Model.prueba.AnswerState
 import com.jonathanev.review.Data.Model.prueba.FolderModel
@@ -58,12 +57,7 @@ class GuiaRepositoryImpl @Inject constructor(
     private val xmlSerializerFactory: XmlSerializerFactory,
     private val fileOutputStreamFactory: FileOutputStreamFactory,
     private val filePathsProvider: FilePathsProvider
-): GuiaRepository {
-    /*fun getGuias(file: File): List<com.jonathanev.review.Data.Model.GuideModel> {
-        guiaProvider.guias = getAllGuiasUseCase.invoke(file)
-        return guiaProvider.guias
-    }*/
-
+) : GuiaRepository {
     override fun getFolders(file: File): List<FolderModel> {
         return file.listFiles()
             ?.filter { it.isDirectory }
@@ -83,7 +77,8 @@ class GuiaRepositoryImpl @Inject constructor(
             ?.filter { !it.isDirectory }
             ?.mapNotNull { item ->
                 runCatching {
-                    getAttributesGuide(item)
+                    val fileName = item.name
+                    getAttributesGuide(item, fileName)
                 }.getOrNull()
             }
             ?: emptyList()
@@ -153,8 +148,8 @@ class GuiaRepositoryImpl @Inject constructor(
             serializer.startTag("", type)
             serializer.attribute("", "pos${type}", index.toString())
 
-            for (content in item.content){
-                when(content){
+            for (content in item.content) {
+                when (content) {
                     is QuestionContent.Image -> {
                         serializer.startTag("", IMAGEN)
                         serializer.attribute("", URI, content.uri)
@@ -176,7 +171,7 @@ class GuiaRepositoryImpl @Inject constructor(
         }
     }
 
-    fun obtenerDatosXMLV2(ruta: String): List<QAItem> {
+    private fun obtenerDatosXMLV2(ruta: String, version: String): List<QAItem> {
         val qaItem = mutableListOf<QAItem>()
 
         /*val listaQA = mutableListOf<QAItem>()
@@ -189,13 +184,19 @@ class GuiaRepositoryImpl @Inject constructor(
 
         //listaQA.addAll(QAItem(getQAXML(doc, QUESTION),getQAXML(doc, ANSWER)))
         //questionItems.addAll()
-        getQAXML(qaItem, doc, QUESTION)
-        getQAXML(qaItem, doc, ANSWER)
+        getQAXML(qaItem, doc, QUESTION, ruta, version)
+        getQAXML(qaItem, doc, ANSWER, ruta, version)
 
         return qaItem
     }
 
-    private fun getQAXML(qaItem: MutableList<QAItem>, doc: Document, typeContent: String) {
+    private fun getQAXML(
+        qaItem: MutableList<QAItem>,
+        doc: Document,
+        typeContent: String,
+        ruta: String,
+        version: String
+    ) {
 
         //val items = mutableListOf<QuestionItem>()
 
@@ -222,15 +223,16 @@ class GuiaRepositoryImpl @Inject constructor(
             val images = element.getElementsByTagName(IMAGEN)
             for (j in 0 until images.length) {
                 val img = images.item(j) as Element
-                val uri = img.getAttribute(URI)
+                //val uri = img.getAttribute(URI)
                 val nameFile = img.getAttribute(NAMEFILE)
+                val uri = setSubstringPathUseCase.invoke(path = ruta, version = version, nameFile = nameFile)
                 contentList.add(
                     QuestionContent.Image(uri, nameFile)
                 )
             }
 
             val item = QuestionItem(contentList)
-            if (typeContent == QUESTION){
+            if (typeContent == QUESTION) {
                 qaItem.add(QAItem(question = item))
             } else {
                 val current = qaItem[i]
@@ -239,7 +241,7 @@ class GuiaRepositoryImpl @Inject constructor(
         }
     }
 
-    fun obtenerDatosXMLV1(ruta: String): List<QAItem> {
+    private fun obtenerDatosXMLV1(ruta: String, version: String): List<QAItem> {
         val listaQA = mutableListOf<QAItem>()
 
         val dbf = DocumentBuilderFactory.newInstance()
@@ -256,15 +258,15 @@ class GuiaRepositoryImpl @Inject constructor(
                 val e = cuestionario.item(i) as Element
 
                 val ques = e.getAttribute(PREGUNTA)
-                val ans  = e.getAttribute(RESPUESTA)
+                val ans = e.getAttribute(RESPUESTA)
 
                 // ---- PREGUNTA ----
                 val preguntaContent = mutableListOf<QuestionContent>()
 
                 val preguntaProcesada = if (ques.contains(BASERUTA_IMG_CIFRADO)) {
                     var decoded = setCifrarRutaImagenUseCase.invoke(ques, 26 - 3)
-                    decoded = setSubstringPathUseCase.invoke(ruta, decoded)
-                    QuestionContent.Image(decoded, ques)
+                    decoded = setSubstringPathUseCase.invoke(ruta, decoded, version)
+                    QuestionContent.Image(uri = decoded, nameFile = "")
                 } else {
                     getColorRanges.invoke(ques)
                 }
@@ -276,8 +278,9 @@ class GuiaRepositoryImpl @Inject constructor(
                 val respuestaContent = mutableListOf<QuestionContent>()
 
                 val respuestaProcesada = if (ans.contains(BASERUTA_IMG_CIFRADO)) {
-                    val decoded = setCifrarRutaImagenUseCase.invoke(ans, 26 - 3)
-                    QuestionContent.Image(decoded, ans)
+                    var decoded = setCifrarRutaImagenUseCase.invoke(ans, 26 - 3)
+                    decoded = setSubstringPathUseCase.invoke(ruta, decoded, version)
+                    QuestionContent.Image(uri = decoded, nameFile = "")
                 } else {
                     getColorRanges.invoke(ans)
                 }
@@ -308,21 +311,32 @@ class GuiaRepositoryImpl @Inject constructor(
 
         val versionNode = doc.getElementsByTagName(GUIAESTUDIO)
         val element = versionNode.item(0) as Element
-        val textValue = element.getAttribute(VERSION)
+        val version = element.getAttribute(VERSION)
 
         //return obtenerDatosXMLV1(ruta)
-        return if(textValue == "1.0") obtenerDatosXMLV1(ruta) else obtenerDatosXMLV2(ruta)
+        return if (version == VERSION1) obtenerDatosXMLV1(ruta, version) else obtenerDatosXMLV2(ruta, version)
     }
 
-    override fun getAttributesGuide(file: File): GuideModel {
+    override fun getAttributesGuide(file: File, fileName: String): GuideModel {
         val db = DocumentBuilderFactory.newInstance().newDocumentBuilder()
         val doc = db.parse(file)
 
-        val cuestionarioNode = doc.getElementsByTagName("Cuestionario")
+        val versionNode = doc.getElementsByTagName(GUIAESTUDIO)
+        val elementGuide = versionNode.item(0) as Element
+        val version = elementGuide.getAttribute(VERSION)
+
+        val cuestionarioNode = doc.getElementsByTagName(CUESTIONARIO)
         val element = cuestionarioNode.item(0) as Element
 
-        val name = element.getAttribute("nombreGuia")
-        val description = element.getAttribute("Descripcion")
+        var name = ""
+        val description = element.getAttribute(DESCRIPCION)
+        //var name = element.getAttribute("nombreGuia")
+        if (version == "1.0"){
+            name = fileName
+            name = name.replace(".xml", "")
+        } else {
+            name = element.getAttribute("nombreGuia")
+        }
 
         return GuideModel(
             nameGuide = name,

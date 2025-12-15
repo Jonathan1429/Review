@@ -2,14 +2,12 @@ package com.jonathanev.review.UI.ViewModel.Fragments
 
 import androidx.lifecycle.ViewModel
 import com.jonathanev.review.Data.GuiaRepository
-import com.jonathanev.review.Data.GuiaRepositoryImpl
 import com.jonathanev.review.Data.Model.StateUIPreviewQuestion
 import com.jonathanev.review.Data.Model.prueba.AnswerState
 import com.jonathanev.review.Data.Model.prueba.QAItem
 import com.jonathanev.review.Data.Model.prueba.QuestionItem
 import com.jonathanev.review.Data.Model.prueba.TypeContent
 import com.jonathanev.review.Data.provider.FilePathsProvider
-import com.jonathanev.review.Data.repository.FileRepositoryImpl
 import com.jonathanev.review.Domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.Domain.GetPreviewQuestionsUseCase
 import com.jonathanev.review.Domain.LoadGuidesUseCase

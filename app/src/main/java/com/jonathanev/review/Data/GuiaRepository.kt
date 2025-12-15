@@ -7,7 +7,7 @@ import java.io.File
 
 interface GuiaRepository {
     fun getXMLVersion(ruta: String): List<QAItem>
-    fun getAttributesGuide(file: File): GuideModel
+    fun getAttributesGuide(file: File, fileName: String): GuideModel
     fun getGuides(file: File): List<GuideModel>
     fun getFolders(file: File):List<FolderModel>
 }
