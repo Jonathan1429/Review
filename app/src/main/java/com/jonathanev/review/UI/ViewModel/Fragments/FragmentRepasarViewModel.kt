@@ -4,6 +4,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.Data.Model.EstadoUI
+import com.jonathanev.review.Data.Model.prueba.AnswerState
 import com.jonathanev.review.Data.Model.prueba.QuestionItem
 import com.jonathanev.review.Data.Model.prueba.TypeContent
 import com.jonathanev.review.Data.Model.prueba.UIStopEvent
@@ -74,7 +75,7 @@ class FragmentRepasarViewModel @Inject constructor(
             val datos = getObtenerDatosXMLUseCase.invoke(ruta = getCurrentPath())
 
             _preguntas = datos.map { it.question }.toMutableList()
-            _respuestas = datos.map { it.answer }.toMutableList()
+            _respuestas = datos.mapNotNull { (it.answer as? AnswerState.Filled )?.item }.toMutableList()
 
             showContents()
         }

@@ -18,7 +18,6 @@ import com.jonathanev.review.Data.Model.prueba.TypeContent
 import com.jonathanev.review.Data.Model.prueba.UIStopEvent
 import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Data.provider.GuiaProvider
-import com.jonathanev.review.Data.repository.FileRepositoryImpl
 import com.jonathanev.review.Domain.GetContentItemsUseCase
 import com.jonathanev.review.Domain.GetTextWithoutLabelsUseCase
 import com.jonathanev.review.Domain.SetCifrarRutaImagenUseCase
@@ -26,17 +25,15 @@ import com.jonathanev.review.Domain.SetColocarEtiquetasUseCase
 import com.jonathanev.review.Domain.SetContentUseCase
 import com.jonathanev.review.Domain.SetCrearXmlUseCase
 import com.jonathanev.review.Domain.SetDecodePathImageUseCase
+import com.jonathanev.review.Domain.repository.FileRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.File
 import javax.inject.Inject
 
@@ -48,7 +45,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     private val setCrearXmlUseCase: SetCrearXmlUseCase,
     private val setDecodePathImageUseCase: SetDecodePathImageUseCase,
     private val getContentItemsUseCase: GetContentItemsUseCase,
-    private val fileRepositoryImpl: FileRepositoryImpl,
+    private val fileRepository: FileRepository,
     private val filePathsProvider: FilePathsProvider,
     private val dataStore: DataStoreManager,
     private val guiaProvider: GuiaProvider,
@@ -354,7 +351,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         }
     }
 
-    fun getCurrentPath() = fileRepositoryImpl.getCurrentPath()
+    fun getCurrentPath() = fileRepository.getCurrentPath()
 
     fun saveGuide(nameGuide: String, description: String) {
         // Revisa que haya un texto en la misma posición para pregunta/respuesta
@@ -400,35 +397,35 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             return
         }
 
-        val currentPath = filePathsProvider.buildFile(File(getCurrentPath()), "$nameGuide.xml")
-        val imagesPath = filePathsProvider.buildFile(File(getCurrentPath()), nameGuide)
+        val currentPath = filePathsProvider.buildFile(File(getCurrentPath()), nameGuide)
+        val imagesPath = filePathsProvider.buildFolder(File(getCurrentPath()), nameGuide).path
 
-        val images = File(imagesPath.toString().replace("guias", "imagenes"))
-        if (images.exists()){
+        val images = File(imagesPath.replace("guias", "imagenes"))
+        if (images.exists()) {
             images.deleteRecursively()
         }
 
         images.mkdirs()
 
         viewModelScope.launch {
-            setDecodePathImageUseCase.invoke(preguntas, respuestas)
+            setDecodePathImageUseCase.invoke(_preguntas, _respuestas)
 
             val listImages = (preguntas + respuestas)
                 .flatMap { it.content }
                 .filterIsInstance<QuestionContent.Image>()
 
             guiaProvider.saveImagesInDevice(listImages, images)
+
+            val isSuccess = setCrearXmlUseCase.invoke(
+                nameGuide,
+                description,
+                currentPath.path,
+                images,
+                preguntas,
+                respuestas
+            )
+
+            Log.i("Guardado", isSuccess.toString())
         }
-
-        val isSuccess = setCrearXmlUseCase.invoke(
-            nameGuide,
-            description,
-            currentPath.path,
-            images,
-            preguntas,
-            respuestas
-        )
-
-        Log.i("Guardado", isSuccess.toString())
     }
 }

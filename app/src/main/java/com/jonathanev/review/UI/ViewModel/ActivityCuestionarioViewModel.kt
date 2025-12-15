@@ -8,7 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.DI.IoDispatcher
 import com.jonathanev.review.DI.MainDispatcher
-import com.jonathanev.review.Data.GuiaRepository
+import com.jonathanev.review.Data.GuiaRepositoryImpl
 import com.jonathanev.review.Data.Model.DataStoreManager
 import com.jonathanev.review.Data.Model.EstadoUI
 import com.jonathanev.review.Data.Model.GuideModel
@@ -46,7 +46,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ActivityCuestionarioViewModel @Inject constructor(
-    private val guiaRepository: GuiaRepository,
+    private val guiaRepositoryImpl: GuiaRepositoryImpl,
     private val getContentItemsUseCase: GetContentItemsUseCase,
     private val setCrearXmlUseCase: SetCrearXmlUseCase,
     private val setColocarEtiquetasUseCase: SetColocarEtiquetasUseCase,

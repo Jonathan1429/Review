@@ -12,6 +12,7 @@ import com.jonathanev.review.Data.Model.EstadoUI
 import com.jonathanev.review.Data.Model.GuideModel
 import com.jonathanev.review.Data.Model.InternalRules
 import com.jonathanev.review.Data.Model.MessageActions
+import com.jonathanev.review.Data.Model.prueba.AnswerState
 import com.jonathanev.review.Data.Model.prueba.ColorRange
 import com.jonathanev.review.Data.Model.prueba.QAUiItem
 import com.jonathanev.review.Data.Model.prueba.QuestionContent
@@ -201,7 +202,7 @@ class ActivityModificarViewModel @Inject constructor(
             val datos = getObtenerDatosXMLUseCase.invoke(ruta = getCurrentPath())
 
             _preguntas = datos.map { it.question }.toMutableList()
-            _respuestas = datos.map { it.answer }.toMutableList()
+            _respuestas = datos.mapNotNull { (it.answer as? AnswerState.Filled )?.item }.toMutableList()
         }
 
         cargarPregunta(typeContent.value)

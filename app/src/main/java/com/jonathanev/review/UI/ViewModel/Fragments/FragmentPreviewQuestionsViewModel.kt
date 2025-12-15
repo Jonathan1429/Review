@@ -2,7 +2,9 @@ package com.jonathanev.review.UI.ViewModel.Fragments
 
 import androidx.lifecycle.ViewModel
 import com.jonathanev.review.Data.GuiaRepository
+import com.jonathanev.review.Data.GuiaRepositoryImpl
 import com.jonathanev.review.Data.Model.StateUIPreviewQuestion
+import com.jonathanev.review.Data.Model.prueba.AnswerState
 import com.jonathanev.review.Data.Model.prueba.QAItem
 import com.jonathanev.review.Data.Model.prueba.QuestionItem
 import com.jonathanev.review.Data.Model.prueba.TypeContent
@@ -10,6 +12,8 @@ import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Data.repository.FileRepositoryImpl
 import com.jonathanev.review.Domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.Domain.GetPreviewQuestionsUseCase
+import com.jonathanev.review.Domain.LoadGuidesUseCase
+import com.jonathanev.review.Domain.repository.FileRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,9 +24,12 @@ import javax.inject.Inject
 class FragmentPreviewQuestionsViewModel @Inject constructor(
     private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
     private val getPreviewQuestionsUseCase: GetPreviewQuestionsUseCase,
-    private val fileRepositoryImpl: FileRepositoryImpl,
+    //private val fileRepositoryImpl: FileRepositoryImpl,
     private val filePathsProvider: FilePathsProvider,
-    private val guiaRepository: GuiaRepository
+    private val loadGuidesUseCase: LoadGuidesUseCase,
+    private val guiaRepository: GuiaRepository,
+    private val fileRepository: FileRepository
+    //private val guiaRepositoryImpl: GuiaRepositoryImpl
 ): ViewModel() {
     private var _preguntas: MutableList<QuestionItem> = mutableListOf()
     val preguntas: MutableList<QuestionItem> get() = _preguntas
@@ -39,15 +46,16 @@ class FragmentPreviewQuestionsViewModel @Inject constructor(
     private var typeContent = TypeContent.QUESTION
 
     fun setMainPath(){
-        val currentPath = fileRepositoryImpl.getCurrentPath()
+        val currentPath = fileRepository.getCurrentPath()
         val beforePath = filePathsProvider.beforePath(File(currentPath))
-        fileRepositoryImpl.setCurrentPath(beforePath.path)
+        fileRepository.setCurrentPath(beforePath.path)
 
         getGuidesBefore()
     }
 
     private fun getGuidesBefore() {
-        guiaRepository.getGuides()
+        loadGuidesUseCase.invoke()
+        //guiaRepository.getGuides()
     }
 
     fun getObtenerDatosXML() {
@@ -55,13 +63,13 @@ class FragmentPreviewQuestionsViewModel @Inject constructor(
             val datos = getObtenerDatosXMLUseCase.invoke(ruta = getCurrentPath())
 
             _preguntas = datos.map { it.question }.toMutableList()
-            _respuestas = datos.map { it.answer }.toMutableList()
+            _respuestas = datos.mapNotNull { (it.answer as? AnswerState.Filled )?.item }.toMutableList()
 
             uploadQuestion(datos)
         }
     }
 
-    private fun getCurrentPath() = fileRepositoryImpl.getCurrentPath()
+    private fun getCurrentPath() = fileRepository.getCurrentPath()
 
     private fun uploadQuestion(qaItems: List<QAItem>) {
         val response = getPreviewQuestionsUseCase.invoke(qaItems)

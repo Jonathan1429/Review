@@ -1,15 +1,15 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.Data.repository.FileRepositoryImpl
+import com.jonathanev.review.Domain.repository.FileRepository
 import java.io.File
 import javax.inject.Inject
 
 class MoveNonFolderFilesToOtrosUseCase @Inject constructor(
-    private val fileRepositoryImpl: FileRepositoryImpl
+    private val fileRepository: FileRepository
 ) {
     operator fun invoke(): Result<Unit> {
         return try {
-            val currentPath = File(fileRepositoryImpl.getCurrentPath())
+            val currentPath = File(fileRepository.getCurrentPath())
             if (!currentPath.exists()) return Result.failure(Exception("Path no existe"))
 
             // Crear carpeta "Otros" si no existe

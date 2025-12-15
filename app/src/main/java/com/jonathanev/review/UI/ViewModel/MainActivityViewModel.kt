@@ -7,19 +7,22 @@ import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.Data.GuiaRepository
 import com.jonathanev.review.Data.Model.FoldersUiState
 import com.jonathanev.review.Data.provider.FilePathsProvider
-import com.jonathanev.review.Data.repository.FileRepositoryImpl
 import com.jonathanev.review.Domain.CreateFoldersUseCase
 import com.jonathanev.review.Domain.MoveNonFolderFilesToOtrosUseCase
+import com.jonathanev.review.Domain.repository.FileRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
 class MainActivityViewModel @Inject constructor(
+    //private val guiaRepositoryImpl: GuiaRepositoryImpl,
     private val guiaRepository: GuiaRepository,
+    private val fileRepository: FileRepository,
     private val moveNonFolderFilesToOtrosUseCase: MoveNonFolderFilesToOtrosUseCase,
     private val createFoldersUseCase: CreateFoldersUseCase,
-    private val fileRepositoryImpl: FileRepositoryImpl,
+    //private val fileRepositoryImpl: FileRepositoryImpl,
     private val filePathsProvider: FilePathsProvider
 ) : ViewModel() {
     private val _shouldRequestPermission = MutableLiveData<Boolean>()
@@ -36,9 +39,9 @@ class MainActivityViewModel @Inject constructor(
 
         viewModelScope.launch {
             // Mover archivos (espera a que termine)
+            val currentPath = fileRepository.getCurrentPath()
             moveNonFolderFilesToOtrosUseCase.invoke()
-
-            guiaRepository.getFolders()
+            guiaRepository.getFolders(File(currentPath))
         }
     }
 
@@ -59,17 +62,17 @@ class MainActivityViewModel @Inject constructor(
         return _createdFolders.value == true
     }*/
 
-    fun checkIfNeedsPermission(hasPermission: Boolean){
-        if (!hasPermission){
+    fun checkIfNeedsPermission(hasPermission: Boolean) {
+        if (!hasPermission) {
             _shouldRequestPermission.value = true
         }
     }
 
-    fun setCurrentPath(){
-        fileRepositoryImpl.setCurrentPath(filePathsProvider.fileGuides.toString())
+    fun setCurrentPath() {
+        fileRepository.setCurrentPath(filePathsProvider.fileGuides.toString())
     }
 
     fun getCurrentPath(): String {
-        return fileRepositoryImpl.getCurrentPath()
+        return fileRepository.getCurrentPath()
     }
 }

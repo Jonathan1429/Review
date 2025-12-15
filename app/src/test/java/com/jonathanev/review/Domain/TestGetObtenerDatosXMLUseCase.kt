@@ -1,12 +1,5 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.Data.GuiaRepository
-import io.mockk.every
-import io.mockk.mockk
-import junit.framework.TestCase.assertEquals
-import junit.framework.TestCase.assertTrue
-import org.junit.Test
-
 class TestGetObtenerDatosXMLUseCase {
     /*//private val guiaProvider
     private val guiaRepository = mockk<GuiaRepository>()

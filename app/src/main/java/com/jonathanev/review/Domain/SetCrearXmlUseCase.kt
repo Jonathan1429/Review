@@ -1,12 +1,12 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.Data.GuiaRepository
+import com.jonathanev.review.Data.GuiaRepositoryImpl
 import com.jonathanev.review.Data.Model.prueba.QuestionItem
 import java.io.File
 import javax.inject.Inject
 
 class SetCrearXmlUseCase @Inject constructor(
-    private val guiaRepository: GuiaRepository
+    private val guiaRepositoryImpl: GuiaRepositoryImpl
 ) {
     operator fun invoke(
         nameGuide: String,
@@ -16,6 +16,6 @@ class SetCrearXmlUseCase @Inject constructor(
         preguntas: MutableList<QuestionItem>,
         respuestas: MutableList<QuestionItem>,
     ): Boolean {
-        return guiaRepository.saveFileV2(nameGuide, description, currentPath, imagesPath, preguntas, respuestas)
+        return guiaRepositoryImpl.saveFileV2(nameGuide, description, currentPath, imagesPath, preguntas, respuestas)
     }
 }

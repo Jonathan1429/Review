@@ -1,18 +1,19 @@
 package com.jonathanev.review.Domain
 
 import com.jonathanev.review.Data.Model.PreviewQuestion
+import com.jonathanev.review.Data.Model.prueba.AnswerState
 import com.jonathanev.review.Data.Model.prueba.QAItem
 import com.jonathanev.review.Data.Model.prueba.QuestionContent
-import com.jonathanev.review.Data.repository.FileRepositoryImpl
+import com.jonathanev.review.Domain.repository.FileRepository
 import javax.inject.Inject
 
 class GetPreviewQuestionsUseCase @Inject constructor(
-    private val fileRepositoryImpl: FileRepositoryImpl,
+    private val fileRepository: FileRepository,
     private val setPintarTextosUseCase: SetPintarTextosUseCase
 ) {
     operator fun invoke(qaItems: List<QAItem>): MutableList<PreviewQuestion> {
         val previewQuestion = mutableListOf<PreviewQuestion>()
-        val currentPath = fileRepositoryImpl.getCurrentPath()
+        val currentPath = fileRepository.getCurrentPath()
 
         qaItems.forEach { qa ->
 
@@ -46,11 +47,13 @@ class GetPreviewQuestionsUseCase @Inject constructor(
             // ----------------------------
             var totalImgsRespuesta = 0
 
-            qa.answer.content.forEach { item ->
-                val result = setPintarTextosUseCase.invoke(item, currentPath)
+            if (qa.answer is AnswerState.Filled) {
+                qa.answer.item.content.forEach { item ->
+                    val result = setPintarTextosUseCase.invoke(item, currentPath)
 
-                if (result is QuestionContent.Image) {
-                    totalImgsRespuesta++
+                    if (result is QuestionContent.Image) {
+                        totalImgsRespuesta++
+                    }
                 }
             }
 

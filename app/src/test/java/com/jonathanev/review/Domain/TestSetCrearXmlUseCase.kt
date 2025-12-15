@@ -1,21 +1,5 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.Data.FileOutputStreamFactory
-import com.jonathanev.review.Data.GuiaRepository
-import com.jonathanev.review.Data.provider.FilePathsProvider
-import com.jonathanev.review.Data.provider.GuiaProvider
-import com.jonathanev.review.Data.Model.ResponseGuia
-import com.jonathanev.review.Data.XmlSerializerFactory
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Test
-import org.xmlpull.v1.XmlSerializer
-import java.io.FileOutputStream
-
 class TestSetCrearXmlUseCase {
     /*private val getAllGuiasUseCase = mockk<GetAllGuiasUseCase>()
     private val guiaProvider       = mockk<GuiaProvider>()

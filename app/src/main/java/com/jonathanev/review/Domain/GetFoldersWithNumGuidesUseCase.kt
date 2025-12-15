@@ -1,20 +1,20 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.Data.GuiaRepository
+import com.jonathanev.review.Data.GuiaRepositoryImpl
 import com.jonathanev.review.Data.Model.prueba.FolderUI
 import com.jonathanev.review.Data.provider.FilePathsProvider
-import com.jonathanev.review.Data.repository.FileRepositoryImpl
+import com.jonathanev.review.Domain.repository.FileRepository
 import java.io.File
 import javax.inject.Inject
 
 class GetFoldersWithNumGuidesUseCase @Inject constructor(
-    private val fileRepositoryImpl: FileRepositoryImpl,
+    private val fileRepository: FileRepository,
     private val filePathsProvider: FilePathsProvider,
-    private val guiaRepository: GuiaRepository
+    private val guiaRepositoryImpl: GuiaRepositoryImpl
 ) {
     operator fun invoke(): List<FolderUI> {
-        val folders = guiaRepository.getFolders()
-        val currentPath = File(fileRepositoryImpl.getCurrentPath())
+        val currentPath = File(fileRepository.getCurrentPath())
+        val folders = guiaRepositoryImpl.getFolders(currentPath)
 
         return folders.map { folder ->
             val currentFolder = filePathsProvider.buildFolder(currentPath, folder.nameFolder)

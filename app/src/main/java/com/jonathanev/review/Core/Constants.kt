@@ -27,6 +27,8 @@ object Constants {
     const val NOMBREGUIA = "nombreGuia"
     const val QUESTION = "Question"
     const val ANSWER = "Answer"
-    const val DECODED = "decoded"
-    const val ENCODED = "encoded"
+    /*const val DECODED = "decoded"
+    const val ENCODED = "encoded"*/
+    const val URI = "Uri"
+    const val NAMEFILE = "NameFile"
 }

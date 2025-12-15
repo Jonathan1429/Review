@@ -2,17 +2,17 @@ package com.jonathanev.review.Domain
 
 import com.jonathanev.review.Core.Constants.PRINCIPAL
 import com.jonathanev.review.Data.provider.FilePathsProvider
-import com.jonathanev.review.Data.repository.FileRepositoryImpl
+import com.jonathanev.review.Domain.repository.FileRepository
 import java.io.File
 import javax.inject.Inject
 
 class GetFoldersCreatedUseCase @Inject constructor(
     private val filePathsProvider: FilePathsProvider,
-    private val fileRepositoryImpl: FileRepositoryImpl
+    private val fileRepository: FileRepository
 ) {
     operator fun invoke(): Array<String>{
         val listaCarpetas = filePathsProvider.fileGuides.listFiles { file -> file.isDirectory } ?: emptyArray()
-        val currentPath = fileRepositoryImpl.getCurrentPath()
+        val currentPath = fileRepository.getCurrentPath()
         val foldersCreated = listaCarpetas.map { it.name }.toTypedArray()
 
         if (File(currentPath) != filePathsProvider.fileGuides) {

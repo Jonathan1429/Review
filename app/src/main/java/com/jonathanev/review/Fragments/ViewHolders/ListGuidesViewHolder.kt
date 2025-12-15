@@ -10,7 +10,9 @@ class ListGuidesViewHolder @Inject constructor(
     private val posClicked: (Int) -> Unit
 ): RecyclerView.ViewHolder(binding.root) {
     fun bind(guia: GuideModel) {
-        binding.tvGuideTitle.text = guia.nameGuide
+        val nameGuide = "${guia.nameGuide}.review"
+
+        binding.tvGuideTitle.text = nameGuide
         if (guia.description.isNotEmpty()){
             binding.tvGuideDescription.text = guia.description
         }

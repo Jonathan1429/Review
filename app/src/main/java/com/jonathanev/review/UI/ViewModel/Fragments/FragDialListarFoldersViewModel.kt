@@ -3,19 +3,19 @@ package com.jonathanev.review.UI.ViewModel.Fragments
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jonathanev.review.Data.GuiaRepository
 import com.jonathanev.review.Data.FolderResult
+import com.jonathanev.review.Data.GuiaRepository
 import com.jonathanev.review.Data.Model.FoldersUiState
 import com.jonathanev.review.Data.Model.prueba.FolderUI
 import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Data.provider.GuiaProvider
 import com.jonathanev.review.Data.repository.FileHelperImpl
-import com.jonathanev.review.Data.repository.FileRepositoryImpl
 import com.jonathanev.review.Domain.DeleteContentGuidesUseCase
 import com.jonathanev.review.Domain.GetAllFoldersUseCase
-import com.jonathanev.review.Domain.GetFoldersCreatedUseCase
 import com.jonathanev.review.Domain.GetFolderPosicionUseCase
+import com.jonathanev.review.Domain.GetFoldersCreatedUseCase
 import com.jonathanev.review.Domain.GetFoldersWithNumGuidesUseCase
+import com.jonathanev.review.Domain.repository.FileRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,12 +25,14 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FragDialListarFoldersViewModel @Inject constructor(
+    //private val guiaRepositoryImpl: GuiaRepositoryImpl,
     private val guiaRepository: GuiaRepository,
+    private val fileRepository: FileRepository,
     private val guiaProvider: GuiaProvider,
     private val getFolderPosicionUseCase: GetFolderPosicionUseCase,
     private val getAllFoldersUseCase: GetAllFoldersUseCase,
     private val filePathsProvider: FilePathsProvider,
-    private val fileRepositoryImpl: FileRepositoryImpl,
+    //private val fileRepositoryImpl: FileRepositoryImpl,
     private val getFoldersCreatedUseCase: GetFoldersCreatedUseCase,
     private val getFoldersWithNumGuidesUseCase: GetFoldersWithNumGuidesUseCase,
     private val deleteContentGuidesUseCase: DeleteContentGuidesUseCase,
@@ -93,20 +95,13 @@ class FragDialListarFoldersViewModel @Inject constructor(
     }*/
 
     fun changeFilePath(folderName: String) {
-        val newPath = filePathsProvider.buildFolder(File(fileRepositoryImpl.getCurrentPath()), folderName).toString()
+        val newPath = filePathsProvider.buildFolder(File(fileRepository.getCurrentPath()), folderName).toString()
 
-        fileRepositoryImpl.setCurrentPath(newPath)
-        //val currentPath = File(fileRepositoryImpl.getCurrentPath())
-        //guiaRepository.getGuias(currentPath)
-
-        /*lastPath = "${lastPath}.xml"
-        // hace esto si es carpeta
-        _guias.postValue(guiaRepository.getGuias(File(lastPath)))
-        _file.postValue(File(lastPath))*/
+        fileRepository.setCurrentPath(newPath)
     }
 
     fun getCurrentPath(): String {
-        return fileRepositoryImpl.getCurrentPath()
+        return fileRepository.getCurrentPath()
     }
 
     fun getFirstPath() {
@@ -128,7 +123,7 @@ class FragDialListarFoldersViewModel @Inject constructor(
         var msgResponse = "Error al eliminar la carpeta"
 
         if (response) {
-            guiaRepository.getFolders()
+            guiaRepository.getFolders(currentPath)
             //getAllGuides(filePathsProvider.fileGuides)
             msgResponse = "¡Exitosamente se ha eliminado la carpeta"
         }

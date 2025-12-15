@@ -25,11 +25,11 @@ class FilePathsProvider @Inject constructor(
     val fileImagesPiv: File = File("$basePath/$IMAGENESPIVOTE")
 
     fun buildFile(base: File, nombreArchivo: String): File {
-        return File("$base/$nombreArchivo")
+        return File("$base/$nombreArchivo.xml")
     }
 
     fun buildFileFolder(base: File, folder: String, nombreArchivo: String): File {
-        return File("$base/$folder/$nombreArchivo")
+        return File("$base/$folder/$nombreArchivo.xml")
     }
 
     fun buildFolder(base: File, folder: String): File {
