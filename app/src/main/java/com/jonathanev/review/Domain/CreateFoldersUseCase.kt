@@ -10,7 +10,7 @@ class CreateFoldersUseCase @Inject constructor(
         val paths = listOf(
             filePathsProvider.fileGuides,
             filePathsProvider.fileImages,
-            filePathsProvider.fileImagesPiv,
+            //filePathsProvider.fileImagesPiv,
         )
 
         for (path in paths){
@@ -18,6 +18,6 @@ class CreateFoldersUseCase @Inject constructor(
                 path.mkdir()
             }
         }
-        return !(!paths[0].exists() || !paths[1].exists() || !paths[2].exists())
+        return !(!paths[0].exists() || !paths[1].exists())
     }
 }
