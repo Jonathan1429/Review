@@ -98,7 +98,7 @@ class FragmentListGuides : Fragment() {
                 builder.setItems(
                     arrayOf<CharSequence>(
                         "Abrir",
-                        "Modificar",
+                        //"Modificar",
                         "Eliminar",
                         "Cambiar nombre",
                         "Mover a",

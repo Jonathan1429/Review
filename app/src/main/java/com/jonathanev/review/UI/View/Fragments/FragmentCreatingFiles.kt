@@ -20,6 +20,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
+import com.jonathanev.review.Data.ActionGuide
 import com.jonathanev.review.Data.FolderAction
 import com.jonathanev.review.Data.Model.ScreenData
 import com.jonathanev.review.Fragments.Adaptadores.ListarIconosAdapter
@@ -131,7 +132,8 @@ class FragmentCreatingFiles : Fragment() {
                 R.id.action_fragmentCreateFiles_to_fragmentCreateFile2,
                 bundleOf(
                     "mode" to mode,
-                    "screenData" to data
+                    "screenData" to data,
+                    "actionGuide" to ActionGuide.CREATE
                 )
             )
         }

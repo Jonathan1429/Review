@@ -12,10 +12,9 @@ import javax.inject.Inject
 class ListPreviewQuestionsViewHolder @Inject constructor(
     private val binding: ListPreviewQuestionsBinding,
     private val clickedPlay: (Int) -> Unit,
-    private val clickedEdit: () -> Unit,
+    private val clickedEdit: (Int) -> Unit,
 ): RecyclerView.ViewHolder(binding.root) {
     fun bind(previewQuestion: PreviewQuestion) {
-        Log.i("Inicio", "Inicio")
         when(previewQuestion.question){
             is QuestionContent.Image -> {
                 binding.previewQuestion.text = binding.previewQuestion.context.getString(R.string.withoutPreviewQuestion)
@@ -36,7 +35,7 @@ class ListPreviewQuestionsViewHolder @Inject constructor(
         }
 
         binding.iconEdit.setOnClickListener{
-            clickedEdit()
+            clickedEdit(layoutPosition)
         }
     }
 }

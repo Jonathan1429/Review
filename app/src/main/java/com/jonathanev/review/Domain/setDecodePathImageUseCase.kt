@@ -23,10 +23,19 @@ class SetDecodePathImageUseCase @Inject constructor(
                 val newContent = item.content.map { content ->
                     if (content is QuestionContent.Image) {
                         wasUpdated = true
-                        val updated = content.copy(
-                            nameFile = "$count.png"
-                        )
-                        count++
+
+                        val updated = if (content.nameFile.isEmpty()) {
+                            val newContent = content.copy(
+                                nameFile = "$count.png"
+                            )
+                            count++
+                            newContent
+                        } else {
+                            val nameFile = content.uri.substringAfterLast("/")
+                            content.copy(
+                                nameFile = nameFile
+                            )
+                        }
                         updated
                     } else {
                         content

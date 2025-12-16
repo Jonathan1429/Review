@@ -174,10 +174,6 @@ class GuiaRepositoryImpl @Inject constructor(
     private fun obtenerDatosXMLV2(ruta: String, version: String): List<QAItem> {
         val qaItem = mutableListOf<QAItem>()
 
-        /*val listaQA = mutableListOf<QAItem>()
-        val questionItems = mutableListOf<QuestionItem>()
-        val answerItems = mutableListOf<QuestionItem>()*/
-
         val db = DocumentBuilderFactory.newInstance().newDocumentBuilder()
         val file = File(ruta)
         val doc = db.parse(file)
@@ -197,9 +193,6 @@ class GuiaRepositoryImpl @Inject constructor(
         ruta: String,
         version: String
     ) {
-
-        //val items = mutableListOf<QuestionItem>()
-
         // Leer Questions
         val questionsNode = doc.getElementsByTagName(typeContent) //Question/Answer
         for (i in 0 until questionsNode.length) {
@@ -266,7 +259,8 @@ class GuiaRepositoryImpl @Inject constructor(
                 val preguntaProcesada = if (ques.contains(BASERUTA_IMG_CIFRADO)) {
                     var decoded = setCifrarRutaImagenUseCase.invoke(ques, 26 - 3)
                     decoded = setSubstringPathUseCase.invoke(ruta, decoded, version)
-                    QuestionContent.Image(uri = decoded, nameFile = "")
+                    val nameFile = decoded.substringAfterLast("/")
+                    QuestionContent.Image(uri = decoded, nameFile = nameFile)
                 } else {
                     getColorRanges.invoke(ques)
                 }
@@ -280,7 +274,8 @@ class GuiaRepositoryImpl @Inject constructor(
                 val respuestaProcesada = if (ans.contains(BASERUTA_IMG_CIFRADO)) {
                     var decoded = setCifrarRutaImagenUseCase.invoke(ans, 26 - 3)
                     decoded = setSubstringPathUseCase.invoke(ruta, decoded, version)
-                    QuestionContent.Image(uri = decoded, nameFile = "")
+                    val nameFile = decoded.substringAfterLast("/")
+                    QuestionContent.Image(uri = decoded, nameFile = nameFile)
                 } else {
                     getColorRanges.invoke(ans)
                 }
@@ -342,5 +337,14 @@ class GuiaRepositoryImpl @Inject constructor(
             nameGuide = name,
             description = description
         )
+    }
+
+    override fun getVersion(file: File): String {
+        val db = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+        val doc = db.parse(file)
+
+        val versionNode = doc.getElementsByTagName(GUIAESTUDIO)
+        val elementGuide = versionNode.item(0) as Element
+        return elementGuide.getAttribute(VERSION)
     }
 }

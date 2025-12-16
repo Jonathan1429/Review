@@ -6,11 +6,13 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jonathanev.review.Core.Constants.VERSION1
 import com.jonathanev.review.DI.IoDispatcher
 import com.jonathanev.review.DI.MainDispatcher
 import com.jonathanev.review.Data.Model.ContentWrapper
 import com.jonathanev.review.Data.Model.DataStoreManager
 import com.jonathanev.review.Data.Model.EstadoUI
+import com.jonathanev.review.Data.Model.prueba.AnswerState
 import com.jonathanev.review.Data.Model.prueba.ColorRange
 import com.jonathanev.review.Data.Model.prueba.QuestionContent
 import com.jonathanev.review.Data.Model.prueba.QuestionItem
@@ -18,8 +20,11 @@ import com.jonathanev.review.Data.Model.prueba.TypeContent
 import com.jonathanev.review.Data.Model.prueba.UIStopEvent
 import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Data.provider.GuiaProvider
+import com.jonathanev.review.Domain.GetAttributesGuideUseCase
 import com.jonathanev.review.Domain.GetContentItemsUseCase
+import com.jonathanev.review.Domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.Domain.GetTextWithoutLabelsUseCase
+import com.jonathanev.review.Domain.GetVersionUseCase
 import com.jonathanev.review.Domain.SetCifrarRutaImagenUseCase
 import com.jonathanev.review.Domain.SetColocarEtiquetasUseCase
 import com.jonathanev.review.Domain.SetContentUseCase
@@ -35,6 +40,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.nio.file.StandardCopyOption
 import javax.inject.Inject
 
 @HiltViewModel
@@ -45,6 +53,9 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     private val setCrearXmlUseCase: SetCrearXmlUseCase,
     private val setDecodePathImageUseCase: SetDecodePathImageUseCase,
     private val getContentItemsUseCase: GetContentItemsUseCase,
+    private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
+    private val getAttributesGuideUseCase: GetAttributesGuideUseCase,
+    private val getVersionUseCase: GetVersionUseCase,
     private val fileRepository: FileRepository,
     private val filePathsProvider: FilePathsProvider,
     private val dataStore: DataStoreManager,
@@ -103,7 +114,6 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             if (typeContent.value == TypeContent.QUESTION) _preguntas else _respuestas
         val noContent = contentList.lastIndex
 
-        //if (contentList.isNotEmpty()) {
         if (contadorPregunta <= noContent) {
             val responseContent = getContentItemsUseCase.invoke(contentList, contadorPregunta)
 
@@ -353,7 +363,25 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
     fun getCurrentPath() = fileRepository.getCurrentPath()
 
-    fun saveGuide(nameGuide: String, description: String) {
+    fun getObtenerDatosXML(positionContent: Int) {
+        setContadorPregunta(positionContent)
+
+        if (respuestas.isEmpty()) {
+            //Revisar como se obtienen los datos aqui, porque no se visualiza la imagen
+            val datos = getObtenerDatosXMLUseCase.invoke(ruta = getCurrentPath())
+
+            _preguntas = datos.map { it.question }.toMutableList()
+            _respuestas = datos.mapNotNull { (it.answer as? AnswerState.Filled )?.item }.toMutableList()
+
+            showContents()
+        }
+    }
+
+    private fun setContadorPregunta(positionContent: Int) {
+        _contadorPregunta = positionContent
+    }
+
+    private fun validationsSave(){
         // Revisa que haya un texto en la misma posición para pregunta/respuesta
         val questionExist =
             preguntas.getOrNull(0)
@@ -396,6 +424,70 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
             return
         }
+    }
+
+    fun saveOldGuide() {
+        validationsSave()
+
+        val currentPath = getCurrentPath()
+        val imagesPath = currentPath.replace(".xml", "")
+
+        val images = File(imagesPath.replace("guias", "imagenes"))
+        if (images.exists()) {
+            images.deleteRecursively()
+        }
+
+        images.mkdirs()
+
+        viewModelScope.launch {
+            val version = getVersionUseCase.invoke(File(currentPath))
+            setDecodePathImageUseCase.invoke(_preguntas, _respuestas)
+
+            // Si existe el archivo
+            if (version == VERSION1){
+                val listImages = (preguntas + respuestas)
+                    .flatMap { it.content }
+                    .filterIsInstance<QuestionContent.Image>()
+
+                listImages.forEach { image ->
+                    val source = File(image.uri)
+                    if (source.exists()){
+                        val noImage = image.uri.substringAfterLast("/")
+                        val newPathFile = filePathsProvider.buildImage(images, noImage)
+
+                        Files.copy(
+                            Paths.get(image.uri),
+                            Paths.get(newPathFile.path),
+                            StandardCopyOption.REPLACE_EXISTING
+                        )
+
+                        if (newPathFile.exists()){
+                            File(image.uri).delete()
+                        }
+                    } else {
+                        guiaProvider.saveImagesInDevice(listOf(image), images)
+                    }
+                }
+            }
+
+            val file = currentPath.substringAfterLast("/")
+            val response = getAttributesGuideUseCase.invoke(File(currentPath), file)
+
+            val isSuccess = setCrearXmlUseCase.invoke(
+                response.nameGuide,
+                response.description,
+                currentPath,
+                images,
+                preguntas,
+                respuestas
+            )
+
+            Log.i("Guardado", isSuccess.toString())
+        }
+    }
+
+    fun saveNewGuide(nameGuide: String, description: String) {
+        validationsSave()
 
         val currentPath = filePathsProvider.buildFile(File(getCurrentPath()), nameGuide)
         val imagesPath = filePathsProvider.buildFolder(File(getCurrentPath()), nameGuide).path

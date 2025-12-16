@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
@@ -20,6 +19,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.jonathanev.review.Data.ActionGuide
 import com.jonathanev.review.Data.FolderAction
 import com.jonathanev.review.Data.Model.ScreenData
 import com.jonathanev.review.Data.Model.prueba.TypeContent
@@ -56,12 +56,12 @@ class FragmentCreateFile : Fragment() {
             requireArguments(), "mode", FolderAction::class.java
         ) ?: FolderAction.NONE
 
-        val screenData = BundleCompat.getParcelable(
-            requireArguments(), "screenData", ScreenData::class.java
-        ) ?: ScreenData("", "", 0, 0)
+        val actionGuide = BundleCompat.getParcelable(
+            requireArguments(), "actionGuide", ActionGuide::class.java
+        ) ?: ActionGuide.NONE
 
-        initUI()
-        initListeners(screenData)
+        initUI(actionGuide)
+        initListeners(actionGuide)
         observers()
 
         lifecycleScope.launch {
@@ -104,7 +104,7 @@ class FragmentCreateFile : Fragment() {
         }
     }
 
-    private fun initUI() {
+    private fun initUI(actionGuide: ActionGuide) {
         adaptListCreateTexts = ListCreateTextsAdapter(
             onEditClicked = { position -> goEditText(position) },
             onDeleteClicked = { position -> goDeleteText(position) }
@@ -123,6 +123,16 @@ class FragmentCreateFile : Fragment() {
             LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         binding.recyclerImagenes.setHasFixedSize(true)
         binding.recyclerImagenes.adapter = adaptListCreateImages
+
+        when(actionGuide){
+            ActionGuide.CREATE -> Log.i("Crear", "Se está creando un archivo")
+            is ActionGuide.EDIT -> {
+                viewModel.getObtenerDatosXML(actionGuide.posGuide)
+            }
+            ActionGuide.NONE -> {
+                Log.e("Error", "No se pudo realizar alguna acción")
+            }
+        }
     }
 
     private fun goDeleteText(position: Int) {
@@ -151,7 +161,11 @@ class FragmentCreateFile : Fragment() {
         )
     }
 
-    private fun initListeners(screenData: ScreenData) {
+    private fun initListeners(actionGuide: ActionGuide) {
+        val screenData = BundleCompat.getParcelable(
+            requireArguments(), "screenData", ScreenData::class.java
+        ) ?: ScreenData("", "", 0, 0)
+
         binding.btnAddText.setOnClickListener {
             findNavController().navigate(
                 R.id.action_fragmentCreateFile2_to_fragmentCreateText
@@ -182,7 +196,12 @@ class FragmentCreateFile : Fragment() {
         }
 
         binding.btnSaveGuide.setOnClickListener {
-            viewModel.saveGuide(screenData.name, screenData.description)
+            when(actionGuide){
+                ActionGuide.CREATE -> viewModel.saveNewGuide(screenData.name, screenData.description)
+                is ActionGuide.EDIT -> viewModel.saveOldGuide()
+                ActionGuide.NONE -> Log.e("Error:", "NO se pudo guardar la guia")
+            }
+
         }
     }
 

@@ -46,12 +46,7 @@ class FragmentRepasar : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val positionContent = arguments?.getInt(
-            "posContent"
-        ) ?: 0
-
-
-        initUI(positionContent)
+        initUI()
         listeners()
 
         lifecycleScope.launch {
@@ -117,7 +112,11 @@ class FragmentRepasar : Fragment() {
         }
     }
 
-    private fun initUI(positionContent: Int) {
+    private fun initUI() {
+        val positionContent = arguments?.getInt(
+            "posContent"
+        ) ?: 0
+
         adaptListPintarTextos = ListItemPintarTextosAdapter { position -> goVisorTexto(position) }
         binding.recyclerTextos.layoutManager =
             LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
@@ -131,6 +130,7 @@ class FragmentRepasar : Fragment() {
         binding.recyclerImagenes.setHasFixedSize(true)
         binding.recyclerImagenes.adapter = adaptListPintarImagenes
         //viewModel.setContadorPregunta(positionContent)
+
         viewModel.getObtenerDatosXML(positionContent)
     }
 

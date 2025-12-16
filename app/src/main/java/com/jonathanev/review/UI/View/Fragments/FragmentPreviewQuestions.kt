@@ -7,10 +7,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
+import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.jonathanev.review.Data.ActionGuide
 import com.jonathanev.review.Fragments.Adaptadores.ListPreviewQuestionsAdapter
 import com.jonathanev.review.R
 import com.jonathanev.review.UI.ViewModel.Fragments.FragmentPreviewQuestionsViewModel
@@ -65,7 +67,7 @@ class FragmentPreviewQuestions : Fragment() {
     private fun initUI() {
         adaptListPreviewQuestion = ListPreviewQuestionsAdapter(
             clickedPlay = { position -> goReview(position) },
-            clickedEdit = { goEdit() })
+            clickedEdit = { position -> goEdit(position) })
         binding.reciclerPreviewQuestions.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         binding.reciclerPreviewQuestions.setHasFixedSize(true)
         binding.reciclerPreviewQuestions.adapter = adaptListPreviewQuestion
@@ -73,8 +75,11 @@ class FragmentPreviewQuestions : Fragment() {
         viewModel.getObtenerDatosXML()
     }
 
-    private fun goEdit() {
-        Log.i("Click", "Edit")
+    private fun goEdit(position: Int) {
+        findNavController().navigate(
+            R.id.action_fragmentPreviewQuestions_to_fragmentCreateFile2,
+            bundleOf("actionGuide" to ActionGuide.EDIT(position))
+        )
     }
 
     private fun goReview(position: Int) {

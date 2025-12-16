@@ -10,7 +10,7 @@ import com.jonathanev.review.databinding.ListPreviewQuestionsBinding
 
 class ListPreviewQuestionsAdapter(
     private val clickedPlay: (Int) -> Unit,
-    private val clickedEdit: () -> Unit
+    private val clickedEdit: (Int) -> Unit
 ): ListAdapter<PreviewQuestion, ListPreviewQuestionsViewHolder>(PreviewQuestionDiffCallback()) {
     override fun onCreateViewHolder(
         parent: ViewGroup,

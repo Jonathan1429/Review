@@ -111,6 +111,9 @@
             android:name="posContent"
             app:argType="integer"
             app:nullable="false" />
+        <action
+            android:id="@+id/action_fragmentPreviewQuestions_to_fragmentCreateFile2"
+            app:destination="@id/fragmentCreateFile2" />
     </fragment>
     <fragment
         android:id="@+id/fragmentRepasar"
@@ -155,6 +158,10 @@
         <action
             android:id="@+id/action_fragmentCreateFile2_to_fragmentCreateImages"
             app:destination="@id/fragmentCreateImages" />
+        <argument
+            android:name="actionGuide"
+            app:argType="com.jonathanev.review.Data.ActionGuide"
+            app:nullable="false" />
     </fragment>
     <fragment
         android:id="@+id/fragmentCreateText"
