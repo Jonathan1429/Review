@@ -12,16 +12,22 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jonathanev.review.Data.FolderAction
 import com.jonathanev.review.Data.Model.GuideResult
+import com.jonathanev.review.Data.Model.prueba.UIStopEvent
 import com.jonathanev.review.Fragments.Adaptadores.ListGuidesAdapter
 import com.jonathanev.review.R
 import com.jonathanev.review.UI.ViewModel.Fragments.FragmentListGuidesViewModel
 import com.jonathanev.review.UI.ViewModel.Fragments.MainToolbarViewModel
 import com.jonathanev.review.databinding.FragmentListGuidesBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class FragmentListGuides : Fragment() {
@@ -45,6 +51,28 @@ class FragmentListGuides : Fragment() {
 
         initUI()
         initListeners()
+
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.eventsMessages.collect { event ->
+                    if (event is UIStopEvent.ShowMessage){
+                        Toast.makeText(context, event.text, Toast.LENGTH_SHORT).show()
+                    }
+
+                    if (event is UIStopEvent.DeleteGuideSuccess){
+                        Toast.makeText(context, event.text, Toast.LENGTH_SHORT).show()
+
+                        findNavController().navigate(
+                            R.id.fragmentsContent,
+                            null,
+                            NavOptions.Builder()
+                                .setPopUpTo(R.id.fragmentsContent, true)
+                                .build()
+                        )
+                    }
+                }
+            }
+        }
 
         val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -113,22 +141,7 @@ class FragmentListGuides : Fragment() {
                             )
                         }
 
-                        1 -> {
-                            /*// Si entra al segundo es para modificar la guía de estudio
-                            viewModel.changeFilePath(folderResult.folder.nombreGuia)
-
-                            val intentActivityModificarGuia =
-                                Intent(activity, ActivityModificar::class.java)
-                            //intentModificarGuia.putExtra("nombre_archivo", guia.nombreGuia)
-                            //intentActivityModificarGuia.putExtra("ruta", ruta)
-                            startActivity(intentActivityModificarGuia)
-                            // Recuperamos el dialogo abierto actualmente
-                            // (Fragment_DialogListarGuias.java) y lo cerramos.
-                            val dialogoModificarGuia = getDialog()
-                            dialogoModificarGuia!!.dismiss()*/
-                        }
-
-                        2 ->
+                        1 ->
                             // Se ejecuta cuando quiere eliminar la guía.
                             AlertDialog.Builder(context)
                                 .setTitle("¡Atención!")
@@ -137,37 +150,11 @@ class FragmentListGuides : Fragment() {
                                             " guia?"
                                 )
                                 .setPositiveButton("Si") { _, _ ->
-                                    //deleteFiles(folderResult.folder)
-
-                                    //guiasViewModel.changeFilePath(guiaResult.guia.nombreGuia)
-                                    //val route = guiasViewModel.getCurrentPath()
-                                    // Si entra al tercero es para eliminar la guia exitosamente
-                                    /*if (filePathsProvider.fileGuides.exists()) {
-                                        File(route).delete()
-                                        Toast.makeText(
-                                            context,
-                                            "¡Archivo eliminado exitosamente!",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-
-                                        //guiasViewModel.getAllUpdatedGuides(filePathsProvider.fileGuides)
-
-                                        // Recuperamos el dialogo abierto actualmente
-                                        // (Fragment_DialogListarGuias_popup.java)
-                                        // y lo cerramos.
-                                        val dialogoEliminarGuia = getDialog()
-                                        dialogoEliminarGuia!!.dismiss()
-                                    } else {
-                                        Toast.makeText(
-                                            context, "La ruta para eliminar el " +
-                                                    "archivo actualmente no existe.",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }*/
+                                    viewModel.deleteFiles(guideResult.folder.nameGuide)
                                 }
                                 .setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
                                 .create().show()
-                        3 -> {
+                        2 -> {
                             /*// Se ejecuta cuando quiere cambiar el nombre de la guía
                             viewModel.changeFilePath(folderResult.folder.nombreGuia)
                             val dialogo = FragmentDialogNuevoArchivoPopu.newInstance(
@@ -176,7 +163,7 @@ class FragmentListGuides : Fragment() {
                             dialogo.show(childFragmentManager, "Fragment_nuevo")*/
                         }
 
-                        4 -> {
+                        3 -> {
                             /*val subMenuBuilder = AlertDialog.Builder(context)
                             subMenuBuilder.setTitle("Mover a...")
 
@@ -247,7 +234,7 @@ class FragmentListGuides : Fragment() {
                             subMenuBuilder.show()*/
                         }
 
-                        5 -> {
+                        4 -> {
                             // Cuando cancela se ejecuta esta acción
                             dialog.dismiss()
                             Toast.makeText(context, "Cancelaste la acción", Toast.LENGTH_SHORT)

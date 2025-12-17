@@ -101,6 +101,9 @@
             android:name="mode"
             app:argType="com.jonathanev.review.Data.FolderAction"
             app:nullable="false" />
+        <action
+            android:id="@+id/action_fragmentListGuides_to_fragmentsContent"
+            app:destination="@id/fragmentsContent" />
     </fragment>
     <fragment
         android:id="@+id/fragmentPreviewQuestions"
