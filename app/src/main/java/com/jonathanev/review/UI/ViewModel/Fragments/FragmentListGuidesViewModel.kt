@@ -88,7 +88,6 @@ class FragmentListGuidesViewModel @Inject constructor(
             _eventsMessages.emit(
                 message
             )
-
         }
     }
 
@@ -100,6 +99,4 @@ class FragmentListGuidesViewModel @Inject constructor(
             _respuestas = datos.mapNotNull { (it.answer as? AnswerState.Filled )?.item }.toMutableList()
         }
     }
-
-    private fun getCurrentPath() = fileRepository.getCurrentPath()
 }

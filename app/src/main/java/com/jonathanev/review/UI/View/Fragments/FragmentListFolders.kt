@@ -20,6 +20,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.jonathanev.review.Core.Constants.BASERUTA_IMG_CIFRADO
@@ -28,6 +29,7 @@ import com.jonathanev.review.Core.Constants.IMAGENES
 import com.jonathanev.review.Data.FolderAction
 import com.jonathanev.review.Data.FolderResult
 import com.jonathanev.review.Data.Model.prueba.FolderUI
+import com.jonathanev.review.Data.Model.prueba.UIStopEvent
 import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Fragments.Adaptadores.ListFoldersAdapter
 import com.jonathanev.review.R
@@ -82,6 +84,22 @@ class FragmentListFolders : DialogFragment(), DialogListener {
         super.onViewCreated(view, savedInstanceState)
 
         initUI()
+
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.eventsMessages.collect { event ->
+                    if (event is UIStopEvent.ShowMessage) {
+                        Toast.makeText(context, event.text, Toast.LENGTH_SHORT).show()
+                    }
+
+                    if (event is UIStopEvent.DeleteFolderSuccess) {
+                        Toast.makeText(context, event.text, Toast.LENGTH_SHORT).show()
+
+                        viewModel.getAllFolders()
+                    }
+                }
+            }
+        }
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -170,9 +188,9 @@ class FragmentListFolders : DialogFragment(), DialogListener {
                                     "¿Estás seguro que deseas eliminar la carpeta y su contenido?"
                                 )
                                 .setPositiveButton("Si") { _, _ ->
-                                    deleteFiles(folderResult.folder)
+                                    viewModel.deleteFiles(folderResult.folder)
                                 }
-                                .setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
+                                .setNegativeButton("Cancelar") { _, _ -> dialog.dismiss() }
                                 .create().show()
                         }
 
@@ -224,7 +242,12 @@ class FragmentListFolders : DialogFragment(), DialogListener {
     ) {
         moverImagenes(File(currentPath), fileName, newPathWithoutFile)
         val currentPathWithFile =
-            "${filePathsProvider.buildFile(File(currentPath), folderResult.folder.folderModel.name)}.xml"
+            "${
+                filePathsProvider.buildFile(
+                    File(currentPath),
+                    folderResult.folder.folderModel.name
+                )
+            }.xml"
 
         Files.copy(
             Paths.get(currentPathWithFile),
@@ -254,9 +277,9 @@ class FragmentListFolders : DialogFragment(), DialogListener {
             return
         }
 
-        val message = viewModel.deleteFiles(folderResult)
+        viewModel.deleteFiles(folderResult)
 
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, "", Toast.LENGTH_SHORT).show()
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {

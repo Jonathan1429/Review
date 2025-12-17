@@ -152,7 +152,7 @@ class FragmentListGuides : Fragment() {
                                 .setPositiveButton("Si") { _, _ ->
                                     viewModel.deleteFiles(guideResult.folder.nameGuide)
                                 }
-                                .setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
+                                .setNegativeButton("Cancelar") { _, _ -> dialog.dismiss() }
                                 .create().show()
                         2 -> {
                             /*// Se ejecuta cuando quiere cambiar el nombre de la guía

@@ -7,17 +7,21 @@ import com.jonathanev.review.Data.FolderResult
 import com.jonathanev.review.Data.GuiaRepository
 import com.jonathanev.review.Data.Model.FoldersUiState
 import com.jonathanev.review.Data.Model.prueba.FolderUI
+import com.jonathanev.review.Data.Model.prueba.UIStopEvent
 import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Data.provider.GuiaProvider
 import com.jonathanev.review.Data.repository.FileHelperImpl
 import com.jonathanev.review.Domain.DeleteContentGuidesUseCase
+import com.jonathanev.review.Domain.DeleteFolderUseCase
 import com.jonathanev.review.Domain.GetAllFoldersUseCase
 import com.jonathanev.review.Domain.GetFolderPosicionUseCase
 import com.jonathanev.review.Domain.GetFoldersCreatedUseCase
 import com.jonathanev.review.Domain.GetFoldersWithNumGuidesUseCase
 import com.jonathanev.review.Domain.repository.FileRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.io.File
@@ -36,6 +40,7 @@ class FragDialListarFoldersViewModel @Inject constructor(
     private val getFoldersCreatedUseCase: GetFoldersCreatedUseCase,
     private val getFoldersWithNumGuidesUseCase: GetFoldersWithNumGuidesUseCase,
     private val deleteContentGuidesUseCase: DeleteContentGuidesUseCase,
+    private val deleteFolderUseCase: DeleteFolderUseCase,
     private val fileHelperImpl: FileHelperImpl,
 ) : ViewModel() {
     private var _foldersUiState = MutableStateFlow(FoldersUiState())
@@ -45,6 +50,9 @@ class FragDialListarFoldersViewModel @Inject constructor(
     val file: MutableLiveData<File> get() = _file
 
     private var cachedFolders: List<FolderUI> = emptyList()
+
+    private val _eventsMessages = MutableSharedFlow<UIStopEvent>()
+    val eventsMessages = _eventsMessages.asSharedFlow()
 
     /*fun getAllGuides() {
         _guias.postValue(fileRepositoryImpl.getFilesInCurrentPath())
@@ -116,19 +124,20 @@ class FragDialListarFoldersViewModel @Inject constructor(
         return getFoldersCreatedUseCase.invoke()
     }
 
-    fun deleteFiles(folderResult: FolderUI): String {
+    fun deleteFiles(folderResult: FolderUI) {
         val currentPath = filePathsProvider.buildFolder(File(getCurrentPath()), folderResult.folderModel.name)
-        val response = deleteContentGuidesUseCase.invoke(currentPath)
 
-        var msgResponse = "Error al eliminar la carpeta"
+        val message = deleteFolderUseCase.invoke(currentPath)
 
-        if (response) {
-            guiaRepository.getFolders(currentPath)
-            //getAllGuides(filePathsProvider.fileGuides)
-            msgResponse = "¡Exitosamente se ha eliminado la carpeta"
+        viewModelScope.launch {
+            if (message is UIStopEvent.DeleteGuideSuccess){
+                fileRepository.setCurrentPath(filePathsProvider.fileGuides.path)
+            }
+
+            _eventsMessages.emit(
+                message
+            )
         }
-
-        return msgResponse
     }
 
     fun existFolder(fileName: String): Boolean {

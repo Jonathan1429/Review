@@ -29,7 +29,6 @@ class FragmentsContent : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         viewModel.folders.observe(viewLifecycleOwner){ folders ->
-            //if (1==1){
             if (folders.isEmpty()){
                 findNavController().navigate(
                     R.id.action_fragmentsContent_to_fragmentMainActivity
