@@ -27,7 +27,7 @@ class ListFoldersViewHolder @Inject constructor(
             .into(binding.itemCarpeta.ivCarpeta)
 
 
-        binding.lblTitle.text = folder.folderModel.nameFolder
+        binding.lblTitle.text = folder.folderModel.name
 
         val background = binding.itemCarpeta.bgCarpeta.background as GradientDrawable
         binding.itemCarpeta.ivCarpeta.imageTintMode = PorterDuff.Mode.SRC_ATOP

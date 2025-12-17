@@ -1,0 +1,25 @@
+package com.jonathanev.review.Domain
+
+import com.jonathanev.review.Data.JsonManager
+import com.jonathanev.review.Data.Model.ScreenData
+import com.jonathanev.review.Domain.repository.FileRepository
+import java.io.File
+import javax.inject.Inject
+
+class CreateFolderUseCase @Inject constructor(
+    private val fileRepository: FileRepository,
+    private val jsonManager: JsonManager
+) {
+    operator fun invoke(data: ScreenData, dir: File) {
+        val screenFile = File(dir, "screen.json")
+
+        val initialData = ScreenData(
+            name = data.name,
+            description = data.description,
+            imgFolder = data.imgFolder,
+            color = data.color
+        )
+
+        jsonManager.write(screenFile, initialData)
+    }
+}

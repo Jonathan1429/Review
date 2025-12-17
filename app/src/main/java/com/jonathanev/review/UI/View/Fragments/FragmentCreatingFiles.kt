@@ -1,6 +1,5 @@
 package com.jonathanev.review.UI.View.Fragments
 
-import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.graphics.PorterDuff
 import android.graphics.drawable.GradientDrawable
@@ -13,7 +12,6 @@ import android.widget.Toast
 import androidx.core.graphics.ColorUtils
 import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
-import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -30,8 +28,10 @@ import com.jonathanev.review.databinding.FragmentCreateFilesBinding
 import com.skydoves.colorpickerview.flag.BubbleFlag
 import com.skydoves.colorpickerview.flag.FlagMode
 import com.skydoves.colorpickerview.listeners.ColorListener
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class FragmentCreatingFiles : Fragment() {
     private var _binding: FragmentCreateFilesBinding? = null
     private val binding get() = _binding!!
@@ -61,15 +61,8 @@ class FragmentCreatingFiles : Fragment() {
             FolderAction::class.java
         ) ?: FolderAction.NONE
 
-        viewModel.loadIconsFor(mode)
-        initUI()
+        initUI(mode)
         initListeners()
-
-        // 1) crear adapter una vez
-        iconsAdapter = ListarIconosAdapter { pos -> viewModel.onIconSelected(pos) }
-        binding.fragmentCreate.rvIconos.adapter = iconsAdapter
-        binding.fragmentCreate.rvIconos.layoutManager =
-            GridLayoutManager(requireContext(), 6)
 
 
         viewLifecycleOwner.lifecycleScope.launch {
@@ -123,9 +116,17 @@ class FragmentCreatingFiles : Fragment() {
         val data = ScreenData(
             name = name,
             description = description,
-            icon = state.icons[state.selectedIndex],
+            imgFolder = state.icons[state.selectedIndex],
             color = state.color
         )
+
+        if (mode == FolderAction.CREATING_FOLDER){
+            viewModel.saveMetadata(data)
+
+            findNavController().navigate(
+                R.id.action_fragmentCreateFiles_to_fragmentListFolders,
+            )
+        }
 
         if (mode == FolderAction.CREATING_FILE){
             findNavController().navigate(
@@ -139,8 +140,16 @@ class FragmentCreatingFiles : Fragment() {
         }
     }
 
-    private fun initUI() {
-        if (mode == FolderAction.CREATING_FOLDER) {
+    private fun initUI(mode: FolderAction) {
+        // 1) crear adapter una vez
+        iconsAdapter = ListarIconosAdapter { pos -> viewModel.onIconSelected(pos) }
+        binding.fragmentCreate.rvIconos.adapter = iconsAdapter
+        binding.fragmentCreate.rvIconos.layoutManager =
+            GridLayoutManager(requireContext(), 6)
+
+        viewModel.loadIconsFor(mode)
+
+        if (this.mode == FolderAction.CREATING_FOLDER) {
             showFolderUI()
         } else {
             showFileUI()

@@ -1,8 +1,10 @@
 package com.jonathanev.review.Domain
 
 import com.jonathanev.review.Data.GuiaRepositoryImpl
+import com.jonathanev.review.Data.Model.prueba.FolderModel
 import com.jonathanev.review.Data.Model.prueba.FolderUI
 import com.jonathanev.review.Data.provider.FilePathsProvider
+import com.jonathanev.review.Data.repository.FolderRepository
 import com.jonathanev.review.Domain.repository.FileRepository
 import java.io.File
 import javax.inject.Inject
@@ -10,6 +12,7 @@ import javax.inject.Inject
 class GetFoldersWithNumGuidesUseCase @Inject constructor(
     private val fileRepository: FileRepository,
     private val filePathsProvider: FilePathsProvider,
+    private val folderRepository: FolderRepository,
     private val guiaRepositoryImpl: GuiaRepositoryImpl
 ) {
     operator fun invoke(): List<FolderUI> {
@@ -17,11 +20,17 @@ class GetFoldersWithNumGuidesUseCase @Inject constructor(
         val folders = guiaRepositoryImpl.getFolders(currentPath)
 
         return folders.map { folder ->
-            val currentFolder = filePathsProvider.buildFolder(currentPath, folder.nameFolder)
-            val numGuidesCurrentFolder = currentFolder.listFiles()?.size ?: 0
+            val currentFolder = filePathsProvider.buildFolder(currentPath, folder.name)
+            val attributes = folderRepository.getAttributesFolder(currentFolder)
+            val numGuidesCurrentFolder = currentFolder.listFiles()?.filter { it.name != "screen.json" }?.size ?: 0
 
             FolderUI(
-                folderModel = folder,
+                folderModel = FolderModel(
+                    name = attributes.name,
+                    description = attributes.description,
+                    imgFolder = attributes.imgFolder,
+                    color = attributes.color
+                ),
                 numGuides = numGuidesCurrentFolder
             )
         }

@@ -6,6 +6,9 @@ plugins {
     id 'kotlin-kapt' // A traves de las anotaciones genera el código por atrás.
     id 'com.google.dagger.hilt.android'
 
+    // Serializable
+    id 'org.jetbrains.kotlin.plugin.serialization'
+
     // Test con jacoco - Reporte
     id 'jacoco'
 
@@ -160,6 +163,9 @@ dependencies {
     //NavComponent
     implementation("androidx.navigation:navigation-fragment-ktx:$navVersion")
     implementation("androidx.navigation:navigation-ui-ktx:$navVersion")
+
+    // JSON
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 
     // UnitTesting
     testImplementation 'junit:junit:4.13.2'

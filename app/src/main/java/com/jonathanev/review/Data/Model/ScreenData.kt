@@ -2,11 +2,14 @@ package com.jonathanev.review.Data.Model
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
 @Parcelize
+@Serializable
 data class ScreenData(
     val name: String,
     val description: String = "",
-    val icon: Int? = null,
-    val color: Int? = null
+    val imgFolder: Int? = null,
+    val color: Int? = null,
+    val version: Int = 1
 ): Parcelable

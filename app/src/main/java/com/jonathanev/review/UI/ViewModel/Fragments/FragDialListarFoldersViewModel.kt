@@ -68,7 +68,7 @@ class FragDialListarFoldersViewModel @Inject constructor(
             )
 
             try {
-                val folders = getFoldersWithNumGuidesUseCase.invoke().sortedBy { it.folderModel.nameFolder }
+                val folders = getFoldersWithNumGuidesUseCase.invoke().sortedBy { it.folderModel.name }
                 cachedFolders = folders
 
                 // 2. actualizar con la lista resultante
@@ -117,7 +117,7 @@ class FragDialListarFoldersViewModel @Inject constructor(
     }
 
     fun deleteFiles(folderResult: FolderUI): String {
-        val currentPath = filePathsProvider.buildFolder(File(getCurrentPath()), folderResult.folderModel.nameFolder)
+        val currentPath = filePathsProvider.buildFolder(File(getCurrentPath()), folderResult.folderModel.name)
         val response = deleteContentGuidesUseCase.invoke(currentPath)
 
         var msgResponse = "Error al eliminar la carpeta"

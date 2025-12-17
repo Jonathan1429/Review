@@ -15,7 +15,7 @@ class GetAllFoldersUseCase @Inject constructor(
 
         return files.map { folder ->
             FolderModel(
-                nameFolder = folder.name,
+                name = folder.name,
                 description = "",
                 imgFolder = R.drawable.ic_anchor_solid_full,
                 color = Color.BLACK

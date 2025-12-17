@@ -11,9 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.Window
-import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.viewModels
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
@@ -147,7 +145,7 @@ class FragmentListFolders : DialogFragment(), DialogListener {
                 ) { dialog, which ->
                     when (which) {
                         0 -> {
-                            viewModel.changeFilePath(folderResult.folder.folderModel.nameFolder)
+                            viewModel.changeFilePath(folderResult.folder.folderModel.name)
                             if (folderResult.folder.numGuides == 0) {
                                 findNavController().navigate(
                                     R.id.action_fragmentDialogListarGuiasPopup_to_fragmentWithoutFiles,
@@ -226,7 +224,7 @@ class FragmentListFolders : DialogFragment(), DialogListener {
     ) {
         moverImagenes(File(currentPath), fileName, newPathWithoutFile)
         val currentPathWithFile =
-            "${filePathsProvider.buildFile(File(currentPath), folderResult.folder.folderModel.nameFolder)}.xml"
+            "${filePathsProvider.buildFile(File(currentPath), folderResult.folder.folderModel.name)}.xml"
 
         Files.copy(
             Paths.get(currentPathWithFile),
@@ -247,7 +245,7 @@ class FragmentListFolders : DialogFragment(), DialogListener {
     }
 
     private fun deleteFiles(folderResult: FolderUI) {
-        if (!viewModel.existFolder(folderResult.folderModel.nameFolder)) {
+        if (!viewModel.existFolder(folderResult.folderModel.name)) {
             Toast.makeText(
                 context,
                 "La ruta para eliminar la carpeta actualmente no existe.",

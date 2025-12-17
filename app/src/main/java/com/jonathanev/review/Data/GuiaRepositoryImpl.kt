@@ -63,7 +63,7 @@ class GuiaRepositoryImpl @Inject constructor(
             ?.filter { it.isDirectory }
             ?.map { item ->
                 FolderModel(
-                    nameFolder = item.name,
+                    name = item.name,
                     description = "",
                     imgFolder = R.drawable.ic_anchor_solid_full,
                     color = Color.BLACK

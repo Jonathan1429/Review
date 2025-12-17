@@ -5,7 +5,7 @@ import com.jonathanev.review.Data.Model.prueba.FolderUI
 
 class FolderUIDiffCallback : DiffUtil.ItemCallback<FolderUI>() {
     override fun areItemsTheSame(oldItem: FolderUI, newItem: FolderUI): Boolean =
-        oldItem.folderModel.nameFolder == newItem.folderModel.nameFolder
+        oldItem.folderModel.name == newItem.folderModel.name
 
     override fun areContentsTheSame(oldItem: FolderUI, newItem: FolderUI): Boolean =
         oldItem == newItem

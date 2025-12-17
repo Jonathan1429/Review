@@ -35,6 +35,9 @@
             android:name="screenData"
             app:argType="com.jonathanev.review.Data.Model.ScreenData"
             app:nullable="true" />
+        <action
+            android:id="@+id/action_fragmentCreateFiles_to_fragmentListFolders"
+            app:destination="@id/fragmentListFolders" />
     </fragment>
 
     <fragment
