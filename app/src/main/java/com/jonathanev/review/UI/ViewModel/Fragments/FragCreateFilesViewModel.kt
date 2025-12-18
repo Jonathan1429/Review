@@ -2,16 +2,27 @@ package com.jonathanev.review.UI.ViewModel.Fragments
 
 import android.graphics.Color
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.Data.FolderAction
+import com.jonathanev.review.Data.Model.GuideModel
 import com.jonathanev.review.Data.Model.ScreenData
+import com.jonathanev.review.Data.Model.prueba.AnswerState
 import com.jonathanev.review.Data.Model.prueba.PreviewState
+import com.jonathanev.review.Data.Model.prueba.QuestionItem
+import com.jonathanev.review.Data.Model.prueba.UIStopEvent
 import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Domain.CreateFolderUseCase
+import com.jonathanev.review.Domain.GetAttributesGuideUseCase
+import com.jonathanev.review.Domain.GetObtenerDatosXMLUseCase
+import com.jonathanev.review.Domain.SetAttributesUseCase
 import com.jonathanev.review.Domain.repository.FileRepository
 import com.jonathanev.review.R
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
 
@@ -19,10 +30,22 @@ import javax.inject.Inject
 class FragCreateFilesViewModel @Inject constructor(
     private val fileRepository: FileRepository,
     private val filePathsProvider: FilePathsProvider,
-    private val createFolderUseCase: CreateFolderUseCase
+    private val createFolderUseCase: CreateFolderUseCase,
+    private val getAttributesGuideUseCase: GetAttributesGuideUseCase,
+    private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
+    private val setAttributesUseCase: SetAttributesUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(PreviewState())
     val uiState = _uiState.asStateFlow()
+
+    private val _eventsMessages = MutableSharedFlow<UIStopEvent>()
+    val eventsMessages = _eventsMessages.asSharedFlow()
+
+    private var _preguntas = mutableListOf<QuestionItem>()
+    val preguntas: List<QuestionItem> get() = _preguntas
+
+    private var _respuestas = mutableListOf<QuestionItem>()
+    val respuestas: List<QuestionItem> get() = _respuestas
 
     fun loadIconsFor(action: FolderAction) {
         val icons = when (action) {
@@ -33,8 +56,13 @@ class FragCreateFilesViewModel @Inject constructor(
                 R.drawable.ic_bacteria_solid_full
             )
 
-            FolderAction.RENAMING_FILE -> emptyList()
-            FolderAction.RENAMING_FOLDER -> emptyList()
+            FolderAction.RENAMING_FILE -> listOf(R.drawable.ic_lightbulb_solid_full)
+            FolderAction.RENAMING_FOLDER -> listOf(
+                R.drawable.ic_anchor_solid_full,
+                R.drawable.ic_angellist_brands_solid_full,
+                R.drawable.ic_bacteria_solid_full
+            )
+
             FolderAction.NONE -> emptyList()
         }
 
@@ -68,7 +96,7 @@ class FragCreateFilesViewModel @Inject constructor(
         val currentPath = File(fileRepository.getCurrentPath())
         val folderPath = File(currentPath, data.name)
 
-        if (!folderPath.exists()){
+        if (!folderPath.exists()) {
             folderPath.mkdir()
             createScreenMetadata(data, folderPath)
         }
@@ -76,5 +104,48 @@ class FragCreateFilesViewModel @Inject constructor(
 
     private fun createScreenMetadata(data: ScreenData, dir: File) {
         createFolderUseCase.invoke(data, dir)
+    }
+
+    fun getCurrentPath() = fileRepository.getCurrentPath()
+
+    fun fillFields(): GuideModel {
+        val currentPath = File(getCurrentPath())
+        return getAttributesGuideUseCase.invoke(currentPath)
+    }
+
+    fun getObtenerDatosXML() {
+        if (respuestas.isEmpty()) {
+            //Revisar como se obtienen los datos aqui, porque no se visualiza la imagen
+            val datos = getObtenerDatosXMLUseCase.invoke(ruta = getCurrentPath())
+
+            _preguntas = datos.map { it.question }.toMutableList()
+            _respuestas =
+                datos.mapNotNull { (it.answer as? AnswerState.Filled)?.item }.toMutableList()
+        }
+    }
+
+    fun renameFile(fileName: String, description: String) {
+        getObtenerDatosXML()
+
+        val currentPath = File(getCurrentPath())
+        val isUpdated =
+            setAttributesUseCase.invoke(currentPath, fileName, description, preguntas, respuestas)
+
+        if (isUpdated) {
+            viewModelScope.launch {
+                _eventsMessages.emit(
+                    UIStopEvent.GuideRenamedSuccess("Se ha renombrado el archivo con exito")
+                )
+
+                fileRepository.setCurrentPath(filePathsProvider.fileGuides.path)
+            }
+        } else {
+            viewModelScope.launch {
+                _eventsMessages.emit(
+                    UIStopEvent.ShowMessage("No se pudo renombrar el archivo")
+                )
+            }
+            return
+        }
     }
 }

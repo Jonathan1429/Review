@@ -11,11 +11,10 @@ class SetCrearXmlUseCase @Inject constructor(
     operator fun invoke(
         nameGuide: String,
         description: String,
-        currentPath: String,
-        imagesPath: File,
+        currentPath: File,
         preguntas: MutableList<QuestionItem>,
         respuestas: MutableList<QuestionItem>,
     ): Boolean {
-        return guiaRepositoryImpl.saveFileV2(nameGuide, description, currentPath, imagesPath, preguntas, respuestas)
+        return guiaRepositoryImpl.saveFileV2(nameGuide, description, currentPath, preguntas, respuestas)
     }
 }

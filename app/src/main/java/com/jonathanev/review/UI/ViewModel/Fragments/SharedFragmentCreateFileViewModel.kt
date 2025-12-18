@@ -429,8 +429,8 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     fun saveOldGuide() {
         validationsSave()
 
-        val currentPath = getCurrentPath()
-        val imagesPath = currentPath.replace(".xml", "")
+        val currentPath = File(getCurrentPath())
+        val imagesPath = currentPath.toString().replace(".xml", "")
 
         val images = File(imagesPath.replace("guias", "imagenes"))
         if (images.exists()) {
@@ -440,7 +440,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         images.mkdirs()
 
         viewModelScope.launch {
-            val version = getVersionUseCase.invoke(File(currentPath))
+            val version = getVersionUseCase.invoke(currentPath)
             setDecodePathImageUseCase.invoke(_preguntas, _respuestas)
 
             // Si existe el archivo
@@ -470,14 +470,12 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 }
             }
 
-            val file = currentPath.substringAfterLast("/")
-            val response = getAttributesGuideUseCase.invoke(File(currentPath), file)
+            val response = getAttributesGuideUseCase.invoke(currentPath)
 
             val isSuccess = setCrearXmlUseCase.invoke(
                 response.nameGuide,
                 response.description,
                 currentPath,
-                images,
                 preguntas,
                 respuestas
             )
@@ -511,8 +509,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             val isSuccess = setCrearXmlUseCase.invoke(
                 nameGuide,
                 description,
-                currentPath.path,
-                images,
+                currentPath,
                 preguntas,
                 respuestas
             )

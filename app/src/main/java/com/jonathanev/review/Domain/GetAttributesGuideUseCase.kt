@@ -8,7 +8,7 @@ import javax.inject.Inject
 class GetAttributesGuideUseCase @Inject constructor(
     private val guiaRepository: GuiaRepository
 ) {
-    operator fun invoke(file: File, fileName: String): GuideModel {
-        return guiaRepository.getAttributesGuide(file, fileName)
+    operator fun invoke(file: File): GuideModel {
+        return guiaRepository.getAttributesGuide(file)
     }
 }

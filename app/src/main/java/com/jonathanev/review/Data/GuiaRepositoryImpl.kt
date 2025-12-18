@@ -1,7 +1,6 @@
 package com.jonathanev.review.Data
 
 import android.graphics.Color
-import android.util.Log
 import android.util.Xml
 import com.jonathanev.review.Core.Constants.ANSWER
 import com.jonathanev.review.Core.Constants.BASERUTA_IMG_CIFRADO
@@ -36,7 +35,6 @@ import org.w3c.dom.NodeList
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
 import java.io.FileOutputStream
-import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.xml.parsers.DocumentBuilderFactory
@@ -77,8 +75,7 @@ class GuiaRepositoryImpl @Inject constructor(
             ?.filter { !it.isDirectory }
             ?.mapNotNull { item ->
                 runCatching {
-                    val fileName = item.name
-                    getAttributesGuide(item, fileName)
+                    getAttributesGuide(item)
                 }.getOrNull()
             }
             ?: emptyList()
@@ -91,32 +88,26 @@ class GuiaRepositoryImpl @Inject constructor(
     fun saveFileV2(
         nameGuide: String,
         description: String,
-        currentPath: String,
-        imagesPath: File,
-        preguntas: MutableList<QuestionItem>,
-        respuestas: MutableList<QuestionItem>,
+        currentPath: File,
+        preguntas: List<QuestionItem>,
+        respuestas: List<QuestionItem>,
     ): Boolean {
-        val file = File(currentPath)
+        val parentDir = currentPath.parent ?: return false
+        val newFile = File(
+            /* parent = */ parentDir,
+            /* child = */ "$nameGuide.xml"
+        )
+        val tempFile = File("$currentPath.tmp")
 
-        // Eliminamos el archivo anteriormente creado
-        if (file.exists()) {
-            file.delete()
-
-            // Delete images from guide
-            //imagesPath.delete()
-            Log.d("ArchivoEliminado", "Archivo eliminado")
-        }
-
-        //Vamos a crear el archivo que acabamos de eliminar pero con el nuevo cuestionario
-        try {
+        return try {
             val serializer = xmlSerializerFactory.create()
-            val fos = fileOutputStreamFactory.create(currentPath)
-            // fos = openFileOutput(nombreArchivo, MODE_PRIVATE) // Guarda el archivo en la raiz
+            val fos = fileOutputStreamFactory.create(tempFile.path)
+
             serializer.setOutput(fos, "UTF-8")
-            serializer.startDocument(null, java.lang.Boolean.valueOf(true))
-            serializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true)
+            serializer.startDocument(null, true)
             serializer.startTag("", GUIAESTUDIO)
             serializer.attribute("", VERSION, "2.0")
+
             serializer.startTag("", CUESTIONARIO)
             serializer.attribute("", NOMBREGUIA, nameGuide)
             serializer.attribute("", DESCRIPCION, description)
@@ -124,23 +115,29 @@ class GuiaRepositoryImpl @Inject constructor(
             writeQuestionsAnswers(serializer, preguntas, QUESTION)
             writeQuestionsAnswers(serializer, respuestas, ANSWER)
 
-            // Si los campos estan vacios simplemente cierro las etiquetas y directamente
-            // guardo el documento en el teléfono.
             serializer.endTag("", CUESTIONARIO)
             serializer.endTag("", GUIAESTUDIO)
             serializer.endDocument()
-            serializer.flush()
-            fos.close()
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
 
-        return file.exists()
+            fos.close()
+
+
+
+            if(!tempFile.renameTo(newFile)) return false
+
+            if (newFile != currentPath){
+                currentPath.delete()
+            }
+
+            true
+        } catch (e: Exception) {
+            false
+        }
     }
 
     private fun writeQuestionsAnswers(
         serializer: XmlSerializer,
-        items: MutableList<QuestionItem>,
+        items: List<QuestionItem>,
         type: String // Question or Answer
     ) {
         // Creo la etiqueta interrogante con su respectiva pregunta
@@ -218,7 +215,11 @@ class GuiaRepositoryImpl @Inject constructor(
                 val img = images.item(j) as Element
                 //val uri = img.getAttribute(URI)
                 val nameFile = img.getAttribute(NAMEFILE)
-                val uri = setSubstringPathUseCase.invoke(path = ruta, version = version, nameFile = nameFile)
+                val uri = setSubstringPathUseCase.invoke(
+                    path = ruta,
+                    version = version,
+                    nameFile = nameFile
+                )
                 contentList.add(
                     QuestionContent.Image(uri, nameFile)
                 )
@@ -309,10 +310,13 @@ class GuiaRepositoryImpl @Inject constructor(
         val version = element.getAttribute(VERSION)
 
         //return obtenerDatosXMLV1(ruta)
-        return if (version == VERSION1) obtenerDatosXMLV1(ruta, version) else obtenerDatosXMLV2(ruta, version)
+        return if (version == VERSION1) obtenerDatosXMLV1(
+            ruta,
+            version
+        ) else obtenerDatosXMLV2(ruta, version)
     }
 
-    override fun getAttributesGuide(file: File, fileName: String): GuideModel {
+    override fun getAttributesGuide(file: File): GuideModel {
         val db = DocumentBuilderFactory.newInstance().newDocumentBuilder()
         val doc = db.parse(file)
 
@@ -326,7 +330,8 @@ class GuiaRepositoryImpl @Inject constructor(
         var name = ""
         val description = element.getAttribute(DESCRIPCION)
         //var name = element.getAttribute("nombreGuia")
-        if (version == "1.0"){
+        if (version == "1.0") {
+            val fileName = file.path.substringAfterLast("/")
             name = fileName
             name = name.replace(".xml", "")
         } else {
@@ -336,6 +341,22 @@ class GuiaRepositoryImpl @Inject constructor(
         return GuideModel(
             nameGuide = name,
             description = description
+        )
+    }
+
+    override fun setAttributesGuide(
+        file: File,
+        fileName: String,
+        description: String,
+        preguntas: List<QuestionItem>,
+        respuestas: List<QuestionItem>
+    ): Boolean {
+        return saveFileV2(
+            fileName,
+            description,
+            file,
+            preguntas,
+            respuestas
         )
     }
 

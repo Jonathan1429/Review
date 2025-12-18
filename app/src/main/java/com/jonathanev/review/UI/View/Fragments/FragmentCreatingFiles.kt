@@ -4,6 +4,7 @@ import android.content.res.ColorStateList
 import android.graphics.PorterDuff
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -16,11 +17,13 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.jonathanev.review.Data.ActionGuide
 import com.jonathanev.review.Data.FolderAction
 import com.jonathanev.review.Data.Model.ScreenData
+import com.jonathanev.review.Data.Model.prueba.UIStopEvent
 import com.jonathanev.review.Fragments.Adaptadores.ListarIconosAdapter
 import com.jonathanev.review.R
 import com.jonathanev.review.UI.ViewModel.Fragments.FragCreateFilesViewModel
@@ -62,8 +65,29 @@ class FragmentCreatingFiles : Fragment() {
         ) ?: FolderAction.NONE
 
         initUI(mode)
-        initListeners()
+        initListeners(mode)
 
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.eventsMessages.collect { event ->
+                    if (event is UIStopEvent.GuideRenamedSuccess){
+                        findNavController().navigate(
+                            R.id.fragmentsContent,
+                            null,
+                            NavOptions.Builder()
+                                .setPopUpTo(R.id.fragmentsContent, true)
+                                .build()
+                        )
+
+                        Toast.makeText(context, event.text, Toast.LENGTH_SHORT).show()
+                    }
+
+                    if (event is UIStopEvent.ShowMessage) {
+                        Toast.makeText(context, event.text, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
 
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -88,14 +112,31 @@ class FragmentCreatingFiles : Fragment() {
         }
     }
 
-    private fun initListeners() {
+    private fun initListeners(mode: FolderAction) {
         binding.fragmentCreate.colorPickerView.setColorListener(ColorListener { color, _ ->
             viewModel.setColor(color)
         })
 
         binding.btnApply.setOnClickListener {
-            createFile()
+            when (mode) {
+                FolderAction.CREATING_FOLDER -> createFile()
+                FolderAction.RENAMING_FILE -> renameFile()
+                FolderAction.RENAMING_FOLDER -> Log.i(
+                    "Advertencia",
+                    "Aun no se aplica la funcion renombrar folder"
+                )
+
+                FolderAction.CREATING_FILE -> createFile()
+                FolderAction.NONE -> Log.e("Error", "No se pudo crear el archivo")
+            }
         }
+    }
+
+    private fun renameFile() {
+        val fileName = binding.fragmentCreate.etNombre.text.toString()
+        val description =
+            binding.fragmentCreate.fragmentComponentsFile.etDescription.text.toString()
+        viewModel.renameFile(fileName, description)
     }
 
     private fun createFile() {
@@ -120,15 +161,15 @@ class FragmentCreatingFiles : Fragment() {
             color = state.color
         )
 
-        if (mode == FolderAction.CREATING_FOLDER){
+        if (mode == FolderAction.CREATING_FOLDER) {
             viewModel.saveMetadata(data)
 
             findNavController().navigate(
-                R.id.action_fragmentCreateFiles_to_fragmentListFolders,
+                R.id.action_fragmentCreateFiles_to_fragmentsContent,
             )
         }
 
-        if (mode == FolderAction.CREATING_FILE){
+        if (mode == FolderAction.CREATING_FILE) {
             findNavController().navigate(
                 R.id.action_fragmentCreateFiles_to_fragmentCreateFile2,
                 bundleOf(
@@ -149,10 +190,18 @@ class FragmentCreatingFiles : Fragment() {
 
         viewModel.loadIconsFor(mode)
 
-        if (this.mode == FolderAction.CREATING_FOLDER) {
-            showFolderUI()
-        } else {
-            showFileUI()
+        when (mode) {
+            FolderAction.CREATING_FOLDER -> showFolderUI()
+            FolderAction.RENAMING_FILE -> {
+                showFileUI()
+                val attributes = viewModel.fillFields()
+                binding.fragmentCreate.etNombre.setText(attributes.nameGuide)
+                binding.fragmentCreate.fragmentComponentsFile.etDescription.setText(attributes.description)
+            }
+
+            FolderAction.RENAMING_FOLDER -> showFolderUI()
+            FolderAction.CREATING_FILE -> showFileUI()
+            FolderAction.NONE -> Log.e("Error", "No se pudieron cargar datos iniciales")
         }
     }
 

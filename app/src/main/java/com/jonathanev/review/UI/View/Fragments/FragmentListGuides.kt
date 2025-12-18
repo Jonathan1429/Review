@@ -55,11 +55,11 @@ class FragmentListGuides : Fragment() {
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.eventsMessages.collect { event ->
-                    if (event is UIStopEvent.ShowMessage){
+                    if (event is UIStopEvent.ShowMessage) {
                         Toast.makeText(context, event.text, Toast.LENGTH_SHORT).show()
                     }
 
-                    if (event is UIStopEvent.DeleteGuideSuccess){
+                    if (event is UIStopEvent.DeleteGuideSuccess) {
                         Toast.makeText(context, event.text, Toast.LENGTH_SHORT).show()
 
                         findNavController().navigate(
@@ -89,7 +89,7 @@ class FragmentListGuides : Fragment() {
         // con el ciclo de vida del Fragment.
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
 
-        viewModel.guides.observe(viewLifecycleOwner){ guides ->
+        viewModel.guides.observe(viewLifecycleOwner) { guides ->
             adaptListGuides.submitList(guides)
         }
     }
@@ -107,7 +107,8 @@ class FragmentListGuides : Fragment() {
         viewModelToolbar.changeTitle("Guias")
 
         adaptListGuides = ListGuidesAdapter { position -> showGuideOptions(position) }
-        binding.lvGuiasEstudioNew.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+        binding.lvGuiasEstudioNew.layoutManager =
+            LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         binding.lvGuiasEstudioNew.setHasFixedSize(true)
         binding.lvGuiasEstudioNew.adapter = adaptListGuides
 
@@ -117,7 +118,7 @@ class FragmentListGuides : Fragment() {
     private fun showGuideOptions(position: Int) {
         val guideResult = viewModel.getGuideSelected(position)
 
-        when(guideResult){
+        when (guideResult) {
             is GuideResult.Error -> Log.i("Error", "Error")
             is GuideResult.Success -> {
                 val builder = AlertDialog.Builder(context)
@@ -154,16 +155,23 @@ class FragmentListGuides : Fragment() {
                                 }
                                 .setNegativeButton("Cancelar") { _, _ -> dialog.dismiss() }
                                 .create().show()
+
                         2 -> {
-                            /*// Se ejecuta cuando quiere cambiar el nombre de la guía
-                            viewModel.changeFilePath(folderResult.folder.nombreGuia)
-                            val dialogo = FragmentDialogNuevoArchivoPopu.newInstance(
-                                mode = FolderAction.RENAMING_FILE
+                            viewModel.changeFilePath(guideResult.folder.nameGuide)
+
+                            findNavController().navigate(
+                                R.id.action_fragmentListGuides_to_fragmentCreateFiles2,
+                                bundleOf("mode" to FolderAction.RENAMING_FILE)
                             )
-                            dialogo.show(childFragmentManager, "Fragment_nuevo")*/
                         }
 
                         3 -> {
+                            Toast.makeText(
+                                requireContext(),
+                                "Opcion aun sin implementar",
+                                Toast.LENGTH_SHORT
+                            ).show()
+
                             /*val subMenuBuilder = AlertDialog.Builder(context)
                             subMenuBuilder.setTitle("Mover a...")
 
