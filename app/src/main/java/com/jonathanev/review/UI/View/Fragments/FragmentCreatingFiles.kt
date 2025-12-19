@@ -64,8 +64,8 @@ class FragmentCreatingFiles : Fragment() {
             FolderAction::class.java
         ) ?: FolderAction.NONE
 
-        initUI(mode)
-        initListeners(mode)
+        initUI()
+        initListeners()
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -112,76 +112,7 @@ class FragmentCreatingFiles : Fragment() {
         }
     }
 
-    private fun initListeners(mode: FolderAction) {
-        binding.fragmentCreate.colorPickerView.setColorListener(ColorListener { color, _ ->
-            viewModel.setColor(color)
-        })
-
-        binding.btnApply.setOnClickListener {
-            when (mode) {
-                FolderAction.CREATING_FOLDER -> createFile()
-                FolderAction.RENAMING_FILE -> renameFile()
-                FolderAction.RENAMING_FOLDER -> Log.i(
-                    "Advertencia",
-                    "Aun no se aplica la funcion renombrar folder"
-                )
-
-                FolderAction.CREATING_FILE -> createFile()
-                FolderAction.NONE -> Log.e("Error", "No se pudo crear el archivo")
-            }
-        }
-    }
-
-    private fun renameFile() {
-        val fileName = binding.fragmentCreate.etNombre.text.toString()
-        val description =
-            binding.fragmentCreate.fragmentComponentsFile.etDescription.text.toString()
-        viewModel.renameFile(fileName, description)
-    }
-
-    private fun createFile() {
-        val name = binding.fragmentCreate.etNombre.text.toString()
-        val description =
-            binding.fragmentCreate.fragmentComponentsFile.etDescription.text.toString()
-
-        val isEmpty = viewModel.validations(name)
-
-        if (isEmpty) {
-            Toast.makeText(requireContext(), "Necesitas tener un nombre", Toast.LENGTH_SHORT)
-                .show()
-            return
-        }
-
-        val state = viewModel.uiState.value
-
-        val data = ScreenData(
-            name = name,
-            description = description,
-            imgFolder = state.icons[state.selectedIndex],
-            color = state.color
-        )
-
-        if (mode == FolderAction.CREATING_FOLDER) {
-            viewModel.saveMetadata(data)
-
-            findNavController().navigate(
-                R.id.action_fragmentCreateFiles_to_fragmentsContent,
-            )
-        }
-
-        if (mode == FolderAction.CREATING_FILE) {
-            findNavController().navigate(
-                R.id.action_fragmentCreateFiles_to_fragmentCreateFile2,
-                bundleOf(
-                    "mode" to mode,
-                    "screenData" to data,
-                    "actionGuide" to ActionGuide.CREATE
-                )
-            )
-        }
-    }
-
-    private fun initUI(mode: FolderAction) {
+    private fun initUI() {
         // 1) crear adapter una vez
         iconsAdapter = ListarIconosAdapter { pos -> viewModel.onIconSelected(pos) }
         binding.fragmentCreate.rvIconos.adapter = iconsAdapter
@@ -203,6 +134,85 @@ class FragmentCreatingFiles : Fragment() {
             FolderAction.CREATING_FILE -> showFileUI()
             FolderAction.NONE -> Log.e("Error", "No se pudieron cargar datos iniciales")
         }
+    }
+
+    private fun initListeners() {
+        binding.fragmentCreate.colorPickerView.setColorListener(ColorListener { color, _ ->
+            viewModel.setColor(color)
+        })
+
+        binding.btnApply.setOnClickListener {
+            val name = binding.fragmentCreate.etNombre.text.toString()
+            val description =
+                binding.fragmentCreate.fragmentComponentsFile.etDescription.text.toString()
+
+            prepareScreenData(name, description)
+        }
+    }
+
+    private fun prepareScreenData(name: String, description: String) {
+        val isEmpty = validation(name)
+
+        if (isEmpty) {
+            Toast.makeText(requireContext(), "Necesitas tener un nombre", Toast.LENGTH_SHORT)
+                .show()
+            return
+        }
+
+        val state = viewModel.uiState.value
+
+        val data = ScreenData(
+            name = name,
+            description = description,
+            imgFolder = state.icons[state.selectedIndex],
+            color = state.color
+        )
+
+        when (mode) {
+            FolderAction.CREATING_FOLDER -> onCreateFolderConfirmed(data)
+            FolderAction.RENAMING_FILE -> renameFile()
+            FolderAction.RENAMING_FOLDER -> Log.i(
+                "Advertencia",
+                "Aun no se aplica la funcion renombrar folder"
+            )
+
+            FolderAction.CREATING_FILE -> onCreateGuideConfirmed(data)
+            FolderAction.NONE -> Log.e("Error", "No se pudo crear el archivo")
+        }
+    }
+
+    private fun validation(name: String): Boolean {
+        return viewModel.validations(name)
+    }
+
+    private fun onCreateGuideConfirmed(data: ScreenData) {
+        if (mode == FolderAction.CREATING_FILE) {
+            findNavController().navigate(
+                R.id.action_fragmentCreateFiles_to_fragmentCreateFile2,
+                bundleOf(
+                    "mode" to mode,
+                    "screenData" to data,
+                    "actionGuide" to ActionGuide.CREATE
+                )
+            )
+        }
+    }
+
+    private fun onCreateFolderConfirmed(data: ScreenData){
+        if (mode == FolderAction.CREATING_FOLDER) {
+            viewModel.saveMetadata(data)
+
+            findNavController().navigate(
+                R.id.action_fragmentCreateFiles_to_fragmentsContent,
+            )
+        }
+    }
+
+    private fun renameFile() {
+        val fileName = binding.fragmentCreate.etNombre.text.toString()
+        val description =
+            binding.fragmentCreate.fragmentComponentsFile.etDescription.text.toString()
+        viewModel.renameFile(fileName, description)
     }
 
     // ---------------------------

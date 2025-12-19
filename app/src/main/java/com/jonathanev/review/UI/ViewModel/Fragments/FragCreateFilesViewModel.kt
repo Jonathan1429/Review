@@ -14,6 +14,7 @@ import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Domain.CreateFolderUseCase
 import com.jonathanev.review.Domain.GetAttributesGuideUseCase
 import com.jonathanev.review.Domain.GetObtenerDatosXMLUseCase
+import com.jonathanev.review.Domain.ReubicarImagenesUseCase
 import com.jonathanev.review.Domain.SetAttributesUseCase
 import com.jonathanev.review.Domain.repository.FileRepository
 import com.jonathanev.review.R
@@ -33,7 +34,8 @@ class FragCreateFilesViewModel @Inject constructor(
     private val createFolderUseCase: CreateFolderUseCase,
     private val getAttributesGuideUseCase: GetAttributesGuideUseCase,
     private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
-    private val setAttributesUseCase: SetAttributesUseCase
+    private val reubicarImagenesUseCase: ReubicarImagenesUseCase,
+    private val setAttributesXMLUseCase: SetAttributesUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(PreviewState())
     val uiState = _uiState.asStateFlow()
@@ -128,8 +130,10 @@ class FragCreateFilesViewModel @Inject constructor(
         getObtenerDatosXML()
 
         val currentPath = File(getCurrentPath())
+
+        reubicarImagenesUseCase.invoke(currentPath, fileName, preguntas, respuestas)
         val isUpdated =
-            setAttributesUseCase.invoke(currentPath, fileName, description, preguntas, respuestas)
+            setAttributesXMLUseCase.invoke(currentPath, fileName, description, preguntas, respuestas)
 
         if (isUpdated) {
             viewModelScope.launch {
