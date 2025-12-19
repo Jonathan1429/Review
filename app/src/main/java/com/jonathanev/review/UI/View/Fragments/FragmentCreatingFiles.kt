@@ -152,6 +152,7 @@ class FragmentCreatingFiles : Fragment() {
             return
         }
 
+
         val state = viewModel.uiState.value
 
         val data = ScreenData(
