@@ -104,6 +104,12 @@ class GuiaRepositoryImpl @Inject constructor(
             val fos = fileOutputStreamFactory.create(tempFile.path)
 
             serializer.setOutput(fos, "UTF-8")
+            try {
+                serializer.setFeature(
+                    "http://xmlpull.org/v1/doc/features.html#indent-output",
+                    true
+                )
+            } catch (_: Exception) {}
             serializer.startDocument(null, true)
             serializer.startTag("", GUIAESTUDIO)
             serializer.attribute("", VERSION, "2.0")
