@@ -8,7 +8,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.DI.IoDispatcher
 import com.jonathanev.review.DI.MainDispatcher
-import com.jonathanev.review.Data.GuiaRepositoryImpl
 import com.jonathanev.review.Data.Model.DataStoreManager
 import com.jonathanev.review.Data.Model.EstadoUI
 import com.jonathanev.review.Data.Model.GuideModel
@@ -19,17 +18,13 @@ import com.jonathanev.review.Data.Model.prueba.QAUiItem
 import com.jonathanev.review.Data.Model.prueba.QuestionContent
 import com.jonathanev.review.Data.Model.prueba.QuestionItem
 import com.jonathanev.review.Data.Model.prueba.TypeContent
-import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Data.repository.FileRepositoryImpl
 import com.jonathanev.review.Domain.DeleteContentInPivUseCase
 import com.jonathanev.review.Domain.DeleteCurrentQuestionUseCase
-import com.jonathanev.review.Domain.GetContentItemsUseCase
 import com.jonathanev.review.Domain.SetCifrarRutaImagenUseCase
 import com.jonathanev.review.Domain.SetColocarEtiquetasUseCase
 import com.jonathanev.review.Domain.SetCopyImagesUseCase
-import com.jonathanev.review.Domain.SetCrearXmlUseCase
 import com.jonathanev.review.Domain.SetPintarLetraUseCase
-import com.jonathanev.review.Domain.SetPintarTextosUseCase
 import com.jonathanev.review.UI.Utils.toUi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -46,17 +41,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ActivityCuestionarioViewModel @Inject constructor(
-    private val guiaRepositoryImpl: GuiaRepositoryImpl,
-    private val getContentItemsUseCase: GetContentItemsUseCase,
-    private val setCrearXmlUseCase: SetCrearXmlUseCase,
     private val setColocarEtiquetasUseCase: SetColocarEtiquetasUseCase,
     private val deleteCurrentQuestionUseCase: DeleteCurrentQuestionUseCase,
     private val setCopyImagesUseCase: SetCopyImagesUseCase,
     private val setCifrarRutaImagenUseCase: SetCifrarRutaImagenUseCase,
-    private val setPintarTextosUseCase: SetPintarTextosUseCase,
     private val setPintarLetraUseCase: SetPintarLetraUseCase,
     private val deleteContentInPivUseCase: DeleteContentInPivUseCase,
-    private val filePathsProvider: FilePathsProvider,
     private val fileRepositoryImpl: FileRepositoryImpl,
     private val dataStore: DataStoreManager,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,

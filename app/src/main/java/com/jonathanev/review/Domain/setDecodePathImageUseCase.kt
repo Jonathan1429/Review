@@ -9,48 +9,33 @@ import javax.inject.Inject
 class SetDecodePathImageUseCase @Inject constructor(
     private val dataStore: DataStoreManager
 ) {
-
     suspend operator fun invoke(
-        preguntas: MutableList<QuestionItem>,
-        respuestas: MutableList<QuestionItem>
-    ) {
+        preguntas: List<QuestionItem>,
+        respuestas: List<QuestionItem>
+    ): Pair<List<QuestionItem>, List<QuestionItem>> { // Retorna ambas listas actualizadas
+
         var count = dataStore.getCountImage().first()
 
-        fun updateItems(items: MutableList<QuestionItem>) {
-            items.forEachIndexed { indexItem, item ->
-                var wasUpdated = false
-
+        // Función interna que devuelve una NUEVA lista, no modifica la anterior
+        fun transformItems(items: List<QuestionItem>): List<QuestionItem> {
+            return items.map { item ->
                 val newContent = item.content.map { content ->
-                    if (content is QuestionContent.Image) {
-                        wasUpdated = true
-
-                        val updated = if (content.nameFile.isEmpty()) {
-                            val newContent = content.copy(
-                                nameFile = "$count.png"
-                            )
-                            count++
-                            newContent
-                        } else {
-                            val nameFile = content.uri.substringAfterLast("/")
-                            content.copy(
-                                nameFile = nameFile
-                            )
-                        }
-                        updated
+                    if (content is QuestionContent.Image && content.nameFile.isEmpty()) {
+                        count++
+                        content.copy(nameFile = "$count.png")
                     } else {
                         content
                     }
                 }
-
-                if (wasUpdated) {
-                    items[indexItem] = item.copy(content = newContent)
-                }
+                item.copy(content = newContent)
             }
         }
 
-        updateItems(preguntas)
-        updateItems(respuestas)
+        val nuevasPreguntas = transformItems(preguntas)
+        val nuevasRespuestas = transformItems(respuestas)
 
         dataStore.setCounter(count)
+
+        return Pair(nuevasPreguntas, nuevasRespuestas)
     }
 }

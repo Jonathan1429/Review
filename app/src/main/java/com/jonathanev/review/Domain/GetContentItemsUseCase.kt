@@ -9,7 +9,7 @@ import javax.inject.Inject
 
 class GetContentItemsUseCase @Inject constructor() {
     operator fun invoke(
-        contentList: MutableList<QuestionItem>,
+        contentList: List<QuestionItem>,
         contadorPregunta: Int
     ): Pair<List<QuestionContent.Text>, List<QuestionContent.Image>> {
         val listTexts: MutableList<QuestionContent.Text> = mutableListOf()
@@ -18,11 +18,11 @@ class GetContentItemsUseCase @Inject constructor() {
         contentList[contadorPregunta].content.forEach { item ->
             when (item) {
                 is QuestionContent.Image -> {
-                    listImages.add(item)
+                    listImages.add(item.copy())
                 }
 
                 is QuestionContent.Text -> {
-                    listTexts.add(item)
+                    listTexts.add(item.copy())
                 }
 
                 QuestionContent.None -> Unit
