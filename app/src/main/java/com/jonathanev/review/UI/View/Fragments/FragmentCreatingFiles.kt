@@ -197,31 +197,33 @@ class FragmentCreatingFiles : Fragment() {
     private fun prepareScreenData(name: String, description: String) {
         val exist = viewModel.fileExist(mode, name)
 
-        if (!exist){
+        if (!exist) {
             viewModel.processScreenData(name, description)
             return
         }
 
-        val message = when (mode) {
+        when (mode) {
             FolderAction.CREATING_FOLDER,
             FolderAction.RENAMING_FOLDER -> {
-                "Ya tienes una carpeta con el mismo nombre, " +
-                        "si continúas se va a sobreescribir el archivo, " +
-                        "¿seguro deseas continuar?"
+                Toast.makeText(
+                    requireContext(),
+                    "Ya tienes una carpeta con el mismo nombre",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
 
             FolderAction.CREATING_FILE,
             FolderAction.RENAMING_FILE -> {
-                "Ya tienes una guia con el mismo nombre, " +
+                val message = "Ya tienes una guia con el mismo nombre, " +
                         "si continúas se va a sobreescribir el archivo, " +
                         "¿seguro deseas continuar?"
+
+                alertDialog(message) { confirmed ->
+                    viewModel.onContinueProcess(confirmed, name, description)
+                }
             }
 
             FolderAction.NONE -> return
-        }
-
-        alertDialog(message) { confirmed ->
-            viewModel.onContinueProcess(confirmed, name, description)
         }
     }
 
