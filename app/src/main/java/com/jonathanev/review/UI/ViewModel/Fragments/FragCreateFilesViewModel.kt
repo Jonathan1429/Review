@@ -9,13 +9,16 @@ import com.jonathanev.review.Data.Model.ScreenData
 import com.jonathanev.review.Data.Model.prueba.AnswerState
 import com.jonathanev.review.Data.Model.prueba.PreviewState
 import com.jonathanev.review.Data.Model.prueba.QuestionItem
+import com.jonathanev.review.Data.Model.prueba.UICreatingFile
 import com.jonathanev.review.Data.Model.prueba.UIStopEvent
 import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Domain.CreateFolderUseCase
+import com.jonathanev.review.Domain.CheckNameConflictUseCase
 import com.jonathanev.review.Domain.GetAttributesGuideUseCase
 import com.jonathanev.review.Domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.Domain.ReubicarImagenesUseCase
 import com.jonathanev.review.Domain.SetAttributesUseCase
+import com.jonathanev.review.Domain.ValidateCreateFileUseCase
 import com.jonathanev.review.Domain.repository.FileRepository
 import com.jonathanev.review.R
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -35,13 +38,18 @@ class FragCreateFilesViewModel @Inject constructor(
     private val getAttributesGuideUseCase: GetAttributesGuideUseCase,
     private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
     private val reubicarImagenesUseCase: ReubicarImagenesUseCase,
-    private val setAttributesXMLUseCase: SetAttributesUseCase
+    private val setAttributesXMLUseCase: SetAttributesUseCase,
+    private val validateCreateFileUseCase: ValidateCreateFileUseCase,
+    private val checkNameConflictUseCase: CheckNameConflictUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(PreviewState())
     val uiState = _uiState.asStateFlow()
 
     private val _eventsMessages = MutableSharedFlow<UIStopEvent>()
     val eventsMessages = _eventsMessages.asSharedFlow()
+
+    private val _messages = MutableSharedFlow<UICreatingFile>()
+    val messages = _messages.asSharedFlow()
 
     private var _preguntas = mutableListOf<QuestionItem>()
     val preguntas: List<QuestionItem> get() = _preguntas
@@ -90,8 +98,15 @@ class FragCreateFilesViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(color = color)
     }
 
-    fun validations(text: String): Boolean {
-        return text.isEmpty()
+    fun processScreenData(name: String, description: String) {
+        // Validación del nombre del archivo
+        val response = validateCreateFileUseCase.invoke(name, description)
+
+        viewModelScope.launch {
+            _messages.emit(
+                response
+            )
+        }
     }
 
     fun saveMetadata(data: ScreenData) {
@@ -133,7 +148,13 @@ class FragCreateFilesViewModel @Inject constructor(
 
         reubicarImagenesUseCase.invoke(currentPath, fileName, preguntas, respuestas)
         val isUpdated =
-            setAttributesXMLUseCase.invoke(currentPath, fileName, description, preguntas, respuestas)
+            setAttributesXMLUseCase.invoke(
+                currentPath,
+                fileName,
+                description,
+                preguntas,
+                respuestas
+            )
 
         if (isUpdated) {
             viewModelScope.launch {
@@ -151,5 +172,15 @@ class FragCreateFilesViewModel @Inject constructor(
             }
             return
         }
+    }
+
+    fun fileExist(mode: FolderAction, name: String): Boolean {
+        return checkNameConflictUseCase.invoke(mode, name)
+    }
+
+    fun onContinueProcess(confirmed: Boolean, name: String, description: String) {
+        if (!confirmed) return
+
+        processScreenData(name, description)
     }
 }
