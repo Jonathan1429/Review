@@ -1,10 +1,6 @@
 package com.jonathanev.review.UI.View.Fragments
 
-import android.content.Context
-import android.graphics.Bitmap
-import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -17,6 +13,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jonathanev.review.Data.ActionGuide
@@ -24,6 +21,7 @@ import com.jonathanev.review.Data.FolderAction
 import com.jonathanev.review.Data.Model.ScreenData
 import com.jonathanev.review.Data.Model.prueba.TypeContent
 import com.jonathanev.review.Data.Model.prueba.UIStopEvent
+import com.jonathanev.review.Domain.GetContentItemsUseCase
 import com.jonathanev.review.Fragments.Adaptadores.ListCreateImagesAdapter
 import com.jonathanev.review.Fragments.Adaptadores.ListCreateTextsAdapter
 import com.jonathanev.review.R
@@ -31,7 +29,6 @@ import com.jonathanev.review.UI.ViewModel.Fragments.SharedFragmentCreateFileView
 import com.jonathanev.review.databinding.FragmentCreateFileBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import java.io.File
 
 @AndroidEntryPoint
 class FragmentCreateFile : Fragment() {
@@ -62,12 +59,11 @@ class FragmentCreateFile : Fragment() {
 
         initUI(actionGuide)
         initListeners(actionGuide)
-        observers()
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiStopEvent.collect { uiStopEvent ->
-                    if (uiStopEvent is UIStopEvent.NotQuestionBefore){
+                    if (uiStopEvent is UIStopEvent.NotQuestionBefore) {
                         Toast.makeText(
                             requireContext(),
                             uiStopEvent.text,
@@ -75,12 +71,24 @@ class FragmentCreateFile : Fragment() {
                         ).show()
                     }
 
-                    if (uiStopEvent is UIStopEvent.ShowMessage){
+                    if (uiStopEvent is UIStopEvent.ShowMessage) {
                         Toast.makeText(
                             requireContext(),
                             uiStopEvent.text,
                             Toast.LENGTH_SHORT
                         ).show()
+                    }
+
+                    if (uiStopEvent is UIStopEvent.GuideCreatedSuccess) {
+                        findNavController().navigate(
+                            R.id.fragmentsContent,
+                            null,
+                            NavOptions.Builder()
+                                .setPopUpTo(R.id.fragmentsContent, true)
+                                .build()
+                        )
+
+                        Toast.makeText(context, uiStopEvent.text, Toast.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -89,18 +97,31 @@ class FragmentCreateFile : Fragment() {
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { uiState ->
-                    adaptListCreateTexts.submitList(uiState.textList)
-                    adaptListCreateImages.submitList(uiState.imageList)
+                    binding.lblPregResp.text =
+                        if (uiState.typeContent == TypeContent.QUESTION)
+                            getString(R.string.etPregunta)
+                        else
+                            getString(R.string.etRespuesta)
                 }
             }
         }
-    }
 
-    private fun observers() {
-        viewModel.typeContent.observe(viewLifecycleOwner) {
-            binding.lblPregResp.text =
-                if (it == TypeContent.QUESTION) getString(R.string.etPregunta)
-                else getString(R.string.etRespuesta)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                // Observamos imageList directamente
+                launch {
+                    viewModel.imageList.collect { list ->
+                        adaptListCreateImages.submitList(list)
+                    }
+                }
+
+                // Observamos textList directamente
+                launch {
+                    viewModel.textList.collect { list ->
+                        adaptListCreateTexts.submitList(list)
+                    }
+                }
+            }
         }
     }
 
@@ -124,11 +145,12 @@ class FragmentCreateFile : Fragment() {
         binding.recyclerImagenes.setHasFixedSize(true)
         binding.recyclerImagenes.adapter = adaptListCreateImages
 
-        when(actionGuide){
+        when (actionGuide) {
             ActionGuide.CREATE -> Log.i("Crear", "Se está creando un archivo")
             is ActionGuide.EDIT -> {
                 viewModel.getObtenerDatosXML(actionGuide.posGuide)
             }
+
             ActionGuide.NONE -> {
                 Log.e("Error", "No se pudo realizar alguna acción")
             }
@@ -148,7 +170,7 @@ class FragmentCreateFile : Fragment() {
 
         findNavController().navigate(
             R.id.action_fragmentCreateFile2_to_fragmentCreateImages,
-            bundleOf("questionImage" to viewModel.uiState.value.imageList[position])
+            bundleOf("questionImage" to viewModel.imageList.value[position])
         )
     }
 
@@ -157,7 +179,7 @@ class FragmentCreateFile : Fragment() {
 
         findNavController().navigate(
             R.id.action_fragmentCreateFile2_to_fragmentCreateText,
-            bundleOf("questionText" to viewModel.uiState.value.textList[position])
+            bundleOf("questionText" to viewModel.textList.value[position])
         )
     }
 
@@ -196,30 +218,16 @@ class FragmentCreateFile : Fragment() {
         }
 
         binding.btnSaveGuide.setOnClickListener {
-            when(actionGuide){
-                ActionGuide.CREATE -> viewModel.saveNewGuide(screenData.name, screenData.description)
+            when (actionGuide) {
+                ActionGuide.CREATE -> viewModel.saveNewGuide(
+                    screenData.name,
+                    screenData.description
+                )
+
                 is ActionGuide.EDIT -> viewModel.saveOldGuide()
                 ActionGuide.NONE -> Log.e("Error:", "NO se pudo guardar la guia")
             }
 
         }
-    }
-
-    fun copyImageToInternalStorage(
-        context: Context,
-        sourceUri: Uri,
-        fileName: String
-    ): File {
-
-        val bitmap = MediaStore.Images.Media.getBitmap(
-            context.contentResolver,
-            sourceUri
-        )
-
-        context.openFileOutput(fileName, Context.MODE_PRIVATE).use { fos ->
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
-        }
-
-        return File(context.filesDir, fileName)
     }
 }

@@ -155,7 +155,8 @@ class GuiaRepositoryImpl @Inject constructor(
                 when (content) {
                     is QuestionContent.Image -> {
                         serializer.startTag("", IMAGEN)
-                        serializer.attribute("", URI, content.uri)
+                        //serializer.attribute("", URI, content.uri)
+                        serializer.attribute("", URI, "")
                         serializer.attribute("", NAMEFILE, content.nameFile)
                         serializer.endTag("", IMAGEN)
                     }
