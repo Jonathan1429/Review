@@ -12,8 +12,8 @@ class SetCrearXmlUseCase @Inject constructor(
         nameGuide: String,
         description: String,
         currentPath: File,
-        preguntas: MutableList<QuestionItem>,
-        respuestas: MutableList<QuestionItem>,
+        preguntas: List<QuestionItem>,
+        respuestas: List<QuestionItem>,
     ): Boolean {
         return guiaRepositoryImpl.saveFileV2(nameGuide, description, currentPath, preguntas, respuestas)
     }

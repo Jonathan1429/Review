@@ -37,13 +37,7 @@ class FileRepositoryImpl @Inject constructor(
 
     override suspend fun saveImage(image: QuestionContent.Image, imagesPath: File) {
         val uri = Uri.parse(image.uri)
-
-        //val count = dataStore.getCountImage().first()
         val fileName = image.nameFile
-
-        if (!imagesPath.exists()) {
-            imagesPath.mkdirs()
-        }
 
         val outputFile = File(imagesPath, fileName)
 

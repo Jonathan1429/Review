@@ -18,19 +18,14 @@ import com.jonathanev.review.Data.Model.prueba.QAUiItem
 import com.jonathanev.review.Data.Model.prueba.QuestionContent
 import com.jonathanev.review.Data.Model.prueba.QuestionItem
 import com.jonathanev.review.Data.Model.prueba.TypeContent
-import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Data.repository.FileRepositoryImpl
 import com.jonathanev.review.Domain.DeleteContentInPivUseCase
 import com.jonathanev.review.Domain.DeleteCurrentQuestionUseCase
 import com.jonathanev.review.Domain.GetGuiaUseCase
 import com.jonathanev.review.Domain.GetObtenerDatosXMLUseCase
-import com.jonathanev.review.Domain.GetContentItemsUseCase
 import com.jonathanev.review.Domain.SetCifrarRutaImagenUseCase
 import com.jonathanev.review.Domain.SetColocarEtiquetasUseCase
-import com.jonathanev.review.Domain.SetCopyImagesUseCase
-import com.jonathanev.review.Domain.SetCrearXmlUseCase
 import com.jonathanev.review.Domain.SetCreatePivImage
-import com.jonathanev.review.Domain.SetPintarTextosUseCase
 import com.jonathanev.review.UI.Utils.toUi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -52,17 +47,12 @@ class ActivityModificarViewModel @Inject constructor(
     private val setColocarEtiquetasUseCase: SetColocarEtiquetasUseCase,
     private val setCifrarRutaImagenUseCase: SetCifrarRutaImagenUseCase,
     private val setCreatePivImage: SetCreatePivImage,
-    private val setCrearXmlUseCase: SetCrearXmlUseCase,
     private val deleteCurrentQuestionUseCase: DeleteCurrentQuestionUseCase,
-    private val getContentItemsUseCase: GetContentItemsUseCase,
     private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
-    private val setPintarTextosUseCase: SetPintarTextosUseCase,
-    private val setCopyImagesUseCase: SetCopyImagesUseCase,
     private val getGuiaUseCase: GetGuiaUseCase,
     private val deleteContentInPivUseCase: DeleteContentInPivUseCase,
     private val dataStore: DataStoreManager,
     private val fileRepositoryImpl: FileRepositoryImpl,
-    private val filePathsProvider: FilePathsProvider,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
     @MainDispatcher private val mainDispatcher: CoroutineDispatcher
 ) : ViewModel() {

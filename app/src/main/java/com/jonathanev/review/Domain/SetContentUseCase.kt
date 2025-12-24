@@ -8,30 +8,37 @@ import javax.inject.Inject
 class SetContentUseCase @Inject constructor() {
     operator fun invoke(
         newContent: QuestionContent,
-        mutablePivRefList: MutableList<QuestionItem>,
+        sourceList: List<QuestionItem>,
         contadorPregunta: Int,
         contadorContenido: Int,
         isEditingMode: Boolean,
         filterType: Class<out QuestionContent>
-    ) {
-        val originalItem = mutablePivRefList[contadorPregunta]
-        val originalContent = originalItem.content.toMutableList()
+    ): List<QuestionItem> {
+        // Validar que el índice de la pregunta sea correcto
+        if (contadorPregunta !in sourceList.indices) return sourceList
 
-        // Envolver con índice real
-        val wrappers = originalItem.content.mapIndexed { index, content ->
-            ContentWrapper(index, content)
+        val updatedItem = sourceList[contadorPregunta].let { originalItem ->
+            val originalContent = originalItem.content.toMutableList()
+
+            // 1. Mapear contenidos del tipo específico para encontrar el índice real
+            val filteredWithIndices = originalItem.content
+                .mapIndexed { index, content -> index to content }
+                .filter { filterType.isInstance(it.second) }
+
+            if (isEditingMode && contadorContenido in filteredWithIndices.indices) {
+                // Modo edición: Reemplazamos en la posición original exacta
+                val realIndexInOriginal = filteredWithIndices[contadorContenido].first
+                originalContent[realIndexInOriginal] = newContent
+            } else {
+                // Modo creación: Añadimos al final
+                originalContent.add(newContent)
+            }
+
+            originalItem.copy(content = originalContent)
         }
 
-        // Filtrar por Tipo de Contenido
-        val filtered = wrappers.filter { filterType.isInstance(it.content) }
-
-        if (isEditingMode) {
-            val realIndex = filtered[contadorContenido].originalIndex
-            originalContent[realIndex] = newContent
-        } else {
-            originalContent.add(newContent)
+        return sourceList.toMutableList().apply {
+            this[contadorPregunta] = updatedItem
         }
-
-        mutablePivRefList[contadorPregunta] = originalItem.copy(content = originalContent.toList())
     }
 }

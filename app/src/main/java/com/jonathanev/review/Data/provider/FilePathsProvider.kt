@@ -4,6 +4,7 @@ import android.content.Context
 import com.jonathanev.review.Core.Constants.GUIAS
 import com.jonathanev.review.Core.Constants.IMAGENES
 import com.jonathanev.review.Core.Constants.IMAGENESPIVOTE
+import com.jonathanev.review.Domain.repository.FileNamingRules
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import javax.inject.Inject
@@ -29,7 +30,8 @@ class FilePathsProvider @Inject constructor(
     }
 
     fun buildFileFolder(base: File, folder: String, nombreArchivo: String): File {
-        return File("$base/$folder/$nombreArchivo.xml")
+        val file = FileNamingRules.buildXmlFileName(nombreArchivo)
+        return File("$base/$folder/$file")
     }
 
     fun buildFolder(base: File, folder: String): File {
