@@ -443,16 +443,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     private fun isDataValid(): Boolean {
         val state = uiState.value
 
-        // 1. Validar existencia mínima (Pregunta 0 y Respuesta 0)
-        val hasInitialPair = state.preguntas.getOrNull(0)?.hasText() == true &&
-                state.respuestas.getOrNull(0)?.hasText() == true
-
-        if (!hasInitialPair) {
-            sendNotification(UIStopEvent.ShowMessage("Debes tener como mínimo una pregunta y respuesta"))
-            return false
-        }
-
-        // 2. Validar consistencia en la posición actual
+        // Validar consistencia en la posición actual
         val currentQuestionHasText =
             state.preguntas.getOrNull(state.contadorPregunta)?.hasText() ?: false
         val currentAnswerHasText =
