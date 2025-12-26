@@ -47,7 +47,7 @@ class FragmentRepasar : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         initUI()
-        listeners()
+        initListeners()
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -83,10 +83,6 @@ class FragmentRepasar : Fragment() {
 
         lifecycleScope.launch {
             viewModel.uiState.collect { uiState ->
-                /*if (uiState.shouldFlip) {
-                    girarCardView()
-                }*/
-
                 adaptListPintarTextos.submitList(uiState.textList)
                 adaptListPintarImagenes.submitList(uiState.imageList)
             }
@@ -98,7 +94,7 @@ class FragmentRepasar : Fragment() {
         }
     }
 
-    private fun listeners() {
+    private fun initListeners() {
         binding.btnPregResp.setOnClickListener {
             viewModel.swapTypeContent()
         }

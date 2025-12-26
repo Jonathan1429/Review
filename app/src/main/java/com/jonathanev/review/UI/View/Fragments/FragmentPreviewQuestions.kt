@@ -77,7 +77,7 @@ class FragmentPreviewQuestions : Fragment() {
 
     private fun goEdit(position: Int) {
         findNavController().navigate(
-            R.id.action_fragmentPreviewQuestions_to_fragmentCreateFile2,
+            R.id.action_to_create_graph,
             bundleOf("actionGuide" to ActionGuide.EDIT(position))
         )
     }

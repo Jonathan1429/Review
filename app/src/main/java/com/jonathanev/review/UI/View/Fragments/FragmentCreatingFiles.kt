@@ -1,5 +1,6 @@
 package com.jonathanev.review.UI.View.Fragments
 
+import android.app.AlertDialog
 import android.content.res.ColorStateList
 import android.graphics.PorterDuff
 import android.graphics.drawable.GradientDrawable
@@ -10,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.core.graphics.ColorUtils
 import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
@@ -23,6 +25,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.jonathanev.review.Data.ActionGuide
 import com.jonathanev.review.Data.FolderAction
 import com.jonathanev.review.Data.Model.ScreenData
+import com.jonathanev.review.Data.Model.prueba.UICreatingFile
 import com.jonathanev.review.Data.Model.prueba.UIStopEvent
 import com.jonathanev.review.Fragments.Adaptadores.ListarIconosAdapter
 import com.jonathanev.review.R
@@ -40,7 +43,7 @@ class FragmentCreatingFiles : Fragment() {
     private val binding get() = _binding!!
     private lateinit var iconsAdapter: ListarIconosAdapter
     private val viewModel: FragCreateFilesViewModel by viewModels()
-    private var mode: FolderAction = FolderAction.NONE
+    private lateinit var mode: FolderAction
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -52,6 +55,22 @@ class FragmentCreatingFiles : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+
+                if (mode == FolderAction.RENAMING_FILE) {
+                    viewModel.beforePath()
+                }
+
+                // back real
+                findNavController().navigateUp()
+            }
+        }
+
+        requireActivity()
+            .onBackPressedDispatcher
+            .addCallback(viewLifecycleOwner, callback)
 
         // Animación cuando se esté seleccionando un color.
         val bubbleFlag = BubbleFlag(context)
@@ -69,8 +88,30 @@ class FragmentCreatingFiles : Fragment() {
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.messages.collect { values ->
+                    when (values) {
+                        is UICreatingFile.ContinuedProcess -> {
+                            folderAction(values.name, values.description)
+                        }
+
+                        is UICreatingFile.Message -> Toast.makeText(
+                            context,
+                            values.message,
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                        is UICreatingFile.FileExisted -> {
+
+                        }
+                    }
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.eventsMessages.collect { event ->
-                    if (event is UIStopEvent.GuideRenamedSuccess){
+                    if (event is UIStopEvent.GuideRenamedSuccess) {
                         findNavController().navigate(
                             R.id.fragmentsContent,
                             null,
@@ -89,7 +130,7 @@ class FragmentCreatingFiles : Fragment() {
             }
         }
 
-        viewLifecycleOwner.lifecycleScope.launch {
+        lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
                     // Cargar íconos en el adapter si cambia la lista
@@ -110,6 +151,28 @@ class FragmentCreatingFiles : Fragment() {
                 }
             }
         }
+    }
+
+    private fun alertDialog(onResult: (Boolean) -> Unit) {
+        AlertDialog.Builder(context)
+            .setTitle("¡Atención!")
+            .setMessage(
+                ("Ya tienes una guia con el mismo nombre, " +
+                        "si continúas se va a sobreescribir el archivo, " +
+                        "¿seguro deseas continuar?")
+            )
+            .setPositiveButton("Continuar") { _, _ ->
+                onResult(true)
+            }
+            .setNegativeButton("Cancelar") { dialog, _ ->
+                dialog.dismiss()
+                onResult(false)
+            }
+            .setOnCancelListener {
+                onResult(false)
+            }
+            .create()
+            .show()
     }
 
     private fun initUI() {
@@ -151,14 +214,35 @@ class FragmentCreatingFiles : Fragment() {
     }
 
     private fun prepareScreenData(name: String, description: String) {
-        val isEmpty = validation(name)
+        val exist = viewModel.fileExist(mode, name)
 
-        if (isEmpty) {
-            Toast.makeText(requireContext(), "Necesitas tener un nombre", Toast.LENGTH_SHORT)
-                .show()
+        if (!exist) {
+            viewModel.processScreenData(name, description)
             return
         }
 
+        when (mode) {
+            FolderAction.CREATING_FOLDER,
+            FolderAction.RENAMING_FOLDER -> {
+                Toast.makeText(
+                    requireContext(),
+                    "Ya tienes una carpeta con el mismo nombre",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+
+            FolderAction.CREATING_FILE,
+            FolderAction.RENAMING_FILE -> {
+                alertDialog { confirmed ->
+                    viewModel.onContinueProcess(confirmed, name, description)
+                }
+            }
+
+            FolderAction.NONE -> return
+        }
+    }
+
+    private fun folderAction(name: String, description: String) {
         val state = viewModel.uiState.value
 
         val data = ScreenData(
@@ -181,31 +265,33 @@ class FragmentCreatingFiles : Fragment() {
         }
     }
 
-    private fun validation(name: String): Boolean {
-        return viewModel.validations(name)
-    }
-
     private fun onCreateGuideConfirmed(data: ScreenData) {
-        if (mode == FolderAction.CREATING_FILE) {
-            findNavController().navigate(
-                R.id.action_fragmentCreateFiles_to_fragmentCreateFile2,
-                bundleOf(
-                    "mode" to mode,
-                    "screenData" to data,
-                    "actionGuide" to ActionGuide.CREATE
-                )
+        findNavController().navigate(
+            R.id.action_to_create_file,
+            bundleOf(
+                //"mode" to mode,
+                "screenData" to data,
+                "actionGuide" to ActionGuide.CREATE
             )
-        }
+        )
     }
 
-    private fun onCreateFolderConfirmed(data: ScreenData){
-        if (mode == FolderAction.CREATING_FOLDER) {
-            viewModel.saveMetadata(data)
+    private fun onCreateFolderConfirmed(data: ScreenData) {
+        viewModel.saveMetadata(data)
 
-            findNavController().navigate(
-                R.id.action_fragmentCreateFiles_to_fragmentsContent,
-            )
-        }
+        Toast.makeText(
+            requireContext(),
+            "Carpeta creada exitosamente",
+            Toast.LENGTH_SHORT
+        ).show()
+
+        findNavController().navigate(
+            R.id.fragmentsContent,
+            null,
+            NavOptions.Builder()
+                .setPopUpTo(R.id.content_graph, true) // Limpia el historial
+                .build()
+        )
     }
 
     private fun renameFile() {

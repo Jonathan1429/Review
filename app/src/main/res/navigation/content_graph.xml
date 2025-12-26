@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/content_graph"
+    app:startDestination="@id/fragmentsContent">
+
+    <fragment
+        android:id="@+id/fragmentsContent"
+        android:name="com.jonathanev.review.FragmentsContent"
+        tools:layout="@layout/fragment_fragments_content">
+
+        <action
+            android:id="@+id/action_to_empty"
+            app:destination="@id/fragmentMainActivity" />
+
+        <action
+            android:id="@+id/action_to_list"
+            app:destination="@id/fragmentListFolders" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/fragmentMainActivity"
+        android:name="com.jonathanev.review.UI.View.Fragments.FragmentMainActivity"
+        tools:layout="@layout/fragment_main_activity">
+
+        <action
+            android:id="@+id/action_to_create_graph"
+            app:destination="@id/create_graph" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/fragmentListFolders"
+        android:name="com.jonathanev.review.UI.View.Fragments.FragmentListFolders"
+        tools:layout="@layout/fragment_list_folders">
+
+        <action
+            android:id="@+id/action_to_create_graph"
+            app:destination="@id/create_graph" />
+
+        <action
+            android:id="@+id/action_to_review_graph"
+            app:destination="@id/review_graph" />
+    </fragment>
+
+    <include app:graph="@navigation/create_graph" />
+    <include app:graph="@navigation/review_graph" />
+</navigation>

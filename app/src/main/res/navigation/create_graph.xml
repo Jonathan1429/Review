@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/create_graph"
+    app:startDestination="@id/createEntryFragment">
+
+    <fragment
+        android:id="@+id/fragmentCreateFiles"
+        android:name="com.jonathanev.review.UI.View.Fragments.FragmentCreatingFiles"
+        tools:layout="@layout/fragment_create_files">
+        <argument
+            android:name="mode"
+            app:argType="com.jonathanev.review.Data.FolderAction"
+            app:nullable="false" />
+
+        <argument
+            android:name="actionGuide"
+            app:argType="com.jonathanev.review.Data.ActionGuide"
+            app:nullable="true" />
+        <action
+            android:id="@+id/action_to_create_file"
+            app:destination="@id/fragmentCreateFile" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/fragmentCreateFile"
+        android:name="com.jonathanev.review.UI.View.Fragments.FragmentCreateFile"
+        tools:layout="@layout/fragment_create_file">
+
+        <argument
+            android:name="actionGuide"
+            app:argType="com.jonathanev.review.Data.ActionGuide"
+            app:nullable="true" />
+        <argument
+            android:name="screenData"
+            app:argType="com.jonathanev.review.Data.Model.ScreenData"
+            app:nullable="true" />
+
+        <action
+            android:id="@+id/action_to_text"
+            app:destination="@id/fragmentCreateText" />
+
+        <action
+            android:id="@+id/action_to_images"
+            app:destination="@id/fragmentCreateImages" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/fragmentCreateText"
+        android:name="com.jonathanev.review.UI.View.Fragments.FragmentCreateText"
+        tools:layout="@layout/fragment_create_text"/>
+
+    <fragment
+        android:id="@+id/fragmentCreateImages"
+        android:name="com.jonathanev.review.UI.View.Fragments.FragmentCreateImages"
+        tools:layout="@layout/fragment_create_images"/>
+
+    <fragment
+        android:id="@+id/createEntryFragment"
+        android:name="com.jonathanev.review.UI.View.Fragments.CreateEntryFragment"
+        android:label="CreateEntryFragment"
+        tools:layout="@layout/fragment_fragments_content">
+        <argument
+            android:name="mode"
+            app:argType="com.jonathanev.review.Data.FolderAction"
+            app:nullable="false" />
+
+        <argument
+            android:name="actionGuide"
+            app:argType="com.jonathanev.review.Data.ActionGuide"
+            app:nullable="true" />
+        <action
+            android:id="@+id/action_createEntryFragment_to_fragmentCreateFile"
+            app:destination="@id/fragmentCreateFile" />
+        <action
+            android:id="@+id/action_createEntryFragment_to_fragmentCreateFiles"
+            app:destination="@id/fragmentCreateFiles" />
+    </fragment>
+</navigation>

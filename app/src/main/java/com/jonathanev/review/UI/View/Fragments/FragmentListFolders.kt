@@ -69,8 +69,7 @@ class FragmentListFolders : DialogFragment(), DialogListener {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // Inflate the layout for this fragment
-        _binding = FragmentListFoldersBinding.inflate(layoutInflater, container, false)
+        _binding = FragmentListFoldersBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -122,7 +121,7 @@ class FragmentListFolders : DialogFragment(), DialogListener {
 
         binding.btnCreateGuide.setOnClickListener {
             findNavController().navigate(
-                R.id.action_fragmentDialogListarGuiasPopup_to_fragmentCreateFiles,
+                R.id.action_to_create_graph,
                 bundleOf("mode" to FolderAction.CREATING_FOLDER)
             )
         }
@@ -164,15 +163,17 @@ class FragmentListFolders : DialogFragment(), DialogListener {
                     when (which) {
                         0 -> {
                             viewModel.changeFilePath(folderResult.folder.folderModel.name)
-                            if (folderResult.folder.numGuides == 0) {
+                            findNavController().navigate(
+                                R.id.action_to_review_graph,
+                            )
+
+                            /*if (folderResult.folder.numGuides == 0) {
                                 findNavController().navigate(
                                     R.id.action_fragmentDialogListarGuiasPopup_to_fragmentWithoutFiles,
                                 )
                             } else {
-                                findNavController().navigate(
-                                    R.id.action_fragmentListFolders_to_fragmentListGuides,
-                                )
-                            }
+
+                            }*/
 
                             binding.imgvFolder.visibility = View.GONE
                             binding.tvNuevaCarpeta.visibility = View.GONE
@@ -207,81 +208,6 @@ class FragmentListFolders : DialogFragment(), DialogListener {
         }
     }
 
-    // Creating file if it's possible
-    private fun existingFile(archivoEnCarpeta: File, onResult: (Boolean) -> Unit) {
-        if (!archivoEnCarpeta.exists()) {
-            return onResult(true)
-        }
-
-        AlertDialog.Builder(context)
-            .setTitle("¡Atención!")
-            .setMessage(
-                ("Ya tienes una guía con el mismo nombre, " +
-                        "si continuas se va a sobreescribir la guia, " +
-                        "¿seguro deseas continuar?")
-            )
-            .setPositiveButton(
-                "Continuar"
-            ) { _, _ ->
-                onResult(true)
-            }
-            .setNegativeButton(
-                "Cancelar"
-            ) { dialog, _ ->
-                dialog.dismiss()
-                onResult(false)
-            }.create().show()
-    }
-
-    private fun relocateGuideWithImages(
-        currentPath: String,
-        newCurrentPath: File,
-        fileName: String,
-        folderResult: FolderResult.Success,
-        newPathWithoutFile: String
-    ) {
-        moverImagenes(File(currentPath), fileName, newPathWithoutFile)
-        val currentPathWithFile =
-            "${
-                filePathsProvider.buildFile(
-                    File(currentPath),
-                    folderResult.folder.folderModel.name
-                )
-            }.xml"
-
-        Files.copy(
-            Paths.get(currentPathWithFile),
-            Paths.get(newCurrentPath.toString()),
-            StandardCopyOption.REPLACE_EXISTING
-        )
-
-        // Borrar archivo
-        File(currentPathWithFile).delete()
-        //guiasViewModel.getAllUpdatedGuides(filePathsProvider.fileGuides)
-        viewModel.getFirstPath()
-
-        Toast.makeText(
-            context,
-            "El archivo se movió correctamente",
-            Toast.LENGTH_SHORT
-        ).show()
-    }
-
-    private fun deleteFiles(folderResult: FolderUI) {
-        if (!viewModel.existFolder(folderResult.folderModel.name)) {
-            Toast.makeText(
-                context,
-                "La ruta para eliminar la carpeta actualmente no existe.",
-                Toast.LENGTH_SHORT
-            ).show()
-            return
-        }
-
-        viewModel.deleteFiles(folderResult)
-
-        Toast.makeText(context, "", Toast.LENGTH_SHORT).show()
-    }
-
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = super.onCreateDialog(savedInstanceState)
         dialog.window!!.requestFeature(Window.FEATURE_NO_TITLE)
@@ -305,72 +231,5 @@ class FragmentListFolders : DialogFragment(), DialogListener {
             window.setLayout(finalWidth, finalHeight)
             window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         }
-    }
-
-    private fun moverImagenes(currentPath: File, fileName: String, newPathWithoutFile: String) {
-        //obtenerDatosXML(fileClickeado, selectedFolder)
-        //var doc: Document? = null
-        val dbf: DocumentBuilderFactory = DocumentBuilderFactory.newInstance()
-        val db: DocumentBuilder
-
-        try {
-            db = dbf.newDocumentBuilder()
-            val filePath: File = File(currentPath.toString() + fileName)
-            val fis = FileInputStream(filePath)
-
-            val doc = db.parse(fis)
-
-            // Buscamos los Nodos Interrogante y accedemos a lo que se encuentre dentro.
-            val cuestionario: NodeList = doc.getElementsByTagName("Interrogante")
-            for (i in 0 until cuestionario.length) {
-                // Accedes a los elementos de dicho nodo
-                val e: Element = cuestionario.item(i) as Element
-
-                val value = mapOf(
-                    "respuesta" to e.getAttribute("respuesta"),
-                    "pregunta" to e.getAttribute("pregunta")
-                ).filterValues { it.contains(BASERUTA_IMG_CIFRADO) }
-
-                if (value.isNotEmpty()) {
-                    value.keys.forEach { pathImage ->
-                        //var descifrado = cifrar(pathImage, 26 - 3)
-                        // descifrado = descifrado.replace("content://media/picker/".toRegex(), "")
-                        val image = pathImage.substringAfterLast("/")
-                        val ruta = currentPath.toString().replace(GUIAS, IMAGENES)
-                        val pathImage = "$newPathWithoutFile/$image"
-
-                        Files.copy(
-                            Paths.get(ruta + image),
-                            Paths.get("" + pathImage),
-                            StandardCopyOption.REPLACE_EXISTING
-                        )
-
-                        File(ruta + image).delete()
-                    }
-                }
-            }
-        } catch (e: ParserConfigurationException) {
-            e.printStackTrace()
-        } catch (e: SAXException) {
-            e.printStackTrace()
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-    }
-
-    private fun cifrar(texto: String, desplazamiento: Int): String {
-        val resultado = StringBuilder()
-
-        for (caracter in texto) {
-            if (caracter.isLetter()) {
-                val base = if (caracter.isUpperCase()) 'A' else 'a'
-                val letraCifrada = ((caracter - base + desplazamiento) % 26 + base.code).toChar()
-                resultado.append(letraCifrada)
-            } else {
-                resultado.append(caracter)
-            }
-        }
-
-        return resultado.toString()
     }
 }

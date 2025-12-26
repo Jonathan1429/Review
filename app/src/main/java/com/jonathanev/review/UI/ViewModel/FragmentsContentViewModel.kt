@@ -2,7 +2,6 @@ package com.jonathanev.review.UI.ViewModel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.jonathanev.review.Data.GuiaRepositoryImpl
 import com.jonathanev.review.Data.Model.prueba.FolderModel
 import com.jonathanev.review.Domain.LoadFoldersUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -10,8 +9,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FragmentsContentViewModel @Inject constructor(
-    //private val guiaRepositoryImpl: GuiaRepositoryImpl,
-    private val loadFoldersUseCase: LoadFoldersUseCase
+    private val loadFoldersUseCase: LoadFoldersUseCase,
 ): ViewModel() {
     private var _folders = MutableLiveData<List<FolderModel>>()
     val folders: MutableLiveData<List<FolderModel>> get() = _folders

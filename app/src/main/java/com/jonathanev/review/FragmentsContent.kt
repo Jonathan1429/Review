@@ -31,11 +31,11 @@ class FragmentsContent : Fragment() {
         viewModel.folders.observe(viewLifecycleOwner){ folders ->
             if (folders.isEmpty()){
                 findNavController().navigate(
-                    R.id.action_fragmentsContent_to_fragmentMainActivity
+                    R.id.action_to_empty
                 )
             } else {
                 findNavController().navigate(
-                    R.id.action_fragmentsContent_to_fragmentDialogListarGuiasPopup,
+                    R.id.action_to_list,
                 )
             }
         }

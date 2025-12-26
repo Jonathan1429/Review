@@ -97,7 +97,7 @@ class FragmentListGuides : Fragment() {
     private fun initListeners() {
         binding.btnCreateGuide.setOnClickListener {
             findNavController().navigate(
-                R.id.action_fragmentListGuides_to_fragmentCreateFiles2,
+                R.id.action_to_create_graph,
                 bundleOf("mode" to FolderAction.CREATING_FILE)
             )
         }
@@ -138,7 +138,7 @@ class FragmentListGuides : Fragment() {
                         0 -> {
                             viewModel.changeFilePath(guideResult.folder.nameGuide)
                             findNavController().navigate(
-                                R.id.action_fragmentListGuides_to_fragmentPreviewQuestions,
+                                R.id.action_to_preview,
                             )
                         }
 
@@ -160,7 +160,7 @@ class FragmentListGuides : Fragment() {
                             viewModel.changeFilePath(guideResult.folder.nameGuide)
 
                             findNavController().navigate(
-                                R.id.action_fragmentListGuides_to_fragmentCreateFiles2,
+                                R.id.action_to_create_graph,
                                 bundleOf("mode" to FolderAction.RENAMING_FILE)
                             )
                         }

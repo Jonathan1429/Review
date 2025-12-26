@@ -35,7 +35,7 @@ class FragmentWithoutFiles : Fragment() {
 
         binding.btnAddGuide.setOnClickListener {
             findNavController().navigate(
-                R.id.action_fragmentWithoutFiles_to_fragmentCreateFiles,
+                R.id.action_to_create_graph,
                 bundleOf("mode" to FolderAction.CREATING_FILE)
             )
         }

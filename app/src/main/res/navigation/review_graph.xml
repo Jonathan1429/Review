@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/review_graph"
+    app:startDestination="@id/fragmentReviewEntry">
+
+    <fragment
+        android:id="@+id/fragmentListGuides2"
+        android:name="com.jonathanev.review.UI.View.Fragments.FragmentListGuides"
+        android:label="fragment_list_guides"
+        tools:layout="@layout/fragment_list_guides">
+
+        <action
+            android:id="@+id/action_to_create_graph"
+            app:destination="@id/create_graph" />
+
+        <action
+            android:id="@+id/action_to_preview"
+            app:destination="@id/fragmentPreviewQuestions" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/fragmentPreviewQuestions"
+        android:name="com.jonathanev.review.UI.View.Fragments.FragmentPreviewQuestions"
+        android:label="fragment_preview_questions"
+        tools:layout="@layout/fragment_preview_questions">
+        <action
+            android:id="@+id/action_to_create_graph"
+            app:destination="@id/create_graph" />
+        <action
+            android:id="@+id/action_fragmentPreviewQuestions_to_fragmentRepasar"
+            app:destination="@id/fragmentRepasar" />
+        <argument
+            android:name="posContent"
+            app:argType="integer"
+            app:nullable="false" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/fragmentRepasar"
+        android:name="com.jonathanev.review.UI.View.Fragments.FragmentRepasar"
+        android:label="fragment_repasar"
+        tools:layout="@layout/fragment_repasar">
+        <action
+            android:id="@+id/action_fragmentRepasar_to_fragmentVisorTexto"
+            app:destination="@id/fragmentVisorTexto" />
+        <action
+            android:id="@+id/action_fragmentRepasar_to_fragmentVisorImagen"
+            app:destination="@id/fragmentVisorImagen" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/fragmentVisorImagen"
+        android:name="com.jonathanev.review.UI.View.Fragments.FragmentVisorImagen"
+        android:label="fragment_visor_imagen"
+        tools:layout="@layout/fragment_visor_imagen">
+        <argument
+            android:name="questionImage"
+            app:argType="com.jonathanev.review.Data.Model.prueba.QuestionContent$Image"
+            app:nullable="false" />
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/fragmentVisorTexto"
+        android:name="com.jonathanev.review.UI.View.Fragments.FragmentVisorTexto"
+        android:label="fragment_visor_texto"
+        tools:layout="@layout/fragment_visor_texto">
+        <argument
+            android:name="questionText"
+            app:argType="com.jonathanev.review.Data.Model.prueba.QuestionContent$Text"
+            app:nullable="false" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/fragmentReviewEntry"
+        android:name="com.jonathanev.review.UI.View.Fragments.FragmentReviewEntry"
+        android:label="fragment_review_entry"
+        tools:layout="@layout/fragment_review_entry">
+        <action
+            android:id="@+id/action_fragmentReviewEntry_to_fragmentListGuides2"
+            app:destination="@id/fragmentListGuides2" />
+        <action
+            android:id="@+id/action_fragmentReviewEntry_to_fragmentWithoutFiles2"
+            app:destination="@id/fragmentWithoutFiles2" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/fragmentWithoutFiles2"
+        android:name="com.jonathanev.review.UI.View.Fragments.FragmentWithoutFiles"
+        android:label="fragment_without_files"
+        tools:layout="@layout/fragment_without_files">
+        <action
+            android:id="@+id/action_to_create_graph"
+            app:destination="@id/create_graph" />
+    </fragment>
+</navigation>

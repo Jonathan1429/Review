@@ -1,6 +1,7 @@
 package com.jonathanev.review.UI.ViewModel.Fragments
 
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.Core.Constants.VERSION1
@@ -99,6 +100,13 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             }
         }
     }*/
+
+    fun beforePath(){
+        val currentPath = File(getCurrentPath())
+        val beforePath = filePathsProvider.beforePath(currentPath)
+        Log.i("Path: ", beforePath.path)
+        fileRepository.setCurrentPath(beforePath.path)
+    }
 
     private fun initUIState() {
         _uiState.value = GuideUiState()

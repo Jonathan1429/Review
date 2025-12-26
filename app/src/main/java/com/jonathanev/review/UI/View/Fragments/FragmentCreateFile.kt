@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -21,7 +22,6 @@ import com.jonathanev.review.Data.FolderAction
 import com.jonathanev.review.Data.Model.ScreenData
 import com.jonathanev.review.Data.Model.prueba.TypeContent
 import com.jonathanev.review.Data.Model.prueba.UIStopEvent
-import com.jonathanev.review.Domain.GetContentItemsUseCase
 import com.jonathanev.review.Fragments.Adaptadores.ListCreateImagesAdapter
 import com.jonathanev.review.Fragments.Adaptadores.ListCreateTextsAdapter
 import com.jonathanev.review.R
@@ -38,6 +38,8 @@ class FragmentCreateFile : Fragment() {
 
     private lateinit var adaptListCreateTexts: ListCreateTextsAdapter
     private lateinit var adaptListCreateImages: ListCreateImagesAdapter
+    private lateinit var actionGuide: ActionGuide
+    private lateinit var screenData: ScreenData
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -49,16 +51,36 @@ class FragmentCreateFile : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val mode = BundleCompat.getParcelable(
+        /*val mode = BundleCompat.getParcelable(
             requireArguments(), "mode", FolderAction::class.java
-        ) ?: FolderAction.NONE
+        ) ?: FolderAction.NONE*/
 
-        val actionGuide = BundleCompat.getParcelable(
+        actionGuide = BundleCompat.getParcelable(
             requireArguments(), "actionGuide", ActionGuide::class.java
         ) ?: ActionGuide.NONE
 
-        initUI(actionGuide)
-        initListeners(actionGuide)
+        screenData = BundleCompat.getParcelable(
+            requireArguments(), "screenData", ScreenData::class.java
+        ) ?: ScreenData("", "", 0, 0)
+
+        /*val callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+
+                if (mode == FolderAction.RENAMING_FILE) {
+                    viewModel.beforePath()
+                }
+
+                // back real
+                findNavController().navigateUp()
+            }
+        }
+
+        requireActivity()
+            .onBackPressedDispatcher
+            .addCallback(viewLifecycleOwner, callback)*/
+
+        initUI()
+        initListeners()
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -125,7 +147,7 @@ class FragmentCreateFile : Fragment() {
         }
     }
 
-    private fun initUI(actionGuide: ActionGuide) {
+    private fun initUI() {
         adaptListCreateTexts = ListCreateTextsAdapter(
             onEditClicked = { position -> goEditText(position) },
             onDeleteClicked = { position -> goDeleteText(position) }
@@ -148,7 +170,7 @@ class FragmentCreateFile : Fragment() {
         when (actionGuide) {
             ActionGuide.CREATE -> Log.i("Crear", "Se está creando un archivo")
             is ActionGuide.EDIT -> {
-                viewModel.getObtenerDatosXML(actionGuide.posGuide)
+                viewModel.getObtenerDatosXML((actionGuide as ActionGuide.EDIT).posGuide)
             }
 
             ActionGuide.NONE -> {
@@ -169,7 +191,7 @@ class FragmentCreateFile : Fragment() {
         viewModel.setEditingMode(true, position)
 
         findNavController().navigate(
-            R.id.action_fragmentCreateFile2_to_fragmentCreateImages,
+            R.id.action_to_images,
             bundleOf("questionImage" to viewModel.imageList.value[position])
         )
     }
@@ -178,19 +200,15 @@ class FragmentCreateFile : Fragment() {
         viewModel.setEditingMode(true, position)
 
         findNavController().navigate(
-            R.id.action_fragmentCreateFile2_to_fragmentCreateText,
+            R.id.action_to_text,
             bundleOf("questionText" to viewModel.textList.value[position])
         )
     }
 
-    private fun initListeners(actionGuide: ActionGuide) {
-        val screenData = BundleCompat.getParcelable(
-            requireArguments(), "screenData", ScreenData::class.java
-        ) ?: ScreenData("", "", 0, 0)
-
+    private fun initListeners() {
         binding.btnAddText.setOnClickListener {
             findNavController().navigate(
-                R.id.action_fragmentCreateFile2_to_fragmentCreateText
+                R.id.action_to_text
             )
         }
 
@@ -200,7 +218,7 @@ class FragmentCreateFile : Fragment() {
             }
 
             findNavController().navigate(
-                R.id.action_fragmentCreateFile2_to_fragmentCreateImages,
+                R.id.action_to_images,
                 bundle
             )
         }
