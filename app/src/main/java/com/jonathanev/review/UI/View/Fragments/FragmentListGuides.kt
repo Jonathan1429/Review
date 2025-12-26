@@ -160,7 +160,7 @@ class FragmentListGuides : Fragment() {
                             viewModel.changeFilePath(guideResult.folder.nameGuide)
 
                             findNavController().navigate(
-                                R.id.action_fragmentListGuides_to_fragmentCreateFiles2,
+                                R.id.action_to_create_graph,
                                 bundleOf("mode" to FolderAction.RENAMING_FILE)
                             )
                         }

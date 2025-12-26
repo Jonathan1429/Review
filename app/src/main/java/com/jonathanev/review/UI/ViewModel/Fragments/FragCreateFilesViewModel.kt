@@ -1,6 +1,7 @@
 package com.jonathanev.review.UI.ViewModel.Fragments
 
 import android.graphics.Color
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.Data.FolderAction
@@ -182,5 +183,12 @@ class FragCreateFilesViewModel @Inject constructor(
         if (!confirmed) return
 
         processScreenData(name, description)
+    }
+
+    fun beforePath(){
+        val currentPath = File(fileRepository.getCurrentPath())
+        val beforePath = filePathsProvider.beforePath(currentPath)
+        Log.i("Path: ", beforePath.path)
+        fileRepository.setCurrentPath(beforePath.path)
     }
 }

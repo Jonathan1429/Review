@@ -11,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.core.graphics.ColorUtils
 import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
@@ -42,7 +43,7 @@ class FragmentCreatingFiles : Fragment() {
     private val binding get() = _binding!!
     private lateinit var iconsAdapter: ListarIconosAdapter
     private val viewModel: FragCreateFilesViewModel by viewModels()
-    private var mode: FolderAction = FolderAction.NONE
+    private lateinit var mode: FolderAction
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -54,6 +55,22 @@ class FragmentCreatingFiles : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+
+                if (mode == FolderAction.RENAMING_FILE) {
+                    viewModel.beforePath()
+                }
+
+                // back real
+                findNavController().navigateUp()
+            }
+        }
+
+        requireActivity()
+            .onBackPressedDispatcher
+            .addCallback(viewLifecycleOwner, callback)
 
         // Animación cuando se esté seleccionando un color.
         val bubbleFlag = BubbleFlag(context)
@@ -113,7 +130,7 @@ class FragmentCreatingFiles : Fragment() {
             }
         }
 
-        viewLifecycleOwner.lifecycleScope.launch {
+        lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
                     // Cargar íconos en el adapter si cambia la lista
@@ -252,7 +269,7 @@ class FragmentCreatingFiles : Fragment() {
         findNavController().navigate(
             R.id.action_to_create_file,
             bundleOf(
-                "mode" to mode,
+                //"mode" to mode,
                 "screenData" to data,
                 "actionGuide" to ActionGuide.CREATE
             )

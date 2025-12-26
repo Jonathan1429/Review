@@ -26,11 +26,11 @@
         android:label="fragment_preview_questions"
         tools:layout="@layout/fragment_preview_questions">
         <action
-            android:id="@+id/action_fragmentPreviewQuestions_to_fragmentRepasar"
-            app:destination="@id/fragmentRepasar" />
-        <action
             android:id="@+id/action_to_create_graph"
             app:destination="@id/create_graph" />
+        <action
+            android:id="@+id/action_fragmentPreviewQuestions_to_fragmentRepasar"
+            app:destination="@id/fragmentRepasar" />
         <argument
             android:name="posContent"
             app:argType="integer"
