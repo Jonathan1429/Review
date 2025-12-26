@@ -46,4 +46,3 @@
     <include app:graph="@navigation/create_graph" />
     <include app:graph="@navigation/review_graph" />
 </navigation>
-

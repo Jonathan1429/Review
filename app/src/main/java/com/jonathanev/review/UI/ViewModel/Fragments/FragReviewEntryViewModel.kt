@@ -7,9 +7,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FragReviewEntryViewModel @Inject constructor(
-    private val getGuidesCountUseCase: GetGuidesCountUseCase
-): ViewModel() {
-    fun getGuides() {
-        getGuidesCountUseCase.invoke()
+    private val getGuidesCountUseCase: GetGuidesCountUseCase,
+) : ViewModel() {
+    fun getGuides(): Int {
+        return getGuidesCountUseCase.invoke()
     }
 }

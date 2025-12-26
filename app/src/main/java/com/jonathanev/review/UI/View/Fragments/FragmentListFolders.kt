@@ -121,7 +121,7 @@ class FragmentListFolders : DialogFragment(), DialogListener {
 
         binding.btnCreateGuide.setOnClickListener {
             findNavController().navigate(
-                R.id.create_graph,
+                R.id.action_to_create_graph,
                 bundleOf("mode" to FolderAction.CREATING_FOLDER)
             )
         }
@@ -164,7 +164,7 @@ class FragmentListFolders : DialogFragment(), DialogListener {
                         0 -> {
                             viewModel.changeFilePath(folderResult.folder.folderModel.name)
                             findNavController().navigate(
-                                R.id.review_graph,
+                                R.id.action_to_review_graph,
                             )
 
                             /*if (folderResult.folder.numGuides == 0) {

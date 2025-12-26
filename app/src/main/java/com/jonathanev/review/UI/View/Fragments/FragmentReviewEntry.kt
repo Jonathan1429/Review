@@ -6,6 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.NavOptions
+import androidx.navigation.fragment.findNavController
+import com.jonathanev.review.R
 import com.jonathanev.review.UI.ViewModel.Fragments.FragReviewEntryViewModel
 import com.jonathanev.review.databinding.FragmentReviewEntryBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -32,6 +35,24 @@ class FragmentReviewEntry : Fragment() {
     }
 
     private fun initUI() {
-        viewModel.getGuides()
+        val noGuides = viewModel.getGuides()
+
+        val navOptions = NavOptions.Builder()
+            .setPopUpTo(R.id.fragmentReviewEntry, true)
+            .build()
+
+        if (noGuides > 0) {
+            findNavController().navigate(
+                R.id.action_fragmentReviewEntry_to_fragmentListGuides2,
+                null,
+                navOptions
+            )
+        } else {
+            findNavController().navigate(
+                R.id.action_fragmentReviewEntry_to_fragmentWithoutFiles2,
+                null,
+                navOptions
+            )
+        }
     }
 }

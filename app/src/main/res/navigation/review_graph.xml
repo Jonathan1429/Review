@@ -28,6 +28,9 @@
         <action
             android:id="@+id/action_fragmentPreviewQuestions_to_fragmentRepasar"
             app:destination="@id/fragmentRepasar" />
+        <action
+            android:id="@+id/action_to_create_graph"
+            app:destination="@id/create_graph" />
         <argument
             android:name="posContent"
             app:argType="integer"
@@ -82,6 +85,7 @@
             android:id="@+id/action_fragmentReviewEntry_to_fragmentWithoutFiles2"
             app:destination="@id/fragmentWithoutFiles2" />
     </fragment>
+
     <fragment
         android:id="@+id/fragmentWithoutFiles2"
         android:name="com.jonathanev.review.UI.View.Fragments.FragmentWithoutFiles"

@@ -190,7 +190,7 @@ class FragmentCreateFile : Fragment() {
 
         binding.btnAddText.setOnClickListener {
             findNavController().navigate(
-                R.id.action_fragmentCreateFile2_to_fragmentCreateText
+                R.id.action_to_text
             )
         }
 
@@ -200,7 +200,7 @@ class FragmentCreateFile : Fragment() {
             }
 
             findNavController().navigate(
-                R.id.action_fragmentCreateFile2_to_fragmentCreateImages,
+                R.id.action_to_images,
                 bundle
             )
         }

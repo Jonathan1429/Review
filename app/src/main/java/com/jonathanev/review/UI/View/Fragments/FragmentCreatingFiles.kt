@@ -136,11 +136,13 @@ class FragmentCreatingFiles : Fragment() {
         }
     }
 
-    private fun alertDialog(message: String, onResult: (Boolean) -> Unit) {
+    private fun alertDialog(onResult: (Boolean) -> Unit) {
         AlertDialog.Builder(context)
             .setTitle("¡Atención!")
             .setMessage(
-                (message)
+                ("Ya tienes una guia con el mismo nombre, " +
+                        "si continúas se va a sobreescribir el archivo, " +
+                        "¿seguro deseas continuar?")
             )
             .setPositiveButton("Continuar") { _, _ ->
                 onResult(true)
@@ -214,11 +216,7 @@ class FragmentCreatingFiles : Fragment() {
 
             FolderAction.CREATING_FILE,
             FolderAction.RENAMING_FILE -> {
-                val message = "Ya tienes una guia con el mismo nombre, " +
-                        "si continúas se va a sobreescribir el archivo, " +
-                        "¿seguro deseas continuar?"
-
-                alertDialog(message) { confirmed ->
+                alertDialog { confirmed ->
                     viewModel.onContinueProcess(confirmed, name, description)
                 }
             }
@@ -252,7 +250,7 @@ class FragmentCreatingFiles : Fragment() {
 
     private fun onCreateGuideConfirmed(data: ScreenData) {
         findNavController().navigate(
-            R.id.action_fragmentCreateFiles_to_fragmentCreateFile2,
+            R.id.action_to_create_file,
             bundleOf(
                 "mode" to mode,
                 "screenData" to data,
@@ -264,8 +262,18 @@ class FragmentCreatingFiles : Fragment() {
     private fun onCreateFolderConfirmed(data: ScreenData) {
         viewModel.saveMetadata(data)
 
+        Toast.makeText(
+            requireContext(),
+            "Carpeta creada exitosamente",
+            Toast.LENGTH_SHORT
+        ).show()
+
         findNavController().navigate(
-            R.id.action_fragmentCreateFiles_to_fragmentsContent,
+            R.id.fragmentsContent,
+            null,
+            NavOptions.Builder()
+                .setPopUpTo(R.id.content_graph, true) // Limpia el historial
+                .build()
         )
     }
 
