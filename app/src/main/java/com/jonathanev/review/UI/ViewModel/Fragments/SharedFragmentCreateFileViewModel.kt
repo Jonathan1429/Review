@@ -448,7 +448,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         if (a == 0){
             return true
         }
-
+        // Comentario guardar mas preguntas
         // Validar consistencia en la posición actual
         val currentQuestionHasText =
             state.preguntas.getOrNull(state.contadorPregunta)?.hasText() ?: false
