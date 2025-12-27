@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.appcompat.app.AlertDialog
 import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -63,21 +64,16 @@ class FragmentCreateFile : Fragment() {
             requireArguments(), "screenData", ScreenData::class.java
         ) ?: ScreenData("", "", 0, 0)
 
-        /*val callback = object : OnBackPressedCallback(true) {
+        val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-
-                if (mode == FolderAction.RENAMING_FILE) {
-                    viewModel.beforePath()
-                }
-
-                // back real
-                findNavController().navigateUp()
+                viewModel.initUIState()
+                findNavController().popBackStack()
             }
         }
 
         requireActivity()
             .onBackPressedDispatcher
-            .addCallback(viewLifecycleOwner, callback)*/
+            .addCallback(viewLifecycleOwner, callback)
 
         initUI()
         initListeners()
@@ -99,6 +95,24 @@ class FragmentCreateFile : Fragment() {
                             uiStopEvent.text,
                             Toast.LENGTH_SHORT
                         ).show()
+                    }
+
+                    if (uiStopEvent is UIStopEvent.AddMoreQuestions){
+                        AlertDialog.Builder(requireContext())
+                            .setTitle("¡Atención!")
+                            .setMessage(uiStopEvent.text)
+                            .setPositiveButton(
+                                "Si"
+                            ) { _, _ ->
+                                viewModel.advanceToNextQuestion()
+                            }
+                            .setNegativeButton(
+                                "Cancelar"
+                            ) { dialog, _ ->
+                                dialog.dismiss()
+                            }.setOnCancelListener {
+
+                            }.create().show()
                     }
 
                     if (uiStopEvent is UIStopEvent.GuideCreatedSuccess) {

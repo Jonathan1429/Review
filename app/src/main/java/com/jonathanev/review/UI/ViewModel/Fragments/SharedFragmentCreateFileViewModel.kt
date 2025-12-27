@@ -101,14 +101,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         }
     }*/
 
-    fun beforePath(){
-        val currentPath = File(getCurrentPath())
-        val beforePath = filePathsProvider.beforePath(currentPath)
-        Log.i("Path: ", beforePath.path)
-        fileRepository.setCurrentPath(beforePath.path)
-    }
-
-    private fun initUIState() {
+    fun initUIState() {
         _uiState.value = GuideUiState()
     }
 
@@ -394,16 +387,23 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             return
         }
 
+        val isLastQuestion =
+            currentState.contadorPregunta + 1 >= currentState.respuestas.size
+
+        if (isLastQuestion){
+            viewModelScope.launch {
+                _uiStopEvent.emit(UIStopEvent.AddMoreQuestions("Ya no hay mas preguntas, ¿quieres agregar mas?"))
+            }
+            return
+        }
+
+        advanceToNextQuestion()
+    }
+
+    fun advanceToNextQuestion(){
         _uiState.update { state ->
-            val nuevoContador = state.contadorPregunta + 1
-
-            val responseContent = getContentItemsUseCase.invoke(
-                if (state.typeContent == TypeContent.QUESTION) state.preguntas else state.respuestas,
-                nuevoContador
-            )
-
             state.copy(
-                contadorPregunta = nuevoContador,
+                contadorPregunta = state.contadorPregunta + 1,
                 typeContent = TypeContent.QUESTION, // Siempre volvemos a QUESTION al avanzar
                 actualUri = null,           // resetContentLists integrado
                 isEditing = false,
@@ -429,13 +429,6 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             // 1. Mapeamos las listas completas desde el XML
             val nuevasPreguntas = datos.map { it.question }
             val nuevasRespuestas = datos.mapNotNull { (it.answer as? AnswerState.Filled)?.item }
-
-            // 2. Extraemos el contenido específico (Textos e Imágenes)
-            // de la posición inicial para que la UI lo pinte
-            val responseContent = getContentItemsUseCase.invoke(
-                nuevasPreguntas, // Pasamos las preguntas porque es lo primero que se ve
-                positionContent
-            )
 
             _uiState.update { state ->
                 state.copy(
@@ -515,12 +508,18 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             var currentDeviceNames =
                 searchFolder?.listFiles()?.map { it.name }?.toSet() ?: emptySet()
 
-            // C. Mover/Copiar (Solo para V1 si es necesario)
+            // D. Guardar nuevas imágenes
+            val imagesToDownload = listImagesXML.filter { it.nameFile !in currentDeviceNames }
+            if (imagesToDownload.isNotEmpty()) {
+                guiaProvider.saveImagesInDevice(imagesToDownload, imagesFolder)
+            }
+
+            // C. Mover imagenes
             if (version == VERSION1) {
                 listImagesXML.filter { it.nameFile in currentDeviceNames }.forEach { image ->
                     val destination = File(imagesFolder, image.nameFile)
 
-                    Files.copy(
+                    Files.move(
                         Paths.get(image.uri),
                         Paths.get(destination.path),
                         StandardCopyOption.REPLACE_EXISTING
@@ -528,28 +527,13 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 }
             }
 
-            // D. Guardar nuevas imágenes
-            val imagesToDownload = listImagesXML.filter { it.nameFile !in currentDeviceNames }
-            if (imagesToDownload.isNotEmpty()) {
-                guiaProvider.saveImagesInDevice(imagesToDownload, imagesFolder)
-            }
+            // Borrar imagenes que ya no estén en el XML pero si en el dispositivo
+            currentDeviceNames = imagesFolder.listFiles()?.map { it.name }?.toSet() ?: emptySet()
+            val listDelete = currentDeviceNames - listImagesXML.map { it.nameFile }.toSet()
 
-            currentDeviceNames =
-                searchFolder?.listFiles()?.map { it.name }?.toSet() ?: emptySet()
-
-            val newListImagesXML = listImagesXML.map { it.nameFile }
-
-            currentDeviceNames.filter { it !in newListImagesXML }
-                .forEach { image ->
-                    val destination = File(imagesFolder, image)
-                    destination.delete()
-                }
-
-            val deleteImages = listImagesXML.filter { it.nameFile !in currentDeviceNames }
-
-            if (deleteImages.isNotEmpty()) {
-                deleteImages.forEach { image ->
-                    val destination = File(imagesFolder, image.nameFile)
+            listDelete.forEach { image ->
+                val destination = File(imagesFolder, image)
+                if (destination.exists() && destination.isFile){
                     destination.delete()
                 }
             }
@@ -634,13 +618,5 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 )
             }
         }
-    }
-
-    fun prueba(): Pair<List<QuestionContent.Text>, List<QuestionContent.Image>> {
-        val state = uiState.value
-        return getContentItemsUseCase.invoke(
-            if (state.typeContent == TypeContent.QUESTION) state.preguntas else state.respuestas,
-            state.contadorPregunta
-        )
     }
 }
