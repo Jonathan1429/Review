@@ -390,7 +390,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         val isLastQuestion =
             currentState.contadorPregunta + 1 >= currentState.respuestas.size
 
-        if (isLastQuestion){
+        if (isLastQuestion) {
             viewModelScope.launch {
                 _uiStopEvent.emit(UIStopEvent.AddMoreQuestions("Ya no hay mas preguntas, ¿quieres agregar mas?"))
             }
@@ -400,7 +400,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         advanceToNextQuestion()
     }
 
-    fun advanceToNextQuestion(){
+    fun advanceToNextQuestion() {
         _uiState.update { state ->
             state.copy(
                 contadorPregunta = state.contadorPregunta + 1,
@@ -443,12 +443,15 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
     private fun isDataValid(): Boolean {
         val state = uiState.value
-        // Guardar guia
-        val a = state.preguntas.getOrNull(state.contadorPregunta)?.content?.size ?: 0
-        if (a == 0){
-            return true
+        val questionHasContent = state.preguntas.isEmpty()
+
+        if (questionHasContent) {
+            sendNotification(
+                UIStopEvent.ShowMessage("Debes tener minimo algo para guardar")
+            )
+            return false
         }
-        // Comentario guardar mas preguntas
+
         // Validar consistencia en la posición actual
         val currentQuestionHasText =
             state.preguntas.getOrNull(state.contadorPregunta)?.hasText() ?: false
@@ -538,7 +541,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
             listDelete.forEach { image ->
                 val destination = File(imagesFolder, image)
-                if (destination.exists() && destination.isFile){
+                if (destination.exists() && destination.isFile) {
                     destination.delete()
                 }
             }
