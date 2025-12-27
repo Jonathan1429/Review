@@ -97,7 +97,7 @@ class FragmentRepasarViewModel @Inject constructor(
         if (count == totalQuestions){
             viewModelScope.launch {
                 _eventsMessages.emit(
-                    UIStopEvent.ShowMessage("Se acabaron las preguntas, ¿Quieres repetir la guía?")
+                    UIStopEvent.RestartGuide("Se acabaron las preguntas, ¿Quieres repetir la guía?")
                 )
             }
             return
