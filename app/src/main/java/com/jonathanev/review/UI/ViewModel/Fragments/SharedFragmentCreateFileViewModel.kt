@@ -444,6 +444,11 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     private fun isDataValid(): Boolean {
         val state = uiState.value
 
+        val a = state.preguntas.getOrNull(state.contadorPregunta)?.content?.size ?: 0
+        if (a == 0){
+            return true
+        }
+
         // Validar consistencia en la posición actual
         val currentQuestionHasText =
             state.preguntas.getOrNull(state.contadorPregunta)?.hasText() ?: false
@@ -537,6 +542,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                     destination.delete()
                 }
             }
+
 
             // 4. Persistencia Final del XML
             val response = getAttributesGuideUseCase.invoke(currentPath)
