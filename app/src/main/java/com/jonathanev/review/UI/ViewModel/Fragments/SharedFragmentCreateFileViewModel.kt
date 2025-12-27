@@ -443,7 +443,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
     private fun isDataValid(): Boolean {
         val state = uiState.value
-
+        // Guardar guia
         val a = state.preguntas.getOrNull(state.contadorPregunta)?.content?.size ?: 0
         if (a == 0){
             return true
