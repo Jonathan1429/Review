@@ -22,11 +22,31 @@ class MainToolbarViewModel @Inject constructor(): ViewModel() {
     private val _isSaveVisible = MutableLiveData<Int>()
     val isSaveVisible: LiveData<Int> get() = _isSaveVisible
 
+    private val _isCancelVisible = MutableLiveData<Int>()
+    val isCancelVisible: LiveData<Int> get() = _isCancelVisible
+
+    private val _isSuccessVisible = MutableLiveData<Int>()
+    val isSuccessVisible: LiveData<Int> get() = _isSuccessVisible
+
     private val _onSave = MutableSharedFlow<Unit>(replay = 0)
     val onSave = _onSave.asSharedFlow()
 
+    private val _onSuccess = MutableSharedFlow<Unit>(replay = 0)
+    val onSuccess = _onSuccess.asSharedFlow()
+
+    private val _onCancel = MutableSharedFlow<Unit>(replay = 0)
+    val onCancel = _onCancel.asSharedFlow()
+
     fun changeTitle(title: String){
         _title.value = title
+    }
+
+    fun isBtnCancelVisible(visible: Int){
+        _isCancelVisible.value = visible
+    }
+
+    fun isBtnSuccessVisible(visible: Int){
+        _isSuccessVisible.value = visible
     }
 
     fun isBtnBackVisible(visible: Int){
@@ -39,13 +59,31 @@ class MainToolbarViewModel @Inject constructor(): ViewModel() {
 
     fun init() {
         changeTitle("Review")
+        initButtons()
+    }
+
+    fun initButtons() {
         isBtnBackVisible(View.GONE)
         isBtnSaveVisible(View.GONE)
+        isBtnSuccessVisible(View.GONE)
+        isBtnCancelVisible(View.GONE)
     }
 
     fun btnSaveText(){
         viewModelScope.launch {
             _onSave.emit(Unit)
+        }
+    }
+
+    fun btnSuccess(){
+        viewModelScope.launch {
+            _onSuccess.emit(Unit)
+        }
+    }
+
+    fun btnCancel(){
+        viewModelScope.launch {
+            _onCancel.emit(Unit)
         }
     }
 }

@@ -56,6 +56,14 @@ class MainActivity : AppCompatActivity() {
         binding.barraSuperiorBack.imgvSave.setOnClickListener {
             viewModelToolbar.btnSaveText()
         }
+
+        binding.barraSuperiorBack.btnCancel.setOnClickListener {
+            viewModelToolbar.btnCancel()
+        }
+
+        binding.barraSuperiorBack.btnSuccess.setOnClickListener {
+            viewModelToolbar.btnSuccess()
+        }
     }
 
     private fun observers() {
@@ -74,6 +82,14 @@ class MainActivity : AppCompatActivity() {
 
         viewModelToolbar.isBackVisible.observe(this){ isVisibleBtnBack ->
             binding.barraSuperiorBack.imgvBack.visibility = isVisibleBtnBack
+        }
+
+        viewModelToolbar.isCancelVisible.observe(this){ isVisibleBtnCancel ->
+            binding.barraSuperiorBack.btnCancel.visibility = isVisibleBtnCancel
+        }
+
+        viewModelToolbar.isSuccessVisible.observe(this){ isVisibleBtnSuccess ->
+            binding.barraSuperiorBack.btnSuccess.visibility = isVisibleBtnSuccess
         }
     }
 

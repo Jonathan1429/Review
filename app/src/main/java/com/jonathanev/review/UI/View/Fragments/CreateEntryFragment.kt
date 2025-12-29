@@ -2,7 +2,6 @@ package com.jonathanev.review.UI.View.Fragments
 
 import android.os.Bundle
 import android.view.View
-import androidx.activity.OnBackPressedCallback
 import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -20,7 +19,7 @@ class CreateEntryFragment : Fragment(R.layout.fragment_fragments_content) {
             requireArguments(),
             "mode",
             FolderAction::class.java
-        ) ?: FolderAction.NONE
+        ) ?: FolderAction.None
 
         val actionGuide = BundleCompat.getParcelable(
             requireArguments(),

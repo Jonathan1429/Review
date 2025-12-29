@@ -43,7 +43,6 @@ class FragmentCreatingFiles : Fragment() {
     private val binding get() = _binding!!
     private lateinit var iconsAdapter: ListarIconosAdapter
     private val viewModel: FragCreateFilesViewModel by viewModels()
-    private lateinit var mode: FolderAction
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -56,10 +55,16 @@ class FragmentCreatingFiles : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val mode = BundleCompat.getParcelable(
+            requireArguments(),
+            "mode",
+            FolderAction::class.java
+        ) ?: FolderAction.None
+
         val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
 
-                if (mode == FolderAction.RENAMING_FILE) {
+                if (mode == FolderAction.RenamingFile) {
                     viewModel.beforePath()
                 }
 
@@ -77,21 +82,15 @@ class FragmentCreatingFiles : Fragment() {
         bubbleFlag.flagMode = FlagMode.FADE
         binding.fragmentCreate.colorPickerView.flagView = bubbleFlag
 
-        mode = BundleCompat.getParcelable(
-            requireArguments(),
-            "mode",
-            FolderAction::class.java
-        ) ?: FolderAction.NONE
-
-        initUI()
-        initListeners()
+        initUI(mode)
+        initListeners(mode)
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.messages.collect { values ->
                     when (values) {
                         is UICreatingFile.ContinuedProcess -> {
-                            folderAction(values.name, values.description)
+                            folderAction(mode, values.name, values.description)
                         }
 
                         is UICreatingFile.Message -> Toast.makeText(
@@ -175,7 +174,7 @@ class FragmentCreatingFiles : Fragment() {
             .show()
     }
 
-    private fun initUI() {
+    private fun initUI(mode: FolderAction) {
         // 1) crear adapter una vez
         iconsAdapter = ListarIconosAdapter { pos -> viewModel.onIconSelected(pos) }
         binding.fragmentCreate.rvIconos.adapter = iconsAdapter
@@ -185,21 +184,22 @@ class FragmentCreatingFiles : Fragment() {
         viewModel.loadIconsFor(mode)
 
         when (mode) {
-            FolderAction.CREATING_FOLDER -> showFolderUI()
-            FolderAction.RENAMING_FILE -> {
+            FolderAction.CreatingFolder -> showFolderUI()
+            FolderAction.RenamingFile -> {
                 showFileUI()
                 val attributes = viewModel.fillFields()
                 binding.fragmentCreate.etNombre.setText(attributes.nameGuide)
                 binding.fragmentCreate.fragmentComponentsFile.etDescription.setText(attributes.description)
             }
 
-            FolderAction.RENAMING_FOLDER -> showFolderUI()
-            FolderAction.CREATING_FILE -> showFileUI()
-            FolderAction.NONE -> Log.e("Error", "No se pudieron cargar datos iniciales")
+            FolderAction.RenamingFolder -> showFolderUI()
+            FolderAction.CreatingFile -> showFileUI()
+            FolderAction.None -> Log.e("Error", "No se pudieron cargar datos iniciales")
+            is FolderAction.MovingFile -> Log.i("Moviendo: ", "Moviendo archivos a ${mode.pathFile.path}")
         }
     }
 
-    private fun initListeners() {
+    private fun initListeners(mode: FolderAction) {
         binding.fragmentCreate.colorPickerView.setColorListener(ColorListener { color, _ ->
             viewModel.setColor(color)
         })
@@ -209,11 +209,11 @@ class FragmentCreatingFiles : Fragment() {
             val description =
                 binding.fragmentCreate.fragmentComponentsFile.etDescription.text.toString()
 
-            prepareScreenData(name, description)
+            prepareScreenData(mode, name, description)
         }
     }
 
-    private fun prepareScreenData(name: String, description: String) {
+    private fun prepareScreenData(mode: FolderAction, name: String, description: String) {
         val exist = viewModel.fileExist(mode, name)
 
         if (!exist) {
@@ -222,8 +222,8 @@ class FragmentCreatingFiles : Fragment() {
         }
 
         when (mode) {
-            FolderAction.CREATING_FOLDER,
-            FolderAction.RENAMING_FOLDER -> {
+            FolderAction.CreatingFolder,
+            FolderAction.RenamingFolder -> {
                 Toast.makeText(
                     requireContext(),
                     "Ya tienes una carpeta con el mismo nombre",
@@ -231,18 +231,19 @@ class FragmentCreatingFiles : Fragment() {
                 ).show()
             }
 
-            FolderAction.CREATING_FILE,
-            FolderAction.RENAMING_FILE -> {
+            FolderAction.CreatingFile,
+            FolderAction.RenamingFile -> {
                 alertDialog { confirmed ->
                     viewModel.onContinueProcess(confirmed, name, description)
                 }
             }
 
-            FolderAction.NONE -> return
+            FolderAction.None -> return
+            is FolderAction.MovingFile -> Log.i("Moviendo: ", "Moviendo archivos a ${mode.pathFile.path}")
         }
     }
 
-    private fun folderAction(name: String, description: String) {
+    private fun folderAction(mode: FolderAction, name: String, description: String) {
         val state = viewModel.uiState.value
 
         val data = ScreenData(
@@ -253,15 +254,16 @@ class FragmentCreatingFiles : Fragment() {
         )
 
         when (mode) {
-            FolderAction.CREATING_FOLDER -> onCreateFolderConfirmed(data)
-            FolderAction.RENAMING_FILE -> renameFile()
-            FolderAction.RENAMING_FOLDER -> Log.i(
+            FolderAction.CreatingFolder -> onCreateFolderConfirmed(data)
+            FolderAction.RenamingFile -> renameFile()
+            FolderAction.RenamingFolder -> Log.i(
                 "Advertencia",
                 "Aun no se aplica la funcion renombrar folder"
             )
 
-            FolderAction.CREATING_FILE -> onCreateGuideConfirmed(data)
-            FolderAction.NONE -> Log.e("Error", "No se pudo crear el archivo")
+            FolderAction.CreatingFile -> onCreateGuideConfirmed(data)
+            FolderAction.None -> Log.e("Error", "No se pudo crear el archivo")
+            is FolderAction.MovingFile -> Log.i("Moviendo: ", "Moviendo archivos a ${mode.pathFile.path}")
         }
     }
 

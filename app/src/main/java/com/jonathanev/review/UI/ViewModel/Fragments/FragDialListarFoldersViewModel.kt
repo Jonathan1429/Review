@@ -7,6 +7,7 @@ import com.jonathanev.review.Data.FolderResult
 import com.jonathanev.review.Data.GuiaRepository
 import com.jonathanev.review.Data.Model.FoldersUiState
 import com.jonathanev.review.Data.Model.prueba.FolderUI
+import com.jonathanev.review.Data.Model.prueba.UIMovingEvent
 import com.jonathanev.review.Data.Model.prueba.UIStopEvent
 import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Data.provider.GuiaProvider
@@ -54,6 +55,9 @@ class FragDialListarFoldersViewModel @Inject constructor(
     private val _eventsMessages = MutableSharedFlow<UIStopEvent>()
     val eventsMessages = _eventsMessages.asSharedFlow()
 
+    private val _eventsMovingFiles = MutableSharedFlow<UIMovingEvent>()
+    val eventsMovingFiles = _eventsMovingFiles.asSharedFlow()
+
     /*fun getAllGuides() {
         _guias.postValue(fileRepositoryImpl.getFilesInCurrentPath())
     }*/
@@ -76,7 +80,8 @@ class FragDialListarFoldersViewModel @Inject constructor(
             )
 
             try {
-                val folders = getFoldersWithNumGuidesUseCase.invoke().sortedBy { it.folderModel.name }
+                val folders =
+                    getFoldersWithNumGuidesUseCase.invoke().sortedBy { it.folderModel.name }
                 cachedFolders = folders
 
                 // 2. actualizar con la lista resultante
@@ -103,7 +108,9 @@ class FragDialListarFoldersViewModel @Inject constructor(
     }*/
 
     fun changeFilePath(folderName: String) {
-        val newPath = filePathsProvider.buildFolder(File(fileRepository.getCurrentPath()), folderName).toString()
+        val newPath =
+            filePathsProvider.buildFolder(File(fileRepository.getCurrentPath()), folderName)
+                .toString()
 
         fileRepository.setCurrentPath(newPath)
     }
@@ -125,12 +132,13 @@ class FragDialListarFoldersViewModel @Inject constructor(
     }
 
     fun deleteFiles(folderResult: FolderUI) {
-        val currentPath = filePathsProvider.buildFolder(File(getCurrentPath()), folderResult.folderModel.name)
+        val currentPath =
+            filePathsProvider.buildFolder(File(getCurrentPath()), folderResult.folderModel.name)
 
         val message = deleteFolderUseCase.invoke(currentPath)
 
         viewModelScope.launch {
-            if (message is UIStopEvent.DeleteGuideSuccess){
+            if (message is UIStopEvent.DeleteGuideSuccess) {
                 fileRepository.setCurrentPath(filePathsProvider.fileGuides.path)
             }
 
@@ -143,5 +151,11 @@ class FragDialListarFoldersViewModel @Inject constructor(
     fun existFolder(fileName: String): Boolean {
         val currentPath = filePathsProvider.buildFolder(File(getCurrentPath()), fileName)
         return fileHelperImpl.exists(currentPath.toString())
+    }
+
+    fun moveFileCancel() {
+        viewModelScope.launch {
+            _eventsMovingFiles.emit(UIMovingEvent.ShowMessage("Se ha cancelado la acción"))
+        }
     }
 }

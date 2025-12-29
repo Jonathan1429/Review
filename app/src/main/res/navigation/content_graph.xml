@@ -10,6 +10,11 @@
         android:name="com.jonathanev.review.FragmentsContent"
         tools:layout="@layout/fragment_fragments_content">
 
+        <argument
+            android:name="mode"
+            app:argType="com.jonathanev.review.Data.FolderAction"
+            app:nullable="false" />
+
         <action
             android:id="@+id/action_to_empty"
             app:destination="@id/fragmentMainActivity" />
@@ -33,6 +38,11 @@
         android:id="@+id/fragmentListFolders"
         android:name="com.jonathanev.review.UI.View.Fragments.FragmentListFolders"
         tools:layout="@layout/fragment_list_folders">
+
+        <argument
+            android:name="mode"
+            app:argType="com.jonathanev.review.Data.FolderAction"
+            app:nullable="false" />
 
         <action
             android:id="@+id/action_to_create_graph"

@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.widget.Toast
+import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.DialogFragment
@@ -23,43 +24,28 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
-import com.jonathanev.review.Core.Constants.BASERUTA_IMG_CIFRADO
-import com.jonathanev.review.Core.Constants.GUIAS
-import com.jonathanev.review.Core.Constants.IMAGENES
 import com.jonathanev.review.Data.FolderAction
 import com.jonathanev.review.Data.FolderResult
-import com.jonathanev.review.Data.Model.prueba.FolderUI
+import com.jonathanev.review.Data.Model.prueba.UIMovingEvent
 import com.jonathanev.review.Data.Model.prueba.UIStopEvent
 import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Fragments.Adaptadores.ListFoldersAdapter
 import com.jonathanev.review.R
-import com.jonathanev.review.UI.View.Fragments.FragmentDialogNuevoArchivoPopu.DialogListener
 import com.jonathanev.review.UI.ViewModel.Fragments.FragDialListarFoldersViewModel
 import com.jonathanev.review.UI.ViewModel.Fragments.MainToolbarViewModel
 import com.jonathanev.review.databinding.FragmentListFoldersBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import org.w3c.dom.Element
-import org.w3c.dom.NodeList
-import org.xml.sax.SAXException
-import java.io.File
-import java.io.FileInputStream
-import java.io.IOException
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.nio.file.StandardCopyOption
 import javax.inject.Inject
-import javax.xml.parsers.DocumentBuilder
-import javax.xml.parsers.DocumentBuilderFactory
-import javax.xml.parsers.ParserConfigurationException
 
 @AndroidEntryPoint
-class FragmentListFolders : DialogFragment(), DialogListener {
+class FragmentListFolders : DialogFragment() {
     private var _binding: FragmentListFoldersBinding? = null
     private val binding get() = _binding!!
 
     private val viewModel by viewModels<FragDialListarFoldersViewModel>()
     private val viewModelToolbar: MainToolbarViewModel by activityViewModels()
+
     private lateinit var adaptListFolders: ListFoldersAdapter
 
     @Inject
@@ -73,16 +59,17 @@ class FragmentListFolders : DialogFragment(), DialogListener {
         return binding.root
     }
 
-    override fun onDialogClosed() {
-        // Realizar las acciones necesarias después de cerrar el diálogo
-        val dialogActual = dialog
-        dialogActual!!.dismiss()
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initUI()
+        var mode = BundleCompat.getParcelable(
+            requireArguments(),
+            "mode",
+            FolderAction::class.java
+        ) ?: FolderAction.None
+
+        initUI(mode)
+        initListeners()
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -114,25 +101,67 @@ class FragmentListFolders : DialogFragment(), DialogListener {
             }
         }
 
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.eventsMovingFiles.collect { message ->
+                    when(message){
+                        is UIMovingEvent.ShowMessage -> {
+                            Toast.makeText(
+                                requireContext(),
+                                message.text,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    viewModelToolbar.onCancel.collect {
+                        viewModelToolbar.initButtons()
+                        viewModel.moveFileCancel()
+
+                        findNavController().navigate(
+                            findNavController().graph.startDestinationId,
+                            null,
+                            NavOptions.Builder()
+                                .setPopUpTo(findNavController().graph.id, inclusive = true)
+                                .build()
+                        )
+                    }
+                }
+            }
+        }
+
         viewModel.file.observe(viewLifecycleOwner) {
             binding.progressBar.visibility = View.VISIBLE
             //guiasViewModel.getAllUpdatedGuides(it)
         }
+    }
 
+    private fun initListeners() {
         binding.btnCreateGuide.setOnClickListener {
             findNavController().navigate(
                 R.id.action_to_create_graph,
-                bundleOf("mode" to FolderAction.CREATING_FOLDER)
+                bundleOf("mode" to FolderAction.CreatingFolder)
             )
         }
     }
 
-    private fun initUI() {
+    private fun initUI(mode: FolderAction) {
+        if (mode is FolderAction.MovingFile) {
+            viewModelToolbar.isBtnCancelVisible(View.VISIBLE)
+            viewModelToolbar.isBtnSuccessVisible(View.GONE)
+        }
+
         viewModelToolbar.changeTitle("Carpetas")
 
         binding.progressBar.visibility = View.VISIBLE
 
-        adaptListFolders = ListFoldersAdapter { position -> showFolderOptions(position) }
+        adaptListFolders = ListFoldersAdapter { position -> showFolderOptions(position, mode) }
         binding.lvGuiasEstudioNew.layoutManager = GridLayoutManager(context, 2)
         binding.lvGuiasEstudioNew.setHasFixedSize(true)
         binding.lvGuiasEstudioNew.adapter = adaptListFolders
@@ -141,7 +170,7 @@ class FragmentListFolders : DialogFragment(), DialogListener {
     }
 
     @SuppressLint("SdCardPath")
-    private fun showFolderOptions(position: Int) {
+    private fun showFolderOptions(position: Int, mode: FolderAction) {
         val folderResult = viewModel.getFolderSelected(position)
         //val a = guiasViewModel.guias.value
         //var fileClickeado: File = filePathsProvider.fileGuides
@@ -165,15 +194,8 @@ class FragmentListFolders : DialogFragment(), DialogListener {
                             viewModel.changeFilePath(folderResult.folder.folderModel.name)
                             findNavController().navigate(
                                 R.id.action_to_review_graph,
+                                bundleOf("mode" to mode)
                             )
-
-                            /*if (folderResult.folder.numGuides == 0) {
-                                findNavController().navigate(
-                                    R.id.action_fragmentDialogListarGuiasPopup_to_fragmentWithoutFiles,
-                                )
-                            } else {
-
-                            }*/
 
                             binding.imgvFolder.visibility = View.GONE
                             binding.tvNuevaCarpeta.visibility = View.GONE
