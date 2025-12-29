@@ -4,10 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.BundleCompat
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
+import com.jonathanev.review.Data.FolderAction
 import com.jonathanev.review.R
 import com.jonathanev.review.UI.ViewModel.Fragments.FragReviewEntryViewModel
 import com.jonathanev.review.databinding.FragmentReviewEntryBinding
@@ -31,10 +34,16 @@ class FragmentReviewEntry : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initUI()
+        val mode = BundleCompat.getParcelable(
+            requireArguments(),
+            "mode",
+            FolderAction::class.java
+        ) ?: FolderAction.None
+
+        initUI(mode)
     }
 
-    private fun initUI() {
+    private fun initUI(mode: FolderAction) {
         val noGuides = viewModel.getGuides()
 
         val navOptions = NavOptions.Builder()
@@ -44,13 +53,13 @@ class FragmentReviewEntry : Fragment() {
         if (noGuides > 0) {
             findNavController().navigate(
                 R.id.action_fragmentReviewEntry_to_fragmentListGuides2,
-                null,
+                bundleOf("mode" to mode),
                 navOptions
             )
         } else {
             findNavController().navigate(
                 R.id.action_fragmentReviewEntry_to_fragmentWithoutFiles2,
-                null,
+                bundleOf("mode" to mode),
                 navOptions
             )
         }

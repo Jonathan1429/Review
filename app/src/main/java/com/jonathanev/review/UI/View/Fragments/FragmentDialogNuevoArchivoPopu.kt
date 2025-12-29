@@ -31,21 +31,21 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class FragmentDialogNuevoArchivoPopu() : DialogFragment() {
-    companion object {
+    /*companion object {
         fun newInstance(mode: FolderAction): FragmentDialogNuevoArchivoPopu {
             val args = Bundle().apply {
-                putString("dialog_mode", mode.name)
+                putString("dialog_mode", mode)
             }
             return FragmentDialogNuevoArchivoPopu().apply {
                 arguments = args
             }
         }
-    }
+    }*/
 
-    private val action: FolderAction by lazy {
-        val value = arguments?.getString("dialog_mode") ?: FolderAction.NONE.name
+    /*private val action: FolderAction by lazy {
+        val value = arguments?.getString("dialog_mode") ?: FolderAction.None.name
         FolderAction.valueOf(value)
-    }
+    }*/
 
     private lateinit var binding: FragmentNuevoArchivoBinding
     private val viewModel by viewModels<FragDialNuevoArchViewModel>()
@@ -103,47 +103,47 @@ class FragmentDialogNuevoArchivoPopu() : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        when (action) {
-            FolderAction.CREATING_FOLDER -> {
+        /*when (action) {
+            FolderAction.CreatingFolder -> {
                 binding.tilNombreArchivo.hint = getString(R.string.etNombreCarpeta)
                 binding.btnGuardarGuiaEstudio.text = getString(R.string.btnCrearCarpeta)
             }
 
-            FolderAction.RENAMING_FILE -> {
+            FolderAction.RenamingFile -> {
                 binding.tilNombreArchivo.hint = getString(R.string.etNombreArchivo)
                 binding.btnGuardarGuiaEstudio.text = getString(R.string.btnCrearArchivo)
             }
 
-            FolderAction.RENAMING_FOLDER -> {
+            FolderAction.RenamingFolder -> {
                 binding.tilNombreArchivo.hint = getString(R.string.etNombreCarpeta)
                 binding.btnGuardarGuiaEstudio.text = getString(R.string.btnCrearCarpeta)
             }
 
-            FolderAction.CREATING_FILE -> {
+            FolderAction.CreatingFile -> {
                 binding.tilNombreArchivo.hint = getString(R.string.etNombreArchivo)
                 binding.btnGuardarGuiaEstudio.text = getString(R.string.btnCrearArchivo)
             }
 
-            FolderAction.NONE -> {
+            FolderAction.None -> {
                 Toast.makeText(
                     context, "No es posible crear archivos",
                     Toast.LENGTH_SHORT
                 ).show()
                 cerrarDialogo()
             }
-        }
+        }*/
 
         binding.btnGuardarGuiaEstudio.setOnClickListener {
             if (!validateName()) return@setOnClickListener
 
             val fileName = binding.etNombreArchivo.text.toString().trim()
-            when (action) {
-                FolderAction.CREATING_FOLDER -> creatingFolder(fileName)
-                FolderAction.RENAMING_FILE -> renamingFile(fileName)
-                FolderAction.RENAMING_FOLDER -> TODO()
-                FolderAction.CREATING_FILE -> creatingGuide(fileName)
-                FolderAction.NONE -> Unit
-            }
+            /*when (action) {
+                FolderAction.CreatingFolder -> creatingFolder(fileName)
+                FolderAction.RenamingFile -> renamingFile(fileName)
+                FolderAction.RenamingFolder -> TODO()
+                FolderAction.CreatingFile -> creatingGuide(fileName)
+                FolderAction.None -> Unit
+            }*/
         }
     }
 

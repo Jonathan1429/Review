@@ -31,7 +31,7 @@ class FragmentMainActivity : Fragment() {
         binding.btnApply.setOnClickListener {
             findNavController().navigate(
                 R.id.action_to_create_graph,
-                bundleOf("mode" to FolderAction.CREATING_FOLDER)
+                bundleOf("mode" to FolderAction.CreatingFolder)
             )
         }
     }

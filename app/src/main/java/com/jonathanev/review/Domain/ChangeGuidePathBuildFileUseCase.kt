@@ -9,11 +9,9 @@ class ChangeGuidePathBuildFileUseCase @Inject constructor(
     private val filePathsProvider: FilePathsProvider,
     private val fileRepository: FileRepository
 ) {
-    operator fun invoke(nameGuide: String) {
-        val newPath = filePathsProvider
+    operator fun invoke(nameGuide: String): String {
+        return filePathsProvider
             .buildFile(File(fileRepository.getCurrentPath()), nameGuide)
             .path
-
-        fileRepository.setCurrentPath(newPath)
     }
 }

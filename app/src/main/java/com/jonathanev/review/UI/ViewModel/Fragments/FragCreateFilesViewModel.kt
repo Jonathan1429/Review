@@ -60,21 +60,22 @@ class FragCreateFilesViewModel @Inject constructor(
 
     fun loadIconsFor(action: FolderAction) {
         val icons = when (action) {
-            FolderAction.CREATING_FILE -> listOf(R.drawable.ic_lightbulb_solid_full)
-            FolderAction.CREATING_FOLDER -> listOf(
+            FolderAction.CreatingFile -> listOf(R.drawable.ic_lightbulb_solid_full)
+            FolderAction.CreatingFolder -> listOf(
                 R.drawable.ic_anchor_solid_full,
                 R.drawable.ic_angellist_brands_solid_full,
                 R.drawable.ic_bacteria_solid_full
             )
 
-            FolderAction.RENAMING_FILE -> listOf(R.drawable.ic_lightbulb_solid_full)
-            FolderAction.RENAMING_FOLDER -> listOf(
+            FolderAction.RenamingFile -> listOf(R.drawable.ic_lightbulb_solid_full)
+            FolderAction.RenamingFolder -> listOf(
                 R.drawable.ic_anchor_solid_full,
                 R.drawable.ic_angellist_brands_solid_full,
                 R.drawable.ic_bacteria_solid_full
             )
 
-            FolderAction.NONE -> emptyList()
+            FolderAction.None -> emptyList()
+            is FolderAction.MovingFile -> emptyList()
         }
 
         _uiState.value = _uiState.value.copy(

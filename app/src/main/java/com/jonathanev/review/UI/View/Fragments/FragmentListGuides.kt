@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -20,6 +21,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jonathanev.review.Data.FolderAction
 import com.jonathanev.review.Data.Model.GuideResult
+import com.jonathanev.review.Data.Model.prueba.UIMovingEvent
 import com.jonathanev.review.Data.Model.prueba.UIStopEvent
 import com.jonathanev.review.Fragments.Adaptadores.ListGuidesAdapter
 import com.jonathanev.review.R
@@ -49,8 +51,67 @@ class FragmentListGuides : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initUI()
+        val mode = BundleCompat.getParcelable(
+            requireArguments(),
+            "mode",
+            FolderAction::class.java
+        ) ?: FolderAction.None
+
+        initUI(mode)
         initListeners()
+
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.eventsMovingFiles.collect { message ->
+                    when(message){
+                        is UIMovingEvent.ShowMessage -> {
+                            Toast.makeText(
+                                requireContext(),
+                                message.text,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    viewModelToolbar.onCancel.collect {
+                        viewModelToolbar.initButtons()
+                        viewModel.setMainPath()
+                        viewModel.moveFileCancel()
+
+                        findNavController().navigate(
+                            R.id.action_to_content_graph,
+                            null,
+                            NavOptions.Builder()
+                                .setPopUpTo(R.id.fragmentsContent, inclusive = true)
+                                .build()
+                        )
+                    }
+                }
+
+                launch {
+                    viewModelToolbar.onSuccess.collect {
+                        viewModelToolbar.initButtons()
+                        viewModel.movingFiles(mode)
+                        viewModel.setMainPath()
+                        viewModel.moveFileSuccess()
+
+                        findNavController().navigate(
+                            R.id.action_to_content_graph,
+                            null,
+                            NavOptions.Builder()
+                                .setPopUpTo(R.id.fragmentsContent, inclusive = true)
+                                .build()
+                        )
+                    }
+                }
+            }
+        }
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -98,15 +159,20 @@ class FragmentListGuides : Fragment() {
         binding.btnCreateGuide.setOnClickListener {
             findNavController().navigate(
                 R.id.action_to_create_graph,
-                bundleOf("mode" to FolderAction.CREATING_FILE)
+                bundleOf("mode" to FolderAction.CreatingFile)
             )
         }
     }
 
-    private fun initUI() {
+    private fun initUI(mode: FolderAction) {
         viewModelToolbar.changeTitle("Guias")
 
-        adaptListGuides = ListGuidesAdapter { position -> showGuideOptions(position) }
+        if (mode is FolderAction.MovingFile){
+            viewModelToolbar.isBtnCancelVisible(View.VISIBLE)
+            viewModelToolbar.isBtnSuccessVisible(View.VISIBLE)
+        }
+
+        adaptListGuides = ListGuidesAdapter { position -> showGuideOptions(position, mode) }
         binding.lvGuiasEstudioNew.layoutManager =
             LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         binding.lvGuiasEstudioNew.setHasFixedSize(true)
@@ -115,7 +181,16 @@ class FragmentListGuides : Fragment() {
         viewModel.getAllGuides()
     }
 
-    private fun showGuideOptions(position: Int) {
+    private fun showGuideOptions(position: Int, mode: FolderAction) {
+        if (mode is FolderAction.MovingFile) {
+            Toast.makeText(
+                requireContext(),
+                "Termina de mover la guia antes de realizar otra acción",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
         val guideResult = viewModel.getGuideSelected(position)
 
         when (guideResult) {
@@ -127,10 +202,9 @@ class FragmentListGuides : Fragment() {
                 builder.setItems(
                     arrayOf<CharSequence>(
                         "Abrir",
-                        //"Modificar",
                         "Eliminar",
                         "Cambiar nombre",
-                        "Mover a",
+                        "Mover",
                         "Cancelar"
                     )
                 ) { dialog, which ->
@@ -161,85 +235,20 @@ class FragmentListGuides : Fragment() {
 
                             findNavController().navigate(
                                 R.id.action_to_create_graph,
-                                bundleOf("mode" to FolderAction.RENAMING_FILE)
+                                bundleOf("mode" to FolderAction.RenamingFile)
                             )
                         }
 
                         3 -> {
-                            Toast.makeText(
-                                requireContext(),
-                                "Opcion aun sin implementar",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            val filePath = viewModel.getFilePath(guideResult.folder.nameGuide)
+                            viewModel.changeFilePathToMain()
 
-                            /*val subMenuBuilder = AlertDialog.Builder(context)
-                            subMenuBuilder.setTitle("Mover a...")
+                            findNavController().navigate(
+                                R.id.action_to_content_graph,
+                                bundleOf("mode" to FolderAction.MovingFile(filePath))
+                            )
 
-                            val foldersCreated = viewModel.getFoldersCreated()
-                            val currentPath = viewModel.getCurrentPath()
-
-                            subMenuBuilder.setItems(foldersCreated) { _, subWhich ->
-                                // Manejar la selección de la carpeta dentro del submenú
-                                val selectedFolder = foldersCreated[subWhich]
-
-                                // Mover a la carpeta seleccionada
-                                try {
-                                    /*// Copiar el archivo
-                                    val guia = guiasViewModel.getGuia(position)*/
-
-                                    // Updated path
-                                    val fileName = "${folderResult.folder.nombreGuia}.xml"
-                                    val archivoEnCarpeta = filePathsProvider.buildFileFolder(
-                                        File(filePathsProvider.fileGuides.toString()),
-                                        selectedFolder,
-                                        fileName
-                                    )
-                                    var creatingFile = false
-                                    existingFile(archivoEnCarpeta) { creatingFile = it }
-
-                                    try {
-                                        val newPathWithoutFile: String =
-                                            archivoEnCarpeta.toString().substringBeforeLast("/")
-                                        var newPath: File = File(newPathWithoutFile)
-                                        if (selectedFolder == PRINCIPAL) {
-                                            newPath = filePathsProvider.fileGuides
-                                        }
-
-                                        if (creatingFile) {
-                                            relocateGuideWithImages(
-                                                currentPath,
-                                                newPath,
-                                                fileName,
-                                                folderResult,
-                                                newPathWithoutFile
-                                            )
-                                        }
-
-                                        /*guiasViewModel.getFirstPath()
-                                        guiasViewModel.getAllUpdatedGuides(
-                                            filePathsProvider.fileGuides
-                                        )*/
-
-                                        binding.imgvFolder.visibility = View.VISIBLE
-                                        binding.tvNuevaCarpeta.visibility = View.VISIBLE
-                                        binding.imgvBack.visibility = View.GONE
-                                        binding.tvRegresar.visibility = View.GONE
-
-                                        Toast.makeText(
-                                            context,
-                                            "El archivo se movió correctamente",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    } catch (e: Exception) {
-                                        println("Error al copiar el archivo: ${e.message}")
-                                    }
-
-                                } catch (e: Exception) {
-                                    println("Error al copiar el archivo: ${e.message}")
-                                }
-                            }
-
-                            subMenuBuilder.show()*/
+                            Log.i("Moviendo: ", filePath.path)
                         }
 
                         4 -> {

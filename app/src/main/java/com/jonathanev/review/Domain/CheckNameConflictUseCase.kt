@@ -15,14 +15,14 @@ class CheckNameConflictUseCase @Inject constructor(
         val basePath = File(fileRepository.getCurrentPath())
 
         val pathToCheck = when (mode) {
-            FolderAction.CREATING_FOLDER ->
+            FolderAction.CreatingFolder ->
                 filePathsProvider.buildFolder(basePath, name)
 
-            FolderAction.CREATING_FILE,
-            FolderAction.RENAMING_FILE ->
+            FolderAction.CreatingFile,
+            FolderAction.RenamingFile ->
                 filePathsProvider.buildFile(basePath, name)
 
-            FolderAction.NONE -> error("FolderAction $mode no soportado")
+            FolderAction.None -> error("FolderAction $mode no soportado")
 
             else -> return false
         }
