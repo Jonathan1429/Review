@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.IOException
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.intPreferencesKey
@@ -24,19 +25,8 @@ class DataStoreManager @Inject constructor(
     private val dataStore = context.dataStore
 
     companion object {
-        /*@SuppressLint("StaticFieldLeak")
-        private var INSTANCE: DataStoreManager? = null
-        private val LOCK = Any()
-
-        fun getInstance(context: Context): DataStoreManager {
-            return INSTANCE ?: synchronized(LOCK) {
-                INSTANCE ?: DataStoreManager(context.applicationContext).also {
-                    INSTANCE = it
-                }
-            }
-        }*/
-
         val contador_imagenes_key = intPreferencesKey("CONTADOR_IMAGENES_KEY")
+        val dont_ask_delete_key = booleanPreferencesKey("DONT_ASK_DELETE_KEY")
     }
 
     fun getCountImage(): Flow<Int> {
@@ -70,5 +60,26 @@ class DataStoreManager @Inject constructor(
         dataStore.edit { pref ->
             pref[contador_imagenes_key] = count
         }
+    }
+
+    // DeleteQuestions
+    suspend fun setDontAskDelete(value: Boolean) {
+        dataStore.edit { pref ->
+            pref[dont_ask_delete_key] = value
+        }
+    }
+
+    fun getDontAskDelete(): Flow<Boolean> {
+        return dataStore.data
+            .catch { exception ->
+                if (exception is IOException) {
+                    emit(emptyPreferences())
+                } else {
+                    throw exception
+                }
+            }
+            .map { pref ->
+                pref[dont_ask_delete_key] ?: false
+            }
     }
 }

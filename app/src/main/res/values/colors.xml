@@ -24,7 +24,7 @@
     <color name="red">#FF0000</color>
 
 
-
+    <color name="background_preguntar">#65000000</color>
     <color name="background_app">#111922</color>
     <color name="contents">#18222C</color>
     <color name="content_in_content">#283849</color>
@@ -34,4 +34,9 @@
     <color name="bg_edittext">#1E293B</color>
     <color name="item_icon">#1A73E8</color>
     <color name="icons">#06DECB</color>
+
+    <color name="background_pop_up">#223040</color>
+    <color name="icon_warning">#0FBD0F</color>
+    <color name="background_warning">#124312</color>
+
 </resources>

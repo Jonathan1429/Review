@@ -45,6 +45,15 @@
 
     <string name="lblCarpetas">Mis carpetas</string>
 
+    <string name="lblNoVolverPreguntar">No volver a preguntar</string>
+    <string name="lblRecordarEleccion">Recordar mi elección</string>
+
+    <string name="lblConfirmar">Confirmar</string>
+    <string name="lblCancelar">Cancelar</string>
+
+    <string name="lblConfirmarAccion">Confirmar Acción</string>
+    <string name="lblConfirmarAccionDes">Esta acción es irreversible, borrarás por completo pregunta y respuesta. ¿Seguro deseas continuar?</string>
+
     <string name="lblWithoutFolders">Sin folders aún</string>
     <string name="lblWithoutFoldersDes">Vamos a ayudarte a ser organizado! Aqui aprender a crear tu primer folder.</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>

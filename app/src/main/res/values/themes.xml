@@ -45,7 +45,7 @@
         <item name="strokeColor">@android:color/holo_blue_dark</item>
         <item name="rippleColor">@android:color/holo_blue_bright</item>
     </style>
-    
+
     <style name="Theme.TextMain" parent="Theme.Review">
         <item name="android:fontFamily">@font/inter</item>
     </style>

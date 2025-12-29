@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.Core.Constants.VERSION1
+import com.jonathanev.review.Data.Model.DataStoreManager
 import com.jonathanev.review.Data.Model.GuideUiState
 import com.jonathanev.review.Data.Model.prueba.AnswerState
 import com.jonathanev.review.Data.Model.prueba.ColorRange
@@ -30,6 +31,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -53,12 +55,20 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     private val fileRepository: FileRepository,
     private val filePathsProvider: FilePathsProvider,
     private val guiaProvider: GuiaProvider,
+    private val dataStoreManager: DataStoreManager
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(GuideUiState())
     val uiState = _uiState.asStateFlow()
 
     private val _uiStopEvent = MutableSharedFlow<UIStopEvent>()
     val uiStopEvent = _uiStopEvent.asSharedFlow()
+
+    val dontAskDelete = dataStoreManager.getDontAskDelete()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false
+        )
 
     val imageList: StateFlow<List<QuestionContent.Image>> = _uiState
         .map { state ->
@@ -628,4 +638,56 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             }
         }
     }
+
+    fun deleteQuesAns() {
+        _uiState.update { state ->
+            val index = state.contadorPregunta
+
+            // 1. Eliminamos pregunta y respuesta en la misma posición
+            val newPreguntas = state.preguntas.toMutableList().apply {
+                if (index in indices) removeAt(index)
+            }
+
+            val newRespuestas = state.respuestas.toMutableList().apply {
+                if (index in indices) removeAt(index)
+            }
+
+            // 2. Si ya no queda nada → limpiar todo
+            if (newPreguntas.isEmpty()) {
+                return@update state.copy(
+                    preguntas = emptyList(),
+                    respuestas = emptyList(),
+                    contadorPregunta = 0,
+                    contadorContenido = 0,
+                    isEditing = false,
+                    actualUri = null
+                )
+            }
+
+            // 3. Calcular nuevo índice
+            val newIndex = if (index > 0) index - 1 else 0
+
+            state.copy(
+                preguntas = newPreguntas,
+                respuestas = newRespuestas,
+                contadorPregunta = newIndex,
+                contadorContenido = 0,
+                isEditing = false,
+                actualUri = null
+            )
+        }
+    }
+
+    fun saveDontAskDelete() {
+        viewModelScope.launch {
+            dataStoreManager.setDontAskDelete(true)
+            val value = dataStoreManager.getDontAskDelete().first()
+            Log.d("DATASTORE", "DontAskDelete = $value")
+        }
+    }
+
+    suspend fun getDontAskDeleteOnce() = dataStoreManager
+        .getDontAskDelete()
+        .first()
+
 }

@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.widget.SwitchCompat
 import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -18,6 +19,8 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.jonathanev.review.Data.ActionGuide
 import com.jonathanev.review.Data.Model.ScreenData
 import com.jonathanev.review.Data.Model.prueba.TypeContent
@@ -98,7 +101,7 @@ class FragmentCreateFile : Fragment() {
                         ).show()
                     }
 
-                    if (uiStopEvent is UIStopEvent.AddMoreQuestions){
+                    if (uiStopEvent is UIStopEvent.AddMoreQuestions) {
                         AlertDialog.Builder(requireContext())
                             .setTitle("¡Atención!")
                             .setMessage(uiStopEvent.text)
@@ -253,6 +256,17 @@ class FragmentCreateFile : Fragment() {
             viewModel.nextQuestion()
         }
 
+        binding.btnTrash.setOnClickListener {
+            lifecycleScope.launch {
+                val dontAsk = viewModel.getDontAskDeleteOnce()
+                if (dontAsk){
+                    viewModel.deleteQuesAns()
+                } else {
+                    showDeletePopup()
+                }
+            }
+        }
+
         binding.btnSaveGuide.setOnClickListener {
             when (actionGuide) {
                 ActionGuide.CREATE -> viewModel.saveNewGuide(
@@ -266,4 +280,45 @@ class FragmentCreateFile : Fragment() {
 
         }
     }
+
+    private fun showDeletePopup() {
+        val dialogView = layoutInflater.inflate(
+            R.layout.pop_up_confirmar_accion, // <-- este XML que mandaste
+            null
+        )
+
+        // Referencias a vistas
+        val btnConfirmar =
+            dialogView.findViewById<MaterialButton>(R.id.btnConfirmar)
+        val btnCancelar =
+            dialogView.findViewById<MaterialButton>(R.id.btnCancelar)
+        val switchElection =
+            dialogView.findViewById<SwitchCompat>(R.id.switchElection)
+
+        // Crear el dialog
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .setCancelable(false)
+            .create()
+
+        // Cancelar
+        btnCancelar.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        // Confirmar
+        btnConfirmar.setOnClickListener {
+            if (switchElection.isChecked) {
+                viewModel.saveDontAskDelete()
+            }
+
+            viewModel.deleteQuesAns()
+            dialog.dismiss()
+        }
+
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        dialog.show()
+    }
+
 }
