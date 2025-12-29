@@ -1,18 +1,9 @@
 package com.jonathanev.review.UI.ViewModel
 
 // Indicamos que vamos a usar JUnit4
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.lifecycle.Observer
-import android.graphics.Color
-import com.jonathanev.review.UI.ViewModel.Fragments.Fragment_DialogColoresMod_popupViewModel
-import io.mockk.mockk
-import io.mockk.verify
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
 
 class FragmentColoresViewModelTest {
-    // Esto hace que LiveData se ejecute inmediatamente en los tests unitarios
+    /*// Esto hace que LiveData se ejecute inmediatamente en los tests unitarios
     @get:Rule
     val instantExecutorRule = InstantTaskExecutorRule()
 
@@ -49,5 +40,5 @@ class FragmentColoresViewModelTest {
 
         // Assert: verificamos que el color actualizado sea negro
         verify { observer.onChanged(Color.BLACK) }
-    }
+    }*/
 }

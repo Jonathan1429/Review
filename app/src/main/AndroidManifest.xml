@@ -49,25 +49,6 @@
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-3940256099942544~3347511713" />
 
-        <!-- El WindowSoft... es para que no se muevan los componentes cuando se habra el teclado -->
-        <activity
-            android:name="com.jonathanev.review.UI.View.ActivityModificar"
-            android:exported="false"
-            android:windowSoftInputMode="adjustPan"
-            android:configChanges="screenSize|smallestScreenSize|orientation"/>
-
-        <activity
-            android:name="com.jonathanev.review.UI.View.ActivityRepasarGuia"
-            android:exported="false"
-            android:configChanges="screenSize|smallestScreenSize|orientation"/>
-
-        <!-- El WindowSoft... es para que no se muevan los componentes cuando se habra el teclado -->
-        <activity
-            android:name="com.jonathanev.review.UI.View.ActivityCuestionario"
-            android:exported="true"
-            android:windowSoftInputMode="adjustPan"
-            android:configChanges="screenSize|smallestScreenSize|orientation">
-        </activity>
         <activity
             android:name="com.jonathanev.review.UI.View.MainActivity"
             android:exported="true">

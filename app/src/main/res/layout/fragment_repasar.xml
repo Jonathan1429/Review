@@ -20,36 +20,21 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <FrameLayout
+            <ImageView
                 android:id="@+id/btnPrevious"
                 android:layout_width="34dp"
                 android:layout_height="34dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:layout_margin="10dp"
-                android:padding="6dp">
-
-                <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
-                    android:src="@drawable/ic_circle_left_right"
-                    tools:ignore="ContentDescription" />
-            </FrameLayout>
+                android:padding="6dp"
+                android:src="@drawable/ic_circle_left_right"
+                tools:ignore="ContentDescription" />
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:gravity="end"
+                android:layout_gravity="end"
                 android:orientation="horizontal">
-
-                <ImageView
-                    android:id="@+id/imgvEdit"
-                    android:layout_width="34dp"
-                    android:layout_height="34dp"
-                    android:layout_margin="10dp"
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
-                    android:padding="6dp"
-                    android:src="@drawable/ic_edit"
-                    tools:ignore="ContentDescription" />
 
                 <ImageView
                     android:id="@+id/btnPregResp"

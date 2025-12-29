@@ -7,7 +7,6 @@ import com.bumptech.glide.load.DecodeFormat
 import com.jonathanev.review.databinding.ItemIconsCustomBinding
 
 class ListarIconosViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-
     private val binding = ItemIconsCustomBinding.bind(view)
 
     fun bind(

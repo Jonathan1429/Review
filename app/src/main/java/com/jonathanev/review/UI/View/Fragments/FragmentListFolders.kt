@@ -196,11 +196,6 @@ class FragmentListFolders : DialogFragment() {
                                 R.id.action_to_review_graph,
                                 bundleOf("mode" to mode)
                             )
-
-                            binding.imgvFolder.visibility = View.GONE
-                            binding.tvNuevaCarpeta.visibility = View.GONE
-                            binding.imgvBack.visibility = View.VISIBLE
-                            binding.tvRegresar.visibility = View.VISIBLE
                         }
 
                         1 -> {

@@ -27,7 +27,7 @@
         android:layout_margin="8dp"
         android:background="?android:attr/selectableItemBackgroundBorderless"
         android:padding="6dp"
-        android:src="@drawable/ic_cancel"
+        android:src="@drawable/ic_trash"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:ignore="ContentDescription" />

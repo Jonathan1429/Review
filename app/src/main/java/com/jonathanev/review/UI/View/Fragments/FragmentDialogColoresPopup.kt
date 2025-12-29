@@ -11,8 +11,6 @@ import android.view.ViewGroup
 import android.view.Window
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
-import androidx.navigation.fragment.findNavController
-import com.jonathanev.review.UI.View.ActivityModificar
 import com.jonathanev.review.UI.ViewModel.Fragments.Fragment_DialogColores_popupViewModel
 import com.jonathanev.review.databinding.FragmentColoresBinding
 import com.skydoves.colorpickerview.flag.BubbleFlag

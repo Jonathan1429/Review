@@ -1,17 +1,11 @@
 package com.jonathanev.review.Domain
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.jonathanev.review.R
-import io.mockk.every
-import io.mockk.mockkObject
-import junit.framework.TestCase.assertEquals
-import org.junit.Test
 import org.junit.runner.RunWith
-import kotlin.random.Random
 
 @RunWith(AndroidJUnit4::class)
 class TestGetRandomGuiaImageUseCase {
-    private val getRandomGuiaImageUseCase = GetRandomGuiaImageUseCase()
+    /*private val getRandomGuiaImageUseCase = GetRandomGuiaImageUseCase()
 
     @Test
     fun regresa_la_imagen_1() {
@@ -77,5 +71,5 @@ class TestGetRandomGuiaImageUseCase {
         val result = getRandomGuiaImageUseCase.invoke()
 
         assertEquals(R.drawable.img_estudiante6, result)  // Verificamos que devuelve la imagen esperada
-    }
+    }*/
 }

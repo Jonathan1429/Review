@@ -26,66 +26,31 @@
             android:background="@drawable/contents"
             android:orientation="vertical">
 
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:gravity="center_horizontal"
+                android:orientation="horizontal">
 
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                <ImageView
+                    android:id="@+id/imgvSelColor"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_margin="10dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:padding="6dp"
+                    android:src="@drawable/ic_palette"
+                    tools:ignore="ContentDescription" />
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center_horizontal"
-                        android:orientation="horizontal">
-
-                        <ImageView
-                            android:id="@+id/imgvSelColor"
-                            android:layout_width="34dp"
-                            android:layout_height="34dp"
-                            android:layout_margin="10dp"
-                            android:background="?android:attr/selectableItemBackgroundBorderless"
-                            android:padding="6dp"
-                            android:src="@drawable/ic_palette"
-                            tools:ignore="ContentDescription" />
-
-                        <ImageView
-                            android:id="@+id/imgvQuitColor"
-                            android:layout_width="34dp"
-                            android:layout_height="34dp"
-                            android:layout_margin="10dp"
-                            android:background="?android:attr/selectableItemBackgroundBorderless"
-                            android:padding="6dp"
-                            android:src="@drawable/ic_eraser"
-                            tools:ignore="ContentDescription" />
-
-                        <ImageView
-                            android:id="@+id/imgvCancelar"
-                            android:layout_width="34dp"
-                            android:layout_height="34dp"
-                            android:layout_margin="10dp"
-                            android:background="?android:attr/selectableItemBackgroundBorderless"
-                            android:padding="6dp"
-                            android:src="@drawable/ic_cancel"
-                            android:visibility="gone"
-                            tools:ignore="ContentDescription" />
-
-                        <ImageView
-                            android:id="@+id/btnPregResp"
-                            android:layout_width="34dp"
-                            android:layout_height="34dp"
-                            android:layout_margin="10dp"
-                            android:background="?android:attr/selectableItemBackgroundBorderless"
-                            android:padding="6dp"
-                            android:src="@drawable/ic_preg_resp"
-                            android:visibility="gone"
-                            tools:ignore="ContentDescription" />
-                    </LinearLayout>
-                </FrameLayout>
-
+                <ImageView
+                    android:id="@+id/imgvQuitColor"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_margin="10dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:padding="6dp"
+                    android:src="@drawable/ic_eraser"
+                    tools:ignore="ContentDescription" />
             </LinearLayout>
 
             <FrameLayout
