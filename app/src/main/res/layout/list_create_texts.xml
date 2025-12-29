@@ -18,7 +18,6 @@
         android:src="@drawable/ic_edit"
         app:layout_constraintEnd_toStartOf="@+id/btnCancel"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="#06DECB"
         tools:ignore="ContentDescription" />
 
     <ImageView
@@ -31,7 +30,6 @@
         android:src="@drawable/ic_cancel"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="#06DECB"
         tools:ignore="ContentDescription" />
 
     <TextView

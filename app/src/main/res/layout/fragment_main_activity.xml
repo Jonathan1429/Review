@@ -156,8 +156,7 @@
                 app:layout_constraintBottom_toBottomOf="@id/circleStepTwo"
                 app:layout_constraintEnd_toEndOf="@id/circleStepTwo"
                 app:layout_constraintStart_toStartOf="@id/circleStepTwo"
-                app:layout_constraintTop_toTopOf="@id/circleStepTwo"
-                app:tint="#06DECB" />
+                app:layout_constraintTop_toTopOf="@id/circleStepTwo" />
 
             <TextView
                 android:id="@+id/lblTitleStepTwo"

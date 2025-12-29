@@ -31,7 +31,7 @@ class FragmentCreateImages : Fragment() {
     private val binding get() = _binding!!
 
     private val sharedViewModel: SharedFragmentCreateFileViewModel by activityViewModels()
-    private val sharedToolbarViewModel: MainToolbarViewModel by activityViewModels()
+    private val viewModelToolbar: MainToolbarViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -52,8 +52,16 @@ class FragmentCreateImages : Fragment() {
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                sharedToolbarViewModel.onSave.collect {
-                    saveProcess()
+                launch {
+                    viewModelToolbar.onSave.collect {
+                        saveProcess()
+                    }
+                }
+
+                launch {
+                    viewModelToolbar.onBefore.collect {
+                        findNavController().navigateUp()
+                    }
                 }
             }
         }
@@ -78,8 +86,8 @@ class FragmentCreateImages : Fragment() {
             binding.ivImagen.setImage(ImageSource.uri(item.uri))
         }
 
-        sharedToolbarViewModel.isBtnSaveVisible(View.VISIBLE)
-        sharedToolbarViewModel.isBtnBackVisible(View.VISIBLE)
+        viewModelToolbar.isBtnSaveVisible(View.VISIBLE)
+        viewModelToolbar.isBtnBackVisible(View.VISIBLE)
     }
 
     private fun initListeners() {

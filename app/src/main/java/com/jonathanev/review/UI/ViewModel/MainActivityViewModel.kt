@@ -17,12 +17,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainActivityViewModel @Inject constructor(
-    //private val guiaRepositoryImpl: GuiaRepositoryImpl,
     private val guiaRepository: GuiaRepository,
     private val fileRepository: FileRepository,
     private val moveNonFolderFilesToOtrosUseCase: MoveNonFolderFilesToOtrosUseCase,
     private val createFoldersUseCase: CreateFoldersUseCase,
-    //private val fileRepositoryImpl: FileRepositoryImpl,
     private val filePathsProvider: FilePathsProvider
 ) : ViewModel() {
     private val _shouldRequestPermission = MutableLiveData<Boolean>()
@@ -32,11 +30,6 @@ class MainActivityViewModel @Inject constructor(
     val foldersUiState: LiveData<FoldersUiState> get() = _foldersUiState
 
     fun getAllFolders() {
-        //return fileRepositoryImpl.getFilesInCurrentPath()
-        /*val a = fileRepositoryImpl.getFilesInCurrentPath()
-        Log.i("a", a.toString())
-        _guias.postValue(a)*/
-
         viewModelScope.launch {
             // Mover archivos (espera a que termine)
             val currentPath = fileRepository.getCurrentPath()
@@ -45,22 +38,7 @@ class MainActivityViewModel @Inject constructor(
         }
     }
 
-    /*fun setGuiasInProvider(){
-        fileRepositoryImpl.setFilesInCurrentPath()
-        val a = fileRepositoryImpl.getFilesInCurrentPath()
-        Log.i("a", a.toString())
-        _guias.postValue(a)
-    }*/
-
     fun createFolders() = createFoldersUseCase.invoke()
-
-    /*fun foldersCreated(value: Boolean){
-        _createdFolders.postValue(value)
-    }
-
-    fun getFoldersCreated(): Boolean{
-        return _createdFolders.value == true
-    }*/
 
     fun checkIfNeedsPermission(hasPermission: Boolean) {
         if (!hasPermission) {

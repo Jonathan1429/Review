@@ -25,6 +25,9 @@ class MainToolbarViewModel @Inject constructor(): ViewModel() {
     private val _onSave = MutableSharedFlow<Unit>(replay = 0)
     val onSave = _onSave.asSharedFlow()
 
+    private val _onBefore = MutableSharedFlow<Unit>(replay = 0)
+    val onBefore = _onBefore.asSharedFlow()
+
     fun changeTitle(title: String){
         _title.value = title
     }
@@ -46,6 +49,12 @@ class MainToolbarViewModel @Inject constructor(): ViewModel() {
     fun btnSaveText(){
         viewModelScope.launch {
             _onSave.emit(Unit)
+        }
+    }
+
+    fun btnBefore(){
+        viewModelScope.launch {
+            _onBefore.emit(Unit)
         }
     }
 }

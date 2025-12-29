@@ -56,6 +56,10 @@ class MainActivity : AppCompatActivity() {
         binding.barraSuperiorBack.imgvSave.setOnClickListener {
             viewModelToolbar.btnSaveText()
         }
+
+        binding.barraSuperiorBack.imgvBack.setOnClickListener {
+            viewModelToolbar.btnBefore()
+        }
     }
 
     private fun observers() {

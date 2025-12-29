@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.appcompat.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/barrasuperior"
     android:layout_width="match_parent"
     android:layout_height="?attr/actionBarSize"
@@ -16,12 +16,12 @@
             android:id="@+id/imgvBack"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:src="@drawable/ic_back"
             android:background="?android:attr/selectableItemBackgroundBorderless"
-            tools:ignore="ContentDescription"
+            android:src="@drawable/ic_back"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            tools:ignore="ContentDescription" />
 
         <TextView
             android:id="@+id/tvTituloToolbar"
@@ -29,28 +29,28 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp"
-            tools:text="@string/tvTituloToolbar"
-            android:textSize="@dimen/texto"
             android:fontFamily="sans-serif-black"
+            android:textSize="@dimen/texto"
             android:textStyle="bold"
-            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/imgvSave"
             app:layout_constraintStart_toEndOf="@+id/imgvBack"
-            app:layout_constraintEnd_toStartOf="@+id/imgvSave"/>
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="@string/tvTituloToolbar" />
 
         <ImageView
             android:id="@+id/imgvSave"
             android:layout_width="34dp"
-            android:layout_weight="1"
             android:layout_height="34dp"
+            android:layout_gravity="end"
             android:layout_margin="10dp"
+            android:layout_weight="1"
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:padding="6dp"
-            android:layout_gravity="end"
             android:src="@drawable/ic_save"
-            tools:ignore="ContentDescription"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            tools:ignore="ContentDescription" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.appcompat.widget.Toolbar>

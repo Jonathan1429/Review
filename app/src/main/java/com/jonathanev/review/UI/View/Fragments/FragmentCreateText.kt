@@ -68,8 +68,16 @@ class FragmentCreateText : Fragment() {
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModelToolbar.onSave.collect {
-                    saveProcess()
+                launch {
+                    viewModelToolbar.onSave.collect {
+                        saveProcess()
+                    }
+                }
+
+                launch {
+                    viewModelToolbar.onBefore.collect {
+                        findNavController().navigateUp()
+                    }
                 }
             }
         }

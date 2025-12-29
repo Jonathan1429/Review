@@ -1,13 +1,13 @@
 package com.jonathanev.review.UI.View.Fragments
 
 import android.os.Bundle
+import androidx.activity.OnBackPressedCallback
+import androidx.appcompat.app.AlertDialog
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.activity.OnBackPressedCallback
-import androidx.appcompat.app.AlertDialog
 import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -19,13 +19,13 @@ import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jonathanev.review.Data.ActionGuide
-import com.jonathanev.review.Data.FolderAction
 import com.jonathanev.review.Data.Model.ScreenData
 import com.jonathanev.review.Data.Model.prueba.TypeContent
 import com.jonathanev.review.Data.Model.prueba.UIStopEvent
 import com.jonathanev.review.Fragments.Adaptadores.ListCreateImagesAdapter
 import com.jonathanev.review.Fragments.Adaptadores.ListCreateTextsAdapter
 import com.jonathanev.review.R
+import com.jonathanev.review.UI.ViewModel.Fragments.MainToolbarViewModel
 import com.jonathanev.review.UI.ViewModel.Fragments.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.databinding.FragmentCreateFileBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -36,6 +36,7 @@ class FragmentCreateFile : Fragment() {
     private var _binding: FragmentCreateFileBinding? = null
     private val binding get() = _binding!!
     private val viewModel: SharedFragmentCreateFileViewModel by activityViewModels()
+    private val viewModelToolbar: MainToolbarViewModel by activityViewModels()
 
     private lateinit var adaptListCreateTexts: ListCreateTextsAdapter
     private lateinit var adaptListCreateImages: ListCreateImagesAdapter
@@ -162,6 +163,9 @@ class FragmentCreateFile : Fragment() {
     }
 
     private fun initUI() {
+        viewModelToolbar.isBtnSaveVisible(View.GONE)
+        viewModelToolbar.isBtnBackVisible(View.GONE)
+
         adaptListCreateTexts = ListCreateTextsAdapter(
             onEditClicked = { position -> goEditText(position) },
             onDeleteClicked = { position -> goDeleteText(position) }

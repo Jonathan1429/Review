@@ -17,8 +17,7 @@
         android:scaleType="fitCenter"
         android:src="@drawable/ic_edit"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/color_icon" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
         android:id="@+id/iconPlay"
@@ -30,8 +29,7 @@
         android:scaleType="fitCenter"
         android:src="@drawable/ic_circle_play_solid_full"
         app:layout_constraintEnd_toStartOf="@+id/iconEdit"
-        app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/color_icon" />
+        app:layout_constraintTop_toTopOf="parent"/>
 
     <TextView
         android:id="@+id/previewQuestion"
@@ -58,8 +56,7 @@
         android:src="@drawable/ic_image_regular_full"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/previewQuestion"
-        app:tint="@color/color_icon" />
+        app:layout_constraintTop_toBottomOf="@id/previewQuestion" />
 
     <TextView
         android:id="@+id/noImages"
