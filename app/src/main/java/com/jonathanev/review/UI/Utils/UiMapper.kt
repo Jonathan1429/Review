@@ -1,11 +1,11 @@
 package com.jonathanev.review.UI.Utils
 
-import com.jonathanev.review.data.Model.prueba.ColorRange
-import com.jonathanev.review.data.Model.prueba.ColorRangeUi
-import com.jonathanev.review.data.Model.prueba.QuestionContent
-import com.jonathanev.review.data.Model.prueba.QuestionContentUi
-import com.jonathanev.review.data.Model.prueba.QuestionItem
-import com.jonathanev.review.data.Model.prueba.QuestionUiItem
+import com.jonathanev.review.presentation.model.ColorRange
+import com.jonathanev.review.presentation.model.ColorRangeUi
+import com.jonathanev.review.presentation.model.QuestionContent
+import com.jonathanev.review.presentation.model.QuestionContentUi
+import com.jonathanev.review.presentation.model.QuestionItem
+import com.jonathanev.review.presentation.model.QuestionUiItem
 
 fun QuestionItem.toUi(): QuestionUiItem {
     return QuestionUiItem(

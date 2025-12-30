@@ -1,6 +1,6 @@
 package com.jonathanev.review.data.Model
 
-import com.jonathanev.review.data.Model.prueba.QuestionContent
+import com.jonathanev.review.presentation.model.QuestionContent
 
 data class ValidacionesGuiaModel(
     val responseSpanPalabra: SpanPalabraModel? = null,

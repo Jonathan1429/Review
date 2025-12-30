@@ -1,8 +1,8 @@
 package com.jonathanev.review.data.Model
 
 import android.net.Uri
-import com.jonathanev.review.data.Model.prueba.QuestionItem
-import com.jonathanev.review.data.Model.prueba.TypeContent
+import com.jonathanev.review.presentation.model.QuestionItem
+import com.jonathanev.review.Domain.model.TypeContent
 
 data class GuideUiState(
     val preguntas: List<QuestionItem> = emptyList(),

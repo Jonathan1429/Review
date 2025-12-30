@@ -1,6 +1,6 @@
 package com.jonathanev.review.data
 
-import com.jonathanev.review.data.Model.prueba.FolderUI
+import com.jonathanev.review.presentation.model.FolderUI
 
 
 sealed class FolderResult {

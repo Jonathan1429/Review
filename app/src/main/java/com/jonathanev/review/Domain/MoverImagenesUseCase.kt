@@ -1,6 +1,6 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.data.Model.prueba.QuestionItem
+import com.jonathanev.review.presentation.model.QuestionItem
 import com.jonathanev.review.data.xml.Versions
 import java.io.File
 import java.nio.file.Files

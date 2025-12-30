@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import com.jonathanev.review.data.Model.FolderUIDiffCallback
-import com.jonathanev.review.data.Model.prueba.FolderUI
+import com.jonathanev.review.presentation.model.FolderUI
 import com.jonathanev.review.Fragments.ViewHolders.ListFoldersViewHolder
 import com.jonathanev.review.databinding.ListItemFolderBinding
 

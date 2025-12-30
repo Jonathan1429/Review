@@ -25,8 +25,8 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.jonathanev.review.data.ActionGuide
 import com.jonathanev.review.data.FolderAction
 import com.jonathanev.review.data.Model.ScreenData
-import com.jonathanev.review.data.Model.prueba.UICreatingFile
-import com.jonathanev.review.data.Model.prueba.UIStopEvent
+import com.jonathanev.review.presentation.state.CreatingFileUiState
+import com.jonathanev.review.presentation.event.UIStopEvent
 import com.jonathanev.review.Fragments.Adaptadores.ListarIconosAdapter
 import com.jonathanev.review.R
 import com.jonathanev.review.UI.ViewModel.Fragments.FragCreateFilesViewModel
@@ -89,17 +89,17 @@ class FragmentCreatingFiles : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.messages.collect { values ->
                     when (values) {
-                        is UICreatingFile.ContinuedProcess -> {
+                        is CreatingFileUiState.ContinuedProcess -> {
                             folderAction(mode, values.name, values.description)
                         }
 
-                        is UICreatingFile.Message -> Toast.makeText(
+                        is CreatingFileUiState.Message -> Toast.makeText(
                             context,
                             values.message,
                             Toast.LENGTH_SHORT
                         ).show()
 
-                        is UICreatingFile.FileExisted -> {
+                        is CreatingFileUiState.FileUiStateExisted -> {
 
                         }
                     }

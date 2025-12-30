@@ -1,7 +1,7 @@
 package com.jonathanev.review.data.Model
 
 import androidx.recyclerview.widget.DiffUtil
-import com.jonathanev.review.data.Model.prueba.QuestionContent
+import com.jonathanev.review.presentation.model.QuestionContent
 
 class QuestionImageDiffCallback : DiffUtil.ItemCallback<QuestionContent.Image>() {
     override fun areItemsTheSame(

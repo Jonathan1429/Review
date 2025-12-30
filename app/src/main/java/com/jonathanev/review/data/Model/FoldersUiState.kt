@@ -1,6 +1,6 @@
 package com.jonathanev.review.data.Model
 
-import com.jonathanev.review.data.Model.prueba.FolderUI
+import com.jonathanev.review.presentation.model.FolderUI
 
 data class FoldersUiState(
     val isLoading: Boolean = false,

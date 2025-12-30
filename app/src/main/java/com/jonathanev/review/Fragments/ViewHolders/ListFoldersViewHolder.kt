@@ -8,7 +8,7 @@ import androidx.core.graphics.ColorUtils
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DecodeFormat
-import com.jonathanev.review.data.Model.prueba.FolderUI
+import com.jonathanev.review.presentation.model.FolderUI
 import com.jonathanev.review.R
 import com.jonathanev.review.databinding.ListItemFolderBinding
 import javax.inject.Inject
@@ -20,21 +20,21 @@ class ListFoldersViewHolder @Inject constructor(
 
     fun bind(folder: FolderUI) {
         Glide.with(binding.itemCarpeta.ivCarpeta.context)
-            .load(folder.folderModel.imgFolder)
+            .load(folder.folderUiModel.imgFolder)
             .override(80, 80)
             .centerCrop()
             .format(DecodeFormat.PREFER_RGB_565)
             .into(binding.itemCarpeta.ivCarpeta)
 
 
-        binding.lblTitle.text = folder.folderModel.name
+        binding.lblTitle.text = folder.folderUiModel.name
 
         val background = binding.itemCarpeta.bgCarpeta.background as GradientDrawable
         binding.itemCarpeta.ivCarpeta.imageTintMode = PorterDuff.Mode.SRC_ATOP
-        val color50 = ColorUtils.setAlphaComponent(folder.folderModel.color, 50)
+        val color50 = ColorUtils.setAlphaComponent(folder.folderUiModel.color, 50)
         background.setColor(color50)
 
-        binding.itemCarpeta.ivCarpeta.imageTintList = ColorStateList.valueOf(folder.folderModel.color)
+        binding.itemCarpeta.ivCarpeta.imageTintList = ColorStateList.valueOf(folder.folderUiModel.color)
         val lblNumGuides = "${folder.numGuides} ${ContextCompat.getString(binding.noFoldersDescription.context, R.string.lblGuides)}"
         binding.noFoldersDescription.text = lblNumGuides
 

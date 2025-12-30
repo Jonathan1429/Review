@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import com.jonathanev.review.data.Model.QuestionTextDiffCallback
-import com.jonathanev.review.data.Model.prueba.QuestionContent
+import com.jonathanev.review.presentation.model.QuestionContent
 import com.jonathanev.review.Fragments.ViewHolders.ListItemPintarTextosViewHolder
 import com.jonathanev.review.databinding.ListPintarTextosRepasarBinding
 

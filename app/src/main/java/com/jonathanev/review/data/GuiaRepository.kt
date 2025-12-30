@@ -1,16 +1,16 @@
 package com.jonathanev.review.data
 
 import com.jonathanev.review.data.Model.GuideModel
-import com.jonathanev.review.data.Model.prueba.FolderModel
-import com.jonathanev.review.data.Model.prueba.QAItem
-import com.jonathanev.review.data.Model.prueba.QuestionItem
+import com.jonathanev.review.presentation.model.FolderUiModel
+import com.jonathanev.review.presentation.state.QAItem
+import com.jonathanev.review.presentation.model.QuestionItem
 import java.io.File
 
 interface GuiaRepository {
     fun getXMLVersion(ruta: String): List<QAItem>
     fun getAttributesGuide(file: File): GuideModel
     fun getGuides(file: File): List<GuideModel>
-    fun getFolders(file: File):List<FolderModel>
+    fun getFolders(file: File):List<FolderUiModel>
     fun getVersion(file: File): String
     fun setAttributesGuide(
         file: File,

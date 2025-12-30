@@ -1,6 +1,6 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.data.Model.prueba.UIStopEvent
+import com.jonathanev.review.presentation.event.UIStopEvent
 import com.jonathanev.review.data.storage.StorageFolders
 import java.io.File
 import javax.inject.Inject

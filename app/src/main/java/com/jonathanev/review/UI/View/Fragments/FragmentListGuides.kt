@@ -21,8 +21,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jonathanev.review.data.FolderAction
 import com.jonathanev.review.data.Model.GuideResult
-import com.jonathanev.review.data.Model.prueba.UIMovingEvent
-import com.jonathanev.review.data.Model.prueba.UIStopEvent
+import com.jonathanev.review.presentation.event.UIMovingEvent
+import com.jonathanev.review.presentation.event.UIStopEvent
 import com.jonathanev.review.Fragments.Adaptadores.ListGuidesAdapter
 import com.jonathanev.review.R
 import com.jonathanev.review.UI.ViewModel.Fragments.FragmentListGuidesViewModel

@@ -1,8 +1,8 @@
 package com.jonathanev.review.Domain
 
 import com.jonathanev.review.data.GuiaRepositoryImpl
-import com.jonathanev.review.data.Model.prueba.FolderModel
-import com.jonathanev.review.data.Model.prueba.FolderUI
+import com.jonathanev.review.presentation.model.FolderUiModel
+import com.jonathanev.review.presentation.model.FolderUI
 import com.jonathanev.review.data.provider.FilePathsProvider
 import com.jonathanev.review.data.repository.FolderRepository
 import com.jonathanev.review.Domain.repository.FileRepository
@@ -25,7 +25,7 @@ class GetFoldersWithNumGuidesUseCase @Inject constructor(
             val numGuidesCurrentFolder = currentFolder.listFiles()?.filter { it.name != "screen.json" }?.size ?: 0
 
             FolderUI(
-                folderModel = FolderModel(
+                folderUiModel = FolderUiModel(
                     name = attributes.name,
                     description = attributes.description,
                     imgFolder = attributes.imgFolder,

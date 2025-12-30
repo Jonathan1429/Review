@@ -1,8 +1,8 @@
 package com.jonathanev.review.data.repository
 
-import com.jonathanev.review.data.Model.prueba.FolderModel
+import com.jonathanev.review.presentation.model.FolderUiModel
 import java.io.File
 
 interface FolderRepository {
-    fun getAttributesFolder(folderPath: File): FolderModel
+    fun getAttributesFolder(folderPath: File): FolderUiModel
 }

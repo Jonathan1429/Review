@@ -4,10 +4,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.data.Model.EstadoUI
-import com.jonathanev.review.data.Model.prueba.AnswerState
-import com.jonathanev.review.data.Model.prueba.QuestionItem
-import com.jonathanev.review.data.Model.prueba.TypeContent
-import com.jonathanev.review.data.Model.prueba.UIStopEvent
+import com.jonathanev.review.presentation.state.AnswerState
+import com.jonathanev.review.presentation.model.QuestionItem
+import com.jonathanev.review.Domain.model.TypeContent
+import com.jonathanev.review.presentation.event.UIStopEvent
 import com.jonathanev.review.Domain.GetContentItemsUseCase
 import com.jonathanev.review.Domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.Domain.repository.FileRepository

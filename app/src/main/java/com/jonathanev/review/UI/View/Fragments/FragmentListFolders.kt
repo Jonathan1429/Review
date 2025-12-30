@@ -26,8 +26,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.jonathanev.review.data.FolderAction
 import com.jonathanev.review.data.FolderResult
-import com.jonathanev.review.data.Model.prueba.UIMovingEvent
-import com.jonathanev.review.data.Model.prueba.UIStopEvent
+import com.jonathanev.review.presentation.event.UIMovingEvent
+import com.jonathanev.review.presentation.event.UIStopEvent
 import com.jonathanev.review.data.provider.FilePathsProvider
 import com.jonathanev.review.Fragments.Adaptadores.ListFoldersAdapter
 import com.jonathanev.review.R
@@ -191,7 +191,7 @@ class FragmentListFolders : DialogFragment() {
                 ) { dialog, which ->
                     when (which) {
                         0 -> {
-                            viewModel.changeFilePath(folderResult.folder.folderModel.name)
+                            viewModel.changeFilePath(folderResult.folder.folderUiModel.name)
                             findNavController().navigate(
                                 R.id.action_to_review_graph,
                                 bundleOf("mode" to mode)

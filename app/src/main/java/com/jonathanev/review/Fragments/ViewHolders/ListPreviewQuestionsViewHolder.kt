@@ -2,7 +2,7 @@ package com.jonathanev.review.Fragments.ViewHolders
 
 import androidx.recyclerview.widget.RecyclerView
 import com.jonathanev.review.data.Model.PreviewQuestion
-import com.jonathanev.review.data.Model.prueba.QuestionContent
+import com.jonathanev.review.presentation.model.QuestionContent
 import com.jonathanev.review.R
 import com.jonathanev.review.databinding.ListPreviewQuestionsBinding
 import javax.inject.Inject

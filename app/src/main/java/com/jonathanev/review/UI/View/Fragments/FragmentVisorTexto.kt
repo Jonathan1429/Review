@@ -9,8 +9,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.jonathanev.review.data.Model.prueba.ColorRange
-import com.jonathanev.review.data.Model.prueba.QuestionContent
+import com.jonathanev.review.presentation.model.ColorRange
+import com.jonathanev.review.presentation.model.QuestionContent
 import com.jonathanev.review.databinding.FragmentVisorTextoBinding
 
 class FragmentVisorTexto : Fragment() {

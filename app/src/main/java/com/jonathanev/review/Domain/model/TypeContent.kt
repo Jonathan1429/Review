@@ -1,4 +1,4 @@
-package com.jonathanev.review.data.Model.prueba
+package com.jonathanev.review.Domain.model
 
 enum class TypeContent {
     QUESTION,

@@ -1,11 +1,11 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.data.Model.prueba.UICreatingFile
+import com.jonathanev.review.presentation.state.CreatingFileUiState
 import com.jonathanev.review.data.storage.StorageFolders
 import javax.inject.Inject
 
 class ValidateCreateFileUseCase @Inject constructor() {
-    operator fun invoke(name: String, description: String): UICreatingFile {
+    operator fun invoke(name: String, description: String): CreatingFileUiState {
         val invalidChars = listOf("/", ".")
         val invalidNames = listOf(
             StorageFolders.DATASTORE,
@@ -29,9 +29,9 @@ class ValidateCreateFileUseCase @Inject constructor() {
 
         //val exist = fileExistUseCase.invoke(name)
         return if (!message.isNullOrEmpty()) {
-            UICreatingFile.Message(message)
+            CreatingFileUiState.Message(message)
         } else {
-            UICreatingFile.ContinuedProcess(name, description)
+            CreatingFileUiState.ContinuedProcess(name, description)
         }
     }
 }

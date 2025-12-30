@@ -1,4 +1,4 @@
-package com.jonathanev.review.data.Model.prueba
+package com.jonathanev.review.presentation.model
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
@@ -26,8 +26,5 @@ sealed class QuestionContentUi : Parcelable {
     data class Image(val decodedPath: String, val encodedPath: String) : QuestionContentUi()
 }
 
-
-
-// Si ColorRange también existe:
 @Parcelize
 data class ColorRangeUi(val start: Int, val end: Int, val color: Int) : Parcelable

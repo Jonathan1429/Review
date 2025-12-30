@@ -7,11 +7,11 @@ import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.data.FolderAction
 import com.jonathanev.review.data.Model.GuideModel
 import com.jonathanev.review.data.Model.ScreenData
-import com.jonathanev.review.data.Model.prueba.AnswerState
-import com.jonathanev.review.data.Model.prueba.PreviewState
-import com.jonathanev.review.data.Model.prueba.QuestionItem
-import com.jonathanev.review.data.Model.prueba.UICreatingFile
-import com.jonathanev.review.data.Model.prueba.UIStopEvent
+import com.jonathanev.review.presentation.state.AnswerState
+import com.jonathanev.review.presentation.state.PreviewState
+import com.jonathanev.review.presentation.model.QuestionItem
+import com.jonathanev.review.presentation.state.CreatingFileUiState
+import com.jonathanev.review.presentation.event.UIStopEvent
 import com.jonathanev.review.data.provider.FilePathsProvider
 import com.jonathanev.review.Domain.CreateFolderUseCase
 import com.jonathanev.review.Domain.CheckNameConflictUseCase
@@ -49,7 +49,7 @@ class FragCreateFilesViewModel @Inject constructor(
     private val _eventsMessages = MutableSharedFlow<UIStopEvent>()
     val eventsMessages = _eventsMessages.asSharedFlow()
 
-    private val _messages = MutableSharedFlow<UICreatingFile>()
+    private val _messages = MutableSharedFlow<CreatingFileUiState>()
     val messages = _messages.asSharedFlow()
 
     private var _preguntas = mutableListOf<QuestionItem>()

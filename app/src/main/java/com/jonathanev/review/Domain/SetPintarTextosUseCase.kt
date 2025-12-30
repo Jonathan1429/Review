@@ -1,6 +1,6 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.data.Model.prueba.QuestionContent
+import com.jonathanev.review.presentation.model.QuestionContent
 import com.jonathanev.review.data.media.MediaPaths
 import com.jonathanev.review.data.repository.FileHelperImpl
 import javax.inject.Inject

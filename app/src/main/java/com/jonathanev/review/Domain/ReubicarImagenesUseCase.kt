@@ -1,7 +1,7 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.data.Model.prueba.QuestionContent
-import com.jonathanev.review.data.Model.prueba.QuestionItem
+import com.jonathanev.review.presentation.model.QuestionContent
+import com.jonathanev.review.presentation.model.QuestionItem
 import com.jonathanev.review.data.provider.FilePathsProvider
 import com.jonathanev.review.data.storage.StorageFolders
 import com.jonathanev.review.data.xml.Versions

@@ -4,9 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.data.FolderAction
 import com.jonathanev.review.data.GuiaRepository
-import com.jonathanev.review.data.Model.prueba.AnswerState
-import com.jonathanev.review.data.Model.prueba.QuestionItem
-import com.jonathanev.review.data.Model.prueba.UIMovingEvent
+import com.jonathanev.review.presentation.state.AnswerState
+import com.jonathanev.review.presentation.model.QuestionItem
+import com.jonathanev.review.presentation.event.UIMovingEvent
 import com.jonathanev.review.data.provider.FilePathsProvider
 import com.jonathanev.review.Domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.Domain.GetVersionUseCase

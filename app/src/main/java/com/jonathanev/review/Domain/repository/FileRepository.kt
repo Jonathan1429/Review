@@ -1,6 +1,6 @@
 package com.jonathanev.review.Domain.repository
 
-import com.jonathanev.review.data.Model.prueba.QuestionContent
+import com.jonathanev.review.presentation.model.QuestionContent
 import java.io.File
 
 interface FileRepository {

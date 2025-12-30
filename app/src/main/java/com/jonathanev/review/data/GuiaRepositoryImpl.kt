@@ -9,11 +9,11 @@ import com.jonathanev.review.Domain.model.ContentType
 import com.jonathanev.review.Domain.model.QAType
 import com.jonathanev.review.R
 import com.jonathanev.review.data.Model.GuideModel
-import com.jonathanev.review.data.Model.prueba.AnswerState
-import com.jonathanev.review.data.Model.prueba.FolderModel
-import com.jonathanev.review.data.Model.prueba.QAItem
-import com.jonathanev.review.data.Model.prueba.QuestionContent
-import com.jonathanev.review.data.Model.prueba.QuestionItem
+import com.jonathanev.review.presentation.state.AnswerState
+import com.jonathanev.review.presentation.model.FolderUiModel
+import com.jonathanev.review.presentation.state.QAItem
+import com.jonathanev.review.presentation.model.QuestionContent
+import com.jonathanev.review.presentation.model.QuestionItem
 import com.jonathanev.review.data.media.MediaPaths
 import com.jonathanev.review.data.xml.Attributes
 import com.jonathanev.review.data.xml.Structure
@@ -47,11 +47,11 @@ class GuiaRepositoryImpl @Inject constructor(
     private val xmlSerializerFactory: XmlSerializerFactory,
     private val fileOutputStreamFactory: FileOutputStreamFactory
 ) : GuiaRepository {
-    override fun getFolders(file: File): List<FolderModel> {
+    override fun getFolders(file: File): List<FolderUiModel> {
         return file.listFiles()
             ?.filter { it.isDirectory }
             ?.map { item ->
-                FolderModel(
+                FolderUiModel(
                     name = item.name,
                     description = "",
                     imgFolder = R.drawable.ic_anchor_solid_full,

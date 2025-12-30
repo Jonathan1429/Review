@@ -27,8 +27,8 @@ import com.jonathanev.review.UI.ViewModel.Fragments.FragmentCreateTextViewModel
 import com.jonathanev.review.UI.ViewModel.Fragments.MainToolbarViewModel
 import com.jonathanev.review.UI.ViewModel.Fragments.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.data.Model.SpanPalabraModel
-import com.jonathanev.review.data.Model.prueba.ColorRange
-import com.jonathanev.review.data.Model.prueba.QuestionContent
+import com.jonathanev.review.presentation.model.ColorRange
+import com.jonathanev.review.presentation.model.QuestionContent
 import com.jonathanev.review.data.media.MediaPaths
 import com.jonathanev.review.databinding.FragmentCreateTextBinding
 import dagger.hilt.android.AndroidEntryPoint

@@ -1,4 +1,4 @@
-package com.jonathanev.review.data.Model.prueba
+package com.jonathanev.review.presentation.event
 
 sealed class UIMovingEvent {
     data class ShowMessage(val text: String): UIMovingEvent()

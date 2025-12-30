@@ -3,10 +3,10 @@ package com.jonathanev.review.UI.ViewModel.Fragments
 import androidx.lifecycle.ViewModel
 import com.jonathanev.review.data.GuiaRepository
 import com.jonathanev.review.data.Model.StateUIPreviewQuestion
-import com.jonathanev.review.data.Model.prueba.AnswerState
-import com.jonathanev.review.data.Model.prueba.QAItem
-import com.jonathanev.review.data.Model.prueba.QuestionItem
-import com.jonathanev.review.data.Model.prueba.TypeContent
+import com.jonathanev.review.presentation.state.AnswerState
+import com.jonathanev.review.presentation.state.QAItem
+import com.jonathanev.review.presentation.model.QuestionItem
+import com.jonathanev.review.Domain.model.TypeContent
 import com.jonathanev.review.data.provider.FilePathsProvider
 import com.jonathanev.review.Domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.Domain.GetPreviewQuestionsUseCase

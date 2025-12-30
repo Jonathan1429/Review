@@ -7,10 +7,10 @@ import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.data.Model.EstadoUI
 import com.jonathanev.review.data.Model.GuideModel
 import com.jonathanev.review.data.Model.InternalRules
-import com.jonathanev.review.data.Model.prueba.AnswerState
-import com.jonathanev.review.data.Model.prueba.QuestionItem
-import com.jonathanev.review.data.Model.prueba.QAUiItem
-import com.jonathanev.review.data.Model.prueba.TypeContent
+import com.jonathanev.review.presentation.state.AnswerState
+import com.jonathanev.review.presentation.model.QuestionItem
+import com.jonathanev.review.presentation.model.QAUiItem
+import com.jonathanev.review.Domain.model.TypeContent
 import com.jonathanev.review.data.provider.GuiaProvider
 import com.jonathanev.review.data.repository.FileRepositoryImpl
 import com.jonathanev.review.Domain.GetGuiaUseCase

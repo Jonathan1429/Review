@@ -7,11 +7,11 @@ import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.data.FolderAction
 import com.jonathanev.review.data.Model.GuideModel
 import com.jonathanev.review.data.Model.GuideResult
-import com.jonathanev.review.data.Model.prueba.AnswerState
-import com.jonathanev.review.data.Model.prueba.QuestionContent
-import com.jonathanev.review.data.Model.prueba.QuestionItem
-import com.jonathanev.review.data.Model.prueba.UIMovingEvent
-import com.jonathanev.review.data.Model.prueba.UIStopEvent
+import com.jonathanev.review.presentation.state.AnswerState
+import com.jonathanev.review.presentation.model.QuestionContent
+import com.jonathanev.review.presentation.model.QuestionItem
+import com.jonathanev.review.presentation.event.UIMovingEvent
+import com.jonathanev.review.presentation.event.UIStopEvent
 import com.jonathanev.review.data.provider.FilePathsProvider
 import com.jonathanev.review.Domain.ChangeGuidePathBuildFileUseCase
 import com.jonathanev.review.Domain.DeleteGuideUseCase

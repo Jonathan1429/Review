@@ -1,7 +1,9 @@
-package com.jonathanev.review.data.Model.prueba
+package com.jonathanev.review.presentation.state
+
+import com.jonathanev.review.presentation.model.QuestionItem
 
 sealed class AnswerState {
-    object Empty : AnswerState()
+    data object Empty : AnswerState()
     data class Filled(val item: QuestionItem) : AnswerState()
 }
 

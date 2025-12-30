@@ -1,4 +1,4 @@
-package com.jonathanev.review.data.Model.prueba
+package com.jonathanev.review.presentation.event
 
 sealed class UIStopEvent {
     //data class PaintTextColors(val text: String) : UiStopEvent()

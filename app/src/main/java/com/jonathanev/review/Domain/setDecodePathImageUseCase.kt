@@ -1,8 +1,8 @@
 package com.jonathanev.review.Domain
 
 import com.jonathanev.review.data.Model.DataStoreManager
-import com.jonathanev.review.data.Model.prueba.QuestionContent
-import com.jonathanev.review.data.Model.prueba.QuestionItem
+import com.jonathanev.review.presentation.model.QuestionContent
+import com.jonathanev.review.presentation.model.QuestionItem
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 

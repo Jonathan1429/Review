@@ -6,9 +6,9 @@ import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.data.FolderResult
 import com.jonathanev.review.data.GuiaRepository
 import com.jonathanev.review.data.Model.FoldersUiState
-import com.jonathanev.review.data.Model.prueba.FolderUI
-import com.jonathanev.review.data.Model.prueba.UIMovingEvent
-import com.jonathanev.review.data.Model.prueba.UIStopEvent
+import com.jonathanev.review.presentation.model.FolderUI
+import com.jonathanev.review.presentation.event.UIMovingEvent
+import com.jonathanev.review.presentation.event.UIStopEvent
 import com.jonathanev.review.data.provider.FilePathsProvider
 import com.jonathanev.review.data.provider.GuiaProvider
 import com.jonathanev.review.data.repository.FileHelperImpl
@@ -81,7 +81,7 @@ class FragDialListarFoldersViewModel @Inject constructor(
 
             try {
                 val folders =
-                    getFoldersWithNumGuidesUseCase.invoke().sortedBy { it.folderModel.name }
+                    getFoldersWithNumGuidesUseCase.invoke().sortedBy { it.folderUiModel.name }
                 cachedFolders = folders
 
                 // 2. actualizar con la lista resultante
@@ -133,7 +133,7 @@ class FragDialListarFoldersViewModel @Inject constructor(
 
     fun deleteFiles(folderResult: FolderUI) {
         val currentPath =
-            filePathsProvider.buildFolder(File(getCurrentPath()), folderResult.folderModel.name)
+            filePathsProvider.buildFolder(File(getCurrentPath()), folderResult.folderUiModel.name)
 
         val message = deleteFolderUseCase.invoke(currentPath)
 

@@ -8,7 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.RequiresApi
 import com.davemorrissey.labs.subscaleview.ImageSource
-import com.jonathanev.review.data.Model.prueba.QuestionContent
+import com.jonathanev.review.presentation.model.QuestionContent
 import com.jonathanev.review.databinding.FragmentVisorImagenBinding
 
 class FragmentVisorImagen : Fragment() {
