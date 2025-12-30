@@ -1,8 +1,7 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.Data.FolderResult
-import com.jonathanev.review.Data.Model.prueba.FolderModel
-import com.jonathanev.review.Data.Model.prueba.FolderUI
+import com.jonathanev.review.data.FolderResult
+import com.jonathanev.review.data.Model.prueba.FolderUI
 import javax.inject.Inject
 
 class GetFolderPosicionUseCase @Inject constructor(){

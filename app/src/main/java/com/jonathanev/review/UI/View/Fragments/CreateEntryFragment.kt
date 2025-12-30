@@ -7,8 +7,8 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
-import com.jonathanev.review.Data.ActionGuide
-import com.jonathanev.review.Data.FolderAction
+import com.jonathanev.review.data.ActionGuide
+import com.jonathanev.review.data.FolderAction
 import com.jonathanev.review.R
 
 class CreateEntryFragment : Fragment(R.layout.fragment_fragments_content) {

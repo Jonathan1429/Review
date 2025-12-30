@@ -1,8 +1,8 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.Data.GuiaRepository
-import com.jonathanev.review.Data.Model.prueba.QuestionContent
-import com.jonathanev.review.Data.Model.prueba.UIStopEvent
+import com.jonathanev.review.data.GuiaRepository
+import com.jonathanev.review.data.Model.prueba.QuestionContent
+import com.jonathanev.review.data.Model.prueba.UIStopEvent
 import java.io.File
 import javax.inject.Inject
 

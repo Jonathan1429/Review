@@ -8,7 +8,7 @@ import androidx.core.graphics.ColorUtils
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DecodeFormat
-import com.jonathanev.review.Data.Model.prueba.FolderUI
+import com.jonathanev.review.data.Model.prueba.FolderUI
 import com.jonathanev.review.R
 import com.jonathanev.review.databinding.ListItemFolderBinding
 import javax.inject.Inject

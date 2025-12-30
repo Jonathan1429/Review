@@ -1,9 +1,8 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.Core.Constants
-import com.jonathanev.review.Core.Constants.IMAGENES
-import com.jonathanev.review.Data.FileAction
 import com.jonathanev.review.Domain.repository.FileRepository
+import com.jonathanev.review.data.FileAction
+import com.jonathanev.review.data.storage.StorageFolders
 import java.io.File
 import javax.inject.Inject
 
@@ -13,7 +12,7 @@ class CreatingFolderUseCase @Inject constructor(
     operator fun invoke(fileName: String): FileAction {
         val path = File(fileRepository.getCurrentPath(), fileName)
         val pathImages = File(fileRepository.getCurrentPath(), fileName).toString()
-            .replace(Constants.GUIAS, IMAGENES)
+            .replace(StorageFolders.GUIAS, StorageFolders.IMAGENES)
 
         if (path.exists()) {
             return FileAction.EXIST

@@ -1,7 +1,7 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.Data.JsonManager
-import com.jonathanev.review.Data.Model.ScreenData
+import com.jonathanev.review.data.JsonManager
+import com.jonathanev.review.data.Model.ScreenData
 import com.jonathanev.review.Domain.repository.FileRepository
 import java.io.File
 import javax.inject.Inject

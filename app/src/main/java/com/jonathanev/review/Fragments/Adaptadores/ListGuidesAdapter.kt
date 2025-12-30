@@ -3,11 +3,8 @@ package com.jonathanev.review.Fragments.Adaptadores
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
-import com.jonathanev.review.Data.Model.FolderUIDiffCallback
-import com.jonathanev.review.Data.Model.GuideDiffCallback
-import com.jonathanev.review.Data.Model.GuideModel
-import com.jonathanev.review.Data.Model.prueba.FolderModel
-import com.jonathanev.review.Data.Model.prueba.FolderUI
+import com.jonathanev.review.data.Model.GuideDiffCallback
+import com.jonathanev.review.data.Model.GuideModel
 import com.jonathanev.review.Fragments.ViewHolders.ListGuidesViewHolder
 import com.jonathanev.review.databinding.ListCustomGuideBinding
 

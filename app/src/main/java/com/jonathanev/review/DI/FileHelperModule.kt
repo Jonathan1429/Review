@@ -1,19 +1,11 @@
 package com.jonathanev.review.DI
 
 import android.content.Context
-import com.jonathanev.review.Data.FileOutputStreamFactory
-import com.jonathanev.review.Data.GuiaRepository
-import com.jonathanev.review.Data.GuiaRepositoryImpl
-import com.jonathanev.review.Data.Model.DataStoreManager
-import com.jonathanev.review.Data.XmlSerializerFactory
-import com.jonathanev.review.Data.provider.FilePathsProvider
-import com.jonathanev.review.Data.provider.GuiaProvider
-import com.jonathanev.review.Data.repository.FileHelperImpl
-import com.jonathanev.review.Data.repository.FileRepositoryImpl
+import com.jonathanev.review.data.Model.DataStoreManager
+import com.jonathanev.review.data.provider.FilePathsProvider
+import com.jonathanev.review.data.repository.FileHelperImpl
+import com.jonathanev.review.data.repository.FileRepositoryImpl
 import com.jonathanev.review.Domain.FileHelper
-import com.jonathanev.review.Domain.GetColorRanges
-import com.jonathanev.review.Domain.SetCifrarRutaImagenUseCase
-import com.jonathanev.review.Domain.SetSubstringPathUseCase
 import com.jonathanev.review.Domain.repository.FileRepository
 import dagger.Module
 import dagger.Provides

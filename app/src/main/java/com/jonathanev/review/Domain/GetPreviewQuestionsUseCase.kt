@@ -1,9 +1,9 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.Data.Model.PreviewQuestion
-import com.jonathanev.review.Data.Model.prueba.AnswerState
-import com.jonathanev.review.Data.Model.prueba.QAItem
-import com.jonathanev.review.Data.Model.prueba.QuestionContent
+import com.jonathanev.review.data.Model.PreviewQuestion
+import com.jonathanev.review.data.Model.prueba.AnswerState
+import com.jonathanev.review.data.Model.prueba.QAItem
+import com.jonathanev.review.data.Model.prueba.QuestionContent
 import com.jonathanev.review.Domain.repository.FileRepository
 import javax.inject.Inject
 

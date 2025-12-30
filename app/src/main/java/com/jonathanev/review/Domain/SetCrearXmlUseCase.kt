@@ -1,7 +1,7 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.Data.GuiaRepositoryImpl
-import com.jonathanev.review.Data.Model.prueba.QuestionItem
+import com.jonathanev.review.data.GuiaRepositoryImpl
+import com.jonathanev.review.data.Model.prueba.QuestionItem
 import java.io.File
 import javax.inject.Inject
 

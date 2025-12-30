@@ -10,7 +10,7 @@ import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import com.jonathanev.review.Data.FolderAction
+import com.jonathanev.review.data.FolderAction
 import com.jonathanev.review.UI.ViewModel.FragmentsContentViewModel
 import com.jonathanev.review.databinding.FragmentFragmentsContentBinding
 import dagger.hilt.android.AndroidEntryPoint

@@ -1,6 +1,6 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.Data.provider.FilePathsProvider
+import com.jonathanev.review.data.provider.FilePathsProvider
 import io.mockk.mockk
 import org.junit.Before
 import org.junit.Rule

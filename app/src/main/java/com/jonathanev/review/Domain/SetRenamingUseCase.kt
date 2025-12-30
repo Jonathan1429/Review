@@ -1,6 +1,6 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.Data.FileAction
+import com.jonathanev.review.data.FileAction
 import com.jonathanev.review.Domain.repository.FileRepository
 import java.io.File
 import javax.inject.Inject

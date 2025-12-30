@@ -1,10 +1,8 @@
 package com.jonathanev.review.Fragments.ViewHolders
 
-import android.util.Log
-import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.jonathanev.review.Data.Model.PreviewQuestion
-import com.jonathanev.review.Data.Model.prueba.QuestionContent
+import com.jonathanev.review.data.Model.PreviewQuestion
+import com.jonathanev.review.data.Model.prueba.QuestionContent
 import com.jonathanev.review.R
 import com.jonathanev.review.databinding.ListPreviewQuestionsBinding
 import javax.inject.Inject

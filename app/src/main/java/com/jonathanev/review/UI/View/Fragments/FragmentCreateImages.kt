@@ -18,7 +18,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.davemorrissey.labs.subscaleview.ImageSource
-import com.jonathanev.review.Data.Model.prueba.QuestionContent
+import com.jonathanev.review.data.Model.prueba.QuestionContent
 import com.jonathanev.review.UI.ViewModel.Fragments.MainToolbarViewModel
 import com.jonathanev.review.UI.ViewModel.Fragments.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.databinding.FragmentCreateImagesBinding

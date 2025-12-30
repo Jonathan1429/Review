@@ -12,7 +12,7 @@
 
         <argument
             android:name="mode"
-            app:argType="com.jonathanev.review.Data.FolderAction"
+            app:argType="com.jonathanev.review.data.FolderAction"
             app:nullable="false" />
 
         <action
@@ -41,7 +41,7 @@
 
         <argument
             android:name="mode"
-            app:argType="com.jonathanev.review.Data.FolderAction"
+            app:argType="com.jonathanev.review.data.FolderAction"
             app:nullable="false" />
 
         <action

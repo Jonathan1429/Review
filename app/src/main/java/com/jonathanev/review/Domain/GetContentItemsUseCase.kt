@@ -1,10 +1,7 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.Data.Model.EstadoUI
-import com.jonathanev.review.Data.Model.InternalRules
-import com.jonathanev.review.Data.Model.prueba.QuestionContent
-import com.jonathanev.review.Data.Model.prueba.QuestionItem
-import kotlinx.coroutines.flow.update
+import com.jonathanev.review.data.Model.prueba.QuestionContent
+import com.jonathanev.review.data.Model.prueba.QuestionItem
 import javax.inject.Inject
 
 class GetContentItemsUseCase @Inject constructor() {

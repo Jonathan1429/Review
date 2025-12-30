@@ -1,6 +1,6 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.Data.Model.prueba.QuestionItem
+import com.jonathanev.review.data.Model.prueba.QuestionItem
 import javax.inject.Inject
 
 class DeleteCurrentQuestionUseCase @Inject constructor() {

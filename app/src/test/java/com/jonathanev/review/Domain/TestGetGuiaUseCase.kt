@@ -1,6 +1,6 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.Data.provider.GuiaProvider
+import com.jonathanev.review.data.provider.GuiaProvider
 import io.mockk.mockk
 
 class TestGetGuiaUseCase {

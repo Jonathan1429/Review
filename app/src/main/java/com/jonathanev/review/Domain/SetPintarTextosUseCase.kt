@@ -1,8 +1,8 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.Core.Constants.BASERUTA_IMG
-import com.jonathanev.review.Data.Model.prueba.QuestionContent
-import com.jonathanev.review.Data.repository.FileHelperImpl
+import com.jonathanev.review.data.Model.prueba.QuestionContent
+import com.jonathanev.review.data.media.MediaPaths
+import com.jonathanev.review.data.repository.FileHelperImpl
 import javax.inject.Inject
 
 class SetPintarTextosUseCase @Inject constructor(
@@ -18,7 +18,7 @@ class SetPintarTextosUseCase @Inject constructor(
             is QuestionContent.Image -> {
                 var descifrado = setCifrarRutaImagenUseCase(item.nameFile, 26 - 3)// cifrar(texto, 26 - 3)
                 //val cifrado = item.url
-                descifrado = descifrado.replace(BASERUTA_IMG.toRegex(), "")
+                descifrado = descifrado.replace(MediaPaths.BASERUTA_IMG.toRegex(), "")
                 var soloRuta = ruta.replaceAfterLast("/", "")
                 soloRuta = soloRuta.replaceFirst("guias", "imagenes")
                 val imagen = descifrado.replaceBeforeLast("/", "").replace("/", "")

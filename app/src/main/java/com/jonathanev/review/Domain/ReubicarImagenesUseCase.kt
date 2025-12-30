@@ -1,11 +1,10 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.Core.Constants.GUIAS
-import com.jonathanev.review.Core.Constants.IMAGENES
-import com.jonathanev.review.Core.Constants.VERSION2
-import com.jonathanev.review.Data.Model.prueba.QuestionContent
-import com.jonathanev.review.Data.Model.prueba.QuestionItem
-import com.jonathanev.review.Data.provider.FilePathsProvider
+import com.jonathanev.review.data.Model.prueba.QuestionContent
+import com.jonathanev.review.data.Model.prueba.QuestionItem
+import com.jonathanev.review.data.provider.FilePathsProvider
+import com.jonathanev.review.data.storage.StorageFolders
+import com.jonathanev.review.data.xml.Versions
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -23,9 +22,9 @@ class ReubicarImagenesUseCase @Inject constructor(
         respuestas: List<QuestionItem>
     ) {
         val version = getVersionUseCase.invoke(currentPath)
-        val oldPathImages = File(currentPath.path.replace(GUIAS, IMAGENES).replace(".xml", ""))
+        val oldPathImages = File(currentPath.path.replace(StorageFolders.GUIAS, StorageFolders.IMAGENES).replace(".xml", ""))
 
-        if (version == VERSION2){
+        if (version == Versions.VERSION2){
             val newPathImages = File(oldPathImages.parent, fileName)
             oldPathImages.renameTo(newPathImages)
         } else { // Version 1

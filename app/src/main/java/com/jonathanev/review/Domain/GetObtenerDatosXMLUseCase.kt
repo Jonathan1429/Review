@@ -1,8 +1,7 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.Data.GuiaRepository
-import com.jonathanev.review.Data.GuiaRepositoryImpl
-import com.jonathanev.review.Data.Model.prueba.QAItem
+import com.jonathanev.review.data.GuiaRepository
+import com.jonathanev.review.data.Model.prueba.QAItem
 import javax.inject.Inject
 
 class GetObtenerDatosXMLUseCase @Inject constructor(

@@ -1,10 +1,10 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.Data.GuiaRepositoryImpl
-import com.jonathanev.review.Data.Model.prueba.FolderModel
-import com.jonathanev.review.Data.Model.prueba.FolderUI
-import com.jonathanev.review.Data.provider.FilePathsProvider
-import com.jonathanev.review.Data.repository.FolderRepository
+import com.jonathanev.review.data.GuiaRepositoryImpl
+import com.jonathanev.review.data.Model.prueba.FolderModel
+import com.jonathanev.review.data.Model.prueba.FolderUI
+import com.jonathanev.review.data.provider.FilePathsProvider
+import com.jonathanev.review.data.repository.FolderRepository
 import com.jonathanev.review.Domain.repository.FileRepository
 import java.io.File
 import javax.inject.Inject

@@ -2,12 +2,12 @@ package com.jonathanev.review.UI.ViewModel.Fragments
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jonathanev.review.Data.FolderAction
-import com.jonathanev.review.Data.GuiaRepository
-import com.jonathanev.review.Data.Model.prueba.AnswerState
-import com.jonathanev.review.Data.Model.prueba.QuestionItem
-import com.jonathanev.review.Data.Model.prueba.UIMovingEvent
-import com.jonathanev.review.Data.provider.FilePathsProvider
+import com.jonathanev.review.data.FolderAction
+import com.jonathanev.review.data.GuiaRepository
+import com.jonathanev.review.data.Model.prueba.AnswerState
+import com.jonathanev.review.data.Model.prueba.QuestionItem
+import com.jonathanev.review.data.Model.prueba.UIMovingEvent
+import com.jonathanev.review.data.provider.FilePathsProvider
 import com.jonathanev.review.Domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.Domain.GetVersionUseCase
 import com.jonathanev.review.Domain.MoverArchivoUseCase

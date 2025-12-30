@@ -1,8 +1,8 @@
 package com.jonathanev.review.Domain
 
 import android.graphics.Color
-import com.jonathanev.review.Data.Model.prueba.FolderModel
-import com.jonathanev.review.Data.provider.FilePathsProvider
+import com.jonathanev.review.data.Model.prueba.FolderModel
+import com.jonathanev.review.data.provider.FilePathsProvider
 import com.jonathanev.review.R
 import javax.inject.Inject
 

@@ -4,17 +4,6 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jonathanev.review.Core.Constants.VERSION1
-import com.jonathanev.review.Data.Model.DataStoreManager
-import com.jonathanev.review.Data.Model.GuideUiState
-import com.jonathanev.review.Data.Model.prueba.AnswerState
-import com.jonathanev.review.Data.Model.prueba.ColorRange
-import com.jonathanev.review.Data.Model.prueba.QuestionContent
-import com.jonathanev.review.Data.Model.prueba.QuestionItem
-import com.jonathanev.review.Data.Model.prueba.TypeContent
-import com.jonathanev.review.Data.Model.prueba.UIStopEvent
-import com.jonathanev.review.Data.provider.FilePathsProvider
-import com.jonathanev.review.Data.provider.GuiaProvider
 import com.jonathanev.review.Domain.GetAttributesGuideUseCase
 import com.jonathanev.review.Domain.GetContentItemsUseCase
 import com.jonathanev.review.Domain.GetObtenerDatosXMLUseCase
@@ -24,6 +13,17 @@ import com.jonathanev.review.Domain.SetContentUseCase
 import com.jonathanev.review.Domain.SetCrearXmlUseCase
 import com.jonathanev.review.Domain.SetDecodePathImageUseCase
 import com.jonathanev.review.Domain.repository.FileRepository
+import com.jonathanev.review.data.Model.DataStoreManager
+import com.jonathanev.review.data.Model.GuideUiState
+import com.jonathanev.review.data.Model.prueba.AnswerState
+import com.jonathanev.review.data.Model.prueba.ColorRange
+import com.jonathanev.review.data.Model.prueba.QuestionContent
+import com.jonathanev.review.data.Model.prueba.QuestionItem
+import com.jonathanev.review.data.Model.prueba.TypeContent
+import com.jonathanev.review.data.Model.prueba.UIStopEvent
+import com.jonathanev.review.data.provider.FilePathsProvider
+import com.jonathanev.review.data.provider.GuiaProvider
+import com.jonathanev.review.data.xml.Versions
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -516,7 +516,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
             // 3. Gestión de Imágenes (Lógica unificada)
             // Determinamos la carpeta de búsqueda según versión (V1 usaba el parent)
-            val searchFolder = if (version == VERSION1) imagesFolder.parentFile else imagesFolder
+            val searchFolder = if (version == Versions.VERSION1) imagesFolder.parentFile else imagesFolder
 
             val allContent = preguntasProcesadas + respuestasProcesadas
             val listImagesXML =
@@ -533,7 +533,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             }
 
             // C. Mover imagenes
-            if (version == VERSION1) {
+            if (version == Versions.VERSION1) {
                 listImagesXML.filter { it.nameFile in currentDeviceNames }.forEach { image ->
                     val destination = File(imagesFolder, image.nameFile)
 

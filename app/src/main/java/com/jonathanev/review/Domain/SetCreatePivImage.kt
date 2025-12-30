@@ -1,6 +1,6 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.Data.provider.FilePathsProvider
+import com.jonathanev.review.data.provider.FilePathsProvider
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths

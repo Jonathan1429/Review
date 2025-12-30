@@ -1,6 +1,6 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.Data.Model.prueba.ColorRange
+import com.jonathanev.review.data.Model.prueba.ColorRange
 import javax.inject.Inject
 
 class SetColocarEtiquetasUseCase @Inject constructor() {

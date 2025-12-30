@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.jonathanev.review.Data.Model.IconDiffCallback
+import com.jonathanev.review.data.Model.IconDiffCallback
 import com.jonathanev.review.Fragments.ViewHolders.ListarIconosViewHolder
 import com.jonathanev.review.R
 

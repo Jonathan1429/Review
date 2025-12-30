@@ -1,13 +1,5 @@
 package com.jonathanev.review.Domain
 
-import android.text.SpannableStringBuilder
-import com.jonathanev.review.Data.Model.EstadoUI
-import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
-import io.mockk.every
-import io.mockk.mockk
-import org.junit.Assert.assertEquals
-import org.junit.Test
-
 class TestGetClickRegresarUseCase {
     /*private val setPintarTextosUseCase = mockk<SetPintarTextosUseCase>()
     private val getClickRegresarUseCase = GetClickRegresarUseCase(setPintarTextosUseCase)

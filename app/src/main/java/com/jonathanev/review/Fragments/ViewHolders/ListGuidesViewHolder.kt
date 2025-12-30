@@ -1,7 +1,7 @@
 package com.jonathanev.review.Fragments.ViewHolders
 
 import androidx.recyclerview.widget.RecyclerView
-import com.jonathanev.review.Data.Model.GuideModel
+import com.jonathanev.review.data.Model.GuideModel
 import com.jonathanev.review.databinding.ListCustomGuideBinding
 import javax.inject.Inject
 

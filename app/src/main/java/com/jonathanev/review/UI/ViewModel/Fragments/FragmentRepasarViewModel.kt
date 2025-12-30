@@ -3,11 +3,11 @@ package com.jonathanev.review.UI.ViewModel.Fragments
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jonathanev.review.Data.Model.EstadoUI
-import com.jonathanev.review.Data.Model.prueba.AnswerState
-import com.jonathanev.review.Data.Model.prueba.QuestionItem
-import com.jonathanev.review.Data.Model.prueba.TypeContent
-import com.jonathanev.review.Data.Model.prueba.UIStopEvent
+import com.jonathanev.review.data.Model.EstadoUI
+import com.jonathanev.review.data.Model.prueba.AnswerState
+import com.jonathanev.review.data.Model.prueba.QuestionItem
+import com.jonathanev.review.data.Model.prueba.TypeContent
+import com.jonathanev.review.data.Model.prueba.UIStopEvent
 import com.jonathanev.review.Domain.GetContentItemsUseCase
 import com.jonathanev.review.Domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.Domain.repository.FileRepository

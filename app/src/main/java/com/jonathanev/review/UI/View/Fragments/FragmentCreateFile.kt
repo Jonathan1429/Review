@@ -21,10 +21,10 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.jonathanev.review.Data.ActionGuide
-import com.jonathanev.review.Data.Model.ScreenData
-import com.jonathanev.review.Data.Model.prueba.TypeContent
-import com.jonathanev.review.Data.Model.prueba.UIStopEvent
+import com.jonathanev.review.data.ActionGuide
+import com.jonathanev.review.data.Model.ScreenData
+import com.jonathanev.review.data.Model.prueba.TypeContent
+import com.jonathanev.review.data.Model.prueba.UIStopEvent
 import com.jonathanev.review.Fragments.Adaptadores.ListCreateImagesAdapter
 import com.jonathanev.review.Fragments.Adaptadores.ListCreateTextsAdapter
 import com.jonathanev.review.R

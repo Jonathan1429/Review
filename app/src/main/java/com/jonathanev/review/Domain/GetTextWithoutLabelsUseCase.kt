@@ -1,6 +1,6 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.Data.Model.prueba.QuestionContent
+import com.jonathanev.review.data.Model.prueba.QuestionContent
 import javax.inject.Inject
 
 class GetTextWithoutLabelsUseCase @Inject constructor() {

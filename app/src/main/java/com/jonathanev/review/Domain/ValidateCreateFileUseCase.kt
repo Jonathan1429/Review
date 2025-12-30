@@ -1,17 +1,19 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.Core.Constants.DATASTORE
-import com.jonathanev.review.Core.Constants.GUIAS
-import com.jonathanev.review.Core.Constants.IMAGENES
-import com.jonathanev.review.Core.Constants.IMAGENESPIVOTE
-import com.jonathanev.review.Core.Constants.PRINCIPAL
-import com.jonathanev.review.Data.Model.prueba.UICreatingFile
+import com.jonathanev.review.data.Model.prueba.UICreatingFile
+import com.jonathanev.review.data.storage.StorageFolders
 import javax.inject.Inject
 
 class ValidateCreateFileUseCase @Inject constructor() {
-    operator fun invoke(name: String, description: String): UICreatingFile{
+    operator fun invoke(name: String, description: String): UICreatingFile {
         val invalidChars = listOf("/", ".")
-        val invalidNames = listOf(DATASTORE, GUIAS, IMAGENES, IMAGENESPIVOTE, PRINCIPAL)
+        val invalidNames = listOf(
+            StorageFolders.DATASTORE,
+            StorageFolders.GUIAS,
+            StorageFolders.IMAGENES,
+            StorageFolders.IMAGENESPIVOTE,
+            StorageFolders.PRINCIPAL
+        )
 
         val message = when {
             name.isBlank() -> "Debes tener un nombre de archivo"
@@ -26,7 +28,7 @@ class ValidateCreateFileUseCase @Inject constructor() {
         }
 
         //val exist = fileExistUseCase.invoke(name)
-        return if (!message.isNullOrEmpty()){
+        return if (!message.isNullOrEmpty()) {
             UICreatingFile.Message(message)
         } else {
             UICreatingFile.ContinuedProcess(name, description)

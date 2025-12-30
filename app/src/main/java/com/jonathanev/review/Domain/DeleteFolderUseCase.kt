@@ -1,14 +1,13 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.Core.Constants.GUIAS
-import com.jonathanev.review.Core.Constants.IMAGENES
-import com.jonathanev.review.Data.Model.prueba.UIStopEvent
+import com.jonathanev.review.data.Model.prueba.UIStopEvent
+import com.jonathanev.review.data.storage.StorageFolders
 import java.io.File
 import javax.inject.Inject
 
 class DeleteFolderUseCase @Inject constructor() {
     operator fun invoke(currentPath: File): UIStopEvent {
-        val pathImages = File(currentPath.path.replace(GUIAS, IMAGENES))
+        val pathImages = File(currentPath.path.replace(StorageFolders.GUIAS, StorageFolders.IMAGENES))
 
         return if (currentPath.deleteRecursively()){
             pathImages.deleteRecursively()

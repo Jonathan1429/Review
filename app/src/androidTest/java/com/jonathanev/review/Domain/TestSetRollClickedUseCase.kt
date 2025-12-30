@@ -1,14 +1,5 @@
 package com.jonathanev.review.Domain
 
-import android.text.SpannableStringBuilder
-import com.jonathanev.review.Data.Model.EstadoUI
-import com.jonathanev.review.Data.Model.SpanPalabraModel
-import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
-import io.mockk.every
-import io.mockk.mockk
-import org.junit.Assert.assertEquals
-import org.junit.Test
-
 class TestSetRollClickedUseCase {
     /*private val setSpanPalabraUseCase = mockk<SetSpanPalabraUseCase>()
     private val setColocarEtiquetasUseCase = mockk<SetColocarEtiquetasUseCase>()

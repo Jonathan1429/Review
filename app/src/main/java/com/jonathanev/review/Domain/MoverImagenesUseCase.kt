@@ -1,8 +1,7 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.Core.Constants.VERSION1
-import com.jonathanev.review.Core.Constants.VERSION2
-import com.jonathanev.review.Data.Model.prueba.QuestionItem
+import com.jonathanev.review.data.Model.prueba.QuestionItem
+import com.jonathanev.review.data.xml.Versions
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -44,7 +43,7 @@ class MoverImagenesUseCase @Inject constructor(
             }
         }
 
-        if (version == VERSION2){
+        if (version == Versions.VERSION2){
             oldPath.deleteRecursively()
         }
     }

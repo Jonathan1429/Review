@@ -1,7 +1,6 @@
 package com.jonathanev.review.UI.View.Fragments
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,8 +16,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
-import com.jonathanev.review.Data.FolderAction
-import com.jonathanev.review.Data.Model.prueba.UIMovingEvent
+import com.jonathanev.review.data.FolderAction
+import com.jonathanev.review.data.Model.prueba.UIMovingEvent
 import com.jonathanev.review.R
 import com.jonathanev.review.UI.ViewModel.Fragments.FragmentWithoutFilesViewModel
 import com.jonathanev.review.UI.ViewModel.Fragments.MainToolbarViewModel

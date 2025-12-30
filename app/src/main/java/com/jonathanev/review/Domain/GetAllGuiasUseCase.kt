@@ -1,6 +1,6 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.Data.Model.GuideModel
+import com.jonathanev.review.data.Model.GuideModel
 import java.io.File
 import javax.inject.Inject
 

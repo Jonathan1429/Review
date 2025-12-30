@@ -3,8 +3,8 @@ package com.jonathanev.review.Fragments.Adaptadores
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
-import com.jonathanev.review.Data.Model.QuestionImageDiffCallback
-import com.jonathanev.review.Data.Model.prueba.QuestionContent
+import com.jonathanev.review.data.Model.QuestionImageDiffCallback
+import com.jonathanev.review.data.Model.prueba.QuestionContent
 import com.jonathanev.review.Fragments.ViewHolders.ListItemPintarImagenesViewHolder
 import com.jonathanev.review.databinding.ListPintarImagenesRepasarBinding
 

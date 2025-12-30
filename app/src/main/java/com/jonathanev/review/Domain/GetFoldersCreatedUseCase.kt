@@ -1,8 +1,8 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.Core.Constants.PRINCIPAL
-import com.jonathanev.review.Data.provider.FilePathsProvider
 import com.jonathanev.review.Domain.repository.FileRepository
+import com.jonathanev.review.data.provider.FilePathsProvider
+import com.jonathanev.review.data.storage.StorageFolders
 import java.io.File
 import javax.inject.Inject
 
@@ -16,7 +16,7 @@ class GetFoldersCreatedUseCase @Inject constructor(
         val foldersCreated = listaCarpetas.map { it.name }.toTypedArray()
 
         if (File(currentPath) != filePathsProvider.fileGuides) {
-            foldersCreated.plus(PRINCIPAL)
+            foldersCreated.plus(StorageFolders.PRINCIPAL)
         }
 
         return foldersCreated

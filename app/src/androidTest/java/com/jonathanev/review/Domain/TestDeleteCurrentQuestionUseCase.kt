@@ -1,13 +1,5 @@
 package com.jonathanev.review.Domain
 
-import android.text.SpannableStringBuilder
-import com.jonathanev.review.Data.Model.EstadoUI
-import com.jonathanev.review.Data.Model.ValidacionesGuiaModel
-import io.mockk.every
-import io.mockk.mockk
-import junit.framework.TestCase.assertEquals
-import org.junit.Test
-
 class TestDeleteCurrentQuestionUseCase {
     /*private val setPintarTextosUseCase = mockk<SetPintarTextosUseCase>()
     private val deleteCurrentQuestionUseCase = DeleteCurrentQuestionUseCase(setPintarTextosUseCase)

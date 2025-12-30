@@ -3,8 +3,8 @@ package com.jonathanev.review.Fragments.Adaptadores
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
-import com.jonathanev.review.Data.Model.QuestionTextDiffCallback
-import com.jonathanev.review.Data.Model.prueba.QuestionContent
+import com.jonathanev.review.data.Model.QuestionTextDiffCallback
+import com.jonathanev.review.data.Model.prueba.QuestionContent
 import com.jonathanev.review.Fragments.ViewHolders.ListCreateTextsViewHolder
 import com.jonathanev.review.databinding.ListCreateTextsBinding
 

@@ -1,21 +1,3 @@
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.jonathanev.review.Data.GuiaRepositoryImpl
-import com.jonathanev.review.Data.provider.FilePathsProvider
-import com.jonathanev.review.Data.provider.GuiaProvider
-import com.jonathanev.review.Data.repository.FileHelperImpl
-import com.jonathanev.review.Domain.DeleteContentGuidesUseCase
-import com.jonathanev.review.Domain.GetAllFoldersUseCase
-import com.jonathanev.review.Domain.GetFoldersCreatedUseCase
-import com.jonathanev.review.Domain.GetFolderPosicionUseCase
-import com.jonathanev.review.Domain.GetFoldersWithNumGuidesUseCase
-import com.jonathanev.review.Domain.repository.FileRepository
-import com.jonathanev.review.UI.ViewModel.Fragments.FragDialListarFoldersViewModel
-import io.mockk.mockk
-import org.junit.Assert.*
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-
 //@RunWith(RobolectricTestRunner::class)
 class FragDialListarFoldersViewModelTest {
 /*

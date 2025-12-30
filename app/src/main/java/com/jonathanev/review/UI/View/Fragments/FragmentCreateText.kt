@@ -10,26 +10,26 @@ import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.TextWatcher
 import android.text.style.ForegroundColorSpan
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.annotation.ColorInt
 import androidx.core.widget.ImageViewCompat
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
-import com.jonathanev.review.Core.Constants.BASERUTA_IMG_CIFRADO
-import com.jonathanev.review.Data.Model.SpanPalabraModel
-import com.jonathanev.review.Data.Model.prueba.ColorRange
-import com.jonathanev.review.Data.Model.prueba.QuestionContent
 import com.jonathanev.review.UI.ViewModel.Fragments.FragmentCreateTextViewModel
 import com.jonathanev.review.UI.ViewModel.Fragments.MainToolbarViewModel
 import com.jonathanev.review.UI.ViewModel.Fragments.SharedFragmentCreateFileViewModel
+import com.jonathanev.review.data.Model.SpanPalabraModel
+import com.jonathanev.review.data.Model.prueba.ColorRange
+import com.jonathanev.review.data.Model.prueba.QuestionContent
+import com.jonathanev.review.data.media.MediaPaths
 import com.jonathanev.review.databinding.FragmentCreateTextBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -156,7 +156,7 @@ class FragmentCreateText : Fragment() {
 
             override fun afterTextChanged(texto: Editable?) {
                 if (!texto.toString()
-                        .contains(BASERUTA_IMG_CIFRADO) && (binding.etPregResp.length() - longCaracteres) == 1
+                        .contains(MediaPaths.BASERUTA_IMG_CIFRADO) && (binding.etPregResp.length() - longCaracteres) == 1
                 ) {
                     // Si hay un salto de linea o es color negro no se pinta nada
                     if (colorActual != -1 && !seAgregoSaltoDeLinea) {

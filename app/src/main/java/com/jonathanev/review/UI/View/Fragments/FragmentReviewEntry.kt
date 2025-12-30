@@ -10,7 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
-import com.jonathanev.review.Data.FolderAction
+import com.jonathanev.review.data.FolderAction
 import com.jonathanev.review.R
 import com.jonathanev.review.UI.ViewModel.Fragments.FragReviewEntryViewModel
 import com.jonathanev.review.databinding.FragmentReviewEntryBinding

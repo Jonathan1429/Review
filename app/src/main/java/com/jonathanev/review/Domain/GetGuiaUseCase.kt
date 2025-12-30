@@ -1,7 +1,7 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.Data.Model.GuideModel
-import com.jonathanev.review.Data.provider.GuiaProvider
+import com.jonathanev.review.data.Model.GuideModel
+import com.jonathanev.review.data.provider.GuiaProvider
 import javax.inject.Inject
 
 class GetGuiaUseCase @Inject constructor(

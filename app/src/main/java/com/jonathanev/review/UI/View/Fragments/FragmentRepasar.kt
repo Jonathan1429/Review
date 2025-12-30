@@ -16,8 +16,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.jonathanev.review.Data.Model.prueba.TypeContent
-import com.jonathanev.review.Data.Model.prueba.UIStopEvent
+import com.jonathanev.review.data.Model.prueba.TypeContent
+import com.jonathanev.review.data.Model.prueba.UIStopEvent
 import com.jonathanev.review.Fragments.Adaptadores.ListItemPintarImagenesAdapter
 import com.jonathanev.review.Fragments.Adaptadores.ListItemPintarTextosAdapter
 import com.jonathanev.review.R
