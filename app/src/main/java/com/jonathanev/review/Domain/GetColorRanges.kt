@@ -1,12 +1,12 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.presentation.model.ColorRange
-import com.jonathanev.review.presentation.model.QuestionContent
+import com.jonathanev.review.presentation.model.ColorRangeDomain
+import com.jonathanev.review.presentation.model.QuestionContentDomain
 import javax.inject.Inject
 
 class GetColorRanges @Inject constructor() {
-    operator fun invoke(originalText: String): QuestionContent.Text{
-        val colorRange = mutableListOf<ColorRange>()
+    operator fun invoke(originalText: String): QuestionContentDomain.Text{
+        val colorRangeDomain = mutableListOf<ColorRangeDomain>()
         var text = originalText
         var contColorPreg: Int = 0
 
@@ -27,11 +27,11 @@ class GetColorRanges @Inject constructor() {
             val endText = text.indexOf("«", startText )
             text = text.replaceFirst("«.*?»".toRegex(), "")
 
-            colorRange.add(ColorRange(startText, endText, color))
+            colorRangeDomain.add(ColorRangeDomain(startText, endText, color))
 
             contColorPreg++
         }
 
-        return QuestionContent.Text(text, colorRange.toList())
+        return QuestionContentDomain.Text(text, colorRangeDomain.toList())
     }
 }

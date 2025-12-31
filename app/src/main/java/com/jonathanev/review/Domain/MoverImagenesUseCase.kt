@@ -1,6 +1,6 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.presentation.model.QuestionItem
+import com.jonathanev.review.presentation.model.QuestionItemDomain
 import com.jonathanev.review.data.xml.Versions
 import java.io.File
 import java.nio.file.Files
@@ -17,8 +17,8 @@ class MoverImagenesUseCase @Inject constructor(
         version: String,
         oldPathFile: File,
         newPathFile: File,
-        preguntas: MutableList<QuestionItem>,
-        respuestas: MutableList<QuestionItem>
+        preguntas: MutableList<QuestionItemDomain>,
+        respuestas: MutableList<QuestionItemDomain>
     ) {
         val oldPath = getRutaImagenesXMLUseCase.invoke(oldPathFile, version)
         val newPath = getRutaImagenesXMLUseCase.invoke(newPathFile, version)

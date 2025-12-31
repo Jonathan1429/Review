@@ -1,10 +1,10 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.presentation.model.ColorRange
+import com.jonathanev.review.presentation.model.ColorRangeDomain
 import javax.inject.Inject
 
 class SetColocarEtiquetasUseCase @Inject constructor() {
-    operator fun invoke(text: String, listSpans: List<ColorRange>): String {
+    operator fun invoke(text: String, listSpans: List<ColorRangeDomain>): String {
         val sb = StringBuilder(text)
         var offset = 0
 

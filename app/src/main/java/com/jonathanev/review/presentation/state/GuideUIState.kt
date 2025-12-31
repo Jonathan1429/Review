@@ -1,12 +1,13 @@
-package com.jonathanev.review.data.Model
+package com.jonathanev.review.presentation.state
 
 import android.net.Uri
-import com.jonathanev.review.presentation.model.QuestionItem
+import com.jonathanev.review.presentation.model.QuestionItemDomain
 import com.jonathanev.review.Domain.model.TypeContent
+import com.jonathanev.review.presentation.model.QuestionItemUi
 
 data class GuideUiState(
-    val preguntas: List<QuestionItem> = emptyList(),
-    val respuestas: List<QuestionItem> = emptyList(),
+    val preguntas: List<QuestionItemUi> = emptyList(),
+    val respuestas: List<QuestionItemUi> = emptyList(),
     val contadorPregunta: Int = 0,
     val contadorContenido: Int = -1,
     val typeContent: TypeContent = TypeContent.QUESTION,

@@ -1,58 +1,75 @@
 package com.jonathanev.review.UI.Utils
 
-import com.jonathanev.review.presentation.model.ColorRange
+import com.jonathanev.review.Domain.model.PreviewQuestionDomain
+import com.jonathanev.review.presentation.model.PreviewQuestionUi
+import com.jonathanev.review.presentation.model.ColorRangeDomain
 import com.jonathanev.review.presentation.model.ColorRangeUi
-import com.jonathanev.review.presentation.model.QuestionContent
+import com.jonathanev.review.presentation.model.QuestionContentDomain
 import com.jonathanev.review.presentation.model.QuestionContentUi
-import com.jonathanev.review.presentation.model.QuestionItem
-import com.jonathanev.review.presentation.model.QuestionUiItem
+import com.jonathanev.review.presentation.model.QuestionItemDomain
+import com.jonathanev.review.presentation.model.QuestionItemUi
 
-fun QuestionItem.toUi(): QuestionUiItem {
-    return QuestionUiItem(
+fun PreviewQuestionDomain.toUi(): PreviewQuestionUi {
+    return PreviewQuestionUi(
+        this.question.toUi(),
+        noImages = this.noImages
+    )
+}
+
+fun QuestionItemDomain.toUi(): QuestionItemUi {
+    return QuestionItemUi(
         content = content.map { it.toUi() }
     )
 }
 
-fun QuestionUiItem.toDomain(): QuestionItem {
-    return QuestionItem(
+fun QuestionItemUi.toDomain(): QuestionItemDomain {
+    return QuestionItemDomain(
         content = content.map { it.toDomain() }
     )
 }
 
-fun QuestionContent.toUi(): QuestionContentUi {
+fun QuestionContentDomain.Text.toUi(): QuestionContentUi.Text {
+    return QuestionContentUi.Text(this.text, this.colorRangeDomains.map { it.toUi() })
+}
+
+fun QuestionContentDomain.Image.toUi(): QuestionContentUi.Image {
+    return QuestionContentUi.Image(this.uri, this.nameFile)
+}
+
+fun QuestionContentDomain.toUi(): QuestionContentUi {
     return when (this) {
-        is QuestionContent.None -> QuestionContentUi.None
-        is QuestionContent.Text -> QuestionContentUi.Text(
+        is QuestionContentDomain.None -> QuestionContentUi.None
+        is QuestionContentDomain.Text -> QuestionContentUi.Text(
             text = this.text,
-            colorRanges = this.colorRanges.map { it.toUi() }
+            colorRanges = this.colorRangeDomains.map { it.toUi() }
         )
 
-        is QuestionContent.Image -> QuestionContentUi.Image(
-            decodedPath = this.uri,
-            encodedPath = this.nameFile
+        is QuestionContentDomain.Image -> QuestionContentUi.Image(
+            uri = this.uri,
+            nameFile = this.nameFile
         )
     }
 }
 
-fun QuestionContentUi.toDomain(): QuestionContent {
+fun QuestionContentUi.toDomain(): QuestionContentDomain {
     return when (this) {
-        is QuestionContentUi.None -> QuestionContent.None
-        is QuestionContentUi.Text -> QuestionContent.Text(
+        is QuestionContentUi.None -> QuestionContentDomain.None
+        is QuestionContentUi.Text -> QuestionContentDomain.Text(
             text = this.text,
-            colorRanges = this.colorRanges.map { it.toDomain() }
+            colorRangeDomains = this.colorRanges.map { it.toDomain() }
         )
 
-        is QuestionContentUi.Image -> QuestionContent.Image(
-            uri = this.decodedPath,
-            nameFile = this.encodedPath
+        is QuestionContentUi.Image -> QuestionContentDomain.Image(
+            uri = this.uri,
+            nameFile = this.nameFile
         )
     }
 }
 
-fun ColorRange.toUi(): ColorRangeUi {
+fun ColorRangeDomain.toUi(): ColorRangeUi {
     return ColorRangeUi(start = start, end = end, color = color)
 }
 
-fun ColorRangeUi.toDomain(): ColorRange {
-    return ColorRange(start = start, end = end, color = color)
+fun ColorRangeUi.toDomain(): ColorRangeDomain {
+    return ColorRangeDomain(start = start, end = end, color = color)
 }

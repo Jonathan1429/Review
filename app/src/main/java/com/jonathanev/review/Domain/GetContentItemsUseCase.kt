@@ -1,28 +1,28 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.presentation.model.QuestionContent
-import com.jonathanev.review.presentation.model.QuestionItem
+import com.jonathanev.review.presentation.model.QuestionContentDomain
+import com.jonathanev.review.presentation.model.QuestionItemDomain
 import javax.inject.Inject
 
 class GetContentItemsUseCase @Inject constructor() {
     operator fun invoke(
-        contentList: List<QuestionItem>,
+        contentList: List<QuestionItemDomain>,
         contadorPregunta: Int
-    ): Pair<List<QuestionContent.Text>, List<QuestionContent.Image>> {
-        val listTexts: MutableList<QuestionContent.Text> = mutableListOf()
-        val listImages: MutableList<QuestionContent.Image> = mutableListOf()
+    ): Pair<List<QuestionContentDomain.Text>, List<QuestionContentDomain.Image>> {
+        val listTexts: MutableList<QuestionContentDomain.Text> = mutableListOf()
+        val listImages: MutableList<QuestionContentDomain.Image> = mutableListOf()
 
         contentList[contadorPregunta].content.forEach { item ->
             when (item) {
-                is QuestionContent.Image -> {
+                is QuestionContentDomain.Image -> {
                     listImages.add(item.copy())
                 }
 
-                is QuestionContent.Text -> {
+                is QuestionContentDomain.Text -> {
                     listTexts.add(item.copy())
                 }
 
-                QuestionContent.None -> Unit
+                QuestionContentDomain.None -> Unit
             }
         }
 

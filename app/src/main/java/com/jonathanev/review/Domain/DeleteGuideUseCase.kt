@@ -1,7 +1,7 @@
 package com.jonathanev.review.Domain
 
 import com.jonathanev.review.data.GuiaRepository
-import com.jonathanev.review.presentation.model.QuestionContent
+import com.jonathanev.review.presentation.model.QuestionContentDomain
 import com.jonathanev.review.presentation.event.UIStopEvent
 import java.io.File
 import javax.inject.Inject
@@ -10,7 +10,7 @@ class DeleteGuideUseCase @Inject constructor(
     private val guiaRepository: GuiaRepository,
     private val deleteImagesFromGuideUseCase: DeleteImagesFromGuideUseCase
 ) {
-    operator fun invoke(currentGuide: File, listImages: List<QuestionContent.Image>): UIStopEvent {
+    operator fun invoke(currentGuide: File, listImages: List<QuestionContentDomain.Image>): UIStopEvent {
         val version = guiaRepository.getVersion(currentGuide)
 
         return if (currentGuide.delete()){

@@ -34,7 +34,7 @@
             app:nullable="true" />
         <argument
             android:name="screenData"
-            app:argType="com.jonathanev.review.data.Model.ScreenData"
+            app:argType="com.jonathanev.review.presentation.model.ScreenData"
             app:nullable="true" />
 
         <action

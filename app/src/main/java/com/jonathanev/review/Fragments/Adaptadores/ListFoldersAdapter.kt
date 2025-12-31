@@ -3,7 +3,7 @@ package com.jonathanev.review.Fragments.Adaptadores
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
-import com.jonathanev.review.data.Model.FolderUIDiffCallback
+import com.jonathanev.review.presentation.ui.adapter.FolderUIDiffCallback
 import com.jonathanev.review.presentation.model.FolderUI
 import com.jonathanev.review.Fragments.ViewHolders.ListFoldersViewHolder
 import com.jonathanev.review.databinding.ListItemFolderBinding

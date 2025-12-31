@@ -13,17 +13,20 @@ import com.jonathanev.review.Domain.SetContentUseCase
 import com.jonathanev.review.Domain.SetCrearXmlUseCase
 import com.jonathanev.review.Domain.SetDecodePathImageUseCase
 import com.jonathanev.review.Domain.repository.FileRepository
-import com.jonathanev.review.data.Model.DataStoreManager
-import com.jonathanev.review.data.Model.GuideUiState
-import com.jonathanev.review.presentation.state.AnswerState
-import com.jonathanev.review.presentation.model.ColorRange
-import com.jonathanev.review.presentation.model.QuestionContent
-import com.jonathanev.review.presentation.model.QuestionItem
+import com.jonathanev.review.data.datastore.DataStoreManager
+import com.jonathanev.review.presentation.state.GuideUiState
+import com.jonathanev.review.presentation.state.ResponseDomain
+import com.jonathanev.review.presentation.model.ColorRangeDomain
+import com.jonathanev.review.presentation.model.QuestionContentDomain
+import com.jonathanev.review.presentation.model.QuestionItemDomain
 import com.jonathanev.review.Domain.model.TypeContent
+import com.jonathanev.review.UI.Utils.toDomain
+import com.jonathanev.review.UI.Utils.toUi
 import com.jonathanev.review.presentation.event.UIStopEvent
 import com.jonathanev.review.data.provider.FilePathsProvider
 import com.jonathanev.review.data.provider.GuiaProvider
 import com.jonathanev.review.data.xml.Versions
+import com.jonathanev.review.presentation.model.QuestionContentUi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -48,7 +51,6 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     private val setContentUseCase: SetContentUseCase,
     private val setCrearXmlUseCase: SetCrearXmlUseCase,
     private val setDecodePathImageUseCase: SetDecodePathImageUseCase,
-    private val getContentItemsUseCase: GetContentItemsUseCase,
     private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
     private val getAttributesGuideUseCase: GetAttributesGuideUseCase,
     private val getVersionUseCase: GetVersionUseCase,
@@ -70,13 +72,13 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             initialValue = false
         )
 
-    val imageList: StateFlow<List<QuestionContent.Image>> = _uiState
+    val imageList: StateFlow<List<QuestionContentUi.Image>> = _uiState
         .map { state ->
             val currentSource =
                 if (state.typeContent == TypeContent.QUESTION) state.preguntas else state.respuestas
             currentSource.getOrNull(state.contadorPregunta)
                 ?.content
-                ?.filterIsInstance<QuestionContent.Image>()
+                ?.filterIsInstance<QuestionContentUi.Image>()
                 ?: emptyList()
         }
         .stateIn(
@@ -86,13 +88,13 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         )
 
     // 3. Estado Derivado: Para la lista de textos
-    val textList: StateFlow<List<QuestionContent.Text>> = _uiState
+    val textList: StateFlow<List<QuestionContentUi.Text>> = _uiState
         .map { state ->
             val currentSource =
                 if (state.typeContent == TypeContent.QUESTION) state.preguntas else state.respuestas
             currentSource.getOrNull(state.contadorPregunta)
                 ?.content
-                ?.filterIsInstance<QuestionContent.Text>()
+                ?.filterIsInstance<QuestionContentUi.Text>()
                 ?: emptyList()
         }
         .stateIn(
@@ -115,7 +117,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         _uiState.value = GuideUiState()
     }
 
-    fun setColocarEtiquetas(text: String, listSpans: List<ColorRange>): String {
+    fun setColocarEtiquetas(text: String, listSpans: List<ColorRangeDomain>): String {
         return setColocarEtiquetasUseCase.invoke(text, listSpans)
     }
 
@@ -128,30 +130,23 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         }
     }
 
-    fun addTextContent(textWithLabels: String, listSpans: List<ColorRange>) {
-        val newContent = QuestionContent.Text(textWithLabels, listSpans)
+    fun addTextContent(textWithLabels: String, listSpans: List<ColorRangeDomain>) {
+        val newContent = QuestionContentDomain.Text(textWithLabels, listSpans)
 
         _uiState.update { state ->
             val isQuestion = state.typeContent == TypeContent.QUESTION
-            val sourceList = if (isQuestion) state.preguntas else state.respuestas
+            val sourceListUi = if (isQuestion) state.preguntas else state.respuestas
 
             // 1. Calculamos la nueva lista de preguntas/respuestas
-            val updatedList = if (sourceList.lastIndex < state.contadorPregunta) {
-                sourceList + QuestionItem(content = listOf(newContent))
+            val updatedList = if (sourceListUi.lastIndex < state.contadorPregunta) {
+                sourceListUi + QuestionItemDomain(content = listOf(newContent)).toUi()
             } else {
-                setContentUseCase.invoke(
-                    newContent, sourceList, state.contadorPregunta,
-                    state.contadorContenido, state.isEditing, QuestionContent.Text::class.java
+                val sourceListDomain = sourceListUi.map { it.toDomain() }
+                val listQuestionItemDomain = setContentUseCase.invoke(
+                    newContent, sourceListDomain, state.contadorPregunta,
+                    state.contadorContenido, state.isEditing, QuestionContentDomain.Text::class.java
                 )
-            }
-
-            // 2. Extraemos el contenido que se debe pintar ahora mismo (lo que hacía showContents)
-            // Usamos la lista actualizada para obtener el item actual
-            val currentItem = updatedList.getOrNull(state.contadorPregunta)
-            val (newTextList, newImageList) = if (currentItem != null) {
-                getContentItemsUseCase.invoke(updatedList, state.contadorPregunta)
-            } else {
-                Pair(emptyList(), emptyList())
+                listQuestionItemDomain.map { it.toUi() }
             }
 
             state.copy(
@@ -168,22 +163,25 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             val uriAAgregar = currentState.actualUri?.toString() ?: return@update currentState
 
             val isQuestion = currentState.typeContent == TypeContent.QUESTION
-            val sourceList = if (isQuestion) currentState.preguntas else currentState.respuestas
+            val sourceListUi = if (isQuestion) currentState.preguntas else currentState.respuestas
 
-            val newImage = QuestionContent.Image(uri = uriAAgregar, nameFile = "")
+            val newImage = QuestionContentDomain.Image(uri = uriAAgregar, nameFile = "")
 
             // Usamos tu UseCase para actualizar la lista maestra
-            val updatedList = if (sourceList.lastIndex < currentState.contadorPregunta) {
-                sourceList + QuestionItem(content = listOf(newImage))
+            val updatedList = if (sourceListUi.lastIndex < currentState.contadorPregunta) {
+                sourceListUi + QuestionItemDomain(content = listOf(newImage)).toUi()
             } else {
-                setContentUseCase.invoke(
+                val sourceListDomain = sourceListUi.map { it.toDomain() }
+
+                val listQuestionItemDomain = setContentUseCase.invoke(
                     newContent = newImage,
-                    sourceList = sourceList,
+                    sourceList = sourceListDomain,
                     contadorPregunta = currentState.contadorPregunta,
                     contadorContenido = currentState.contadorContenido,
                     isEditingMode = currentState.isEditing,
-                    filterType = QuestionContent.Image::class.java
+                    filterType = QuestionContentDomain.Image::class.java
                 )
+                listQuestionItemDomain.map { it.toUi() }
             }
 
             // Solo retornamos las listas maestras y reseteamos flags
@@ -206,27 +204,21 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     fun deleteImage(position: Int) {
         _uiState.update { currentState ->
             val isQuestion = currentState.typeContent == TypeContent.QUESTION
-            val sourceList = if (isQuestion) currentState.preguntas else currentState.respuestas
+            val sourceListUi = if (isQuestion) currentState.preguntas else currentState.respuestas
 
             // 1. Calculamos la lista actualizada usando la lógica funcional de borrado
-            val updatedList = deleteFilteredContent(
-                sourceList = sourceList,
+            val sourceListToDomain = sourceListUi.map { it.toDomain() }
+            val updatedListDomain = deleteFilteredContent(
+                sourceList = sourceListToDomain,
                 contadorPregunta = currentState.contadorPregunta,
                 posFiltered = position,
-                filterType = QuestionContent.Image::class.java
+                filterType = QuestionContentDomain.Image::class.java
             )
-
-            // 2. Sincronizamos lo que la UI debe mostrar (Reemplaza a showContents)
-            // Usamos updatedList para que el cambio sea inmediato en los adaptadores
-            val responseContent = getContentItemsUseCase.invoke(
-                updatedList,
-                currentState.contadorPregunta
-            )
-
+            val updatedListToUi = updatedListDomain.map { it.toUi() }
             // 3. Emitimos el nuevo estado con todas las limpiezas integradas
             currentState.copy(
-                preguntas = if (isQuestion) updatedList else currentState.preguntas,
-                respuestas = if (!isQuestion) updatedList else currentState.respuestas,
+                preguntas = if (isQuestion) updatedListToUi else currentState.preguntas,
+                respuestas = if (!isQuestion) updatedListToUi else currentState.respuestas,
                 actualUri = null,         // resetContentLists integrado
                 isEditing = false,
                 contadorContenido = -1
@@ -237,27 +229,23 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     fun deleteText(position: Int) {
         _uiState.update { currentState ->
             val isQuestion = currentState.typeContent == TypeContent.QUESTION
-            val sourceList = if (isQuestion) currentState.preguntas else currentState.respuestas
+            val sourceListUi = if (isQuestion) currentState.preguntas else currentState.respuestas
 
             // 1. Obtenemos la lista actualizada usando la función de borrado funcional
-            val updatedList = deleteFilteredContent(
-                sourceList = sourceList,
+            val sourceListToDomain = sourceListUi.map { it.toDomain() }
+
+            val updatedListDomain = deleteFilteredContent(
+                sourceList = sourceListToDomain,
                 contadorPregunta = currentState.contadorPregunta,
                 posFiltered = position,
-                filterType = QuestionContent.Text::class.java
+                filterType = QuestionContentDomain.Text::class.java
             )
-
-            // 2. Recalculamos el contenido que debe ver la UI (Reemplaza a showContents)
-            // Es vital pasar la 'updatedList' para que el cambio sea visible de inmediato
-            val responseContent = getContentItemsUseCase.invoke(
-                updatedList,
-                currentState.contadorPregunta
-            )
+            val updatedListToUi = updatedListDomain.map { it.toUi() }
 
             // 3. Emitimos el nuevo estado completo
             currentState.copy(
-                preguntas = if (isQuestion) updatedList else currentState.preguntas,
-                respuestas = if (!isQuestion) updatedList else currentState.respuestas,
+                preguntas = if (isQuestion) updatedListToUi else currentState.preguntas,
+                respuestas = if (!isQuestion) updatedListToUi else currentState.respuestas,
                 actualUri = null, // resetContentLists integrado
                 isEditing = false,
                 contadorContenido = -1
@@ -266,11 +254,11 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     }
 
     private fun deleteFilteredContent(
-        sourceList: List<QuestionItem>,
+        sourceList: List<QuestionItemDomain>,
         contadorPregunta: Int,
         posFiltered: Int,
-        filterType: Class<out QuestionContent>
-    ): List<QuestionItem> {
+        filterType: Class<out QuestionContentDomain>
+    ): List<QuestionItemDomain> {
         return sourceList.mapIndexed { index, item ->
             if (index == contadorPregunta) {
                 // 1. Identificamos el elemento exacto dentro de la sublista filtrada
@@ -312,13 +300,6 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 TypeContent.QUESTION
             }
 
-            /*// Obtenemos qué listas mostrar según el nuevo tipo
-            val sourceList =
-                if (newType == TypeContent.QUESTION) state.preguntas else state.respuestas*/
-
-            // Obtenemos el contenido para la UI (Reemplaza a showContents)
-            //val responseContent = getContentItemsUseCase.invoke(sourceList, state.contadorPregunta)
-
             state.copy(
                 typeContent = newType,
                 actualUri = null,           // resetContentLists integrado
@@ -343,13 +324,14 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         }
 
         // Validar contraparte (si estoy en pregunta, validar que la respuesta tenga texto)
-        val listToCheck = if (currentState.typeContent == TypeContent.QUESTION)
+        val listToCheckUi = if (currentState.typeContent == TypeContent.QUESTION)
             currentState.respuestas
         else
             currentState.preguntas
 
-        val hasCounterpartText = listToCheck.getOrNull(currentState.contadorPregunta)?.content
-            ?.any { it is QuestionContent.Text } ?: false
+        val listCheckToDomain = listToCheckUi.map { it.toDomain() }
+        val hasCounterpartText = listCheckToDomain.getOrNull(currentState.contadorPregunta)?.content
+            ?.any { it is QuestionContentDomain.Text } ?: false
 
         if (!hasCounterpartText) {
             emitShowMessage() // Mantiene tu lógica de mostrar mensaje si no hay contraparte
@@ -384,13 +366,14 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             return
         }
 
-        val listToCheck = if (currentState.typeContent == TypeContent.QUESTION)
+        val listToCheckUi = if (currentState.typeContent == TypeContent.QUESTION)
             currentState.respuestas
         else
             currentState.preguntas
+        val listCheckToDomain = listToCheckUi.map { it.toDomain() }
 
-        val hasCounterpart = listToCheck.getOrNull(currentState.contadorPregunta)?.content
-            ?.any { it is QuestionContent.Text } ?: false
+        val hasCounterpart = listCheckToDomain.getOrNull(currentState.contadorPregunta)?.content
+            ?.any { it is QuestionContentDomain.Text } ?: false
 
         if (!hasCounterpart) {
             emitShowMessage()
@@ -437,24 +420,28 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             val datos = getObtenerDatosXMLUseCase.invoke(ruta = getCurrentPath())
 
             // 1. Mapeamos las listas completas desde el XML
-            val nuevasPreguntas = datos.map { it.question }
-            val nuevasRespuestas = datos.mapNotNull { (it.answer as? AnswerState.Filled)?.item }
+            val newQuestionsDomain = datos.mapNotNull { (it.question as? ResponseDomain.Filled)?.item }
+            val newAnswersDomain = datos.mapNotNull { (it.answer as? ResponseDomain.Filled)?.item }
+            val newQuestionsToUi = newQuestionsDomain.map { it.toUi() }
+            val newAnswersToUi = newAnswersDomain.map { it.toUi() }
 
             _uiState.update { state ->
                 state.copy(
                     contadorPregunta = positionContent,
                     typeContent = TypeContent.QUESTION,
-                    preguntas = nuevasPreguntas,
-                    respuestas = nuevasRespuestas,
+                    preguntas = newQuestionsToUi,
+                    respuestas = newAnswersToUi,
                 )
             }
         }
     }
 
     private fun isDataValid(): Boolean {
-        val state = uiState.value
-        val questionHasContent = state.preguntas.isEmpty()
+        val stateUi = uiState.value
+        val preguntasDomain = stateUi.preguntas.map { it.toDomain() }
+        val respuestasDomain = stateUi.respuestas.map { it.toDomain() }
 
+        val questionHasContent = preguntasDomain.isEmpty()
         if (questionHasContent) {
             sendNotification(
                 UIStopEvent.ShowMessage("Debes tener minimo algo para guardar")
@@ -464,9 +451,9 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
         // Validar consistencia en la posición actual
         val currentQuestionHasText =
-            state.preguntas.getOrNull(state.contadorPregunta)?.hasText() ?: false
+            preguntasDomain.getOrNull(stateUi.contadorPregunta)?.hasText() ?: false
         val currentAnswerHasText =
-            state.respuestas.getOrNull(state.contadorPregunta)?.hasText() ?: false
+            respuestasDomain.getOrNull(stateUi.contadorPregunta)?.hasText() ?: false
 
         if (!currentQuestionHasText || !currentAnswerHasText) {
             // Usamos el mensaje genérico que ya tenías definido
@@ -478,8 +465,8 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     }
 
     // Extension function para limpiar el código de las listas
-    private fun QuestionItem.hasText(): Boolean {
-        return this.content.any { it is QuestionContent.Text }
+    private fun QuestionItemDomain.hasText(): Boolean {
+        return this.content.any { it is QuestionContentDomain.Text }
     }
 
     fun saveOldGuide() {
@@ -489,19 +476,24 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
         viewModelScope.launch {
             val currentPath = File(getCurrentPath())
+            val preguntasDomain = uiState.value.preguntas.map { it.toDomain() }
+            val respuestasDomain = uiState.value.respuestas.map { it.toDomain() }
 
             // 1. Transformación de datos (Dominio)
             // Generamos nombres de archivo antes de cualquier operación de archivos
-            val (preguntasProcesadas, respuestasProcesadas) = setDecodePathImageUseCase(
-                uiState.value.preguntas,
-                uiState.value.respuestas
+            val (preguntasProcesadas, respuestasProcesadas) = setDecodePathImageUseCase.invoke(
+               preguntasDomain,
+               respuestasDomain
             )
+
+            val preguntasProcesadasUi = preguntasProcesadas.map { it.toUi() }
+            val respuestasProcesadasUi = respuestasProcesadas.map { it.toUi() }
 
             // Actualizamos estado para que la UI y el proceso de guardado usen lo mismo
             _uiState.update {
                 it.copy(
-                    preguntas = preguntasProcesadas,
-                    respuestas = respuestasProcesadas
+                    preguntas = preguntasProcesadasUi,
+                    respuestas =respuestasProcesadasUi
                 )
             }
 
@@ -520,7 +512,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
             val allContent = preguntasProcesadas + respuestasProcesadas
             val listImagesXML =
-                allContent.flatMap { it.content }.filterIsInstance<QuestionContent.Image>()
+                allContent.flatMap { it.content }.filterIsInstance<QuestionContentDomain.Image>()
 
             // B. Identificar faltantes
             var currentDeviceNames =
@@ -583,18 +575,24 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
+            val preguntasDomain = uiState.value.preguntas.map { it.toDomain() }
+            val respuestasDomain = uiState.value.respuestas.map { it.toDomain() }
+
             // 2. Transformación de datos (Capa de Dominio)
             // Obtenemos las listas con los nombres de imagen ya generados (1.png, 2.png, etc.)
-            val (preguntasProcesadas, respuestasProcesadas) = setDecodePathImageUseCase(
-                uiState.value.preguntas,
-                uiState.value.respuestas
+            val (preguntasProcesadas, respuestasProcesadas) = setDecodePathImageUseCase.invoke(
+                preguntasDomain,
+                respuestasDomain
             )
+
+            val preguntasProcesadasUi = preguntasProcesadas.map { it.toUi() }
+            val respuestasProcesadasUi = respuestasProcesadas.map { it.toUi() }
 
             // 3. Actualizamos el estado de la UI para que coincida con lo que vamos a guardar
             _uiState.update {
                 it.copy(
-                    preguntas = preguntasProcesadas,
-                    respuestas = respuestasProcesadas
+                    preguntas = preguntasProcesadasUi,
+                    respuestas = respuestasProcesadasUi
                 )
             }
 
@@ -613,7 +611,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             // Usamos las listas PROCESADAS, no las del state viejo
             val listImages = (preguntasProcesadas + respuestasProcesadas)
                 .flatMap { it.content }
-                .filterIsInstance<QuestionContent.Image>()
+                .filterIsInstance<QuestionContentDomain.Image>()
 
             if (listImages.isNotEmpty()) {
                 guiaProvider.saveImagesInDevice(listImages, imagesFolder)

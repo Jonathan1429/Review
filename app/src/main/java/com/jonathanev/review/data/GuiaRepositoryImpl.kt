@@ -8,12 +8,12 @@ import com.jonathanev.review.Domain.SetSubstringPathUseCase
 import com.jonathanev.review.Domain.model.ContentType
 import com.jonathanev.review.Domain.model.QAType
 import com.jonathanev.review.R
-import com.jonathanev.review.data.Model.GuideModel
-import com.jonathanev.review.presentation.state.AnswerState
+import com.jonathanev.review.data.model.GuideXmlModel
+import com.jonathanev.review.presentation.state.ResponseDomain
 import com.jonathanev.review.presentation.model.FolderUiModel
-import com.jonathanev.review.presentation.state.QAItem
-import com.jonathanev.review.presentation.model.QuestionContent
-import com.jonathanev.review.presentation.model.QuestionItem
+import com.jonathanev.review.presentation.state.QAItemDomain
+import com.jonathanev.review.presentation.model.QuestionContentDomain
+import com.jonathanev.review.presentation.model.QuestionItemDomain
 import com.jonathanev.review.data.media.MediaPaths
 import com.jonathanev.review.data.xml.Attributes
 import com.jonathanev.review.data.xml.Structure
@@ -61,7 +61,7 @@ class GuiaRepositoryImpl @Inject constructor(
             ?: emptyList()
     }
 
-    override fun getGuides(file: File): List<GuideModel> {
+    override fun getGuides(file: File): List<GuideXmlModel> {
         return file.listFiles()
             ?.filter { !it.isDirectory }
             ?.mapNotNull { item ->
@@ -76,8 +76,8 @@ class GuiaRepositoryImpl @Inject constructor(
         nameGuide: String,
         description: String,
         currentPath: File,
-        preguntas: List<QuestionItem>,
-        respuestas: List<QuestionItem>,
+        preguntas: List<QuestionItemDomain>,
+        respuestas: List<QuestionItemDomain>,
     ): Boolean {
         val parentDir = currentPath.parent ?: return false
         val newFile = File(
@@ -129,7 +129,7 @@ class GuiaRepositoryImpl @Inject constructor(
 
     private fun writeQuestionsAnswers(
         serializer: XmlSerializer,
-        items: List<QuestionItem>,
+        items: List<QuestionItemDomain>,
         type: String // Question or Answer
     ) {
         // Creo la etiqueta interrogante con su respectiva pregunta
@@ -139,16 +139,16 @@ class GuiaRepositoryImpl @Inject constructor(
 
             for (content in item.content) {
                 when (content) {
-                    is QuestionContent.Image -> {
+                    is QuestionContentDomain.Image -> {
                         serializer.startTag("", XmlMapper.toXmlContent(ContentType.IMAGE))
                         serializer.attribute("", Attributes.URI, "")
                         serializer.attribute("", Attributes.NAMEFILE, content.nameFile)
                         serializer.endTag("", XmlTagsV2.TEXTO)
                     }
 
-                    QuestionContent.None -> Unit
+                    QuestionContentDomain.None -> Unit
 
-                    is QuestionContent.Text -> {
+                    is QuestionContentDomain.Text -> {
                         serializer.startTag("", XmlMapper.toXmlContent(ContentType.IMAGE))
                         serializer.attribute("", XmlTagsV2.TEXTO, content.text)
                         serializer.endTag("", XmlMapper.toXmlContent(ContentType.IMAGE))
@@ -160,8 +160,8 @@ class GuiaRepositoryImpl @Inject constructor(
         }
     }
 
-    private fun obtenerDatosXMLV2(ruta: String, version: String): List<QAItem> {
-        val qaItem = mutableListOf<QAItem>()
+    private fun obtenerDatosXMLV2(ruta: String, version: String): List<QAItemDomain> {
+        val qaItemDomain = mutableListOf<QAItemDomain>()
 
         val db = DocumentBuilderFactory.newInstance().newDocumentBuilder()
         val file = File(ruta)
@@ -169,14 +169,14 @@ class GuiaRepositoryImpl @Inject constructor(
 
         //listaQA.addAll(QAItem(getQAXML(doc, QUESTION),getQAXML(doc, ANSWER)))
         //questionItems.addAll()
-        getQAXML(qaItem, doc, XmlMapper.toXmlQA(QAType.QUESTION), ruta, version)
-        getQAXML(qaItem, doc, XmlMapper.toXmlQA(QAType.ANSWER), ruta, version)
+        getQAXML(qaItemDomain, doc, XmlMapper.toXmlQA(QAType.QUESTION), ruta, version)
+        getQAXML(qaItemDomain, doc, XmlMapper.toXmlQA(QAType.ANSWER), ruta, version)
 
-        return qaItem
+        return qaItemDomain
     }
 
     private fun getQAXML(
-        qaItem: MutableList<QAItem>,
+        qaItemDomain: MutableList<QAItemDomain>,
         doc: Document,
         typeContent: String,
         ruta: String,
@@ -186,7 +186,7 @@ class GuiaRepositoryImpl @Inject constructor(
         val questionsNode = doc.getElementsByTagName(typeContent) //Question/Answer
         for (i in 0 until questionsNode.length) {
             val element = questionsNode.item(i) as Element
-            val contentList = mutableListOf<QuestionContent>()
+            val contentList = mutableListOf<QuestionContentDomain>()
 
             val texts = element.getElementsByTagName(XmlMapper.toXmlContent(ContentType.TEXT))
             for (j in 0 until texts.length) {
@@ -195,9 +195,9 @@ class GuiaRepositoryImpl @Inject constructor(
                 val qcText = getColorRanges.invoke(textValue)
 
                 contentList.add(
-                    QuestionContent.Text(
+                    QuestionContentDomain.Text(
                         text = qcText.text,
-                        colorRanges = qcText.colorRanges // tu lógica aquí
+                        colorRangeDomains = qcText.colorRangeDomains // tu lógica aquí
                     )
                 )
             }
@@ -213,22 +213,22 @@ class GuiaRepositoryImpl @Inject constructor(
                     nameFile = nameFile
                 )
                 contentList.add(
-                    QuestionContent.Image(uri, nameFile)
+                    QuestionContentDomain.Image(uri, nameFile)
                 )
             }
 
-            val item = QuestionItem(contentList)
+            val item = QuestionItemDomain(contentList)
             if (typeContent == XmlMapper.toXmlQA(QAType.QUESTION)) {
-                qaItem.add(QAItem(question = item))
+                qaItemDomain.add(QAItemDomain(question = ResponseDomain.Filled(item)))
             } else {
-                val current = qaItem[i]
-                qaItem[i] = current.copy(answer = AnswerState.Filled(item))
+                val current = qaItemDomain[i]
+                qaItemDomain[i] = current.copy(answer = ResponseDomain.Filled(item))
             }
         }
     }
 
-    private fun obtenerDatosXMLV1(ruta: String, version: String): List<QAItem> {
-        val listaQA = mutableListOf<QAItem>()
+    private fun obtenerDatosXMLV1(ruta: String, version: String): List<QAItemDomain> {
+        val listaQA = mutableListOf<QAItemDomain>()
 
         val dbf = DocumentBuilderFactory.newInstance()
 
@@ -247,40 +247,40 @@ class GuiaRepositoryImpl @Inject constructor(
                 val ans = e.getAttribute(XmlTagsV1.RESPUESTA)
 
                 // ---- PREGUNTA ----
-                val preguntaContent = mutableListOf<QuestionContent>()
+                val preguntaContent = mutableListOf<QuestionContentDomain>()
 
                 val preguntaProcesada = if (ques.contains(MediaPaths.BASERUTA_IMG_CIFRADO)) {
                     var decoded = setCifrarRutaImagenUseCase.invoke(ques, 26 - 3)
                     decoded = setSubstringPathUseCase.invoke(ruta, decoded, version)
                     val nameFile = decoded.substringAfterLast("/")
-                    QuestionContent.Image(uri = decoded, nameFile = nameFile)
+                    QuestionContentDomain.Image(uri = decoded, nameFile = nameFile)
                 } else {
                     getColorRanges.invoke(ques)
                 }
 
                 preguntaContent.add(preguntaProcesada)
-                val preguntaItem = QuestionItem(preguntaContent.toList())
+                val preguntaItem = QuestionItemDomain(preguntaContent.toList())
 
                 // ---- RESPUESTA ----
-                val respuestaContent = mutableListOf<QuestionContent>()
+                val respuestaContent = mutableListOf<QuestionContentDomain>()
 
                 val respuestaProcesada = if (ans.contains(MediaPaths.BASERUTA_IMG_CIFRADO)) {
                     var decoded = setCifrarRutaImagenUseCase.invoke(ans, 26 - 3)
                     decoded = setSubstringPathUseCase.invoke(ruta, decoded, version)
                     val nameFile = decoded.substringAfterLast("/")
-                    QuestionContent.Image(uri = decoded, nameFile = nameFile)
+                    QuestionContentDomain.Image(uri = decoded, nameFile = nameFile)
                 } else {
                     getColorRanges.invoke(ans)
                 }
 
                 respuestaContent.add(respuestaProcesada)
-                val respuestaItem = QuestionItem(respuestaContent.toList())
+                val respuestaItem = QuestionItemDomain(respuestaContent.toList())
 
 
                 listaQA.add(
-                    QAItem(
-                        question = preguntaItem,
-                        answer = AnswerState.Filled(respuestaItem)
+                    QAItemDomain(
+                        question = ResponseDomain.Filled(preguntaItem),
+                        answer = ResponseDomain.Filled(respuestaItem)
                     )
                 )
             }
@@ -292,7 +292,7 @@ class GuiaRepositoryImpl @Inject constructor(
         return listaQA
     }
 
-    override fun getXMLVersion(ruta: String): List<QAItem> {
+    override fun getXMLVersion(ruta: String): List<QAItemDomain> {
         val db = DocumentBuilderFactory.newInstance().newDocumentBuilder()
         val file = File(ruta)
         val doc = db.parse(file)
@@ -308,7 +308,7 @@ class GuiaRepositoryImpl @Inject constructor(
             obtenerDatosXMLV2(ruta, version)
     }
 
-    override fun getAttributesGuide(file: File): GuideModel {
+    override fun getAttributesGuide(file: File): GuideXmlModel {
         val db = DocumentBuilderFactory.newInstance().newDocumentBuilder()
         val doc = db.parse(file)
 
@@ -330,7 +330,7 @@ class GuiaRepositoryImpl @Inject constructor(
             name = element.getAttribute("nombreGuia")
         }
 
-        return GuideModel(
+        return GuideXmlModel(
             nameGuide = name,
             description = description
         )
@@ -340,8 +340,8 @@ class GuiaRepositoryImpl @Inject constructor(
         file: File,
         fileName: String,
         description: String,
-        preguntas: List<QuestionItem>,
-        respuestas: List<QuestionItem>
+        preguntas: List<QuestionItemDomain>,
+        respuestas: List<QuestionItemDomain>
     ): Boolean {
         return saveFileV2(
             fileName,

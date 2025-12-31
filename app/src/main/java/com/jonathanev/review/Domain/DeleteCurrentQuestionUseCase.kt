@@ -1,12 +1,12 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.presentation.model.QuestionItem
+import com.jonathanev.review.presentation.model.QuestionItemDomain
 import javax.inject.Inject
 
 class DeleteCurrentQuestionUseCase @Inject constructor() {
     operator fun invoke(
-        preguntas: MutableList<QuestionItem>,
-        respuestas: MutableList<QuestionItem>,
+        preguntas: MutableList<QuestionItemDomain>,
+        respuestas: MutableList<QuestionItemDomain>,
         contadorPregunta: Int,
     ) {
         if (contadorPregunta in preguntas.indices) preguntas.removeAt(contadorPregunta)

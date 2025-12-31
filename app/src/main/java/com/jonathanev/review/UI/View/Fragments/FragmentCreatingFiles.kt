@@ -24,7 +24,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.jonathanev.review.data.ActionGuide
 import com.jonathanev.review.data.FolderAction
-import com.jonathanev.review.data.Model.ScreenData
+import com.jonathanev.review.presentation.model.ScreenData
 import com.jonathanev.review.presentation.state.CreatingFileUiState
 import com.jonathanev.review.presentation.event.UIStopEvent
 import com.jonathanev.review.Fragments.Adaptadores.ListarIconosAdapter

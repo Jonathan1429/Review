@@ -1,7 +1,7 @@
 package com.jonathanev.review.DI
 
 import android.content.Context
-import com.jonathanev.review.data.Model.DataStoreManager
+import com.jonathanev.review.data.datastore.DataStoreManager
 import com.jonathanev.review.data.provider.FilePathsProvider
 import com.jonathanev.review.data.repository.FileHelperImpl
 import com.jonathanev.review.data.repository.FileRepositoryImpl

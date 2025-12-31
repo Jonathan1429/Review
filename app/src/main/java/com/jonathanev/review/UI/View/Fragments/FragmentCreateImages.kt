@@ -18,7 +18,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.davemorrissey.labs.subscaleview.ImageSource
-import com.jonathanev.review.presentation.model.QuestionContent
+import com.jonathanev.review.presentation.model.QuestionContentDomain
 import com.jonathanev.review.UI.ViewModel.Fragments.MainToolbarViewModel
 import com.jonathanev.review.UI.ViewModel.Fragments.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.databinding.FragmentCreateImagesBinding
@@ -47,8 +47,8 @@ class FragmentCreateImages : Fragment() {
 
         val data = arguments?.getParcelable(
             "questionImage",
-            QuestionContent.Image::class.java
-        ) ?: QuestionContent.None
+            QuestionContentDomain.Image::class.java
+        ) ?: QuestionContentDomain.None
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -81,8 +81,8 @@ class FragmentCreateImages : Fragment() {
         findNavController().navigateUp()
     }
 
-    private fun initUI(item: QuestionContent) {
-        if (item is QuestionContent.Image){
+    private fun initUI(item: QuestionContentDomain) {
+        if (item is QuestionContentDomain.Image){
             binding.ivImagen.setImage(ImageSource.uri(item.uri))
         }
 

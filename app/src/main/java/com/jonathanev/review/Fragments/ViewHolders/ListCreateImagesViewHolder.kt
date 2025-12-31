@@ -3,15 +3,16 @@ package com.jonathanev.review.Fragments.ViewHolders
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DecodeFormat
-import com.jonathanev.review.presentation.model.QuestionContent
+import com.jonathanev.review.presentation.model.QuestionContentDomain
 import com.jonathanev.review.databinding.ListCreateImagesBinding
+import com.jonathanev.review.presentation.model.QuestionContentUi
 
 class ListCreateImagesViewHolder(
     private val binding: ListCreateImagesBinding,
     private val onEditClicked: (Int) -> Unit,
     private val onDeleteClicked: (Int) -> Unit
 ): RecyclerView.ViewHolder(binding.root) {
-    fun bind(image: QuestionContent.Image) {
+    fun bind(image: QuestionContentUi.Image) {
         Glide.with(binding.ivImagen.context)
             .load(image.uri)
             .centerCrop()

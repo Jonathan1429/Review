@@ -1,10 +1,10 @@
 package com.jonathanev.review.Fragments.ViewHolders
 
 import androidx.recyclerview.widget.RecyclerView
-import com.jonathanev.review.data.Model.PreviewQuestion
-import com.jonathanev.review.presentation.model.QuestionContent
+import com.jonathanev.review.presentation.model.PreviewQuestionUi
 import com.jonathanev.review.R
 import com.jonathanev.review.databinding.ListPreviewQuestionsBinding
+import com.jonathanev.review.presentation.model.QuestionContentUi
 import javax.inject.Inject
 
 class ListPreviewQuestionsViewHolder @Inject constructor(
@@ -12,19 +12,19 @@ class ListPreviewQuestionsViewHolder @Inject constructor(
     private val clickedPlay: (Int) -> Unit,
     private val clickedEdit: (Int) -> Unit,
 ): RecyclerView.ViewHolder(binding.root) {
-    fun bind(previewQuestion: PreviewQuestion) {
-        when(previewQuestion.question){
-            is QuestionContent.Image -> {
+    fun bind(previewQuestionUi: PreviewQuestionUi) {
+        when(previewQuestionUi.question){
+            is QuestionContentUi.Image -> {
                 binding.previewQuestion.text = binding.previewQuestion.context.getString(R.string.withoutPreviewQuestion)
-                binding.noImages.text = previewQuestion.noImages
+                binding.noImages.text = previewQuestionUi.noImages
             }
-            QuestionContent.None -> {
+            QuestionContentUi.None -> {
                 binding.previewQuestion.text = binding.previewQuestion.context.getString(R.string.withoutPreviewQuestion)
-                binding.noImages.text = previewQuestion.noImages
+                binding.noImages.text = previewQuestionUi.noImages
             }
-            is QuestionContent.Text -> {
-                binding.previewQuestion.text = previewQuestion.question.text
-                binding.noImages.text = previewQuestion.noImages
+            is QuestionContentUi.Text -> {
+                binding.previewQuestion.text = previewQuestionUi.question.text
+                binding.noImages.text = previewQuestionUi.noImages
             }
         }
 

@@ -2,8 +2,8 @@ package com.jonathanev.review.data.repository
 
 import android.content.Context
 import android.net.Uri
-import com.jonathanev.review.data.Model.DataStoreManager
-import com.jonathanev.review.presentation.model.QuestionContent
+import com.jonathanev.review.data.datastore.DataStoreManager
+import com.jonathanev.review.presentation.model.QuestionContentDomain
 import com.jonathanev.review.data.provider.FilePathsProvider
 import com.jonathanev.review.Domain.repository.FileRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -35,7 +35,7 @@ class FileRepositoryImpl @Inject constructor(
     // Ya no necesitas override fun getCurrentPath(): String, pero si lo conservas:
     override fun getCurrentPath(): String = currentPathFlow.value
 
-    override suspend fun saveImage(image: QuestionContent.Image, imagesPath: File) {
+    override suspend fun saveImage(image: QuestionContentDomain.Image, imagesPath: File) {
         val uri = Uri.parse(image.uri)
         val fileName = image.nameFile
 

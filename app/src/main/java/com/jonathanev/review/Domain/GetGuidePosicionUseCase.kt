@@ -1,12 +1,12 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.data.Model.GuideModel
-import com.jonathanev.review.data.Model.GuideResult
+import com.jonathanev.review.Domain.model.GuideDomainModel
+import com.jonathanev.review.Domain.model.GuideResultDomain
 import javax.inject.Inject
 
 class GetGuidePosicionUseCase @Inject constructor() {
-    operator fun invoke(position: Int, guides: List<GuideModel>): GuideResult {
-        return guides.getOrNull(position)?.let { GuideResult.Success(it) }
-            ?: GuideResult.Error("No se encontró la carpeta en la posición $position")
+    operator fun invoke(position: Int, guides: List<GuideDomainModel>): GuideResultDomain {
+        return guides.getOrNull(position)?.let { GuideResultDomain.Success(it) }
+            ?: GuideResultDomain.Error("No se encontró la carpeta en la posición $position")
     }
 }

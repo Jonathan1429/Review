@@ -1,7 +1,7 @@
 package com.jonathanev.review.Domain
 
 import com.jonathanev.review.data.GuiaRepositoryImpl
-import com.jonathanev.review.presentation.model.QuestionItem
+import com.jonathanev.review.presentation.model.QuestionItemDomain
 import java.io.File
 import javax.inject.Inject
 
@@ -12,8 +12,8 @@ class SetCrearXmlUseCase @Inject constructor(
         nameGuide: String,
         description: String,
         currentPath: File,
-        preguntas: List<QuestionItem>,
-        respuestas: List<QuestionItem>,
+        preguntas: List<QuestionItemDomain>,
+        respuestas: List<QuestionItemDomain>,
     ): Boolean {
         return guiaRepositoryImpl.saveFileV2(nameGuide, description, currentPath, preguntas, respuestas)
     }

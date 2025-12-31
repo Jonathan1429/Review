@@ -20,7 +20,6 @@ import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jonathanev.review.data.FolderAction
-import com.jonathanev.review.data.Model.GuideResult
 import com.jonathanev.review.presentation.event.UIMovingEvent
 import com.jonathanev.review.presentation.event.UIStopEvent
 import com.jonathanev.review.Fragments.Adaptadores.ListGuidesAdapter
@@ -28,6 +27,7 @@ import com.jonathanev.review.R
 import com.jonathanev.review.UI.ViewModel.Fragments.FragmentListGuidesViewModel
 import com.jonathanev.review.UI.ViewModel.Fragments.MainToolbarViewModel
 import com.jonathanev.review.databinding.FragmentListGuidesBinding
+import com.jonathanev.review.presentation.model.GuideResultUi
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -59,11 +59,12 @@ class FragmentListGuides : Fragment() {
 
         initUI(mode)
         initListeners()
+        observers()
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.eventsMovingFiles.collect { message ->
-                    when(message){
+                    when (message) {
                         is UIMovingEvent.ShowMessage -> {
                             Toast.makeText(
                                 requireContext(),
@@ -155,6 +156,86 @@ class FragmentListGuides : Fragment() {
         }
     }
 
+    private fun observers() {
+        viewModel.selectedGuide.observe(viewLifecycleOwner) { guideResult ->
+            when (guideResult) {
+                is GuideResultUi.Error -> Toast.makeText(
+                    requireContext(),
+                    "No se pudo cargar la guia",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                is GuideResultUi.Success -> {
+                    val builder = AlertDialog.Builder(context)
+                    builder.setIcon(R.drawable.ic_advertencia)
+                    builder.setTitle("¿Qué acción deseas realizar?")
+                    builder.setItems(
+                        arrayOf<CharSequence>(
+                            "Abrir",
+                            "Eliminar",
+                            "Cambiar nombre",
+                            "Mover",
+                            "Cancelar"
+                        )
+                    ) { dialog, which ->
+                        when (which) {
+                            0 -> {
+                                viewModel.changeFilePath(guideResult.guideUiModel.nameGuide)
+                                findNavController().navigate(
+                                    R.id.action_to_preview,
+                                )
+                            }
+
+                            1 ->
+                                // Se ejecuta cuando quiere eliminar la guía.
+                                AlertDialog.Builder(context)
+                                    .setTitle("¡Atención!")
+                                    .setMessage(
+                                        "¿Estás seguro que deseas eliminar la" +
+                                                " guia?"
+                                    )
+                                    .setPositiveButton("Si") { _, _ ->
+                                        viewModel.deleteFiles(guideResult.guideUiModel.nameGuide)
+                                    }
+                                    .setNegativeButton("Cancelar") { _, _ -> dialog.dismiss() }
+                                    .create().show()
+
+                            2 -> {
+                                viewModel.changeFilePath(guideResult.guideUiModel.nameGuide)
+
+                                findNavController().navigate(
+                                    R.id.action_to_create_graph,
+                                    bundleOf("mode" to FolderAction.RenamingFile)
+                                )
+                            }
+
+                            3 -> {
+                                val filePath =
+                                    viewModel.getFilePath(guideResult.guideUiModel.nameGuide)
+                                viewModel.changeFilePathToMain()
+
+                                findNavController().navigate(
+                                    R.id.action_to_content_graph,
+                                    bundleOf("mode" to FolderAction.MovingFile(filePath))
+                                )
+
+                                Log.i("Moviendo: ", filePath.path)
+                            }
+
+                            4 -> {
+                                // Cuando cancela se ejecuta esta acción
+                                dialog.dismiss()
+                                Toast.makeText(context, "Cancelaste la acción", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+                        }
+                    }
+                    builder.create().show()
+                }
+            }
+        }
+    }
+
     private fun initListeners() {
         binding.btnCreateGuide.setOnClickListener {
             findNavController().navigate(
@@ -167,7 +248,7 @@ class FragmentListGuides : Fragment() {
     private fun initUI(mode: FolderAction) {
         viewModelToolbar.changeTitle("Guias")
 
-        if (mode is FolderAction.MovingFile){
+        if (mode is FolderAction.MovingFile) {
             viewModelToolbar.isBtnCancelVisible(View.VISIBLE)
             viewModelToolbar.isBtnSuccessVisible(View.VISIBLE)
         }
@@ -191,76 +272,6 @@ class FragmentListGuides : Fragment() {
             return
         }
 
-        val guideResult = viewModel.getGuideSelected(position)
-
-        when (guideResult) {
-            is GuideResult.Error -> Log.i("Error", "Error")
-            is GuideResult.Success -> {
-                val builder = AlertDialog.Builder(context)
-                builder.setIcon(R.drawable.ic_advertencia)
-                builder.setTitle("¿Qué acción deseas realizar?")
-                builder.setItems(
-                    arrayOf<CharSequence>(
-                        "Abrir",
-                        "Eliminar",
-                        "Cambiar nombre",
-                        "Mover",
-                        "Cancelar"
-                    )
-                ) { dialog, which ->
-                    when (which) {
-                        0 -> {
-                            viewModel.changeFilePath(guideResult.folder.nameGuide)
-                            findNavController().navigate(
-                                R.id.action_to_preview,
-                            )
-                        }
-
-                        1 ->
-                            // Se ejecuta cuando quiere eliminar la guía.
-                            AlertDialog.Builder(context)
-                                .setTitle("¡Atención!")
-                                .setMessage(
-                                    "¿Estás seguro que deseas eliminar la" +
-                                            " guia?"
-                                )
-                                .setPositiveButton("Si") { _, _ ->
-                                    viewModel.deleteFiles(guideResult.folder.nameGuide)
-                                }
-                                .setNegativeButton("Cancelar") { _, _ -> dialog.dismiss() }
-                                .create().show()
-
-                        2 -> {
-                            viewModel.changeFilePath(guideResult.folder.nameGuide)
-
-                            findNavController().navigate(
-                                R.id.action_to_create_graph,
-                                bundleOf("mode" to FolderAction.RenamingFile)
-                            )
-                        }
-
-                        3 -> {
-                            val filePath = viewModel.getFilePath(guideResult.folder.nameGuide)
-                            viewModel.changeFilePathToMain()
-
-                            findNavController().navigate(
-                                R.id.action_to_content_graph,
-                                bundleOf("mode" to FolderAction.MovingFile(filePath))
-                            )
-
-                            Log.i("Moviendo: ", filePath.path)
-                        }
-
-                        4 -> {
-                            // Cuando cancela se ejecuta esta acción
-                            dialog.dismiss()
-                            Toast.makeText(context, "Cancelaste la acción", Toast.LENGTH_SHORT)
-                                .show()
-                        }
-                    }
-                }
-                builder.create().show()
-            }
-        }
+        viewModel.getGuideSelected(position)
     }
 }

@@ -3,15 +3,16 @@ package com.jonathanev.review.Fragments.Adaptadores
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
-import com.jonathanev.review.data.Model.QuestionImageDiffCallback
-import com.jonathanev.review.presentation.model.QuestionContent
+import com.jonathanev.review.presentation.ui.adapter.QuestionImageDiffCallback
+import com.jonathanev.review.presentation.model.QuestionContentDomain
 import com.jonathanev.review.Fragments.ViewHolders.ListCreateImagesViewHolder
 import com.jonathanev.review.databinding.ListCreateImagesBinding
+import com.jonathanev.review.presentation.model.QuestionContentUi
 
 class ListCreateImagesAdapter(
     private val onEditClicked:(Int) -> Unit,
     private val onDeleteClicked: (Int) -> Unit
-): ListAdapter<QuestionContent.Image, ListCreateImagesViewHolder>(QuestionImageDiffCallback()) {
+): ListAdapter<QuestionContentUi.Image, ListCreateImagesViewHolder>(QuestionImageDiffCallback()) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ListCreateImagesViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         val binding = ListCreateImagesBinding.inflate(inflater, parent, false)

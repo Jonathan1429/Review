@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.data.GuiaRepository
-import com.jonathanev.review.data.Model.FoldersUiState
+import com.jonathanev.review.presentation.state.FoldersUiState
 import com.jonathanev.review.data.provider.FilePathsProvider
 import com.jonathanev.review.Domain.CreateFoldersUseCase
 import com.jonathanev.review.Domain.MoveNonFolderFilesToOtrosUseCase

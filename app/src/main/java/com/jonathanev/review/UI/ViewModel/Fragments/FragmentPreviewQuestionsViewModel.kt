@@ -2,16 +2,17 @@ package com.jonathanev.review.UI.ViewModel.Fragments
 
 import androidx.lifecycle.ViewModel
 import com.jonathanev.review.data.GuiaRepository
-import com.jonathanev.review.data.Model.StateUIPreviewQuestion
-import com.jonathanev.review.presentation.state.AnswerState
-import com.jonathanev.review.presentation.state.QAItem
-import com.jonathanev.review.presentation.model.QuestionItem
+import com.jonathanev.review.presentation.state.StateUIPreviewQuestion
+import com.jonathanev.review.presentation.state.ResponseDomain
+import com.jonathanev.review.presentation.model.QuestionItemDomain
 import com.jonathanev.review.Domain.model.TypeContent
 import com.jonathanev.review.data.provider.FilePathsProvider
 import com.jonathanev.review.Domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.Domain.GetPreviewQuestionsUseCase
 import com.jonathanev.review.Domain.LoadGuidesUseCase
 import com.jonathanev.review.Domain.repository.FileRepository
+import com.jonathanev.review.UI.Utils.toUi
+import com.jonathanev.review.presentation.state.QAItemDomain
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,11 +30,11 @@ class FragmentPreviewQuestionsViewModel @Inject constructor(
     private val fileRepository: FileRepository
     //private val guiaRepositoryImpl: GuiaRepositoryImpl
 ): ViewModel() {
-    private var _preguntas: MutableList<QuestionItem> = mutableListOf()
-    val preguntas: MutableList<QuestionItem> get() = _preguntas
+    private var _preguntas: MutableList<QuestionItemDomain> = mutableListOf()
+    val preguntas: List<QuestionItemDomain> get() = _preguntas
 
-    private var _respuestas: MutableList<QuestionItem> = mutableListOf()
-    val respuestas: MutableList<QuestionItem> get() = _respuestas
+    private var _respuestas: MutableList<QuestionItemDomain> = mutableListOf()
+    val respuestas: List<QuestionItemDomain> get() = _respuestas
 
     private val _uiState = MutableStateFlow(StateUIPreviewQuestion(emptyList()))
     val uiState = _uiState.asStateFlow()
@@ -58,32 +59,25 @@ class FragmentPreviewQuestionsViewModel @Inject constructor(
 
     fun getObtenerDatosXML() {
         if (respuestas.isEmpty()) {
-            val datos = getObtenerDatosXMLUseCase.invoke(ruta = getCurrentPath())
+            val domainItems = getObtenerDatosXMLUseCase.invoke(ruta = getCurrentPath())
 
-            _preguntas = datos.map { it.question }.toMutableList()
-            _respuestas = datos.mapNotNull { (it.answer as? AnswerState.Filled )?.item }.toMutableList()
+            _preguntas = domainItems.mapNotNull { (it.question as? ResponseDomain.Filled)?.item }.toMutableList()
+            _respuestas = domainItems.mapNotNull { (it.answer as? ResponseDomain.Filled)?.item }.toMutableList()
 
-            uploadQuestion(datos)
+            uploadQuestion(domainItems)
         }
     }
 
-    private fun getCurrentPath() = fileRepository.getCurrentPath()
-
-    private fun uploadQuestion(qaItems: List<QAItem>) {
-        val response = getPreviewQuestionsUseCase.invoke(qaItems)
+    private fun uploadQuestion(
+        domainItems: List<QAItemDomain>,
+    ) {
+        val response = getPreviewQuestionsUseCase.invoke(domainItems)
+        val responseToUi = response.map { it.toUi() }
 
         _uiState.value = StateUIPreviewQuestion(
-            previewState = response
+            previewState = responseToUi
         )
     }
 
-    /*fun getReinicioGuia() {
-        onResetContadorPreg()
-
-        cargarPregunta(typeContent)
-    }
-
-    private fun onResetContadorPreg() {
-        _contadorPregunta = 0
-    }*/
+    private fun getCurrentPath() = fileRepository.getCurrentPath()
 }

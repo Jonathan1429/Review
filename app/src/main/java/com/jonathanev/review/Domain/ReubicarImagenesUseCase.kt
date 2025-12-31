@@ -1,7 +1,7 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.presentation.model.QuestionContent
-import com.jonathanev.review.presentation.model.QuestionItem
+import com.jonathanev.review.presentation.model.QuestionContentDomain
+import com.jonathanev.review.presentation.model.QuestionItemDomain
 import com.jonathanev.review.data.provider.FilePathsProvider
 import com.jonathanev.review.data.storage.StorageFolders
 import com.jonathanev.review.data.xml.Versions
@@ -18,8 +18,8 @@ class ReubicarImagenesUseCase @Inject constructor(
     operator fun invoke(
         currentPath: File,
         fileName: String,
-        preguntas: List<QuestionItem>,
-        respuestas: List<QuestionItem>
+        preguntas: List<QuestionItemDomain>,
+        respuestas: List<QuestionItemDomain>
     ) {
         val version = getVersionUseCase.invoke(currentPath)
         val oldPathImages = File(currentPath.path.replace(StorageFolders.GUIAS, StorageFolders.IMAGENES).replace(".xml", ""))
@@ -33,7 +33,7 @@ class ReubicarImagenesUseCase @Inject constructor(
 
             val listImages = (preguntas + respuestas)
                 .flatMap { it.content }
-                .filterIsInstance<QuestionContent.Image>()
+                .filterIsInstance<QuestionContentDomain.Image>()
 
             listImages.forEach { image ->
                 val source = File(image.uri)

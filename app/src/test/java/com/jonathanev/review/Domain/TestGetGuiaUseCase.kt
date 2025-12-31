@@ -4,10 +4,10 @@ import com.jonathanev.review.data.provider.GuiaProvider
 import io.mockk.mockk
 
 class TestGetGuiaUseCase {
-    private val guiaProvider = mockk<GuiaProvider>()
+    /*private val guiaProvider = mockk<GuiaProvider>()
     private val getGuiaUseCase = GetGuiaUseCase(guiaProvider)
 
-    /*@Test
+    @Test
     fun `cuando la ruta contiene un archivo existente, devuelve el GuiaModel correcto`() {
         // Arrange
         val guias = listOf(

@@ -1,4 +1,4 @@
-package com.jonathanev.review.data.Model
+package com.jonathanev.review.presentation.model
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize

@@ -1,6 +1,6 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.presentation.model.QuestionContent
+import com.jonathanev.review.presentation.model.QuestionContentDomain
 import com.jonathanev.review.data.storage.StorageFolders
 import com.jonathanev.review.data.xml.Versions
 import java.io.File
@@ -10,7 +10,7 @@ class DeleteImagesFromGuideUseCase @Inject constructor() {
     operator fun invoke(
         version: String,
         currentGuide: File,
-        listImages: List<QuestionContent.Image>
+        listImages: List<QuestionContentDomain.Image>
     ): Boolean {
         if (version == Versions.VERSION2){
             var pathImages = File(currentGuide.path.replace(".xml", ""))

@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.data.FolderAction
 import com.jonathanev.review.data.GuiaRepository
-import com.jonathanev.review.presentation.state.AnswerState
-import com.jonathanev.review.presentation.model.QuestionItem
+import com.jonathanev.review.presentation.state.ResponseDomain
+import com.jonathanev.review.presentation.model.QuestionItemDomain
 import com.jonathanev.review.presentation.event.UIMovingEvent
 import com.jonathanev.review.data.provider.FilePathsProvider
 import com.jonathanev.review.Domain.GetObtenerDatosXMLUseCase
@@ -31,17 +31,17 @@ class FragmentWithoutFilesViewModel @Inject constructor(
     private val moverImagenesUseCase: MoverImagenesUseCase,
     private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
     private val setMainPathUseCase: SetMainPathUseCase
-): ViewModel(){
+) : ViewModel() {
     private val _eventsMovingFiles = MutableSharedFlow<UIMovingEvent>()
     val eventsMovingFiles = _eventsMovingFiles.asSharedFlow()
 
-    private var _preguntas: MutableList<QuestionItem> = mutableListOf()
-    val preguntas: MutableList<QuestionItem> get() = _preguntas
+    private var _preguntas: MutableList<QuestionItemDomain> = mutableListOf()
+    val preguntas: MutableList<QuestionItemDomain> get() = _preguntas
 
-    private var _respuestas: MutableList<QuestionItem> = mutableListOf()
-    val respuestas: MutableList<QuestionItem> get() = _respuestas
+    private var _respuestas: MutableList<QuestionItemDomain> = mutableListOf()
+    val respuestas: MutableList<QuestionItemDomain> get() = _respuestas
 
-    fun setMainPath(){
+    fun setMainPath() {
         val initialPath = filePathsProvider.fileGuides
         fileRepository.setCurrentPath(initialPath.path)
 
@@ -54,26 +54,34 @@ class FragmentWithoutFilesViewModel @Inject constructor(
     }
 
     fun movingFiles(mode: FolderAction) {
-        if (mode is FolderAction.MovingFile){
+        if (mode is FolderAction.MovingFile) {
             val isSuccessXML = moverArchivoUseCase.invoke(mode.pathFile)
 
             getObtenerDatosXML(isSuccessXML.second)
 
-            if (isSuccessXML.first){
+            if (isSuccessXML.first) {
                 val version = getVersionUseCase.invoke(isSuccessXML.second)
-                moverImagenesUseCase.invoke(version, mode.pathFile, isSuccessXML.second, preguntas, respuestas)
+                moverImagenesUseCase.invoke(
+                    version,
+                    mode.pathFile,
+                    isSuccessXML.second,
+                    preguntas,
+                    respuestas
+                )
             }
 
             setMainPathUseCase.invoke()
         }
-   }
+    }
 
     private fun getObtenerDatosXML(currentGuide: File) {
         if (respuestas.isEmpty()) {
             val datos = getObtenerDatosXMLUseCase.invoke(ruta = currentGuide.path)
 
-            _preguntas = datos.map { it.question }.toMutableList()
-            _respuestas = datos.mapNotNull { (it.answer as? AnswerState.Filled )?.item }.toMutableList()
+            _preguntas =
+                datos.mapNotNull { (it.question as? ResponseDomain.Filled)?.item }.toMutableList()
+            _respuestas =
+                datos.mapNotNull { (it.answer as? ResponseDomain.Filled)?.item }.toMutableList()
         }
     }
 
@@ -87,7 +95,7 @@ class FragmentWithoutFilesViewModel @Inject constructor(
         eventMovingFile("Se ha cancelado la acción")
     }
 
-    fun moveFileSuccess(){
+    fun moveFileSuccess() {
         eventMovingFile("Se ha movido la guia correctamente")
     }
 }

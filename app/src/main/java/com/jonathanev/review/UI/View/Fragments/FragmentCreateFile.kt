@@ -22,7 +22,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.jonathanev.review.data.ActionGuide
-import com.jonathanev.review.data.Model.ScreenData
+import com.jonathanev.review.presentation.model.ScreenData
 import com.jonathanev.review.Domain.model.TypeContent
 import com.jonathanev.review.presentation.event.UIStopEvent
 import com.jonathanev.review.Fragments.Adaptadores.ListCreateImagesAdapter

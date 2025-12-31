@@ -1,4 +1,4 @@
-package com.jonathanev.review.data.Model
+package com.jonathanev.review.presentation.ui.adapter
 
 import androidx.recyclerview.widget.DiffUtil
 

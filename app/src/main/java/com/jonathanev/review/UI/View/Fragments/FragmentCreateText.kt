@@ -26,9 +26,9 @@ import androidx.navigation.fragment.findNavController
 import com.jonathanev.review.UI.ViewModel.Fragments.FragmentCreateTextViewModel
 import com.jonathanev.review.UI.ViewModel.Fragments.MainToolbarViewModel
 import com.jonathanev.review.UI.ViewModel.Fragments.SharedFragmentCreateFileViewModel
-import com.jonathanev.review.data.Model.SpanPalabraModel
-import com.jonathanev.review.presentation.model.ColorRange
-import com.jonathanev.review.presentation.model.QuestionContent
+import com.jonathanev.review.Domain.model.SpanPalabraModel
+import com.jonathanev.review.presentation.model.ColorRangeDomain
+import com.jonathanev.review.presentation.model.QuestionContentDomain
 import com.jonathanev.review.data.media.MediaPaths
 import com.jonathanev.review.databinding.FragmentCreateTextBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -60,8 +60,8 @@ class FragmentCreateText : Fragment() {
 
         val data = arguments?.getParcelable(
             "questionText",
-            QuestionContent.Text::class.java
-        ) ?: QuestionContent.None
+            QuestionContentDomain.Text::class.java
+        ) ?: QuestionContentDomain.None
 
         initUI(data)
         initListeners()
@@ -97,13 +97,13 @@ class FragmentCreateText : Fragment() {
     }
 
     @SuppressLint("NewApi")
-    private fun initUI(data: QuestionContent) {
+    private fun initUI(data: QuestionContentDomain) {
         when (data) {
-            is QuestionContent.Image -> Unit
-            QuestionContent.None -> Unit
-            is QuestionContent.Text -> {
+            is QuestionContentDomain.Image -> Unit
+            QuestionContentDomain.None -> Unit
+            is QuestionContentDomain.Text -> {
                 val builder =
-                    data.toSpannable(data.text, data.colorRanges)
+                    data.toSpannable(data.text, data.colorRangeDomains)
                 binding.etPregResp.text = builder
             }
         }
@@ -303,7 +303,7 @@ class FragmentCreateText : Fragment() {
         val listSpans = binding.etPregResp.text!!.getSpans(
             0, editable.length, ForegroundColorSpan::class.java
         ).map { span ->
-            ColorRange(
+            ColorRangeDomain(
                 start = editable.getSpanStart(span),
                 end = editable.getSpanEnd(span),
                 color = span.foregroundColor
@@ -324,13 +324,13 @@ class FragmentCreateText : Fragment() {
         }
     }
 
-    private fun QuestionContent.Text.toSpannable(
+    private fun QuestionContentDomain.Text.toSpannable(
         text: String,
-        colorRanges: List<ColorRange>
+        colorRangeDomains: List<ColorRangeDomain>
     ): SpannableStringBuilder {
         val builder = SpannableStringBuilder(text)
 
-        for (colorRange in colorRanges) {
+        for (colorRange in colorRangeDomains) {
             val colorSpan = ForegroundColorSpan(colorRange.color)
             builder.setSpan(
                 colorSpan,

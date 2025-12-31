@@ -8,7 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.RequiresApi
 import com.davemorrissey.labs.subscaleview.ImageSource
-import com.jonathanev.review.presentation.model.QuestionContent
+import com.jonathanev.review.presentation.model.QuestionContentDomain
 import com.jonathanev.review.databinding.FragmentVisorImagenBinding
 
 class FragmentVisorImagen : Fragment() {
@@ -29,19 +29,19 @@ class FragmentVisorImagen : Fragment() {
 
         val data = arguments?.getParcelable(
             "questionImage",
-            QuestionContent.Image::class.java
-        ) ?: QuestionContent.None
+            QuestionContentDomain.Image::class.java
+        ) ?: QuestionContentDomain.None
 
         initUI(data)
     }
 
-    private fun initUI(questionContent: QuestionContent) {
-        when(questionContent){
-            is QuestionContent.Image -> {
-                binding.ivImagen.setImage(ImageSource.uri(questionContent.uri))
+    private fun initUI(questionContentDomain: QuestionContentDomain) {
+        when(questionContentDomain){
+            is QuestionContentDomain.Image -> {
+                binding.ivImagen.setImage(ImageSource.uri(questionContentDomain.uri))
             }
-            QuestionContent.None -> Unit
-            is QuestionContent.Text -> Unit
+            QuestionContentDomain.None -> Unit
+            is QuestionContentDomain.Text -> Unit
         }
     }
 }

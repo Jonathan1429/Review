@@ -1,18 +1,18 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.presentation.model.QuestionContent
-import com.jonathanev.review.presentation.model.QuestionItem
+import com.jonathanev.review.presentation.model.QuestionContentDomain
+import com.jonathanev.review.presentation.model.QuestionItemDomain
 import javax.inject.Inject
 
 class SetContentUseCase @Inject constructor() {
     operator fun invoke(
-        newContent: QuestionContent,
-        sourceList: List<QuestionItem>,
+        newContent: QuestionContentDomain,
+        sourceList: List<QuestionItemDomain>,
         contadorPregunta: Int,
         contadorContenido: Int,
         isEditingMode: Boolean,
-        filterType: Class<out QuestionContent>
-    ): List<QuestionItem> {
+        filterType: Class<out QuestionContentDomain>
+    ): List<QuestionItemDomain> {
         // Validar que el índice de la pregunta sea correcto
         if (contadorPregunta !in sourceList.indices) return sourceList
 

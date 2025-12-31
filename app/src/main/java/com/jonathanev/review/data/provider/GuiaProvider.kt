@@ -1,6 +1,6 @@
 package com.jonathanev.review.data.provider
 
-import com.jonathanev.review.presentation.model.QuestionContent
+import com.jonathanev.review.presentation.model.QuestionContentDomain
 import com.jonathanev.review.Domain.repository.FileRepository
 import java.io.File
 import javax.inject.Inject
@@ -22,7 +22,7 @@ class GuiaProvider @Inject constructor(
             ?: emptyList()
     }
 
-    suspend fun saveImagesInDevice(images: List<QuestionContent.Image>, imagesPath: File) {
+    suspend fun saveImagesInDevice(images: List<QuestionContentDomain.Image>, imagesPath: File) {
         images.map { image ->
             fileRepository.saveImage(image, imagesPath)
         }

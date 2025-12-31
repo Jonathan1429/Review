@@ -1,13 +1,11 @@
 package com.jonathanev.review.Domain
 
 import com.jonathanev.review.data.JsonManager
-import com.jonathanev.review.data.Model.ScreenData
-import com.jonathanev.review.Domain.repository.FileRepository
+import com.jonathanev.review.presentation.model.ScreenData
 import java.io.File
 import javax.inject.Inject
 
 class CreateFolderUseCase @Inject constructor(
-    private val fileRepository: FileRepository,
     private val jsonManager: JsonManager
 ) {
     operator fun invoke(data: ScreenData, dir: File) {

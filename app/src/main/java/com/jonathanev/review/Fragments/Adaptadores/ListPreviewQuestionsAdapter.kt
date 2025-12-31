@@ -3,15 +3,15 @@ package com.jonathanev.review.Fragments.Adaptadores
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
-import com.jonathanev.review.data.Model.PreviewQuestion
-import com.jonathanev.review.data.Model.PreviewQuestionDiffCallback
+import com.jonathanev.review.presentation.model.PreviewQuestionUi
+import com.jonathanev.review.presentation.ui.adapter.PreviewQuestionDiffCallback
 import com.jonathanev.review.Fragments.ViewHolders.ListPreviewQuestionsViewHolder
 import com.jonathanev.review.databinding.ListPreviewQuestionsBinding
 
 class ListPreviewQuestionsAdapter(
     private val clickedPlay: (Int) -> Unit,
     private val clickedEdit: (Int) -> Unit
-): ListAdapter<PreviewQuestion, ListPreviewQuestionsViewHolder>(PreviewQuestionDiffCallback()) {
+): ListAdapter<PreviewQuestionUi, ListPreviewQuestionsViewHolder>(PreviewQuestionDiffCallback()) {
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int

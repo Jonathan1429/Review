@@ -1,10 +1,10 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.presentation.model.QuestionContent
+import com.jonathanev.review.presentation.model.QuestionContentDomain
 import javax.inject.Inject
 
 class GetTextWithoutLabelsUseCase @Inject constructor() {
-    operator fun invoke(originalText: String): QuestionContent.Text{
+    operator fun invoke(originalText: String): QuestionContentDomain.Text{
         var text = originalText
 
         while (text.contains("«")) {
@@ -15,6 +15,6 @@ class GetTextWithoutLabelsUseCase @Inject constructor() {
             text = text.replaceFirst("«.*?»".toRegex(), "")
         }
 
-        return QuestionContent.Text(text, emptyList())
+        return QuestionContentDomain.Text(text, emptyList())
     }
 }

@@ -1,6 +1,6 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.presentation.model.QuestionContent
+import com.jonathanev.review.presentation.model.QuestionContentDomain
 import com.jonathanev.review.data.media.MediaPaths
 import com.jonathanev.review.data.repository.FileHelperImpl
 import javax.inject.Inject
@@ -11,11 +11,11 @@ class SetPintarTextosUseCase @Inject constructor(
     private val fileHelper: FileHelperImpl
 ) {
     operator fun invoke(
-        item: QuestionContent,
+        item: QuestionContentDomain,
         ruta: String,
-    ): QuestionContent {
+    ): QuestionContentDomain {
         return when(item){
-            is QuestionContent.Image -> {
+            is QuestionContentDomain.Image -> {
                 var descifrado = setCifrarRutaImagenUseCase(item.nameFile, 26 - 3)// cifrar(texto, 26 - 3)
                 //val cifrado = item.url
                 descifrado = descifrado.replace(MediaPaths.BASERUTA_IMG.toRegex(), "")
@@ -28,13 +28,13 @@ class SetPintarTextosUseCase @Inject constructor(
                     descifrado = descifrado.replace("imagenes".toRegex(), "imagenesPivote")
                 }
 
-                QuestionContent.Image(descifrado, item.nameFile)
+                QuestionContentDomain.Image(descifrado, item.nameFile)
             }
-            is QuestionContent.Text -> {
+            is QuestionContentDomain.Text -> {
                 getColorRanges.invoke(item.text)
             }
 
-            is QuestionContent.None -> QuestionContent.None
+            is QuestionContentDomain.None -> QuestionContentDomain.None
         }
     }
 }

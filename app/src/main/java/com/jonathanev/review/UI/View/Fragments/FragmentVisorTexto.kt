@@ -9,8 +9,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.jonathanev.review.presentation.model.ColorRange
-import com.jonathanev.review.presentation.model.QuestionContent
+import com.jonathanev.review.presentation.model.ColorRangeDomain
+import com.jonathanev.review.presentation.model.QuestionContentDomain
 import com.jonathanev.review.databinding.FragmentVisorTextoBinding
 
 class FragmentVisorTexto : Fragment() {
@@ -31,30 +31,30 @@ class FragmentVisorTexto : Fragment() {
 
         val data = arguments?.getParcelable(
             "questionText",
-            QuestionContent.Text::class.java
-        ) ?: QuestionContent.None
+            QuestionContentDomain.Text::class.java
+        ) ?: QuestionContentDomain.None
 
         initUI(data)
     }
 
-    private fun initUI(questionContent: QuestionContent) {
-        when(questionContent){
-            is QuestionContent.Image -> Unit
-            QuestionContent.None -> Unit
-            is QuestionContent.Text -> {
-                val builder = questionContent.toSpannable(questionContent.text, questionContent.colorRanges)
+    private fun initUI(questionContentDomain: QuestionContentDomain) {
+        when(questionContentDomain){
+            is QuestionContentDomain.Image -> Unit
+            QuestionContentDomain.None -> Unit
+            is QuestionContentDomain.Text -> {
+                val builder = questionContentDomain.toSpannable(questionContentDomain.text, questionContentDomain.colorRangeDomains)
                 binding.lblText.text = builder
             }
         }
     }
 
-    private fun QuestionContent.Text.toSpannable(
+    private fun QuestionContentDomain.Text.toSpannable(
         text: String,
-        colorRanges: List<ColorRange>
+        colorRangeDomains: List<ColorRangeDomain>
     ): SpannableStringBuilder {
         val builder = SpannableStringBuilder(text)
 
-        for (colorRange in colorRanges) {
+        for (colorRange in colorRangeDomains) {
             val colorSpan = ForegroundColorSpan(colorRange.color)
             builder.setSpan(
                 colorSpan,

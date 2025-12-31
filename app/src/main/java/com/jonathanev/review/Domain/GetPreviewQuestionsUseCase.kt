@@ -1,70 +1,66 @@
 package com.jonathanev.review.Domain
 
-import com.jonathanev.review.data.Model.PreviewQuestion
-import com.jonathanev.review.presentation.state.AnswerState
-import com.jonathanev.review.presentation.state.QAItem
-import com.jonathanev.review.presentation.model.QuestionContent
 import com.jonathanev.review.Domain.repository.FileRepository
+import com.jonathanev.review.Domain.model.PreviewQuestionDomain
+import com.jonathanev.review.presentation.model.QuestionContentDomain
+import com.jonathanev.review.presentation.state.QAItemDomain
+import com.jonathanev.review.presentation.state.ResponseDomain
 import javax.inject.Inject
 
 class GetPreviewQuestionsUseCase @Inject constructor(
     private val fileRepository: FileRepository,
     private val setPintarTextosUseCase: SetPintarTextosUseCase
 ) {
-    operator fun invoke(qaItems: List<QAItem>): MutableList<PreviewQuestion> {
-        val previewQuestion = mutableListOf<PreviewQuestion>()
+    operator fun invoke(
+        domainItems: List<QAItemDomain>
+    ): List<PreviewQuestionDomain> {
+        val previewQuestionDomain = mutableListOf<PreviewQuestionDomain>()
         val currentPath = fileRepository.getCurrentPath()
 
-        qaItems.forEach { qa ->
-
-            // ----------------------------
-            //   PREGUNTA
-            // ----------------------------
-            var primerTextoPregunta: QuestionContent = QuestionContent.None
+        domainItems.forEach { domainItem ->
+            var primerTextoPregunta: QuestionContentDomain = QuestionContentDomain.None
             var totalImgsPregunta = 0
 
-            qa.question.content.forEach { item ->
-                when (val result = setPintarTextosUseCase.invoke(item, currentPath)) {
-                    is QuestionContent.Image -> {
-                        totalImgsPregunta++
-                    }
-
-                    is QuestionContent.Text -> {
-                        if (primerTextoPregunta == QuestionContent.None) {
-                            primerTextoPregunta = QuestionContent.Text(
-                                result.text,
-                                result.colorRanges
-                            )
+            if (domainItem.question is ResponseDomain.Filled) {
+                domainItem.question.item.content.forEach { item ->
+                    when (val result = setPintarTextosUseCase.invoke(item, currentPath)) {
+                        is QuestionContentDomain.Image -> {
+                            totalImgsPregunta++
                         }
-                    }
 
-                    QuestionContent.None -> Unit
+                        is QuestionContentDomain.Text -> {
+                            if (primerTextoPregunta == QuestionContentDomain.None) {
+                                primerTextoPregunta = QuestionContentDomain.Text(
+                                    result.text,
+                                    result.colorRangeDomains
+                                )
+                            }
+                        }
+
+                        QuestionContentDomain.None -> Unit
+                    }
                 }
             }
 
-            // ----------------------------
-            //   RESPUESTA
-            // ----------------------------
             var totalImgsRespuesta = 0
-
-            if (qa.answer is AnswerState.Filled) {
-                qa.answer.item.content.forEach { item ->
+            if (domainItem.answer is ResponseDomain.Filled) {
+                domainItem.answer.item.content.forEach { item ->
                     val result = setPintarTextosUseCase.invoke(item, currentPath)
 
-                    if (result is QuestionContent.Image) {
+                    if (result is QuestionContentDomain.Image) {
                         totalImgsRespuesta++
                     }
                 }
             }
 
-            previewQuestion.add(
-                PreviewQuestion(
+            previewQuestionDomain.add(
+                PreviewQuestionDomain(
                     question = primerTextoPregunta,
                     noImages = (totalImgsPregunta + totalImgsRespuesta).toString()
                 )
             )
         }
 
-        return previewQuestion
+        return previewQuestionDomain
     }
 }

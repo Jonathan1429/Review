@@ -1,15 +1,15 @@
 package com.jonathanev.review.Fragments.ViewHolders
 
 import androidx.recyclerview.widget.RecyclerView
-import com.jonathanev.review.data.Model.GuideModel
 import com.jonathanev.review.databinding.ListCustomGuideBinding
+import com.jonathanev.review.presentation.model.GuideUiModel
 import javax.inject.Inject
 
 class ListGuidesViewHolder @Inject constructor(
     private val binding: ListCustomGuideBinding,
     private val posClicked: (Int) -> Unit
 ): RecyclerView.ViewHolder(binding.root) {
-    fun bind(guia: GuideModel) {
+    fun bind(guia: GuideUiModel) {
         val nameGuide = "${guia.nameGuide}.review"
 
         binding.tvGuideTitle.text = nameGuide

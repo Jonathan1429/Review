@@ -1,6 +1,6 @@
 package com.jonathanev.review.Domain.repository
 
-import com.jonathanev.review.presentation.model.QuestionContent
+import com.jonathanev.review.presentation.model.QuestionContentDomain
 import java.io.File
 
 interface FileRepository {
@@ -8,5 +8,5 @@ interface FileRepository {
     fun getFilesInCurrentPath(): List<GuiaModel>*/
     fun setCurrentPath(path: String)
     fun getCurrentPath(): String
-    suspend fun saveImage(image: QuestionContent.Image, imagesPath: File)
+    suspend fun saveImage(image: QuestionContentDomain.Image, imagesPath: File)
 }

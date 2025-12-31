@@ -3,15 +3,16 @@ package com.jonathanev.review.Fragments.Adaptadores
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
-import com.jonathanev.review.data.Model.QuestionTextDiffCallback
-import com.jonathanev.review.presentation.model.QuestionContent
+import com.jonathanev.review.presentation.ui.adapter.QuestionTextDiffCallback
+import com.jonathanev.review.presentation.model.QuestionContentDomain
 import com.jonathanev.review.Fragments.ViewHolders.ListCreateTextsViewHolder
 import com.jonathanev.review.databinding.ListCreateTextsBinding
+import com.jonathanev.review.presentation.model.QuestionContentUi
 
 class ListCreateTextsAdapter(
     private val onEditClicked:(Int) -> Unit,
     private val onDeleteClicked: (Int) -> Unit
-): ListAdapter<QuestionContent.Text, ListCreateTextsViewHolder>(QuestionTextDiffCallback()) {
+): ListAdapter<QuestionContentUi.Text, ListCreateTextsViewHolder>(QuestionTextDiffCallback()) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ListCreateTextsViewHolder {
         val inflater = LayoutInflater.from(parent.context)
         val binding = ListCreateTextsBinding.inflate(inflater, parent, false)

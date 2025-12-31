@@ -3,14 +3,17 @@ package com.jonathanev.review.Fragments.Adaptadores
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
-import com.jonathanev.review.data.Model.QuestionImageDiffCallback
-import com.jonathanev.review.presentation.model.QuestionContent
+import com.jonathanev.review.presentation.ui.adapter.QuestionImageDiffCallback
+import com.jonathanev.review.presentation.model.QuestionContentDomain
 import com.jonathanev.review.Fragments.ViewHolders.ListItemPintarImagenesViewHolder
 import com.jonathanev.review.databinding.ListPintarImagenesRepasarBinding
+import com.jonathanev.review.presentation.model.QuestionContentUi
 
 class ListItemPintarImagenesAdapter(
     private val posClicked: (Int) -> Unit
-): ListAdapter<QuestionContent.Image, ListItemPintarImagenesViewHolder>(QuestionImageDiffCallback()) {
+): ListAdapter<QuestionContentUi.Image, ListItemPintarImagenesViewHolder>(
+    QuestionImageDiffCallback()
+) {
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int

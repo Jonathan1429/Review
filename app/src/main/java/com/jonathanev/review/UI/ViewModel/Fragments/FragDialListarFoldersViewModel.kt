@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.data.FolderResult
 import com.jonathanev.review.data.GuiaRepository
-import com.jonathanev.review.data.Model.FoldersUiState
+import com.jonathanev.review.presentation.state.FoldersUiState
 import com.jonathanev.review.presentation.model.FolderUI
 import com.jonathanev.review.presentation.event.UIMovingEvent
 import com.jonathanev.review.presentation.event.UIStopEvent

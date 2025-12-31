@@ -5,11 +5,10 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.data.FolderAction
-import com.jonathanev.review.data.Model.GuideModel
-import com.jonathanev.review.data.Model.ScreenData
-import com.jonathanev.review.presentation.state.AnswerState
+import com.jonathanev.review.presentation.model.ScreenData
+import com.jonathanev.review.presentation.state.ResponseDomain
 import com.jonathanev.review.presentation.state.PreviewState
-import com.jonathanev.review.presentation.model.QuestionItem
+import com.jonathanev.review.presentation.model.QuestionItemDomain
 import com.jonathanev.review.presentation.state.CreatingFileUiState
 import com.jonathanev.review.presentation.event.UIStopEvent
 import com.jonathanev.review.data.provider.FilePathsProvider
@@ -22,6 +21,9 @@ import com.jonathanev.review.Domain.SetAttributesUseCase
 import com.jonathanev.review.Domain.ValidateCreateFileUseCase
 import com.jonathanev.review.Domain.repository.FileRepository
 import com.jonathanev.review.R
+import com.jonathanev.review.UI.Utils.toUi
+import com.jonathanev.review.data.mapper.GuideXmlMapper
+import com.jonathanev.review.presentation.model.GuideUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,11 +54,11 @@ class FragCreateFilesViewModel @Inject constructor(
     private val _messages = MutableSharedFlow<CreatingFileUiState>()
     val messages = _messages.asSharedFlow()
 
-    private var _preguntas = mutableListOf<QuestionItem>()
-    val preguntas: List<QuestionItem> get() = _preguntas
+    private var _preguntas = mutableListOf<QuestionItemDomain>()
+    val preguntas: List<QuestionItemDomain> get() = _preguntas
 
-    private var _respuestas = mutableListOf<QuestionItem>()
-    val respuestas: List<QuestionItem> get() = _respuestas
+    private var _respuestas = mutableListOf<QuestionItemDomain>()
+    val respuestas: List<QuestionItemDomain> get() = _respuestas
 
     fun loadIconsFor(action: FolderAction) {
         val icons = when (action) {
@@ -127,9 +129,10 @@ class FragCreateFilesViewModel @Inject constructor(
 
     fun getCurrentPath() = fileRepository.getCurrentPath()
 
-    fun fillFields(): GuideModel {
+    fun fillFields(): GuideUiModel {
         val currentPath = File(getCurrentPath())
-        return getAttributesGuideUseCase.invoke(currentPath)
+        val guideDomain = getAttributesGuideUseCase.invoke(currentPath)
+        return guideDomain.toUi()
     }
 
     fun getObtenerDatosXML() {
@@ -137,9 +140,10 @@ class FragCreateFilesViewModel @Inject constructor(
             //Revisar como se obtienen los datos aqui, porque no se visualiza la imagen
             val datos = getObtenerDatosXMLUseCase.invoke(ruta = getCurrentPath())
 
-            _preguntas = datos.map { it.question }.toMutableList()
+            _preguntas =
+                datos.mapNotNull { (it.question as? ResponseDomain.Filled)?.item }.toMutableList()
             _respuestas =
-                datos.mapNotNull { (it.answer as? AnswerState.Filled)?.item }.toMutableList()
+                datos.mapNotNull { (it.answer as? ResponseDomain.Filled)?.item }.toMutableList()
         }
     }
 
@@ -186,7 +190,7 @@ class FragCreateFilesViewModel @Inject constructor(
         processScreenData(name, description)
     }
 
-    fun beforePath(){
+    fun beforePath() {
         val currentPath = File(fileRepository.getCurrentPath())
         val beforePath = filePathsProvider.beforePath(currentPath)
         Log.i("Path: ", beforePath.path)
