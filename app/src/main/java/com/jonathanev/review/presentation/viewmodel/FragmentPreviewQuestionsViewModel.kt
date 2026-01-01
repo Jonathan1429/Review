@@ -2,7 +2,7 @@ package com.jonathanev.review.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import com.jonathanev.review.domain.ApplyColorRangesToQAUseCase
-import com.jonathanev.review.presentation.state.StateUIPreviewQuestion
+import com.jonathanev.review.presentation.state.UIPreviewQuestionState
 import com.jonathanev.review.domain.model.ResponseDomain
 import com.jonathanev.review.domain.model.TypeContent
 import com.jonathanev.review.data.provider.FilePathsProvider
@@ -34,7 +34,7 @@ class FragmentPreviewQuestionsViewModel @Inject constructor(
     private var _respuestas: MutableList<QuestionItemUi> = mutableListOf()
     val respuestas: List<QuestionItemUi> get() = _respuestas
 
-    private val _uiState = MutableStateFlow(StateUIPreviewQuestion(emptyList()))
+    private val _uiState = MutableStateFlow(UIPreviewQuestionState(emptyList()))
     val uiState = _uiState.asStateFlow()
 
     private var _contadorPregunta: Int = 0
@@ -78,7 +78,7 @@ class FragmentPreviewQuestionsViewModel @Inject constructor(
         val response = getPreviewQuestionsUseCase.invoke(domainItems)
         val responseToUi = response.map { it.toUi() }
 
-        _uiState.value = StateUIPreviewQuestion(
+        _uiState.value = UIPreviewQuestionState(
             previewState = responseToUi
         )
     }

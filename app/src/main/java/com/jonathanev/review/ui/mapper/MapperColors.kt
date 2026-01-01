@@ -8,5 +8,6 @@ fun ColorType.toInt(): Int {
         ColorType.Black -> Color.BLACK
         ColorType.Gray -> Color.GRAY
         is ColorType.RandomColor -> this.color
+        ColorType.White -> Color.WHITE
     }
 }

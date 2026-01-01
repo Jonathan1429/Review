@@ -3,24 +3,24 @@ package com.jonathanev.review.UIs.ViewModel
 import android.graphics.Color
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
-import com.jonathanev.review.presentation.viewmodel.Fragment_DialogColores_popupViewModel
+import com.jonathanev.review.presentation.viewmodel.DialogColorsPopUpViewModel
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-class Fragment_DialogColores_popupViewModelTest {
+class _DialogColorsPopUpViewModelTest {
     // Esto hace que LiveData se ejecute inmediatamente en los tests unitarios
     @get:Rule
     val instantExecutorRule = InstantTaskExecutorRule()
 
-    private lateinit var viewModel: Fragment_DialogColores_popupViewModel
+    private lateinit var viewModel: DialogColorsPopUpViewModel
 
     @Before
     fun setup() {
         // Inicializamos el ViewModel antes de cada test
-        viewModel = Fragment_DialogColores_popupViewModel()
+        viewModel = DialogColorsPopUpViewModel()
     }
 
     @Test

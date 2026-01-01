@@ -11,7 +11,7 @@ import android.view.ViewGroup
 import android.view.Window
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
-import com.jonathanev.review.presentation.viewmodel.Fragment_DialogColores_popupViewModel
+import com.jonathanev.review.presentation.viewmodel.DialogColorsPopUpViewModel
 import com.jonathanev.review.databinding.FragmentColoresBinding
 import com.skydoves.colorpickerview.flag.BubbleFlag
 import com.skydoves.colorpickerview.flag.FlagMode
@@ -21,7 +21,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class FragmentDialogColoresPopup : DialogFragment() {
     private lateinit var binding: FragmentColoresBinding
-    private val viewModel: Fragment_DialogColores_popupViewModel by viewModels()
+    private val viewModel: DialogColorsPopUpViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
