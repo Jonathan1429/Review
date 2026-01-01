@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background_app"
-    tools:context="com.jonathanev.review.UI.View.Fragments.FragmentCreateImages">
+    tools:context="com.jonathanev.review.ui.fragment.FragmentCreateImages">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cvPregResp"
@@ -29,7 +29,7 @@
                 android:id="@+id/ivImagen"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                tools:context=".UI.View.Fragments.FragmentVisorImagen" />
+                tools:context=".ui.fragment.FragmentVisorImagen" />
         </FrameLayout>
     </androidx.cardview.widget.CardView>
 

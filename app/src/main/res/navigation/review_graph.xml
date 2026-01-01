@@ -7,13 +7,13 @@
 
     <fragment
         android:id="@+id/fragmentListGuides2"
-        android:name="com.jonathanev.review.UI.View.Fragments.FragmentListGuides"
+        android:name="com.jonathanev.review.ui.fragment.FragmentListGuides"
         android:label="fragment_list_guides"
         tools:layout="@layout/fragment_list_guides">
 
         <argument
             android:name="mode"
-            app:argType="com.jonathanev.review.data.FolderAction"
+            app:argType="com.jonathanev.review.presentation.folders.model.FolderAction"
             app:nullable="false" />
 
         <action
@@ -31,7 +31,7 @@
 
     <fragment
         android:id="@+id/fragmentPreviewQuestions"
-        android:name="com.jonathanev.review.UI.View.Fragments.FragmentPreviewQuestions"
+        android:name="com.jonathanev.review.ui.fragment.FragmentPreviewQuestions"
         android:label="fragment_preview_questions"
         tools:layout="@layout/fragment_preview_questions">
         <action
@@ -48,7 +48,7 @@
 
     <fragment
         android:id="@+id/fragmentRepasar"
-        android:name="com.jonathanev.review.UI.View.Fragments.FragmentRepasar"
+        android:name="com.jonathanev.review.ui.fragment.FragmentRepasar"
         android:label="fragment_repasar"
         tools:layout="@layout/fragment_repasar">
         <action
@@ -61,36 +61,36 @@
 
     <fragment
         android:id="@+id/fragmentVisorImagen"
-        android:name="com.jonathanev.review.UI.View.Fragments.FragmentVisorImagen"
+        android:name="com.jonathanev.review.ui.fragment.FragmentVisorImagen"
         android:label="fragment_visor_imagen"
         tools:layout="@layout/fragment_visor_imagen">
         <argument
             android:name="questionImage"
-            app:argType="com.jonathanev.review.presentation.model.QuestionContentDomain$Image"
+            app:argType="com.jonathanev.review.domain.model.QuestionContentDomain$Image"
             app:nullable="false" />
     </fragment>
 
 
     <fragment
         android:id="@+id/fragmentVisorTexto"
-        android:name="com.jonathanev.review.UI.View.Fragments.FragmentVisorTexto"
+        android:name="com.jonathanev.review.ui.fragment.FragmentVisorTexto"
         android:label="fragment_visor_texto"
         tools:layout="@layout/fragment_visor_texto">
         <argument
             android:name="questionText"
-            app:argType="com.jonathanev.review.presentation.model.QuestionContentDomain$Text"
+            app:argType="com.jonathanev.review.domain.model.QuestionContentDomain$Text"
             app:nullable="false" />
     </fragment>
 
     <fragment
         android:id="@+id/fragmentReviewEntry"
-        android:name="com.jonathanev.review.UI.View.Fragments.FragmentReviewEntry"
+        android:name="com.jonathanev.review.ui.fragment.FragmentReviewEntry"
         android:label="fragment_review_entry"
         tools:layout="@layout/fragment_review_entry">
 
         <argument
             android:name="mode"
-            app:argType="com.jonathanev.review.data.FolderAction"
+            app:argType="com.jonathanev.review.presentation.folders.model.FolderAction"
             app:nullable="false" />
 
         <action
@@ -104,12 +104,12 @@
 
     <fragment
         android:id="@+id/fragmentWithoutFiles2"
-        android:name="com.jonathanev.review.UI.View.Fragments.FragmentWithoutFiles"
+        android:name="com.jonathanev.review.ui.fragment.FragmentWithoutFiles"
         android:label="fragment_without_files"
         tools:layout="@layout/fragment_without_files">
         <argument
             android:name="mode"
-            app:argType="com.jonathanev.review.data.FolderAction"
+            app:argType="com.jonathanev.review.presentation.folders.model.FolderAction"
             app:nullable="false" />
         <action
             android:id="@+id/action_to_create_graph"

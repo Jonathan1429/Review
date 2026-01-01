@@ -50,7 +50,7 @@
             android:value="ca-app-pub-3940256099942544~3347511713" />
 
         <activity
-            android:name="com.jonathanev.review.UI.View.MainActivity"
+            android:name="com.jonathanev.review.ui.main.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

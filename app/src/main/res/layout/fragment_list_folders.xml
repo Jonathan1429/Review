@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:layout_gravity="center"
     android:background="@color/background_app"
-    tools:context="com.jonathanev.review.UI.View.Fragments.FragmentListFolders">
+    tools:context="com.jonathanev.review.ui.fragment.FragmentListFolders">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/lvGuiasEstudioNew"

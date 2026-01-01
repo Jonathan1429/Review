@@ -1,7 +1,7 @@
 package com.jonathanev.review.data.provider
 
 import android.content.Context
-import com.jonathanev.review.Domain.repository.FileNamingRules
+import com.jonathanev.review.domain.repository.FileNamingRules
 import com.jonathanev.review.data.storage.StorageFolders
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File

@@ -1,0 +1,26 @@
+package com.jonathanev.review.ui.adapter
+
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import androidx.recyclerview.widget.ListAdapter
+import com.jonathanev.review.presentation.model.PreviewQuestionUi
+import com.jonathanev.review.databinding.ListPreviewQuestionsBinding
+
+class ListPreviewQuestionsAdapter(
+    private val clickedPlay: (Int) -> Unit,
+    private val clickedEdit: (Int) -> Unit
+): ListAdapter<PreviewQuestionUi, ListPreviewQuestionsViewHolder>(PreviewQuestionDiffCallback()) {
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int
+    ): ListPreviewQuestionsViewHolder {
+        val inflater = LayoutInflater.from(parent.context)
+        val binding = ListPreviewQuestionsBinding.inflate(inflater, parent, false)
+        return ListPreviewQuestionsViewHolder(binding, clickedPlay, clickedEdit)
+    }
+
+    override fun onBindViewHolder(holder: ListPreviewQuestionsViewHolder, position: Int) {
+        val guia = getItem(position)
+        holder.bind(guia)
+    }
+}

@@ -1,8 +1,7 @@
 package com.jonathanev.review.presentation.state
 
 import android.net.Uri
-import com.jonathanev.review.presentation.model.QuestionItemDomain
-import com.jonathanev.review.Domain.model.TypeContent
+import com.jonathanev.review.domain.model.TypeContent
 import com.jonathanev.review.presentation.model.QuestionItemUi
 
 data class GuideUiState(

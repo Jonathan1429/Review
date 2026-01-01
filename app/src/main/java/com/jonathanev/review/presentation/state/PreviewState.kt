@@ -1,10 +1,11 @@
 package com.jonathanev.review.presentation.state
 
-import android.graphics.Color
+import com.jonathanev.review.presentation.model.ColorType
+import com.jonathanev.review.presentation.model.IconType
 
 data class PreviewState(
-    val icon: Int = 0,
-    val color: Int = Color.BLACK,
+    val icon: IconType = IconType.ANCHOR_SOLID_FULL,
+    val color: ColorType = ColorType.Black,
     val selectedIndex: Int = -1,
-    val icons: List<Int> = emptyList()
+    val icons: List<IconType> = emptyList()
 )

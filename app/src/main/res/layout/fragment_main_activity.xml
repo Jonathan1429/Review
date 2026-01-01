@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/background_app"
     android:theme="@style/Theme.TextMain"
-    tools:context=".UI.View.Fragments.FragmentMainActivity">
+    tools:context=".ui.main.FragmentMain">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"

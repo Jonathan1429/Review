@@ -1,0 +1,16 @@
+package com.jonathanev.review.domain
+
+import com.jonathanev.review.data.GuiaRepository
+import com.jonathanev.review.data.mapper.toDomain
+import com.jonathanev.review.domain.model.QAItemDomain
+import javax.inject.Inject
+
+class GetObtenerDatosXMLUseCase @Inject constructor(
+    private val guiaRepository: GuiaRepository
+){
+    operator fun invoke(): List<QAItemDomain> {
+        val qaItemXml = guiaRepository.getXMLVersion()
+        val qaItemDomain = qaItemXml.map { it.toDomain() }
+        return qaItemDomain
+    }
+}

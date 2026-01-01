@@ -7,16 +7,16 @@
 
     <fragment
         android:id="@+id/fragmentCreateFiles"
-        android:name="com.jonathanev.review.UI.View.Fragments.FragmentCreatingFiles"
+        android:name="com.jonathanev.review.ui.fragment.FragmentCreatingFiles"
         tools:layout="@layout/fragment_create_files">
         <argument
             android:name="mode"
-            app:argType="com.jonathanev.review.data.FolderAction"
+            app:argType="com.jonathanev.review.presentation.folders.model.FolderAction"
             app:nullable="false" />
 
         <argument
             android:name="actionGuide"
-            app:argType="com.jonathanev.review.data.ActionGuide"
+            app:argType="com.jonathanev.review.presentation.model.ActionGuide"
             app:nullable="true" />
         <action
             android:id="@+id/action_to_create_file"
@@ -25,12 +25,12 @@
 
     <fragment
         android:id="@+id/fragmentCreateFile"
-        android:name="com.jonathanev.review.UI.View.Fragments.FragmentCreateFile"
+        android:name="com.jonathanev.review.ui.fragment.FragmentCreateFile"
         tools:layout="@layout/fragment_create_file">
 
         <argument
             android:name="actionGuide"
-            app:argType="com.jonathanev.review.data.ActionGuide"
+            app:argType="com.jonathanev.review.presentation.model.ActionGuide"
             app:nullable="true" />
         <argument
             android:name="screenData"
@@ -48,27 +48,27 @@
 
     <fragment
         android:id="@+id/fragmentCreateText"
-        android:name="com.jonathanev.review.UI.View.Fragments.FragmentCreateText"
+        android:name="com.jonathanev.review.ui.fragment.FragmentCreateText"
         tools:layout="@layout/fragment_create_text"/>
 
     <fragment
         android:id="@+id/fragmentCreateImages"
-        android:name="com.jonathanev.review.UI.View.Fragments.FragmentCreateImages"
+        android:name="com.jonathanev.review.ui.fragment.FragmentCreateImages"
         tools:layout="@layout/fragment_create_images"/>
 
     <fragment
         android:id="@+id/createEntryFragment"
-        android:name="com.jonathanev.review.UI.View.Fragments.CreateEntryFragment"
+        android:name="com.jonathanev.review.ui.fragment.CreateEntryFragment"
         android:label="CreateEntryFragment"
         tools:layout="@layout/fragment_fragments_content">
         <argument
             android:name="mode"
-            app:argType="com.jonathanev.review.data.FolderAction"
+            app:argType="com.jonathanev.review.presentation.folders.model.FolderAction"
             app:nullable="false" />
 
         <argument
             android:name="actionGuide"
-            app:argType="com.jonathanev.review.data.ActionGuide"
+            app:argType="com.jonathanev.review.presentation.model.ActionGuide"
             app:nullable="true" />
         <action
             android:id="@+id/action_createEntryFragment_to_fragmentCreateFile"

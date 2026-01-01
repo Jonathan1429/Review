@@ -7,12 +7,12 @@
 
     <fragment
         android:id="@+id/fragmentsContent"
-        android:name="com.jonathanev.review.FragmentsContent"
+        android:name="com.jonathanev.review.ui.fragment.FragmentsContent"
         tools:layout="@layout/fragment_fragments_content">
 
         <argument
             android:name="mode"
-            app:argType="com.jonathanev.review.data.FolderAction"
+            app:argType="com.jonathanev.review.presentation.folders.model.FolderAction"
             app:nullable="false" />
 
         <action
@@ -26,7 +26,7 @@
 
     <fragment
         android:id="@+id/fragmentMainActivity"
-        android:name="com.jonathanev.review.UI.View.Fragments.FragmentMainActivity"
+        android:name="com.jonathanev.review.ui.main.FragmentMain"
         tools:layout="@layout/fragment_main_activity">
 
         <action
@@ -36,12 +36,12 @@
 
     <fragment
         android:id="@+id/fragmentListFolders"
-        android:name="com.jonathanev.review.UI.View.Fragments.FragmentListFolders"
+        android:name="com.jonathanev.review.ui.fragment.FragmentListFolders"
         tools:layout="@layout/fragment_list_folders">
 
         <argument
             android:name="mode"
-            app:argType="com.jonathanev.review.data.FolderAction"
+            app:argType="com.jonathanev.review.presentation.folders.model.FolderAction"
             app:nullable="false" />
 
         <action

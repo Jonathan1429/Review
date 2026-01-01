@@ -1,7 +1,9 @@
 package com.jonathanev.review.data
 
-import com.jonathanev.review.data.repository.FolderRepository
+import com.jonathanev.review.domain.repository.FolderRepository
+import com.jonathanev.review.domain.repository.ImagesRepository
 import com.jonathanev.review.data.repository.FolderRepositoryImp
+import com.jonathanev.review.data.repository.ImagesRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -15,4 +17,14 @@ abstract class RepositoryModule {
     abstract fun bindFolderRepository(
         impl: FolderRepositoryImp
     ): FolderRepository
+
+    @Binds
+    abstract fun bindImagesRepository(
+        impl: ImagesRepositoryImpl
+    ): ImagesRepository
+
+    @Binds
+    abstract fun bindGuiaRepository(
+        impl: GuiaRepositoryImpl
+    ): GuiaRepository
 }
