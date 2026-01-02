@@ -1,13 +1,10 @@
 package com.jonathanev.review.domain
 
-import com.jonathanev.review.data.storage.GuideImageStorage
-import io.mockk.mockk
-
 class TestGetGuiaPosicionUseCase {
-    private val guideImageStorage = mockk<GuideImageStorage>()
+    /*private val guideImageStorage = mockk<GuideImageStorage>()
     private var getFolderPosicionUseCase = GetFolderPosicionUseCase()
 
-    /*@Test
+    @Test
     fun `te regresa la guia en la posicion enviada que se encuentra en el provider`() {
         val guias = mockk<GuiaProvider>()
         every { guiaProvider.guias } returns

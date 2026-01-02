@@ -7,11 +7,10 @@ import java.io.File
 
 interface GuiaRepository {
     fun getXMLVersion(): List<QAItemXml>
-    fun getAttributesGuide(file: File): GuideXmlModel
-    fun getGuides(file: File): List<GuideXmlModel>
-    fun getVersion(file: File): String
+    fun getAttributesGuide(): GuideXmlModel
+    fun getGuides(): List<GuideXmlModel>
+    fun getVersion(): String
     fun setAttributesGuide(
-        file: File,
         fileName: String,
         description: String,
         preguntas: List<QuestionItemDomain>,
@@ -21,7 +20,6 @@ interface GuiaRepository {
     fun saveFileV2(
         nameGuide: String,
         description: String,
-        currentPath: File,
         preguntas: List<QuestionItemDomain>,
         respuestas: List<QuestionItemDomain>,
     ): Boolean

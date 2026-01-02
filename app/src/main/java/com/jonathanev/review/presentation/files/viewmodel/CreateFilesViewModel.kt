@@ -1,19 +1,19 @@
 package com.jonathanev.review.presentation.files.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jonathanev.review.domain.ChangeBeforePathUseCase
 import com.jonathanev.review.domain.CheckNameConflictUseCase
-import com.jonathanev.review.domain.CreateFolderUseCase
 import com.jonathanev.review.domain.GenerateTextColorRangesUseCase
 import com.jonathanev.review.domain.GetAttributesGuideUseCase
 import com.jonathanev.review.domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.domain.ReubicarImagenesUseCase
+import com.jonathanev.review.domain.SaveMetadataUseCase
 import com.jonathanev.review.domain.SetAttributesUseCase
+import com.jonathanev.review.domain.SetCurrentPathUseCase
 import com.jonathanev.review.domain.ValidateCreateFileUseCase
 import com.jonathanev.review.domain.model.ResponseDomain
 import com.jonathanev.review.domain.repository.PathProvider
-import com.jonathanev.review.data.provider.FilePathsProvider
 import com.jonathanev.review.presentation.event.UIStopEvent
 import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.presentation.mapper.toUi
@@ -31,21 +31,21 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
 class CreateFilesViewModel @Inject constructor(
     private val pathProvider: PathProvider,
-    private val filePathsProvider: FilePathsProvider,
-    private val createFolderUseCase: CreateFolderUseCase,
     private val getAttributesGuideUseCase: GetAttributesGuideUseCase,
     private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
     private val reubicarImagenesUseCase: ReubicarImagenesUseCase,
     private val setAttributesXMLUseCase: SetAttributesUseCase,
     private val validateCreateFileUseCase: ValidateCreateFileUseCase,
     private val checkNameConflictUseCase: CheckNameConflictUseCase,
-    private val generateTextColorRangesUseCase: GenerateTextColorRangesUseCase
+    private val generateTextColorRangesUseCase: GenerateTextColorRangesUseCase,
+    private val setCurrentPathUseCase: SetCurrentPathUseCase,
+    private val changeBeforePathUseCase: ChangeBeforePathUseCase,
+    private val saveMetadataUseCase: SaveMetadataUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(PreviewState())
     val uiState = _uiState.asStateFlow()
@@ -120,24 +120,13 @@ class CreateFilesViewModel @Inject constructor(
     }
 
     fun saveMetadata(data: ScreenData) {
-        val currentPath = File(pathProvider.getCurrentPath())
-        val folderPath = File(currentPath, data.name)
-
-        if (!folderPath.exists()) {
-            folderPath.mkdir()
-            createScreenMetadata(data, folderPath)
-        }
-    }
-
-    private fun createScreenMetadata(data: ScreenData, dir: File) {
-        createFolderUseCase.invoke(data, dir)
+        saveMetadataUseCase.invoke(data)
     }
 
     fun getCurrentPath() = pathProvider.getCurrentPath()
 
     fun fillFields(): GuideUiModel {
-        val currentPath = File(getCurrentPath())
-        val guideDomain = getAttributesGuideUseCase.invoke(currentPath)
+        val guideDomain = getAttributesGuideUseCase.invoke()
         return guideDomain.toUi()
     }
 
@@ -160,16 +149,12 @@ class CreateFilesViewModel @Inject constructor(
 
     fun renameFile(fileName: String, description: String) {
         getObtenerDatosXML()
-
-        val currentPath = File(getCurrentPath())
-
         val questionsDomain = preguntas.map { it.toDomain() }
         val answersDomain = preguntas.map { it.toDomain() }
 
-        reubicarImagenesUseCase.invoke(currentPath, fileName, questionsDomain, answersDomain)
+        reubicarImagenesUseCase.invoke(fileName, questionsDomain, answersDomain)
         val isUpdated =
             setAttributesXMLUseCase.invoke(
-                currentPath,
                 fileName,
                 description,
                 questionsDomain,
@@ -182,7 +167,7 @@ class CreateFilesViewModel @Inject constructor(
                     UIStopEvent.GuideRenamedSuccess("Se ha renombrado el archivo con exito")
                 )
 
-                pathProvider.setCurrentPath(filePathsProvider.fileGuides.path)
+                setCurrentPathUseCase.invoke()
             }
         } else {
             viewModelScope.launch {
@@ -205,9 +190,6 @@ class CreateFilesViewModel @Inject constructor(
     }
 
     fun beforePath() {
-        val currentPath = File(pathProvider.getCurrentPath())
-        val beforePath = filePathsProvider.beforePath(currentPath)
-        Log.i("Path: ", beforePath.path)
-        pathProvider.setCurrentPath(beforePath.path)
+        changeBeforePathUseCase.invoke()
     }
 }

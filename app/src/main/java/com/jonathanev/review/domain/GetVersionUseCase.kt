@@ -7,7 +7,7 @@ import javax.inject.Inject
 class GetVersionUseCase @Inject constructor(
     private val guiaRepository: GuiaRepository
 ) {
-    operator fun invoke(file: File): String {
-        return guiaRepository.getVersion(file)
+    operator fun invoke(): String {
+        return guiaRepository.getVersion()
     }
 }

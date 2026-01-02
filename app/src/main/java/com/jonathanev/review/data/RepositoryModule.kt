@@ -4,6 +4,8 @@ import com.jonathanev.review.domain.repository.FolderRepository
 import com.jonathanev.review.domain.repository.ImagesRepository
 import com.jonathanev.review.data.repository.FolderRepositoryImp
 import com.jonathanev.review.data.repository.ImagesRepositoryImpl
+import com.jonathanev.review.data.repository.MetadataRepositoryImpl
+import com.jonathanev.review.domain.repository.MetadataRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -27,4 +29,9 @@ abstract class RepositoryModule {
     abstract fun bindGuiaRepository(
         impl: GuiaRepositoryImpl
     ): GuiaRepository
+
+    @Binds
+    abstract fun bindMetadataRepository(
+        impl: MetadataRepositoryImpl
+    ): MetadataRepository
 }

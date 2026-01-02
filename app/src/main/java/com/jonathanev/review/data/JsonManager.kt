@@ -6,7 +6,6 @@ import java.io.File
 import javax.inject.Inject
 
 class JsonManager @Inject constructor() {
-
     val json = Json {
         ignoreUnknownKeys = true
         prettyPrint = true

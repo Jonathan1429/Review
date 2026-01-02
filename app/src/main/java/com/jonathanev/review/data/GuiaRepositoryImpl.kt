@@ -1,17 +1,10 @@
 package com.jonathanev.review.data
 
 import android.util.Xml
-import com.jonathanev.review.domain.SetCifrarRutaImagenUseCase
-import com.jonathanev.review.domain.SetSubstringPathUseCase
-import com.jonathanev.review.domain.model.ContentType
-import com.jonathanev.review.domain.model.QAType
-import com.jonathanev.review.domain.repository.PathProvider
-import com.jonathanev.review.data.model.GuideXmlModel
-import com.jonathanev.review.domain.model.QuestionContentDomain
-import com.jonathanev.review.domain.model.QuestionItemDomain
 import com.jonathanev.review.data.mapper.toXmlContent
 import com.jonathanev.review.data.mapper.toXmlQA
 import com.jonathanev.review.data.media.MediaPaths
+import com.jonathanev.review.data.model.GuideXmlModel
 import com.jonathanev.review.data.model.QAItemXml
 import com.jonathanev.review.data.model.QuestionContentXml
 import com.jonathanev.review.data.model.QuestionItemXml
@@ -21,6 +14,13 @@ import com.jonathanev.review.data.xml.Structure
 import com.jonathanev.review.data.xml.Versions
 import com.jonathanev.review.data.xml.XmlTagsV1
 import com.jonathanev.review.data.xml.XmlTagsV2
+import com.jonathanev.review.domain.SetCifrarRutaImagenUseCase
+import com.jonathanev.review.domain.SetSubstringPathUseCase
+import com.jonathanev.review.domain.model.ContentType
+import com.jonathanev.review.domain.model.QAType
+import com.jonathanev.review.domain.model.QuestionContentDomain
+import com.jonathanev.review.domain.model.QuestionItemDomain
+import com.jonathanev.review.domain.repository.PathProvider
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.NodeList
@@ -47,8 +47,13 @@ class GuiaRepositoryImpl @Inject constructor(
     private val fileOutputStreamFactory: FileOutputStreamFactory,
     private val pathProvider: PathProvider
 ) : GuiaRepository {
-    override fun getGuides(file: File): List<GuideXmlModel> {
-        return file.listFiles()
+    override fun getGuides(): List<GuideXmlModel> {
+        val folder = File(pathProvider.getCurrentPath())
+        return getGuidesFromFolder(folder)
+    }
+
+    private fun getGuidesFromFolder(folder: File): List<GuideXmlModel> {
+        return folder.listFiles()
             ?.filter { !it.isDirectory }
             ?.mapNotNull { item ->
                 runCatching {
@@ -61,11 +66,12 @@ class GuiaRepositoryImpl @Inject constructor(
     override fun saveFileV2(
         nameGuide: String,
         description: String,
-        currentPath: File,
         preguntas: List<QuestionItemDomain>,
         respuestas: List<QuestionItemDomain>,
     ): Boolean {
-        val parentDir = currentPath.parent ?: return false
+        val currentPath = File(pathProvider.getCurrentPath())
+        val parentDir = currentPath.parent
+
         val newFile = File(
             /* parent = */ parentDir,
             /* child = */ "$nameGuide.xml"
@@ -305,10 +311,20 @@ class GuiaRepositoryImpl @Inject constructor(
             obtenerDatosXMLV2(version)
     }
 
-    override fun getAttributesGuide(file: File): GuideXmlModel {
+    override fun getAttributesGuide(): GuideXmlModel {
+        val currentPath = File(pathProvider.getCurrentPath())
+        val db = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+        val doc = db.parse(currentPath)
+        return contentAttributesGuide(doc, currentPath)
+    }
+
+    private fun getAttributesGuide(file: File): GuideXmlModel {
         val db = DocumentBuilderFactory.newInstance().newDocumentBuilder()
         val doc = db.parse(file)
+        return contentAttributesGuide(doc, file)
+    }
 
+    private fun contentAttributesGuide(doc: Document, currentPath: File): GuideXmlModel {
         val versionNode = doc.getElementsByTagName(Structure.GUIAESTUDIO)
         val elementGuide = versionNode.item(0) as Element
         val version = elementGuide.getAttribute(Attributes.VERSION)
@@ -320,7 +336,7 @@ class GuiaRepositoryImpl @Inject constructor(
         val description = element.getAttribute(Attributes.DESCRIPCION)
         //var name = element.getAttribute("nombreGuia")
         if (version == "1.0") {
-            val fileName = file.path.substringAfterLast("/")
+            val fileName = currentPath.path.substringAfterLast("/")
             name = fileName
             name = name.replace(".xml", "")
         } else {
@@ -334,7 +350,6 @@ class GuiaRepositoryImpl @Inject constructor(
     }
 
     override fun setAttributesGuide(
-        file: File,
         fileName: String,
         description: String,
         preguntas: List<QuestionItemDomain>,
@@ -343,15 +358,15 @@ class GuiaRepositoryImpl @Inject constructor(
         return saveFileV2(
             fileName,
             description,
-            file,
             preguntas,
             respuestas
         )
     }
 
-    override fun getVersion(file: File): String {
+    override fun getVersion(): String {
+        val currentPath = pathProvider.getCurrentPath()
         val db = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-        val doc = db.parse(file)
+        val doc = db.parse(currentPath)
 
         val versionNode = doc.getElementsByTagName(Structure.GUIAESTUDIO)
         val elementGuide = versionNode.item(0) as Element

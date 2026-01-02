@@ -9,11 +9,9 @@ import javax.inject.Inject
 
 class LoadGuidesUseCase @Inject constructor(
     private val guiaRepository: GuiaRepository,
-    private val pathProvider: PathProvider,
 ) {
     operator fun invoke(): List<GuideDomainModel> {
-        val path = File(pathProvider.getCurrentPath())
-        val guidesXML = guiaRepository.getGuides(path)
+        val guidesXML = guiaRepository.getGuides()
         return guidesXML.map { GuideXmlMapper.toDomain(it) }
     }
 }
