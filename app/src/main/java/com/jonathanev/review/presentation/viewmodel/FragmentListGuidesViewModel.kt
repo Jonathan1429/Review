@@ -47,7 +47,7 @@ class FragmentListGuidesViewModel @Inject constructor(
     private val deleteGuideUseCase: DeleteGuideUseCase,
     private val moverArchivoUseCase: MoverArchivoUseCase,
     private val moverImagenesUseCase: MoverImagenesUseCase,
-    private val generateTextColorRangesUseCase: GenerateTextColorRangesUseCase
+    private val generateTextColorRangesUseCase: GenerateTextColorRangesUseCase,
 ) : ViewModel() {
     private var cachedGuides: List<GuideDomainModel> = emptyList()
     private val _guides = MutableLiveData<List<GuideUiModel>>()
@@ -94,16 +94,14 @@ class FragmentListGuidesViewModel @Inject constructor(
     }
 
     fun deleteFiles(nameGuide: String) {
-        val currentPath = File(pathProvider.getCurrentPath())
-        val currentGuide = filePathsProvider.buildFile(currentPath, nameGuide)
-
-        getObtenerDatosXML(currentGuide)
+        val currentGuide = changeGuidePathBuildFileUseCase.invoke(nameGuide)
+        getObtenerDatosXML(File(currentGuide))
 
         val listImages = (preguntas + respuestas)
             .flatMap { it.content }
             .filterIsInstance<QuestionContentDomain.Image>()
 
-        val message = deleteGuideUseCase.invoke(currentGuide, listImages)
+        val message = deleteGuideUseCase.invoke(File(currentGuide), listImages)
 
         viewModelScope.launch {
             if (message is UIStopEvent.DeleteGuideSuccess) {
@@ -151,7 +149,7 @@ class FragmentListGuidesViewModel @Inject constructor(
             val answersItemDomain = respuestas.map { it.toDomain() }
 
             if (isSuccessXML.first) {
-                val version = getVersionUseCase.invoke(isSuccessXML.second)
+                val version = getVersionUseCase.invoke()
                 moverImagenesUseCase.invoke(
                     version,
                     mode.pathFile,

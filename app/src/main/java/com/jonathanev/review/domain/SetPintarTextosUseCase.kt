@@ -2,13 +2,13 @@ package com.jonathanev.review.domain
 
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.data.media.MediaPaths
-import com.jonathanev.review.data.provider.FileHelperImpl
+import com.jonathanev.review.data.provider.DirectoryManagerImpl
 import javax.inject.Inject
 
 class SetPintarTextosUseCase @Inject constructor(
     private val setCifrarRutaImagenUseCase: SetCifrarRutaImagenUseCase,
     private val getColorRangesUseCase: GetColorRangesUseCase,
-    private val fileHelper: FileHelperImpl
+    private val fileHelper: DirectoryManagerImpl
 ) {
     operator fun invoke(
         item: QuestionContentDomain,
@@ -24,7 +24,7 @@ class SetPintarTextosUseCase @Inject constructor(
                 val imagen = descifrado.replaceBeforeLast("/", "").replace("/", "")
                 descifrado = "$soloRuta$imagen"
 
-                if (!fileHelper.exists(descifrado)) {
+                if (!fileHelper.existPath(descifrado)) {
                     descifrado = descifrado.replace("imagenes".toRegex(), "imagenesPivote")
                 }
 

@@ -1,7 +1,6 @@
 package com.jonathanev.review.presentation.viewmodel
 
 import android.net.Uri
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.domain.GenerateTextColorRangesUseCase
@@ -24,8 +23,12 @@ import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.event.UIStopEvent
 import com.jonathanev.review.data.provider.FilePathsProvider
-import com.jonathanev.review.data.storage.GuideImageStorage
+import com.jonathanev.review.domain.SaveGuideImagesUseCase
 import com.jonathanev.review.data.xml.Versions
+import com.jonathanev.review.domain.ChangeBeforePathUseCase
+import com.jonathanev.review.domain.ChangeGuidePathBuildFileUseCase
+import com.jonathanev.review.domain.SetMainPathUseCase
+import com.jonathanev.review.domain.UpdateImagesUseCase
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -39,7 +42,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
@@ -56,9 +58,13 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     private val getVersionUseCase: GetVersionUseCase,
     private val pathProvider: PathProvider,
     private val filePathsProvider: FilePathsProvider,
-    private val guideImageStorage: GuideImageStorage,
+    private val saveGuideImagesUseCase: SaveGuideImagesUseCase,
     private val dataStoreManager: DataStoreManager,
-    private val generateTextColorRangesUseCase: GenerateTextColorRangesUseCase
+    private val generateTextColorRangesUseCase: GenerateTextColorRangesUseCase,
+    private val updateImagesUseCase: UpdateImagesUseCase,
+    private val changeGuidePathBuildFileUseCase: ChangeGuidePathBuildFileUseCase,
+    private val setMainPathUseCase: SetMainPathUseCase,
+    private val changeBeforePathUseCase: ChangeBeforePathUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(GuideUiState())
     val uiState = _uiState.asStateFlow()
@@ -478,7 +484,6 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            val currentPath = File(getCurrentPath())
             val preguntasDomain = uiState.value.preguntas.map { it.toDomain() }
             val respuestasDomain = uiState.value.respuestas.map { it.toDomain() }
 
@@ -500,65 +505,17 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 )
             }
 
-            // 2. Preparación de rutas
-            val version = getVersionUseCase.invoke(currentPath)
-            val basePath = currentPath.toString().replace(".xml", "")
-            val imagesFolder = File(basePath.replace("guias", "imagenes"))
-
-            if (!imagesFolder.exists()) {
-                imagesFolder.mkdir()
-            }
-
-            // 3. Gestión de Imágenes (Lógica unificada)
-            // Determinamos la carpeta de búsqueda según versión (V1 usaba el parent)
-            val searchFolder =
-                if (version == Versions.VERSION1) imagesFolder.parentFile else imagesFolder
-
-            val allContent = preguntasProcesadas + respuestasProcesadas
-            val listImagesXML =
-                allContent.flatMap { it.content }.filterIsInstance<QuestionContentDomain.Image>()
-
-            // B. Identificar faltantes
-            var currentDeviceNames =
-                searchFolder?.listFiles()?.map { it.name }?.toSet() ?: emptySet()
-
-            // D. Guardar nuevas imágenes
-            val imagesToDownload = listImagesXML.filter { it.nameFile !in currentDeviceNames }
-            if (imagesToDownload.isNotEmpty()) {
-                guideImageStorage.saveImagesInDevice(imagesToDownload, imagesFolder)
-            }
-
-            // C. Mover imagenes
-            if (version == Versions.VERSION1) {
-                listImagesXML.filter { it.nameFile in currentDeviceNames }.forEach { image ->
-                    val destination = File(imagesFolder, image.nameFile)
-
-                    Files.move(
-                        Paths.get(image.uri),
-                        Paths.get(destination.path),
-                        StandardCopyOption.REPLACE_EXISTING
-                    )
-                }
-            }
-
-            // Borrar imagenes que ya no estén en el XML pero si en el dispositivo
-            currentDeviceNames = imagesFolder.listFiles()?.map { it.name }?.toSet() ?: emptySet()
-            val listDelete = currentDeviceNames - listImagesXML.map { it.nameFile }.toSet()
-
-            listDelete.forEach { image ->
-                val destination = File(imagesFolder, image)
-                if (destination.exists() && destination.isFile) {
-                    destination.delete()
-                }
-            }
-
+            updateImagesUseCase.invoke(
+                preguntasProcesadas = preguntasProcesadas,
+                respuestasProcesadas = respuestasProcesadas,
+                isNewFile = false
+            )
 
             // 4. Persistencia Final del XML
-            val response = getAttributesGuideUseCase.invoke(currentPath)
+            val response = getAttributesGuideUseCase.invoke()
             val isSuccess = setCrearXmlUseCase.invoke(
                 response.nameGuide,
                 response.description,
-                currentPath,
                 preguntasProcesadas,
                 respuestasProcesadas
             )
@@ -600,32 +557,19 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 )
             }
 
-            // 4. Preparación de Archivos (Lógica de IO)
-            val currentPath = filePathsProvider.buildFile(File(getCurrentPath()), nameGuide)
-            val imagesFolder = File(
-                filePathsProvider.buildFolder(File(getCurrentPath()), nameGuide).path
-                    .replace("guias", "imagenes")
+            updateImagesUseCase.invoke(
+                nameGuide = nameGuide,
+                preguntasProcesadas = preguntasProcesadas,
+                respuestasProcesadas = respuestasProcesadas,
+                isNewFile = true
             )
 
-            // Limpieza y creación de directorio de imágenes
-            if (imagesFolder.exists()) imagesFolder.deleteRecursively()
-            imagesFolder.mkdir()
-
-            // 5. Persistencia de Imágenes
-            // Usamos las listas PROCESADAS, no las del state viejo
-            val listImages = (preguntasProcesadas + respuestasProcesadas)
-                .flatMap { it.content }
-                .filterIsInstance<QuestionContentDomain.Image>()
-
-            if (listImages.isNotEmpty()) {
-                guideImageStorage.saveImagesInDevice(listImages, imagesFolder)
-            }
+            changeGuidePathBuildFileUseCase.invoke(nameGuide)
 
             // 6. Persistencia del XML
             val isSuccess = setCrearXmlUseCase.invoke(
                 nameGuide,
                 description,
-                currentPath,
                 preguntasProcesadas, // IMPORTANTE: Usar los datos actualizados
                 respuestasProcesadas
             )
@@ -633,10 +577,12 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             // 7. Notificación de resultado y limpieza de navegación
             if (isSuccess) {
                 initUIState()
-                pathProvider.setCurrentPath(filePathsProvider.fileGuides.path)
+                setMainPathUseCase.invoke()
                 _uiStopEvent.emit(
                     UIStopEvent.GuideCreatedSuccess("Se ha guardado la guía correctamente")
                 )
+            } else {
+                changeBeforePathUseCase.invoke()
             }
         }
     }
@@ -684,7 +630,6 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         viewModelScope.launch {
             dataStoreManager.setDontAskDelete(true)
             val value = dataStoreManager.getDontAskDelete().first()
-            Log.d("DATASTORE", "DontAskDelete = $value")
         }
     }
 

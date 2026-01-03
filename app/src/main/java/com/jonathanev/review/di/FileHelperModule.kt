@@ -1,9 +1,9 @@
 package com.jonathanev.review.di
 
 import com.jonathanev.review.data.provider.FilePathsProvider
-import com.jonathanev.review.data.provider.FileHelperImpl
+import com.jonathanev.review.data.provider.DirectoryManagerImpl
 import com.jonathanev.review.data.provider.PathProviderImpl
-import com.jonathanev.review.domain.FileHelper
+import com.jonathanev.review.domain.DirectoryManager
 import com.jonathanev.review.domain.repository.PathProvider
 import dagger.Module
 import dagger.Provides
@@ -17,7 +17,9 @@ object FileHelperModule {
 
     @Provides
     @Singleton
-    fun provideFileHelper(): FileHelper = FileHelperImpl()
+    fun provideFileHelper(
+        pathProvider: PathProvider
+    ): DirectoryManager = DirectoryManagerImpl(pathProvider)
 
     @Provides
     @Singleton

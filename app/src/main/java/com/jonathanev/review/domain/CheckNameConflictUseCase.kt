@@ -9,7 +9,7 @@ import javax.inject.Inject
 class CheckNameConflictUseCase @Inject constructor(
     private val pathProvider: PathProvider,
     private val filePathsProvider: FilePathsProvider,
-    private val fileHelper: FileHelper
+    private val directoryManager: DirectoryManager
 ) {
     operator fun invoke(mode: FolderAction, name: String): Boolean {
         val basePath = File(pathProvider.getCurrentPath())
@@ -27,6 +27,6 @@ class CheckNameConflictUseCase @Inject constructor(
             else -> return false
         }
 
-        return fileHelper.exists(pathToCheck.path)
+        return directoryManager.existPath(pathToCheck.path)
     }
 }

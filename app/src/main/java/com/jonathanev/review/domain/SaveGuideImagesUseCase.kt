@@ -1,11 +1,11 @@
-package com.jonathanev.review.data.storage
+package com.jonathanev.review.domain
 
 import com.jonathanev.review.domain.repository.ImagesRepository
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import java.io.File
 import javax.inject.Inject
 
-class GuideImageStorage @Inject constructor(
+class SaveGuideImagesUseCase @Inject constructor(
     private val imagesRepository: ImagesRepository
 ) {
     suspend fun saveImagesInDevice(images: List<QuestionContentDomain.Image>, imagesPath: File) {

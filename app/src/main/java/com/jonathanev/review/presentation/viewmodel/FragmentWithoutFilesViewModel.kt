@@ -63,7 +63,7 @@ class FragmentWithoutFilesViewModel @Inject constructor(
             val answersDomain = respuestas.map { it.toDomain() }
 
             if (isSuccessXML.first) {
-                val version = getVersionUseCase.invoke(isSuccessXML.second)
+                val version = getVersionUseCase.invoke()
                 moverImagenesUseCase.invoke(
                     version,
                     mode.pathFile,

@@ -11,10 +11,9 @@ class SetCrearXmlUseCase @Inject constructor(
     operator fun invoke(
         nameGuide: String,
         description: String,
-        currentPath: File,
         preguntas: List<QuestionItemDomain>,
         respuestas: List<QuestionItemDomain>,
     ): Boolean {
-        return guiaRepositoryImpl.saveFileV2(nameGuide, description, currentPath, preguntas, respuestas)
+        return guiaRepositoryImpl.saveFileV2(nameGuide, description,  preguntas, respuestas)
     }
 }
