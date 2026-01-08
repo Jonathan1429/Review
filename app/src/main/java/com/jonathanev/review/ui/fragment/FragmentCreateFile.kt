@@ -127,6 +127,7 @@ class FragmentCreateFile : Fragment() {
                                 .build()
                         )
 
+                        viewModel.initUIState()
                         Toast.makeText(context, uiStopEvent.text, Toast.LENGTH_SHORT).show()
                     }
                 }
