@@ -119,6 +119,7 @@ class FragmentCreateFile : Fragment() {
                     }
 
                     if (uiStopEvent is UIStopEvent.GuideCreatedSuccess) {
+                        viewModel.initUIState()
                         findNavController().navigate(
                             R.id.fragmentsContent,
                             null,
@@ -127,7 +128,6 @@ class FragmentCreateFile : Fragment() {
                                 .build()
                         )
 
-                        viewModel.initUIState()
                         Toast.makeText(context, uiStopEvent.text, Toast.LENGTH_SHORT).show()
                     }
                 }
