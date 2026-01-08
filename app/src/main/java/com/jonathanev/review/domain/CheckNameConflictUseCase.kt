@@ -11,7 +11,7 @@ class CheckNameConflictUseCase @Inject constructor(
     private val filePathsProvider: FilePathsProvider,
     private val directoryManager: DirectoryManager
 ) {
-    operator fun invoke(mode: FolderAction, name: String): Boolean {
+    operator fun invoke(mode: FolderAction, name: String) {
         val basePath = File(pathProvider.getCurrentPath())
 
         val pathToCheck = when (mode) {

@@ -9,6 +9,7 @@ import com.jonathanev.review.data.model.QAItemXml
 import com.jonathanev.review.data.model.QuestionContentXml
 import com.jonathanev.review.data.model.QuestionItemXml
 import com.jonathanev.review.data.model.ResponseXml
+import com.jonathanev.review.data.provider.FilePathsProvider
 import com.jonathanev.review.data.xml.Attributes
 import com.jonathanev.review.data.xml.Structure
 import com.jonathanev.review.data.xml.Versions
@@ -17,9 +18,12 @@ import com.jonathanev.review.data.xml.XmlTagsV2
 import com.jonathanev.review.domain.SetCifrarRutaImagenUseCase
 import com.jonathanev.review.domain.SetSubstringPathUseCase
 import com.jonathanev.review.domain.model.ContentType
+import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.QAType
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
+import com.jonathanev.review.domain.repository.FileNamingRules.XML_EXTENSION
+import com.jonathanev.review.domain.repository.NavigationPathRepository
 import com.jonathanev.review.domain.repository.PathProvider
 import org.w3c.dom.Document
 import org.w3c.dom.Element
@@ -45,37 +49,144 @@ class GuiaRepositoryImpl @Inject constructor(
     private val setSubstringPathUseCase: SetSubstringPathUseCase,
     private val xmlSerializerFactory: XmlSerializerFactory,
     private val fileOutputStreamFactory: FileOutputStreamFactory,
-    private val pathProvider: PathProvider
+    private val pathProvider: PathProvider,
+    private val navigationPathRepository: NavigationPathRepository,
+    private val filePathsProvider: FilePathsProvider
 ) : GuiaRepository {
-    override fun getGuides(): List<GuideXmlModel> {
-        val folder = File(pathProvider.getCurrentPath())
-        return getGuidesFromFolder(folder)
+    private var _guidesRecovery = emptyList<GuideXmlModel>()
+    override val guidesRecovery: List<GuideXmlModel>
+        get() = _guidesRecovery
+
+    override fun getNumGuides(): Int {
+        return navigationPathRepository.currentPath.listFiles()?.size ?: 0
     }
 
-    private fun getGuidesFromFolder(folder: File): List<GuideXmlModel> {
-        return folder.listFiles()
-            ?.filter { !it.isDirectory }
+    override fun getGuides(): List<GuideXmlModel> {
+        val listFiles = navigationPathRepository.currentPath.listFiles()
+            ?.filter { file ->
+                file.isFile &&
+                        file.extension == XML_EXTENSION
+            } ?: emptyList()
+
+        val listFromFolders = navigationPathRepository.currentPath
+            .listFiles()
+            ?.filter { it.isDirectory }?.map { folder ->
+                folder.listFiles()?.find { file ->
+                    file.isFile &&
+                            file.extension == XML_EXTENSION &&
+                            file.nameWithoutExtension == (file.parentFile?.name ?: "")
+                }
+            } ?: emptyList()
+
+        val result = (listFiles + listFromFolders)
+        val resultGuides = result.map { file -> getAttributesGuide(file!!) }
+        _guidesRecovery = resultGuides
+        return resultGuides
+    }
+
+    /*private fun getGuidesFromFolder(folderId: String): List<GuideXmlModel> {
+        val context = GuidePathContext(
+            version = VERSION1,
+            guideName = folderId,
+            target = GuidePathTarget.GUIDES,
+        )
+
+        val pathFiles = pathProvider.resolveGuidePath(context)
+
+        return pathFiles.listFiles()
+            ?.filter { !it.name.endsWith(".json") }
             ?.mapNotNull { item ->
                 runCatching {
                     getAttributesGuide(item)
                 }.getOrNull()
             }
             ?: emptyList()
+    }*/
+
+    override fun renameGuide(
+        fileName: String,
+        description: String,
+        preguntas: List<QuestionItemDomain>,
+        respuestas: List<QuestionItemDomain>,
+        attributesGuide: GuideDomainModel
+    ): Boolean {
+        val currentPath = filePathsProvider.buildFolderFile(
+            navigationPathRepository.currentPath,
+            attributesGuide.nameGuide,
+            attributesGuide.nameGuide
+        )
+
+        val tempFile = File("$currentPath.tmp")
+
+        return try {
+            val serializer = xmlSerializerFactory.create()
+            val fos = fileOutputStreamFactory.create(tempFile.path)
+
+            serializer.setOutput(fos, "UTF-8")
+            try {
+                serializer.setFeature(
+                    "http://xmlpull.org/v1/doc/features.html#indent-output",
+                    true
+                )
+            } catch (_: Exception) {
+            }
+            serializer.startDocument(null, true)
+            serializer.startTag("", Structure.GUIAESTUDIO)
+            serializer.attribute("", Attributes.VERSION, "2.0")
+
+            serializer.startTag("", Structure.CUESTIONARIO)
+            serializer.attribute("", Attributes.NOMBREGUIA, fileName)
+            serializer.attribute("", Attributes.DESCRIPCION, description)
+
+            writeQuestionsAnswers(serializer, preguntas, toXmlQA(QAType.QUESTION))
+            writeQuestionsAnswers(serializer, respuestas, toXmlQA(QAType.ANSWER))
+
+            serializer.endTag("", Structure.CUESTIONARIO)
+            serializer.endTag("", Structure.GUIAESTUDIO)
+            serializer.endDocument()
+
+            fos.close()
+
+            val isRenamed = !tempFile.renameTo(currentPath)
+            if (!isRenamed) {
+                tempFile.delete()
+                return false
+            }
+
+            if (attributesGuide.version == Versions.VERSION1) {
+                val pathV1 = filePathsProvider.buildFile(
+                    navigationPathRepository.currentPath,
+                    fileName
+                )
+
+                pathV1.delete()
+            }
+
+            true
+        } catch (e: Exception) {
+            false
+        }
     }
 
     override fun saveFileV2(
         nameGuide: String,
         description: String,
+        version: String,
         preguntas: List<QuestionItemDomain>,
         respuestas: List<QuestionItemDomain>,
     ): Boolean {
-        val currentPath = File(pathProvider.getCurrentPath())
-        val parentDir = currentPath.parent
+        val currentPath = filePathsProvider.buildFolderFile(
+            navigationPathRepository.currentPath,
+            nameGuide,
+            nameGuide
+        )
+        /*val parentDir = currentPath.parent
 
         val newFile = File(
             /* parent = */ parentDir,
-            /* child = */ "$nameGuide.xml"
-        )
+            /* child = */ "${nameGuide}.xml"
+        )*/
+
         val tempFile = File("$currentPath.tmp")
 
         return try {
@@ -107,10 +218,19 @@ class GuiaRepositoryImpl @Inject constructor(
 
             fos.close()
 
-            if (!tempFile.renameTo(newFile)) return false
+            val isRenamed = !tempFile.renameTo(currentPath)
+            if (!isRenamed) {
+                tempFile.delete()
+                return false
+            }
 
-            if (newFile != currentPath) {
-                currentPath.delete()
+            if (version == Versions.VERSION1) {
+                val pathV1 = filePathsProvider.buildFile(
+                    navigationPathRepository.currentPath,
+                    nameGuide
+                )
+
+                pathV1.delete()
             }
 
             true
@@ -135,15 +255,15 @@ class GuiaRepositoryImpl @Inject constructor(
                         serializer.startTag("", toXmlContent(ContentType.IMAGE))
                         serializer.attribute("", Attributes.URI, "")
                         serializer.attribute("", Attributes.NAMEFILE, content.nameFile)
-                        serializer.endTag("", XmlTagsV2.TEXTO)
+                        serializer.endTag("", XmlTagsV2.IMAGEN)
                     }
 
                     QuestionContentDomain.None -> Unit
 
                     is QuestionContentDomain.Text -> {
-                        serializer.startTag("", toXmlContent(ContentType.IMAGE))
+                        serializer.startTag("", toXmlContent(ContentType.TEXT))
                         serializer.attribute("", XmlTagsV2.TEXTO, content.text)
-                        serializer.endTag("", toXmlContent(ContentType.IMAGE))
+                        serializer.endTag("", toXmlContent(ContentType.TEXT))
                     }
                 }
             }
@@ -152,18 +272,34 @@ class GuiaRepositoryImpl @Inject constructor(
         }
     }
 
-    private fun obtenerDatosXMLV2(version: String): List<QAItemXml> {
-        val currentPath = pathProvider.getCurrentPath()
+    private fun obtenerDatosXMLV2(guideDomainModel: GuideDomainModel?): List<QAItemXml> {
+        val currentPath = filePathsProvider.buildFolderFile(
+            navigationPathRepository.currentPath,
+            guideDomainModel!!.nameGuide,
+            guideDomainModel.nameGuide
+        )
+
         val qaItemXml = mutableListOf<QAItemXml>()
 
         val db = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-        val file = File(currentPath)
-        val doc = db.parse(file)
+        val doc = db.parse(currentPath)
 
         //listaQA.addAll(QAItem(getQAXML(doc, QUESTION),getQAXML(doc, ANSWER)))
         //questionItems.addAll()
-        getQAXML(qaItemXml, doc, toXmlQA(QAType.QUESTION), currentPath, version)
-        getQAXML(qaItemXml, doc, toXmlQA(QAType.ANSWER), currentPath, version)
+        getQAXML(
+            qaItemXml,
+            doc,
+            toXmlQA(QAType.QUESTION),
+            (currentPath.parent ?: ""),
+            guideDomainModel.version
+        )
+        getQAXML(
+            qaItemXml,
+            doc,
+            toXmlQA(QAType.ANSWER),
+            (currentPath.parent ?: ""),
+            guideDomainModel.version
+        )
 
         return qaItemXml
     }
@@ -172,7 +308,7 @@ class GuiaRepositoryImpl @Inject constructor(
         qaItemDomain: MutableList<QAItemXml>,
         doc: Document,
         typeContent: String,
-        ruta: String,
+        path: String,
         version: String
     ) {
         // Leer Questions
@@ -201,7 +337,7 @@ class GuiaRepositoryImpl @Inject constructor(
                 //val uri = img.getAttribute(URI)
                 val nameFile = img.getAttribute(Attributes.NAMEFILE)
                 val uri = setSubstringPathUseCase.invoke(
-                    path = ruta,
+                    path = path,
                     version = version,
                     nameFile = nameFile
                 )
@@ -220,16 +356,18 @@ class GuiaRepositoryImpl @Inject constructor(
         }
     }
 
-    private fun obtenerDatosXMLV1(version: String): List<QAItemXml> {
-        val currentPath = pathProvider.getCurrentPath()
+    private fun obtenerDatosXMLV1(guideDomainModel: GuideDomainModel?): List<QAItemXml> {
         val listaQA = mutableListOf<QAItemXml>()
 
         val dbf = DocumentBuilderFactory.newInstance()
 
         try {
             val db = dbf.newDocumentBuilder()
-            val filePath = File(currentPath)
-            val doc = db.parse(filePath)
+            val currentPath = filePathsProvider.buildFile(
+                navigationPathRepository.currentPath,
+                guideDomainModel!!.nameGuide
+            )
+            val doc = db.parse(currentPath)
 
             val cuestionario: NodeList = doc.getElementsByTagName(XmlTagsV2.INTERROGANTE)
 
@@ -245,7 +383,11 @@ class GuiaRepositoryImpl @Inject constructor(
 
                 val preguntaProcesada = if (ques.contains(MediaPaths.BASERUTA_IMG_CIFRADO)) {
                     var decoded = setCifrarRutaImagenUseCase.invoke(ques, 26 - 3)
-                    decoded = setSubstringPathUseCase.invoke(currentPath, decoded, version)
+                    decoded = setSubstringPathUseCase.invoke(
+                        currentPath.path,
+                        decoded,
+                        guideDomainModel.version
+                    )
                     val nameFile = decoded.substringAfterLast("/")
                     QuestionContentXml.Image(uri = decoded, nameFile = nameFile)
                 } else {
@@ -264,7 +406,11 @@ class GuiaRepositoryImpl @Inject constructor(
 
                 val respuestaProcesada = if (ans.contains(MediaPaths.BASERUTA_IMG_CIFRADO)) {
                     var decoded = setCifrarRutaImagenUseCase.invoke(ans, 26 - 3)
-                    decoded = setSubstringPathUseCase.invoke(currentPath, decoded, version)
+                    decoded = setSubstringPathUseCase.invoke(
+                        currentPath.path,
+                        decoded,
+                        guideDomainModel.version
+                    )
                     val nameFile = decoded.substringAfterLast("/")
                     QuestionContentXml.Image(uri = decoded, nameFile = nameFile)
                 } else {
@@ -294,37 +440,50 @@ class GuiaRepositoryImpl @Inject constructor(
         return listaQA
     }
 
-    override fun getXMLVersion(): List<QAItemXml> {
-        val currentPath = pathProvider.getCurrentPath()
-        val db = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-        val file = File(currentPath)
-        val doc = db.parse(file)
-
-        val versionNode = doc.getElementsByTagName(Structure.GUIAESTUDIO)
-        val element = versionNode.item(0) as Element
-        val version = element.getAttribute(Attributes.VERSION)
+    override fun getXML(guideDomainModel: GuideDomainModel?): List<QAItemXml> {
+        val version = guideDomainModel?.version!!
 
         //return obtenerDatosXMLV1(ruta)
         return if (version == Versions.VERSION1)
-            obtenerDatosXMLV1(version)
+            obtenerDatosXMLV1(guideDomainModel)
         else
-            obtenerDatosXMLV2(version)
+            obtenerDatosXMLV2(guideDomainModel)
     }
 
-    override fun getAttributesGuide(): GuideXmlModel {
+    /*override fun getAttributesGuide(): GuideXmlModel {
         val currentPath = File(pathProvider.getCurrentPath())
         val db = DocumentBuilderFactory.newInstance().newDocumentBuilder()
         val doc = db.parse(currentPath)
-        return contentAttributesGuide(doc, currentPath)
-    }
+        return contentAttributesGuide(doc)
+    }*/
 
     private fun getAttributesGuide(file: File): GuideXmlModel {
         val db = DocumentBuilderFactory.newInstance().newDocumentBuilder()
         val doc = db.parse(file)
-        return contentAttributesGuide(doc, file)
+        return contentAttributesGuide(doc)
     }
 
-    private fun contentAttributesGuide(doc: Document, currentPath: File): GuideXmlModel {
+    private fun contentAttributesGuide(doc: Document): GuideXmlModel {
+        val cuestionarioNode = doc
+            .getElementsByTagName(Structure.CUESTIONARIO)
+            .item(0) as Element
+
+        val guiaEstudioNode = doc
+            .getElementsByTagName(Structure.GUIAESTUDIO)
+            .item(0) as Element
+
+        var name = cuestionarioNode.getAttribute(Attributes.NOMBREGUIA).replace(".$XML_EXTENSION", "")
+        val description = cuestionarioNode.getAttribute(Attributes.DESCRIPCION)
+        val version = guiaEstudioNode.getAttribute(Attributes.VERSION)
+
+        return GuideXmlModel(
+            version = version,
+            nameGuide = name,
+            description = description
+        )
+    }
+
+    /*private fun contentAttributesGuide(doc: Document, currentPath: File): GuideXmlModel {
         val versionNode = doc.getElementsByTagName(Structure.GUIAESTUDIO)
         val elementGuide = versionNode.item(0) as Element
         val version = elementGuide.getAttribute(Attributes.VERSION)
@@ -347,9 +506,9 @@ class GuiaRepositoryImpl @Inject constructor(
             nameGuide = name,
             description = description
         )
-    }
+    }*/
 
-    override fun setAttributesGuide(
+    /*override fun setAttributesGuide(
         fileName: String,
         description: String,
         preguntas: List<QuestionItemDomain>,
@@ -358,18 +517,21 @@ class GuiaRepositoryImpl @Inject constructor(
         return saveFileV2(
             fileName,
             description,
+            version,
             preguntas,
             respuestas
         )
-    }
+    }*/
 
-    override fun getVersion(): String {
-        val currentPath = pathProvider.getCurrentPath()
+    /*override fun getVersion(nameGuide: String): String {
+        //val currentPath = pathProvider.getCurrentPath()
+        val context = GuidePathContext()
+        pathProvider.resolveGuidePath()
         val db = DocumentBuilderFactory.newInstance().newDocumentBuilder()
         val doc = db.parse(currentPath)
 
         val versionNode = doc.getElementsByTagName(Structure.GUIAESTUDIO)
         val elementGuide = versionNode.item(0) as Element
         return elementGuide.getAttribute(Attributes.VERSION)
-    }
+    }*/
 }

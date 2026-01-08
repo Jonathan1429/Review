@@ -5,17 +5,19 @@ import com.jonathanev.review.domain.model.PreviewQuestionDomain
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QAItemDomain
 import com.jonathanev.review.domain.model.ResponseDomain
+import com.jonathanev.review.domain.repository.FileExplorerRepository
+import com.jonathanev.review.domain.repository.NavigationPathRepository
 import javax.inject.Inject
 
 class GetPreviewQuestionsUseCase @Inject constructor(
-    private val pathProvider: PathProvider,
+    private val navigationPathRepository: NavigationPathRepository,
     private val setPintarTextosUseCase: SetPintarTextosUseCase
 ) {
     operator fun invoke(
         domainItems: List<QAItemDomain>
-    ): List<PreviewQuestionDomain> {
+    ): MutableList<PreviewQuestionDomain> {
         val previewQuestionDomain = mutableListOf<PreviewQuestionDomain>()
-        val currentPath = pathProvider.getCurrentPath()
+        val currentPath = navigationPathRepository.currentPath.path
 
         domainItems.forEach { domainItem ->
             var primerTextoPregunta: QuestionContentDomain = QuestionContentDomain.None

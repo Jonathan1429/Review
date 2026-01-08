@@ -7,6 +7,6 @@ class ChangeBeforePathUseCase @Inject constructor(
     private val pathProvider: PathProvider,
 ) {
     operator fun invoke(){
-        pathProvider.setBeforePath()
+        //pathProvider.setBeforePath()
     }
 }

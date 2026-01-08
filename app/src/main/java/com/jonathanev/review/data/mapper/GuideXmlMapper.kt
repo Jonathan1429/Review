@@ -6,6 +6,7 @@ import com.jonathanev.review.data.model.GuideXmlModel
 object GuideXmlMapper {
     fun toDomain(model: GuideXmlModel): GuideDomainModel =
         GuideDomainModel(
+            version = model.version,
             nameGuide = model.nameGuide,
             description = model.description
         )

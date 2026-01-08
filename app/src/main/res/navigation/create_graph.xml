@@ -49,12 +49,27 @@
     <fragment
         android:id="@+id/fragmentCreateText"
         android:name="com.jonathanev.review.ui.fragment.FragmentCreateText"
-        tools:layout="@layout/fragment_create_text"/>
+        tools:layout="@layout/fragment_create_text">
+        <argument
+            android:name="actionGuide"
+            app:argType="com.jonathanev.review.presentation.model.QuestionContentUi$Text"
+            app:nullable="true" />
+    </fragment>
+
 
     <fragment
         android:id="@+id/fragmentCreateImages"
         android:name="com.jonathanev.review.ui.fragment.FragmentCreateImages"
-        tools:layout="@layout/fragment_create_images"/>
+        tools:layout="@layout/fragment_create_images">
+    <argument
+        android:name="actionGuide"
+        app:argType="com.jonathanev.review.presentation.model.QuestionContentUi$Text"
+        app:nullable="true" />
+        <argument
+            android:name="actionGuide"
+            app:argType="com.jonathanev.review.presentation.model.QuestionContentUi$Image"
+            app:nullable="true" />
+    </fragment>
 
     <fragment
         android:id="@+id/createEntryFragment"

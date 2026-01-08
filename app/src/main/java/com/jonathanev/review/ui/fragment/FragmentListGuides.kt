@@ -2,7 +2,6 @@ package com.jonathanev.review.ui.fragment
 
 import android.app.AlertDialog
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,15 +18,15 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.jonathanev.review.presentation.folders.model.FolderAction
+import com.jonathanev.review.R
+import com.jonathanev.review.databinding.FragmentListGuidesBinding
 import com.jonathanev.review.presentation.event.UIMovingEvent
 import com.jonathanev.review.presentation.event.UIStopEvent
-import com.jonathanev.review.ui.adapter.ListGuidesAdapter
-import com.jonathanev.review.R
+import com.jonathanev.review.presentation.files.model.GuideResultUi
+import com.jonathanev.review.presentation.folders.model.FolderAction
 import com.jonathanev.review.presentation.viewmodel.FragmentListGuidesViewModel
 import com.jonathanev.review.presentation.viewmodel.MainToolbarViewModel
-import com.jonathanev.review.databinding.FragmentListGuidesBinding
-import com.jonathanev.review.presentation.files.model.GuideResultUi
+import com.jonathanev.review.ui.adapter.ListGuidesAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -59,7 +58,6 @@ class FragmentListGuides : Fragment() {
 
         initUI(mode)
         initListeners()
-        observers()
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -82,7 +80,7 @@ class FragmentListGuides : Fragment() {
                 launch {
                     viewModelToolbar.onCancel.collect {
                         viewModelToolbar.initButtons()
-                        viewModel.setMainPath()
+                        //viewModel.setMainPath()
                         viewModel.moveFileCancel()
 
                         findNavController().navigate(
@@ -98,8 +96,8 @@ class FragmentListGuides : Fragment() {
                 launch {
                     viewModelToolbar.onSuccess.collect {
                         viewModelToolbar.initButtons()
-                        viewModel.movingFiles(mode)
-                        viewModel.setMainPath()
+                        //viewModel.movingFiles(mode)
+                        //viewModel.setMainPath()
                         viewModel.moveFileSuccess()
 
                         findNavController().navigate(
@@ -136,103 +134,35 @@ class FragmentListGuides : Fragment() {
             }
         }
 
+        /* otra manera de ejecuta el botón para atrás
         val callback = object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                viewModel.setMainPath()
+            override fun handleOnBackPressed() { // Si no consumes el evento, puedes volver atrás en la pila de Fragments. // Para esto, deshabilita y llama a la implementación por defecto.
+                viewModel.back()
 
-                // Si no consumes el evento, puedes volver atrás en la pila de Fragments.
-                // Para esto, deshabilita y llama a la implementación por defecto.
-                isEnabled = false
+                isEnabled = true
                 requireActivity().onBackPressedDispatcher.onBackPressed()
             }
         }
+        // El 'this' como LifecycleOwner asegura que el callback se maneje correctamente // con el ciclo de vida del Fragment.
 
-        // El 'this' como LifecycleOwner asegura que el callback se maneje correctamente
-        // con el ciclo de vida del Fragment.
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)*/
+
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    viewModel.back()
+
+                    findNavController().popBackStack(
+                        R.id.fragmentListFolders,
+                        false
+                    )
+                }
+            }
+        )
 
         viewModel.guides.observe(viewLifecycleOwner) { guides ->
             adaptListGuides.submitList(guides)
-        }
-    }
-
-    private fun observers() {
-        viewModel.selectedGuide.observe(viewLifecycleOwner) { guideResult ->
-            when (guideResult) {
-                is GuideResultUi.Error -> Toast.makeText(
-                    requireContext(),
-                    "No se pudo cargar la guia",
-                    Toast.LENGTH_SHORT
-                ).show()
-
-                is GuideResultUi.Success -> {
-                    val builder = AlertDialog.Builder(context)
-                    builder.setIcon(R.drawable.ic_advertencia)
-                    builder.setTitle("¿Qué acción deseas realizar?")
-                    builder.setItems(
-                        arrayOf<CharSequence>(
-                            "Abrir",
-                            "Eliminar",
-                            "Cambiar nombre",
-                            "Mover",
-                            "Cancelar"
-                        )
-                    ) { dialog, which ->
-                        when (which) {
-                            0 -> {
-                                viewModel.changeFilePath(guideResult.guideUiModel.nameGuide)
-                                findNavController().navigate(
-                                    R.id.action_to_preview,
-                                )
-                            }
-
-                            1 ->
-                                // Se ejecuta cuando quiere eliminar la guía.
-                                AlertDialog.Builder(context)
-                                    .setTitle("¡Atención!")
-                                    .setMessage(
-                                        "¿Estás seguro que deseas eliminar la" +
-                                                " guia?"
-                                    )
-                                    .setPositiveButton("Si") { _, _ ->
-                                        viewModel.deleteFiles(guideResult.guideUiModel.nameGuide)
-                                    }
-                                    .setNegativeButton("Cancelar") { _, _ -> dialog.dismiss() }
-                                    .create().show()
-
-                            2 -> {
-                                viewModel.changeFilePath(guideResult.guideUiModel.nameGuide)
-
-                                findNavController().navigate(
-                                    R.id.action_to_create_graph,
-                                    bundleOf("mode" to FolderAction.RenamingFile)
-                                )
-                            }
-
-                            3 -> {
-                                val filePath =
-                                    viewModel.getFilePath(guideResult.guideUiModel.nameGuide)
-                                viewModel.changeFilePathToMain()
-
-                                findNavController().navigate(
-                                    R.id.action_to_content_graph,
-                                    bundleOf("mode" to FolderAction.MovingFile(filePath))
-                                )
-
-                                Log.i("Moviendo: ", filePath.path)
-                            }
-
-                            4 -> {
-                                // Cuando cancela se ejecuta esta acción
-                                dialog.dismiss()
-                                Toast.makeText(context, "Cancelaste la acción", Toast.LENGTH_SHORT)
-                                    .show()
-                            }
-                        }
-                    }
-                    builder.create().show()
-                }
-            }
         }
     }
 
@@ -272,6 +202,97 @@ class FragmentListGuides : Fragment() {
             return
         }
 
-        viewModel.getGuideSelected(position)
+        when (val guideResult = viewModel.getGuideSelected(position)) {
+            is GuideResultUi.Error -> Toast.makeText(
+                requireContext(),
+                "No se pudo cargar la guia",
+                Toast.LENGTH_SHORT
+            ).show()
+
+            is GuideResultUi.Success -> {
+                val builder = AlertDialog.Builder(context)
+                builder.setIcon(R.drawable.ic_advertencia)
+                builder.setTitle("¿Qué acción deseas realizar?")
+                builder.setItems(
+                    arrayOf<CharSequence>(
+                        "Abrir",
+                        "Eliminar",
+                        "Cambiar nombre",
+                        "Mover",
+                        "Cancelar"
+                    )
+                ) { dialog, which ->
+                    when (which) {
+                        0 -> {
+                            //viewModel.openFilePath(guideResult.guideUiModel.nameGuide)
+                            val bundle = Bundle().apply {
+                                putString("guideId", guideResult.guideUiModel.nameGuide)
+                            }
+
+                            findNavController().navigate(
+                                R.id.action_to_preview,
+                                bundle
+                            )
+                        }
+
+                        1 ->
+
+                            Toast.makeText(
+                                requireContext(),
+                                "No se pueden eliminar archivos aún",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        // Se ejecuta cuando quiere eliminar la guía.
+                        /*AlertDialog.Builder(context)
+                            .setTitle("¡Atención!")
+                            .setMessage(
+                                "¿Estás seguro que deseas eliminar la" +
+                                        " guia?"
+                            )
+                            .setPositiveButton("Si") { _, _ ->
+                                //viewModel.deleteFiles(guideResult.guideUiModel.nameGuide)
+                            }
+                            .setNegativeButton("Cancelar") { _, _ -> dialog.dismiss() }
+                            .create().show()*/
+
+                        2 -> {
+                            findNavController().navigate(
+                                R.id.action_to_create_graph,
+                                bundleOf("mode" to FolderAction.RenamingFile(guideResult.guideUiModel.nameGuide))
+                            )
+                        }
+
+                        3 -> {
+                            Toast.makeText(
+                                requireContext(),
+                                "No se puede eliminar aún",
+                                Toast.LENGTH_SHORT
+                            ).show()
+
+                            /*val filePath =
+                                viewModel.getFilePath(guideResult.guideUiModel.nameGuide)
+                            viewModel.changeFilePathToMain()
+
+                            findNavController().navigate(
+                                R.id.action_to_content_graph,
+                                bundleOf("mode" to FolderAction.MovingFile(filePath))
+                            )*/
+                        }
+
+                        4 -> {
+                            // Cuando cancela se ejecuta esta acción
+                            dialog.dismiss()
+                            Toast.makeText(
+                                context,
+                                "Cancelaste la acción",
+                                Toast.LENGTH_SHORT
+                            )
+                                .show()
+                        }
+                    }
+                }
+                builder.create().show()
+            }
+        }
     }
 }

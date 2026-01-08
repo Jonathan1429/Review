@@ -5,10 +5,11 @@ import android.net.Uri
 import com.jonathanev.review.data.provider.FilePathsProvider
 import com.jonathanev.review.data.storage.StorageFolders
 import com.jonathanev.review.data.xml.Versions
-import com.jonathanev.review.domain.repository.ImagesRepository
+import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
-import com.jonathanev.review.domain.repository.PathProvider
+import com.jonathanev.review.domain.repository.ImagesRepository
+import com.jonathanev.review.domain.repository.NavigationPathRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import java.nio.file.Files
@@ -18,14 +19,15 @@ import javax.inject.Inject
 
 class ImagesRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val pathProvider: PathProvider,
-    private val filePathsProvider: FilePathsProvider
+    private val filePathsProvider: FilePathsProvider,
+    private val navigationPathRepository: NavigationPathRepository
 ) : ImagesRepository {
-    override suspend fun saveImage(image: QuestionContentDomain.Image, imagesPath: File) {
+    override suspend fun saveImage(image: QuestionContentDomain.Image, nameFolder: String) {
+        val currentPath =
+            filePathsProvider.buildImage(navigationPathRepository.currentPath, nameFolder)
         val uri = Uri.parse(image.uri)
         val fileName = image.nameFile
-
-        val outputFile = File(imagesPath, fileName)
+        val outputFile = File(currentPath, fileName)
 
         context.contentResolver.openInputStream(uri)?.use { input ->
             outputFile.outputStream().use { output ->
@@ -35,20 +37,23 @@ class ImagesRepositoryImpl @Inject constructor(
     }
 
     override fun reubicarImagenes(
-        version: String,
         fileName: String,
         preguntas: List<QuestionItemDomain>,
-        respuestas: List<QuestionItemDomain>
+        respuestas: List<QuestionItemDomain>,
+        attributesGuide: GuideDomainModel
     ) {
-        val currentPath = File(pathProvider.getCurrentPath())
-        val oldPathImages = File(currentPath.path.replace(StorageFolders.GUIAS, StorageFolders.IMAGENES).replace(".xml", ""))
+        val oldPathImages = filePathsProvider.buildImage(navigationPathRepository.currentPath, fileName)
 
-        if (version == Versions.VERSION2){
+        // Renamed folder
+        if (attributesGuide.version == Versions.VERSION2){
             val newPathImages = File(oldPathImages.parent, fileName)
             oldPathImages.renameTo(newPathImages)
         } else { // Version 1
             val newPathImages = File(oldPathImages.parent, fileName)
-            newPathImages.mkdir()
+
+            if (newPathImages.exists()){
+                newPathImages.mkdir()
+            }
 
             val listImages = (preguntas + respuestas)
                 .flatMap { it.content }
@@ -60,16 +65,11 @@ class ImagesRepositoryImpl @Inject constructor(
                     val noImage = image.uri.substringAfterLast("/")
                     val newPathFile = filePathsProvider.buildImage(newPathImages, noImage)
 
-                    Files.copy(
+                    Files.move(
                         Paths.get(image.uri),
                         Paths.get(newPathFile.path),
                         StandardCopyOption.REPLACE_EXISTING
                     )
-
-                    // Delete old Image
-                    if (newPathFile.exists()){
-                        File(image.uri).delete()
-                    }
                 }
             }
         }

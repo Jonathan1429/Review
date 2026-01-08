@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jonathanev.review.domain.BackPathUseCase
 import com.jonathanev.review.domain.ChangeGuidePathBuildFileUseCase
 import com.jonathanev.review.domain.DeleteGuideUseCase
 import com.jonathanev.review.domain.GenerateTextColorRangesUseCase
@@ -15,10 +16,9 @@ import com.jonathanev.review.domain.MoverArchivoUseCase
 import com.jonathanev.review.domain.MoverImagenesUseCase
 import com.jonathanev.review.domain.SetMainPathUseCase
 import com.jonathanev.review.domain.model.GuideDomainModel
-import com.jonathanev.review.domain.repository.PathProvider
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.folders.model.FolderAction
-import com.jonathanev.review.data.provider.FilePathsProvider
+import com.jonathanev.review.domain.GoPreviewFileUseCase
 import com.jonathanev.review.presentation.event.UIMovingEvent
 import com.jonathanev.review.presentation.event.UIStopEvent
 import com.jonathanev.review.presentation.files.model.GuideResultUi
@@ -38,8 +38,6 @@ import javax.inject.Inject
 class FragmentListGuidesViewModel @Inject constructor(
     private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
     private val getVersionUseCase: GetVersionUseCase,
-    private val pathProvider: PathProvider,
-    private val filePathsProvider: FilePathsProvider,
     private val loadGuidesUseCase: LoadGuidesUseCase,
     private val getGuidePosicionUseCase: GetGuidePosicionUseCase,
     private val setMainPathUseCase: SetMainPathUseCase,
@@ -48,6 +46,8 @@ class FragmentListGuidesViewModel @Inject constructor(
     private val moverArchivoUseCase: MoverArchivoUseCase,
     private val moverImagenesUseCase: MoverImagenesUseCase,
     private val generateTextColorRangesUseCase: GenerateTextColorRangesUseCase,
+    private val goPreviewFileUseCase: GoPreviewFileUseCase,
+    private val backPathUseCase: BackPathUseCase
 ) : ViewModel() {
     private var cachedGuides: List<GuideDomainModel> = emptyList()
     private val _guides = MutableLiveData<List<GuideUiModel>>()
@@ -63,39 +63,35 @@ class FragmentListGuidesViewModel @Inject constructor(
     val eventsMovingFiles = _eventsMovingFiles.asSharedFlow()
 
     private var _preguntas: MutableList<QuestionItemUi> = mutableListOf()
-    val preguntas: MutableList<QuestionItemUi> get() = _preguntas
+    val preguntas: List<QuestionItemUi> get() = _preguntas
 
     private var _respuestas: MutableList<QuestionItemUi> = mutableListOf()
-    val respuestas: MutableList<QuestionItemUi> get() = _respuestas
+    val respuestas: List<QuestionItemUi> get() = _respuestas
 
     fun getAllGuides() {
-        val xmlGuides = loadGuidesUseCase.invoke()
-        cachedGuides = xmlGuides
-        val guidesUi = xmlGuides.map { guide -> guide.toUi() }
+        cachedGuides = loadGuidesUseCase.invoke()
+        val guidesUi = cachedGuides.map { guide -> guide.toUi() }
         _guides.postValue(guidesUi)
     }
 
-    fun getGuideSelected(position: Int) {
+    fun getGuideSelected(position: Int): GuideResultUi {
         val resultDomain = getGuidePosicionUseCase.invoke(position, cachedGuides)
-        val resultToUi = resultDomain.toUi()
-
-        _selectedGuide.value = resultToUi
+        return resultDomain.toUi()
+        //_selectedGuide.value = resultToUi
     }
 
-    fun setMainPath() {
+    /*fun setMainPath() {
         setMainPathUseCase.invoke()
-        getAllGuides()
-    }
+        getAllGuides(folderId)
+    }*/
 
-    fun changeFilePath(nameGuide: String) {
-        val newPath = changeGuidePathBuildFileUseCase.invoke(nameGuide)
-        pathProvider.setCurrentPath(newPath)
-        getAllGuides()
+    fun openFilePath(nameGuide: String) {
+        goPreviewFileUseCase.invoke(cachedGuides, nameGuide)
     }
 
     fun deleteFiles(nameGuide: String) {
-        val currentGuide = changeGuidePathBuildFileUseCase.invoke(nameGuide)
-        getObtenerDatosXML(File(currentGuide))
+        /*val currentGuide = changeGuidePathBuildFileUseCase.invoke(nameGuide)
+        //getObtenerDatosXML(File(currentGuide))
 
         val listImages = (preguntas + respuestas)
             .flatMap { it.content }
@@ -104,20 +100,20 @@ class FragmentListGuidesViewModel @Inject constructor(
         val message = deleteGuideUseCase.invoke(File(currentGuide), listImages)
 
         viewModelScope.launch {
-            if (message is UIStopEvent.DeleteGuideSuccess) {
+            /*if (message is UIStopEvent.DeleteGuideSuccess) {
                 pathProvider.setCurrentPath(filePathsProvider.fileGuides.path)
-            }
+            }*/
 
             _eventsMessages.emit(
                 message
             )
-        }
+        }*/
     }
 
     private fun getObtenerDatosXML(currentGuide: File) {
-        if (respuestas.isEmpty()) {
+        /*if (respuestas.isEmpty()) {
             //Revisar como se obtienen los datos aqui, porque no se visualiza la imagen
-            val datos = getObtenerDatosXMLUseCase.invoke()
+            val datos = getObtenerDatosXMLUseCase.invoke(guideDomainModel)
 
             val tempQuestions =
                 datos.mapNotNull { (it.question as? ResponseDomain.Filled)?.item }.toList()
@@ -128,39 +124,39 @@ class FragmentListGuidesViewModel @Inject constructor(
             val answersDomain = generateTextColorRangesUseCase.invoke(tempAnswers)
             _preguntas = questionsDomain.map { it.toUi() }.toMutableList()
             _respuestas = answersDomain.map { it.toUi() }.toMutableList()
-        }
+        }*/
     }
 
     fun changeFilePathToMain() {
         setMainPathUseCase.invoke()
     }
 
-    fun getFilePath(nameGuide: String): File {
-        return File(changeGuidePathBuildFileUseCase.invoke(nameGuide))
+    fun getFilePath(nameGuide: String) {
+        //return File(changeGuidePathBuildFileUseCase.invoke(nameGuide))
     }
 
     fun movingFiles(mode: FolderAction) {
-        if (mode is FolderAction.MovingFile) {
+        /*if (mode is FolderAction.MovingFile) {
             val isSuccessXML = moverArchivoUseCase.invoke(mode.pathFile)
 
-            getObtenerDatosXML(isSuccessXML.second)
+            //getObtenerDatosXML(isSuccessXML.second)
 
             val questionsItemDomain = preguntas.map { it.toDomain() }
             val answersItemDomain = respuestas.map { it.toDomain() }
 
             if (isSuccessXML.first) {
-                val version = getVersionUseCase.invoke()
+                /*val version = getVersionUseCase.invoke(nameGuide)
                 moverImagenesUseCase.invoke(
                     version,
                     mode.pathFile,
                     isSuccessXML.second,
                     questionsItemDomain,
                     answersItemDomain
-                )
+                )*/
             }
 
             setMainPathUseCase.invoke()
-        }
+        }*/
     }
 
     private fun eventMovingFile(message: String) {
@@ -175,5 +171,9 @@ class FragmentListGuidesViewModel @Inject constructor(
 
     fun moveFileSuccess() {
         eventMovingFile("Se ha movido la guia correctamente")
+    }
+
+    fun back() {
+        backPathUseCase.invoke()
     }
 }

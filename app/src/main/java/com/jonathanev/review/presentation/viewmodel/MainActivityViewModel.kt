@@ -31,7 +31,7 @@ class MainActivityViewModel @Inject constructor(
     fun getAllFolders() {
         viewModelScope.launch {
             moveNonFolderFilesToOtrosUseCase.invoke()
-            getAllFoldersUseCase.invoke()
+            //getAllFoldersUseCase.invoke()
         }
     }
 
@@ -43,11 +43,11 @@ class MainActivityViewModel @Inject constructor(
         }
     }
 
-    fun setCurrentPath() {
+    /*fun setCurrentPath() {
         pathProvider.setCurrentPath(filePathsProvider.fileGuides.toString())
     }
 
     fun getCurrentPath(): String {
         return pathProvider.getCurrentPath()
-    }
+    }*/
 }

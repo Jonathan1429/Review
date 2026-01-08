@@ -13,8 +13,8 @@ class DeleteFolderUseCase @Inject constructor(
     private val filePathsProvider: FilePathsProvider,
     private val pathProvider: PathProvider
 ) {
-    operator fun invoke(folderUiModel: FolderUiModel): UIStopEvent {
-        val folderDomainModel = folderUiModel.toDomain()
+    operator fun invoke(folderUiModel: FolderUiModel) {
+        /*val folderDomainModel = folderUiModel.toDomain()
         val currentPath =
             filePathsProvider.buildFolder(File(pathProvider.getCurrentPath()), folderDomainModel.name)
 
@@ -25,6 +25,6 @@ class DeleteFolderUseCase @Inject constructor(
             UIStopEvent.DeleteFolderSuccess("Se ha borrado la carpeta correctamente")
         } else{
             UIStopEvent.ShowMessage("No se pudo borrar la carpeta correctamente")
-        }
+        }*/
     }
 }

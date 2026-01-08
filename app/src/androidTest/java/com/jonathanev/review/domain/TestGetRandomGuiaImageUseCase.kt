@@ -3,7 +3,6 @@ package com.jonathanev.review.domain
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.runner.RunWith
 
-@RunWith(AndroidJUnit4::class)
 class TestGetRandomGuiaImageUseCase {
     /*private val getRandomGuiaImageUseCase = GetRandomGuiaImageUseCase()
 

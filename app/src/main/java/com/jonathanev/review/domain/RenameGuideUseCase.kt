@@ -1,19 +1,20 @@
 package com.jonathanev.review.domain
 
 import com.jonathanev.review.data.GuiaRepository
+import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.QuestionItemDomain
-import java.io.File
 import javax.inject.Inject
 
-class SetAttributesUseCase @Inject constructor(
+class RenameGuideUseCase @Inject constructor(
     private val guiaRepository: GuiaRepository
 ) {
     operator fun invoke(
         fileName: String,
         description: String,
         preguntas: List<QuestionItemDomain>,
-        respuestas: List<QuestionItemDomain>
+        respuestas: List<QuestionItemDomain>,
+        attributesGuide: GuideDomainModel
     ): Boolean {
-        return guiaRepository.setAttributesGuide(fileName, description, preguntas, respuestas)
+        return guiaRepository.renameGuide(fileName, description, preguntas, respuestas, attributesGuide)
     }
 }

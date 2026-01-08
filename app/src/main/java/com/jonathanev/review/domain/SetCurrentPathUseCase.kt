@@ -9,6 +9,6 @@ class SetCurrentPathUseCase @Inject constructor(
     private val pathProvider: PathProvider
 ) {
     operator fun invoke(){
-        pathProvider.setCurrentPath(filePathsProvider.fileGuides.path)
+        //pathProvider.setCurrentPath(filePathsProvider.fileGuides.path)
     }
 }

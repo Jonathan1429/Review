@@ -27,7 +27,7 @@ class FilePathsProvider @Inject constructor(
         return File("$base/$nombreArchivo.xml")
     }
 
-    fun buildFileFolder(base: File, folder: String, nombreArchivo: String): File {
+    fun buildFolderFile(base: File, folder: String, nombreArchivo: String): File {
         val file = FileNamingRules.buildXmlFileName(nombreArchivo)
         return File("$base/$folder/$file")
     }
@@ -37,7 +37,8 @@ class FilePathsProvider @Inject constructor(
     }
 
     fun buildImage(base: File, image: String): File{
-        return File("$base/$image")
+        val pathImages = base.path.replace(StorageFolders.GUIAS, StorageFolders.IMAGENES)
+        return File("$pathImages/$image")
     }
 
     fun beforePath(base: File): File {

@@ -1,10 +1,11 @@
 package com.jonathanev.review.presentation.viewmodel
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.jonathanev.review.domain.GetFoldersWithNumGuidesUseCase
-import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.folders.model.FolderUiModel
+import com.jonathanev.review.presentation.mapper.toUi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -13,7 +14,7 @@ class FragmentsContentViewModel @Inject constructor(
     private val getFoldersWithNumGuidesUseCase: GetFoldersWithNumGuidesUseCase
 ): ViewModel() {
     private var _folders = MutableLiveData<List<FolderUiModel>>()
-    val folders: MutableLiveData<List<FolderUiModel>> get() = _folders
+    val folders: LiveData<List<FolderUiModel>> get() = _folders
 
     fun getAllFolders() {
         val foldersWithNumGuidesDomain = getFoldersWithNumGuidesUseCase.invoke()

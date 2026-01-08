@@ -10,9 +10,9 @@ import javax.inject.Inject
 class GetAttributesGuideUseCase @Inject constructor(
     private val guiaRepository: GuiaRepository,
 ) {
-    operator fun invoke(): GuideDomainModel {
-        val guideXmlModel = guiaRepository.getAttributesGuide()
+    operator fun invoke() {
+        /*val guideXmlModel = guiaRepository.getAttributesGuide()
         val guideDomain = GuideXmlMapper.toDomain(guideXmlModel)
-        return guideDomain
+        return guideDomain*/
     }
 }

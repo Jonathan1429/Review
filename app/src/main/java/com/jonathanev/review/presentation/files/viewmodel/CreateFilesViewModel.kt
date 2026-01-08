@@ -7,19 +7,20 @@ import com.jonathanev.review.domain.CheckNameConflictUseCase
 import com.jonathanev.review.domain.GenerateTextColorRangesUseCase
 import com.jonathanev.review.domain.GetAttributesGuideUseCase
 import com.jonathanev.review.domain.GetObtenerDatosXMLUseCase
+import com.jonathanev.review.domain.LoadGuidesUseCase
 import com.jonathanev.review.domain.ReubicarImagenesUseCase
 import com.jonathanev.review.domain.SaveMetadataUseCase
-import com.jonathanev.review.domain.SetAttributesUseCase
+import com.jonathanev.review.domain.RenameGuideUseCase
 import com.jonathanev.review.domain.SetCurrentPathUseCase
 import com.jonathanev.review.domain.ValidateCreateFileUseCase
-import com.jonathanev.review.domain.model.ResponseDomain
+import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.repository.PathProvider
 import com.jonathanev.review.presentation.event.UIStopEvent
+import com.jonathanev.review.presentation.files.model.GuideUiModel
 import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.ColorType
 import com.jonathanev.review.presentation.folders.model.FolderAction
-import com.jonathanev.review.presentation.files.model.GuideUiModel
 import com.jonathanev.review.presentation.model.IconType
 import com.jonathanev.review.presentation.model.QuestionItemUi
 import com.jonathanev.review.presentation.model.ScreenData
@@ -39,14 +40,18 @@ class CreateFilesViewModel @Inject constructor(
     private val getAttributesGuideUseCase: GetAttributesGuideUseCase,
     private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
     private val reubicarImagenesUseCase: ReubicarImagenesUseCase,
-    private val setAttributesXMLUseCase: SetAttributesUseCase,
+    private val renameGuideUseCase: RenameGuideUseCase,
     private val validateCreateFileUseCase: ValidateCreateFileUseCase,
     private val checkNameConflictUseCase: CheckNameConflictUseCase,
     private val generateTextColorRangesUseCase: GenerateTextColorRangesUseCase,
     private val setCurrentPathUseCase: SetCurrentPathUseCase,
     private val changeBeforePathUseCase: ChangeBeforePathUseCase,
-    private val saveMetadataUseCase: SaveMetadataUseCase
+    private val saveMetadataUseCase: SaveMetadataUseCase,
+    private val loadGuidesUseCase: LoadGuidesUseCase
 ) : ViewModel() {
+    private var cachedGuides: List<GuideDomainModel> = emptyList()
+    private var attributesGuide: GuideDomainModel? = null
+
     private val _uiState = MutableStateFlow(PreviewState())
     val uiState = _uiState.asStateFlow()
 
@@ -71,7 +76,7 @@ class CreateFilesViewModel @Inject constructor(
                 IconType.BACTERIA_SOLID_FULL
             )
 
-            FolderAction.RenamingFile -> listOf(IconType.LIGHTBULB)
+            is FolderAction.RenamingFile -> listOf(IconType.LIGHTBULB)
 
             FolderAction.RenamingFolder -> listOf(
                 IconType.ANCHOR_SOLID_FULL,
@@ -123,17 +128,18 @@ class CreateFilesViewModel @Inject constructor(
         saveMetadataUseCase.invoke(data)
     }
 
-    fun getCurrentPath() = pathProvider.getCurrentPath()
+    //fun getCurrentPath() = pathProvider.getCurrentPath()
 
-    fun fillFields(): GuideUiModel {
-        val guideDomain = getAttributesGuideUseCase.invoke()
-        return guideDomain.toUi()
+    fun fillFields(fileName: String): GuideUiModel {
+        val guideDomainModel = cachedGuides.find { it.nameGuide == fileName }
+        attributesGuide = guideDomainModel
+        return guideDomainModel!!.toUi()
     }
 
     fun getObtenerDatosXML() {
-        if (respuestas.isEmpty()) {
+        /*if (respuestas.isEmpty()) {
             //Revisar como se obtienen los datos aqui, porque no se visualiza la imagen
-            val datos = getObtenerDatosXMLUseCase.invoke()
+            val datos = getObtenerDatosXMLUseCase.invoke(guideDomainModel)
 
             val tempQuestions =
                 datos.mapNotNull { (it.question as? ResponseDomain.Filled)?.item }.toList()
@@ -144,21 +150,22 @@ class CreateFilesViewModel @Inject constructor(
             val answersDomain = generateTextColorRangesUseCase.invoke(tempAnswers)
             _preguntas = questionsDomain.map { it.toUi() }.toMutableList()
             _respuestas = answersDomain.map { it.toUi() }.toMutableList()
-        }
+        }*/
     }
 
     fun renameFile(fileName: String, description: String) {
-        getObtenerDatosXML()
         val questionsDomain = preguntas.map { it.toDomain() }
-        val answersDomain = preguntas.map { it.toDomain() }
+        val answersDomain = respuestas.map { it.toDomain() }
 
-        reubicarImagenesUseCase.invoke(fileName, questionsDomain, answersDomain)
+        reubicarImagenesUseCase.invoke(fileName, questionsDomain, answersDomain, attributesGuide!!)
+
         val isUpdated =
-            setAttributesXMLUseCase.invoke(
+            renameGuideUseCase.invoke(
                 fileName,
                 description,
                 questionsDomain,
-                answersDomain
+                answersDomain,
+                attributesGuide!!
             )
 
         if (isUpdated) {
@@ -179,8 +186,9 @@ class CreateFilesViewModel @Inject constructor(
         }
     }
 
-    fun fileExist(mode: FolderAction, name: String): Boolean {
-        return checkNameConflictUseCase.invoke(mode, name)
+    fun fileExist(name: String): GuideUiModel? {
+        val guideDomainModel = cachedGuides.find { it.nameGuide == name }
+        return guideDomainModel?.toUi()
     }
 
     fun onContinueProcess(confirmed: Boolean, name: String, description: String) {
@@ -191,5 +199,9 @@ class CreateFilesViewModel @Inject constructor(
 
     fun beforePath() {
         changeBeforePathUseCase.invoke()
+    }
+
+    fun uploadCachedGuides() {
+        cachedGuides = loadGuidesUseCase.invoke()
     }
 }

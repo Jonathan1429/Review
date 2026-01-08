@@ -31,6 +31,8 @@ import com.jonathanev.review.domain.model.ColorRangeDomain
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.data.media.MediaPaths
 import com.jonathanev.review.databinding.FragmentCreateTextBinding
+import com.jonathanev.review.presentation.model.ColorRangeUi
+import com.jonathanev.review.presentation.model.QuestionContentUi
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -60,8 +62,8 @@ class FragmentCreateText : Fragment() {
 
         val data = arguments?.getParcelable(
             "questionText",
-            QuestionContentDomain.Text::class.java
-        ) ?: QuestionContentDomain.None
+            QuestionContentUi.Text::class.java
+        ) ?: QuestionContentUi.None
 
         initUI(data)
         initListeners()
@@ -97,13 +99,13 @@ class FragmentCreateText : Fragment() {
     }
 
     @SuppressLint("NewApi")
-    private fun initUI(data: QuestionContentDomain) {
+    private fun initUI(data: QuestionContentUi) {
         when (data) {
-            is QuestionContentDomain.Image -> Unit
-            QuestionContentDomain.None -> Unit
-            is QuestionContentDomain.Text -> {
+            is QuestionContentUi.Image -> Unit
+            QuestionContentUi.None -> Unit
+            is QuestionContentUi.Text -> {
                 val builder =
-                    data.toSpannable(data.text, data.colorRangeDomains)
+                    data.toSpannable(data.text, data.colorRanges)
                 binding.etPregResp.text = builder
             }
         }
@@ -324,9 +326,9 @@ class FragmentCreateText : Fragment() {
         }
     }
 
-    private fun QuestionContentDomain.Text.toSpannable(
+    private fun QuestionContentUi.Text.toSpannable(
         text: String,
-        colorRangeDomains: List<ColorRangeDomain>
+        colorRangeDomains: List<ColorRangeUi>
     ): SpannableStringBuilder {
         val builder = SpannableStringBuilder(text)
 

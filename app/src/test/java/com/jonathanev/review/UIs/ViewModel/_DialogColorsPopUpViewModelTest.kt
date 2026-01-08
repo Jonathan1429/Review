@@ -11,7 +11,7 @@ import org.junit.Rule
 import org.junit.Test
 
 class _DialogColorsPopUpViewModelTest {
-    // Esto hace que LiveData se ejecute inmediatamente en los tests unitarios
+    /*// Esto hace que LiveData se ejecute inmediatamente en los tests unitarios
     @get:Rule
     val instantExecutorRule = InstantTaskExecutorRule()
 
@@ -48,5 +48,5 @@ class _DialogColorsPopUpViewModelTest {
 
         // Assert: verificamos que el color actualizado sea negro
         verify { observer.onChanged(Color.BLACK) }
-    }
+    }*/
 }

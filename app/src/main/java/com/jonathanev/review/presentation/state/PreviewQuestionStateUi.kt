@@ -2,6 +2,6 @@ package com.jonathanev.review.presentation.state
 
 import com.jonathanev.review.presentation.model.PreviewQuestionUi
 
-data class UIPreviewQuestionState(
+data class PreviewQuestionStateUi(
     val previewState: List<PreviewQuestionUi>
 )

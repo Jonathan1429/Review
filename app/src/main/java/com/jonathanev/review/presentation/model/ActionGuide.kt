@@ -10,5 +10,5 @@ sealed class ActionGuide: Parcelable {
     @Parcelize
     data object CREATE: ActionGuide()
     @Parcelize
-    data class EDIT(val posGuide: Int): ActionGuide()
+    data class EDIT(val nameGuide: String, val posGuide: Int): ActionGuide()
 }

@@ -45,7 +45,7 @@ class FragmentWithoutFilesViewModel @Inject constructor(
 
     fun setMainPath() {
         val initialPath = filePathsProvider.fileGuides
-        pathProvider.setCurrentPath(initialPath.path)
+        //pathProvider.setCurrentPath(initialPath.path)
 
         //getFolders()
     }
@@ -55,7 +55,7 @@ class FragmentWithoutFilesViewModel @Inject constructor(
     }*/
 
     fun movingFiles(mode: FolderAction) {
-        if (mode is FolderAction.MovingFile) {
+        /*if (mode is FolderAction.MovingFile) {
             val isSuccessXML = moverArchivoUseCase.invoke(mode.pathFile)
 
             getObtenerDatosXML(isSuccessXML.second)
@@ -63,7 +63,7 @@ class FragmentWithoutFilesViewModel @Inject constructor(
             val answersDomain = respuestas.map { it.toDomain() }
 
             if (isSuccessXML.first) {
-                val version = getVersionUseCase.invoke()
+                val version = getVersionUseCase.invoke(nameGuide)
                 moverImagenesUseCase.invoke(
                     version,
                     mode.pathFile,
@@ -74,13 +74,13 @@ class FragmentWithoutFilesViewModel @Inject constructor(
             }
 
             setMainPathUseCase.invoke()
-        }
+        }*/
     }
 
     private fun getObtenerDatosXML(currentGuide: File) {
-        if (respuestas.isEmpty()) {
+        /*if (respuestas.isEmpty()) {
             //Revisar como se obtienen los datos aqui, porque no se visualiza la imagen
-            val datos = getObtenerDatosXMLUseCase.invoke()
+            val datos = getObtenerDatosXMLUseCase.invoke(guideDomainModel)
 
             val tempQuestions =
                 datos.mapNotNull { (it.question as? ResponseDomain.Filled)?.item }.toList()
@@ -91,7 +91,7 @@ class FragmentWithoutFilesViewModel @Inject constructor(
             val answersDomain = generateTextColorRangesUseCase.invoke(tempAnswers)
             _preguntas = questionsDomain.map { it.toUi() }.toMutableList()
             _respuestas = answersDomain.map { it.toUi() }.toMutableList()
-        }
+        }*/
     }
 
     private fun eventMovingFile(message: String) {

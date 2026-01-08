@@ -10,7 +10,7 @@ class MoveNonFolderFilesToOtrosUseCase @Inject constructor(
     private val filePathsProvider: FilePathsProvider
 ) {
     operator fun invoke() {
-        val currentPath = File(pathProvider.getCurrentPath())
+        /*val currentPath = File(pathProvider.getCurrentPath())
 
         // Crear carpeta "Otros" si no existe
         if (!currentPath.listFiles().isNullOrEmpty()) {
@@ -48,6 +48,6 @@ class MoveNonFolderFilesToOtrosUseCase @Inject constructor(
                 val newPath = File(otrosDirImage, file.name)
                 file.renameTo(newPath)
             }
-        }
+        }*/
     }
 }

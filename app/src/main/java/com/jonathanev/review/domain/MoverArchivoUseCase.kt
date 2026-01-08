@@ -13,8 +13,8 @@ class MoverArchivoUseCase @Inject constructor(
     private val pathProvider: PathProvider,
     private val filePathsProvider: FilePathsProvider
 ) {
-    operator fun invoke(pathFile: File): Pair<Boolean, File> {
-        val file = pathFile.path.substringAfterLast("/").replace(FileNamingRules.XML_EXTENSION, "")
+    operator fun invoke(pathFile: File) {
+        /*val file = pathFile.path.substringAfterLast("/").replace(FileNamingRules.XML_EXTENSION, "")
         val currrentPath = File(pathProvider.getCurrentPath())
         val newPath = filePathsProvider.buildFile(currrentPath, file)
 
@@ -24,6 +24,6 @@ class MoverArchivoUseCase @Inject constructor(
             StandardCopyOption.REPLACE_EXISTING
         )
 
-       return Pair(newPath.exists(), newPath)
+       return Pair(newPath.exists(), newPath)*/
     }
 }

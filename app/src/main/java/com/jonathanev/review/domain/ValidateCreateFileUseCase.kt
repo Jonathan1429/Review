@@ -24,11 +24,10 @@ class ValidateCreateFileUseCase @Inject constructor() {
             invalidNames.any { nameFile -> name.equals(nameFile, ignoreCase = true) } ->
                 "Ese nombre no está permitido"
 
-            else -> null
+            else -> ""
         }
 
-        //val exist = fileExistUseCase.invoke(name)
-        return if (!message.isNullOrEmpty()) {
+        return if (message.isNotEmpty()) {
             CreatingFileUiState.Message(message)
         } else {
             CreatingFileUiState.ContinuedProcess(name, description)

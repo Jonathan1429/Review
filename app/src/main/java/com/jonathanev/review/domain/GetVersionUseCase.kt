@@ -1,13 +1,12 @@
 package com.jonathanev.review.domain
 
 import com.jonathanev.review.data.GuiaRepository
-import java.io.File
 import javax.inject.Inject
 
 class GetVersionUseCase @Inject constructor(
     private val guiaRepository: GuiaRepository
 ) {
-    operator fun invoke(): String {
-        return guiaRepository.getVersion()
+    operator fun invoke(nameGuide: String) {
+        //return guiaRepository.getVersion(nameGuide)
     }
 }

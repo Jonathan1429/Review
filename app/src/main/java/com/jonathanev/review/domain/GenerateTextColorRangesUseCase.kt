@@ -34,7 +34,7 @@ class GenerateTextColorRangesUseCase @Inject constructor(
                 }
             }
 
-            resultList.add(QuestionItemDomain(resultContent))
+            resultList.add(QuestionItemDomain(resultContent.toList()))
         }
 
         return resultList

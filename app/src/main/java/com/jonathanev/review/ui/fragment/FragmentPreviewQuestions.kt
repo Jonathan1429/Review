@@ -1,22 +1,21 @@
 package com.jonathanev.review.ui.fragment
 
 import android.os.Bundle
-import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.core.os.bundleOf
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.jonathanev.review.presentation.model.ActionGuide
-import com.jonathanev.review.ui.adapter.ListPreviewQuestionsAdapter
 import com.jonathanev.review.R
-import com.jonathanev.review.presentation.viewmodel.FragmentPreviewQuestionsViewModel
 import com.jonathanev.review.databinding.FragmentPreviewQuestionsBinding
+import com.jonathanev.review.presentation.model.ActionGuide
+import com.jonathanev.review.presentation.viewmodel.FragmentRepasarViewModel
+import com.jonathanev.review.ui.adapter.ListPreviewQuestionsAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -25,7 +24,7 @@ class FragmentPreviewQuestions : Fragment() {
     private var _binding: FragmentPreviewQuestionsBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: FragmentPreviewQuestionsViewModel by viewModels()
+    private val viewModel: FragmentRepasarViewModel by activityViewModels()
     private lateinit var adaptListPreviewQuestion: ListPreviewQuestionsAdapter
 
     override fun onCreateView(
@@ -39,11 +38,15 @@ class FragmentPreviewQuestions : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initUI()
+        val folderId = arguments?.getString(
+            "guideId"
+        ) ?: ""
+
+        initUI(folderId)
 
         val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                viewModel.setMainPath()
+                //viewModel.setMainPath()
 
                 // Si no consumes el evento, puedes volver atrás en la pila de Fragments.
                 // Para esto, deshabilita y llama a la implementación por defecto.
@@ -57,39 +60,36 @@ class FragmentPreviewQuestions : Fragment() {
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
 
         lifecycleScope.launch {
-            viewModel.uiState.collect { uiState ->
-                Log.i("UISTATE", "Lista recibida: ${uiState.previewState.size}")
-                adaptListPreviewQuestion.submitList(uiState.previewState)
+            viewModel.uiStatePreview.collect { uiStatePreview ->
+                adaptListPreviewQuestion.submitList(uiStatePreview.previewState)
             }
         }
     }
 
-    private fun initUI() {
+    private fun initUI(folderId: String) {
         adaptListPreviewQuestion = ListPreviewQuestionsAdapter(
             clickedPlay = { position -> goReview(position) },
-            clickedEdit = { position -> goEdit(position) })
+            clickedEdit = { position -> goEdit(position, folderId) })
         binding.reciclerPreviewQuestions.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         binding.reciclerPreviewQuestions.setHasFixedSize(true)
         binding.reciclerPreviewQuestions.adapter = adaptListPreviewQuestion
 
-        viewModel.getObtenerDatosXML()
+        viewModel.uploadCachedGuides()
+        viewModel.getObtenerDatosXML(folderId)
     }
 
-    private fun goEdit(position: Int) {
+    private fun goEdit(position: Int, folderId: String) {
         findNavController().navigate(
             R.id.action_to_create_graph,
-            bundleOf("actionGuide" to ActionGuide.EDIT(position))
+            bundleOf("actionGuide" to ActionGuide.EDIT(folderId, position))
         )
     }
 
     private fun goReview(position: Int) {
-        val bundle = Bundle().apply {
-            putInt("posContent", position)
-        }
+        viewModel.showQuestionClicked(position)
 
         findNavController().navigate(
             R.id.action_fragmentPreviewQuestions_to_fragmentRepasar,
-            bundle
         )
     }
 }

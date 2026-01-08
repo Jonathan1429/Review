@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.jonathanev.review.R
 import com.jonathanev.review.presentation.folders.model.FolderAction
@@ -39,19 +40,22 @@ class FragmentsContent : Fragment() {
             FolderAction::class.java
         ) ?: FolderAction.None
 
+        val navOptions = NavOptions.Builder()
+            .setPopUpTo(R.id.createEntryFragment, true)
+            .build()
+
         viewModel.folders.observe(viewLifecycleOwner){ folders ->
             if (folders.isEmpty()){
                 findNavController().navigate(
-                    R.id.action_to_empty
+                    route = R.id.action_to_empty,
+                    navOptions = navOptions
                 )
             } else {
                 findNavController().navigate(
-                    R.id.action_to_list,
-                    bundleOf("mode" to mode)
+                    resId = R.id.action_to_list,
+                    args = bundleOf("mode" to mode),
+                    navOptions = navOptions
                 )
-                if (mode is FolderAction.MovingFile){
-                    Log.i("Moviendo: ", mode.pathFile.path)
-                }
             }
         }
 

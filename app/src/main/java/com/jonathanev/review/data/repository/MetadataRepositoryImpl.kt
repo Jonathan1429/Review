@@ -12,7 +12,7 @@ class MetadataRepositoryImpl @Inject constructor(
     private val jsonManager: JsonManager
 ) : MetadataRepository {
     override fun saveMetadata(data: ScreenData) {
-        val currentPath = File(pathProvider.getCurrentPath())
+        /*val currentPath = File(pathProvider.getCurrentPath())
 
         if (!currentPath.exists()) {
             currentPath.mkdir()
@@ -27,6 +27,6 @@ class MetadataRepositoryImpl @Inject constructor(
             color = data.color
         )
 
-        jsonManager.write(screenFile, initialData)
+        jsonManager.write(screenFile, initialData)*/
     }
 }

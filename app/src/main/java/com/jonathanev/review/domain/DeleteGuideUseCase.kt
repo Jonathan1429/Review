@@ -10,14 +10,14 @@ class DeleteGuideUseCase @Inject constructor(
     private val guiaRepository: GuiaRepository,
     private val deleteImagesFromGuideUseCase: DeleteImagesFromGuideUseCase
 ) {
-    operator fun invoke(currentGuide: File, listImages: List<QuestionContentDomain.Image>): UIStopEvent {
-        val version = guiaRepository.getVersion()
+    operator fun invoke(currentGuide: File, listImages: List<QuestionContentDomain.Image>) {
+        /*val version = guiaRepository.getVersion(nameGuide)
 
         return if (currentGuide.delete()){
             deleteImagesFromGuideUseCase.invoke(version, currentGuide, listImages)
             UIStopEvent.DeleteGuideSuccess("Guia eliminada correctamente")
         } else {
             UIStopEvent.ShowMessage("No se pudo eliminar la guia")
-        }
+        }*/
     }
 }

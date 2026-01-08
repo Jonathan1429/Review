@@ -6,12 +6,10 @@ import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.domain.GenerateTextColorRangesUseCase
 import com.jonathanev.review.domain.GetAttributesGuideUseCase
 import com.jonathanev.review.domain.GetObtenerDatosXMLUseCase
-import com.jonathanev.review.domain.GetVersionUseCase
 import com.jonathanev.review.domain.SetColocarEtiquetasUseCase
 import com.jonathanev.review.domain.SetContentUseCase
 import com.jonathanev.review.domain.SetCrearXmlUseCase
 import com.jonathanev.review.domain.SetDecodePathImageUseCase
-import com.jonathanev.review.domain.repository.PathProvider
 import com.jonathanev.review.data.datastore.DataStoreManager
 import com.jonathanev.review.presentation.state.GuideUiState
 import com.jonathanev.review.domain.model.ResponseDomain
@@ -22,13 +20,14 @@ import com.jonathanev.review.domain.model.TypeContent
 import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.event.UIStopEvent
-import com.jonathanev.review.data.provider.FilePathsProvider
-import com.jonathanev.review.domain.SaveGuideImagesUseCase
-import com.jonathanev.review.data.xml.Versions
 import com.jonathanev.review.domain.ChangeBeforePathUseCase
-import com.jonathanev.review.domain.ChangeGuidePathBuildFileUseCase
+import com.jonathanev.review.domain.CreateFilePathUseCase
+import com.jonathanev.review.domain.GetSaveGuidesUseCase
+import com.jonathanev.review.domain.GetVersionUseCase
+import com.jonathanev.review.domain.LoadGuidesUseCase
 import com.jonathanev.review.domain.SetMainPathUseCase
 import com.jonathanev.review.domain.UpdateImagesUseCase
+import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -42,9 +41,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.nio.file.StandardCopyOption
 import javax.inject.Inject
 
 @HiltViewModel
@@ -54,17 +50,16 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     private val setCrearXmlUseCase: SetCrearXmlUseCase,
     private val setDecodePathImageUseCase: SetDecodePathImageUseCase,
     private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
-    private val getAttributesGuideUseCase: GetAttributesGuideUseCase,
     private val getVersionUseCase: GetVersionUseCase,
-    private val pathProvider: PathProvider,
-    private val filePathsProvider: FilePathsProvider,
-    private val saveGuideImagesUseCase: SaveGuideImagesUseCase,
+    private val getSaveGuidesUseCase: GetSaveGuidesUseCase,
+    private val getAttributesGuideUseCase: GetAttributesGuideUseCase,
     private val dataStoreManager: DataStoreManager,
     private val generateTextColorRangesUseCase: GenerateTextColorRangesUseCase,
     private val updateImagesUseCase: UpdateImagesUseCase,
-    private val changeGuidePathBuildFileUseCase: ChangeGuidePathBuildFileUseCase,
     private val setMainPathUseCase: SetMainPathUseCase,
-    private val changeBeforePathUseCase: ChangeBeforePathUseCase
+    private val changeBeforePathUseCase: ChangeBeforePathUseCase,
+    private val createFilePathUseCase: CreateFilePathUseCase,
+    private val loadGuidesUseCase: LoadGuidesUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(GuideUiState())
     val uiState = _uiState.asStateFlow()
@@ -418,13 +413,14 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         }
     }
 
-    fun getCurrentPath() = pathProvider.getCurrentPath()
+    //fun getCurrentPath() = pathProvider.getCurrentPath()
 
-    fun getObtenerDatosXML(positionContent: Int) {
-        val currentState = _uiState.value
+    fun getObtenerDatosXML(positionContent: Int, nameGuide: String) {
+        val status = uiState.value
 
-        if (currentState.respuestas.isEmpty()) {
-            val datos = getObtenerDatosXMLUseCase.invoke()
+        if (status.respuestas.isEmpty()) {
+            val guideDomainModel = getSaveGuidesUseCase.invoke().find { it.nameGuide == nameGuide }
+            val datos = getObtenerDatosXMLUseCase.invoke(guideDomainModel)
 
             // 1. Mapeamos las listas completas desde el XML
             val tempQuestions = datos.mapNotNull { (it.question as? ResponseDomain.Filled)?.item }
@@ -478,7 +474,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         return this.content.any { it is QuestionContentDomain.Text }
     }
 
-    fun saveOldGuide() {
+    fun saveOldGuide(nameGuide: String) {
         if (!isDataValid()) {
             return
         }
@@ -505,26 +501,34 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 )
             }
 
+            val guides = loadGuidesUseCase.invoke()
+            val guide = guides.find { it.nameGuide == nameGuide }
+
             updateImagesUseCase.invoke(
+                guide!!,
                 preguntasProcesadas = preguntasProcesadas,
                 respuestasProcesadas = respuestasProcesadas,
                 isNewFile = false
             )
 
-            // 4. Persistencia Final del XML
-            val response = getAttributesGuideUseCase.invoke()
+            createFilePathUseCase.invoke(nameGuide)
             val isSuccess = setCrearXmlUseCase.invoke(
-                response.nameGuide,
-                response.description,
-                preguntasProcesadas,
-                respuestasProcesadas
+                nameGuide = guide.nameGuide,
+                description = guide.description,
+                version = guide.version,
+                preguntas = preguntasProcesadas,
+                respuestas = respuestasProcesadas
             )
 
-            // 5. Evento de cierre
             if (isSuccess) {
-                initUIState()
-                pathProvider.setCurrentPath(filePathsProvider.fileGuides.path)
-                _uiStopEvent.emit(UIStopEvent.GuideCreatedSuccess("Se ha guardado la guia correctamente"))
+                setMainPathUseCase.invoke()
+                _uiStopEvent.emit(
+                    UIStopEvent.GuideCreatedSuccess("Se ha guardado la guía correctamente")
+                )
+            } else {
+                _uiStopEvent.emit(
+                    UIStopEvent.ShowMessage("No se pudo guardar la guia correctamente")
+                )
             }
         }
     }
@@ -557,32 +561,35 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 )
             }
 
+            val guides = loadGuidesUseCase.invoke()
+            val guide = guides.find { it.nameGuide == nameGuide }
+
             updateImagesUseCase.invoke(
-                nameGuide = nameGuide,
+                guide = guide ?: GuideDomainModel("2", nameGuide, description),
                 preguntasProcesadas = preguntasProcesadas,
                 respuestasProcesadas = respuestasProcesadas,
-                isNewFile = true
+                isNewFile = true,
             )
 
-            changeGuidePathBuildFileUseCase.invoke(nameGuide)
-
+            createFilePathUseCase.invoke(nameGuide)
             // 6. Persistencia del XML
             val isSuccess = setCrearXmlUseCase.invoke(
-                nameGuide,
-                description,
-                preguntasProcesadas, // IMPORTANTE: Usar los datos actualizados
-                respuestasProcesadas
+                nameGuide = nameGuide,
+                description = description,
+                preguntas = preguntasProcesadas,
+                respuestas = respuestasProcesadas
             )
 
             // 7. Notificación de resultado y limpieza de navegación
             if (isSuccess) {
-                initUIState()
                 setMainPathUseCase.invoke()
                 _uiStopEvent.emit(
                     UIStopEvent.GuideCreatedSuccess("Se ha guardado la guía correctamente")
                 )
             } else {
-                changeBeforePathUseCase.invoke()
+                _uiStopEvent.emit(
+                    UIStopEvent.ShowMessage("No se pudo guardar la guia correctamente")
+                )
             }
         }
     }

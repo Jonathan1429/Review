@@ -7,7 +7,7 @@ import javax.inject.Inject
 class GetAllFoldersUseCase @Inject constructor(
     private val folderRepository: FolderRepository
 ) {
-    operator fun invoke(): List<FolderDomainModel> {
-        return folderRepository.getFolders()
+    operator fun invoke() {
+        //return folderRepository.getFolders()
     }
 }

@@ -10,7 +10,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.animation.doOnEnd
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -30,7 +30,7 @@ import kotlinx.coroutines.launch
 class FragmentRepasar : Fragment() {
     private var _binding: FragmentRepasarBinding? = null
     private val binding get() = _binding!!
-    private val viewModel by viewModels<FragmentRepasarViewModel>()
+    private val viewModel:FragmentRepasarViewModel by activityViewModels()
 
     private lateinit var adaptListPintarTextos: ListItemPintarTextosAdapter
     private lateinit var adaptListPintarImagenes: ListItemPintarImagenesAdapter
@@ -49,48 +49,63 @@ class FragmentRepasar : Fragment() {
         initUI()
         initListeners()
 
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.eventsMessages.collect { event ->
-                    if (event is UIStopEvent.RestartGuide){
-                        AlertDialog.Builder(requireContext())
-                            .setTitle("¡Atención!")
-                            .setMessage(event.text)
-                            .setPositiveButton(
-                                "Si"
-                            ) { _, _ ->
-                                viewModel.restartReview()
-
-                                Toast.makeText(
-                                    requireContext(), "Guia reiniciada", Toast.LENGTH_LONG
-                                ).show()
-                            }
-                            .setNegativeButton(
-                                "Cancelar"
-                            ) { dialog, _ ->
-                                dialog.dismiss()
-                            }.setOnCancelListener {
-
-                            }.create().show()
+                // Observamos imageList directamente
+                launch {
+                    viewModel.imageList.collect { list ->
+                        adaptListPintarImagenes.submitList(list)
                     }
+                }
 
-                    if (event is UIStopEvent.NotQuestionBefore){
-                        Toast.makeText(context, event.text, Toast.LENGTH_SHORT).show()
+                // Observamos textList directamente
+                launch {
+                    viewModel.textList.collect { list ->
+                        adaptListPintarTextos.submitList(list)
+                    }
+                }
+
+                // Texto pregunta/respuesta
+                launch {
+                    viewModel.uiState.collect { uiState ->
+                        binding.lblPregResp.text =
+                            if (uiState.typeContent == TypeContent.QUESTION)
+                                getString(R.string.etPregunta)
+                            else
+                                getString(R.string.etRespuesta)
+                    }
+                }
+
+                launch {
+                    viewModel.eventsMessages.collect { event ->
+                        if (event is UIStopEvent.RestartGuide){
+                            AlertDialog.Builder(requireContext())
+                                .setTitle("¡Atención!")
+                                .setMessage(event.text)
+                                .setPositiveButton(
+                                    "Si"
+                                ) { _, _ ->
+                                    viewModel.restartReview()
+
+                                    Toast.makeText(
+                                        requireContext(), "Guia reiniciada", Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                                .setNegativeButton(
+                                    "Cancelar"
+                                ) { dialog, _ ->
+                                    dialog.dismiss()
+                                }.setOnCancelListener {
+
+                                }.create().show()
+                        }
+
+                        if (event is UIStopEvent.NotQuestionBefore){
+                            Toast.makeText(context, event.text, Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
             }
-        }
-
-        lifecycleScope.launch {
-            viewModel.uiState.collect { uiState ->
-                adaptListPintarTextos.submitList(uiState.textList)
-                adaptListPintarImagenes.submitList(uiState.imageList)
-            }
-        }
-
-        viewModel.typeContent.observe(viewLifecycleOwner) { typeContent ->
-            binding.lblPregResp.text =
-                if (typeContent == TypeContent.QUESTION) "Pregunta" else "Respuesta"
         }
     }
 
@@ -109,10 +124,6 @@ class FragmentRepasar : Fragment() {
     }
 
     private fun initUI() {
-        val positionContent = arguments?.getInt(
-            "posContent"
-        ) ?: 0
-
         adaptListPintarTextos = ListItemPintarTextosAdapter { position -> goVisorTexto(position) }
         binding.recyclerTextos.layoutManager =
             LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
@@ -125,22 +136,22 @@ class FragmentRepasar : Fragment() {
             LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         binding.recyclerImagenes.setHasFixedSize(true)
         binding.recyclerImagenes.adapter = adaptListPintarImagenes
-        //viewModel.setContadorPregunta(positionContent)
 
-        viewModel.getObtenerDatosXML(positionContent)
+        //viewModel.uploadCachedGuides()
+        //viewModel.getObtenerDatosXML()
     }
 
     private fun goVisorTexto(position: Int) {
         findNavController().navigate(
             R.id.action_fragmentRepasar_to_fragmentVisorTexto,
-            bundleOf("questionText" to viewModel.uiState.value.textList[position])
+            bundleOf("questionText" to viewModel.textList.value[position])
         )
     }
 
     private fun goVisorImagen(position: Int) {
         findNavController().navigate(
             R.id.action_fragmentRepasar_to_fragmentVisorImagen,
-            bundleOf("questionImage" to viewModel.uiState.value.imageList[position])
+            bundleOf("questionImage" to viewModel.imageList.value[position])
         )
     }
 

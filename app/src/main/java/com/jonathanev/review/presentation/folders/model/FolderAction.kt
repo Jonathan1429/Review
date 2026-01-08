@@ -10,7 +10,7 @@ sealed class FolderAction: Parcelable {
     data object CreatingFolder: FolderAction()
 
     @Parcelize
-    data object RenamingFile: FolderAction()
+    data class RenamingFile(val fileName: String): FolderAction()
 
     @Parcelize
     data object RenamingFolder: FolderAction()

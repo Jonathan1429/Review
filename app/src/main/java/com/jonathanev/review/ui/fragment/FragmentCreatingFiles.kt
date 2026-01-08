@@ -100,10 +100,6 @@ class FragmentCreatingFiles : Fragment() {
                             values.message,
                             Toast.LENGTH_SHORT
                         ).show()
-
-                        is CreatingFileUiState.FileUiStateExisted -> {
-
-                        }
                     }
                 }
             }
@@ -189,9 +185,11 @@ class FragmentCreatingFiles : Fragment() {
 
         when (mode) {
             FolderAction.CreatingFolder -> showFolderUI()
-            FolderAction.RenamingFile -> {
+            is FolderAction.RenamingFile -> {
                 showFileUI()
-                val attributes = viewModel.fillFields()
+                viewModel.uploadCachedGuides()
+
+                val attributes = viewModel.fillFields(mode.fileName)
                 binding.fragmentCreate.etNombre.setText(attributes.nameGuide)
                 binding.fragmentCreate.fragmentComponentsFile.etDescription.setText(attributes.description)
             }
@@ -218,9 +216,9 @@ class FragmentCreatingFiles : Fragment() {
     }
 
     private fun prepareScreenData(mode: FolderAction, name: String, description: String) {
-        val exist = viewModel.fileExist(mode, name)
+        val existGuideDomainModel = viewModel.fileExist(name)
 
-        if (!exist) {
+        if (existGuideDomainModel == null) {
             viewModel.processScreenData(name, description)
             return
         }
@@ -236,7 +234,7 @@ class FragmentCreatingFiles : Fragment() {
             }
 
             FolderAction.CreatingFile,
-            FolderAction.RenamingFile -> {
+            is FolderAction.RenamingFile -> {
                 alertDialog { confirmed ->
                     viewModel.onContinueProcess(confirmed, name, description)
                 }
@@ -267,7 +265,7 @@ class FragmentCreatingFiles : Fragment() {
 
         when (mode) {
             FolderAction.CreatingFolder -> onCreateFolderConfirmed(data)
-            FolderAction.RenamingFile -> renameFile()
+            is FolderAction.RenamingFile -> renameFile()
             FolderAction.RenamingFolder -> Log.i(
                 "Advertencia",
                 "Aun no se aplica la funcion renombrar folder"

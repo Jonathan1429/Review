@@ -10,8 +10,8 @@ class GetFoldersCreatedUseCase @Inject constructor(
     private val filePathsProvider: FilePathsProvider,
     private val pathProvider: PathProvider
 ) {
-    operator fun invoke(): Array<String>{
-        val listaCarpetas = filePathsProvider.fileGuides.listFiles { file -> file.isDirectory } ?: emptyArray()
+    operator fun invoke() {
+        /*val listaCarpetas = filePathsProvider.fileGuides.listFiles { file -> file.isDirectory } ?: emptyArray()
         val currentPath = pathProvider.getCurrentPath()
         val foldersCreated = listaCarpetas.map { it.name }.toTypedArray()
 
@@ -19,6 +19,6 @@ class GetFoldersCreatedUseCase @Inject constructor(
             foldersCreated.plus(StorageFolders.PRINCIPAL)
         }
 
-        return foldersCreated
+        return foldersCreated*/
     }
 }

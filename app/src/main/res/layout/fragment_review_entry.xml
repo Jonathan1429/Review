@@ -4,6 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/contents"
-    tools:context=".ui.fragment.FragmentsContent">
+    tools:context=".ui.fragment.FragmentReviewEntry">
 
 </FrameLayout>

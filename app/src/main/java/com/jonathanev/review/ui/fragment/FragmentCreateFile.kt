@@ -43,7 +43,6 @@ class FragmentCreateFile : Fragment() {
 
     private lateinit var adaptListCreateTexts: ListCreateTextsAdapter
     private lateinit var adaptListCreateImages: ListCreateImagesAdapter
-    private lateinit var actionGuide: ActionGuide
     private lateinit var screenData: ScreenData
 
     override fun onCreateView(
@@ -60,7 +59,7 @@ class FragmentCreateFile : Fragment() {
             requireArguments(), "mode", FolderAction::class.java
         ) ?: FolderAction.NONE*/
 
-        actionGuide = BundleCompat.getParcelable(
+        val actionGuide = BundleCompat.getParcelable(
             requireArguments(), "actionGuide", ActionGuide::class.java
         ) ?: ActionGuide.NONE
 
@@ -79,8 +78,8 @@ class FragmentCreateFile : Fragment() {
             .onBackPressedDispatcher
             .addCallback(viewLifecycleOwner, callback)
 
-        initUI()
-        initListeners()
+        initUI(actionGuide)
+        initListeners(actionGuide)
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -165,7 +164,7 @@ class FragmentCreateFile : Fragment() {
         }
     }
 
-    private fun initUI() {
+    private fun initUI(actionGuide: ActionGuide) {
         viewModelToolbar.isBtnSaveVisible(View.GONE)
         viewModelToolbar.isBtnBackVisible(View.GONE)
 
@@ -191,7 +190,7 @@ class FragmentCreateFile : Fragment() {
         when (actionGuide) {
             ActionGuide.CREATE -> Log.i("Crear", "Se está creando un archivo")
             is ActionGuide.EDIT -> {
-                viewModel.getObtenerDatosXML((actionGuide as ActionGuide.EDIT).posGuide)
+                viewModel.getObtenerDatosXML(actionGuide.posGuide, actionGuide.nameGuide)
             }
 
             ActionGuide.NONE -> {
@@ -226,7 +225,7 @@ class FragmentCreateFile : Fragment() {
         )
     }
 
-    private fun initListeners() {
+    private fun initListeners(actionGuide: ActionGuide) {
         binding.btnAddText.setOnClickListener {
             findNavController().navigate(
                 R.id.action_to_text
@@ -274,10 +273,9 @@ class FragmentCreateFile : Fragment() {
                     screenData.description
                 )
 
-                is ActionGuide.EDIT -> viewModel.saveOldGuide()
+                is ActionGuide.EDIT -> viewModel.saveOldGuide(actionGuide.nameGuide)
                 ActionGuide.NONE -> Log.e("Error:", "NO se pudo guardar la guia")
             }
-
         }
     }
 

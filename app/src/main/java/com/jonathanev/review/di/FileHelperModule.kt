@@ -18,8 +18,9 @@ object FileHelperModule {
     @Provides
     @Singleton
     fun provideFileHelper(
-        pathProvider: PathProvider
-    ): DirectoryManager = DirectoryManagerImpl(pathProvider)
+        pathProvider: PathProvider,
+        filePathsProvider: FilePathsProvider
+    ): DirectoryManager = DirectoryManagerImpl(pathProvider, filePathsProvider)
 
     @Provides
     @Singleton

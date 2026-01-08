@@ -34,16 +34,16 @@
         android:name="com.jonathanev.review.ui.fragment.FragmentPreviewQuestions"
         android:label="fragment_preview_questions"
         tools:layout="@layout/fragment_preview_questions">
+        <argument
+            android:name="folderId"
+            app:argType="string"
+            app:nullable="false" />
         <action
             android:id="@+id/action_to_create_graph"
             app:destination="@id/create_graph" />
         <action
             android:id="@+id/action_fragmentPreviewQuestions_to_fragmentRepasar"
             app:destination="@id/fragmentRepasar" />
-        <argument
-            android:name="posContent"
-            app:argType="integer"
-            app:nullable="false" />
     </fragment>
 
     <fragment

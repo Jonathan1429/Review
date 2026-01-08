@@ -9,8 +9,8 @@ import javax.inject.Inject
 class CreatingFolderUseCase @Inject constructor(
     private val pathProvider: PathProvider
 ) {
-    operator fun invoke(fileName: String): FileAction {
-        val path = File(pathProvider.getCurrentPath(), fileName)
+    operator fun invoke(fileName: String) {
+        /*val path = File(pathProvider.getCurrentPath(), fileName)
         val pathImages = File(pathProvider.getCurrentPath(), fileName).toString()
             .replace(StorageFolders.GUIAS, StorageFolders.IMAGENES)
 
@@ -25,6 +25,6 @@ class CreatingFolderUseCase @Inject constructor(
             FileAction.SUCCESS
         } else {
             FileAction.ERROR
-        }
+        }*/
     }
 }

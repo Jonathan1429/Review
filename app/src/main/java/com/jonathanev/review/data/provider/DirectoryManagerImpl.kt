@@ -1,10 +1,9 @@
 package com.jonathanev.review.data.provider
 
-import com.jonathanev.review.data.storage.StorageFolders
-import com.jonathanev.review.data.xml.Versions
 import com.jonathanev.review.domain.DirectoryManager
+import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.QuestionContentDomain
-import com.jonathanev.review.domain.repository.FileNamingRules
+import com.jonathanev.review.domain.repository.NavigationPathRepository
 import com.jonathanev.review.domain.repository.PathProvider
 import java.io.File
 import java.nio.file.Files
@@ -13,26 +12,23 @@ import java.nio.file.StandardCopyOption
 import javax.inject.Inject
 
 class DirectoryManagerImpl @Inject constructor(
-    private val pathProvider: PathProvider
+    private val navigationPathRepository: NavigationPathRepository,
+    private val filePathsProvider: FilePathsProvider
 ) : DirectoryManager {
-    override fun prepareCleanDirectory(path: String, isNewFile: Boolean) {
+    override fun prepareCleanDirectory(guideDomainModel: GuideDomainModel, isNewFile: Boolean) {
+        val currentPath = filePathsProvider.buildImage(navigationPathRepository.currentPath, guideDomainModel.nameGuide)
+
         when {
             isNewFile -> {
-                val directory = File(path)
-                if (directory.exists()) {
-                    directory.deleteRecursively()
+                if (currentPath.exists()) {
+                    currentPath.deleteRecursively()
                 }
-                directory.mkdir()
+                currentPath.mkdir()
             }
 
             else -> {
-                val basePath =
-                    pathProvider.getCurrentPath().replace(FileNamingRules.XML_EXTENSION, "")
-                val imagesFolder =
-                    File(basePath.replace(StorageFolders.GUIAS, StorageFolders.IMAGENES))
-
-                if (!imagesFolder.exists()) {
-                    imagesFolder.mkdir()
+                if (!currentPath.exists()) {
+                    currentPath.mkdir()
                 }
             }
         }
@@ -46,13 +42,13 @@ class DirectoryManagerImpl @Inject constructor(
         listImages: List<QuestionContentDomain.Image>,
         nameGuide: String
     ) {
-        val imagesFolder = pathProvider.buildTempPathFile(nameGuide)
+        val currentPath = filePathsProvider.buildImage(navigationPathRepository.currentPath, nameGuide)
 
         val currentDeviceNames =
-            imagesFolder.parentFile?.listFiles()?.map { it.name }?.toSet() ?: emptySet()
+            navigationPathRepository.currentPath.listFiles()?.map { it.name }?.toSet() ?: emptySet()
 
         listImages.filter { it.nameFile in currentDeviceNames }.forEach { image ->
-            val destination = File(imagesFolder, image.nameFile)
+            val destination = File(currentPath, image.nameFile)
 
             Files.move(
                 Paths.get(image.uri),
@@ -66,17 +62,24 @@ class DirectoryManagerImpl @Inject constructor(
         nameGuide: String,
         listImages: List<QuestionContentDomain.Image>
     ) {
-        val imagesFolder = pathProvider.buildTempPathFile(nameGuide)
+        val currentPath = filePathsProvider.buildImage(navigationPathRepository.currentPath, nameGuide)
 
         // Borrar imagenes que ya no estén en el XML pero si en el dispositivo
-        val currentDeviceNames = imagesFolder.listFiles()?.map { it.name }?.toSet() ?: emptySet()
+        val currentDeviceNames = currentPath.listFiles()?.map { it.name }?.toSet() ?: emptySet()
         val listDelete = currentDeviceNames - listImages.map { it.nameFile }.toSet()
 
         listDelete.forEach { image ->
-            val destination = File(imagesFolder, image)
+            val destination = File(currentPath, image)
             if (destination.exists() && destination.isFile) {
                 destination.delete()
             }
+        }
+    }
+
+    override fun createPathGuide(nameGuide: String) {
+        val currentPath = filePathsProvider.buildFolder(navigationPathRepository.currentPath, nameGuide)
+        if (!currentPath.exists()){
+            currentPath.mkdir()
         }
     }
 }

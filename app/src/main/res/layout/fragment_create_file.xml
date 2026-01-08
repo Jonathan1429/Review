@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -7,207 +7,212 @@
     android:background="@color/background_app"
     tools:context=".ui.fragment.FragmentCreateFile">
 
-    <LinearLayout
-        android:id="@+id/optionsIcons"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_height="wrap_content">
 
-        <FrameLayout
+        <LinearLayout
+            android:id="@+id/optionsIcons"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
             <FrameLayout
-                android:id="@+id/btnPrevious"
-                android:layout_width="34dp"
-                android:layout_height="34dp"
-                android:layout_margin="10dp"
-                android:padding="6dp">
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-                <ImageView
+                <FrameLayout
+                    android:id="@+id/btnPrevious"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_margin="10dp"
+                    android:padding="6dp">
+
+                    <ImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/ic_circle_left_right"
+                        tools:ignore="ContentDescription" />
+                </FrameLayout>
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
-                    android:src="@drawable/ic_circle_left_right"
-                    tools:ignore="ContentDescription" />
+                    android:gravity="end"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/btnTrash"
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
+                        android:layout_margin="10dp"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:padding="6dp"
+                        android:src="@drawable/ic_trash"
+                        tools:ignore="ContentDescription" />
+
+                    <ImageView
+                        android:id="@+id/btnPregResp"
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
+                        android:layout_margin="10dp"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:padding="6dp"
+                        android:src="@drawable/ic_preg_resp"
+                        tools:ignore="ContentDescription" />
+
+                    <ImageView
+                        android:id="@+id/btnNext"
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
+                        android:layout_margin="10dp"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:padding="6dp"
+                        android:rotationY="180"
+                        android:src="@drawable/ic_circle_left_right"
+                        tools:ignore="ContentDescription" />
+                </LinearLayout>
+
             </FrameLayout>
 
-            <LinearLayout
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/lblPregResp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:gravity="center_horizontal"
+            android:text="Pregunta"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/optionsIcons" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/contentText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:background="@drawable/contents"
+            android:padding="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/lblPregResp">
+
+            <TextView
+                android:id="@+id/lblTextos"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:fontFamily="@font/inter"
+                android:text="Textos"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAddText"
+                style="@style/btnCrearGuia"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/ic_filter_state_crear_guia"
+                android:layoutDirection="ltr"
+                android:text="@string/add_text"
+                app:backgroundTint="@null"
+                app:icon="@drawable/plus"
+                app:iconPadding="5dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerTextos"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="end"
-                android:orientation="horizontal">
+                android:layout_height="230dp"
+                android:layout_margin="8dp"
+                android:orientation="horizontal"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/btnAddText" />
 
-                <ImageView
-                    android:id="@+id/btnTrash"
-                    android:layout_width="34dp"
-                    android:layout_height="34dp"
-                    android:layout_margin="10dp"
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
-                    android:padding="6dp"
-                    android:src="@drawable/ic_trash"
-                    tools:ignore="ContentDescription" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <ImageView
-                    android:id="@+id/btnPregResp"
-                    android:layout_width="34dp"
-                    android:layout_height="34dp"
-                    android:layout_margin="10dp"
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
-                    android:padding="6dp"
-                    android:src="@drawable/ic_preg_resp"
-                    tools:ignore="ContentDescription" />
-
-                <ImageView
-                    android:id="@+id/btnNext"
-                    android:layout_width="34dp"
-                    android:layout_height="34dp"
-                    android:layout_margin="10dp"
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
-                    android:padding="6dp"
-                    android:rotationY="180"
-                    android:src="@drawable/ic_circle_left_right"
-                    tools:ignore="ContentDescription" />
-            </LinearLayout>
-
-        </FrameLayout>
-
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/lblPregResp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:gravity="center_horizontal"
-        android:text="Pregunta"
-        android:textColor="@color/white"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/optionsIcons" />
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/contentText"
-        android:layout_width="match_parent"
-        android:layout_height="250dp"
-        android:layout_margin="16dp"
-        android:background="@drawable/contents"
-        android:padding="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/lblPregResp">
-
-        <TextView
-            android:id="@+id/lblTextos"
-            android:layout_width="wrap_content"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            android:fontFamily="@font/inter"
-            android:text="Textos"
-            android:textColor="@color/white"
-            android:textSize="20sp"
-            android:textStyle="bold"
+            android:background="@drawable/contents"
+            android:padding="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/contentText">
+
+            <TextView
+                android:id="@+id/lblImagenes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:fontFamily="@font/inter"
+                android:text="Imagenes"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnAddImages"
+                style="@style/btnCrearGuia"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/ic_filter_state_crear_guia"
+                android:layoutDirection="ltr"
+                android:text="@string/add_image"
+                app:backgroundTint="@null"
+                app:icon="@drawable/plus"
+                app:iconPadding="5dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerImagenes"
+                android:layout_width="match_parent"
+                android:layout_height="230dp"
+                android:layout_margin="8dp"
+                android:orientation="horizontal"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/lblImagenes" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnAddText"
+            android:id="@+id/btnSaveGuide"
             style="@style/btnCrearGuia"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="10dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
             android:background="@drawable/ic_filter_state_crear_guia"
             android:layoutDirection="ltr"
-            android:text="@string/add_text"
+            android:text="@string/btnGuardarGuia"
             app:backgroundTint="@null"
             app:icon="@drawable/plus"
             app:iconPadding="5dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerTextos"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_margin="8dp"
-            android:orientation="horizontal"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btnAddText" />
-
+            app:layout_constraintEnd_toEndOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:layout_margin="16dp"
-        android:background="@drawable/contents"
-        android:padding="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/contentText">
-
-        <TextView
-            android:id="@+id/lblImagenes"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:fontFamily="@font/inter"
-            android:text="Imagenes"
-            android:textColor="@color/white"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnAddImages"
-            style="@style/btnCrearGuia"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="10dp"
-            android:background="@drawable/ic_filter_state_crear_guia"
-            android:layoutDirection="ltr"
-            android:text="@string/add_image"
-            app:backgroundTint="@null"
-            app:icon="@drawable/plus"
-            app:iconPadding="5dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerImagenes"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_margin="8dp"
-            android:orientation="horizontal"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/lblImagenes" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnSaveGuide"
-        style="@style/btnCrearGuia"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        android:background="@drawable/ic_filter_state_crear_guia"
-        android:layoutDirection="ltr"
-        android:text="@string/btnGuardarGuia"
-        app:backgroundTint="@null"
-        app:icon="@drawable/plus"
-        app:iconPadding="5dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

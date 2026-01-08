@@ -1,15 +1,15 @@
 package com.jonathanev.review.domain.repository
 
+import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
-import java.io.File
 
 interface ImagesRepository {
-    suspend fun saveImage(image: QuestionContentDomain.Image, imagesPath: File)
+    suspend fun saveImage(image: QuestionContentDomain.Image, nameFolder: String)
     fun reubicarImagenes(
-        version: String,
         fileName: String,
         preguntas: List<QuestionItemDomain>,
-        respuestas: List<QuestionItemDomain>
+        respuestas: List<QuestionItemDomain>,
+        attributesGuide: GuideDomainModel
     )
 }

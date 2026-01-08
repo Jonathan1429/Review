@@ -22,6 +22,7 @@ import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.presentation.viewmodel.MainToolbarViewModel
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.databinding.FragmentCreateImagesBinding
+import com.jonathanev.review.presentation.model.QuestionContentUi
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -47,8 +48,8 @@ class FragmentCreateImages : Fragment() {
 
         val data = arguments?.getParcelable(
             "questionImage",
-            QuestionContentDomain.Image::class.java
-        ) ?: QuestionContentDomain.None
+            QuestionContentUi.Image::class.java
+        ) ?: QuestionContentUi.None
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -81,8 +82,8 @@ class FragmentCreateImages : Fragment() {
         findNavController().navigateUp()
     }
 
-    private fun initUI(item: QuestionContentDomain) {
-        if (item is QuestionContentDomain.Image){
+    private fun initUI(item: QuestionContentUi) {
+        if (item is QuestionContentUi.Image){
             binding.ivImagen.setImage(ImageSource.uri(item.uri))
         }
 

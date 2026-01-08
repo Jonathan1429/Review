@@ -21,6 +21,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
@@ -62,7 +63,7 @@ class FragmentListFolders : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        var mode = BundleCompat.getParcelable(
+        val mode = BundleCompat.getParcelable(
             requireArguments(),
             "mode",
             FolderAction::class.java
@@ -166,11 +167,10 @@ class FragmentListFolders : DialogFragment() {
 
     @SuppressLint("SdCardPath")
     private fun showFolderOptions(position: Int, mode: FolderAction) {
-        val folderResult = viewModel.getFolderSelected(position)
         //val a = guiasViewModel.guias.value
         //var fileClickeado: File = filePathsProvider.fileGuides
 
-        when (folderResult) {
+        when (val folderResult = viewModel.getFolderSelected(position)) {
             //GuiaResult.Empty -> Log.i("Vacio", "Vacio")
             is FolderResult.Error -> Log.i("Error", "Error")
             is FolderResult.Success -> {
@@ -186,16 +186,17 @@ class FragmentListFolders : DialogFragment() {
                 ) { dialog, which ->
                     when (which) {
                         0 -> {
-                            viewModel.changeFilePath(folderResult.folder.name)
+                            viewModel.nextPath(folderResult.folder.name)
+
                             findNavController().navigate(
-                                R.id.action_to_review_graph,
-                                bundleOf("mode" to mode)
+                                R.id.action_to_review_graph
                             )
                         }
 
                         1 -> {
-                            // Se ejecuta cuando quiere eliminar la guía.
-                            AlertDialog.Builder(context)
+                            // Se ejecuta cuando quiere eliminar la carpeta.
+                            Toast.makeText(requireContext(), "No está implementado eliminar una carpeta aún", Toast.LENGTH_SHORT).show()
+                            /*AlertDialog.Builder(context)
                                 .setTitle("¡Atención!")
                                 .setMessage(
                                     "¿Estás seguro que deseas eliminar la carpeta y su contenido?"
@@ -204,7 +205,7 @@ class FragmentListFolders : DialogFragment() {
                                     viewModel.deleteFiles(folderResult.folder)
                                 }
                                 .setNegativeButton("Cancelar") { _, _ -> dialog.dismiss() }
-                                .create().show()
+                                .create().show()*/
                         }
 
                         2 -> {
@@ -224,24 +225,5 @@ class FragmentListFolders : DialogFragment() {
         val dialog = super.onCreateDialog(savedInstanceState)
         dialog.window!!.requestFeature(Window.FEATURE_NO_TITLE)
         return dialog
-    }
-
-    override fun onStart() {
-        super.onStart()
-        dialog?.window?.let { window ->
-            val metrics = resources.displayMetrics
-
-            val maxWidth = 900   // en píxeles
-            val maxHeight = 1200 // en píxeles
-
-            val calculatedWidth = (metrics.widthPixels * 0.9).toInt()  // 90% del ancho de pantalla
-            val calculatedHeight = (metrics.heightPixels * 0.8).toInt() // 80% del alto de pantalla
-
-            val finalWidth = minOf(calculatedWidth, maxWidth)
-            val finalHeight = minOf(calculatedHeight, maxHeight)
-
-            window.setLayout(finalWidth, finalHeight)
-            window.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        }
     }
 }

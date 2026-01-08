@@ -8,9 +8,9 @@ import javax.inject.Inject
 class SetRenamingUseCase @Inject constructor(
     private val pathProvider: PathProvider
 ) {
-    operator fun invoke(newFileName: String): FileAction {
+    operator fun invoke(newFileName: String) {
         // Ruta + nombre del archivo.
-        val routeWithoutFile = pathProvider.getCurrentPath().substringBeforeLast("/")
+        /*val routeWithoutFile = pathProvider.getCurrentPath().substringBeforeLast("/")
         val newPathFile = File("$routeWithoutFile/$newFileName")
 
         if (newPathFile.exists()){
@@ -18,6 +18,6 @@ class SetRenamingUseCase @Inject constructor(
         }
 
         val response = File(pathProvider.getCurrentPath()).renameTo(newPathFile)
-        return if (response) FileAction.SUCCESS else FileAction.ERROR
+        return if (response) FileAction.SUCCESS else FileAction.ERROR*/
     }
 }

@@ -21,7 +21,7 @@ import javax.inject.Singleton
 class DataStoreManager @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
-    private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
+    /*private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
         name = "APP_PREFERENCES",
         produceMigrations = { context ->
             listOf(
@@ -32,7 +32,8 @@ class DataStoreManager @Inject constructor(
                 )
             )
         }
-    )
+    )*/
+    private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "CONTADOR_IMAGENES")
 
     private val dataStore = context.dataStore
 

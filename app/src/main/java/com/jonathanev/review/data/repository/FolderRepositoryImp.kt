@@ -5,14 +5,16 @@ import com.jonathanev.review.domain.repository.FolderRepository
 import com.jonathanev.review.domain.repository.PathProvider
 import com.jonathanev.review.data.JsonManager
 import com.jonathanev.review.data.FolderFileModel
+import com.jonathanev.review.domain.model.FolderWithNumGuidesDomainModel
+import com.jonathanev.review.domain.repository.FileExplorerRepository
 import java.io.File
 import javax.inject.Inject
 
 class FolderRepositoryImp @Inject constructor(
     private val jsonManager: JsonManager,
-    private val pathProvider: PathProvider
+    private val fileExplorerRepository: FileExplorerRepository
 ) : FolderRepository {
-    override fun getAttributesFolder(folderPath: File): FolderDomainModel {
+    /*override fun getAttributesFolder(folderPath: File): FolderDomainModel {
         val nameFolder = folderPath.toString().substringAfterLast("/")
 
         val file = File(folderPath, "screen.json")
@@ -22,18 +24,15 @@ class FolderRepositoryImp @Inject constructor(
 
         val fileModel = jsonManager.read<FolderFileModel>(file)
         return FolderDomainModel(name = fileModel.name)
-    }
+    }*/
 
-    override fun getFolders(): List<FolderDomainModel> {
-        val file = File(pathProvider.getCurrentPath())
-
-        return file.listFiles()
-            ?.filter { it.isDirectory }
-            ?.map { item ->
-                FolderDomainModel(
-                    name = item.name
-                )
-            }
-            ?: emptyList()
+    override fun getFolders(): List<FolderWithNumGuidesDomainModel> {
+        return fileExplorerRepository.listCurrent().filter { it.isDirectory }.map { item ->
+            val numGuidesCurrentFolder = item.listFiles()?.filter { it.name != "screen.json" }?.size ?: 0
+            FolderWithNumGuidesDomainModel(
+                FolderDomainModel(item.name),
+                numGuidesCurrentFolder
+            )
+        }
     }
 }

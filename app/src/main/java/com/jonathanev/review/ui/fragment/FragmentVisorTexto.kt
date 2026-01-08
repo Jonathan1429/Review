@@ -9,9 +9,10 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.jonathanev.review.domain.model.ColorRangeDomain
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.databinding.FragmentVisorTextoBinding
+import com.jonathanev.review.presentation.model.ColorRangeUi
+import com.jonathanev.review.presentation.model.QuestionContentUi
 
 class FragmentVisorTexto : Fragment() {
     private var _binding: FragmentVisorTextoBinding? = null
@@ -31,30 +32,30 @@ class FragmentVisorTexto : Fragment() {
 
         val data = arguments?.getParcelable(
             "questionText",
-            QuestionContentDomain.Text::class.java
-        ) ?: QuestionContentDomain.None
+            QuestionContentUi.Text::class.java
+        ) ?: QuestionContentUi.None
 
         initUI(data)
     }
 
-    private fun initUI(questionContentDomain: QuestionContentDomain) {
-        when(questionContentDomain){
-            is QuestionContentDomain.Image -> Unit
-            QuestionContentDomain.None -> Unit
-            is QuestionContentDomain.Text -> {
-                val builder = questionContentDomain.toSpannable(questionContentDomain.text, questionContentDomain.colorRangeDomains)
+    private fun initUI(questionContentUi: QuestionContentUi) {
+        when(questionContentUi){
+            is QuestionContentUi.Image -> Unit
+            QuestionContentUi.None -> Unit
+            is QuestionContentUi.Text -> {
+                val builder = questionContentUi.toSpannable(questionContentUi.text, questionContentUi.colorRanges)
                 binding.lblText.text = builder
             }
         }
     }
 
-    private fun QuestionContentDomain.Text.toSpannable(
+    private fun QuestionContentUi.Text.toSpannable(
         text: String,
-        colorRangeDomains: List<ColorRangeDomain>
+        colorRangeUi: List<ColorRangeUi>
     ): SpannableStringBuilder {
         val builder = SpannableStringBuilder(text)
 
-        for (colorRange in colorRangeDomains) {
+        for (colorRange in colorRangeUi) {
             val colorSpan = ForegroundColorSpan(colorRange.color)
             builder.setSpan(
                 colorSpan,
