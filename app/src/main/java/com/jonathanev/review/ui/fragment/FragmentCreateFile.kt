@@ -31,6 +31,7 @@ import com.jonathanev.review.R
 import com.jonathanev.review.presentation.viewmodel.MainToolbarViewModel
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.databinding.FragmentCreateFileBinding
+import com.jonathanev.review.presentation.model.IconType
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -65,7 +66,7 @@ class FragmentCreateFile : Fragment() {
 
         screenData = BundleCompat.getParcelable(
             requireArguments(), "screenData", ScreenData::class.java
-        ) ?: ScreenData("", "", 0, 0)
+        ) ?: ScreenData("", "", IconType.ANCHOR_SOLID_FULL, 0)
 
         val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {

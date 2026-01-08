@@ -3,8 +3,6 @@ package com.jonathanev.review.ui.fragment
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.app.Dialog
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -21,7 +19,6 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
@@ -186,7 +183,7 @@ class FragmentListFolders : DialogFragment() {
                 ) { dialog, which ->
                     when (which) {
                         0 -> {
-                            viewModel.nextPath(folderResult.folder.name)
+                            viewModel.nextPath(folderResult.folderUi.folder.name)
 
                             findNavController().navigate(
                                 R.id.action_to_review_graph

@@ -1,8 +1,12 @@
 package com.jonathanev.review.data.mapper
 
-import com.jonathanev.review.domain.model.FolderDomainModel
-import com.jonathanev.review.data.FolderFileModel
+import com.jonathanev.review.domain.model.FolderAttributesDomain
+import com.jonathanev.review.data.AttributesFolderModel
 
-fun FolderFileModel.toDomain(): FolderDomainModel{
-    return FolderDomainModel(name = this.name)
+fun AttributesFolderModel.toIconType(): FolderAttributesDomain{
+    return FolderAttributesDomain(
+        name = this.name,
+        imgFolder = this.imgFolder,
+        color = this.color
+    )
 }

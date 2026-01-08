@@ -26,31 +26,31 @@ fun toXmlQA(type: QAType): String =
         QAType.ANSWER -> XmlTagsV2.ANSWER
     }
 
-fun QAItemXml.toDomain(): QAItemDomain {
-    return QAItemDomain(this.question.toDomain(), this.answer.toDomain())
+fun QAItemXml.toIconType(): QAItemDomain {
+    return QAItemDomain(this.question.toIconType(), this.answer.toIconType())
 }
 
-fun ResponseXml.toDomain(): ResponseDomain {
+fun ResponseXml.toIconType(): ResponseDomain {
     return when (this) {
         ResponseXml.Empty -> ResponseDomain.Empty
-        is ResponseXml.Filled -> ResponseDomain.Filled(this.item.toDomain())
+        is ResponseXml.Filled -> ResponseDomain.Filled(this.item.toIconType())
     }
 }
 
-fun QuestionItemXml.toDomain(): QuestionItemDomain {
-    return QuestionItemDomain(this.content.map { it.toDomain() })
+fun QuestionItemXml.toIconType(): QuestionItemDomain {
+    return QuestionItemDomain(this.content.map { it.toIconType() })
 }
 
-fun QuestionContentXml.toDomain(): QuestionContentDomain {
+fun QuestionContentXml.toIconType(): QuestionContentDomain {
     return when (this) {
         is QuestionContentXml.Image -> QuestionContentDomain.Image(this.uri, this.nameFile)
         QuestionContentXml.None -> QuestionContentDomain.None
         is QuestionContentXml.Text -> QuestionContentDomain.Text(
             this.text,
-            this.colorRangeXml.map { it.toDomain() })
+            this.colorRangeXml.map { it.toIconType() })
     }
 }
 
-fun ColorRangeXml.toDomain(): ColorRangeDomain {
+fun ColorRangeXml.toIconType(): ColorRangeDomain {
     return ColorRangeDomain(this.start, this.end, this.color)
 }

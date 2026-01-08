@@ -17,8 +17,8 @@ class FragmentsContentViewModel @Inject constructor(
     val folders: LiveData<List<FolderUiModel>> get() = _folders
 
     fun getAllFolders() {
-        val foldersWithNumGuidesDomain = getFoldersWithNumGuidesUseCase.invoke()
-        val foldersWithNumGuidesUi = foldersWithNumGuidesDomain.map { it.toUi() }
-        _folders.postValue(foldersWithNumGuidesUi)
+        val foldersDomainModel = getFoldersWithNumGuidesUseCase.invoke()
+        val foldersUiModel = foldersDomainModel.map { it.toUi() }
+        _folders.postValue(foldersUiModel)
     }
 }

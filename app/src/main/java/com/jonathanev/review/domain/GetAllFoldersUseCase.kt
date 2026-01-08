@@ -1,6 +1,5 @@
 package com.jonathanev.review.domain
 
-import com.jonathanev.review.domain.model.FolderDomainModel
 import com.jonathanev.review.domain.repository.FolderRepository
 import javax.inject.Inject
 

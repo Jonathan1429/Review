@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 data class ScreenData(
     val name: String,
     val description: String = "",
-    val imgFolder: Int? = null,
-    val color: Int? = null,
+    val imgFolder: IconType,
+    val color: Int,
     val version: Int = 1
 ): Parcelable

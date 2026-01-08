@@ -2,11 +2,7 @@ package com.jonathanev.review.domain
 
 import com.jonathanev.review.domain.repository.PathProvider
 import com.jonathanev.review.data.provider.FilePathsProvider
-import com.jonathanev.review.presentation.event.UIStopEvent
-import com.jonathanev.review.data.storage.StorageFolders
 import com.jonathanev.review.presentation.folders.model.FolderUiModel
-import com.jonathanev.review.presentation.mapper.toDomain
-import java.io.File
 import javax.inject.Inject
 
 class DeleteFolderUseCase @Inject constructor(

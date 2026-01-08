@@ -47,7 +47,8 @@ class FragmentsContent : Fragment() {
         viewModel.folders.observe(viewLifecycleOwner){ folders ->
             if (folders.isEmpty()){
                 findNavController().navigate(
-                    route = R.id.action_to_empty,
+                    resId = R.id.action_to_empty,
+                    args = null,
                     navOptions = navOptions
                 )
             } else {

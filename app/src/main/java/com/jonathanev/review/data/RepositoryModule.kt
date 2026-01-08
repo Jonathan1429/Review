@@ -1,5 +1,6 @@
 package com.jonathanev.review.data
 
+import com.jonathanev.review.data.provider.DefaultFolderAttributesProvider
 import com.jonathanev.review.data.provider.FilePathsProvider
 import com.jonathanev.review.data.repository.FileExplorerRepositoryImpl
 import com.jonathanev.review.domain.repository.FolderRepository

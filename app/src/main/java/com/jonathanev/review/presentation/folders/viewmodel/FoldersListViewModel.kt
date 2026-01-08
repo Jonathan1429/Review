@@ -2,17 +2,17 @@ package com.jonathanev.review.presentation.folders.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jonathanev.review.domain.ResolveFolderPathUseCase
 import com.jonathanev.review.domain.DeleteFolderUseCase
 import com.jonathanev.review.domain.GetFolderPosicionUseCase
 import com.jonathanev.review.domain.GetFoldersWithNumGuidesUseCase
 import com.jonathanev.review.domain.NextPathUseCase
-import com.jonathanev.review.domain.SetCurrentPathUseCase
+import com.jonathanev.review.domain.ResolveFolderPathUseCase
+import com.jonathanev.review.domain.model.FolderDomainModel
 import com.jonathanev.review.presentation.event.UIMovingEvent
 import com.jonathanev.review.presentation.event.UIStopEvent
 import com.jonathanev.review.presentation.folders.model.FolderResult
 import com.jonathanev.review.presentation.folders.model.FolderUiModel
-import com.jonathanev.review.presentation.mapper.toDomainWithFolders
+import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.state.FoldersUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,15 +27,14 @@ import javax.inject.Inject
 class FoldersListViewModel @Inject constructor(
     private val getFolderPosicionUseCase: GetFolderPosicionUseCase,
     private val getFoldersWithNumGuidesUseCase: GetFoldersWithNumGuidesUseCase,
-    private val setCurrentPathUseCase: SetCurrentPathUseCase,
     private val deleteFolderUseCase: DeleteFolderUseCase,
     private val nextPathUseCase: NextPathUseCase,
-    private val resolveFolderPathUseCase: ResolveFolderPathUseCase
+    private val resolveFolderPathUseCase: ResolveFolderPathUseCase,
 ) : ViewModel() {
     private var _foldersUiState = MutableStateFlow(FoldersUiState())
     val foldersUiState = _foldersUiState.asStateFlow()
 
-    private var cachedFolders: List<FolderUiModel> = emptyList()
+    private var cachedFolders: List<FolderDomainModel> = emptyList()
 
     private val _eventsMessages = MutableSharedFlow<UIStopEvent>()
     val eventsMessages = _eventsMessages.asSharedFlow()
@@ -54,10 +53,9 @@ class FoldersListViewModel @Inject constructor(
             try {
                 val folderDomain =
                     getFoldersWithNumGuidesUseCase.invoke().sortedBy { it.folder.name }
+                cachedFolders = folderDomain
+
                 val folderUi = folderDomain.map { it.toUi() }
-
-                cachedFolders = folderUi
-
                 // 2. actualizar con la lista resultante
                 _foldersUiState.value = _foldersUiState.value.copy(
                     isLoading = false,
@@ -77,11 +75,10 @@ class FoldersListViewModel @Inject constructor(
     }*/
 
     fun getFolderSelected(position: Int): FolderResult {
-        val foldersDomain = cachedFolders.map { it.toDomainWithFolders() }
-        return getFolderPosicionUseCase.invoke(position, foldersDomain)
+        return getFolderPosicionUseCase.invoke(position, cachedFolders)
     }
 
-    fun deleteFiles(folderResult: FolderUiModel) {
+    /*fun deleteFiles(folderResult: FolderUiModel) {
         /*val message = deleteFolderUseCase.invoke(folderResult)
 
         viewModelScope.launch {
@@ -93,7 +90,7 @@ class FoldersListViewModel @Inject constructor(
                 message
             )
         }*/
-    }
+    }*/
 
     fun moveFileCancel() {
         viewModelScope.launch {

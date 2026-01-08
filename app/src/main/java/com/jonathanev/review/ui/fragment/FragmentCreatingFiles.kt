@@ -249,17 +249,17 @@ class FragmentCreatingFiles : Fragment() {
         val state = viewModel.uiState.value
 
         val icon = state.icons[state.selectedIndex]
-        val drawableIcon = when(icon){
+        /*val drawableIcon = when(icon){
             IconType.LIGHTBULB -> R.drawable.ic_lightbulb_solid_full
             IconType.ANCHOR_SOLID_FULL -> R.drawable.ic_anchor_solid_full
             IconType.ANGELLIST_BRANDS_SOLID_FULL -> R.drawable.ic_angellist_brands_solid_full
             IconType.BACTERIA_SOLID_FULL -> R.drawable.ic_bacteria_solid_full
-        }
+        }*/
 
         val data = ScreenData(
             name = name,
             description = description,
-            imgFolder = drawableIcon,
+            imgFolder = icon,
             color = state.color.toInt()
         )
 

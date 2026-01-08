@@ -20,21 +20,21 @@ class ListFoldersViewHolder @Inject constructor(
 
     fun bind(folder: FolderUiModel) {
         Glide.with(binding.itemCarpeta.ivCarpeta.context)
-            .load(folder.imgFolder)
+            .load(folder.folder.imgFolder)
             .override(80, 80)
             .centerCrop()
             .format(DecodeFormat.PREFER_RGB_565)
             .into(binding.itemCarpeta.ivCarpeta)
 
 
-        binding.lblTitle.text = folder.name
+        binding.lblTitle.text = folder.folder.name
 
         val background = binding.itemCarpeta.bgCarpeta.background as GradientDrawable
         binding.itemCarpeta.ivCarpeta.imageTintMode = PorterDuff.Mode.SRC_ATOP
-        val color50 = ColorUtils.setAlphaComponent(folder.color, 50)
+        val color50 = ColorUtils.setAlphaComponent(folder.folder.color, 50)
         background.setColor(color50)
 
-        binding.itemCarpeta.ivCarpeta.imageTintList = ColorStateList.valueOf(folder.color)
+        binding.itemCarpeta.ivCarpeta.imageTintList = ColorStateList.valueOf(folder.folder.color)
         val lblNumGuides = "${folder.numGuides} ${ContextCompat.getString(binding.noFoldersDescription.context, R.string.lblGuides)}"
         binding.noFoldersDescription.text = lblNumGuides
 
