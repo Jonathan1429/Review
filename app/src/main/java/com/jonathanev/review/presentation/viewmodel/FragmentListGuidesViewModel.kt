@@ -5,28 +5,18 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.domain.BackPathUseCase
-import com.jonathanev.review.domain.ChangeGuidePathBuildFileUseCase
-import com.jonathanev.review.domain.DeleteGuideUseCase
-import com.jonathanev.review.domain.GenerateTextColorRangesUseCase
 import com.jonathanev.review.domain.GetGuidePosicionUseCase
-import com.jonathanev.review.domain.GetObtenerDatosXMLUseCase
-import com.jonathanev.review.domain.GetVersionUseCase
+import com.jonathanev.review.domain.GoPreviewFileUseCase
 import com.jonathanev.review.domain.LoadGuidesUseCase
-import com.jonathanev.review.domain.MoverArchivoUseCase
-import com.jonathanev.review.domain.MoverImagenesUseCase
 import com.jonathanev.review.domain.SetMainPathUseCase
 import com.jonathanev.review.domain.model.GuideDomainModel
-import com.jonathanev.review.presentation.mapper.toUi
-import com.jonathanev.review.presentation.folders.model.FolderAction
-import com.jonathanev.review.domain.GoPreviewFileUseCase
 import com.jonathanev.review.presentation.event.UIMovingEvent
 import com.jonathanev.review.presentation.event.UIStopEvent
 import com.jonathanev.review.presentation.files.model.GuideResultUi
 import com.jonathanev.review.presentation.files.model.GuideUiModel
-import com.jonathanev.review.domain.model.QuestionContentDomain
+import com.jonathanev.review.presentation.folders.model.FolderAction
+import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.QuestionItemUi
-import com.jonathanev.review.domain.model.ResponseDomain
-import com.jonathanev.review.presentation.mapper.toDomain
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -36,16 +26,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FragmentListGuidesViewModel @Inject constructor(
-    private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
-    private val getVersionUseCase: GetVersionUseCase,
     private val loadGuidesUseCase: LoadGuidesUseCase,
     private val getGuidePosicionUseCase: GetGuidePosicionUseCase,
     private val setMainPathUseCase: SetMainPathUseCase,
-    private val changeGuidePathBuildFileUseCase: ChangeGuidePathBuildFileUseCase,
-    private val deleteGuideUseCase: DeleteGuideUseCase,
-    private val moverArchivoUseCase: MoverArchivoUseCase,
-    private val moverImagenesUseCase: MoverImagenesUseCase,
-    private val generateTextColorRangesUseCase: GenerateTextColorRangesUseCase,
     private val goPreviewFileUseCase: GoPreviewFileUseCase,
     private val backPathUseCase: BackPathUseCase
 ) : ViewModel() {

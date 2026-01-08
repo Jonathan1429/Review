@@ -1,9 +1,9 @@
 package com.jonathanev.review.domain.repository
 
-object FileNamingRules {
-    const val XML_EXTENSION = "xml"
+import com.jonathanev.review.data.Extensions
 
+object FileNamingRules {
     fun buildXmlFileName(name: String): String {
-        return "$name.$XML_EXTENSION"
+        return "$name${Extensions.POINT_XML_EXTENSION}"
     }
 }

@@ -5,7 +5,7 @@ import com.jonathanev.review.domain.model.QuestionContentDomain
 
 interface DirectoryManager {
     fun prepareCleanDirectory(guideDomainModel: GuideDomainModel, isNewFile: Boolean)
-    fun moveImagesV1(
+    suspend fun moveImagesV1(
         listImages: List<QuestionContentDomain.Image>,
         nameGuide: String
     )
