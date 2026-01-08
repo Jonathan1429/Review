@@ -66,7 +66,7 @@ class FragmentCreatingFiles : Fragment() {
         val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
 
-                if (mode == FolderAction.RenamingFile) {
+                if (mode is FolderAction.RenamingFile) {
                     viewModel.beforePath()
                 }
 

@@ -3,32 +3,29 @@ package com.jonathanev.review.presentation.viewmodel
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jonathanev.review.data.datastore.DataStoreManager
+import com.jonathanev.review.domain.CreateFilePathUseCase
 import com.jonathanev.review.domain.GenerateTextColorRangesUseCase
-import com.jonathanev.review.domain.GetAttributesGuideUseCase
 import com.jonathanev.review.domain.GetObtenerDatosXMLUseCase
+import com.jonathanev.review.domain.GetSaveGuidesUseCase
+import com.jonathanev.review.domain.LoadGuidesUseCase
 import com.jonathanev.review.domain.SetColocarEtiquetasUseCase
 import com.jonathanev.review.domain.SetContentUseCase
 import com.jonathanev.review.domain.SetCrearXmlUseCase
 import com.jonathanev.review.domain.SetDecodePathImageUseCase
-import com.jonathanev.review.data.datastore.DataStoreManager
-import com.jonathanev.review.presentation.state.GuideUiState
-import com.jonathanev.review.domain.model.ResponseDomain
-import com.jonathanev.review.domain.model.ColorRangeDomain
-import com.jonathanev.review.domain.model.QuestionContentDomain
-import com.jonathanev.review.domain.model.QuestionItemDomain
-import com.jonathanev.review.domain.model.TypeContent
-import com.jonathanev.review.presentation.mapper.toDomain
-import com.jonathanev.review.presentation.mapper.toUi
-import com.jonathanev.review.presentation.event.UIStopEvent
-import com.jonathanev.review.domain.ChangeBeforePathUseCase
-import com.jonathanev.review.domain.CreateFilePathUseCase
-import com.jonathanev.review.domain.GetSaveGuidesUseCase
-import com.jonathanev.review.domain.GetVersionUseCase
-import com.jonathanev.review.domain.LoadGuidesUseCase
 import com.jonathanev.review.domain.SetMainPathUseCase
 import com.jonathanev.review.domain.UpdateImagesUseCase
+import com.jonathanev.review.domain.model.ColorRangeDomain
 import com.jonathanev.review.domain.model.GuideDomainModel
+import com.jonathanev.review.domain.model.QuestionContentDomain
+import com.jonathanev.review.domain.model.QuestionItemDomain
+import com.jonathanev.review.domain.model.ResponseDomain
+import com.jonathanev.review.domain.model.TypeContent
+import com.jonathanev.review.presentation.event.UIStopEvent
+import com.jonathanev.review.presentation.mapper.toDomain
+import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.QuestionContentUi
+import com.jonathanev.review.presentation.state.GuideUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -50,14 +47,11 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     private val setCrearXmlUseCase: SetCrearXmlUseCase,
     private val setDecodePathImageUseCase: SetDecodePathImageUseCase,
     private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
-    private val getVersionUseCase: GetVersionUseCase,
     private val getSaveGuidesUseCase: GetSaveGuidesUseCase,
-    private val getAttributesGuideUseCase: GetAttributesGuideUseCase,
     private val dataStoreManager: DataStoreManager,
     private val generateTextColorRangesUseCase: GenerateTextColorRangesUseCase,
     private val updateImagesUseCase: UpdateImagesUseCase,
     private val setMainPathUseCase: SetMainPathUseCase,
-    private val changeBeforePathUseCase: ChangeBeforePathUseCase,
     private val createFilePathUseCase: CreateFilePathUseCase,
     private val loadGuidesUseCase: LoadGuidesUseCase
 ) : ViewModel() {

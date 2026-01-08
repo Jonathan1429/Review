@@ -472,7 +472,7 @@ class GuiaRepositoryImpl @Inject constructor(
             .getElementsByTagName(Structure.GUIAESTUDIO)
             .item(0) as Element
 
-        var name = cuestionarioNode.getAttribute(Attributes.NOMBREGUIA).replace(".$XML_EXTENSION", "")
+        val name = cuestionarioNode.getAttribute(Attributes.NOMBREGUIA).replace(".$XML_EXTENSION", "")
         val description = cuestionarioNode.getAttribute(Attributes.DESCRIPCION)
         val version = guiaEstudioNode.getAttribute(Attributes.VERSION)
 

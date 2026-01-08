@@ -2,25 +2,20 @@ package com.jonathanev.review.presentation.files.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jonathanev.review.domain.ChangeBeforePathUseCase
-import com.jonathanev.review.domain.CheckNameConflictUseCase
-import com.jonathanev.review.domain.GenerateTextColorRangesUseCase
-import com.jonathanev.review.domain.GetAttributesGuideUseCase
-import com.jonathanev.review.domain.GetObtenerDatosXMLUseCase
+import com.jonathanev.review.domain.BackPathUseCase
 import com.jonathanev.review.domain.LoadGuidesUseCase
+import com.jonathanev.review.domain.RenameGuideUseCase
 import com.jonathanev.review.domain.ReubicarImagenesUseCase
 import com.jonathanev.review.domain.SaveMetadataUseCase
-import com.jonathanev.review.domain.RenameGuideUseCase
 import com.jonathanev.review.domain.SetCurrentPathUseCase
 import com.jonathanev.review.domain.ValidateCreateFileUseCase
 import com.jonathanev.review.domain.model.GuideDomainModel
-import com.jonathanev.review.domain.repository.PathProvider
 import com.jonathanev.review.presentation.event.UIStopEvent
 import com.jonathanev.review.presentation.files.model.GuideUiModel
+import com.jonathanev.review.presentation.folders.model.FolderAction
 import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.ColorType
-import com.jonathanev.review.presentation.folders.model.FolderAction
 import com.jonathanev.review.presentation.model.IconType
 import com.jonathanev.review.presentation.model.QuestionItemUi
 import com.jonathanev.review.presentation.model.ScreenData
@@ -36,18 +31,13 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CreateFilesViewModel @Inject constructor(
-    private val pathProvider: PathProvider,
-    private val getAttributesGuideUseCase: GetAttributesGuideUseCase,
-    private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
     private val reubicarImagenesUseCase: ReubicarImagenesUseCase,
     private val renameGuideUseCase: RenameGuideUseCase,
     private val validateCreateFileUseCase: ValidateCreateFileUseCase,
-    private val checkNameConflictUseCase: CheckNameConflictUseCase,
-    private val generateTextColorRangesUseCase: GenerateTextColorRangesUseCase,
     private val setCurrentPathUseCase: SetCurrentPathUseCase,
-    private val changeBeforePathUseCase: ChangeBeforePathUseCase,
     private val saveMetadataUseCase: SaveMetadataUseCase,
-    private val loadGuidesUseCase: LoadGuidesUseCase
+    private val loadGuidesUseCase: LoadGuidesUseCase,
+    private val backPathUseCase: BackPathUseCase
 ) : ViewModel() {
     private var cachedGuides: List<GuideDomainModel> = emptyList()
     private var attributesGuide: GuideDomainModel? = null
@@ -198,7 +188,7 @@ class CreateFilesViewModel @Inject constructor(
     }
 
     fun beforePath() {
-        changeBeforePathUseCase.invoke()
+        backPathUseCase.invoke()
     }
 
     fun uploadCachedGuides() {
