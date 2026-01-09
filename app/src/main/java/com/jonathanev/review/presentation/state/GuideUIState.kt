@@ -12,6 +12,7 @@ data class GuideUiState(
     val typeContent: TypeContent = TypeContent.QUESTION,
     val fileName: String = "",
     val isEditing: Boolean = false,
-    val actualUri: Uri? = null
+    val actualUri: Uri? = null,
+    val isLastQuestion: Boolean? = null
 )
 

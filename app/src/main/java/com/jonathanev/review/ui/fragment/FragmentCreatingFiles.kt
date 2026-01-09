@@ -206,7 +206,7 @@ class FragmentCreatingFiles : Fragment() {
             viewModel.setColor(color)
         })
 
-        binding.btnApply.setOnClickListener {
+        binding.btnAddQuestion.setOnClickListener {
             val name = binding.fragmentCreate.etNombre.text.toString()
             val description =
                 binding.fragmentCreate.fragmentComponentsFile.etDescription.text.toString()

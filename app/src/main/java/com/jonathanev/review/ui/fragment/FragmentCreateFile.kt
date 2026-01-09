@@ -108,7 +108,8 @@ class FragmentCreateFile : Fragment() {
                             .setPositiveButton(
                                 "Si"
                             ) { _, _ ->
-                                viewModel.advanceToNextQuestion()
+                                viewModel.updateLastQuestion()
+                                viewModel.nextQuestion()
                             }
                             .setNegativeButton(
                                 "Cancelar"
