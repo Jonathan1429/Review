@@ -7,7 +7,6 @@ import com.jonathanev.review.domain.LoadGuidesUseCase
 import com.jonathanev.review.domain.RenameGuideUseCase
 import com.jonathanev.review.domain.ReubicarImagenesUseCase
 import com.jonathanev.review.domain.SaveMetadataUseCase
-import com.jonathanev.review.domain.SetCurrentPathUseCase
 import com.jonathanev.review.domain.ValidateCreateFileUseCase
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.presentation.event.UIStopEvent
@@ -34,7 +33,6 @@ class CreateFilesViewModel @Inject constructor(
     private val reubicarImagenesUseCase: ReubicarImagenesUseCase,
     private val renameGuideUseCase: RenameGuideUseCase,
     private val validateCreateFileUseCase: ValidateCreateFileUseCase,
-    private val setCurrentPathUseCase: SetCurrentPathUseCase,
     private val saveMetadataUseCase: SaveMetadataUseCase,
     private val loadGuidesUseCase: LoadGuidesUseCase,
     private val backPathUseCase: BackPathUseCase
@@ -163,8 +161,6 @@ class CreateFilesViewModel @Inject constructor(
                 _eventsMessages.emit(
                     UIStopEvent.GuideRenamedSuccess("Se ha renombrado el archivo con exito")
                 )
-
-                setCurrentPathUseCase.invoke()
             }
         } else {
             viewModelScope.launch {

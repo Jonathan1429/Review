@@ -22,8 +22,9 @@ import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.QAType
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
+import com.jonathanev.review.domain.repository.ImagesRepository
 import com.jonathanev.review.domain.repository.NavigationPathRepository
-import com.jonathanev.review.domain.repository.PathProvider
+import com.jonathanev.review.presentation.event.UIStopEvent
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.NodeList
@@ -48,26 +49,26 @@ class GuiaRepositoryImpl @Inject constructor(
     private val setSubstringPathUseCase: SetSubstringPathUseCase,
     private val xmlSerializerFactory: XmlSerializerFactory,
     private val fileOutputStreamFactory: FileOutputStreamFactory,
-    private val pathProvider: PathProvider,
     private val navigationPathRepository: NavigationPathRepository,
-    private val filePathsProvider: FilePathsProvider
+    private val filePathsProvider: FilePathsProvider,
+    private val imagesRepository: ImagesRepository
 ) : GuiaRepository {
     private var _guidesRecovery = emptyList<GuideXmlModel>()
     override val guidesRecovery: List<GuideXmlModel>
         get() = _guidesRecovery
 
     override fun getNumGuides(): Int {
-        return navigationPathRepository.currentPath.listFiles()?.size ?: 0
+        return navigationPathRepository.currentPathGuides.listFiles()?.size ?: 0
     }
 
     override fun getGuides(): List<GuideXmlModel> {
-        val listFiles = navigationPathRepository.currentPath.listFiles()
+        val listFiles = navigationPathRepository.currentPathGuides.listFiles()
             ?.filter { file ->
                 file.isFile &&
                         file.extension == Extensions.XML_EXTENSION
             } ?: emptyList()
 
-        val listFromFolders = navigationPathRepository.currentPath
+        val listFromFolders = navigationPathRepository.currentPathGuides
             .listFiles()
             ?.filter { it.isDirectory }?.map { folder ->
                 folder.listFiles()?.find { file ->
@@ -83,25 +84,6 @@ class GuiaRepositoryImpl @Inject constructor(
         return resultGuides
     }
 
-    /*private fun getGuidesFromFolder(folderId: String): List<GuideXmlModel> {
-        val context = GuidePathContext(
-            version = VERSION1,
-            guideName = folderId,
-            target = GuidePathTarget.GUIDES,
-        )
-
-        val pathFiles = pathProvider.resolveGuidePath(context)
-
-        return pathFiles.listFiles()
-            ?.filter { !it.name.endsWith(".json") }
-            ?.mapNotNull { item ->
-                runCatching {
-                    getAttributesGuide(item)
-                }.getOrNull()
-            }
-            ?: emptyList()
-    }*/
-
     override fun renameGuide(
         fileName: String,
         description: String,
@@ -109,8 +91,8 @@ class GuiaRepositoryImpl @Inject constructor(
         respuestas: List<QuestionItemDomain>,
         attributesGuide: GuideDomainModel
     ): Boolean {
-        val currentPath = filePathsProvider.buildFolderFile(
-            navigationPathRepository.currentPath,
+        val currentPath = filePathsProvider.buildFolderGuide(
+            navigationPathRepository.currentPathGuides,
             attributesGuide.nameGuide,
             attributesGuide.nameGuide
         )
@@ -153,8 +135,8 @@ class GuiaRepositoryImpl @Inject constructor(
             }
 
             if (attributesGuide.version == Versions.VERSION1) {
-                val pathV1 = filePathsProvider.buildFile(
-                    navigationPathRepository.currentPath,
+                val pathV1 = filePathsProvider.buildGuide(
+                    navigationPathRepository.currentPathGuides,
                     fileName
                 )
 
@@ -174,17 +156,11 @@ class GuiaRepositoryImpl @Inject constructor(
         preguntas: List<QuestionItemDomain>,
         respuestas: List<QuestionItemDomain>,
     ): Boolean {
-        val currentPath = filePathsProvider.buildFolderFile(
-            navigationPathRepository.currentPath,
+        val currentPath = filePathsProvider.buildFolderGuide(
+            navigationPathRepository.currentPathGuides,
             nameGuide,
             nameGuide
         )
-        /*val parentDir = currentPath.parent
-
-        val newFile = File(
-            /* parent = */ parentDir,
-            /* child = */ "${nameGuide}.xml"
-        )*/
 
         val tempFile = File("$currentPath.tmp")
 
@@ -224,8 +200,8 @@ class GuiaRepositoryImpl @Inject constructor(
             }
 
             if (version == Versions.VERSION1) {
-                val pathV1 = filePathsProvider.buildFile(
-                    navigationPathRepository.currentPath,
+                val pathV1 = filePathsProvider.buildGuide(
+                    navigationPathRepository.currentPathGuides,
                     nameGuide
                 )
 
@@ -235,6 +211,30 @@ class GuiaRepositoryImpl @Inject constructor(
             true
         } catch (e: Exception) {
             false
+        }
+    }
+
+    override fun deleteGuide(
+        guideDomainModel: GuideDomainModel,
+        listImages: List<QuestionContentDomain.Image>
+    ): UIStopEvent {
+        val pathGuide = if (guideDomainModel.version == Versions.VERSION1) {
+            filePathsProvider.buildGuide(
+                navigationPathRepository.currentPathGuides,
+                guideDomainModel.nameGuide
+            )
+        } else {
+            filePathsProvider.buildFolder(
+                navigationPathRepository.currentPathGuides,
+                guideDomainModel.nameGuide
+            ) // Borrar desde la carpeta
+        }
+
+        return if (pathGuide.deleteRecursively()) {
+            imagesRepository.deleteImages(guideDomainModel, listImages)
+            UIStopEvent.DeleteGuideSuccess("Guia eliminada correctamente")
+        } else {
+            UIStopEvent.ShowMessage("No se pudo eliminar la guia")
         }
     }
 
@@ -272,8 +272,8 @@ class GuiaRepositoryImpl @Inject constructor(
     }
 
     private fun obtenerDatosXMLV2(guideDomainModel: GuideDomainModel?): List<QAItemXml> {
-        val currentPath = filePathsProvider.buildFolderFile(
-            navigationPathRepository.currentPath,
+        val currentPath = filePathsProvider.buildFolderGuide(
+            navigationPathRepository.currentPathGuides,
             guideDomainModel!!.nameGuide,
             guideDomainModel.nameGuide
         )
@@ -362,8 +362,8 @@ class GuiaRepositoryImpl @Inject constructor(
 
         try {
             val db = dbf.newDocumentBuilder()
-            val currentPath = filePathsProvider.buildFile(
-                navigationPathRepository.currentPath,
+            val currentPath = filePathsProvider.buildGuide(
+                navigationPathRepository.currentPathGuides,
                 guideDomainModel!!.nameGuide
             )
             val doc = db.parse(currentPath)
@@ -471,7 +471,8 @@ class GuiaRepositoryImpl @Inject constructor(
             .getElementsByTagName(Structure.GUIAESTUDIO)
             .item(0) as Element
 
-        val name = cuestionarioNode.getAttribute(Attributes.NOMBREGUIA).replace(Extensions.POINT_XML_EXTENSION, "")
+        val name = cuestionarioNode.getAttribute(Attributes.NOMBREGUIA)
+            .replace(Extensions.POINT_XML_EXTENSION, "")
         val description = cuestionarioNode.getAttribute(Attributes.DESCRIPCION)
         val version = guiaEstudioNode.getAttribute(Attributes.VERSION)
 

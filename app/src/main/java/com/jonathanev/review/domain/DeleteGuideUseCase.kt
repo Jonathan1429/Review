@@ -1,6 +1,7 @@
 package com.jonathanev.review.domain
 
 import com.jonathanev.review.data.GuiaRepository
+import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.presentation.event.UIStopEvent
 import java.io.File
@@ -8,16 +9,8 @@ import javax.inject.Inject
 
 class DeleteGuideUseCase @Inject constructor(
     private val guiaRepository: GuiaRepository,
-    private val deleteImagesFromGuideUseCase: DeleteImagesFromGuideUseCase
 ) {
-    operator fun invoke(currentGuide: File, listImages: List<QuestionContentDomain.Image>) {
-        /*val version = guiaRepository.getVersion(nameGuide)
-
-        return if (currentGuide.delete()){
-            deleteImagesFromGuideUseCase.invoke(version, currentGuide, listImages)
-            UIStopEvent.DeleteGuideSuccess("Guia eliminada correctamente")
-        } else {
-            UIStopEvent.ShowMessage("No se pudo eliminar la guia")
-        }*/
+    operator fun invoke(guideDomainModel: GuideDomainModel, listImages: List<QuestionContentDomain.Image>): UIStopEvent {
+        return guiaRepository.deleteGuide(guideDomainModel, listImages)
     }
 }

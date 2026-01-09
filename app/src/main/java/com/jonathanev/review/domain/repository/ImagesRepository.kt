@@ -12,4 +12,8 @@ interface ImagesRepository {
         respuestas: List<QuestionItemDomain>,
         attributesGuide: GuideDomainModel
     )
+    fun deleteImages(
+        guideDomainModel: GuideDomainModel,
+        listImages: List<QuestionContentDomain.Image>
+    )
 }

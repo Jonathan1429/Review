@@ -3,7 +3,8 @@ package com.jonathanev.review.domain.repository
 import java.io.File
 
 interface NavigationPathRepository {
-    val currentPath: File
+    val currentPathGuides: File
+    val currentPathImages: File
 
     fun next(fileName: String)
     fun back()

@@ -1,13 +1,11 @@
 package com.jonathanev.review.domain
 
-import com.jonathanev.review.data.Extensions
 import com.jonathanev.review.data.provider.FilePathsProvider
 import com.jonathanev.review.data.xml.Versions
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
 import com.jonathanev.review.domain.repository.NavigationPathRepository
-import com.jonathanev.review.domain.repository.PathProvider
 import javax.inject.Inject
 
 class UpdateImagesUseCase @Inject constructor(
@@ -43,7 +41,8 @@ class UpdateImagesUseCase @Inject constructor(
 
             // Add new Images.
             val currentPath =
-                filePathsProvider.buildImage(navigationPathRepository.currentPath, guide.nameGuide)
+                filePathsProvider.buildFolder(navigationPathRepository.currentPathGuides, guide.nameGuide)
+
             val currentDeviceNames =
                 currentPath.listFiles()?.map { it.name }?.toSet() ?: emptySet()
 

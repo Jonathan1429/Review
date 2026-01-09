@@ -1,11 +1,9 @@
 package com.jonathanev.review.domain
 
-import com.jonathanev.review.domain.repository.PathProvider
 import com.jonathanev.review.domain.model.PreviewQuestionDomain
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QAItemDomain
 import com.jonathanev.review.domain.model.ResponseDomain
-import com.jonathanev.review.domain.repository.FileExplorerRepository
 import com.jonathanev.review.domain.repository.NavigationPathRepository
 import javax.inject.Inject
 
@@ -17,7 +15,7 @@ class GetPreviewQuestionsUseCase @Inject constructor(
         domainItems: List<QAItemDomain>
     ): MutableList<PreviewQuestionDomain> {
         val previewQuestionDomain = mutableListOf<PreviewQuestionDomain>()
-        val currentPath = navigationPathRepository.currentPath.path
+        val currentPath = navigationPathRepository.currentPathGuides.path
 
         domainItems.forEach { domainItem ->
             var primerTextoPregunta: QuestionContentDomain = QuestionContentDomain.None

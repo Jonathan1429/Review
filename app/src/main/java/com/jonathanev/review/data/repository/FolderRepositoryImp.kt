@@ -22,7 +22,7 @@ class FolderRepositoryImp @Inject constructor(
     private val filePathsProvider: FilePathsProvider
 ) : FolderRepository {
     private fun loadFolderAttributes(nameFolder: String): AttributesFolderJson {
-        val currentPath = filePathsProvider.buildFolder(navigationPathRepository.currentPath, nameFolder)
+        val currentPath = filePathsProvider.buildFolder(navigationPathRepository.currentPathGuides, nameFolder)
 
         val file = File(currentPath, "screen.json")
         if (!file.exists()) return defaultFolderAttributesProvider.default(nameFolder)
