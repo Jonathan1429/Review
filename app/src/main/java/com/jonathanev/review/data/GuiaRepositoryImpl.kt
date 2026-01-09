@@ -22,7 +22,6 @@ import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.QAType
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
-import com.jonathanev.review.domain.repository.FileNamingRules.XML_EXTENSION
 import com.jonathanev.review.domain.repository.NavigationPathRepository
 import com.jonathanev.review.domain.repository.PathProvider
 import org.w3c.dom.Document
@@ -65,7 +64,7 @@ class GuiaRepositoryImpl @Inject constructor(
         val listFiles = navigationPathRepository.currentPath.listFiles()
             ?.filter { file ->
                 file.isFile &&
-                        file.extension == XML_EXTENSION
+                        file.extension == Extensions.XML_EXTENSION
             } ?: emptyList()
 
         val listFromFolders = navigationPathRepository.currentPath
@@ -73,7 +72,7 @@ class GuiaRepositoryImpl @Inject constructor(
             ?.filter { it.isDirectory }?.map { folder ->
                 folder.listFiles()?.find { file ->
                     file.isFile &&
-                            file.extension == XML_EXTENSION &&
+                            file.extension == Extensions.XML_EXTENSION &&
                             file.nameWithoutExtension == (file.parentFile?.name ?: "")
                 }
             } ?: emptyList()
@@ -218,7 +217,7 @@ class GuiaRepositoryImpl @Inject constructor(
 
             fos.close()
 
-            val isRenamed = !tempFile.renameTo(currentPath)
+            val isRenamed = tempFile.renameTo(currentPath)
             if (!isRenamed) {
                 tempFile.delete()
                 return false
@@ -472,7 +471,7 @@ class GuiaRepositoryImpl @Inject constructor(
             .getElementsByTagName(Structure.GUIAESTUDIO)
             .item(0) as Element
 
-        val name = cuestionarioNode.getAttribute(Attributes.NOMBREGUIA).replace(".$XML_EXTENSION", "")
+        val name = cuestionarioNode.getAttribute(Attributes.NOMBREGUIA).replace(Extensions.POINT_XML_EXTENSION, "")
         val description = cuestionarioNode.getAttribute(Attributes.DESCRIPCION)
         val version = guiaEstudioNode.getAttribute(Attributes.VERSION)
 

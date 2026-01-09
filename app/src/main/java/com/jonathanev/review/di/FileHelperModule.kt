@@ -4,6 +4,7 @@ import com.jonathanev.review.data.provider.FilePathsProvider
 import com.jonathanev.review.data.provider.DirectoryManagerImpl
 import com.jonathanev.review.data.provider.PathProviderImpl
 import com.jonathanev.review.domain.DirectoryManager
+import com.jonathanev.review.domain.repository.ImagesRepository
 import com.jonathanev.review.domain.repository.NavigationPathRepository
 import com.jonathanev.review.domain.repository.PathProvider
 import dagger.Module
@@ -20,8 +21,10 @@ object FileHelperModule {
     @Singleton
     fun provideDirectoryManager(
         navigationPathRepository: NavigationPathRepository,
-        filePathsProvider: FilePathsProvider
-    ): DirectoryManager = DirectoryManagerImpl(navigationPathRepository, filePathsProvider)
+        filePathsProvider: FilePathsProvider,
+        imagesRepository: ImagesRepository
+    ): DirectoryManager =
+        DirectoryManagerImpl(navigationPathRepository, filePathsProvider, imagesRepository)
 
     @Provides
     @Singleton

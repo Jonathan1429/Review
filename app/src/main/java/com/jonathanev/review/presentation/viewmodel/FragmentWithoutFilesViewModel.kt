@@ -2,20 +2,10 @@ package com.jonathanev.review.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jonathanev.review.domain.GenerateTextColorRangesUseCase
-import com.jonathanev.review.domain.GetObtenerDatosXMLUseCase
-import com.jonathanev.review.domain.GetVersionUseCase
-import com.jonathanev.review.domain.MoverArchivoUseCase
-import com.jonathanev.review.domain.MoverImagenesUseCase
-import com.jonathanev.review.domain.SetMainPathUseCase
-import com.jonathanev.review.domain.repository.PathProvider
-import com.jonathanev.review.presentation.mapper.toUi
-import com.jonathanev.review.presentation.folders.model.FolderAction
 import com.jonathanev.review.data.provider.FilePathsProvider
 import com.jonathanev.review.presentation.event.UIMovingEvent
+import com.jonathanev.review.presentation.folders.model.FolderAction
 import com.jonathanev.review.presentation.model.QuestionItemUi
-import com.jonathanev.review.domain.model.ResponseDomain
-import com.jonathanev.review.presentation.mapper.toDomain
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -25,14 +15,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FragmentWithoutFilesViewModel @Inject constructor(
-    private val pathProvider: PathProvider,
     private val filePathsProvider: FilePathsProvider,
-    private val moverArchivoUseCase: MoverArchivoUseCase,
-    private val getVersionUseCase: GetVersionUseCase,
-    private val moverImagenesUseCase: MoverImagenesUseCase,
-    private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
-    private val setMainPathUseCase: SetMainPathUseCase,
-    private val generateTextColorRangesUseCase: GenerateTextColorRangesUseCase,
 ) : ViewModel() {
     private val _eventsMovingFiles = MutableSharedFlow<UIMovingEvent>()
     val eventsMovingFiles = _eventsMovingFiles.asSharedFlow()

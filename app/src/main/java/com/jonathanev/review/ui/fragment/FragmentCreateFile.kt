@@ -120,6 +120,7 @@ class FragmentCreateFile : Fragment() {
                     }
 
                     if (uiStopEvent is UIStopEvent.GuideCreatedSuccess) {
+                        viewModel.initUIState()
                         findNavController().navigate(
                             R.id.fragmentsContent,
                             null,
