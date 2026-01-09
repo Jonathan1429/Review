@@ -23,7 +23,6 @@ import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.jonathanev.review.presentation.folders.model.FolderAction
-import com.jonathanev.review.presentation.folders.model.FolderResult
 import com.jonathanev.review.presentation.event.UIMovingEvent
 import com.jonathanev.review.presentation.event.UIStopEvent
 import com.jonathanev.review.data.provider.FilePathsProvider
@@ -32,6 +31,7 @@ import com.jonathanev.review.R
 import com.jonathanev.review.presentation.folders.viewmodel.FoldersListViewModel
 import com.jonathanev.review.presentation.viewmodel.MainToolbarViewModel
 import com.jonathanev.review.databinding.FragmentListFoldersBinding
+import com.jonathanev.review.presentation.model.FolderResultUi
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -169,8 +169,8 @@ class FragmentListFolders : DialogFragment() {
 
         when (val folderResult = viewModel.getFolderSelected(position)) {
             //GuiaResult.Empty -> Log.i("Vacio", "Vacio")
-            is FolderResult.Error -> Log.i("Error", "Error")
-            is FolderResult.Success -> {
+            is FolderResultUi.Error -> Log.i("Error", "Error")
+            is FolderResultUi.Success -> {
                 val builder = AlertDialog.Builder(context)
                 builder.setIcon(R.drawable.ic_advertencia)
                 builder.setTitle("¿Qué acción deseas realizar?")
@@ -192,17 +192,16 @@ class FragmentListFolders : DialogFragment() {
 
                         1 -> {
                             // Se ejecuta cuando quiere eliminar la carpeta.
-                            Toast.makeText(requireContext(), "No está implementado eliminar una carpeta aún", Toast.LENGTH_SHORT).show()
-                            /*AlertDialog.Builder(context)
+                            AlertDialog.Builder(context)
                                 .setTitle("¡Atención!")
                                 .setMessage(
                                     "¿Estás seguro que deseas eliminar la carpeta y su contenido?"
                                 )
                                 .setPositiveButton("Si") { _, _ ->
-                                    viewModel.deleteFiles(folderResult.folder)
+                                    viewModel.deleteFiles(folderResult.folderUi.folder.name)
                                 }
                                 .setNegativeButton("Cancelar") { _, _ -> dialog.dismiss() }
-                                .create().show()*/
+                                .create().show()
                         }
 
                         2 -> {

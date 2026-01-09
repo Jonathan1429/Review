@@ -10,10 +10,8 @@ import com.jonathanev.review.domain.ResolveFolderPathUseCase
 import com.jonathanev.review.domain.model.FolderDomainModel
 import com.jonathanev.review.presentation.event.UIMovingEvent
 import com.jonathanev.review.presentation.event.UIStopEvent
-import com.jonathanev.review.presentation.folders.model.FolderResult
-import com.jonathanev.review.presentation.folders.model.FolderUiModel
-import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.presentation.mapper.toUi
+import com.jonathanev.review.presentation.model.FolderResultUi
 import com.jonathanev.review.presentation.state.FoldersUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -74,23 +72,20 @@ class FoldersListViewModel @Inject constructor(
         resolveFolderPathUseCase.invoke(folderName)
     }*/
 
-    fun getFolderSelected(position: Int): FolderResult {
-        return getFolderPosicionUseCase.invoke(position, cachedFolders)
+    fun getFolderSelected(position: Int): FolderResultUi {
+        val folderResultDomain = getFolderPosicionUseCase.invoke(position, cachedFolders)
+        return folderResultDomain.toUi()
     }
 
-    /*fun deleteFiles(folderResult: FolderUiModel) {
-        /*val message = deleteFolderUseCase.invoke(folderResult)
+    fun deleteFiles(nameFolder: String) {
+        val message = deleteFolderUseCase.invoke(nameFolder)
 
         viewModelScope.launch {
-            if (message is UIStopEvent.DeleteGuideSuccess) {
-                setCurrentPathUseCase.invoke()
-            }
-
             _eventsMessages.emit(
                 message
             )
-        }*/
-    }*/
+        }
+    }
 
     fun moveFileCancel() {
         viewModelScope.launch {

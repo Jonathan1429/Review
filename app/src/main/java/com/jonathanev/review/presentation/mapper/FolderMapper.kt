@@ -4,9 +4,11 @@ import androidx.annotation.DrawableRes
 import com.jonathanev.review.R
 import com.jonathanev.review.domain.model.FolderAttributesDomain
 import com.jonathanev.review.domain.model.FolderDomainModel
+import com.jonathanev.review.presentation.folders.model.FolderResultDomain
 import com.jonathanev.review.presentation.folders.model.FolderUiModel
 import com.jonathanev.review.presentation.model.ColorType
 import com.jonathanev.review.presentation.model.FolderAttributesUi
+import com.jonathanev.review.presentation.model.FolderResultUi
 import com.jonathanev.review.presentation.model.IconType
 
 fun FolderDomainModel.toUi(): FolderUiModel{
@@ -40,5 +42,12 @@ private fun mapDrawable(iconType: IconType): Int {
         IconType.ANCHOR_SOLID_FULL -> R.drawable.ic_anchor_solid_full
         IconType.ANGELLIST_BRANDS_SOLID_FULL -> R.drawable.ic_angellist_brands_solid_full
         IconType.BACTERIA_SOLID_FULL -> R.drawable.ic_bacteria_solid_full
+    }
+}
+
+fun FolderResultDomain.toUi(): FolderResultUi {
+    return when(this){
+        is FolderResultDomain.Error -> FolderResultUi.Error(this.message)
+        is FolderResultDomain.Success -> FolderResultUi.Success(this.folderDomain.toUi())
     }
 }

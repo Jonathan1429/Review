@@ -11,6 +11,7 @@ import com.jonathanev.review.data.provider.FilePathsProvider
 import com.jonathanev.review.domain.model.FolderDomainModel
 import com.jonathanev.review.domain.repository.FileExplorerRepository
 import com.jonathanev.review.domain.repository.NavigationPathRepository
+import com.jonathanev.review.presentation.event.UIStopEvent
 import java.io.File
 import javax.inject.Inject
 
@@ -33,6 +34,19 @@ class FolderRepositoryImp @Inject constructor(
             imgFolder = fileModel.imgFolder,
             color = fileModel.color,
         )
+    }
+
+    override fun deleteFolder(nameFolder: String): UIStopEvent {
+        val pathGuides =
+            filePathsProvider.buildFolder(navigationPathRepository.currentPath, nameFolder)
+        val pathImages = filePathsProvider.buildImage(navigationPathRepository.currentPath, nameFolder)
+
+        return if (pathGuides.deleteRecursively()){
+            pathImages.deleteRecursively()
+            UIStopEvent.DeleteFolderSuccess("Se ha borrado la carpeta correctamente")
+        } else{
+            UIStopEvent.ShowMessage("No se pudo borrar la carpeta correctamente")
+        }
     }
 
     override fun getFolders(): List<FolderDomainModel> {
