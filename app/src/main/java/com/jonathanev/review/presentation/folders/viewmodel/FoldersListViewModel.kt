@@ -6,7 +6,6 @@ import com.jonathanev.review.domain.DeleteFolderUseCase
 import com.jonathanev.review.domain.GetFolderPosicionUseCase
 import com.jonathanev.review.domain.GetFoldersWithNumGuidesUseCase
 import com.jonathanev.review.domain.NextPathUseCase
-import com.jonathanev.review.domain.ResolveFolderPathUseCase
 import com.jonathanev.review.domain.model.FolderDomainModel
 import com.jonathanev.review.presentation.event.UIMovingEvent
 import com.jonathanev.review.presentation.event.UIStopEvent
@@ -27,7 +26,6 @@ class FoldersListViewModel @Inject constructor(
     private val getFoldersWithNumGuidesUseCase: GetFoldersWithNumGuidesUseCase,
     private val deleteFolderUseCase: DeleteFolderUseCase,
     private val nextPathUseCase: NextPathUseCase,
-    private val resolveFolderPathUseCase: ResolveFolderPathUseCase,
 ) : ViewModel() {
     private var _foldersUiState = MutableStateFlow(FoldersUiState())
     val foldersUiState = _foldersUiState.asStateFlow()

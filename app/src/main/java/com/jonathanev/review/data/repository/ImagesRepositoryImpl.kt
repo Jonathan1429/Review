@@ -3,7 +3,6 @@ package com.jonathanev.review.data.repository
 import android.content.Context
 import android.net.Uri
 import com.jonathanev.review.data.provider.FilePathsProvider
-import com.jonathanev.review.data.storage.StorageFolders
 import com.jonathanev.review.data.xml.Versions
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.QuestionContentDomain
@@ -23,8 +22,10 @@ class ImagesRepositoryImpl @Inject constructor(
     private val navigationPathRepository: NavigationPathRepository
 ) : ImagesRepository {
     override suspend fun saveImage(image: QuestionContentDomain.Image, nameFolder: String) {
+        /*val currentPath =
+            filePathsProvider.buildImage(navigationPathRepository.currentPathGuides, nameFolder)*/
         val currentPath =
-            filePathsProvider.buildImage(navigationPathRepository.currentPath, nameFolder)
+            filePathsProvider.buildFolder(navigationPathRepository.currentPathImages, nameFolder)
         val uri = Uri.parse(image.uri)
         val fileName = image.nameFile
         val outputFile = File(currentPath, fileName)
@@ -36,22 +37,50 @@ class ImagesRepositoryImpl @Inject constructor(
         } ?: throw IllegalStateException("No se pudo abrir imagen")
     }
 
+    override fun deleteImages(
+        guideDomainModel: GuideDomainModel,
+        listImages: List<QuestionContentDomain.Image>
+    ) {
+
+        if (guideDomainModel.version == Versions.VERSION1) {
+            val basePathImages = navigationPathRepository.currentPathImages
+
+            //filePathsProvider.buildFolder(navigationPathRepository.currentPathImages, guideDomainModel.nameGuide)
+            listImages.forEach { image ->
+                val noImage = File(image.uri.substringAfterLast("/")).nameWithoutExtension
+                val currentPath = filePathsProvider.buildImage(basePathImages, noImage)
+                if (currentPath.exists()) {
+                    currentPath.delete()
+                }
+            }
+        } else {
+            val basePathImages = filePathsProvider.buildFolder(
+                navigationPathRepository.currentPathImages,
+                guideDomainModel.nameGuide
+            )
+
+            basePathImages.deleteRecursively()
+        }
+    }
+
     override fun reubicarImagenes(
         fileName: String,
         preguntas: List<QuestionItemDomain>,
         respuestas: List<QuestionItemDomain>,
         attributesGuide: GuideDomainModel
     ) {
-        val oldPathImages = filePathsProvider.buildImage(navigationPathRepository.currentPath, fileName)
+        /*val oldPathImages = filePathsProvider.buildImage(navigationPathRepository.currentPathGuides, fileName)*/
+        val oldPathImages =
+            filePathsProvider.buildFolder(navigationPathRepository.currentPathImages, fileName)
 
         // Renamed folder
-        if (attributesGuide.version == Versions.VERSION2){
+        if (attributesGuide.version == Versions.VERSION2) {
             val newPathImages = File(oldPathImages.parent, fileName)
             oldPathImages.renameTo(newPathImages)
         } else { // Version 1
             val newPathImages = File(oldPathImages.parent, fileName)
 
-            if (newPathImages.exists()){
+            if (newPathImages.exists()) {
                 newPathImages.mkdir()
             }
 
@@ -61,13 +90,13 @@ class ImagesRepositoryImpl @Inject constructor(
 
             listImages.forEach { image ->
                 val source = File(image.uri)
-                if (source.exists()){
-                    val noImage = image.uri.substringAfterLast("/")
-                    val newPathFile = filePathsProvider.buildImage(newPathImages, noImage)
+                if (source.exists()) {
+                    val noImage = File(image.uri.substringAfterLast("/")).nameWithoutExtension
+                    val newPathImage = filePathsProvider.buildImage(newPathImages, noImage)
 
                     Files.move(
                         Paths.get(image.uri),
-                        Paths.get(newPathFile.path),
+                        Paths.get(newPathImage.path),
                         StandardCopyOption.REPLACE_EXISTING
                     )
                 }

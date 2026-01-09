@@ -9,6 +9,6 @@ class FileExplorerRepositoryImpl @Inject constructor(
     private val navigationPathRepository: NavigationPathRepository
 ) : FileExplorerRepository {
     override fun listCurrent(): List<File> {
-        return navigationPathRepository.currentPath.listFiles()?.toList() ?: emptyList()
+        return navigationPathRepository.currentPathGuides.listFiles()?.toList() ?: emptyList()
     }
 }

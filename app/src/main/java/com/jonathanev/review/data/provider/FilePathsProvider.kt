@@ -23,11 +23,17 @@ class FilePathsProvider @Inject constructor(
     val fileImages: File = File("$basePath/${StorageFolders.IMAGENES}")
     val fileImagesPiv: File = File("$basePath/${StorageFolders.IMAGENESPIVOTE}")
 
-    fun buildFile(base: File, nombreArchivo: String): File {
-        return File("$base/$nombreArchivo.xml")
+    fun buildGuide(base: File, nombreArchivo: String): File {
+        val file = FileNamingRules.buildXmlFileName(nombreArchivo)
+        return File("$base/$file")
     }
 
-    fun buildFolderFile(base: File, folder: String, nombreArchivo: String): File {
+    fun buildImage(base: File, image: String): File {
+        val file = FileNamingRules.buildPngFileName(image)
+        return File("$base/$file")
+    }
+
+    fun buildFolderGuide(base: File, folder: String, nombreArchivo: String): File {
         val file = FileNamingRules.buildXmlFileName(nombreArchivo)
         return File("$base/$folder/$file")
     }
@@ -36,10 +42,10 @@ class FilePathsProvider @Inject constructor(
         return File("$base/$folder")
     }
 
-    fun buildImage(base: File, image: String): File{
+    /*fun buildImage(base: File, image: String): File{
         val pathImages = base.path.replace(StorageFolders.GUIAS, StorageFolders.IMAGENES)
         return File("$pathImages/$image")
-    }
+    }*/
 
     fun beforePath(base: File): File {
         val beforePath = File(base.path.substringBeforeLast("/"))

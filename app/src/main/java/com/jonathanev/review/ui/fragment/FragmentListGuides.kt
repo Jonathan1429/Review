@@ -121,7 +121,7 @@ class FragmentListGuides : Fragment() {
 
                     if (event is UIStopEvent.DeleteGuideSuccess) {
                         Toast.makeText(context, event.text, Toast.LENGTH_SHORT).show()
-
+                        viewModel.resetPaths()
                         findNavController().navigate(
                             R.id.fragmentsContent,
                             null,
@@ -236,24 +236,18 @@ class FragmentListGuides : Fragment() {
                         }
 
                         1 ->
-
-                            Toast.makeText(
-                                requireContext(),
-                                "No se pueden eliminar archivos aún",
-                                Toast.LENGTH_SHORT
-                            ).show()
                         // Se ejecuta cuando quiere eliminar la guía.
-                        /*AlertDialog.Builder(context)
+                        AlertDialog.Builder(context)
                             .setTitle("¡Atención!")
                             .setMessage(
                                 "¿Estás seguro que deseas eliminar la" +
                                         " guia?"
                             )
                             .setPositiveButton("Si") { _, _ ->
-                                //viewModel.deleteFiles(guideResult.guideUiModel.nameGuide)
+                                viewModel.deleteFiles(guideResult.guideUiModel.nameGuide)
                             }
                             .setNegativeButton("Cancelar") { _, _ -> dialog.dismiss() }
-                            .create().show()*/
+                            .create().show()
 
                         2 -> {
                             findNavController().navigate(

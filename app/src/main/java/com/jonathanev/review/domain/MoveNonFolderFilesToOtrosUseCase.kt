@@ -1,12 +1,9 @@
 package com.jonathanev.review.domain
 
 import com.jonathanev.review.data.provider.FilePathsProvider
-import com.jonathanev.review.domain.repository.PathProvider
-import java.io.File
 import javax.inject.Inject
 
 class MoveNonFolderFilesToOtrosUseCase @Inject constructor(
-    private val pathProvider: PathProvider,
     private val filePathsProvider: FilePathsProvider
 ) {
     operator fun invoke() {

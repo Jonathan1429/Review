@@ -5,11 +5,14 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.domain.BackPathUseCase
+import com.jonathanev.review.domain.DeleteGuideUseCase
 import com.jonathanev.review.domain.GetGuidePosicionUseCase
-import com.jonathanev.review.domain.GoPreviewFileUseCase
+import com.jonathanev.review.domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.domain.LoadGuidesUseCase
 import com.jonathanev.review.domain.SetMainPathUseCase
 import com.jonathanev.review.domain.model.GuideDomainModel
+import com.jonathanev.review.domain.model.QuestionContentDomain
+import com.jonathanev.review.domain.model.ResponseDomain
 import com.jonathanev.review.presentation.event.UIMovingEvent
 import com.jonathanev.review.presentation.event.UIStopEvent
 import com.jonathanev.review.presentation.files.model.GuideResultUi
@@ -29,8 +32,9 @@ class FragmentListGuidesViewModel @Inject constructor(
     private val loadGuidesUseCase: LoadGuidesUseCase,
     private val getGuidePosicionUseCase: GetGuidePosicionUseCase,
     private val setMainPathUseCase: SetMainPathUseCase,
-    private val goPreviewFileUseCase: GoPreviewFileUseCase,
-    private val backPathUseCase: BackPathUseCase
+    private val backPathUseCase: BackPathUseCase,
+    private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
+    private val deleteGuideUseCase: DeleteGuideUseCase
 ) : ViewModel() {
     private var cachedGuides: List<GuideDomainModel> = emptyList()
     private val _guides = MutableLiveData<List<GuideUiModel>>()
@@ -68,29 +72,31 @@ class FragmentListGuidesViewModel @Inject constructor(
         getAllGuides(folderId)
     }*/
 
-    fun openFilePath(nameGuide: String) {
-        goPreviewFileUseCase.invoke(cachedGuides, nameGuide)
-    }
-
     fun deleteFiles(nameGuide: String) {
+        val guideDomainModel = cachedGuides.find { it.nameGuide == nameGuide }
+        val datos = getObtenerDatosXMLUseCase.invoke(guideDomainModel)
+
+        val tempQuestions =
+            datos.mapNotNull { (it.question as? ResponseDomain.Filled)?.item }.toList()
+        val tempAnswers =
+            datos.mapNotNull { (it.answer as? ResponseDomain.Filled)?.item }.toList()
+
+        val listImages = (tempQuestions + tempAnswers).flatMap { it.content }
+            .filterIsInstance<QuestionContentDomain.Image>()
         /*val currentGuide = changeGuidePathBuildFileUseCase.invoke(nameGuide)
         //getObtenerDatosXML(File(currentGuide))
 
         val listImages = (preguntas + respuestas)
             .flatMap { it.content }
-            .filterIsInstance<QuestionContentDomain.Image>()
+            .filterIsInstance<QuestionContentDomain.Image>()*/
 
-        val message = deleteGuideUseCase.invoke(File(currentGuide), listImages)
+        val message = deleteGuideUseCase.invoke(guideDomainModel!!, listImages)
 
         viewModelScope.launch {
-            /*if (message is UIStopEvent.DeleteGuideSuccess) {
-                pathProvider.setCurrentPath(filePathsProvider.fileGuides.path)
-            }*/
-
             _eventsMessages.emit(
                 message
             )
-        }*/
+        }
     }
 
     private fun getObtenerDatosXML(currentGuide: File) {
@@ -158,5 +164,9 @@ class FragmentListGuidesViewModel @Inject constructor(
 
     fun back() {
         backPathUseCase.invoke()
+    }
+
+    fun resetPaths() {
+        setMainPathUseCase.invoke()
     }
 }
