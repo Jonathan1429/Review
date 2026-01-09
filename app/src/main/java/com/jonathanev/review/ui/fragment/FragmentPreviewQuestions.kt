@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -43,6 +44,7 @@ class FragmentPreviewQuestions : Fragment() {
         ) ?: ""
 
         initUI(folderId)
+        initListeners(folderId)
 
         val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -66,11 +68,27 @@ class FragmentPreviewQuestions : Fragment() {
         }
     }
 
+    private fun initListeners(folderId: String) {
+        binding.btnAddQuestion.setOnClickListener {
+            Toast.makeText(
+                requireContext(),
+                "Ya puedes agregar más preguntas",
+                Toast.LENGTH_SHORT
+            ).show()
+
+            findNavController().navigate(
+                R.id.action_to_create_graph,
+                bundleOf("actionGuide" to ActionGuide.EDIT(folderId, -1))
+            )
+        }
+    }
+
     private fun initUI(folderId: String) {
         adaptListPreviewQuestion = ListPreviewQuestionsAdapter(
             clickedPlay = { position -> goReview(position) },
             clickedEdit = { position -> goEdit(position, folderId) })
-        binding.reciclerPreviewQuestions.layoutManager = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+        binding.reciclerPreviewQuestions.layoutManager =
+            LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         binding.reciclerPreviewQuestions.setHasFixedSize(true)
         binding.reciclerPreviewQuestions.adapter = adaptListPreviewQuestion
 

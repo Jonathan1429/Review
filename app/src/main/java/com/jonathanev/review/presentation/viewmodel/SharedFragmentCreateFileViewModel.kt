@@ -376,8 +376,13 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             return
         }
 
-        val isLastQuestion =
-            currentState.contadorPregunta + 1 >= currentState.respuestas.size
+        var isLastQuestion = false
+        /*val isLastQuestion =
+            currentState.contadorPregunta + 1 == currentState.respuestas.size*/
+        if (currentState.isLastQuestion == null) {
+            isLastQuestion =
+                currentState.contadorPregunta + 1 == currentState.respuestas.size
+        }
 
         if (isLastQuestion) {
             viewModelScope.launch {
@@ -386,17 +391,13 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             return
         }
 
-        advanceToNextQuestion()
-    }
-
-    fun advanceToNextQuestion() {
         _uiState.update { state ->
             state.copy(
                 contadorPregunta = state.contadorPregunta + 1,
                 typeContent = TypeContent.QUESTION, // Siempre volvemos a QUESTION al avanzar
                 actualUri = null,           // resetContentLists integrado
                 isEditing = false,
-                contadorContenido = -1
+                contadorContenido = -1,
             )
         }
     }
@@ -426,10 +427,15 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
             _uiState.update { state ->
                 state.copy(
-                    contadorPregunta = positionContent,
+                    contadorPregunta = if (positionContent == -1) {
+                        answersDomain.size
+                    } else {
+                        positionContent
+                    },
                     typeContent = TypeContent.QUESTION,
                     preguntas = newQuestionsToUi,
                     respuestas = newAnswersToUi,
+                    isLastQuestion = if (positionContent == -1) false else null
                 )
             }
         }
@@ -638,4 +644,9 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         .getDontAskDelete()
         .first()
 
+    fun updateLastQuestion() {
+        _uiState.update { state ->
+            state.copy(isLastQuestion = false)
+        }
+    }
 }
