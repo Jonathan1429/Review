@@ -38,8 +38,8 @@ class FolderRepositoryImp @Inject constructor(
 
     override fun deleteFolder(nameFolder: String): UIStopEvent {
         val pathGuides =
-            filePathsProvider.buildFolder(navigationPathRepository.currentPath, nameFolder)
-        val pathImages = filePathsProvider.buildImage(navigationPathRepository.currentPath, nameFolder)
+            filePathsProvider.buildFolder(navigationPathRepository.currentPathGuides, nameFolder)
+        val pathImages = filePathsProvider.buildImage(navigationPathRepository.currentPathImages, nameFolder)
 
         return if (pathGuides.deleteRecursively()){
             pathImages.deleteRecursively()
