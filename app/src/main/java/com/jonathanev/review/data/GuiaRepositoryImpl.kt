@@ -10,6 +10,7 @@ import com.jonathanev.review.data.model.QuestionContentXml
 import com.jonathanev.review.data.model.QuestionItemXml
 import com.jonathanev.review.data.model.ResponseXml
 import com.jonathanev.review.data.provider.FilePathsProvider
+import com.jonathanev.review.data.storage.StorageFolders
 import com.jonathanev.review.data.xml.Attributes
 import com.jonathanev.review.data.xml.Structure
 import com.jonathanev.review.data.xml.Versions
@@ -268,6 +269,27 @@ class GuiaRepositoryImpl @Inject constructor(
             }
 
             serializer.endTag("", type)
+        }
+    }
+
+    override fun moveGuides() {
+        val currentPath = navigationPathRepository.currentPathGuides
+
+        val guidesInDivice = currentPath.listFiles()
+            ?.filter { it.isFile && it.extension == Extensions.XML_EXTENSION } ?: emptyList()
+
+        if (guidesInDivice.isNotEmpty()) {
+            val otrosDir = File(currentPath, StorageFolders.OTROS)
+            if (!otrosDir.exists()) {
+                otrosDir.mkdir()
+            }
+
+            guidesInDivice.forEach { file ->
+                val newPath = File(otrosDir, file.name)
+                file.renameTo(newPath)
+            }
+
+            imagesRepository.movingImagesToOtros()
         }
     }
 

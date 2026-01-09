@@ -6,4 +6,5 @@ object StorageFolders {
     const val IMAGENESPIVOTE = "imagenesPivote"
     const val PRINCIPAL = "Principal"
     const val DATASTORE = "datastore"
+    const val OTROS = "Otros"
 }

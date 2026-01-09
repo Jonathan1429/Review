@@ -36,4 +36,6 @@ interface GuiaRepository {
         guideDomainModel: GuideDomainModel,
         listImages: List<QuestionContentDomain.Image>
     ): UIStopEvent
+
+    fun moveGuides()
 }

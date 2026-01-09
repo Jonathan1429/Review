@@ -19,13 +19,9 @@ class MainActivityViewModel @Inject constructor(
     private val _shouldRequestPermission = MutableLiveData<Boolean>()
     val shouldRequestPermission: LiveData<Boolean> get() = _shouldRequestPermission
 
-    private var _foldersUiState = MutableLiveData(FoldersUiState())
-    val foldersUiState: LiveData<FoldersUiState> get() = _foldersUiState
-
-    fun getAllFolders() {
+    fun movingFilesToOtros() {
         viewModelScope.launch {
             moveNonFolderFilesToOtrosUseCase.invoke()
-            //getAllFoldersUseCase.invoke()
         }
     }
 
@@ -36,12 +32,4 @@ class MainActivityViewModel @Inject constructor(
             _shouldRequestPermission.value = true
         }
     }
-
-    /*fun setCurrentPath() {
-        pathProvider.setCurrentPath(filePathsProvider.fileGuides.toString())
-    }
-
-    fun getCurrentPath(): String {
-        return pathProvider.getCurrentPath()
-    }*/
 }
