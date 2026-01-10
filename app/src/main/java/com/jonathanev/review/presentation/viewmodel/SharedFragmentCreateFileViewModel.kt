@@ -61,13 +61,6 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     private val _uiStopEvent = MutableSharedFlow<UIStopEvent>()
     val uiStopEvent = _uiStopEvent.asSharedFlow()
 
-    val dontAskDelete = dataStoreManager.getDontAskDelete()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = false
-        )
-
     val imageList: StateFlow<List<QuestionContentUi.Image>> = _uiState
         .map { state ->
             val currentSource =
