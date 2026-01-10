@@ -16,4 +16,5 @@ interface ImagesRepository {
         guideDomainModel: GuideDomainModel,
         listImages: List<QuestionContentDomain.Image>
     )
+    fun movingImagesToOtros()
 }

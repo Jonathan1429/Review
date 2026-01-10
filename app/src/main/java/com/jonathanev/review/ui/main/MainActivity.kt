@@ -98,7 +98,7 @@ class MainActivity : AppCompatActivity() {
         val foldersCreated = foldersGuides()
 
         if (foldersCreated) {
-            viewModel.getAllFolders()
+            viewModel.movingFilesToOtros()
         }
     }
 

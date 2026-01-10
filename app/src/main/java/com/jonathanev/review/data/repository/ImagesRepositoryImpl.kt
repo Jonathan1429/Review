@@ -2,7 +2,9 @@ package com.jonathanev.review.data.repository
 
 import android.content.Context
 import android.net.Uri
+import com.jonathanev.review.data.Extensions
 import com.jonathanev.review.data.provider.FilePathsProvider
+import com.jonathanev.review.data.storage.StorageFolders
 import com.jonathanev.review.data.xml.Versions
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.QuestionContentDomain
@@ -35,6 +37,27 @@ class ImagesRepositoryImpl @Inject constructor(
                 input.copyTo(output)
             }
         } ?: throw IllegalStateException("No se pudo abrir imagen")
+    }
+
+    override fun movingImagesToOtros() {
+        val currentPathImages = navigationPathRepository.currentPathImages
+        val images = currentPathImages.listFiles()
+            ?.filter { it.isFile && it.extension == Extensions.PNG_EXTENSION}
+            ?: emptyList()
+
+        if (images.isNotEmpty()){
+            val pathImageOtros = File(navigationPathRepository.currentPathImages, StorageFolders.OTROS)
+
+            if (!pathImageOtros.exists()) {
+                pathImageOtros.mkdir()
+            }
+
+            // Mover cada archivo imagen
+            images.forEach { file ->
+                val newPath = File(pathImageOtros, file.name)
+                file.renameTo(newPath)
+            }
+        }
     }
 
     override fun deleteImages(
