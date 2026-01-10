@@ -28,7 +28,7 @@ class FragmentMain : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.btnAddQuestion.setOnClickListener {
+        binding.btnCrearCarpeta.setOnClickListener {
             findNavController().navigate(
                 R.id.action_to_create_graph,
                 bundleOf("mode" to FolderAction.CreatingFolder)

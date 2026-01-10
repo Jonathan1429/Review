@@ -69,7 +69,7 @@ class FragmentPreviewQuestions : Fragment() {
     }
 
     private fun initListeners(folderId: String) {
-        binding.btnAddQuestion.setOnClickListener {
+        binding.btnAddQuestions.setOnClickListener {
             Toast.makeText(
                 requireContext(),
                 "Ya puedes agregar más preguntas",

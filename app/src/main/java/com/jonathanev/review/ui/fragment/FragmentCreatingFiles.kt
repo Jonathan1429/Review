@@ -31,7 +31,6 @@ import com.jonathanev.review.ui.adapter.ListarIconosAdapter
 import com.jonathanev.review.R
 import com.jonathanev.review.presentation.files.viewmodel.CreateFilesViewModel
 import com.jonathanev.review.databinding.FragmentCreateFilesBinding
-import com.jonathanev.review.presentation.model.IconType
 import com.jonathanev.review.ui.mapper.toInt
 import com.skydoves.colorpickerview.flag.BubbleFlag
 import com.skydoves.colorpickerview.flag.FlagMode
@@ -195,7 +194,10 @@ class FragmentCreatingFiles : Fragment() {
             }
 
             FolderAction.RenamingFolder -> showFolderUI()
-            FolderAction.CreatingFile -> showFileUI()
+            FolderAction.CreatingFile -> {
+                showFileUI()
+                viewModel.uploadCachedGuides()
+            }
             FolderAction.None -> Log.e("Error", "No se pudieron cargar datos iniciales")
             is FolderAction.MovingFile -> Log.i("Moviendo: ", "Moviendo archivos a ${mode.pathFile.path}")
         }
@@ -206,19 +208,19 @@ class FragmentCreatingFiles : Fragment() {
             viewModel.setColor(color)
         })
 
-        binding.btnAddQuestion.setOnClickListener {
-            val name = binding.fragmentCreate.etNombre.text.toString()
+        binding.btnAplicar.setOnClickListener {
+            val name = binding.fragmentCreate.etNombre.text.toString().trim()
             val description =
-                binding.fragmentCreate.fragmentComponentsFile.etDescription.text.toString()
+                binding.fragmentCreate.fragmentComponentsFile.etDescription.text.toString().trim()
 
             prepareScreenData(mode, name, description)
         }
     }
 
     private fun prepareScreenData(mode: FolderAction, name: String, description: String) {
-        val existGuideDomainModel = viewModel.fileExist(name)
+        val isExistFile = viewModel.fileExist(mode, name)
 
-        if (existGuideDomainModel == null) {
+        if (!isExistFile) {
             viewModel.processScreenData(name, description)
             return
         }

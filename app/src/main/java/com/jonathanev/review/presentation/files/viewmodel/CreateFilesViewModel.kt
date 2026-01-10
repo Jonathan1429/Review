@@ -3,6 +3,7 @@ package com.jonathanev.review.presentation.files.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.domain.BackPathUseCase
+import com.jonathanev.review.domain.IsExistFileUseCase
 import com.jonathanev.review.domain.LoadGuidesUseCase
 import com.jonathanev.review.domain.RenameGuideUseCase
 import com.jonathanev.review.domain.ReubicarImagenesUseCase
@@ -35,7 +36,8 @@ class CreateFilesViewModel @Inject constructor(
     private val validateCreateFileUseCase: ValidateCreateFileUseCase,
     private val saveMetadataUseCase: SaveMetadataUseCase,
     private val loadGuidesUseCase: LoadGuidesUseCase,
-    private val backPathUseCase: BackPathUseCase
+    private val backPathUseCase: BackPathUseCase,
+    private val isExistFileUseCase: IsExistFileUseCase
 ) : ViewModel() {
     private var cachedGuides: List<GuideDomainModel> = emptyList()
     private var attributesGuide: GuideDomainModel? = null
@@ -172,9 +174,8 @@ class CreateFilesViewModel @Inject constructor(
         }
     }
 
-    fun fileExist(name: String): GuideUiModel? {
-        val guideDomainModel = cachedGuides.find { it.nameGuide == name }
-        return guideDomainModel?.toUi()
+    fun fileExist(mode: FolderAction, name: String): Boolean {
+        return isExistFileUseCase.invoke(mode, cachedGuides, name)
     }
 
     fun onContinueProcess(confirmed: Boolean, name: String, description: String) {

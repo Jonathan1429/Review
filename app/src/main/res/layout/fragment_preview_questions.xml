@@ -26,10 +26,10 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/lblQuestions"
-        app:layout_constraintBottom_toTopOf="@+id/btnAddQuestion"/>
+        app:layout_constraintBottom_toTopOf="@+id/btnAddQuestions"/>
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnAddQuestion"
+        android:id="@+id/btnAddQuestions"
         style="@style/btnCrearGuia"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
