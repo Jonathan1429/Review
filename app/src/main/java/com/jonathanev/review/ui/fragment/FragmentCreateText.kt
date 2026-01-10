@@ -28,8 +28,6 @@ import com.jonathanev.review.presentation.viewmodel.MainToolbarViewModel
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.presentation.model.SpanPalabraModel
 import com.jonathanev.review.domain.model.ColorRangeDomain
-import com.jonathanev.review.domain.model.QuestionContentDomain
-import com.jonathanev.review.data.media.MediaPaths
 import com.jonathanev.review.databinding.FragmentCreateTextBinding
 import com.jonathanev.review.presentation.model.ColorRangeUi
 import com.jonathanev.review.presentation.model.QuestionContentUi
@@ -44,13 +42,11 @@ class FragmentCreateText : Fragment() {
     private val sharedViewModel: SharedFragmentCreateFileViewModel by activityViewModels()
 
     private var colorActual: Int = 0
-    private var longCaracteres = 0
 
     private val viewModel: FragmentCreateTextViewModel by viewModels()
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentCreateTextBinding.inflate(inflater, container, false)
         return binding.root
@@ -61,8 +57,7 @@ class FragmentCreateText : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val data = arguments?.getParcelable(
-            "questionText",
-            QuestionContentUi.Text::class.java
+            "questionText", QuestionContentUi.Text::class.java
         ) ?: QuestionContentUi.None
 
         initUI(data)
@@ -104,8 +99,7 @@ class FragmentCreateText : Fragment() {
             is QuestionContentUi.Image -> Unit
             QuestionContentUi.None -> Unit
             is QuestionContentUi.Text -> {
-                val builder =
-                    data.toSpannable(data.text, data.colorRanges)
+                val builder = data.toSpannable(data.text, data.colorRanges)
                 binding.etPregResp.text = builder
             }
         }
@@ -137,38 +131,37 @@ class FragmentCreateText : Fragment() {
         binding.etPregResp.addTextChangedListener(object : TextWatcher {
             private var textoAnterior: String = ""
             private var seAgregoSaltoDeLinea = false
+            private var caracteresAntesDelCambio = 0
 
             override fun beforeTextChanged(
-                s: CharSequence?,
-                start: Int,
-                count: Int,
-                after: Int
+                s: CharSequence?, start: Int, count: Int, after: Int
             ) {
                 // Guarda el texto antes del cambio
                 textoAnterior = s?.toString() ?: ""
-                longCaracteres = binding.etPregResp.length()
+                caracteresAntesDelCambio = binding.etPregResp.text.toString().length
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 // Aquí puedes verificar si se ha añadido un salto de línea en este momento
                 seAgregoSaltoDeLinea =
-                    count > before && s?.subSequence(start, start + count)
-                        ?.contains("\n") == true
+                    count > before && s?.subSequence(start, start + count)?.contains("\n") == true
             }
 
             override fun afterTextChanged(texto: Editable?) {
-                if (!texto.toString()
-                        .contains(MediaPaths.BASERUTA_IMG_CIFRADO) && (binding.etPregResp.length() - longCaracteres) == 1
-                ) {
+                if ((binding.etPregResp.text.toString().length - caracteresAntesDelCambio) == 1
+                    && !seAgregoSaltoDeLinea
+                    && (colorActual != Color.WHITE)) {
                     // Si hay un salto de linea o es color negro no se pinta nada
-                    if (colorActual != -1 && !seAgregoSaltoDeLinea) {
-                        val cursorPosition = binding.etPregResp.selectionStart
-                        viewModel.setPintarLetra(
-                            texto!!,
-                            cursorPosition,
-                            colorActual
-                        )
+                    val cursorPosition = binding.etPregResp.selectionStart
+
+                    binding.etPregResp.post {
+                        texto!!.toPaintingLetters(cursorPosition, colorActual)
                     }
+                    /*viewModel.setPintarLetra(
+                        texto,
+                        cursorPosition,
+                        colorActual
+                    )*/
                 }
             }
         })
@@ -179,7 +172,7 @@ class FragmentCreateText : Fragment() {
         }
     }
 
-    fun setColor(@ColorInt color: Int?) {
+    private fun setColor(@ColorInt color: Int?) {
         if (color == null) {
             ImageViewCompat.setImageTintList(binding.imgvSelColor, null)
             return
@@ -234,9 +227,7 @@ class FragmentCreateText : Fragment() {
             if (toCleaningColors) {
                 // Obtener los spans dentro del rango especificado
                 val spansToRemove = oldEditable.getSpans(
-                    start,
-                    endAnterior,
-                    ForegroundColorSpan::class.java
+                    start, endAnterior, ForegroundColorSpan::class.java
                 )
 
                 for (span in spansToRemove) {
@@ -254,9 +245,7 @@ class FragmentCreateText : Fragment() {
             } else if (isColNuevo || (end - endAnterior) != 1) {
                 // Obtener los spans dentro del rango especificado
                 val spansToRemove = oldEditable.getSpans(
-                    start,
-                    endAnterior,
-                    ForegroundColorSpan::class.java
+                    start, endAnterior, ForegroundColorSpan::class.java
                 )
 
                 for (span in spansToRemove) {
@@ -305,16 +294,16 @@ class FragmentCreateText : Fragment() {
         val listSpans = binding.etPregResp.text!!.getSpans(
             0, editable.length, ForegroundColorSpan::class.java
         ).map { span ->
-            ColorRangeDomain(
+            ColorRangeUi(
                 start = editable.getSpanStart(span),
                 end = editable.getSpanEnd(span),
                 color = span.foregroundColor
             )
         }
 
-        val resColocarEtiquetas =
-            sharedViewModel.setColocarEtiquetas(editable.toString(), listSpans)
-        sharedViewModel.addTextContent(resColocarEtiquetas, listSpans)
+        /*val resColocarEtiquetas =
+            sharedViewModel.setColocarEtiquetas(editable.toString(), listSpans)*/
+        sharedViewModel.addTextContent(editable.toString(), listSpans)
 
         return if (isDoubleColors) {
             SpanPalabraModel(
@@ -326,19 +315,31 @@ class FragmentCreateText : Fragment() {
         }
     }
 
+    private fun Editable.toPaintingLetters(positionCursor: Int, color: Int){
+        if (positionCursor <= 0) return
+        val start = positionCursor - 1
+
+        // 1️⃣ Quitar spans de color previos en esa posición
+        getSpans(start, positionCursor, ForegroundColorSpan::class.java)
+            .forEach { removeSpan(it) }
+
+        setSpan(
+            ForegroundColorSpan(color),
+            positionCursor - 1,    // Painting color - start
+            positionCursor,        // Painting color - end
+            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+    }
+
     private fun QuestionContentUi.Text.toSpannable(
-        text: String,
-        colorRangeDomains: List<ColorRangeUi>
+        text: String, colorRangeDomains: List<ColorRangeUi>
     ): SpannableStringBuilder {
         val builder = SpannableStringBuilder(text)
 
         for (colorRange in colorRangeDomains) {
             val colorSpan = ForegroundColorSpan(colorRange.color)
             builder.setSpan(
-                colorSpan,
-                colorRange.start,
-                colorRange.end,
-                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                colorSpan, colorRange.start, colorRange.end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
             )
         }
 

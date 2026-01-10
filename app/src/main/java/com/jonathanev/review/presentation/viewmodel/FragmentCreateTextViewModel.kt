@@ -11,6 +11,6 @@ class FragmentCreateTextViewModel @Inject constructor(
     private val setPintarLetraUseCase: SetPintarLetraUseCase
 ) : ViewModel() {
     fun setPintarLetra(texto: Editable, cursorPosition: Int, colorActual: Int) {
-        setPintarLetraUseCase.invoke(texto, cursorPosition, colorActual)
+        //setPintarLetraUseCase.invoke(texto, cursorPosition, colorActual)
     }
 }

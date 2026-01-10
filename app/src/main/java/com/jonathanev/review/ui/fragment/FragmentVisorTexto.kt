@@ -43,19 +43,16 @@ class FragmentVisorTexto : Fragment() {
             is QuestionContentUi.Image -> Unit
             QuestionContentUi.None -> Unit
             is QuestionContentUi.Text -> {
-                val builder = questionContentUi.toSpannable(questionContentUi.text, questionContentUi.colorRanges)
+                val builder = questionContentUi.toSpannable()
                 binding.lblText.text = builder
             }
         }
     }
 
-    private fun QuestionContentUi.Text.toSpannable(
-        text: String,
-        colorRangeUi: List<ColorRangeUi>
-    ): SpannableStringBuilder {
-        val builder = SpannableStringBuilder(text)
+    private fun QuestionContentUi.Text.toSpannable(): SpannableStringBuilder {
+        val builder = SpannableStringBuilder(this.text)
 
-        for (colorRange in colorRangeUi) {
+        for (colorRange in this.colorRanges) {
             val colorSpan = ForegroundColorSpan(colorRange.color)
             builder.setSpan(
                 colorSpan,

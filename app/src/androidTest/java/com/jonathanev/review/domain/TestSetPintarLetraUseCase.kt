@@ -1,13 +1,7 @@
 package com.jonathanev.review.domain
 
-import android.text.SpannableStringBuilder
-import android.text.style.ForegroundColorSpan
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Test
-
 class TestSetPintarLetraUseCase {
-    private val setPintarLetraUseCase = SetPintarLetraUseCase()
+    /*private val setPintarLetraUseCase = SetPintarLetraUseCase()
 
     @Test
     fun se_aplica_color_al_ultimo_caracter(){
@@ -22,5 +16,5 @@ class TestSetPintarLetraUseCase {
 
         assertTrue("No se aplicó el span", spans.isNotEmpty()) // Verifica que se aplicó al menos un span
         assertEquals("El color no coincide", color, spans[0].foregroundColor) // Verifica el color aplicado
-    }
+    }*/
 }

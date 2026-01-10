@@ -15,7 +15,6 @@ import com.jonathanev.review.domain.SetCrearXmlUseCase
 import com.jonathanev.review.domain.SetDecodePathImageUseCase
 import com.jonathanev.review.domain.SetMainPathUseCase
 import com.jonathanev.review.domain.UpdateImagesUseCase
-import com.jonathanev.review.domain.model.ColorRangeDomain
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
@@ -24,6 +23,7 @@ import com.jonathanev.review.domain.model.TypeContent
 import com.jonathanev.review.presentation.event.UIStopEvent
 import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.presentation.mapper.toUi
+import com.jonathanev.review.presentation.model.ColorRangeUi
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.presentation.state.GuideUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -113,10 +113,6 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         _uiState.value = GuideUiState()
     }
 
-    fun setColocarEtiquetas(text: String, listSpans: List<ColorRangeDomain>): String {
-        return setColocarEtiquetasUseCase.invoke(text, listSpans)
-    }
-
     fun setEditingMode(value: Boolean, position: Int) {
         _uiState.update {
             it.copy(
@@ -126,8 +122,9 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         }
     }
 
-    fun addTextContent(textWithLabels: String, listSpans: List<ColorRangeDomain>) {
-        val newContent = QuestionContentDomain.Text(textWithLabels, listSpans)
+    fun addTextContent(textWithLabels: String, listSpans: List<ColorRangeUi>) {
+        val listSpansDomain = listSpans.map { it.toDomain() }
+        val newContent = QuestionContentDomain.Text(textWithLabels, listSpansDomain)
 
         _uiState.update { state ->
             val isQuestion = state.typeContent == TypeContent.QUESTION
@@ -543,8 +540,6 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             val preguntasDomain = uiState.value.preguntas.map { it.toDomain() }
             val respuestasDomain = uiState.value.respuestas.map { it.toDomain() }
 
-            // 2. Transformación de datos (Capa de Dominio)
-            // Obtenemos las listas con los nombres de imagen ya generados (1.png, 2.png, etc.)
             val (preguntasProcesadas, respuestasProcesadas) = setDecodePathImageUseCase.invoke(
                 preguntasDomain,
                 respuestasDomain
@@ -572,12 +567,14 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             )
 
             createFilePathUseCase.invoke(nameGuide)
+            val dataWithTags = setColocarEtiquetasUseCase.invoke(preguntasProcesadas, respuestasProcesadas)
+
             // 6. Persistencia del XML
             val isSuccess = setCrearXmlUseCase.invoke(
                 nameGuide = nameGuide,
                 description = description,
-                preguntas = preguntasProcesadas,
-                respuestas = respuestasProcesadas
+                preguntas = dataWithTags.first,
+                respuestas = dataWithTags.second
             )
 
             // 7. Notificación de resultado y limpieza de navegación

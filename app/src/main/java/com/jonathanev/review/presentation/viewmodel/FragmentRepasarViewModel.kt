@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jonathanev.review.domain.ApplyColorRangesToQAUseCase
 import com.jonathanev.review.domain.GenerateTextColorRangesUseCase
 import com.jonathanev.review.domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.domain.GetPreviewQuestionsUseCase
@@ -37,7 +38,8 @@ class FragmentRepasarViewModel @Inject constructor(
     private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
     private val generateTextColorRangesUseCase: GenerateTextColorRangesUseCase,
     private val getPreviewQuestionsUseCase: GetPreviewQuestionsUseCase,
-    private val getSaveGuidesUseCase: GetSaveGuidesUseCase
+    private val getSaveGuidesUseCase: GetSaveGuidesUseCase,
+    private val applyColorRangesToQAUseCase: ApplyColorRangesToQAUseCase
 ) : ViewModel() {
     private var cachedGuides: List<GuideDomainModel> = emptyList()
 
