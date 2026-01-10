@@ -6,6 +6,7 @@ import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
 import com.jonathanev.review.presentation.event.UIStopEvent
+import com.jonathanev.review.presentation.folders.model.FolderAction
 
 interface GuiaRepository {
     val guidesRecovery: List<GuideXmlModel>
@@ -23,6 +24,8 @@ interface GuiaRepository {
         respuestas: List<QuestionItemDomain>,
         attributesGuide: GuideDomainModel
     ): Boolean
+
+    fun moveGuide(mode: FolderAction.MovingFile): Boolean
 
     fun saveFileV2(
         nameGuide: String,

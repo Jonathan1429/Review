@@ -31,7 +31,6 @@ import com.jonathanev.review.ui.adapter.ListarIconosAdapter
 import com.jonathanev.review.R
 import com.jonathanev.review.presentation.files.viewmodel.CreateFilesViewModel
 import com.jonathanev.review.databinding.FragmentCreateFilesBinding
-import com.jonathanev.review.presentation.model.IconType
 import com.jonathanev.review.ui.mapper.toInt
 import com.skydoves.colorpickerview.flag.BubbleFlag
 import com.skydoves.colorpickerview.flag.FlagMode
@@ -197,7 +196,7 @@ class FragmentCreatingFiles : Fragment() {
             FolderAction.RenamingFolder -> showFolderUI()
             FolderAction.CreatingFile -> showFileUI()
             FolderAction.None -> Log.e("Error", "No se pudieron cargar datos iniciales")
-            is FolderAction.MovingFile -> Log.i("Moviendo: ", "Moviendo archivos a ${mode.pathFile.path}")
+            is FolderAction.MovingFile -> Log.i("Moviendo: ", "Moviendo archivos a ${mode.guideDomain.nameGuide}")
         }
     }
 
@@ -241,7 +240,7 @@ class FragmentCreatingFiles : Fragment() {
             }
 
             FolderAction.None -> return
-            is FolderAction.MovingFile -> Log.i("Moviendo: ", "Moviendo archivos a ${mode.pathFile.path}")
+            is FolderAction.MovingFile -> Log.i("Moviendo: ", "Moviendo archivos a ${mode.guideDomain.nameGuide}")
         }
     }
 
@@ -273,7 +272,7 @@ class FragmentCreatingFiles : Fragment() {
 
             FolderAction.CreatingFile -> onCreateGuideConfirmed(data)
             FolderAction.None -> Log.e("Error", "No se pudo crear el archivo")
-            is FolderAction.MovingFile -> Log.i("Moviendo: ", "Moviendo archivos a ${mode.pathFile.path}")
+            is FolderAction.MovingFile -> Log.i("Moviendo: ", "Moviendo archivos a ${mode.guideDomain.nameGuide}")
         }
     }
 
