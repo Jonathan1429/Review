@@ -116,7 +116,7 @@ class FragmentWithoutFiles : Fragment() {
 
         val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                viewModel.setMainPath()
+                viewModel.back()
 
                 // Si no consumes el evento, puedes volver atrás en la pila de Fragments.
                 // Para esto, deshabilita y llama a la implementación por defecto.

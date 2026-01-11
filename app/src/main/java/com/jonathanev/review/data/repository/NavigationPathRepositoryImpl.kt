@@ -26,8 +26,8 @@ class NavigationPathRepositoryImpl @Inject constructor(
     }
 
     override fun back() {
-        _currentPathGuides = _currentPathGuides.parentFile ?: _currentPathGuides
-        _currentPathGuides = _currentPathImages.parentFile ?: _currentPathImages
+        _currentPathGuides = currentPathGuides.parentFile ?: currentPathGuides
+        _currentPathImages = currentPathImages.parentFile ?: currentPathImages
     }
 
     override fun reset() {

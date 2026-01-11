@@ -1,11 +1,9 @@
 package com.jonathanev.review.data
 
-import com.jonathanev.review.data.repository.FileExplorerRepositoryImpl
 import com.jonathanev.review.data.repository.FolderRepositoryImp
 import com.jonathanev.review.data.repository.ImagesRepositoryImpl
 import com.jonathanev.review.data.repository.MetadataRepositoryImpl
 import com.jonathanev.review.data.repository.NavigationPathRepositoryImpl
-import com.jonathanev.review.domain.repository.FileExplorerRepository
 import com.jonathanev.review.domain.repository.FolderRepository
 import com.jonathanev.review.domain.repository.ImagesRepository
 import com.jonathanev.review.domain.repository.MetadataRepository
@@ -27,11 +25,6 @@ abstract class RepositoryModule {
     abstract fun bindNavigationRepository(
         impl: NavigationPathRepositoryImpl
     ): NavigationPathRepository
-
-    @Binds
-    abstract fun bindFileExplorerRepository(
-        impl: FileExplorerRepositoryImpl
-    ): FileExplorerRepository
 
     @Binds
     abstract fun bindImagesRepository(
