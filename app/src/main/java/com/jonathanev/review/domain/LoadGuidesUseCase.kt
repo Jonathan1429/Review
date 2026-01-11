@@ -1,8 +1,8 @@
 package com.jonathanev.review.domain
 
-import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.data.GuiaRepository
 import com.jonathanev.review.data.mapper.GuideXmlMapper
+import com.jonathanev.review.domain.model.GuideDomainModel
 import javax.inject.Inject
 
 class LoadGuidesUseCase @Inject constructor(

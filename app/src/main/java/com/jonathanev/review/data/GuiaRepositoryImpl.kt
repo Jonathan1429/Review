@@ -235,7 +235,7 @@ class GuiaRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun saveFileV2(
+    override fun saveGuide(
         nameGuide: String,
         description: String,
         version: String,
@@ -386,7 +386,7 @@ class GuiaRepositoryImpl @Inject constructor(
             GuideSource.CurrentPath -> {
                 filePathsProvider.buildFolderGuide(
                     navigationPathRepository.currentPathGuides,
-                    guideDomainModel!!.nameGuide,
+                    guideDomainModel.nameGuide,
                     guideDomainModel.nameGuide
                 )
             }
@@ -401,8 +401,6 @@ class GuiaRepositoryImpl @Inject constructor(
         val db = DocumentBuilderFactory.newInstance().newDocumentBuilder()
         val doc = db.parse(currentPath)
 
-        //listaQA.addAll(QAItem(getQAXML(doc, QUESTION),getQAXML(doc, ANSWER)))
-        //questionItems.addAll()
         getQAXML(
             qaItemXml,
             doc,
@@ -438,7 +436,6 @@ class GuiaRepositoryImpl @Inject constructor(
             for (j in 0 until texts.length) {
                 val t = texts.item(j) as Element
                 val textValue = t.getAttribute(toXmlContent(ContentType.TEXT))
-                //val qcText = getColorRanges.invoke(textValue)
 
                 contentList.add(
                     QuestionContentXml.Text(
@@ -525,7 +522,6 @@ class GuiaRepositoryImpl @Inject constructor(
                         text = ans,
                         colorRangeXml = emptyList()
                     )
-                    //getColorRanges.invoke(ques)
                 }
 
                 preguntaContent.add(preguntaProcesada)
@@ -548,7 +544,6 @@ class GuiaRepositoryImpl @Inject constructor(
                         text = ans,
                         colorRangeXml = emptyList()
                     )
-                    //getColorRanges.invoke(ans)
                 }
 
                 respuestaContent.add(respuestaProcesada)
@@ -570,7 +565,7 @@ class GuiaRepositoryImpl @Inject constructor(
         return listaQA
     }
 
-    override fun getXML(guideDomainModel: GuideDomainModel?): List<QAItemXml> {
+    override fun getXMLGuide(guideDomainModel: GuideDomainModel?): List<QAItemXml> {
         val version = guideDomainModel!!.version
 
         //return obtenerDatosXMLV1(ruta)
@@ -580,20 +575,9 @@ class GuiaRepositoryImpl @Inject constructor(
             obtenerDatosXMLV2(guideDomainModel)
     }
 
-    /*override fun getAttributesGuide(): GuideXmlModel {
-        val currentPath = File(pathProvider.getCurrentPath())
-        val db = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-        val doc = db.parse(currentPath)
-        return contentAttributesGuide(doc)
-    }*/
-
     private fun getAttributesGuide(file: File): GuideXmlModel {
         val db = DocumentBuilderFactory.newInstance().newDocumentBuilder()
         val doc = db.parse(file)
-        return contentAttributesGuide(doc)
-    }
-
-    private fun contentAttributesGuide(doc: Document): GuideXmlModel {
         val cuestionarioNode = doc
             .getElementsByTagName(Structure.CUESTIONARIO)
             .item(0) as Element
@@ -602,10 +586,13 @@ class GuiaRepositoryImpl @Inject constructor(
             .getElementsByTagName(Structure.GUIAESTUDIO)
             .item(0) as Element
 
-        val name = cuestionarioNode.getAttribute(Attributes.NOMBREGUIA)
-            .replace(Extensions.POINT_XML_EXTENSION, "")
         val description = cuestionarioNode.getAttribute(Attributes.DESCRIPCION)
         val version = guiaEstudioNode.getAttribute(Attributes.VERSION)
+        val name = if(version == Versions.VERSION1) {
+            file.name.replace(Extensions.POINT_XML_EXTENSION, "")
+        } else {
+            cuestionarioNode.getAttribute(Attributes.NOMBREGUIA)
+        }
 
         return GuideXmlModel(
             version = version,
@@ -613,56 +600,4 @@ class GuiaRepositoryImpl @Inject constructor(
             description = description
         )
     }
-
-    /*private fun contentAttributesGuide(doc: Document, currentPath: File): GuideXmlModel {
-        val versionNode = doc.getElementsByTagName(Structure.GUIAESTUDIO)
-        val elementGuide = versionNode.item(0) as Element
-        val version = elementGuide.getAttribute(Attributes.VERSION)
-
-        val cuestionarioNode = doc.getElementsByTagName(Structure.CUESTIONARIO)
-        val element = cuestionarioNode.item(0) as Element
-
-        var name = ""
-        val description = element.getAttribute(Attributes.DESCRIPCION)
-        //var name = element.getAttribute("nombreGuia")
-        if (version == "1.0") {
-            val fileName = currentPath.path.substringAfterLast("/")
-            name = fileName
-            name = name.replace(".xml", "")
-        } else {
-            name = element.getAttribute("nombreGuia")
-        }
-
-        return GuideXmlModel(
-            nameGuide = name,
-            description = description
-        )
-    }*/
-
-    /*override fun setAttributesGuide(
-        fileName: String,
-        description: String,
-        preguntas: List<QuestionItemDomain>,
-        respuestas: List<QuestionItemDomain>
-    ): Boolean {
-        return saveFileV2(
-            fileName,
-            description,
-            version,
-            preguntas,
-            respuestas
-        )
-    }*/
-
-    /*override fun getVersion(nameGuide: String): String {
-        //val currentPath = pathProvider.getCurrentPath()
-        val context = GuidePathContext()
-        pathProvider.resolveGuidePath()
-        val db = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-        val doc = db.parse(currentPath)
-
-        val versionNode = doc.getElementsByTagName(Structure.GUIAESTUDIO)
-        val elementGuide = versionNode.item(0) as Element
-        return elementGuide.getAttribute(Attributes.VERSION)
-    }*/
 }

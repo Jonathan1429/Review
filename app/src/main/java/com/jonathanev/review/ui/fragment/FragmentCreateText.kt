@@ -18,32 +18,25 @@ import androidx.annotation.ColorInt
 import androidx.core.widget.ImageViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
-import com.jonathanev.review.presentation.viewmodel.FragmentCreateTextViewModel
-import com.jonathanev.review.presentation.viewmodel.MainToolbarViewModel
-import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
-import com.jonathanev.review.presentation.model.SpanPalabraModel
-import com.jonathanev.review.domain.model.ColorRangeDomain
 import com.jonathanev.review.databinding.FragmentCreateTextBinding
 import com.jonathanev.review.presentation.model.ColorRangeUi
 import com.jonathanev.review.presentation.model.QuestionContentUi
+import com.jonathanev.review.presentation.model.SpanPalabraModel
+import com.jonathanev.review.presentation.viewmodel.MainToolbarViewModel
+import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
-@AndroidEntryPoint
 class FragmentCreateText : Fragment() {
     private var _binding: FragmentCreateTextBinding? = null
     private val binding get() = _binding!!
     private val viewModelToolbar: MainToolbarViewModel by activityViewModels()
     private val sharedViewModel: SharedFragmentCreateFileViewModel by activityViewModels()
-
     private var colorActual: Int = 0
-
-    private val viewModel: FragmentCreateTextViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?

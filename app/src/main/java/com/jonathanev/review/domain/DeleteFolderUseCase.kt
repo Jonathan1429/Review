@@ -1,6 +1,5 @@
 package com.jonathanev.review.domain
 
-import com.jonathanev.review.domain.model.FolderDomainModel
 import com.jonathanev.review.domain.repository.FolderRepository
 import com.jonathanev.review.presentation.event.UIStopEvent
 import javax.inject.Inject

@@ -1,11 +1,7 @@
 package com.jonathanev.review.presentation.viewmodel
 
-import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jonathanev.review.domain.ApplyColorRangesToQAUseCase
 import com.jonathanev.review.domain.GenerateTextColorRangesUseCase
 import com.jonathanev.review.domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.domain.GetPreviewQuestionsUseCase
@@ -17,7 +13,6 @@ import com.jonathanev.review.domain.model.TypeContent
 import com.jonathanev.review.presentation.event.UIStopEvent
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.QuestionContentUi
-import com.jonathanev.review.presentation.model.QuestionItemUi
 import com.jonathanev.review.presentation.state.GuideUiState
 import com.jonathanev.review.presentation.state.PreviewQuestionStateUi
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -39,7 +34,6 @@ class FragmentRepasarViewModel @Inject constructor(
     private val generateTextColorRangesUseCase: GenerateTextColorRangesUseCase,
     private val getPreviewQuestionsUseCase: GetPreviewQuestionsUseCase,
     private val getSaveGuidesUseCase: GetSaveGuidesUseCase,
-    private val applyColorRangesToQAUseCase: ApplyColorRangesToQAUseCase
 ) : ViewModel() {
     private var cachedGuides: List<GuideDomainModel> = emptyList()
 
@@ -117,10 +111,6 @@ class FragmentRepasarViewModel @Inject constructor(
         )
     }
 
-    fun initReview(uiState: GuideUiState) {
-        _uiState.value = uiState
-    }
-
     fun swapTypeContent() {
         _uiState.update { uiState ->
             uiState.copy(
@@ -172,10 +162,6 @@ class FragmentRepasarViewModel @Inject constructor(
         cachedGuides = getSaveGuidesUseCase.invoke()
     }
 
-    private fun initUIState() {
-        _uiState.value = GuideUiState()
-    }
-
     fun restartReview() {
         _uiState.update { uiState ->
             uiState.copy(
@@ -193,9 +179,5 @@ class FragmentRepasarViewModel @Inject constructor(
                 contadorPregunta = position
             )
         }
-    }
-
-    fun addQuestions() {
-
     }
 }

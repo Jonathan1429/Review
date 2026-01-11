@@ -12,7 +12,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
-import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
@@ -33,7 +32,6 @@ class FragmentWithoutFilesViewModel @Inject constructor(
     fun back(){
         backPathUseCase.invoke()
     }
-
 
     fun setMainPath() {
         setMainPathUseCase.invoke()

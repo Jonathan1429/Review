@@ -1,7 +1,7 @@
 package com.jonathanev.review.domain
 
-import com.jonathanev.review.presentation.state.CreatingFileUiState
 import com.jonathanev.review.data.storage.StorageFolders
+import com.jonathanev.review.presentation.state.CreatingFileUiState
 import javax.inject.Inject
 
 class ValidateCreateFileUseCase @Inject constructor() {

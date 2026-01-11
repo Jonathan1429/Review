@@ -367,8 +367,6 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         }
 
         var isLastQuestion = false
-        /*val isLastQuestion =
-            currentState.contadorPregunta + 1 == currentState.respuestas.size*/
         if (currentState.isLastQuestion == null) {
             isLastQuestion =
                 currentState.contadorPregunta + 1 == currentState.respuestas.size
@@ -397,8 +395,6 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             _uiStopEvent.emit(UIStopEvent.ShowMessage("Debes tener al menos un texto en pregunta/respuesta"))
         }
     }
-
-    //fun getCurrentPath() = pathProvider.getCurrentPath()
 
     fun getObtenerDatosXML(positionContent: Int, nameGuide: String) {
         val status = uiState.value

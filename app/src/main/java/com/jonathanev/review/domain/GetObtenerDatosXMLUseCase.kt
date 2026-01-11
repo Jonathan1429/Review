@@ -10,7 +10,7 @@ class GetObtenerDatosXMLUseCase @Inject constructor(
     private val guiaRepository: GuiaRepository
 ){
     operator fun invoke(guideDomainModel: GuideDomainModel?): List<QAItemDomain> {
-        val qaItemXml = guiaRepository.getXML(guideDomainModel)
+        val qaItemXml = guiaRepository.getXMLGuide(guideDomainModel)
         val qaItemDomain = qaItemXml.map { it.toIconType() }
         return qaItemDomain
     }

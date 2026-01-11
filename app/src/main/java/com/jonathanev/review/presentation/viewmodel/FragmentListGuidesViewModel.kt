@@ -21,7 +21,6 @@ import com.jonathanev.review.presentation.event.UIStopEvent
 import com.jonathanev.review.presentation.files.model.GuideResultUi
 import com.jonathanev.review.presentation.files.model.GuideUiModel
 import com.jonathanev.review.presentation.folders.model.FolderAction
-import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.QuestionItemUi
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -45,9 +44,6 @@ class FragmentListGuidesViewModel @Inject constructor(
     private var cachedGuides: List<GuideDomainModel> = emptyList()
     private val _guides = MutableLiveData<List<GuideUiModel>>()
     val guides: LiveData<List<GuideUiModel>> = _guides
-
-    private val _selectedGuide = MutableLiveData<GuideResultUi>()
-    val selectedGuide: LiveData<GuideResultUi> = _selectedGuide
 
     private val _eventsMessages = MutableSharedFlow<UIStopEvent>()
     val eventsMessages = _eventsMessages.asSharedFlow()
@@ -73,11 +69,6 @@ class FragmentListGuidesViewModel @Inject constructor(
         //_selectedGuide.value = resultToUi
     }
 
-    /*fun setMainPath() {
-        setMainPathUseCase.invoke()
-        getAllGuides(folderId)
-    }*/
-
     fun deleteFiles(nameGuide: String) {
         val guideDomainModel = cachedGuides.find { it.nameGuide == nameGuide }
         val datos = getObtenerDatosXMLUseCase.invoke(guideDomainModel)
@@ -89,12 +80,6 @@ class FragmentListGuidesViewModel @Inject constructor(
 
         val listImages = (tempQuestions + tempAnswers).flatMap { it.content }
             .filterIsInstance<QuestionContentDomain.Image>()
-        /*val currentGuide = changeGuidePathBuildFileUseCase.invoke(nameGuide)
-        //getObtenerDatosXML(File(currentGuide))
-
-        val listImages = (preguntas + respuestas)
-            .flatMap { it.content }
-            .filterIsInstance<QuestionContentDomain.Image>()*/
 
         val message = deleteGuideUseCase.invoke(guideDomainModel!!, listImages)
 
@@ -103,23 +88,6 @@ class FragmentListGuidesViewModel @Inject constructor(
                 message
             )
         }
-    }
-
-    private fun getObtenerDatosXML(currentGuide: File) {
-        /*if (respuestas.isEmpty()) {
-            //Revisar como se obtienen los datos aqui, porque no se visualiza la imagen
-            val datos = getObtenerDatosXMLUseCase.invoke(guideDomainModel)
-
-            val tempQuestions =
-                datos.mapNotNull { (it.question as? ResponseDomain.Filled)?.item }.toList()
-            val tempAnswers =
-                datos.mapNotNull { (it.answer as? ResponseDomain.Filled)?.item }.toList()
-
-            val questionsDomain = generateTextColorRangesUseCase.invoke(tempQuestions)
-            val answersDomain = generateTextColorRangesUseCase.invoke(tempAnswers)
-            _preguntas = questionsDomain.map { it.toUi() }.toMutableList()
-            _respuestas = answersDomain.map { it.toUi() }.toMutableList()
-        }*/
     }
 
     fun changeFilePathToMain() {

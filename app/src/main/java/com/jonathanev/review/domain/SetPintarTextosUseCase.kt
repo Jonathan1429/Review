@@ -1,8 +1,8 @@
 package com.jonathanev.review.domain
 
-import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.data.media.MediaPaths
 import com.jonathanev.review.data.provider.DirectoryManagerImpl
+import com.jonathanev.review.domain.model.QuestionContentDomain
 import javax.inject.Inject
 
 class SetPintarTextosUseCase @Inject constructor(

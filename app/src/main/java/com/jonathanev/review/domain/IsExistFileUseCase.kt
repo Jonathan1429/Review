@@ -1,6 +1,5 @@
 package com.jonathanev.review.domain
 
-import android.icu.text.CaseMap.Fold
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.presentation.folders.model.FolderAction
 import javax.inject.Inject
