@@ -16,16 +16,19 @@ import com.jonathanev.review.data.xml.Structure
 import com.jonathanev.review.data.xml.Versions
 import com.jonathanev.review.data.xml.XmlTagsV1
 import com.jonathanev.review.data.xml.XmlTagsV2
+import com.jonathanev.review.domain.DirectoryManager
 import com.jonathanev.review.domain.SetCifrarRutaImagenUseCase
 import com.jonathanev.review.domain.SetSubstringPathUseCase
 import com.jonathanev.review.domain.model.ContentType
 import com.jonathanev.review.domain.model.GuideDomainModel
+import com.jonathanev.review.domain.model.GuideSource
 import com.jonathanev.review.domain.model.QAType
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
 import com.jonathanev.review.domain.repository.ImagesRepository
 import com.jonathanev.review.domain.repository.NavigationPathRepository
 import com.jonathanev.review.presentation.event.UIStopEvent
+import com.jonathanev.review.presentation.folders.model.FolderAction
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.NodeList
@@ -52,7 +55,8 @@ class GuiaRepositoryImpl @Inject constructor(
     private val fileOutputStreamFactory: FileOutputStreamFactory,
     private val navigationPathRepository: NavigationPathRepository,
     private val filePathsProvider: FilePathsProvider,
-    private val imagesRepository: ImagesRepository
+    private val imagesRepository: ImagesRepository,
+    private val directoryManager: DirectoryManager
 ) : GuiaRepository {
     private var _guidesRecovery = emptyList<GuideXmlModel>()
     override val guidesRecovery: List<GuideXmlModel>
@@ -83,6 +87,87 @@ class GuiaRepositoryImpl @Inject constructor(
         val resultGuides = result.map { file -> getAttributesGuide(file!!) }
         _guidesRecovery = resultGuides
         return resultGuides
+    }
+
+    override fun moveGuide(mode: FolderAction.MovingFile): Boolean {
+        val oldPathGuide = if (mode.guideDomain.version == Versions.VERSION1) {
+            filePathsProvider.buildGuide(
+                mode.pathGuides,
+                mode.guideDomain.nameGuide
+            )
+        } else {
+            filePathsProvider.buildFolderGuide(
+                mode.pathGuides,
+                mode.guideDomain.nameGuide,
+                mode.guideDomain.nameGuide
+            )
+        }
+
+        val oldPathImages = if (mode.guideDomain.version == Versions.VERSION1) {
+            mode.pathImages
+        } else {
+            filePathsProvider.buildFolder(
+                mode.pathImages,
+                mode.guideDomain.nameGuide
+            )
+        }
+
+        val currentPath = if (mode.guideDomain.version == Versions.VERSION1) {
+            filePathsProvider.buildGuide(
+                navigationPathRepository.currentPathGuides,
+                mode.guideDomain.nameGuide
+            )
+        } else {
+            filePathsProvider.buildFolderGuide(
+                navigationPathRepository.currentPathGuides,
+                mode.guideDomain.nameGuide,
+                mode.guideDomain.nameGuide
+            )
+        }
+
+        val data = if (mode.guideDomain.version == Versions.VERSION1) {
+            obtenerDatosXMLV1(mode.guideDomain, GuideSource.CustomPath(oldPathGuide.path))
+        } else {
+            obtenerDatosXMLV2(mode.guideDomain, GuideSource.CustomPath(oldPathGuide.path))
+        }
+
+        val tempQuestions =
+            data.mapNotNull { (it.question as? ResponseXml.Filled)?.item }.toList()
+        val tempAnswers =
+            data.mapNotNull { (it.answer as? ResponseXml.Filled)?.item }.toList()
+
+        val listImagesXml = (tempQuestions + tempAnswers).flatMap { it.content }
+            .filterIsInstance<QuestionContentXml.Image>()
+
+        val listImagesDomain = listImagesXml.map { it.toDomain() }
+        if (mode.guideDomain.version == Versions.VERSION2) {
+            directoryManager.createPathGuide(
+                nameGuide = mode.guideDomain.nameGuide
+            )
+        }
+
+        val successGuide = oldPathGuide.renameTo(currentPath)
+        if (!successGuide) return false
+
+        if (mode.guideDomain.version == Versions.VERSION2) {
+            directoryManager.deleteFolderEmpty(oldPathGuide.parentFile!!.toString())
+            directoryManager.createPathImages(
+                guideDomainModel = mode.guideDomain,
+                isNewFile = true
+            )
+        }
+
+        directoryManager.moveImages(
+            listImagesDomain,
+            mode.guideDomain.nameGuide,
+            mode.guideDomain.version,
+            oldPathImages
+        )
+        return true
+    }
+
+    private fun QuestionContentXml.Image.toDomain(): QuestionContentDomain.Image {
+        return QuestionContentDomain.Image(this.uri, this.nameFile)
     }
 
     override fun renameGuide(
@@ -293,12 +378,23 @@ class GuiaRepositoryImpl @Inject constructor(
         }
     }
 
-    private fun obtenerDatosXMLV2(guideDomainModel: GuideDomainModel?): List<QAItemXml> {
-        val currentPath = filePathsProvider.buildFolderGuide(
-            navigationPathRepository.currentPathGuides,
-            guideDomainModel!!.nameGuide,
-            guideDomainModel.nameGuide
-        )
+    private fun obtenerDatosXMLV2(
+        guideDomainModel: GuideDomainModel,
+        guideSource: GuideSource = GuideSource.CurrentPath
+    ): List<QAItemXml> {
+        val currentPath = when (guideSource) {
+            GuideSource.CurrentPath -> {
+                filePathsProvider.buildFolderGuide(
+                    navigationPathRepository.currentPathGuides,
+                    guideDomainModel!!.nameGuide,
+                    guideDomainModel.nameGuide
+                )
+            }
+
+            is GuideSource.CustomPath -> {
+                File(guideSource.path)
+            }
+        }
 
         val qaItemXml = mutableListOf<QAItemXml>()
 
@@ -377,17 +473,30 @@ class GuiaRepositoryImpl @Inject constructor(
         }
     }
 
-    private fun obtenerDatosXMLV1(guideDomainModel: GuideDomainModel?): List<QAItemXml> {
+    private fun obtenerDatosXMLV1(
+        guideDomainModel: GuideDomainModel,
+        guideSource: GuideSource = GuideSource.CurrentPath
+    ): List<QAItemXml> {
         val listaQA = mutableListOf<QAItemXml>()
 
         val dbf = DocumentBuilderFactory.newInstance()
 
         try {
             val db = dbf.newDocumentBuilder()
-            val currentPath = filePathsProvider.buildGuide(
-                navigationPathRepository.currentPathGuides,
-                guideDomainModel!!.nameGuide
-            )
+
+            val currentPath = when (guideSource) {
+                GuideSource.CurrentPath -> {
+                    filePathsProvider.buildGuide(
+                        navigationPathRepository.currentPathGuides,
+                        guideDomainModel!!.nameGuide
+                    )
+                }
+
+                is GuideSource.CustomPath -> {
+                    File(guideSource.path)
+                }
+            }
+
             val doc = db.parse(currentPath)
 
             val cuestionario: NodeList = doc.getElementsByTagName(XmlTagsV2.INTERROGANTE)
@@ -462,7 +571,7 @@ class GuiaRepositoryImpl @Inject constructor(
     }
 
     override fun getXML(guideDomainModel: GuideDomainModel?): List<QAItemXml> {
-        val version = guideDomainModel?.version!!
+        val version = guideDomainModel!!.version
 
         //return obtenerDatosXMLV1(ruta)
         return if (version == Versions.VERSION1)

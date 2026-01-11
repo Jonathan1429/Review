@@ -6,11 +6,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.domain.BackPathUseCase
 import com.jonathanev.review.domain.DeleteGuideUseCase
+import com.jonathanev.review.domain.GetCurrentPathFilesUseCase
 import com.jonathanev.review.domain.GetGuidePosicionUseCase
 import com.jonathanev.review.domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.domain.LoadGuidesUseCase
+import com.jonathanev.review.domain.MoveGuideUseCase
 import com.jonathanev.review.domain.SetMainPathUseCase
 import com.jonathanev.review.domain.model.GuideDomainModel
+import com.jonathanev.review.domain.model.GuideResultDomain
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.ResponseDomain
 import com.jonathanev.review.presentation.event.UIMovingEvent
@@ -18,6 +21,7 @@ import com.jonathanev.review.presentation.event.UIStopEvent
 import com.jonathanev.review.presentation.files.model.GuideResultUi
 import com.jonathanev.review.presentation.files.model.GuideUiModel
 import com.jonathanev.review.presentation.folders.model.FolderAction
+import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.QuestionItemUi
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -34,7 +38,9 @@ class FragmentListGuidesViewModel @Inject constructor(
     private val setMainPathUseCase: SetMainPathUseCase,
     private val backPathUseCase: BackPathUseCase,
     private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
-    private val deleteGuideUseCase: DeleteGuideUseCase
+    private val deleteGuideUseCase: DeleteGuideUseCase,
+    private val getCurrentPathFilesUseCase: GetCurrentPathFilesUseCase,
+    private val moveGuideUseCase: MoveGuideUseCase
 ) : ViewModel() {
     private var cachedGuides: List<GuideDomainModel> = emptyList()
     private val _guides = MutableLiveData<List<GuideUiModel>>()
@@ -120,32 +126,36 @@ class FragmentListGuidesViewModel @Inject constructor(
         setMainPathUseCase.invoke()
     }
 
-    fun getFilePath(nameGuide: String) {
-        //return File(changeGuidePathBuildFileUseCase.invoke(nameGuide))
+    fun getPaths(): Pair<File, File> {
+        return getCurrentPathFilesUseCase.invoke()
     }
 
-    fun movingFiles(mode: FolderAction) {
-        /*if (mode is FolderAction.MovingFile) {
-            val isSuccessXML = moverArchivoUseCase.invoke(mode.pathFile)
+    fun movingFiles(mode: FolderAction): Boolean {
+        if (mode is FolderAction.MovingFile){
+            val guideDomainModel = cachedGuides.find { it.nameGuide == mode.guideDomain.nameGuide }
+            if (guideDomainModel != null) {
+                viewModelScope.launch {
+                    _eventsMovingFiles.emit(
+                        UIMovingEvent.ExistFile
+                    )
+                }
 
-            //getObtenerDatosXML(isSuccessXML.second)
-
-            val questionsItemDomain = preguntas.map { it.toDomain() }
-            val answersItemDomain = respuestas.map { it.toDomain() }
-
-            if (isSuccessXML.first) {
-                /*val version = getVersionUseCase.invoke(nameGuide)
-                moverImagenesUseCase.invoke(
-                    version,
-                    mode.pathFile,
-                    isSuccessXML.second,
-                    questionsItemDomain,
-                    answersItemDomain
-                )*/
+                return false
             }
 
-            setMainPathUseCase.invoke()
-        }*/
+            return onContinueProcess(confirmed = true, mode = mode)
+        }
+        return false
+    }
+
+    fun onContinueProcess(confirmed: Boolean, mode: FolderAction): Boolean {
+        if (!confirmed) return false
+
+        return if (mode is FolderAction.MovingFile) {
+            moveGuideUseCase.invoke(mode)
+        } else {
+            false
+        }
     }
 
     private fun eventMovingFile(message: String) {
@@ -168,5 +178,13 @@ class FragmentListGuidesViewModel @Inject constructor(
 
     fun resetPaths() {
         setMainPathUseCase.invoke()
+    }
+
+    fun setMainPath() {
+        setMainPathUseCase.invoke()
+    }
+
+    fun getGuideDomain(position: Int): GuideResultDomain {
+        return getGuidePosicionUseCase.invoke(position, cachedGuides)
     }
 }

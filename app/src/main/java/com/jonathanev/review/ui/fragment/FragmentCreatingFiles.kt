@@ -199,7 +199,7 @@ class FragmentCreatingFiles : Fragment() {
                 viewModel.uploadCachedGuides()
             }
             FolderAction.None -> Log.e("Error", "No se pudieron cargar datos iniciales")
-            is FolderAction.MovingFile -> Log.i("Moviendo: ", "Moviendo archivos a ${mode.pathFile.path}")
+            is FolderAction.MovingFile -> Log.i("Moviendo: ", "Moviendo archivos a ${mode.guideDomain.nameGuide}")
         }
     }
 
@@ -243,7 +243,7 @@ class FragmentCreatingFiles : Fragment() {
             }
 
             FolderAction.None -> return
-            is FolderAction.MovingFile -> Log.i("Moviendo: ", "Moviendo archivos a ${mode.pathFile.path}")
+            is FolderAction.MovingFile -> Log.i("Moviendo: ", "Moviendo archivos a ${mode.guideDomain.nameGuide}")
         }
     }
 
@@ -275,7 +275,7 @@ class FragmentCreatingFiles : Fragment() {
 
             FolderAction.CreatingFile -> onCreateGuideConfirmed(data)
             FolderAction.None -> Log.e("Error", "No se pudo crear el archivo")
-            is FolderAction.MovingFile -> Log.i("Moviendo: ", "Moviendo archivos a ${mode.pathFile.path}")
+            is FolderAction.MovingFile -> Log.i("Moviendo: ", "Moviendo archivos a ${mode.guideDomain.nameGuide}")
         }
     }
 

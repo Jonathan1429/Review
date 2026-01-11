@@ -3,6 +3,7 @@ package com.jonathanev.review.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.data.provider.FilePathsProvider
+import com.jonathanev.review.domain.MoveGuideUseCase
 import com.jonathanev.review.presentation.event.UIMovingEvent
 import com.jonathanev.review.presentation.folders.model.FolderAction
 import com.jonathanev.review.presentation.model.QuestionItemUi
@@ -16,6 +17,7 @@ import javax.inject.Inject
 @HiltViewModel
 class FragmentWithoutFilesViewModel @Inject constructor(
     private val filePathsProvider: FilePathsProvider,
+    private val moveGuideUseCase: MoveGuideUseCase
 ) : ViewModel() {
     private val _eventsMovingFiles = MutableSharedFlow<UIMovingEvent>()
     val eventsMovingFiles = _eventsMovingFiles.asSharedFlow()
@@ -89,5 +91,15 @@ class FragmentWithoutFilesViewModel @Inject constructor(
 
     fun moveFileSuccess() {
         eventMovingFile("Se ha movido la guia correctamente")
+    }
+
+    fun onContinueProcess(confirmed: Boolean, mode: FolderAction): Boolean {
+        if (!confirmed) return false
+
+        return if (mode is FolderAction.MovingFile) {
+            moveGuideUseCase.invoke(mode)
+        } else {
+            false
+        }
     }
 }

@@ -1,11 +1,11 @@
 package com.jonathanev.review.domain
 
 import com.jonathanev.review.data.provider.FilePathsProvider
-import com.jonathanev.review.data.xml.Versions
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
 import com.jonathanev.review.domain.repository.NavigationPathRepository
+import java.io.File
 import javax.inject.Inject
 
 class UpdateImagesUseCase @Inject constructor(
@@ -21,7 +21,7 @@ class UpdateImagesUseCase @Inject constructor(
         isNewFile: Boolean,
     ) {
         // Preparar la carpeta para las imagenes.
-        directoryManager.prepareCleanDirectory(guide, isNewFile)
+        directoryManager.createPathImages(guide, isNewFile)
 
         val listImages = (preguntasProcesadas + respuestasProcesadas)
             .flatMap { it.content }
@@ -32,16 +32,18 @@ class UpdateImagesUseCase @Inject constructor(
                 saveGuideImagesUseCase.saveImagesInDevice(listImages, guide.nameGuide)
             }
         } else {
-            if (guide.version == Versions.VERSION1) {
-                directoryManager.moveImagesV1(
-                    listImages = listImages,
-                    nameGuide = guide.nameGuide
-                )
-            }
+            directoryManager.moveImages(
+                listImages = listImages,
+                nameGuide = guide.nameGuide,
+                version = guide.version
+            )
 
             // Add new Images.
             val currentPath =
-                filePathsProvider.buildFolder(navigationPathRepository.currentPathGuides, guide.nameGuide)
+                filePathsProvider.buildFolder(
+                    navigationPathRepository.currentPathGuides,
+                    guide.nameGuide
+                )
 
             val currentDeviceNames =
                 currentPath.listFiles()?.map { it.name }?.toSet() ?: emptySet()

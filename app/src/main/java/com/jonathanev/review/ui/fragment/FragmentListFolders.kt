@@ -110,6 +110,14 @@ class FragmentListFolders : DialogFragment() {
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
+
+                        UIMovingEvent.ExistFile -> {
+                            Toast.makeText(
+                                requireContext(),
+                                "No es posible guardar una guia aquí",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     }
                 }
             }
@@ -186,7 +194,8 @@ class FragmentListFolders : DialogFragment() {
                             viewModel.nextPath(folderResult.folderUi.folder.name)
 
                             findNavController().navigate(
-                                R.id.action_to_review_graph
+                                R.id.action_to_review_graph,
+                                bundleOf("mode" to mode)
                             )
                         }
 

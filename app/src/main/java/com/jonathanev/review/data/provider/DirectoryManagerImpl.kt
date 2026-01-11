@@ -1,5 +1,6 @@
 package com.jonathanev.review.data.provider
 
+import com.jonathanev.review.data.xml.Versions
 import com.jonathanev.review.domain.DirectoryManager
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.QuestionContentDomain
@@ -14,7 +15,7 @@ class DirectoryManagerImpl @Inject constructor(
     private val navigationPathRepository: NavigationPathRepository,
     private val filePathsProvider: FilePathsProvider,
 ) : DirectoryManager {
-    override fun prepareCleanDirectory(guideDomainModel: GuideDomainModel, isNewFile: Boolean) {
+    override fun createPathImages(guideDomainModel: GuideDomainModel, isNewFile: Boolean) {
         /*val currentPath = filePathsProvider.buildImage(
             navigationPathRepository.currentPathGuides,
             guideDomainModel.nameGuide
@@ -44,20 +45,30 @@ class DirectoryManagerImpl @Inject constructor(
         return File(path).exists()
     }
 
-    override suspend fun moveImagesV1(
+    override fun moveImages(
         listImages: List<QuestionContentDomain.Image>,
-        nameGuide: String
+        nameGuide: String,
+        version: String,
+        oldPath: File?
     ) {
-        /*val currentPath =
-            filePathsProvider.buildImage(navigationPathRepository.currentPathGuides, nameGuide)*/
-        val currentPath =
+        val newPath = if (version == Versions.VERSION1){
+            navigationPathRepository.currentPathImages
+        } else {
             filePathsProvider.buildFolder(navigationPathRepository.currentPathImages, nameGuide)
+        }
 
         listImages.forEach { image ->
-            if (File(image.uri).exists()) {
-                val destination = File(currentPath, image.nameFile)
+            val oldPathImages = if (version == Versions.VERSION1){
+                val nameFile = image.uri.substringAfterLast("/")
+                File(oldPath, nameFile)
+            } else {
+                File(oldPath, image.nameFile)
+            }
+
+            if (oldPathImages.exists()) {
+                val destination = File(newPath, image.nameFile)
                 Files.move(
-                    Paths.get(image.uri),
+                    Paths.get(oldPathImages.path),
                     Paths.get(destination.path),
                     StandardCopyOption.REPLACE_EXISTING
                 )
@@ -91,5 +102,9 @@ class DirectoryManagerImpl @Inject constructor(
         if (!currentPath.exists()) {
             currentPath.mkdir()
         }
+    }
+
+    override fun deleteFolderEmpty(oldPathGuide: String) {
+        File(oldPathGuide).delete()
     }
 }

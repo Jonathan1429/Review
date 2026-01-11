@@ -1,6 +1,7 @@
 package com.jonathanev.review.ui.fragment
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -65,6 +66,10 @@ class FragmentWithoutFiles : Fragment() {
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
+
+                        UIMovingEvent.ExistFile -> {
+                            Log.i("ExistFile: ", "Imposible que entre aquí")
+                        }
                     }
                 }
             }
@@ -90,18 +95,20 @@ class FragmentWithoutFiles : Fragment() {
 
                 launch {
                     viewModelToolbar.onSuccess.collect {
-                        viewModelToolbar.initButtons()
-                        viewModel.movingFiles(mode)
-                        viewModel.setMainPath()
-                        viewModel.moveFileSuccess()
+                        val isSuccess = viewModel.onContinueProcess(true, mode)
 
-                        findNavController().navigate(
-                            R.id.action_to_content_graph,
-                            null,
-                            NavOptions.Builder()
-                                .setPopUpTo(R.id.fragmentsContent, inclusive = true)
-                                .build()
-                        )
+                        if (isSuccess) {
+                            viewModel.setMainPath()
+                            viewModel.moveFileSuccess()
+
+                            findNavController().navigate(
+                                R.id.action_to_content_graph,
+                                null,
+                                NavOptions.Builder()
+                                    .setPopUpTo(R.id.fragmentsContent, inclusive = true)
+                                    .build()
+                            )
+                        }
                     }
                 }
             }
