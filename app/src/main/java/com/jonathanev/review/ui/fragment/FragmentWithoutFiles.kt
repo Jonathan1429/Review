@@ -98,6 +98,7 @@ class FragmentWithoutFiles : Fragment() {
                         val isSuccess = viewModel.onContinueProcess(true, mode)
 
                         if (isSuccess) {
+                            viewModelToolbar.initButtons()
                             viewModel.setMainPath()
                             viewModel.moveFileSuccess()
 
