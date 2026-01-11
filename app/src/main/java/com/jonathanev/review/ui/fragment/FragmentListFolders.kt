@@ -67,7 +67,7 @@ class FragmentListFolders : DialogFragment() {
         ) ?: FolderAction.None
 
         initUI(mode)
-        initListeners()
+        initListeners(mode)
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -143,12 +143,20 @@ class FragmentListFolders : DialogFragment() {
         }
     }
 
-    private fun initListeners() {
+    private fun initListeners(mode: FolderAction) {
         binding.btnCreateGuide.setOnClickListener {
-            findNavController().navigate(
-                R.id.action_to_create_graph,
-                bundleOf("mode" to FolderAction.CreatingFolder)
-            )
+            if (mode is FolderAction.MovingFile) {
+                Toast.makeText(
+                    requireContext(),
+                    "Termina de mover la guia antes de realizar otra acción",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                findNavController().navigate(
+                    R.id.action_to_create_graph,
+                    bundleOf("mode" to FolderAction.CreatingFolder)
+                )
+            }
         }
     }
 
