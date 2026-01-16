@@ -3,10 +3,14 @@ package com.jonathanev.review.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.domain.BackPathUseCase
+import com.jonathanev.review.domain.GetGuideMoveUseCase
+import com.jonathanev.review.domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.domain.MoveGuideUseCase
 import com.jonathanev.review.domain.SetMainPathUseCase
+import com.jonathanev.review.domain.model.GuideContext
+import com.jonathanev.review.domain.result.GetGuideResult
+import com.jonathanev.review.domain.result.MoveGuideResponse
 import com.jonathanev.review.presentation.event.UIMovingEvent
-import com.jonathanev.review.presentation.folders.model.FolderAction
 import com.jonathanev.review.presentation.model.QuestionItemUi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -18,7 +22,9 @@ import javax.inject.Inject
 class FragmentWithoutFilesViewModel @Inject constructor(
     private val moveGuideUseCase: MoveGuideUseCase,
     private val backPathUseCase: BackPathUseCase,
-    private val setMainPathUseCase: SetMainPathUseCase
+    private val setMainPathUseCase: SetMainPathUseCase,
+    private val getGuideMoveUseCase: GetGuideMoveUseCase,
+    private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase
 ) : ViewModel() {
     private val _eventsMovingFiles = MutableSharedFlow<UIMovingEvent>()
     val eventsMovingFiles = _eventsMovingFiles.asSharedFlow()
@@ -29,7 +35,7 @@ class FragmentWithoutFilesViewModel @Inject constructor(
     private var _respuestas: MutableList<QuestionItemUi> = mutableListOf()
     val respuestas: List<QuestionItemUi> get() = _respuestas
 
-    fun back(){
+    fun back() {
         backPathUseCase.invoke()
     }
 
@@ -47,17 +53,46 @@ class FragmentWithoutFilesViewModel @Inject constructor(
         eventMovingFile("Se ha cancelado la acción")
     }
 
-    fun moveFileSuccess() {
-        eventMovingFile("Se ha movido la guia correctamente")
-    }
+    fun movingGuide() {
+        when (val context = getGuideMoveUseCase.invoke()) {
+            is GuideContext.Moving -> {
+                when (val guideData = getObtenerDatosXMLUseCase.invoke(context)) {
+                    is GetGuideResult.Success -> {
+                        val response = moveGuideUseCase.invoke(guideData, context)
+                        when (response) {
+                            MoveGuideResponse.ErrorMovingGuide ->
+                                eventMovingFile("Error al intentar mover la guia")
 
-    fun onContinueProcess(confirmed: Boolean, mode: FolderAction): Boolean {
-        if (!confirmed) return false
+                            MoveGuideResponse.ErrorMovingImages ->
+                                eventMovingFile("Error al intentar mover imagenes")
 
-        return if (mode is FolderAction.MovingFile) {
-            moveGuideUseCase.invoke(mode)
-        } else {
-            false
+                            MoveGuideResponse.ErrorPathGuide ->
+                                eventMovingFile("No existe la ruta para mover la guia")
+
+                            MoveGuideResponse.ErrorPathImages ->
+                                eventMovingFile("No existe una ruta para guardar las imagenes")
+
+                            MoveGuideResponse.Success ->
+                                eventMovingFile("Guia movida exitosamente")
+
+                            MoveGuideResponse.WarningDeleteFolder ->
+                                eventMovingFile("Hubo inconveniente en el paso de todos los archivos")
+                        }
+                    }
+
+                    GetGuideResult.Error -> eventMovingFile("Ocurrió un error al abrir la guia")
+
+                    GetGuideResult.InvalidFormat -> eventMovingFile("La guia está dañada")
+
+                    GetGuideResult.NotFound -> eventMovingFile("No se ha encontrado la guia")
+
+                    GetGuideResult.UnknownError -> eventMovingFile("Error desconocido")
+                }
+            }
+
+            else -> eventMovingFile("Error inesperado")
         }
+
+        return
     }
 }

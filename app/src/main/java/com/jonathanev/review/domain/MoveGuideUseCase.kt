@@ -1,13 +1,82 @@
 package com.jonathanev.review.domain
 
-import com.jonathanev.review.data.GuiaRepository
-import com.jonathanev.review.presentation.folders.model.FolderAction
+import com.jonathanev.review.domain.model.GuideContext
+import com.jonathanev.review.domain.model.GuideVersion
+import com.jonathanev.review.domain.model.QAItemDomain
+import com.jonathanev.review.domain.model.QuestionContentDomain
+import com.jonathanev.review.domain.model.ResponseDomain
+import com.jonathanev.review.domain.repository.GuiaRepository
+import com.jonathanev.review.domain.result.GetGuideResult
+import com.jonathanev.review.domain.result.MoveGuideResponse
 import javax.inject.Inject
 
 class MoveGuideUseCase @Inject constructor(
-    private val guiaRepository: GuiaRepository
+    private val guiaRepository: GuiaRepository,
+    private val directoryManager: DirectoryManager,
 ) {
-    operator fun invoke(mode: FolderAction.MovingFile): Boolean {
-        return guiaRepository.moveGuide(mode)
+    operator fun invoke(guideData: GetGuideResult.Success, context: GuideContext.Moving): MoveGuideResponse {
+        var isExistPathGuide = true
+
+        if (context.guide.version == GuideVersion.V2) {
+            isExistPathGuide = directoryManager.createPathGuide(context.guide.nameGuide)
+        }
+
+        if (!isExistPathGuide) {
+            return MoveGuideResponse.ErrorPathGuide
+        }
+
+        val moveGuide = guiaRepository.moveGuide(
+            GuideContext.Moving(
+                context.guide,
+                context.oldGuidePath,
+                context.currentGuidePath
+            )
+        )
+        if (!moveGuide) {
+            return MoveGuideResponse.ErrorMovingGuide
+        }
+
+        val isDeleteFolder = directoryManager.deleteFolderEmpty(
+            GuideContext.Actual(
+                guide = context.guide,
+                currentGuidePath = context.oldGuidePath,
+            )
+        )
+
+        if (!isDeleteFolder) {
+            return MoveGuideResponse.WarningDeleteFolder
+        }
+
+        var isSuccessFolderImages =  true
+
+        if (context.guide.version == GuideVersion.V2) {
+            isSuccessFolderImages = directoryManager.createPathImages(
+                guideDomainModel = context.guide,
+                isNewFile = true
+            )
+        }
+
+        if (isSuccessFolderImages) {
+            return MoveGuideResponse.ErrorPathImages
+        }
+
+        val images = extractImagesFromData(guideData.list)
+
+        val isSuccessMoveImages =
+            directoryManager.moveImages(
+                context.guide,
+                ImageSource.MovingGuide(context.oldGuidePath),
+                images
+            )
+
+        return if(isSuccessMoveImages) MoveGuideResponse.Success else MoveGuideResponse.ErrorMovingImages
+    }
+
+    private fun extractImagesFromData(data: List<QAItemDomain>): List<QuestionContentDomain.Image> {
+        // Esta lógica de filtrado SÍ puede estar aquí porque usa modelos de Dominio
+        return data.flatMap { listOf(it.question, it.answer) }
+            .filterIsInstance<ResponseDomain.Filled>()
+            .flatMap { it.item.content }
+            .filterIsInstance<QuestionContentDomain.Image>()
     }
 }

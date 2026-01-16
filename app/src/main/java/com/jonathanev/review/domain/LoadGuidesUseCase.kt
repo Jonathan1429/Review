@@ -1,15 +1,16 @@
 package com.jonathanev.review.domain
 
-import com.jonathanev.review.data.GuiaRepository
-import com.jonathanev.review.data.mapper.GuideXmlMapper
+import com.jonathanev.review.domain.repository.GuiaRepository
 import com.jonathanev.review.domain.model.GuideDomainModel
+import com.jonathanev.review.data.repository.NavigationPathRepository
 import javax.inject.Inject
 
 class LoadGuidesUseCase @Inject constructor(
     private val guiaRepository: GuiaRepository,
+    private val navigationPathRepository: NavigationPathRepository
 ) {
     operator fun invoke(): List<GuideDomainModel> {
-        val guidesXML = guiaRepository.getGuides()
-        return guidesXML.map { GuideXmlMapper.toDomain(it) }
+        val guidesDomain = guiaRepository.getGuides(navigationPathRepository.currentPathGuides)
+        return guidesDomain
     }
 }

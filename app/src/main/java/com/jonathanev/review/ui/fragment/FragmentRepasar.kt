@@ -17,12 +17,12 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jonathanev.review.domain.model.TypeContent
-import com.jonathanev.review.presentation.event.UIStopEvent
 import com.jonathanev.review.ui.adapter.ListItemPintarImagenesAdapter
 import com.jonathanev.review.ui.adapter.ListItemPintarTextosAdapter
 import com.jonathanev.review.R
 import com.jonathanev.review.presentation.viewmodel.FragmentRepasarViewModel
 import com.jonathanev.review.databinding.FragmentRepasarBinding
+import com.jonathanev.review.presentation.event.GuideReviewEvent
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -30,7 +30,7 @@ import kotlinx.coroutines.launch
 class FragmentRepasar : Fragment() {
     private var _binding: FragmentRepasarBinding? = null
     private val binding get() = _binding!!
-    private val viewModel:FragmentRepasarViewModel by activityViewModels()
+    private val viewModel: FragmentRepasarViewModel by activityViewModels()
 
     private lateinit var adaptListPintarTextos: ListItemPintarTextosAdapter
     private lateinit var adaptListPintarImagenes: ListItemPintarImagenesAdapter
@@ -78,35 +78,41 @@ class FragmentRepasar : Fragment() {
 
                 launch {
                     viewModel.eventsMessages.collect { event ->
-                        if (event is UIStopEvent.RestartGuide){
-                            AlertDialog.Builder(requireContext())
-                                .setTitle("¡Atención!")
-                                .setMessage(event.text)
-                                .setPositiveButton(
-                                    "Si"
-                                ) { _, _ ->
-                                    viewModel.restartReview()
+                        when (event) {
+                            GuideReviewEvent.NotQuestionBefore ->
+                                showToast("Ya no tienes preguntas anteriores")
 
-                                    Toast.makeText(
-                                        requireContext(), "Guia reiniciada", Toast.LENGTH_LONG
-                                    ).show()
-                                }
-                                .setNegativeButton(
-                                    "Cancelar"
-                                ) { dialog, _ ->
-                                    dialog.dismiss()
-                                }.setOnCancelListener {
+                            GuideReviewEvent.RestartGuide -> {
+                                AlertDialog.Builder(requireContext())
+                                    .setTitle("¡Atención!")
+                                    .setMessage("Se acabaron las preguntas, ¿quieres repetir la guia?")
+                                    .setPositiveButton(
+                                        "Si"
+                                    ) { _, _ ->
+                                        viewModel.restartReview()
+                                        showToast("Guia reiniciada")
+                                    }
+                                    .setNegativeButton(
+                                        "Cancelar"
+                                    ) { dialog, _ ->
+                                        dialog.dismiss()
+                                    }.setOnCancelListener {
 
-                                }.create().show()
-                        }
+                                    }.create().show()
+                            }
 
-                        if (event is UIStopEvent.NotQuestionBefore){
-                            Toast.makeText(context, event.text, Toast.LENGTH_SHORT).show()
+                            is GuideReviewEvent.ShowMessage -> showToast(event.text)
                         }
                     }
                 }
             }
         }
+    }
+
+    private fun showToast(text: String) {
+        Toast.makeText(
+            requireContext(), text, Toast.LENGTH_LONG
+        ).show()
     }
 
     private fun initListeners() {

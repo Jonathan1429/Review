@@ -1,12 +1,14 @@
 package com.jonathanev.review.domain
 
-import com.jonathanev.review.data.GuiaRepository
+import com.jonathanev.review.domain.repository.GuiaRepository
+import com.jonathanev.review.data.repository.NavigationPathRepository
 import javax.inject.Inject
 
 class GetGuidesCountUseCase @Inject constructor(
-    private val guiaRepository: GuiaRepository
+    private val guiaRepository: GuiaRepository,
+    private val navigationPathRepository: NavigationPathRepository
 ) {
     operator fun invoke(): Int {
-        return guiaRepository.getNumGuides()
+        return guiaRepository.getNumGuides(navigationPathRepository.currentPathGuides)
     }
 }

@@ -24,13 +24,14 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.jonathanev.review.presentation.model.ActionGuide
 import com.jonathanev.review.presentation.folders.model.FolderAction
-import com.jonathanev.review.presentation.model.ScreenData
+import com.jonathanev.review.presentation.model.ScreenDataUi
 import com.jonathanev.review.presentation.state.CreatingFileUiState
-import com.jonathanev.review.presentation.event.UIStopEvent
+import com.jonathanev.review.presentation.event.PrepareGuideEvent
 import com.jonathanev.review.ui.adapter.ListarIconosAdapter
 import com.jonathanev.review.R
 import com.jonathanev.review.presentation.files.viewmodel.CreateFilesViewModel
 import com.jonathanev.review.databinding.FragmentCreateFilesBinding
+import com.jonathanev.review.presentation.files.model.GuideResultUi
 import com.jonathanev.review.ui.mapper.toInt
 import com.skydoves.colorpickerview.flag.BubbleFlag
 import com.skydoves.colorpickerview.flag.FlagMode
@@ -107,20 +108,8 @@ class FragmentCreatingFiles : Fragment() {
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.eventsMessages.collect { event ->
-                    if (event is UIStopEvent.GuideRenamedSuccess) {
-                        findNavController().navigate(
-                            R.id.fragmentsContent,
-                            null,
-                            NavOptions.Builder()
-                                .setPopUpTo(R.id.fragmentsContent, true)
-                                .build()
-                        )
-
-                        Toast.makeText(context, event.text, Toast.LENGTH_SHORT).show()
-                    }
-
-                    if (event is UIStopEvent.ShowMessage) {
-                        Toast.makeText(context, event.text, Toast.LENGTH_SHORT).show()
+                    when(event){
+                        is PrepareGuideEvent.ShowMessage -> showToast(event.text)
                     }
                 }
             }
@@ -188,9 +177,13 @@ class FragmentCreatingFiles : Fragment() {
                 showFileUI()
                 viewModel.uploadCachedGuides()
 
-                val attributes = viewModel.fillFields(mode.fileName)
-                binding.fragmentCreate.etNombre.setText(attributes.nameGuide)
-                binding.fragmentCreate.fragmentComponentsFile.etDescription.setText(attributes.description)
+                when(val result = viewModel.fillFields(mode.fileName)){
+                    is GuideResultUi.Error -> showToast(result.message)
+                    is GuideResultUi.Success -> {
+                        binding.fragmentCreate.etNombre.setText(result.guideUiModel.nameGuide)
+                        binding.fragmentCreate.fragmentComponentsFile.etDescription.setText(result.guideUiModel.description)
+                    }
+                }
             }
 
             FolderAction.RenamingFolder -> showFolderUI()
@@ -199,7 +192,7 @@ class FragmentCreatingFiles : Fragment() {
                 viewModel.uploadCachedGuides()
             }
             FolderAction.None -> Log.e("Error", "No se pudieron cargar datos iniciales")
-            is FolderAction.MovingFile -> Log.i("Moviendo: ", "Moviendo archivos a ${mode.guideDomain.nameGuide}")
+            is FolderAction.MovingFile -> Log.i("Moviendo: ", "Moviendo archivos")
         }
     }
 
@@ -243,7 +236,7 @@ class FragmentCreatingFiles : Fragment() {
             }
 
             FolderAction.None -> return
-            is FolderAction.MovingFile -> Log.i("Moviendo: ", "Moviendo archivos a ${mode.guideDomain.nameGuide}")
+            is FolderAction.MovingFile -> Log.i("Moviendo: ", "Moviendo archivos")
         }
     }
 
@@ -258,7 +251,7 @@ class FragmentCreatingFiles : Fragment() {
             IconType.BACTERIA_SOLID_FULL -> R.drawable.ic_bacteria_solid_full
         }*/
 
-        val data = ScreenData(
+        val data = ScreenDataUi(
             name = name,
             description = description,
             imgFolder = icon,
@@ -275,11 +268,11 @@ class FragmentCreatingFiles : Fragment() {
 
             FolderAction.CreatingFile -> onCreateGuideConfirmed(data)
             FolderAction.None -> Log.e("Error", "No se pudo crear el archivo")
-            is FolderAction.MovingFile -> Log.i("Moviendo: ", "Moviendo archivos a ${mode.guideDomain.nameGuide}")
+            is FolderAction.MovingFile -> Log.i("Moviendo: ", "Moviendo archivos")
         }
     }
 
-    private fun onCreateGuideConfirmed(data: ScreenData) {
+    private fun onCreateGuideConfirmed(data: ScreenDataUi) {
         findNavController().navigate(
             R.id.action_to_create_file,
             bundleOf(
@@ -290,7 +283,7 @@ class FragmentCreatingFiles : Fragment() {
         )
     }
 
-    private fun onCreateFolderConfirmed(data: ScreenData) {
+    private fun onCreateFolderConfirmed(data: ScreenDataUi) {
         viewModel.saveMetadata(data)
 
         Toast.makeText(
@@ -337,5 +330,11 @@ class FragmentCreatingFiles : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun showToast(text: String) {
+        Toast.makeText(
+            requireContext(), text, Toast.LENGTH_LONG
+        ).show()
     }
 }

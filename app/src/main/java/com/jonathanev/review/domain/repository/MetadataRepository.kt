@@ -1,7 +1,7 @@
 package com.jonathanev.review.domain.repository
 
-import com.jonathanev.review.presentation.model.ScreenData
+import com.jonathanev.review.data.model.json.ScreenDataDto
 
 interface MetadataRepository {
-    fun saveMetadata(data: ScreenData)
+    fun saveMetadata(data: ScreenDataDto)
 }

@@ -5,7 +5,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class GuideDomainModel(
-    val version: String,
+    val version: GuideVersion,
     val nameGuide: String,
     val description: String
 ): Parcelable

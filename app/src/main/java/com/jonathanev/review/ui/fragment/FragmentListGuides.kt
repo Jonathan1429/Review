@@ -20,9 +20,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jonathanev.review.R
 import com.jonathanev.review.databinding.FragmentListGuidesBinding
-import com.jonathanev.review.domain.model.GuideResultDomain
+import com.jonathanev.review.presentation.event.GuideActionEvent
 import com.jonathanev.review.presentation.event.UIMovingEvent
-import com.jonathanev.review.presentation.event.UIStopEvent
 import com.jonathanev.review.presentation.files.model.GuideResultUi
 import com.jonathanev.review.presentation.folders.model.FolderAction
 import com.jonathanev.review.presentation.viewmodel.FragmentListGuidesViewModel
@@ -62,34 +61,23 @@ class FragmentListGuides : Fragment() {
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.eventsMovingFiles.collect { message ->
-                    when (message) {
-                        is UIMovingEvent.ShowMessage -> {
-                            Toast.makeText(
-                                requireContext(),
-                                message.text,
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-
+                viewModel.eventsMovingFiles.collect { event ->
+                    when (event) {
                         UIMovingEvent.ExistFile -> {
                             alertDialog { confirmed ->
-                                val isSuccess = viewModel.onContinueProcess(confirmed, mode)
+                                viewModel.onContinueProcess(confirmed)
 
-                                if (isSuccess){
-                                    viewModel.setMainPath()
-                                    viewModel.moveFileSuccess()
-
-                                    findNavController().navigate(
-                                        R.id.action_to_content_graph,
-                                        null,
-                                        NavOptions.Builder()
-                                            .setPopUpTo(R.id.fragmentsContent, inclusive = true)
-                                            .build()
-                                    )
-                                }
+                                findNavController().navigate(
+                                    R.id.action_to_content_graph,
+                                    null,
+                                    NavOptions.Builder()
+                                        .setPopUpTo(R.id.fragmentsContent, inclusive = true)
+                                        .build()
+                                )
                             }
                         }
+
+                        is UIMovingEvent.ShowMessage -> showToast(event.text)
                     }
                 }
             }
@@ -115,11 +103,8 @@ class FragmentListGuides : Fragment() {
 
                 launch {
                     viewModelToolbar.onSuccess.collect {
+                        viewModel.movingGuide()
                         viewModelToolbar.initButtons()
-                        val isSuccess = viewModel.movingFiles(mode)
-                        if (isSuccess){
-                            viewModel.moveFileSuccess()
-                        }
                         viewModel.setMainPath()
                         findNavController().navigate(
                             R.id.action_to_content_graph,
@@ -136,20 +121,8 @@ class FragmentListGuides : Fragment() {
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.eventsMessages.collect { event ->
-                    if (event is UIStopEvent.ShowMessage) {
-                        Toast.makeText(context, event.text, Toast.LENGTH_SHORT).show()
-                    }
-
-                    if (event is UIStopEvent.DeleteGuideSuccess) {
-                        Toast.makeText(context, event.text, Toast.LENGTH_SHORT).show()
-                        viewModel.resetPaths()
-                        findNavController().navigate(
-                            R.id.fragmentsContent,
-                            null,
-                            NavOptions.Builder()
-                                .setPopUpTo(R.id.fragmentsContent, true)
-                                .build()
-                        )
+                    when (event) {
+                        is GuideActionEvent.ShowMessage -> showToast(event.text)
                     }
                 }
             }
@@ -202,6 +175,12 @@ class FragmentListGuides : Fragment() {
                 )
             }
         }
+    }
+
+    private fun showToast(text: String) {
+        Toast.makeText(
+            requireContext(), text, Toast.LENGTH_LONG
+        ).show()
     }
 
     private fun initUI(mode: FolderAction) {
@@ -265,18 +244,18 @@ class FragmentListGuides : Fragment() {
                         }
 
                         1 ->
-                        // Se ejecuta cuando quiere eliminar la guía.
-                        AlertDialog.Builder(context)
-                            .setTitle("¡Atención!")
-                            .setMessage(
-                                "¿Estás seguro que deseas eliminar la" +
-                                        " guia?"
-                            )
-                            .setPositiveButton("Si") { _, _ ->
-                                viewModel.deleteFiles(guideResult.guideUiModel.nameGuide)
-                            }
-                            .setNegativeButton("Cancelar") { _, _ -> dialog.dismiss() }
-                            .create().show()
+                            // Se ejecuta cuando quiere eliminar la guía.
+                            AlertDialog.Builder(context)
+                                .setTitle("¡Atención!")
+                                .setMessage(
+                                    "¿Estás seguro que deseas eliminar la" +
+                                            " guia?"
+                                )
+                                .setPositiveButton("Si") { _, _ ->
+                                    viewModel.deleteFiles(guideResult.guideUiModel.nameGuide)
+                                }
+                                .setNegativeButton("Cancelar") { _, _ -> dialog.dismiss() }
+                                .create().show()
 
                         2 -> {
                             findNavController().navigate(
@@ -286,29 +265,16 @@ class FragmentListGuides : Fragment() {
                         }
 
                         3 -> {
-                            /*Toast.makeText(
-                                requireContext(),
-                                "No se puede eliminar aún",
-                                Toast.LENGTH_SHORT
-                            ).show()
-
-                            val filePath =
-                                viewModel.getFilePath(guideResult.guideUiModel.nameGuide)*/
-
-                            val paths = viewModel.getPaths()
-                            val resultDomain = viewModel.getGuideDomain(position)
-                            when(resultDomain){
-                                is GuideResultDomain.Error -> {
-                                    Toast.makeText(
-                                        requireContext(),
-                                        "No se pudo cargar la guia",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
+                            val result = viewModel.guideToMove(position)
+                            when (result) {
+                                is GuideResultUi.Error -> {
+                                    showToast("No se pudo cargar la guia")
                                 }
-                                is GuideResultDomain.Success -> {
+
+                                is GuideResultUi.Success -> {
                                     findNavController().navigate(
                                         R.id.action_to_content_graph,
-                                        bundleOf("mode" to FolderAction.MovingFile(paths.first, paths.second, resultDomain.guideDomainModel))
+                                        bundleOf("mode" to FolderAction.MovingFile)
                                     )
                                 }
                             }

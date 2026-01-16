@@ -1,7 +1,7 @@
 package com.jonathanev.review.domain
 
-import com.jonathanev.review.data.media.MediaPaths
-import com.jonathanev.review.data.provider.DirectoryManagerImpl
+import com.jonathanev.review.core.media.MediaPaths
+import com.jonathanev.review.data.filesystem.DirectoryManagerImpl
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import javax.inject.Inject
 
@@ -18,7 +18,7 @@ class SetPintarTextosUseCase @Inject constructor(
             is QuestionContentDomain.Image -> {
                 var descifrado = setCifrarRutaImagenUseCase(item.nameFile, 26 - 3)// cifrar(texto, 26 - 3)
                 //val cifrado = item.url
-                descifrado = descifrado.replace(MediaPaths.BASERUTA_IMG.toRegex(), "")
+                descifrado = descifrado.replace(MediaPaths.MEDIA_PICKER_BASE_PATH.toRegex(), "")
                 var soloRuta = ruta.replaceAfterLast("/", "")
                 soloRuta = soloRuta.replaceFirst("guias", "imagenes")
                 val imagen = descifrado.replaceBeforeLast("/", "").replace("/", "")

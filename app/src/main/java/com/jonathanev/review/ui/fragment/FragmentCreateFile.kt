@@ -1,13 +1,13 @@
 package com.jonathanev.review.ui.fragment
 
 import android.os.Bundle
-import androidx.activity.OnBackPressedCallback
-import androidx.appcompat.app.AlertDialog
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
@@ -21,17 +21,17 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.jonathanev.review.presentation.model.ActionGuide
-import com.jonathanev.review.presentation.model.ScreenData
-import com.jonathanev.review.domain.model.TypeContent
-import com.jonathanev.review.presentation.event.UIStopEvent
-import com.jonathanev.review.ui.adapter.ListCreateImagesAdapter
-import com.jonathanev.review.ui.adapter.ListCreateTextsAdapter
 import com.jonathanev.review.R
+import com.jonathanev.review.databinding.FragmentCreateFileBinding
+import com.jonathanev.review.domain.model.TypeContent
+import com.jonathanev.review.presentation.event.CreateGuideEvent
+import com.jonathanev.review.presentation.model.ActionGuide
+import com.jonathanev.review.presentation.model.IconType
+import com.jonathanev.review.presentation.model.ScreenDataUi
 import com.jonathanev.review.presentation.viewmodel.MainToolbarViewModel
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
-import com.jonathanev.review.databinding.FragmentCreateFileBinding
-import com.jonathanev.review.presentation.model.IconType
+import com.jonathanev.review.ui.adapter.ListCreateImagesAdapter
+import com.jonathanev.review.ui.adapter.ListCreateTextsAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -44,7 +44,7 @@ class FragmentCreateFile : Fragment() {
 
     private lateinit var adaptListCreateTexts: ListCreateTextsAdapter
     private lateinit var adaptListCreateImages: ListCreateImagesAdapter
-    private lateinit var screenData: ScreenData
+    private lateinit var screenDataUi: ScreenDataUi
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -64,9 +64,9 @@ class FragmentCreateFile : Fragment() {
             requireArguments(), "actionGuide", ActionGuide::class.java
         ) ?: ActionGuide.NONE
 
-        screenData = BundleCompat.getParcelable(
-            requireArguments(), "screenData", ScreenData::class.java
-        ) ?: ScreenData("", "", IconType.ANCHOR_SOLID_FULL, 0)
+        screenDataUi = BundleCompat.getParcelable(
+            requireArguments(), "screenData", ScreenDataUi::class.java
+        ) ?: ScreenDataUi("", "", IconType.ANCHOR_SOLID_FULL, 0)
 
         val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -84,53 +84,42 @@ class FragmentCreateFile : Fragment() {
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiStopEvent.collect { uiStopEvent ->
-                    if (uiStopEvent is UIStopEvent.NotQuestionBefore) {
-                        Toast.makeText(
-                            requireContext(),
-                            uiStopEvent.text,
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
+                viewModel.createGuideEvent.collect { createGuideEvent ->
+                    when (createGuideEvent) {
+                        CreateGuideEvent.AddMoreQuestions -> {
+                            AlertDialog.Builder(requireContext())
+                                .setTitle("¡Atención!")
+                                .setMessage("Ya no hay mas preguntas, ¿quieres agregar mas?")
+                                .setPositiveButton(
+                                    "Si"
+                                ) { _, _ ->
+                                    viewModel.updateLastQuestion()
+                                    viewModel.nextQuestion()
+                                }
+                                .setNegativeButton(
+                                    "Cancelar"
+                                ) { dialog, _ ->
+                                    dialog.dismiss()
+                                }.setOnCancelListener {
 
-                    if (uiStopEvent is UIStopEvent.ShowMessage) {
-                        Toast.makeText(
-                            requireContext(),
-                            uiStopEvent.text,
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
+                                }.create().show()
+                        }
 
-                    if (uiStopEvent is UIStopEvent.AddMoreQuestions) {
-                        AlertDialog.Builder(requireContext())
-                            .setTitle("¡Atención!")
-                            .setMessage(uiStopEvent.text)
-                            .setPositiveButton(
-                                "Si"
-                            ) { _, _ ->
-                                viewModel.updateLastQuestion()
-                                viewModel.nextQuestion()
-                            }
-                            .setNegativeButton(
-                                "Cancelar"
-                            ) { dialog, _ ->
-                                dialog.dismiss()
-                            }.setOnCancelListener {
+                        CreateGuideEvent.ErrorGuideCreated -> showToast("No se pudo crear la guia")
+                        CreateGuideEvent.NotQuestionBefore -> showToast("Ya no hay preguntas anteriores")
+                        is CreateGuideEvent.ShowMessage -> showToast(createGuideEvent.text)
+                        CreateGuideEvent.SuccessGuideCreated -> {
+                            viewModel.initUIState()
+                            showToast("Guia creada correctamente")
 
-                            }.create().show()
-                    }
-
-                    if (uiStopEvent is UIStopEvent.GuideCreatedSuccess) {
-                        viewModel.initUIState()
-                        findNavController().navigate(
-                            R.id.fragmentsContent,
-                            null,
-                            NavOptions.Builder()
-                                .setPopUpTo(R.id.fragmentsContent, true)
-                                .build()
-                        )
-
-                        Toast.makeText(context, uiStopEvent.text, Toast.LENGTH_SHORT).show()
+                            findNavController().navigate(
+                                R.id.fragmentsContent,
+                                null,
+                                NavOptions.Builder()
+                                    .setPopUpTo(R.id.fragmentsContent, true)
+                                    .build()
+                            )
+                        }
                     }
                 }
             }
@@ -261,7 +250,7 @@ class FragmentCreateFile : Fragment() {
         binding.btnTrash.setOnClickListener {
             lifecycleScope.launch {
                 val dontAsk = viewModel.getDontAskDeleteOnce()
-                if (dontAsk){
+                if (dontAsk) {
                     viewModel.deleteQuesAns()
                 } else {
                     showDeletePopup()
@@ -272,8 +261,8 @@ class FragmentCreateFile : Fragment() {
         binding.btnSaveGuide.setOnClickListener {
             when (actionGuide) {
                 ActionGuide.CREATE -> viewModel.saveNewGuide(
-                    screenData.name,
-                    screenData.description
+                    screenDataUi.name,
+                    screenDataUi.description
                 )
 
                 is ActionGuide.EDIT -> viewModel.saveOldGuide(actionGuide.nameGuide)
@@ -322,4 +311,9 @@ class FragmentCreateFile : Fragment() {
         dialog.show()
     }
 
+    private fun showToast(text: String) {
+        Toast.makeText(
+            requireContext(), text, Toast.LENGTH_LONG
+        ).show()
+    }
 }

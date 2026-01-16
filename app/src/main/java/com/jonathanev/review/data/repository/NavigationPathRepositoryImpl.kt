@@ -1,7 +1,6 @@
 package com.jonathanev.review.data.repository
 
-import com.jonathanev.review.data.provider.FilePathsProvider
-import com.jonathanev.review.domain.repository.NavigationPathRepository
+import com.jonathanev.review.data.filesystem.FilePathsProvider
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -10,14 +9,14 @@ import javax.inject.Singleton
 class NavigationPathRepositoryImpl @Inject constructor(
     private val filePathsProvider: FilePathsProvider
 ): NavigationPathRepository {
-    private var _currentPathGuides: File = filePathsProvider.fileGuides
+    private var _currentPathGuides: String = filePathsProvider.fileGuides
 
-    override val currentPathGuides: File
+    override val currentPathGuides: String
         get() = _currentPathGuides
 
-    private var _currentPathImages: File = filePathsProvider.fileImages
+    private var _currentPathImages: String = filePathsProvider.fileImages
 
-    override val currentPathImages: File
+    override val currentPathImages: String
         get() = _currentPathImages
 
     override fun next(fileName: String) {
@@ -26,8 +25,8 @@ class NavigationPathRepositoryImpl @Inject constructor(
     }
 
     override fun back() {
-        _currentPathGuides = currentPathGuides.parentFile ?: currentPathGuides
-        _currentPathImages = currentPathImages.parentFile ?: currentPathImages
+        _currentPathGuides = File(currentPathGuides).parentFile?.path ?: currentPathGuides
+        _currentPathImages = File(currentPathImages).parentFile?.path ?: currentPathImages
     }
 
     override fun reset() {

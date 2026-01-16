@@ -2,15 +2,14 @@ package com.jonathanev.review.data.repository
 
 import android.content.Context
 import android.net.Uri
-import com.jonathanev.review.data.Extensions
-import com.jonathanev.review.data.provider.FilePathsProvider
+import com.jonathanev.review.data.filesystem.Extensions
+import com.jonathanev.review.data.filesystem.FilePathsProvider
 import com.jonathanev.review.data.storage.StorageFolders
-import com.jonathanev.review.data.xml.Versions
 import com.jonathanev.review.domain.model.GuideDomainModel
+import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
 import com.jonathanev.review.domain.repository.ImagesRepository
-import com.jonathanev.review.domain.repository.NavigationPathRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import java.nio.file.Files
@@ -23,9 +22,7 @@ class ImagesRepositoryImpl @Inject constructor(
     private val filePathsProvider: FilePathsProvider,
     private val navigationPathRepository: NavigationPathRepository
 ) : ImagesRepository {
-    override suspend fun saveImage(image: QuestionContentDomain.Image, nameFolder: String) {
-        /*val currentPath =
-            filePathsProvider.buildImage(navigationPathRepository.currentPathGuides, nameFolder)*/
+    override suspend fun save(image: QuestionContentDomain.Image, nameFolder: String) {
         val currentPath =
             filePathsProvider.buildFolder(navigationPathRepository.currentPathImages, nameFolder)
         val uri = Uri.parse(image.uri)
@@ -40,7 +37,7 @@ class ImagesRepositoryImpl @Inject constructor(
     }
 
     override fun movingImagesToOtros() {
-        val currentPathImages = navigationPathRepository.currentPathImages
+        val currentPathImages = File(navigationPathRepository.currentPathImages)
         val images = currentPathImages.listFiles()
             ?.filter { it.isFile && it.extension == Extensions.PNG_EXTENSION}
             ?: emptyList()
@@ -60,29 +57,30 @@ class ImagesRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun deleteImages(
+    override fun delete(
         guideDomainModel: GuideDomainModel,
         listImages: List<QuestionContentDomain.Image>
-    ) {
+    ): Boolean {
 
-        if (guideDomainModel.version == Versions.VERSION1) {
+        if (guideDomainModel.version == GuideVersion.V1) {
             val basePathImages = navigationPathRepository.currentPathImages
 
-            //filePathsProvider.buildFolder(navigationPathRepository.currentPathImages, guideDomainModel.nameGuide)
             listImages.forEach { image ->
                 val noImage = File(image.uri.substringAfterLast("/")).nameWithoutExtension
-                val currentPath = filePathsProvider.buildImage(basePathImages, noImage)
+                val currentPath = File(filePathsProvider.buildImage(basePathImages, noImage))
                 if (currentPath.exists()) {
                     currentPath.delete()
                 }
             }
+
+            return true
         } else {
             val basePathImages = filePathsProvider.buildFolder(
                 navigationPathRepository.currentPathImages,
                 guideDomainModel.nameGuide
             )
 
-            basePathImages.deleteRecursively()
+            return File(basePathImages).deleteRecursively()
         }
     }
 
@@ -91,17 +89,17 @@ class ImagesRepositoryImpl @Inject constructor(
         preguntas: List<QuestionItemDomain>,
         respuestas: List<QuestionItemDomain>,
         attributesGuide: GuideDomainModel
-    ) {
+    ): Boolean {
         /*val oldPathImages = filePathsProvider.buildImage(navigationPathRepository.currentPathGuides, fileName)*/
         val oldPathImages =
             filePathsProvider.buildFolder(navigationPathRepository.currentPathImages, fileName)
 
         // Renamed folder
-        if (attributesGuide.version == Versions.VERSION2) {
-            val newPathImages = File(oldPathImages.parent, fileName)
-            oldPathImages.renameTo(newPathImages)
-        } else { // Version 1
-            val newPathImages = File(oldPathImages.parent, fileName)
+        if (attributesGuide.version == GuideVersion.V2) {
+            val newPathImages = File(oldPathImages, fileName)
+            return File(oldPathImages).renameTo(newPathImages)
+        } else { // Version 1 a Version 2
+            val newPathImages = File(oldPathImages, fileName)
 
             if (newPathImages.exists()) {
                 newPathImages.mkdir()
@@ -111,19 +109,25 @@ class ImagesRepositoryImpl @Inject constructor(
                 .flatMap { it.content }
                 .filterIsInstance<QuestionContentDomain.Image>()
 
+            var isSuccess = true
             listImages.forEach { image ->
                 val source = File(image.uri)
                 if (source.exists()) {
                     val noImage = File(image.uri.substringAfterLast("/")).nameWithoutExtension
-                    val newPathImage = filePathsProvider.buildImage(newPathImages, noImage)
+                    val newPathImage = filePathsProvider.buildImage(newPathImages.path, noImage)
 
-                    Files.move(
+                    val isRenamed = File(image.uri).renameTo(File(newPathImage))
+                    if (!isRenamed) isSuccess = false
+
+                    /*Files.move(
                         Paths.get(image.uri),
-                        Paths.get(newPathImage.path),
+                        Paths.get(newPathImage),
                         StandardCopyOption.REPLACE_EXISTING
-                    )
+                    )*/
                 }
             }
+
+            return isSuccess
         }
     }
 }

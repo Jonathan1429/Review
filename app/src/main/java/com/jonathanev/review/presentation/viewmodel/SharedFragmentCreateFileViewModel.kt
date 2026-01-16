@@ -3,9 +3,8 @@ package com.jonathanev.review.presentation.viewmodel
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jonathanev.review.data.datastore.DataStoreManager
 import com.jonathanev.review.domain.CreateFilePathUseCase
-import com.jonathanev.review.domain.GenerateTextColorRangesUseCase
+import com.jonathanev.review.domain.GetCurrentPathGuidesUseCase
 import com.jonathanev.review.domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.domain.GetSaveGuidesUseCase
 import com.jonathanev.review.domain.LoadGuidesUseCase
@@ -15,12 +14,18 @@ import com.jonathanev.review.domain.SetCrearXmlUseCase
 import com.jonathanev.review.domain.SetDecodePathImageUseCase
 import com.jonathanev.review.domain.SetMainPathUseCase
 import com.jonathanev.review.domain.UpdateImagesUseCase
+import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
+import com.jonathanev.review.domain.model.GuidePath
+import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
 import com.jonathanev.review.domain.model.ResponseDomain
 import com.jonathanev.review.domain.model.TypeContent
-import com.jonathanev.review.presentation.event.UIStopEvent
+import com.jonathanev.review.domain.repository.UserPreferencesRepository
+import com.jonathanev.review.domain.result.GetGuideResult
+import com.jonathanev.review.domain.usecase.guide.GenerateTextColorRangesUseCase
+import com.jonathanev.review.presentation.event.CreateGuideEvent
 import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.ColorRangeUi
@@ -48,18 +53,19 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     private val setDecodePathImageUseCase: SetDecodePathImageUseCase,
     private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
     private val getSaveGuidesUseCase: GetSaveGuidesUseCase,
-    private val dataStoreManager: DataStoreManager,
     private val generateTextColorRangesUseCase: GenerateTextColorRangesUseCase,
     private val updateImagesUseCase: UpdateImagesUseCase,
     private val setMainPathUseCase: SetMainPathUseCase,
     private val createFilePathUseCase: CreateFilePathUseCase,
-    private val loadGuidesUseCase: LoadGuidesUseCase
+    private val userPreferencesRepository: UserPreferencesRepository,
+    private val loadGuidesUseCase: LoadGuidesUseCase,
+    private val getCurrentPathGuidesUseCase: GetCurrentPathGuidesUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(GuideUiState())
     val uiState = _uiState.asStateFlow()
 
-    private val _uiStopEvent = MutableSharedFlow<UIStopEvent>()
-    val uiStopEvent = _uiStopEvent.asSharedFlow()
+    private val _createGuideEvent = MutableSharedFlow<CreateGuideEvent>()
+    val createGuideEvent = _createGuideEvent.asSharedFlow()
 
     val imageList: StateFlow<List<QuestionContentUi.Image>> = _uiState
         .map { state ->
@@ -273,7 +279,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     fun rollPregResp() {
         // 1. Validación de Negocio
         if (textList.value.isEmpty()) {
-            sendNotification(UIStopEvent.ShowMessage("Debes tener al menos un texto"))
+            sendNotification(CreateGuideEvent.ShowMessage("Debes tener al menos un texto"))
             return
         }
 
@@ -300,12 +306,12 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
         // 1. Validaciones de Negocio
         if (currentState.contadorPregunta == 0) {
-            sendNotification(UIStopEvent.NotQuestionBefore("Ya no hay preguntas anteriores"))
+            sendNotification(CreateGuideEvent.NotQuestionBefore)//("Ya no hay preguntas anteriores"))
             return
         }
 
         if (textList.value.isEmpty()) {
-            sendNotification(UIStopEvent.ShowMessage("Debes tener al menos un texto"))
+            sendNotification(CreateGuideEvent.ShowMessage("Debes tener al menos un texto"))
             return
         }
 
@@ -338,9 +344,9 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         }
     }
 
-    private fun sendNotification(event: UIStopEvent) {
+    private fun sendNotification(event: CreateGuideEvent) {
         viewModelScope.launch {
-            _uiStopEvent.emit(event)
+            _createGuideEvent.emit(event)
         }
     }
 
@@ -348,7 +354,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         val currentState = uiState.value
 
         if (textList.value.isEmpty()) {
-            sendNotification(UIStopEvent.ShowMessage("Debes tener al menos un texto"))
+            sendNotification(CreateGuideEvent.ShowMessage("Debes tener al menos un texto"))
             return
         }
 
@@ -374,7 +380,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
         if (isLastQuestion) {
             viewModelScope.launch {
-                _uiStopEvent.emit(UIStopEvent.AddMoreQuestions("Ya no hay mas preguntas, ¿quieres agregar mas?"))
+                _createGuideEvent.emit(CreateGuideEvent.AddMoreQuestions)//("Ya no hay mas preguntas, ¿quieres agregar mas?"))
             }
             return
         }
@@ -392,37 +398,62 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
     private fun emitShowMessage() {
         viewModelScope.launch {
-            _uiStopEvent.emit(UIStopEvent.ShowMessage("Debes tener al menos un texto en pregunta/respuesta"))
+            _createGuideEvent.emit(CreateGuideEvent.ShowMessage("Debes tener al menos un texto en pregunta/respuesta"))
         }
     }
 
     fun getObtenerDatosXML(positionContent: Int, nameGuide: String) {
         val status = uiState.value
-
         if (status.respuestas.isEmpty()) {
             val guideDomainModel = getSaveGuidesUseCase.invoke().find { it.nameGuide == nameGuide }
-            val datos = getObtenerDatosXMLUseCase.invoke(guideDomainModel)
+            if (guideDomainModel == null) {
+                emitShowMessage()
+                sendNotification(CreateGuideEvent.ShowMessage("No se ha encontrado la guia a renombrar"))
+                return
+            }
 
-            // 1. Mapeamos las listas completas desde el XML
-            val tempQuestions = datos.mapNotNull { (it.question as? ResponseDomain.Filled)?.item }
-            val tempAnswers = datos.mapNotNull { (it.answer as? ResponseDomain.Filled)?.item }
-            val questionsDomain = generateTextColorRangesUseCase.invoke(tempQuestions)
-            val answersDomain = generateTextColorRangesUseCase.invoke(tempAnswers)
-            val newQuestionsToUi = questionsDomain.map { it.toUi() }
-            val newAnswersToUi = answersDomain.map { it.toUi() }
-
-            _uiState.update { state ->
-                state.copy(
-                    contadorPregunta = if (positionContent == -1) {
-                        answersDomain.size
-                    } else {
-                        positionContent
-                    },
-                    typeContent = TypeContent.QUESTION,
-                    preguntas = newQuestionsToUi,
-                    respuestas = newAnswersToUi,
-                    isLastQuestion = if (positionContent == -1) false else null
+            val currentPath = getCurrentPathGuidesUseCase.invoke()
+            when (val result = getObtenerDatosXMLUseCase.invoke(
+                GuideContext.Actual(
+                    guideDomainModel,
+                    GuidePath(currentPath)
                 )
+            )) {
+                is GetGuideResult.Success -> {
+                    viewModelScope.launch {
+                        // 1. Mapeamos las listas completas desde el XML
+                        val tempQuestions =
+                            result.list.mapNotNull { (it.question as? ResponseDomain.Filled)?.item }
+                        val tempAnswers =
+                            result.list.mapNotNull { (it.answer as? ResponseDomain.Filled)?.item }
+                        val questionsDomain = generateTextColorRangesUseCase.invoke(tempQuestions)
+                        val answersDomain = generateTextColorRangesUseCase.invoke(tempAnswers)
+                        val newQuestionsToUi = questionsDomain.map { it.toUi() }
+                        val newAnswersToUi = answersDomain.map { it.toUi() }
+
+                        _uiState.update { state ->
+                            state.copy(
+                                contadorPregunta = if (positionContent == -1) {
+                                    answersDomain.size
+                                } else {
+                                    positionContent
+                                },
+                                typeContent = TypeContent.QUESTION,
+                                preguntas = newQuestionsToUi,
+                                respuestas = newAnswersToUi,
+                                isLastQuestion = if (positionContent == -1) false else null
+                            )
+                        }
+                    }
+                }
+
+                GetGuideResult.Error -> sendNotification(CreateGuideEvent.ShowMessage("Ocurrió un error al abrir la guia"))
+
+                GetGuideResult.InvalidFormat -> CreateGuideEvent.ShowMessage("La guia está dañada")
+
+                GetGuideResult.NotFound -> CreateGuideEvent.ShowMessage("No se ha encontrado la guia")
+
+                GetGuideResult.UnknownError -> CreateGuideEvent.ShowMessage("Error desconocido")
             }
         }
     }
@@ -435,7 +466,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         val questionHasContent = preguntasDomain.isEmpty()
         if (questionHasContent) {
             sendNotification(
-                UIStopEvent.ShowMessage("Debes tener minimo algo para guardar")
+                CreateGuideEvent.ShowMessage("Debes tener minimo algo para guardar")
             )
             return false
         }
@@ -508,12 +539,12 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
             if (isSuccess) {
                 setMainPathUseCase.invoke()
-                _uiStopEvent.emit(
-                    UIStopEvent.GuideCreatedSuccess("Se ha guardado la guía correctamente")
+                _createGuideEvent.emit(
+                    CreateGuideEvent.SuccessGuideCreated//("Se ha guardado la guía correctamente")
                 )
             } else {
-                _uiStopEvent.emit(
-                    UIStopEvent.ShowMessage("No se pudo guardar la guia correctamente")
+                _createGuideEvent.emit(
+                    CreateGuideEvent.ErrorGuideCreated//("No se pudo guardar la guia correctamente")
                 )
             }
         }
@@ -549,14 +580,15 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             val guide = guides.find { it.nameGuide == nameGuide }
 
             updateImagesUseCase.invoke(
-                guide = guide ?: GuideDomainModel("2", nameGuide, description),
+                guideDomain = guide ?: GuideDomainModel(GuideVersion.V2, nameGuide, description),
                 preguntasProcesadas = preguntasProcesadas,
                 respuestasProcesadas = respuestasProcesadas,
                 isNewFile = true,
             )
 
             createFilePathUseCase.invoke(nameGuide)
-            val dataWithTags = setColocarEtiquetasUseCase.invoke(preguntasProcesadas, respuestasProcesadas)
+            val dataWithTags =
+                setColocarEtiquetasUseCase.invoke(preguntasProcesadas, respuestasProcesadas)
 
             // 6. Persistencia del XML
             val isSuccess = setCrearXmlUseCase.invoke(
@@ -569,12 +601,12 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             // 7. Notificación de resultado y limpieza de navegación
             if (isSuccess) {
                 setMainPathUseCase.invoke()
-                _uiStopEvent.emit(
-                    UIStopEvent.GuideCreatedSuccess("Se ha guardado la guía correctamente")
+                _createGuideEvent.emit(
+                    CreateGuideEvent.SuccessGuideCreated//("Se ha guardado la guía correctamente")
                 )
             } else {
-                _uiStopEvent.emit(
-                    UIStopEvent.ShowMessage("No se pudo guardar la guia correctamente")
+                _createGuideEvent.emit(
+                    CreateGuideEvent.ErrorGuideCreated//("No se pudo guardar la guia correctamente")
                 )
             }
         }
@@ -621,12 +653,11 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
     fun saveDontAskDelete() {
         viewModelScope.launch {
-            dataStoreManager.setDontAskDelete(true)
-            val value = dataStoreManager.getDontAskDelete().first()
+            userPreferencesRepository.setDontAskDelete(true)
         }
     }
 
-    suspend fun getDontAskDeleteOnce() = dataStoreManager
+    suspend fun getDontAskDeleteOnce() = userPreferencesRepository
         .getDontAskDelete()
         .first()
 

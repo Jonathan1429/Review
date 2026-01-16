@@ -7,8 +7,9 @@ import com.jonathanev.review.domain.GetFolderPosicionUseCase
 import com.jonathanev.review.domain.GetFoldersWithNumGuidesUseCase
 import com.jonathanev.review.domain.NextPathUseCase
 import com.jonathanev.review.domain.model.FolderDomainModel
+import com.jonathanev.review.presentation.event.FolderActionEvent
 import com.jonathanev.review.presentation.event.UIMovingEvent
-import com.jonathanev.review.presentation.event.UIStopEvent
+import com.jonathanev.review.presentation.event.PrepareGuideEvent
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.FolderResultUi
 import com.jonathanev.review.presentation.state.FoldersUiState
@@ -32,7 +33,7 @@ class FoldersListViewModel @Inject constructor(
 
     private var cachedFolders: List<FolderDomainModel> = emptyList()
 
-    private val _eventsMessages = MutableSharedFlow<UIStopEvent>()
+    private val _eventsMessages = MutableSharedFlow<FolderActionEvent>()
     val eventsMessages = _eventsMessages.asSharedFlow()
 
     private val _eventsMovingFiles = MutableSharedFlow<UIMovingEvent>()
@@ -76,11 +77,14 @@ class FoldersListViewModel @Inject constructor(
     }
 
     fun deleteFiles(nameFolder: String) {
-        val message = deleteFolderUseCase.invoke(nameFolder)
-
         viewModelScope.launch {
+            val message = deleteFolderUseCase.invoke(nameFolder)
             _eventsMessages.emit(
-                message
+                if (message) {
+                    FolderActionEvent.DeleteFolderSuccess
+                } else {
+                    FolderActionEvent.ShowMessage("No se pudo borrar la carpeta correctamente")
+                }
             )
         }
     }

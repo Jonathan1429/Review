@@ -24,13 +24,14 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.jonathanev.review.presentation.folders.model.FolderAction
 import com.jonathanev.review.presentation.event.UIMovingEvent
-import com.jonathanev.review.presentation.event.UIStopEvent
-import com.jonathanev.review.data.provider.FilePathsProvider
+import com.jonathanev.review.presentation.event.PrepareGuideEvent
+import com.jonathanev.review.data.filesystem.FilePathsProvider
 import com.jonathanev.review.ui.adapter.ListFoldersAdapter
 import com.jonathanev.review.R
 import com.jonathanev.review.presentation.folders.viewmodel.FoldersListViewModel
 import com.jonathanev.review.presentation.viewmodel.MainToolbarViewModel
 import com.jonathanev.review.databinding.FragmentListFoldersBinding
+import com.jonathanev.review.presentation.event.FolderActionEvent
 import com.jonathanev.review.presentation.model.FolderResultUi
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -72,14 +73,13 @@ class FragmentListFolders : DialogFragment() {
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.eventsMessages.collect { event ->
-                    if (event is UIStopEvent.ShowMessage) {
-                        Toast.makeText(context, event.text, Toast.LENGTH_SHORT).show()
-                    }
+                    when (event) {
+                        FolderActionEvent.DeleteFolderSuccess -> {
+                            viewModel.getAllFolders()
+                            showToast("Se ha borrado la carpeta correctamente")
+                        }
 
-                    if (event is UIStopEvent.DeleteFolderSuccess) {
-                        Toast.makeText(context, event.text, Toast.LENGTH_SHORT).show()
-
-                        viewModel.getAllFolders()
+                        is FolderActionEvent.ShowMessage -> showToast(event.text)
                     }
                 }
             }
@@ -102,7 +102,7 @@ class FragmentListFolders : DialogFragment() {
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.eventsMovingFiles.collect { message ->
-                    when(message){
+                    when (message) {
                         is UIMovingEvent.ShowMessage -> {
                             Toast.makeText(
                                 requireContext(),
@@ -238,5 +238,11 @@ class FragmentListFolders : DialogFragment() {
         val dialog = super.onCreateDialog(savedInstanceState)
         dialog.window!!.requestFeature(Window.FEATURE_NO_TITLE)
         return dialog
+    }
+
+    private fun showToast(text: String) {
+        Toast.makeText(
+            requireContext(), text, Toast.LENGTH_LONG
+        ).show()
     }
 }

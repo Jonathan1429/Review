@@ -20,7 +20,7 @@ sealed class FolderAction: Parcelable {
     data object CreatingFile: FolderAction()
 
     @Parcelize
-    data class MovingFile(val pathGuides: File, val pathImages: File, val guideDomain: GuideDomainModel): FolderAction()
+    data object MovingFile: FolderAction()
 
     @Parcelize
     data object None: FolderAction()

@@ -13,7 +13,7 @@ class ReubicarImagenesUseCase @Inject constructor(
         preguntas: List<QuestionItemDomain>,
         respuestas: List<QuestionItemDomain>,
         attributesGuide: GuideDomainModel
-    ) {
-        imagesRepository.reubicarImagenes(fileName, preguntas, respuestas, attributesGuide)
+    ): Boolean {
+        return imagesRepository.reubicarImagenes(fileName, preguntas, respuestas, attributesGuide)
     }
 }

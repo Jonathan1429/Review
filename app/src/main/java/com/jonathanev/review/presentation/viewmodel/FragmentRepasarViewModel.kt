@@ -2,15 +2,20 @@ package com.jonathanev.review.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jonathanev.review.domain.GenerateTextColorRangesUseCase
+import com.jonathanev.review.domain.GetCurrentPathGuidesUseCase
+import com.jonathanev.review.domain.usecase.guide.GenerateTextColorRangesUseCase
 import com.jonathanev.review.domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.domain.GetPreviewQuestionsUseCase
 import com.jonathanev.review.domain.GetSaveGuidesUseCase
+import com.jonathanev.review.domain.UploadContentUseCase
+import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
+import com.jonathanev.review.domain.model.GuidePath
 import com.jonathanev.review.domain.model.QAItemDomain
 import com.jonathanev.review.domain.model.ResponseDomain
 import com.jonathanev.review.domain.model.TypeContent
-import com.jonathanev.review.presentation.event.UIStopEvent
+import com.jonathanev.review.domain.result.GetGuideResult
+import com.jonathanev.review.presentation.event.GuideReviewEvent
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.presentation.state.GuideUiState
@@ -31,9 +36,10 @@ import javax.inject.Inject
 @HiltViewModel
 class FragmentRepasarViewModel @Inject constructor(
     private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
-    private val generateTextColorRangesUseCase: GenerateTextColorRangesUseCase,
     private val getPreviewQuestionsUseCase: GetPreviewQuestionsUseCase,
     private val getSaveGuidesUseCase: GetSaveGuidesUseCase,
+    private val uploadContentUseCase: UploadContentUseCase,
+    private val getCurrentPathGuidesUseCase: GetCurrentPathGuidesUseCase
 ) : ViewModel() {
     private var cachedGuides: List<GuideDomainModel> = emptyList()
 
@@ -42,6 +48,9 @@ class FragmentRepasarViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(GuideUiState())
     val uiState = _uiState.asStateFlow()
+
+    private val _eventsMessages = MutableSharedFlow<GuideReviewEvent>()
+    val eventsMessages = _eventsMessages.asSharedFlow()
 
     val imageList: StateFlow<List<QuestionContentUi.Image>> = _uiState
         .map { state ->
@@ -74,29 +83,44 @@ class FragmentRepasarViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
-    private val _eventsMessages = MutableSharedFlow<UIStopEvent>()
-    val eventsMessages = _eventsMessages.asSharedFlow()
-
     fun getObtenerDatosXML(folderId: String) {
         val guideDomainModel = cachedGuides.find { it.nameGuide == folderId }
+        if (guideDomainModel == null) {
+            emitMessage("No se ha encontrado la guia a renombrar")
+            return
+        }
+        val currentPath = getCurrentPathGuidesUseCase.invoke()
         //Revisar como se obtienen los datos aqui, porque no se visualiza la imagen
-        val datos = getObtenerDatosXMLUseCase.invoke(guideDomainModel)
-        //val datosProcesados = applyColorRangesToQAUseCase.invoke(datos)
-
-        val tempQuestions =
-            datos.mapNotNull { (it.question as? ResponseDomain.Filled)?.item }.toList()
-        val tempAnswers =
-            datos.mapNotNull { (it.answer as? ResponseDomain.Filled)?.item }.toList()
-
-        val questionsDomain = generateTextColorRangesUseCase.invoke(tempQuestions)
-        val answersDomain = generateTextColorRangesUseCase.invoke(tempAnswers)
-
-        initUiPreviewQuestions(datos)
-        _uiState.update { currentState ->
-            currentState.copy(
-                preguntas = questionsDomain.map { it.toUi() },
-                respuestas = answersDomain.map { it.toUi() }
+        when (val result = getObtenerDatosXMLUseCase.invoke(
+            GuideContext.Actual(
+                guideDomainModel,
+                GuidePath(currentPath)
             )
+        )) {
+            is GetGuideResult.Success -> {
+                val (questions, answers) = uploadContentUseCase.invoke(result)
+                initUiPreviewQuestions(result.list)
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        preguntas = questions.map { it.toUi() },
+                        respuestas = answers.map { it.toUi() }
+                    )
+                }
+            }
+
+            GetGuideResult.Error -> emitMessage("Ocurrió un error al abrir la guia")
+
+            GetGuideResult.InvalidFormat -> emitMessage("La guia está dañada")
+
+            GetGuideResult.NotFound -> emitMessage("No se ha encontrado la guia")
+
+            GetGuideResult.UnknownError -> emitMessage("Error desconocido")
+        }
+    }
+
+    private fun emitMessage(text: String) {
+        viewModelScope.launch {
+            _eventsMessages.emit(GuideReviewEvent.ShowMessage(text))
         }
     }
 
@@ -124,7 +148,7 @@ class FragmentRepasarViewModel @Inject constructor(
         if (state.contadorPregunta == state.respuestas.size - 1) {
             viewModelScope.launch {
                 _eventsMessages.emit(
-                    UIStopEvent.RestartGuide("Se acabaron las preguntas, ¿Quieres repetir la guía?")
+                    GuideReviewEvent.RestartGuide
                 )
             }
             return
@@ -144,7 +168,7 @@ class FragmentRepasarViewModel @Inject constructor(
         if (count == 0) {
             viewModelScope.launch {
                 _eventsMessages.emit(
-                    UIStopEvent.NotQuestionBefore("Ya no tienes preguntas anteriores")
+                    GuideReviewEvent.NotQuestionBefore
                 )
             }
             return
@@ -153,7 +177,7 @@ class FragmentRepasarViewModel @Inject constructor(
         _uiState.update { uiState ->
             uiState.copy(
                 typeContent = TypeContent.QUESTION,
-                contadorPregunta =  count - 1
+                contadorPregunta = count - 1
             )
         }
     }

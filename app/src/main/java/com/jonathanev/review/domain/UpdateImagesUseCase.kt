@@ -1,61 +1,51 @@
 package com.jonathanev.review.domain
 
-import com.jonathanev.review.data.provider.FilePathsProvider
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
-import com.jonathanev.review.domain.repository.NavigationPathRepository
-import java.io.File
+import com.jonathanev.review.data.repository.NavigationPathRepository
+import com.jonathanev.review.domain.model.GuidePath
 import javax.inject.Inject
 
 class UpdateImagesUseCase @Inject constructor(
     private val directoryManager: DirectoryManager,
     private val saveGuideImagesUseCase: SaveGuideImagesUseCase,
-    private val filePathsProvider: FilePathsProvider,
     private val navigationPathRepository: NavigationPathRepository
 ) {
     suspend operator fun invoke(
-        guide: GuideDomainModel,
+        guideDomain: GuideDomainModel,
         preguntasProcesadas: List<QuestionItemDomain>,
         respuestasProcesadas: List<QuestionItemDomain>,
         isNewFile: Boolean,
-    ) {
+    ): Boolean {
         // Preparar la carpeta para las imagenes.
-        directoryManager.createPathImages(guide, isNewFile)
-
+        directoryManager.createPathImages(guideDomain, isNewFile)
         val listImages = (preguntasProcesadas + respuestasProcesadas)
             .flatMap { it.content }
             .filterIsInstance<QuestionContentDomain.Image>()
 
-        if (isNewFile) {
-            if (listImages.isNotEmpty()) {
-                saveGuideImagesUseCase.saveImagesInDevice(listImages, guide.nameGuide)
-            }
-        } else {
-            directoryManager.moveImages(
-                listImages = listImages,
-                nameGuide = guide.nameGuide,
-                version = guide.version
-            )
-
-            // Add new Images.
-            val currentPath =
-                filePathsProvider.buildFolder(
-                    navigationPathRepository.currentPathGuides,
-                    guide.nameGuide
+        if (!isNewFile) {
+            val isSuccessMoveImages =
+                directoryManager.moveImages(
+                    guideDomain,
+                    ImageSource.SaveGuide(GuidePath(navigationPathRepository.currentPathImages)),
+                    listImages
                 )
-
-            val currentDeviceNames =
-                currentPath.listFiles()?.map { it.name }?.toSet() ?: emptySet()
-
-            val addImages =
-                listImages.filter { it.nameFile !in currentDeviceNames && it.uri.isNotEmpty() }
-            if (addImages.isNotEmpty()) {
-                saveGuideImagesUseCase.saveImagesInDevice(addImages, guide.nameGuide)
-            }
-            // Delete images V2
-            directoryManager.deleteLeftoverImagesInDevice(guide.nameGuide, listImages)
-
+            if (!isSuccessMoveImages) return false
         }
+
+        val imagesInDevice = directoryManager.getImagesInDevice(guideDomain)
+
+        val addImages =
+            listImages.filter { it.nameFile !in imagesInDevice && it.uri.isNotEmpty() }
+
+        if (addImages.isNotEmpty()) {
+            saveGuideImagesUseCase.saveImagesInDevice(addImages, guideDomain.nameGuide)
+        }
+
+        // Borrar imagenes que se encuentren en el dispositivo y no en el archivo
+        directoryManager.deleteLeftoverImagesInDevice(guideDomain.nameGuide, listImages)
+
+        return true
     }
 }

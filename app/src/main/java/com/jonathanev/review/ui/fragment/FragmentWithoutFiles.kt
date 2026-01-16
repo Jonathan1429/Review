@@ -95,21 +95,17 @@ class FragmentWithoutFiles : Fragment() {
 
                 launch {
                     viewModelToolbar.onSuccess.collect {
-                        val isSuccess = viewModel.onContinueProcess(true, mode)
+                        viewModel.movingGuide()
+                        viewModelToolbar.initButtons()
+                        viewModel.setMainPath()
 
-                        if (isSuccess) {
-                            viewModelToolbar.initButtons()
-                            viewModel.setMainPath()
-                            viewModel.moveFileSuccess()
-
-                            findNavController().navigate(
-                                R.id.action_to_content_graph,
-                                null,
-                                NavOptions.Builder()
-                                    .setPopUpTo(R.id.fragmentsContent, inclusive = true)
-                                    .build()
-                            )
-                        }
+                        findNavController().navigate(
+                            R.id.action_to_content_graph,
+                            null,
+                            NavOptions.Builder()
+                                .setPopUpTo(R.id.fragmentsContent, inclusive = true)
+                                .build()
+                        )
                     }
                 }
             }

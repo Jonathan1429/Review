@@ -1,20 +1,20 @@
 package com.jonathanev.review.domain
 
-import com.jonathanev.review.data.datastore.DataStoreManager
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
+import com.jonathanev.review.domain.repository.UserPreferencesRepository
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 class SetDecodePathImageUseCase @Inject constructor(
-    private val dataStore: DataStoreManager
+    private val userPreferencesRepository: UserPreferencesRepository
 ) {
     suspend operator fun invoke(
         preguntas: List<QuestionItemDomain>,
         respuestas: List<QuestionItemDomain>
     ): Pair<List<QuestionItemDomain>, List<QuestionItemDomain>> { // Retorna ambas listas actualizadas
 
-        var count = dataStore.getCountImage().first()
+        var count = userPreferencesRepository.getCountImage().first()
 
         // Función interna que devuelve una NUEVA lista, no modifica la anterior
         fun transformItems(items: List<QuestionItemDomain>): List<QuestionItemDomain> {
@@ -34,7 +34,7 @@ class SetDecodePathImageUseCase @Inject constructor(
         val nuevasPreguntas = transformItems(preguntas)
         val nuevasRespuestas = transformItems(respuestas)
 
-        dataStore.setCounter(count)
+        userPreferencesRepository.setImageCount(count)
 
         return Pair(nuevasPreguntas, nuevasRespuestas)
     }

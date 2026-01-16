@@ -5,16 +5,16 @@ import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
 
 interface ImagesRepository {
-    suspend fun saveImage(image: QuestionContentDomain.Image, nameFolder: String)
+    suspend fun save(image: QuestionContentDomain.Image, nameFolder: String)
     fun reubicarImagenes(
         fileName: String,
         preguntas: List<QuestionItemDomain>,
         respuestas: List<QuestionItemDomain>,
         attributesGuide: GuideDomainModel
-    )
-    fun deleteImages(
+    ): Boolean
+    fun delete(
         guideDomainModel: GuideDomainModel,
         listImages: List<QuestionContentDomain.Image>
-    )
+    ): Boolean
     fun movingImagesToOtros()
 }

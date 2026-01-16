@@ -21,8 +21,8 @@ fun FolderDomainModel.toUi(): FolderUiModel{
 fun FolderAttributesDomain.toUi(): FolderAttributesUi {
     return FolderAttributesUi(
         name = this.name,
-        imgFolder = mapDrawable(this.imgFolder),
-        color = mapColor(this.color)
+        imgFolder = mapDrawable(this.imgFolder.toIconType()),
+        color = mapColor(this.color.toColorType())
     )
 }
 

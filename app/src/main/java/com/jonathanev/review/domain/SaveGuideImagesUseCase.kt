@@ -9,7 +9,7 @@ class SaveGuideImagesUseCase @Inject constructor(
 ) {
     suspend fun saveImagesInDevice(images: List<QuestionContentDomain.Image>, nameFolder: String) {
         images.forEach { image ->
-            imagesRepository.saveImage(image, nameFolder)
+            imagesRepository.save(image, nameFolder)
         }
     }
 }

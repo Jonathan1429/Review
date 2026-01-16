@@ -3,22 +3,28 @@ package com.jonathanev.review.presentation.files.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.domain.BackPathUseCase
+import com.jonathanev.review.domain.GetCurrentPathGuidesUseCase
+import com.jonathanev.review.domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.domain.IsExistFileUseCase
 import com.jonathanev.review.domain.LoadGuidesUseCase
 import com.jonathanev.review.domain.RenameGuideUseCase
 import com.jonathanev.review.domain.ReubicarImagenesUseCase
 import com.jonathanev.review.domain.SaveMetadataUseCase
 import com.jonathanev.review.domain.ValidateCreateFileUseCase
+import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
-import com.jonathanev.review.presentation.event.UIStopEvent
-import com.jonathanev.review.presentation.files.model.GuideUiModel
+import com.jonathanev.review.domain.model.GuidePath
+import com.jonathanev.review.domain.result.GetGuideResult
+import com.jonathanev.review.domain.result.RenamedGuideResult
+import com.jonathanev.review.presentation.event.PrepareGuideEvent
+import com.jonathanev.review.presentation.files.model.GuideResultUi
 import com.jonathanev.review.presentation.folders.model.FolderAction
 import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.ColorType
 import com.jonathanev.review.presentation.model.IconType
 import com.jonathanev.review.presentation.model.QuestionItemUi
-import com.jonathanev.review.presentation.model.ScreenData
+import com.jonathanev.review.presentation.model.ScreenDataUi
 import com.jonathanev.review.presentation.state.CreatingFileUiState
 import com.jonathanev.review.presentation.state.PreviewState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,21 +37,21 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CreateFilesViewModel @Inject constructor(
-    private val reubicarImagenesUseCase: ReubicarImagenesUseCase,
     private val renameGuideUseCase: RenameGuideUseCase,
     private val validateCreateFileUseCase: ValidateCreateFileUseCase,
     private val saveMetadataUseCase: SaveMetadataUseCase,
     private val loadGuidesUseCase: LoadGuidesUseCase,
     private val backPathUseCase: BackPathUseCase,
-    private val isExistFileUseCase: IsExistFileUseCase
+    private val isExistFileUseCase: IsExistFileUseCase,
+    private val getCurrentPathGuidesUseCase: GetCurrentPathGuidesUseCase,
+    private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase
 ) : ViewModel() {
     private var cachedGuides: List<GuideDomainModel> = emptyList()
-    private var attributesGuide: GuideDomainModel? = null
 
     private val _uiState = MutableStateFlow(PreviewState())
     val uiState = _uiState.asStateFlow()
 
-    private val _eventsMessages = MutableSharedFlow<UIStopEvent>()
+    private val _eventsMessages = MutableSharedFlow<PrepareGuideEvent>()
     val eventsMessages = _eventsMessages.asSharedFlow()
 
     private val _messages = MutableSharedFlow<CreatingFileUiState>()
@@ -114,63 +120,67 @@ class CreateFilesViewModel @Inject constructor(
         }
     }
 
-    fun saveMetadata(data: ScreenData) {
-        saveMetadataUseCase.invoke(data)
+    fun saveMetadata(data: ScreenDataUi) {
+        val screenDataDomain = data.toDomain()
+
+        saveMetadataUseCase.invoke(screenDataDomain)
     }
 
-    //fun getCurrentPath() = pathProvider.getCurrentPath()
-
-    fun fillFields(fileName: String): GuideUiModel {
+    fun fillFields(fileName: String): GuideResultUi {
         val guideDomainModel = cachedGuides.find { it.nameGuide == fileName }
-        attributesGuide = guideDomainModel
-        return guideDomainModel!!.toUi()
-    }
 
-    fun getObtenerDatosXML() {
-        /*if (respuestas.isEmpty()) {
-            //Revisar como se obtienen los datos aqui, porque no se visualiza la imagen
-            val datos = getObtenerDatosXMLUseCase.invoke(guideDomainModel)
+        if (guideDomainModel == null) {
+            return GuideResultUi.Error("No se ha encontrado la guia a cargar")
+        }
 
-            val tempQuestions =
-                datos.mapNotNull { (it.question as? ResponseDomain.Filled)?.item }.toList()
-            val tempAnswers =
-                datos.mapNotNull { (it.answer as? ResponseDomain.Filled)?.item }.toList()
-
-            val questionsDomain = generateTextColorRangesUseCase.invoke(tempQuestions)
-            val answersDomain = generateTextColorRangesUseCase.invoke(tempAnswers)
-            _preguntas = questionsDomain.map { it.toUi() }.toMutableList()
-            _respuestas = answersDomain.map { it.toUi() }.toMutableList()
-        }*/
+        return GuideResultUi.Success(guideDomainModel.toUi())
     }
 
     fun renameFile(fileName: String, description: String) {
-        val questionsDomain = preguntas.map { it.toDomain() }
-        val answersDomain = respuestas.map { it.toDomain() }
-
-        reubicarImagenesUseCase.invoke(fileName, questionsDomain, answersDomain, attributesGuide!!)
-
-        val isUpdated =
-            renameGuideUseCase.invoke(
-                fileName,
-                description,
-                questionsDomain,
-                answersDomain,
-                attributesGuide!!
-            )
-
-        if (isUpdated) {
-            viewModelScope.launch {
-                _eventsMessages.emit(
-                    UIStopEvent.GuideRenamedSuccess("Se ha renombrado el archivo con exito")
-                )
-            }
-        } else {
-            viewModelScope.launch {
-                _eventsMessages.emit(
-                    UIStopEvent.ShowMessage("No se pudo renombrar el archivo")
-                )
-            }
+        val guideDomainModel = cachedGuides.find { it.nameGuide == fileName }
+        if (guideDomainModel == null) {
+            emitMessage("No se ha encontrado la guia a renombrar")
             return
+        }
+
+        val currentPath = getCurrentPathGuidesUseCase.invoke()
+        //Revisar como se obtienen los datos aqui, porque no se visualiza la imagen
+        when (val result = getObtenerDatosXMLUseCase.invoke(
+            GuideContext.Actual(
+                guideDomainModel,
+                GuidePath(currentPath)
+            )
+        )) {
+            is GetGuideResult.Success -> {
+                viewModelScope.launch {
+                    val response =
+                        renameGuideUseCase.invoke(
+                            fileName,
+                            description,
+                            result
+                        )
+
+                    when(response){
+                        RenamedGuideResult.ImageError -> emitMessage("No se pasaron correctamente todas las imagenes")
+                        RenamedGuideResult.RenamedError -> emitMessage("No se ha podido renombrar la guia")
+                        RenamedGuideResult.Sucess -> emitMessage("Guia renombrada exitosamente")
+                    }
+                }
+            }
+
+            GetGuideResult.Error -> emitMessage("Ocurrió un error al abrir la guia")
+
+            GetGuideResult.InvalidFormat -> emitMessage("La guia está dañada")
+
+            GetGuideResult.NotFound -> emitMessage("No se ha encontrado la guia")
+
+            GetGuideResult.UnknownError -> emitMessage("Error desconocido")
+        }
+    }
+
+    private fun emitMessage(text: String) {
+        viewModelScope.launch {
+            _eventsMessages.emit(PrepareGuideEvent.ShowMessage(text))
         }
     }
 
