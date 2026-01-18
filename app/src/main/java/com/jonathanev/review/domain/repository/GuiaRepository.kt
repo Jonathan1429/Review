@@ -30,7 +30,7 @@ interface GuiaRepository {
 
     fun deleteGuide(
         guideDomainModel: GuideDomainModel,
-        browsing: GuideContext.Browsing,
+        deleteGuide: GuideContext.DeleteGuide,
     ): Boolean
 
     fun moveGuide(guideContext: GuideContext.Moving): Boolean

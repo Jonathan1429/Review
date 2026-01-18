@@ -122,7 +122,17 @@ class FragmentListGuides : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.eventsMessages.collect { event ->
                     when (event) {
-                        is GuideActionEvent.ShowMessage -> showToast(event.text)
+                        is GuideActionEvent.ShowMessage -> {
+                            showToast(event.text)
+
+                            findNavController().navigate(
+                                R.id.action_to_content_graph,
+                                null,
+                                NavOptions.Builder()
+                                    .setPopUpTo(R.id.fragmentsContent, inclusive = true)
+                                    .build()
+                            )
+                        }
                     }
                 }
             }
@@ -252,7 +262,7 @@ class FragmentListGuides : Fragment() {
                                             " guia?"
                                 )
                                 .setPositiveButton("Si") { _, _ ->
-                                    viewModel.deleteFiles(guideResult.guideUiModel.nameGuide)
+                                    viewModel.deleteGuide(guideResult.guideUiModel.nameGuide)
                                 }
                                 .setNegativeButton("Cancelar") { _, _ -> dialog.dismiss() }
                                 .create().show()

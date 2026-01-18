@@ -207,16 +207,16 @@ class GuiaRepositoryImpl @Inject constructor(
 
     override fun deleteGuide(
         guideDomainModel: GuideDomainModel,
-        browsing: GuideContext.Browsing,
+        deleteGuide: GuideContext.DeleteGuide,
     ): Boolean {
         val pathGuide = if (guideDomainModel.version == GuideVersion.V1) {
             filePathsProvider.buildGuide(
-                browsing.currentPath.value,
+                deleteGuide.currentPath.value,
                 guideDomainModel.nameGuide
             )
         } else {
             filePathsProvider.buildFolder(
-                browsing.currentPath.value,
+                deleteGuide.currentPath.value,
                 guideDomainModel.nameGuide
             ) // Borrar desde la carpeta
         }

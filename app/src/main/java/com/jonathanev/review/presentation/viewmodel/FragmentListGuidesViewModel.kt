@@ -8,7 +8,6 @@ import com.jonathanev.review.domain.DeleteGuideUseCase
 import com.jonathanev.review.domain.GetCurrentPathGuidesUseCase
 import com.jonathanev.review.domain.GetGuideMoveUseCase
 import com.jonathanev.review.domain.GetGuidePosicionUseCase
-import com.jonathanev.review.domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.domain.SetContextMoveUseCase
 import com.jonathanev.review.domain.LoadGuidesUseCase
 import com.jonathanev.review.domain.MoveGuideUseCase
@@ -41,7 +40,6 @@ class FragmentListGuidesViewModel @Inject constructor(
     private val getGuidePosicionUseCase: GetGuidePosicionUseCase,
     private val setMainPathUseCase: SetMainPathUseCase,
     private val navigationPathRepository: NavigationPathRepository,
-    private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
     private val deleteGuideUseCase: DeleteGuideUseCase,
     private val moveGuideUseCase: MoveGuideUseCase,
     private val setContextMoveUseCase: SetContextMoveUseCase,
@@ -77,44 +75,24 @@ class FragmentListGuidesViewModel @Inject constructor(
         //_selectedGuide.value = resultToUi
     }
 
-    fun deleteFiles(nameGuide: String) {
+    fun deleteGuide(nameGuide: String) {
         val guideDomainModel = cachedGuides.find { it.nameGuide == nameGuide }
         if (guideDomainModel == null) {
             emitMessage("No se ha encontrado la guia")
             return
         }
 
-        val currentPath = getCurrentPathGuidesUseCase.invoke()
-        //Revisar como se obtienen los datos aqui, porque no se visualiza la imagen
-        when (val result = getObtenerDatosXMLUseCase.invoke(
-            GuideContext.Actual(
-                guideDomainModel,
-                GuidePath(currentPath)
-            )
-        )) {
-            is GetGuideResult.Success -> {
-                viewModelScope.launch {
-                    val (questions, answers) = uploadContentUseCase.invoke(result)
-                    val listImages = (questions + answers).flatMap { it.content }
-                        .filterIsInstance<QuestionContentDomain.Image>()
+        val response = deleteGuideUseCase.invoke(guideDomainModel)
+        when (response) {
+            DeleteGuideResult.DeleteSuccess -> emitMessage("Guia borrada exitosamente")
+            DeleteGuideResult.Error -> emitMessage("Ocurrió un error al abrir la guia")
+            DeleteGuideResult.ErrorGuide -> emitMessage("Hubo un error al borrar la guia")
+            DeleteGuideResult.ErrorImage ->
+                emitMessage("Hubo inconvenientes en el borrado completo de archivos")
 
-                    val response = deleteGuideUseCase.invoke(result.guideDomainModel, listImages)
-
-                    when (response) {
-                        DeleteGuideResult.DeleteSuccess -> emitMessage("Guia borrada exitosamente")
-                        DeleteGuideResult.ErrorGuide -> emitMessage("Hubo un error al borrar la guia")
-                        DeleteGuideResult.ErrorImage -> emitMessage("Hubo inconvenientes en el borrado completo de archivos")
-                    }
-                }
-            }
-
-            GetGuideResult.Error -> emitMessage("Ocurrió un error al abrir la guia")
-
-            GetGuideResult.InvalidFormat -> emitMessage("La guia está dañada")
-
-            GetGuideResult.NotFound -> emitMessage("No se ha encontrado la guia")
-
-            GetGuideResult.UnknownError -> emitMessage("Error desconocido")
+            DeleteGuideResult.InvalidFormat -> emitMessage("La guia está dañada")
+            DeleteGuideResult.NotFound -> emitMessage("No se ha encontrado la guia")
+            DeleteGuideResult.UnknownError -> emitMessage("Error desconocido")
         }
     }
 
@@ -151,8 +129,9 @@ class FragmentListGuidesViewModel @Inject constructor(
         }
     }
 
+    // Al moveeeeer las guiiiiaaaaaaaaaaaaaaaaaaas
     fun onContinueProcess(confirmed: Boolean) {
-        if (!confirmed) return
+        /*if (!confirmed) return
 
         when (val context = getGuideMoveUseCase.invoke()) {
             is GuideContext.Moving -> {
@@ -192,7 +171,7 @@ class FragmentListGuidesViewModel @Inject constructor(
             }
 
             else -> eventMovingFile("Error inesperado")
-        }
+        }*/
     }
 
     private fun eventMovingFile(message: String) {

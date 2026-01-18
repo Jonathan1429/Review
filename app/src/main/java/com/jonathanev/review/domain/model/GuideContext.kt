@@ -1,7 +1,7 @@
 package com.jonathanev.review.domain.model
 
 sealed class GuideContext {
-    data class Browsing(
+    data class DeleteGuide(
         val currentPath: GuidePath
     ) : GuideContext()
 

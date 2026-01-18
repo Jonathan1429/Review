@@ -47,7 +47,7 @@ class GetObtenerDatosXMLUseCase @Inject constructor(
 
             }
 
-            is GuideContext.Browsing -> GetGuideResult.Error
+            is GuideContext.DeleteGuide -> GetGuideResult.Error
         }
     }
 
