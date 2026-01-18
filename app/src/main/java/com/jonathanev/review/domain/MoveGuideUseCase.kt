@@ -5,6 +5,7 @@ import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.QAItemDomain
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.ResponseDomain
+import com.jonathanev.review.domain.repository.DirectoryManager
 import com.jonathanev.review.domain.repository.GuiaRepository
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.MoveGuideResponse

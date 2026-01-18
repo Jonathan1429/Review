@@ -1,7 +1,7 @@
 package com.jonathanev.review.data.filesystem
 
-import com.jonathanev.review.data.repository.NavigationPathRepository
-import com.jonathanev.review.domain.DirectoryManager
+import com.jonathanev.review.presentation.navigation.NavigationPathRepository
+import com.jonathanev.review.domain.repository.DirectoryManager
 import com.jonathanev.review.domain.ImageSource
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
@@ -60,18 +60,12 @@ class DirectoryManagerImpl @Inject constructor(
 
         images.forEach { image ->
             val oldPathImage = File(getPathImage(guideDomain, image, oldImagesPath))
-            val newPathImages =
-                getSourceImagePath(navigationPathRepository.currentPathImages, guideDomain)
+            val newPathImages = filePathsProvider.buildFolder(navigationPathRepository.currentPathImages, guideDomain.nameGuide)
 
             if (oldPathImage.exists()) {
                 val destination = File(newPathImages, image.nameFile)
                 val successImage = oldPathImage.renameTo(destination)
                 if (!successImage) isSuccess = false
-                /*Files.move(
-                    Paths.get(oldPathImage),
-                    Paths.get(destination),
-                    StandardCopyOption.REPLACE_EXISTING
-                )*/
             }
         }
 
@@ -132,7 +126,7 @@ class DirectoryManagerImpl @Inject constructor(
     override fun getImagesInDevice(guideDomain: GuideDomainModel): Set<String> {
         val currentPath =
             filePathsProvider.buildFolder(
-                navigationPathRepository.currentPathGuides,
+                navigationPathRepository.currentPathImages,
                 guideDomain.nameGuide
             )
 
@@ -146,9 +140,9 @@ class DirectoryManagerImpl @Inject constructor(
     ): String {
         return if (guideDomain.version == GuideVersion.V1) {
             val nameFile = image.uri.substringAfterLast("/")
-            "$oldImagesPath$nameFile"
+            "$oldImagesPath/$nameFile"
         } else {
-            "$oldImagesPath${image.nameFile}"
+            "$oldImagesPath/${image.nameFile}"
         }
     }
 

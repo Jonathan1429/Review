@@ -3,11 +3,12 @@ package com.jonathanev.review.domain
 import com.jonathanev.review.core.media.MediaPaths
 import com.jonathanev.review.data.filesystem.DirectoryManagerImpl
 import com.jonathanev.review.domain.model.QuestionContentDomain
+import com.jonathanev.review.domain.service.ColorRangeParser
 import javax.inject.Inject
 
 class SetPintarTextosUseCase @Inject constructor(
     private val setCifrarRutaImagenUseCase: SetCifrarRutaImagenUseCase,
-    private val getColorRangesUseCase: GetColorRangesUseCase,
+    private val colorRangeParser: ColorRangeParser,
     private val fileHelper: DirectoryManagerImpl
 ) {
     operator fun invoke(
@@ -31,7 +32,7 @@ class SetPintarTextosUseCase @Inject constructor(
                 QuestionContentDomain.Image(descifrado, item.nameFile)
             }
             is QuestionContentDomain.Text -> {
-                getColorRangesUseCase.invoke(item.text)
+                colorRangeParser.invoke(item.text)
             }
 
             is QuestionContentDomain.None -> QuestionContentDomain.None

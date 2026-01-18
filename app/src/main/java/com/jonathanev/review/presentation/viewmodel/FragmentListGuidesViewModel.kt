@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jonathanev.review.domain.BackPathUseCase
 import com.jonathanev.review.domain.DeleteGuideUseCase
 import com.jonathanev.review.domain.GetCurrentPathGuidesUseCase
 import com.jonathanev.review.domain.GetGuideMoveUseCase
@@ -29,6 +28,7 @@ import com.jonathanev.review.presentation.files.model.GuideResultUi
 import com.jonathanev.review.presentation.files.model.GuideUiModel
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.QuestionItemUi
+import com.jonathanev.review.presentation.navigation.NavigationPathRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -40,7 +40,7 @@ class FragmentListGuidesViewModel @Inject constructor(
     private val loadGuidesUseCase: LoadGuidesUseCase,
     private val getGuidePosicionUseCase: GetGuidePosicionUseCase,
     private val setMainPathUseCase: SetMainPathUseCase,
-    private val backPathUseCase: BackPathUseCase,
+    private val navigationPathRepository: NavigationPathRepository,
     private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
     private val deleteGuideUseCase: DeleteGuideUseCase,
     private val moveGuideUseCase: MoveGuideUseCase,
@@ -206,7 +206,7 @@ class FragmentListGuidesViewModel @Inject constructor(
     }
 
     fun back() {
-        backPathUseCase.invoke()
+        navigationPathRepository.back()
     }
 
     fun setMainPath() {

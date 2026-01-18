@@ -4,7 +4,7 @@ import com.jonathanev.review.domain.model.PreviewQuestionDomain
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QAItemDomain
 import com.jonathanev.review.domain.model.ResponseDomain
-import com.jonathanev.review.data.repository.NavigationPathRepository
+import com.jonathanev.review.presentation.navigation.NavigationPathRepository
 import javax.inject.Inject
 
 class GetPreviewQuestionsUseCase @Inject constructor(

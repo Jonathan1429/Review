@@ -3,7 +3,6 @@ package com.jonathanev.review.presentation.viewmodel
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jonathanev.review.domain.CreateFilePathUseCase
 import com.jonathanev.review.domain.GetCurrentPathGuidesUseCase
 import com.jonathanev.review.domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.domain.GetSaveGuidesUseCase
@@ -24,7 +23,7 @@ import com.jonathanev.review.domain.model.ResponseDomain
 import com.jonathanev.review.domain.model.TypeContent
 import com.jonathanev.review.domain.repository.UserPreferencesRepository
 import com.jonathanev.review.domain.result.GetGuideResult
-import com.jonathanev.review.domain.usecase.guide.GenerateTextColorRangesUseCase
+import com.jonathanev.review.domain.service.TextColorRangeGenerator
 import com.jonathanev.review.presentation.event.CreateGuideEvent
 import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.presentation.mapper.toUi
@@ -53,10 +52,9 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     private val setDecodePathImageUseCase: SetDecodePathImageUseCase,
     private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
     private val getSaveGuidesUseCase: GetSaveGuidesUseCase,
-    private val generateTextColorRangesUseCase: GenerateTextColorRangesUseCase,
+    private val textColorRangeGenerator: TextColorRangeGenerator,
     private val updateImagesUseCase: UpdateImagesUseCase,
     private val setMainPathUseCase: SetMainPathUseCase,
-    private val createFilePathUseCase: CreateFilePathUseCase,
     private val userPreferencesRepository: UserPreferencesRepository,
     private val loadGuidesUseCase: LoadGuidesUseCase,
     private val getCurrentPathGuidesUseCase: GetCurrentPathGuidesUseCase
@@ -426,8 +424,8 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                             result.list.mapNotNull { (it.question as? ResponseDomain.Filled)?.item }
                         val tempAnswers =
                             result.list.mapNotNull { (it.answer as? ResponseDomain.Filled)?.item }
-                        val questionsDomain = generateTextColorRangesUseCase.invoke(tempQuestions)
-                        val answersDomain = generateTextColorRangesUseCase.invoke(tempAnswers)
+                        val questionsDomain = textColorRangeGenerator.invoke(tempQuestions)
+                        val answersDomain = textColorRangeGenerator.invoke(tempAnswers)
                         val newQuestionsToUi = questionsDomain.map { it.toUi() }
                         val newAnswersToUi = answersDomain.map { it.toUi() }
 
@@ -528,7 +526,6 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 isNewFile = false
             )
 
-            createFilePathUseCase.invoke(nameGuide)
             val isSuccess = setCrearXmlUseCase.invoke(
                 nameGuide = guide.nameGuide,
                 description = guide.description,
@@ -538,6 +535,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             )
 
             if (isSuccess) {
+                initUIState()
                 setMainPathUseCase.invoke()
                 _createGuideEvent.emit(
                     CreateGuideEvent.SuccessGuideCreated//("Se ha guardado la guía correctamente")
@@ -586,7 +584,6 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 isNewFile = true,
             )
 
-            createFilePathUseCase.invoke(nameGuide)
             val dataWithTags =
                 setColocarEtiquetasUseCase.invoke(preguntasProcesadas, respuestasProcesadas)
 
@@ -600,6 +597,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
             // 7. Notificación de resultado y limpieza de navegación
             if (isSuccess) {
+                initUIState()
                 setMainPathUseCase.invoke()
                 _createGuideEvent.emit(
                     CreateGuideEvent.SuccessGuideCreated//("Se ha guardado la guía correctamente")
@@ -663,7 +661,11 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
     fun updateLastQuestion() {
         _uiState.update { state ->
-            state.copy(isLastQuestion = false)
+            state.copy(
+                typeContent = TypeContent.QUESTION,
+                isLastQuestion = false,
+                contadorPregunta = state.contadorPregunta + 1
+            )
         }
     }
 }

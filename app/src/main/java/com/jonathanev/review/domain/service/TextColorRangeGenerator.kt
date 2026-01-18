@@ -1,12 +1,11 @@
-package com.jonathanev.review.domain.usecase.guide
+package com.jonathanev.review.domain.service
 
-import com.jonathanev.review.domain.GetColorRangesUseCase
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
 import javax.inject.Inject
 
-class GenerateTextColorRangesUseCase @Inject constructor(
-    private val getColorRangesUseCase: GetColorRangesUseCase
+class TextColorRangeGenerator @Inject constructor(
+    private val colorRangeParser: ColorRangeParser
 ) {
     operator fun invoke(tempQuestions: List<QuestionItemDomain>): List<QuestionItemDomain> {
         val resultList = mutableListOf<QuestionItemDomain>()
@@ -18,7 +17,7 @@ class GenerateTextColorRangesUseCase @Inject constructor(
             item.content.forEach { content ->
                 when (content) {
                     is QuestionContentDomain.Text -> {
-                        val questionContentDomain = getColorRangesUseCase.invoke(content.text)
+                        val questionContentDomain = colorRangeParser.invoke(content.text)
                         val modifiedText = content.copy(
                             text = questionContentDomain.text,
                             colorRangeDomains = questionContentDomain.colorRangeDomains

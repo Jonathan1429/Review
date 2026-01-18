@@ -3,7 +3,6 @@ package com.jonathanev.review.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.domain.GetCurrentPathGuidesUseCase
-import com.jonathanev.review.domain.usecase.guide.GenerateTextColorRangesUseCase
 import com.jonathanev.review.domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.domain.GetPreviewQuestionsUseCase
 import com.jonathanev.review.domain.GetSaveGuidesUseCase
@@ -12,9 +11,9 @@ import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuidePath
 import com.jonathanev.review.domain.model.QAItemDomain
-import com.jonathanev.review.domain.model.ResponseDomain
 import com.jonathanev.review.domain.model.TypeContent
 import com.jonathanev.review.domain.result.GetGuideResult
+import com.jonathanev.review.presentation.event.GuidePreviewEvent
 import com.jonathanev.review.presentation.event.GuideReviewEvent
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.QuestionContentUi
@@ -51,6 +50,9 @@ class FragmentRepasarViewModel @Inject constructor(
 
     private val _eventsMessages = MutableSharedFlow<GuideReviewEvent>()
     val eventsMessages = _eventsMessages.asSharedFlow()
+
+    private val _eventsPreviewMessages = MutableSharedFlow<GuidePreviewEvent>()
+    val eventsPreviewMessages = _eventsPreviewMessages.asSharedFlow()
 
     val imageList: StateFlow<List<QuestionContentUi.Image>> = _uiState
         .map { state ->
@@ -120,7 +122,7 @@ class FragmentRepasarViewModel @Inject constructor(
 
     private fun emitMessage(text: String) {
         viewModelScope.launch {
-            _eventsMessages.emit(GuideReviewEvent.ShowMessage(text))
+            _eventsPreviewMessages.emit(GuidePreviewEvent.ShowMessage(text))
         }
     }
 

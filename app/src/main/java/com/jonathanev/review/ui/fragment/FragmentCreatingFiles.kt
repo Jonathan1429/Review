@@ -31,6 +31,7 @@ import com.jonathanev.review.ui.adapter.ListarIconosAdapter
 import com.jonathanev.review.R
 import com.jonathanev.review.presentation.files.viewmodel.CreateFilesViewModel
 import com.jonathanev.review.databinding.FragmentCreateFilesBinding
+import com.jonathanev.review.presentation.event.RenameGuideEvent
 import com.jonathanev.review.presentation.files.model.GuideResultUi
 import com.jonathanev.review.ui.mapper.toInt
 import com.skydoves.colorpickerview.flag.BubbleFlag
@@ -101,6 +102,28 @@ class FragmentCreatingFiles : Fragment() {
                             Toast.LENGTH_SHORT
                         ).show()
                     }
+                }
+            }
+        }
+
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.eventsRenameMessages.collect { event ->
+                    when(event){
+                        RenameGuideEvent.ImageError -> showToast("No se pasaron correctamente todas las imagenes")
+                        RenameGuideEvent.RenamedError -> showToast("No se ha podido renombrar la guia")
+                        RenameGuideEvent.Success -> {
+                            showToast("Guia renombrada exitosamente")
+                        }
+                    }
+
+                    findNavController().navigate(
+                        R.id.fragmentsContent,
+                        null,
+                        NavOptions.Builder()
+                            .setPopUpTo(R.id.content_graph, true) // Limpia el historial
+                            .build()
+                    )
                 }
             }
         }
@@ -260,7 +283,7 @@ class FragmentCreatingFiles : Fragment() {
 
         when (mode) {
             FolderAction.CreatingFolder -> onCreateFolderConfirmed(data)
-            is FolderAction.RenamingFile -> renameFile()
+            is FolderAction.RenamingFile -> renameFile(mode.fileName)
             FolderAction.RenamingFolder -> Log.i(
                 "Advertencia",
                 "Aun no se aplica la funcion renombrar folder"
@@ -301,11 +324,11 @@ class FragmentCreatingFiles : Fragment() {
         )
     }
 
-    private fun renameFile() {
+    private fun renameFile(oldName: String) {
         val fileName = binding.fragmentCreate.etNombre.text.toString()
         val description =
             binding.fragmentCreate.fragmentComponentsFile.etDescription.text.toString()
-        viewModel.renameFile(fileName, description)
+        viewModel.renameFile(oldName, fileName, description)
     }
 
     // ---------------------------

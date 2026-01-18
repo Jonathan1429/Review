@@ -8,7 +8,7 @@ import com.jonathanev.review.data.repository.ImagesRepositoryImpl
 import com.jonathanev.review.data.repository.NavigationPathRepositoryImpl
 import com.jonathanev.review.domain.repository.FolderRepository
 import com.jonathanev.review.domain.repository.ImagesRepository
-import com.jonathanev.review.data.repository.NavigationPathRepository
+import com.jonathanev.review.presentation.navigation.NavigationPathRepository
 import com.jonathanev.review.domain.repository.GuideMoveRepository
 import dagger.Binds
 import dagger.Module

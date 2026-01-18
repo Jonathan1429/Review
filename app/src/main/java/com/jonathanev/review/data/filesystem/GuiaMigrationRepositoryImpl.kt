@@ -1,9 +1,9 @@
 package com.jonathanev.review.data.filesystem
 
-import com.jonathanev.review.data.repository.GuiaMigrationRepository
+import com.jonathanev.review.domain.repository.GuiaMigrationRepository
 import com.jonathanev.review.data.storage.StorageFolders
 import com.jonathanev.review.domain.repository.ImagesRepository
-import com.jonathanev.review.data.repository.NavigationPathRepository
+import com.jonathanev.review.presentation.navigation.NavigationPathRepository
 import java.io.File
 import javax.inject.Inject
 

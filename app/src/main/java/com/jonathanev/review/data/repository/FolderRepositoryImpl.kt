@@ -8,6 +8,7 @@ import com.jonathanev.review.data.filesystem.FilePathsProvider
 import com.jonathanev.review.domain.model.FolderAttributesDomain
 import com.jonathanev.review.domain.model.FolderDomainModel
 import com.jonathanev.review.domain.repository.FolderRepository
+import com.jonathanev.review.presentation.navigation.NavigationPathRepository
 import java.io.File
 import javax.inject.Inject
 

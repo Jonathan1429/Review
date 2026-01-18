@@ -2,13 +2,11 @@ package com.jonathanev.review.presentation.files.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jonathanev.review.domain.BackPathUseCase
 import com.jonathanev.review.domain.GetCurrentPathGuidesUseCase
 import com.jonathanev.review.domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.domain.IsExistFileUseCase
 import com.jonathanev.review.domain.LoadGuidesUseCase
 import com.jonathanev.review.domain.RenameGuideUseCase
-import com.jonathanev.review.domain.ReubicarImagenesUseCase
 import com.jonathanev.review.domain.SaveMetadataUseCase
 import com.jonathanev.review.domain.ValidateCreateFileUseCase
 import com.jonathanev.review.domain.model.GuideContext
@@ -17,6 +15,7 @@ import com.jonathanev.review.domain.model.GuidePath
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.RenamedGuideResult
 import com.jonathanev.review.presentation.event.PrepareGuideEvent
+import com.jonathanev.review.presentation.event.RenameGuideEvent
 import com.jonathanev.review.presentation.files.model.GuideResultUi
 import com.jonathanev.review.presentation.folders.model.FolderAction
 import com.jonathanev.review.presentation.mapper.toDomain
@@ -25,6 +24,7 @@ import com.jonathanev.review.presentation.model.ColorType
 import com.jonathanev.review.presentation.model.IconType
 import com.jonathanev.review.presentation.model.QuestionItemUi
 import com.jonathanev.review.presentation.model.ScreenDataUi
+import com.jonathanev.review.presentation.navigation.NavigationPathRepository
 import com.jonathanev.review.presentation.state.CreatingFileUiState
 import com.jonathanev.review.presentation.state.PreviewState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -41,7 +41,7 @@ class CreateFilesViewModel @Inject constructor(
     private val validateCreateFileUseCase: ValidateCreateFileUseCase,
     private val saveMetadataUseCase: SaveMetadataUseCase,
     private val loadGuidesUseCase: LoadGuidesUseCase,
-    private val backPathUseCase: BackPathUseCase,
+    private val navigationPathRepository: NavigationPathRepository,
     private val isExistFileUseCase: IsExistFileUseCase,
     private val getCurrentPathGuidesUseCase: GetCurrentPathGuidesUseCase,
     private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase
@@ -53,6 +53,9 @@ class CreateFilesViewModel @Inject constructor(
 
     private val _eventsMessages = MutableSharedFlow<PrepareGuideEvent>()
     val eventsMessages = _eventsMessages.asSharedFlow()
+
+    private val _eventsRenameMessages = MutableSharedFlow<RenameGuideEvent>()
+    val eventsRenameMessages = _eventsRenameMessages.asSharedFlow()
 
     private val _messages = MutableSharedFlow<CreatingFileUiState>()
     val messages = _messages.asSharedFlow()
@@ -136,10 +139,10 @@ class CreateFilesViewModel @Inject constructor(
         return GuideResultUi.Success(guideDomainModel.toUi())
     }
 
-    fun renameFile(fileName: String, description: String) {
-        val guideDomainModel = cachedGuides.find { it.nameGuide == fileName }
+    fun renameFile(oldName: String, fileName: String, description: String) {
+        val guideDomainModel = cachedGuides.find { it.nameGuide == oldName }
         if (guideDomainModel == null) {
-            emitMessage("No se ha encontrado la guia a renombrar")
+            emitMessagePrepare("No se ha encontrado la guia a renombrar")
             return
         }
 
@@ -161,26 +164,32 @@ class CreateFilesViewModel @Inject constructor(
                         )
 
                     when(response){
-                        RenamedGuideResult.ImageError -> emitMessage("No se pasaron correctamente todas las imagenes")
-                        RenamedGuideResult.RenamedError -> emitMessage("No se ha podido renombrar la guia")
-                        RenamedGuideResult.Sucess -> emitMessage("Guia renombrada exitosamente")
+                        RenamedGuideResult.ImageError -> emitMessageRename(RenameGuideEvent.ImageError)
+                        RenamedGuideResult.RenamedError -> emitMessageRename(RenameGuideEvent.RenamedError)
+                        RenamedGuideResult.Success -> emitMessageRename(RenameGuideEvent.Success)
                     }
                 }
             }
 
-            GetGuideResult.Error -> emitMessage("Ocurrió un error al abrir la guia")
+            GetGuideResult.Error -> emitMessagePrepare("Ocurrió un error al abrir la guia")
 
-            GetGuideResult.InvalidFormat -> emitMessage("La guia está dañada")
+            GetGuideResult.InvalidFormat -> emitMessagePrepare("La guia está dañada")
 
-            GetGuideResult.NotFound -> emitMessage("No se ha encontrado la guia")
+            GetGuideResult.NotFound -> emitMessagePrepare("No se ha encontrado la guia")
 
-            GetGuideResult.UnknownError -> emitMessage("Error desconocido")
+            GetGuideResult.UnknownError -> emitMessagePrepare("Error desconocido")
         }
     }
 
-    private fun emitMessage(text: String) {
+    private fun emitMessagePrepare(text: String) {
         viewModelScope.launch {
             _eventsMessages.emit(PrepareGuideEvent.ShowMessage(text))
+        }
+    }
+
+    private fun emitMessageRename(imageError: RenameGuideEvent) {
+        viewModelScope.launch {
+            _eventsRenameMessages.emit(imageError)
         }
     }
 
@@ -195,7 +204,7 @@ class CreateFilesViewModel @Inject constructor(
     }
 
     fun beforePath() {
-        backPathUseCase.invoke()
+        navigationPathRepository.back()
     }
 
     fun uploadCachedGuides() {

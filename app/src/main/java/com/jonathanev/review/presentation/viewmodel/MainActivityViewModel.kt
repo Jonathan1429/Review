@@ -4,27 +4,36 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jonathanev.review.domain.CreateFoldersUseCase
-import com.jonathanev.review.domain.MoveNonFolderFilesToOtrosUseCase
+import com.jonathanev.review.domain.InitializeGuideStorageUseCase
+import com.jonathanev.review.presentation.event.MainUiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MainActivityViewModel @Inject constructor(
-    private val moveNonFolderFilesToOtrosUseCase: MoveNonFolderFilesToOtrosUseCase,
-    private val createFoldersUseCase: CreateFoldersUseCase,
+    private val initializeGuideStorageUseCase: InitializeGuideStorageUseCase,
 ) : ViewModel() {
     private val _shouldRequestPermission = MutableLiveData<Boolean>()
     val shouldRequestPermission: LiveData<Boolean> get() = _shouldRequestPermission
 
-    fun movingFilesToOtros() {
-        viewModelScope.launch {
-            moveNonFolderFilesToOtrosUseCase.invoke()
+    private val _uiEvent = MutableSharedFlow<MainUiEvent>()
+    val uiEvent = _uiEvent.asSharedFlow()
+
+    fun createFolders() {
+        val isSuccess = initializeGuideStorageUseCase.invoke()
+        if (!isSuccess){
+            emitEvent(MainUiEvent.ShowCreateFoldersError)
         }
     }
 
-    fun createFolders() = createFoldersUseCase.invoke()
+    private fun emitEvent(event: MainUiEvent) {
+        viewModelScope.launch {
+            _uiEvent.emit(event)
+        }
+    }
 
     fun checkIfNeedsPermission(hasPermission: Boolean) {
         if (!hasPermission) {

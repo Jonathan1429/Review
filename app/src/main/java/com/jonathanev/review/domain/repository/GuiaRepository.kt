@@ -25,13 +25,12 @@ interface GuiaRepository {
         description: String,
         preguntas: List<QuestionItemDomain>,
         respuestas: List<QuestionItemDomain>,
-        attributesGuide: GuideDomainModel,
-        currentPathGuides: String
+        guideContext: GuideContext.Actual,
     ): Boolean
 
     fun deleteGuide(
         guideDomainModel: GuideDomainModel,
-        currentPathGuides: String
+        browsing: GuideContext.Browsing,
     ): Boolean
 
     fun moveGuide(guideContext: GuideContext.Moving): Boolean

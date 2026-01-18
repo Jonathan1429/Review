@@ -1,5 +1,6 @@
-package com.jonathanev.review.domain
+package com.jonathanev.review.domain.repository
 
+import com.jonathanev.review.domain.ImageSource
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.QuestionContentDomain

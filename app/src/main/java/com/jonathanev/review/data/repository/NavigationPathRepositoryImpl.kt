@@ -1,6 +1,7 @@
 package com.jonathanev.review.data.repository
 
 import com.jonathanev.review.data.filesystem.FilePathsProvider
+import com.jonathanev.review.presentation.navigation.NavigationPathRepository
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton

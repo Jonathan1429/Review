@@ -9,7 +9,6 @@ import com.jonathanev.review.domain.NextPathUseCase
 import com.jonathanev.review.domain.model.FolderDomainModel
 import com.jonathanev.review.presentation.event.FolderActionEvent
 import com.jonathanev.review.presentation.event.UIMovingEvent
-import com.jonathanev.review.presentation.event.PrepareGuideEvent
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.FolderResultUi
 import com.jonathanev.review.presentation.state.FoldersUiState
@@ -25,8 +24,8 @@ import javax.inject.Inject
 class FoldersListViewModel @Inject constructor(
     private val getFolderPosicionUseCase: GetFolderPosicionUseCase,
     private val getFoldersWithNumGuidesUseCase: GetFoldersWithNumGuidesUseCase,
-    private val deleteFolderUseCase: DeleteFolderUseCase,
     private val nextPathUseCase: NextPathUseCase,
+    private val deleteFolderUseCase: DeleteFolderUseCase
 ) : ViewModel() {
     private var _foldersUiState = MutableStateFlow(FoldersUiState())
     val foldersUiState = _foldersUiState.asStateFlow()
@@ -66,10 +65,6 @@ class FoldersListViewModel @Inject constructor(
             }
         }
     }
-
-    /*fun resolveFolderPath(folderName: String) {
-        resolveFolderPathUseCase.invoke(folderName)
-    }*/
 
     fun getFolderSelected(position: Int): FolderResultUi {
         val folderResultDomain = getFolderPosicionUseCase.invoke(position, cachedFolders)

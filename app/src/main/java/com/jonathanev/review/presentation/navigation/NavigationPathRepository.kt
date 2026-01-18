@@ -1,4 +1,4 @@
-package com.jonathanev.review.data.repository
+package com.jonathanev.review.presentation.navigation
 
 interface NavigationPathRepository {
     val currentPathGuides: String

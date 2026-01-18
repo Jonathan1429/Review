@@ -1,4 +1,4 @@
-package com.jonathanev.review.data.repository
+package com.jonathanev.review.domain.repository
 
 interface GuiaMigrationRepository {
     fun moveGuides()

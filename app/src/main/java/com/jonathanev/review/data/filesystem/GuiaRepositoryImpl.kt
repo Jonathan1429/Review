@@ -93,13 +93,18 @@ class GuiaRepositoryImpl @Inject constructor(
         description: String,
         preguntas: List<QuestionItemDomain>,
         respuestas: List<QuestionItemDomain>,
-        attributesGuide: GuideDomainModel,
-        currentPathGuides: String
+        guideContext: GuideContext.Actual
     ): Boolean {
-        val currentPath = filePathsProvider.buildFolderGuide(
-            currentPathGuides,
-            attributesGuide.nameGuide,
-            attributesGuide.nameGuide
+        val currentPath = getGuidePath(guideContext.currentGuidePath.value, guideContext.guide)
+        val newPathGuide = filePathsProvider.buildFolderGuide(
+            guideContext.currentGuidePath.value,
+            fileName,
+            fileName
+        )
+
+        val newPathFolder = filePathsProvider.buildFolder(
+            guideContext.currentGuidePath.value,
+            fileName
         )
 
         val tempFile = File("$currentPath.tmp")
@@ -133,19 +138,30 @@ class GuiaRepositoryImpl @Inject constructor(
 
             fos.close()
 
-            val isRenamed = !tempFile.renameTo(File(currentPath))
-            if (!isRenamed) {
-                tempFile.delete()
+            val existFolderPath = if (!File(newPathFolder).exists()){
+                File(newPathFolder).mkdir()
+            } else {
+                tempFile.renameTo(File(newPathFolder))
+            }
+            val isRenamedGuide = tempFile.renameTo(File(newPathGuide))
+            tempFile.delete()
+            if (!isRenamedGuide || !existFolderPath) {
                 return false
             }
 
-            if (attributesGuide.version == GuideVersion.V1) {
+            if (guideContext.guide.version == GuideVersion.V1) {
                 val pathV1 = filePathsProvider.buildGuide(
-                    currentPathGuides,
+                    guideContext.currentGuidePath.value,
                     fileName
                 )
 
                 File(pathV1).delete()
+            } else {
+                val oldPath = filePathsProvider.buildFolder(
+                    guideContext.currentGuidePath.value,
+                    guideContext.guide.nameGuide
+                )
+                //File(oldPath).deleteRecursively()
             }
 
             true
@@ -222,16 +238,16 @@ class GuiaRepositoryImpl @Inject constructor(
 
     override fun deleteGuide(
         guideDomainModel: GuideDomainModel,
-        currentPathGuides: String
+        browsing: GuideContext.Browsing,
     ): Boolean {
         val pathGuide = if (guideDomainModel.version == GuideVersion.V1) {
             filePathsProvider.buildGuide(
-                currentPathGuides,
+                browsing.currentPath.value,
                 guideDomainModel.nameGuide
             )
         } else {
             filePathsProvider.buildFolder(
-                currentPathGuides,
+                browsing.currentPath.value,
                 guideDomainModel.nameGuide
             ) // Borrar desde la carpeta
         }
@@ -294,7 +310,7 @@ class GuiaRepositoryImpl @Inject constructor(
         val db = DocumentBuilderFactory.newInstance().newDocumentBuilder()
 
         try {
-            val doc = db.parse(currentPath)
+            val doc = db.parse(File(currentPath))
 
             getQAXML(
                 qaItemXmlDto,
@@ -395,7 +411,7 @@ class GuiaRepositoryImpl @Inject constructor(
                 }
             }
 
-            val doc = db.parse(currentPath)
+            val doc = db.parse(File(currentPath))
 
             val cuestionario: NodeList = doc.getElementsByTagName(XmlTagsV2.INTERROGANTE)
 
@@ -472,15 +488,15 @@ class GuiaRepositoryImpl @Inject constructor(
 
     override fun getXMLGuide(guideContext: GuideContext.Actual): GetGuideResult {
         val version = guideContext.guide.version
-        val currentPathGuide = getGuidePath(
+        /*val currentPathGuide = getGuidePath(
             sourceGuidePath = guideContext.currentGuidePath.value,
             guideDomain = guideContext.guide
-        )
+        )*/
 
         return if (version == GuideVersion.V1)
-            obtenerDatosXMLV1(guideContext.guide, GuideSource.CurrentPath(currentPathGuide))
+            obtenerDatosXMLV1(guideContext.guide, GuideSource.CurrentPath(guideContext.currentGuidePath.value))
         else
-            obtenerDatosXMLV2(guideContext.guide, GuideSource.CurrentPath(currentPathGuide))
+            obtenerDatosXMLV2(guideContext.guide, GuideSource.CurrentPath(guideContext.currentGuidePath.value))
     }
 
     override fun moveGuide(guideContext: GuideContext.Moving): Boolean {

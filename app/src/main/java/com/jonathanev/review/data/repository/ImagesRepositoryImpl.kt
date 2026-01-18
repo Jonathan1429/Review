@@ -10,11 +10,9 @@ import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
 import com.jonathanev.review.domain.repository.ImagesRepository
+import com.jonathanev.review.presentation.navigation.NavigationPathRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.nio.file.StandardCopyOption
 import javax.inject.Inject
 
 class ImagesRepositoryImpl @Inject constructor(
@@ -90,18 +88,17 @@ class ImagesRepositoryImpl @Inject constructor(
         respuestas: List<QuestionItemDomain>,
         attributesGuide: GuideDomainModel
     ): Boolean {
-        /*val oldPathImages = filePathsProvider.buildImage(navigationPathRepository.currentPathGuides, fileName)*/
         val oldPathImages =
-            filePathsProvider.buildFolder(navigationPathRepository.currentPathImages, fileName)
+            getSourceImagePath(navigationPathRepository.currentPathImages, attributesGuide)
 
         // Renamed folder
         if (attributesGuide.version == GuideVersion.V2) {
-            val newPathImages = File(oldPathImages, fileName)
+            val newPathImages = File(filePathsProvider.buildFolder(navigationPathRepository.currentPathImages, fileName))
             return File(oldPathImages).renameTo(newPathImages)
         } else { // Version 1 a Version 2
             val newPathImages = File(oldPathImages, fileName)
 
-            if (newPathImages.exists()) {
+            if (!newPathImages.exists()) {
                 newPathImages.mkdir()
             }
 
@@ -118,16 +115,24 @@ class ImagesRepositoryImpl @Inject constructor(
 
                     val isRenamed = File(image.uri).renameTo(File(newPathImage))
                     if (!isRenamed) isSuccess = false
-
-                    /*Files.move(
-                        Paths.get(image.uri),
-                        Paths.get(newPathImage),
-                        StandardCopyOption.REPLACE_EXISTING
-                    )*/
                 }
             }
 
             return isSuccess
+        }
+    }
+
+    private fun getSourceImagePath(
+        sourceImagePath: String,
+        guideDomain: GuideDomainModel,
+    ): String {
+        return if (guideDomain.version == GuideVersion.V1) {
+            sourceImagePath
+        } else {
+            filePathsProvider.buildFolder(
+                sourceImagePath,
+                guideDomain.nameGuide
+            )
         }
     }
 }

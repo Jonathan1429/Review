@@ -4,7 +4,7 @@ import com.jonathanev.review.data.filesystem.FilePathsProvider
 import com.jonathanev.review.domain.repository.GuiaRepository
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuideVersion
-import com.jonathanev.review.data.repository.NavigationPathRepository
+import com.jonathanev.review.presentation.navigation.NavigationPathRepository
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuidePath
 import com.jonathanev.review.domain.result.GetGuideResult

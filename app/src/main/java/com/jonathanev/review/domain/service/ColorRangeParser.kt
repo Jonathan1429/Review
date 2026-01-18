@@ -1,10 +1,10 @@
-package com.jonathanev.review.domain
+package com.jonathanev.review.domain.service
 
 import com.jonathanev.review.domain.model.ColorRangeDomain
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import javax.inject.Inject
 
-class GetColorRangesUseCase @Inject constructor() {
+class ColorRangeParser @Inject constructor() {
     operator fun invoke(originalText: String): QuestionContentDomain.Text{
         val colorRangeDomain = mutableListOf<ColorRangeDomain>()
         var text = originalText

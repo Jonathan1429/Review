@@ -11,10 +11,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.jonathanev.review.databinding.ActivityMainBinding
+import com.jonathanev.review.presentation.event.MainUiEvent
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
 import com.jonathanev.review.presentation.viewmodel.MainToolbarViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -41,6 +46,18 @@ class MainActivity : AppCompatActivity() {
         ) == PackageManager.PERMISSION_GRANTED
 
         viewModel.checkIfNeedsPermission(hasPermission)
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.uiEvent.collect { event ->
+                    when (event) {
+                        MainUiEvent.ShowCreateFoldersError -> {
+                            alertWithoutFolders()
+                        }
+                    }
+                }
+            }
+        }
 
         initUI()
         observers()
@@ -94,22 +111,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun initUI() {
         viewModelToolbar.init()
-
-        val foldersCreated = foldersGuides()
-
-        if (foldersCreated) {
-            viewModel.movingFilesToOtros()
-        }
-    }
-
-    private fun foldersGuides(): Boolean {
-        val foldersCreated = viewModel.createFolders()
-
-        if (!foldersCreated) {
-            alertWithoutFolders()
-        }
-
-        return foldersCreated
+        viewModel.createFolders()
     }
 
     private fun alertWithoutFolders() {
@@ -119,7 +121,7 @@ class MainActivity : AppCompatActivity() {
 
         // Agregar un botón para cerrar el diálogo
         builder.setPositiveButton("Reintentar") { dialog, _ ->
-            foldersGuides()
+            initUI()
             dialog.dismiss() // Cerrar el diálogo
         }
 

@@ -6,7 +6,7 @@ import com.jonathanev.review.domain.model.GuideVersion
 import javax.inject.Inject
 
 class PathHandler @Inject constructor() {
-    fun encrypt(texto: String, desplazamiento: Int = 3): String {
+    fun encrypt(texto: String, desplazamiento: Int = 23): String {
         val resultado = StringBuilder()
 
         for (caracter in texto) {

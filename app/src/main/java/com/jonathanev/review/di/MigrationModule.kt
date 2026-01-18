@@ -1,7 +1,7 @@
 package com.jonathanev.review.di
 
 import com.jonathanev.review.data.filesystem.GuiaMigrationRepositoryImpl
-import com.jonathanev.review.data.repository.GuiaMigrationRepository
+import com.jonathanev.review.domain.repository.GuiaMigrationRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

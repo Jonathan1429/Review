@@ -2,7 +2,6 @@ package com.jonathanev.review.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jonathanev.review.domain.BackPathUseCase
 import com.jonathanev.review.domain.GetGuideMoveUseCase
 import com.jonathanev.review.domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.domain.MoveGuideUseCase
@@ -12,6 +11,7 @@ import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.MoveGuideResponse
 import com.jonathanev.review.presentation.event.UIMovingEvent
 import com.jonathanev.review.presentation.model.QuestionItemUi
+import com.jonathanev.review.presentation.navigation.NavigationPathRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -21,7 +21,7 @@ import javax.inject.Inject
 @HiltViewModel
 class FragmentWithoutFilesViewModel @Inject constructor(
     private val moveGuideUseCase: MoveGuideUseCase,
-    private val backPathUseCase: BackPathUseCase,
+    private val navigationPathRepository: NavigationPathRepository,
     private val setMainPathUseCase: SetMainPathUseCase,
     private val getGuideMoveUseCase: GetGuideMoveUseCase,
     private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase
@@ -36,7 +36,7 @@ class FragmentWithoutFilesViewModel @Inject constructor(
     val respuestas: List<QuestionItemUi> get() = _respuestas
 
     fun back() {
-        backPathUseCase.invoke()
+        navigationPathRepository.back()
     }
 
     fun setMainPath() {

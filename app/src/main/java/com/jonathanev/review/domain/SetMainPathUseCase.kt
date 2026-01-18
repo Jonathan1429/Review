@@ -1,6 +1,6 @@
 package com.jonathanev.review.domain
 
-import com.jonathanev.review.data.repository.NavigationPathRepository
+import com.jonathanev.review.presentation.navigation.NavigationPathRepository
 import javax.inject.Inject
 
 class SetMainPathUseCase @Inject constructor(

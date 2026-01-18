@@ -1,6 +1,7 @@
 package com.jonathanev.review.ui.fragment
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,15 +10,20 @@ import androidx.activity.OnBackPressedCallback
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jonathanev.review.R
 import com.jonathanev.review.databinding.FragmentPreviewQuestionsBinding
+import com.jonathanev.review.presentation.event.GuidePreviewEvent
+import com.jonathanev.review.presentation.event.GuideReviewEvent
 import com.jonathanev.review.presentation.model.ActionGuide
 import com.jonathanev.review.presentation.viewmodel.FragmentRepasarViewModel
 import com.jonathanev.review.ui.adapter.ListPreviewQuestionsAdapter
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -42,6 +48,16 @@ class FragmentPreviewQuestions : Fragment() {
         val folderId = arguments?.getString(
             "guideId"
         ) ?: ""
+
+        lifecycleScope.launch {
+            viewModel.eventsPreviewMessages.collect { event ->
+                when (event) {
+                    is GuidePreviewEvent.ShowMessage -> {
+                        showToast(event.text)
+                    }
+                }
+            }
+        }
 
         initUI(folderId)
         initListeners(folderId)
@@ -109,5 +125,11 @@ class FragmentPreviewQuestions : Fragment() {
         findNavController().navigate(
             R.id.action_fragmentPreviewQuestions_to_fragmentRepasar,
         )
+    }
+
+    private fun showToast(text: String) {
+        Toast.makeText(
+            requireContext(), text, Toast.LENGTH_SHORT
+        ).show()
     }
 }
