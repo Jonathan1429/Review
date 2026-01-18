@@ -25,7 +25,7 @@ interface GuiaRepository {
         description: String,
         preguntas: List<QuestionItemDomain>,
         respuestas: List<QuestionItemDomain>,
-        guideContext: GuideContext.Actual,
+        guideContext: GuideContext.Rename,
     ): Boolean
 
     fun deleteGuide(

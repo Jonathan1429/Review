@@ -9,10 +9,7 @@ import com.jonathanev.review.domain.LoadGuidesUseCase
 import com.jonathanev.review.domain.RenameGuideUseCase
 import com.jonathanev.review.domain.SaveMetadataUseCase
 import com.jonathanev.review.domain.ValidateCreateFileUseCase
-import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
-import com.jonathanev.review.domain.model.GuidePath
-import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.RenamedGuideResult
 import com.jonathanev.review.presentation.event.PrepareGuideEvent
 import com.jonathanev.review.presentation.event.RenameGuideEvent
@@ -43,19 +40,14 @@ class CreateFilesViewModel @Inject constructor(
     private val loadGuidesUseCase: LoadGuidesUseCase,
     private val navigationPathRepository: NavigationPathRepository,
     private val isExistFileUseCase: IsExistFileUseCase,
-    private val getCurrentPathGuidesUseCase: GetCurrentPathGuidesUseCase,
-    private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase
 ) : ViewModel() {
     private var cachedGuides: List<GuideDomainModel> = emptyList()
 
     private val _uiState = MutableStateFlow(PreviewState())
     val uiState = _uiState.asStateFlow()
 
-    private val _eventsMessages = MutableSharedFlow<PrepareGuideEvent>()
+    private val _eventsMessages = MutableSharedFlow<RenameGuideEvent>()
     val eventsMessages = _eventsMessages.asSharedFlow()
-
-    private val _eventsRenameMessages = MutableSharedFlow<RenameGuideEvent>()
-    val eventsRenameMessages = _eventsRenameMessages.asSharedFlow()
 
     private val _messages = MutableSharedFlow<CreatingFileUiState>()
     val messages = _messages.asSharedFlow()
@@ -140,56 +132,43 @@ class CreateFilesViewModel @Inject constructor(
     }
 
     fun renameFile(oldName: String, fileName: String, description: String) {
-        val guideDomainModel = cachedGuides.find { it.nameGuide == oldName }
-        if (guideDomainModel == null) {
-            emitMessagePrepare("No se ha encontrado la guia a renombrar")
+        val guide = cachedGuides.find { it.nameGuide == oldName }
+        if (guide == null) {
+            emitMessage("No se ha encontrado la guia a renombrar")
             return
         }
 
-        val currentPath = getCurrentPathGuidesUseCase.invoke()
-        //Revisar como se obtienen los datos aqui, porque no se visualiza la imagen
-        when (val result = getObtenerDatosXMLUseCase.invoke(
-            GuideContext.Actual(
-                guideDomainModel,
-                GuidePath(currentPath)
-            )
-        )) {
-            is GetGuideResult.Success -> {
-                viewModelScope.launch {
-                    val response =
-                        renameGuideUseCase.invoke(
-                            fileName,
-                            description,
-                            result
-                        )
+        viewModelScope.launch {
+            when (renameGuideUseCase.invoke(
+                guide = guide,
+                newName = fileName,
+                description = description
+            )) {
+                RenamedGuideResult.ImageError ->
+                    emitMessage("No se pasaron correctamente todas las imagenes")
 
-                    when(response){
-                        RenamedGuideResult.ImageError -> emitMessageRename(RenameGuideEvent.ImageError)
-                        RenamedGuideResult.RenamedError -> emitMessageRename(RenameGuideEvent.RenamedError)
-                        RenamedGuideResult.Success -> emitMessageRename(RenameGuideEvent.Success)
-                    }
-                }
+                RenamedGuideResult.RenamedError ->
+                    emitMessage("No se ha podido renombrar la guia")
+
+                RenamedGuideResult.Success ->
+                    emitMessage("Guia renombrada exitosamente")
+
+                RenamedGuideResult.Error -> emitMessage("Ocurrió un error al abrir la guia")
+
+                RenamedGuideResult.InvalidFormat -> emitMessage("La guia está dañada")
+
+                RenamedGuideResult.NotFound -> emitMessage("No se ha encontrado la guia")
+
+                RenamedGuideResult.UnknownError -> emitMessage("Error desconocido")
+                RenamedGuideResult.GuidePathError ->
+                    emitMessage("No fue posible renombrar la guia en la ruta actual")
             }
-
-            GetGuideResult.Error -> emitMessagePrepare("Ocurrió un error al abrir la guia")
-
-            GetGuideResult.InvalidFormat -> emitMessagePrepare("La guia está dañada")
-
-            GetGuideResult.NotFound -> emitMessagePrepare("No se ha encontrado la guia")
-
-            GetGuideResult.UnknownError -> emitMessagePrepare("Error desconocido")
         }
     }
 
-    private fun emitMessagePrepare(text: String) {
+    private fun emitMessage(text: String) {
         viewModelScope.launch {
-            _eventsMessages.emit(PrepareGuideEvent.ShowMessage(text))
-        }
-    }
-
-    private fun emitMessageRename(imageError: RenameGuideEvent) {
-        viewModelScope.launch {
-            _eventsRenameMessages.emit(imageError)
+            _eventsMessages.emit(RenameGuideEvent.ShowMessage(text))
         }
     }
 

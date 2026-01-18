@@ -23,6 +23,7 @@ class GetObtenerDatosXMLUseCase @Inject constructor(
         return when(guideContext){
             is GuideContext.Actual -> {
                 val currentPath = getCurrentPath(guideContext.guide)
+
                 guiaRepository.getXMLGuide(
                     GuideContext.Actual(
                         guide = guideContext.guide, currentGuidePath = GuidePath(currentPath)
@@ -37,7 +38,16 @@ class GetObtenerDatosXMLUseCase @Inject constructor(
                 )
 
             }
-            else -> GetGuideResult.Error
+            is GuideContext.Rename -> {
+                guiaRepository.getXMLGuide(
+                    GuideContext.Actual(
+                        guide = guideContext.guide, currentGuidePath = guideContext.currentGuidePath
+                    )
+                )
+
+            }
+
+            is GuideContext.Browsing -> GetGuideResult.Error
         }
     }
 

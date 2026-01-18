@@ -104,6 +104,19 @@ class DirectoryManagerImpl @Inject constructor(
         return currentPath.exists()
     }
 
+    override fun prepareGuidePath(newName: String): Boolean {
+        val currentPath =
+            File(
+                filePathsProvider.buildFolder(
+                    navigationPathRepository.currentPathGuides,
+                    newName
+                )
+            )
+
+        currentPath.mkdir()
+        return currentPath.exists()
+    }
+
     override fun createFoldersMain(): Boolean {
         val paths = listOf(
             File(filePathsProvider.fileGuides),

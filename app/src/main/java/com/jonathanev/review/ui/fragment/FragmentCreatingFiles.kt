@@ -108,31 +108,19 @@ class FragmentCreatingFiles : Fragment() {
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.eventsRenameMessages.collect { event ->
-                    when(event){
-                        RenameGuideEvent.ImageError -> showToast("No se pasaron correctamente todas las imagenes")
-                        RenameGuideEvent.RenamedError -> showToast("No se ha podido renombrar la guia")
-                        RenameGuideEvent.Success -> {
-                            showToast("Guia renombrada exitosamente")
-                        }
-                    }
-
-                    findNavController().navigate(
-                        R.id.fragmentsContent,
-                        null,
-                        NavOptions.Builder()
-                            .setPopUpTo(R.id.content_graph, true) // Limpia el historial
-                            .build()
-                    )
-                }
-            }
-        }
-
-        lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.eventsMessages.collect { event ->
                     when(event){
-                        is PrepareGuideEvent.ShowMessage -> showToast(event.text)
+                        is RenameGuideEvent.ShowMessage -> {
+                            showToast(event.message)
+
+                            findNavController().navigate(
+                                R.id.fragmentsContent,
+                                null,
+                                NavOptions.Builder()
+                                    .setPopUpTo(R.id.content_graph, true) // Limpia el historial
+                                    .build()
+                            )
+                        }
                     }
                 }
             }

@@ -93,21 +93,9 @@ class GuiaRepositoryImpl @Inject constructor(
         description: String,
         preguntas: List<QuestionItemDomain>,
         respuestas: List<QuestionItemDomain>,
-        guideContext: GuideContext.Actual
+        guideContext: GuideContext.Rename
     ): Boolean {
-        val currentPath = getGuidePath(guideContext.currentGuidePath.value, guideContext.guide)
-        val newPathGuide = filePathsProvider.buildFolderGuide(
-            guideContext.currentGuidePath.value,
-            fileName,
-            fileName
-        )
-
-        val newPathFolder = filePathsProvider.buildFolder(
-            guideContext.currentGuidePath.value,
-            fileName
-        )
-
-        val tempFile = File("$currentPath.tmp")
+        val tempFile = File("${guideContext.currentGuidePath.value}.tmp")
 
         return try {
             val serializer = xmlSerializerFactory.create()
@@ -138,32 +126,13 @@ class GuiaRepositoryImpl @Inject constructor(
 
             fos.close()
 
-            val existFolderPath = if (!File(newPathFolder).exists()){
-                File(newPathFolder).mkdir()
-            } else {
-                tempFile.renameTo(File(newPathFolder))
-            }
-            val isRenamedGuide = tempFile.renameTo(File(newPathGuide))
+            val isRenamedGuide = tempFile.renameTo(File(guideContext.newGuidePath.value))
             tempFile.delete()
-            if (!isRenamedGuide || !existFolderPath) {
+            if (!isRenamedGuide) {
                 return false
             }
 
-            if (guideContext.guide.version == GuideVersion.V1) {
-                val pathV1 = filePathsProvider.buildGuide(
-                    guideContext.currentGuidePath.value,
-                    fileName
-                )
-
-                File(pathV1).delete()
-            } else {
-                val oldPath = filePathsProvider.buildFolder(
-                    guideContext.currentGuidePath.value,
-                    guideContext.guide.nameGuide
-                )
-                //File(oldPath).deleteRecursively()
-            }
-
+            //File(guideContext.currentGuidePath.value).delete()
             true
         } catch (e: Exception) {
             false
