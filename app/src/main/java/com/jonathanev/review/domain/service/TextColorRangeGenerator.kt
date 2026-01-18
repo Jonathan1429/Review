@@ -9,10 +9,9 @@ class TextColorRangeGenerator @Inject constructor(
 ) {
     operator fun invoke(tempQuestions: List<QuestionItemDomain>): List<QuestionItemDomain> {
         val resultList = mutableListOf<QuestionItemDomain>()
-        val resultContent = mutableListOf<QuestionContentDomain>()
 
         tempQuestions.forEach { item ->
-            resultContent.clear()
+            val resultContent = mutableListOf<QuestionContentDomain>()
 
             item.content.forEach { content ->
                 when (content) {

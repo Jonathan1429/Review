@@ -6,7 +6,7 @@ import com.jonathanev.review.domain.GetCurrentPathGuidesUseCase
 import com.jonathanev.review.domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.domain.GetPreviewQuestionsUseCase
 import com.jonathanev.review.domain.GetSaveGuidesUseCase
-import com.jonathanev.review.domain.UploadContentUseCase
+import com.jonathanev.review.presentation.mapper.GuidePreviewMapper
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuidePath
@@ -37,7 +37,7 @@ class FragmentRepasarViewModel @Inject constructor(
     private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
     private val getPreviewQuestionsUseCase: GetPreviewQuestionsUseCase,
     private val getSaveGuidesUseCase: GetSaveGuidesUseCase,
-    private val uploadContentUseCase: UploadContentUseCase,
+    private val guidePreviewMapper: GuidePreviewMapper,
     private val getCurrentPathGuidesUseCase: GetCurrentPathGuidesUseCase
 ) : ViewModel() {
     private var cachedGuides: List<GuideDomainModel> = emptyList()
@@ -100,7 +100,7 @@ class FragmentRepasarViewModel @Inject constructor(
             )
         )) {
             is GetGuideResult.Success -> {
-                val (questions, answers) = uploadContentUseCase.invoke(result)
+                val (questions, answers) = guidePreviewMapper.map(result)
                 initUiPreviewQuestions(result.list)
                 _uiState.update { currentState ->
                     currentState.copy(

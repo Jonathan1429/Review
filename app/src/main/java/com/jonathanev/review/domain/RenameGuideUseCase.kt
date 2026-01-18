@@ -2,20 +2,20 @@ package com.jonathanev.review.domain
 
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
-import com.jonathanev.review.domain.model.GuidePath
 import com.jonathanev.review.domain.repository.DirectoryManager
 import com.jonathanev.review.domain.repository.GuiaRepository
 import com.jonathanev.review.domain.repository.PathResolve
 import com.jonathanev.review.domain.repository.ImagesRepository
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.RenamedGuideResult
+import com.jonathanev.review.presentation.mapper.GuidePreviewMapper
 import com.jonathanev.review.presentation.navigation.NavigationPathRepository
 import javax.inject.Inject
 
 class RenameGuideUseCase @Inject constructor(
     private val obtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
     private val guiaRepository: GuiaRepository,
-    private val uploadContentUseCase: UploadContentUseCase,
+    private val guidePreviewMapper: GuidePreviewMapper,
     private val imagesRepository: ImagesRepository,
     private val directoryManager: DirectoryManager,
     private val pathResolve: PathResolve,
@@ -34,7 +34,7 @@ class RenameGuideUseCase @Inject constructor(
 
         return when (val result = obtenerDatosXMLUseCase.invoke(context)) {
             is GetGuideResult.Success -> {
-                val (questions, answers) = uploadContentUseCase.invoke(result)
+                val (questions, answers) = guidePreviewMapper.invoke(result)
 
                 val isPathExist = directoryManager.prepareGuidePath(newName)
                 if (!isPathExist) {

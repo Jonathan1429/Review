@@ -405,7 +405,6 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         if (status.respuestas.isEmpty()) {
             val guideDomainModel = getSaveGuidesUseCase.invoke().find { it.nameGuide == nameGuide }
             if (guideDomainModel == null) {
-                emitShowMessage()
                 sendNotification(CreateGuideEvent.ShowMessage("No se ha encontrado la guia a renombrar"))
                 return
             }

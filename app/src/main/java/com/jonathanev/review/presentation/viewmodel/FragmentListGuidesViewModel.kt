@@ -12,15 +12,11 @@ import com.jonathanev.review.domain.SetContextMoveUseCase
 import com.jonathanev.review.domain.LoadGuidesUseCase
 import com.jonathanev.review.domain.MoveGuideUseCase
 import com.jonathanev.review.domain.SetMainPathUseCase
-import com.jonathanev.review.domain.UploadContentUseCase
+import com.jonathanev.review.presentation.mapper.GuidePreviewMapper
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
-import com.jonathanev.review.domain.model.GuidePath
 import com.jonathanev.review.domain.model.GuideResultDomain
-import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.result.DeleteGuideResult
-import com.jonathanev.review.domain.result.GetGuideResult
-import com.jonathanev.review.domain.result.MoveGuideResponse
 import com.jonathanev.review.presentation.event.GuideActionEvent
 import com.jonathanev.review.presentation.event.UIMovingEvent
 import com.jonathanev.review.presentation.files.model.GuideResultUi
@@ -44,7 +40,7 @@ class FragmentListGuidesViewModel @Inject constructor(
     private val moveGuideUseCase: MoveGuideUseCase,
     private val setContextMoveUseCase: SetContextMoveUseCase,
     private val getGuideMoveUseCase: GetGuideMoveUseCase,
-    private val uploadContentUseCase: UploadContentUseCase,
+    private val guidePreviewMapper: GuidePreviewMapper,
     private val getCurrentPathGuidesUseCase: GetCurrentPathGuidesUseCase
 ) : ViewModel() {
     private var cachedGuides: List<GuideDomainModel> = emptyList()
