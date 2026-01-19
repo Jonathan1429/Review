@@ -85,6 +85,10 @@ class FragmentRepasarViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
+    fun initUiState(){
+        _uiState.value =  GuideUiState()
+    }
+
     fun getObtenerDatosXML(folderId: String) {
         val guideDomainModel = cachedGuides.find { it.nameGuide == folderId }
         if (guideDomainModel == null) {
