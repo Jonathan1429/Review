@@ -132,7 +132,7 @@ class GuiaRepositoryImpl @Inject constructor(
                 return false
             }
 
-            //File(guideContext.currentGuidePath.value).delete()
+            File(guideContext.currentGuidePath.value).delete()
             true
         } catch (e: Exception) {
             false

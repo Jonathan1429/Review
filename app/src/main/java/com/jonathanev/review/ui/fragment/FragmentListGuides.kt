@@ -221,11 +221,7 @@ class FragmentListGuides : Fragment() {
         }
 
         when (val guideResult = viewModel.getGuideSelected(position)) {
-            is GuideResultUi.Error -> Toast.makeText(
-                requireContext(),
-                "No se pudo cargar la guia",
-                Toast.LENGTH_SHORT
-            ).show()
+            is GuideResultUi.Error -> showToast("No se encontró la guia en la posición $position")
 
             is GuideResultUi.Success -> {
                 val builder = AlertDialog.Builder(context)
@@ -275,19 +271,11 @@ class FragmentListGuides : Fragment() {
                         }
 
                         3 -> {
-                            val result = viewModel.guideToMove(position)
-                            when (result) {
-                                is GuideResultUi.Error -> {
-                                    showToast("No se pudo cargar la guia")
-                                }
-
-                                is GuideResultUi.Success -> {
-                                    findNavController().navigate(
-                                        R.id.action_to_content_graph,
-                                        bundleOf("mode" to FolderAction.MovingFile)
-                                    )
-                                }
-                            }
+                            viewModel.setContext()
+                            findNavController().navigate(
+                                R.id.action_to_content_graph,
+                                bundleOf("mode" to FolderAction.MovingFile)
+                            )
                         }
 
                         4 -> {

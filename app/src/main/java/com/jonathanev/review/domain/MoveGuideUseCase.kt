@@ -1,6 +1,7 @@
 package com.jonathanev.review.domain
 
 import com.jonathanev.review.domain.model.GuideContext
+import com.jonathanev.review.domain.model.GuidePath
 import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.ImageSource
 import com.jonathanev.review.domain.model.QAItemDomain
@@ -10,11 +11,13 @@ import com.jonathanev.review.domain.repository.DirectoryManager
 import com.jonathanev.review.domain.repository.GuiaRepository
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.MoveGuideResponse
+import com.jonathanev.review.presentation.navigation.NavigationPathRepository
 import javax.inject.Inject
 
 class MoveGuideUseCase @Inject constructor(
     private val guiaRepository: GuiaRepository,
     private val directoryManager: DirectoryManager,
+    private val navigationPathRepository: NavigationPathRepository
 ) {
     operator fun invoke(guideData: GetGuideResult.Success, context: GuideContext.Moving): MoveGuideResponse {
         var isExistPathGuide = true
@@ -30,8 +33,9 @@ class MoveGuideUseCase @Inject constructor(
         val moveGuide = guiaRepository.moveGuide(
             GuideContext.Moving(
                 context.guide,
-                context.oldGuidePath,
-                context.currentGuidePath
+                GuidePath(context.oldGuidePath.value),
+                GuidePath(navigationPathRepository.currentPathGuides),
+                GuidePath(context.oldImagePath.value),
             )
         )
         if (!moveGuide) {
@@ -41,7 +45,7 @@ class MoveGuideUseCase @Inject constructor(
         val isDeleteFolder = directoryManager.deleteFolderEmpty(
             GuideContext.Actual(
                 guide = context.guide,
-                currentGuidePath = context.oldGuidePath,
+                currentGuidePath = GuidePath(context.oldGuidePath.value),
             )
         )
 
@@ -58,7 +62,7 @@ class MoveGuideUseCase @Inject constructor(
             )
         }
 
-        if (isSuccessFolderImages) {
+        if (!isSuccessFolderImages) {
             return MoveGuideResponse.ErrorPathImages
         }
 
@@ -67,7 +71,7 @@ class MoveGuideUseCase @Inject constructor(
         val isSuccessMoveImages =
             directoryManager.moveImages(
                 context.guide,
-                ImageSource.MovingGuide(context.oldGuidePath),
+                ImageSource.MovingGuide(GuidePath(context.oldImagePath.value)),
                 images
             )
 

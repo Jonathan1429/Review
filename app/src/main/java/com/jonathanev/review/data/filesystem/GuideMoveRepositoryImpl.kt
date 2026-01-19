@@ -6,7 +6,9 @@ import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.repository.GuideMoveRepository
 import java.io.File
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class GuideMoveRepositoryImpl @Inject constructor(
     private val filePathsProvider: FilePathsProvider
 ) : GuideMoveRepository {

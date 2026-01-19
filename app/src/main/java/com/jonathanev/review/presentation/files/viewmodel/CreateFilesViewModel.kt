@@ -122,7 +122,7 @@ class CreateFilesViewModel @Inject constructor(
         val guideDomainModel = cachedGuides.find { it.nameGuide == fileName }
 
         if (guideDomainModel == null) {
-            return GuideResultUi.Error("No se ha encontrado la guia a cargar")
+            return GuideResultUi.Error
         }
 
         return GuideResultUi.Success(guideDomainModel.toUi())

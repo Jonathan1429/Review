@@ -60,7 +60,8 @@ class DirectoryManagerImpl @Inject constructor(
 
         images.forEach { image ->
             val oldPathImage = File(getPathImage(guideDomain, image, oldImagesPath))
-            val newPathImages = filePathsProvider.buildFolder(navigationPathRepository.currentPathImages, guideDomain.nameGuide)
+            val newPathImages = getSourceImagePath(navigationPathRepository.currentPathImages, guideDomain)
+                //filePathsProvider.buildFolder(navigationPathRepository.currentPathImages, guideDomain.nameGuide)
 
             if (oldPathImage.exists()) {
                 val destination = File(newPathImages, image.nameFile)
@@ -133,7 +134,11 @@ class DirectoryManagerImpl @Inject constructor(
     }
 
     override fun deleteFolderEmpty(guideContext: GuideContext.Actual): Boolean {
-        return File(guideContext.currentGuidePath.value).delete()
+        return if (guideContext.guide.version == GuideVersion.V2){
+            File(guideContext.currentGuidePath.value, guideContext.guide.nameGuide).delete()
+        } else {
+            true
+        }
     }
 
     override fun getImagesInDevice(guideDomain: GuideDomainModel): Set<String> {

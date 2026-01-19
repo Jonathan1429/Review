@@ -31,17 +31,20 @@ class GetObtenerDatosXMLUseCase @Inject constructor(
                 )
             }
             is GuideContext.Moving -> {
+                val currentPath = getCurrentPath(guideContext.guide, guideContext.oldGuidePath.value)
+
                 guiaRepository.getXMLGuide(
                     GuideContext.Actual(
-                        guide = guideContext.guide, currentGuidePath = guideContext.oldGuidePath
+                        guide = guideContext.guide, currentGuidePath = GuidePath(currentPath)
                     )
                 )
 
             }
+            // Verificar que el renombrar se haga correctamente
             is GuideContext.Rename -> {
                 guiaRepository.getXMLGuide(
                     GuideContext.Actual(
-                        guide = guideContext.guide, currentGuidePath = guideContext.currentGuidePath
+                        guide = guideContext.guide, currentGuidePath = GuidePath(guideContext.currentGuidePath.value)
                     )
                 )
 
@@ -51,14 +54,14 @@ class GetObtenerDatosXMLUseCase @Inject constructor(
         }
     }
 
-    private fun getCurrentPath(guideDomainModel: GuideDomainModel) = if (guideDomainModel.version == GuideVersion.V1) {
+    private fun getCurrentPath(guideDomainModel: GuideDomainModel, basePath: String = navigationPathRepository.currentPathGuides) = if (guideDomainModel.version == GuideVersion.V1) {
         filePathsProvider.buildGuide(
-            navigationPathRepository.currentPathGuides,
+            basePath,
             guideDomainModel.nameGuide
         )
     } else {
         filePathsProvider.buildFolderGuide(
-            navigationPathRepository.currentPathGuides,
+            basePath,
             guideDomainModel.nameGuide,
             guideDomainModel.nameGuide
         )

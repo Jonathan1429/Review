@@ -14,6 +14,7 @@ sealed class GuideContext {
         val guide: GuideDomainModel,
         val oldGuidePath: GuidePath,
         val currentGuidePath: GuidePath,
+        val oldImagePath: GuidePath
     ) : GuideContext()
 
     data class Rename(

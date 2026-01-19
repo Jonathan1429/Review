@@ -7,13 +7,17 @@ import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.domain.DeleteGuideUseCase
 import com.jonathanev.review.domain.GetGuideMoveUseCase
 import com.jonathanev.review.domain.GetGuidePosicionUseCase
+import com.jonathanev.review.domain.GetObtenerDatosXMLUseCase
 import com.jonathanev.review.domain.LoadGuidesUseCase
+import com.jonathanev.review.domain.MoveGuideUseCase
 import com.jonathanev.review.domain.SetContextMoveUseCase
 import com.jonathanev.review.domain.SetMainPathUseCase
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuideResultDomain
 import com.jonathanev.review.domain.result.DeleteGuideResult
+import com.jonathanev.review.domain.result.GetGuideResult
+import com.jonathanev.review.domain.result.MoveGuideResponse
 import com.jonathanev.review.presentation.event.GuideActionEvent
 import com.jonathanev.review.presentation.event.UIMovingEvent
 import com.jonathanev.review.presentation.files.model.GuideResultUi
@@ -36,8 +40,12 @@ class FragmentListGuidesViewModel @Inject constructor(
     private val deleteGuideUseCase: DeleteGuideUseCase,
     private val setContextMoveUseCase: SetContextMoveUseCase,
     private val getGuideMoveUseCase: GetGuideMoveUseCase,
+    private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
+    private val moveGuideUseCase: MoveGuideUseCase
 ) : ViewModel() {
     private var cachedGuides: List<GuideDomainModel> = emptyList()
+    private var selectedGuideDomain: GuideDomainModel? = null
+
     private val _guides = MutableLiveData<List<GuideUiModel>>()
     val guides: LiveData<List<GuideUiModel>> = _guides
 
@@ -60,9 +68,13 @@ class FragmentListGuidesViewModel @Inject constructor(
     }
 
     fun getGuideSelected(position: Int): GuideResultUi {
-        val resultDomain = getGuidePosicionUseCase.invoke(position, cachedGuides)
-        return resultDomain.toUi()
-        //_selectedGuide.value = resultToUi
+        return when(val result = getGuidePosicionUseCase.invoke(position, cachedGuides)){
+            GuideResultDomain.Error -> result.toUi()
+            is GuideResultDomain.Success -> {
+                selectedGuideDomain = result.guideDomainModel
+                result.toUi()
+            }
+        }
     }
 
     fun deleteGuide(nameGuide: String) {
@@ -92,9 +104,9 @@ class FragmentListGuidesViewModel @Inject constructor(
         }
     }
 
-    fun changeFilePathToMain() {
+    /*fun changeFilePathToMain() {
         setMainPathUseCase.invoke()
-    }
+    }*/
 
     /*fun getPaths(): Pair<String, String> {
         return getCurrentFolderUseCase.invoke()
@@ -119,9 +131,8 @@ class FragmentListGuidesViewModel @Inject constructor(
         }
     }
 
-    // Al moveeeeer las guiiiiaaaaaaaaaaaaaaaaaaas
     fun onContinueProcess(confirmed: Boolean) {
-        /*if (!confirmed) return
+        if (!confirmed) return
 
         when (val context = getGuideMoveUseCase.invoke()) {
             is GuideContext.Moving -> {
@@ -161,7 +172,7 @@ class FragmentListGuidesViewModel @Inject constructor(
             }
 
             else -> eventMovingFile("Error inesperado")
-        }*/
+        }
     }
 
     private fun eventMovingFile(message: String) {
@@ -182,14 +193,8 @@ class FragmentListGuidesViewModel @Inject constructor(
         setMainPathUseCase.invoke()
     }
 
-    fun guideToMove(position: Int): GuideResultUi {
-        return when (val guideResultDomain =
-            getGuidePosicionUseCase.invoke(position, cachedGuides)) {
-            is GuideResultDomain.Error -> guideResultDomain.toUi()
-            is GuideResultDomain.Success -> {
-                setContextMoveUseCase.invoke(guideResultDomain.guideDomainModel)
-                return guideResultDomain.toUi()
-            }
-        }
+    fun setContext() {
+        val guide = selectedGuideDomain ?: return
+        setContextMoveUseCase.invoke(guide)
     }
 }

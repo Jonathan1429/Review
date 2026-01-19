@@ -189,7 +189,7 @@ class FragmentCreatingFiles : Fragment() {
                 viewModel.uploadCachedGuides()
 
                 when(val result = viewModel.fillFields(mode.fileName)){
-                    is GuideResultUi.Error -> showToast(result.message)
+                    is GuideResultUi.Error -> showToast("No se ha encontrado la guia a cargar")
                     is GuideResultUi.Success -> {
                         binding.fragmentCreate.etNombre.setText(result.guideUiModel.nameGuide)
                         binding.fragmentCreate.fragmentComponentsFile.etDescription.setText(result.guideUiModel.description)
