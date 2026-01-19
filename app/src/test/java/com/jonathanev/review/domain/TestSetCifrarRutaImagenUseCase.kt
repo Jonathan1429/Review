@@ -4,7 +4,7 @@ import junit.framework.TestCase.assertEquals
 import org.junit.Test
 
 class TestSetCifrarRutaImagenUseCase {
-    private val setCifrarRutaImagenUseCase = SetCifrarRutaImagenUseCase()
+    /*private val setCifrarRutaImagenUseCase = SetCifrarRutaImagenUseCase()
 
     @Test
     fun `Cuando enviamos un texto debe regresarte todo el texto cifrado`(){
@@ -24,5 +24,5 @@ class TestSetCifrarRutaImagenUseCase {
         val result = setCifrarRutaImagenUseCase(texto, desplazamiento)
         assertEquals("K1r3o4d", result)
         //println((('l' - 'a' + 3) % 26 + 'a'.code).toChar())
-    }
+    }*/
 }

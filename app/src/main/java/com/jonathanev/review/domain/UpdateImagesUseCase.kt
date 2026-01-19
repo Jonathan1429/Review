@@ -5,6 +5,7 @@ import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
 import com.jonathanev.review.presentation.navigation.NavigationPathRepository
 import com.jonathanev.review.domain.model.GuidePath
+import com.jonathanev.review.domain.model.ImageSource
 import com.jonathanev.review.domain.repository.DirectoryManager
 import javax.inject.Inject
 

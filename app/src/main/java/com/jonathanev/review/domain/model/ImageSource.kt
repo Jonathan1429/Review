@@ -1,6 +1,4 @@
-package com.jonathanev.review.domain
-
-import com.jonathanev.review.domain.model.GuidePath
+package com.jonathanev.review.domain.model
 
 sealed class ImageSource {
     data class MovingGuide(val oldPath: GuidePath): ImageSource()

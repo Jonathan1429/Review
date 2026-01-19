@@ -149,9 +149,7 @@ class FragmentRepasarViewModel @Inject constructor(
         val state = uiState.value
         if (state.contadorPregunta == state.respuestas.size - 1) {
             viewModelScope.launch {
-                _eventsMessages.emit(
-                    GuideReviewEvent.RestartGuide
-                )
+                _eventsMessages.emit(GuideReviewEvent.RestartGuide)
             }
             return
         }

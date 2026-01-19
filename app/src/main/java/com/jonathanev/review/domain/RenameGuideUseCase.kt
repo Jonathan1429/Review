@@ -34,7 +34,7 @@ class RenameGuideUseCase @Inject constructor(
 
         return when (val result = obtenerDatosXMLUseCase.invoke(context)) {
             is GetGuideResult.Success -> {
-                val (questions, answers) = guidePreviewMapper.invoke(result)
+                val (questions, answers) = guidePreviewMapper.map(result)
 
                 val isPathExist = directoryManager.prepareGuidePath(newName)
                 if (!isPathExist) {

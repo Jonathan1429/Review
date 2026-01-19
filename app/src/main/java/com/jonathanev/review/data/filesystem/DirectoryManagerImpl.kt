@@ -2,7 +2,7 @@ package com.jonathanev.review.data.filesystem
 
 import com.jonathanev.review.presentation.navigation.NavigationPathRepository
 import com.jonathanev.review.domain.repository.DirectoryManager
-import com.jonathanev.review.domain.ImageSource
+import com.jonathanev.review.domain.model.ImageSource
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuideVersion

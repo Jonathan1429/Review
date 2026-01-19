@@ -288,7 +288,6 @@ class FragmentListGuides : Fragment() {
                                     )
                                 }
                             }
-                            viewModel.changeFilePathToMain()
                         }
 
                         4 -> {

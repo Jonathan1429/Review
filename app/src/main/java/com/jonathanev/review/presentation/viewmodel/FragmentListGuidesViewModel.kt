@@ -5,14 +5,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.domain.DeleteGuideUseCase
-import com.jonathanev.review.domain.GetCurrentPathGuidesUseCase
 import com.jonathanev.review.domain.GetGuideMoveUseCase
 import com.jonathanev.review.domain.GetGuidePosicionUseCase
-import com.jonathanev.review.domain.SetContextMoveUseCase
 import com.jonathanev.review.domain.LoadGuidesUseCase
-import com.jonathanev.review.domain.MoveGuideUseCase
+import com.jonathanev.review.domain.SetContextMoveUseCase
 import com.jonathanev.review.domain.SetMainPathUseCase
-import com.jonathanev.review.presentation.mapper.GuidePreviewMapper
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuideResultDomain
@@ -37,11 +34,8 @@ class FragmentListGuidesViewModel @Inject constructor(
     private val setMainPathUseCase: SetMainPathUseCase,
     private val navigationPathRepository: NavigationPathRepository,
     private val deleteGuideUseCase: DeleteGuideUseCase,
-    private val moveGuideUseCase: MoveGuideUseCase,
     private val setContextMoveUseCase: SetContextMoveUseCase,
     private val getGuideMoveUseCase: GetGuideMoveUseCase,
-    private val guidePreviewMapper: GuidePreviewMapper,
-    private val getCurrentPathGuidesUseCase: GetCurrentPathGuidesUseCase
 ) : ViewModel() {
     private var cachedGuides: List<GuideDomainModel> = emptyList()
     private val _guides = MutableLiveData<List<GuideUiModel>>()
