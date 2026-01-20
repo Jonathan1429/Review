@@ -1,5 +1,6 @@
 package com.jonathanev.review.ui.fragment
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.res.ColorStateList
 import android.graphics.PorterDuff
@@ -19,6 +20,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
@@ -64,12 +66,16 @@ class FragmentCreatingFiles : Fragment() {
             FolderAction::class.java
         ) ?: FolderAction.None
 
-        val callback = object : OnBackPressedCallback(true) {
+        /*val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-
-                if (mode is FolderAction.RenamingFile) {
-                    viewModel.beforePath()
+                /* Rastrear pila de ventanas
+                val stack = findNavController().currentBackStack.value
+                Log.d("NavDebug", "--- Inicio del Stack (Tamaño: ${stack.size}) ---")
+                stack.forEachIndexed { index, entry ->
+                    val name = entry.destination.displayName.split("/").last()
+                    Log.d("NavDebug", "Posición [$index]: $name (ID: ${entry.destination.id})")
                 }
+                Log.d("NavDebug", "--- Fin del Stack ---")*/
 
                 // back real
                 findNavController().navigateUp()
@@ -78,7 +84,7 @@ class FragmentCreatingFiles : Fragment() {
 
         requireActivity()
             .onBackPressedDispatcher
-            .addCallback(viewLifecycleOwner, callback)
+            .addCallback(viewLifecycleOwner, callback)*/
 
         // Animación cuando se esté seleccionando un color.
         val bubbleFlag = BubbleFlag(context)

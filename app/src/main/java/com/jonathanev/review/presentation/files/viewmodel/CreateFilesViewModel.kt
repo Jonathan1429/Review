@@ -179,10 +179,6 @@ class CreateFilesViewModel @Inject constructor(
         processScreenData(name, description)
     }
 
-    fun beforePath() {
-        navigationPathRepository.back()
-    }
-
     fun uploadCachedGuides() {
         cachedGuides = loadGuidesUseCase.invoke()
     }
