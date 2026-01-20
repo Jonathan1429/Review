@@ -1,40 +1,36 @@
 package com.jonathanev.review.ui.fragment
 
-import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.res.ColorStateList
 import android.graphics.PorterDuff
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.activity.OnBackPressedCallback
 import androidx.core.graphics.ColorUtils
 import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
-import com.jonathanev.review.presentation.model.ActionGuide
-import com.jonathanev.review.presentation.folders.model.FolderAction
-import com.jonathanev.review.presentation.model.ScreenDataUi
-import com.jonathanev.review.presentation.state.CreatingFileUiState
-import com.jonathanev.review.presentation.event.PrepareGuideEvent
-import com.jonathanev.review.ui.adapter.ListarIconosAdapter
 import com.jonathanev.review.R
-import com.jonathanev.review.presentation.files.viewmodel.CreateFilesViewModel
 import com.jonathanev.review.databinding.FragmentCreateFilesBinding
 import com.jonathanev.review.presentation.event.RenameGuideEvent
 import com.jonathanev.review.presentation.files.model.GuideResultUi
+import com.jonathanev.review.presentation.files.viewmodel.CreateFilesViewModel
+import com.jonathanev.review.presentation.folders.model.FolderAction
+import com.jonathanev.review.presentation.model.ActionGuide
+import com.jonathanev.review.presentation.model.ScreenDataUi
+import com.jonathanev.review.presentation.state.CreatingFileUiState
+import com.jonathanev.review.ui.adapter.ListarIconosAdapter
 import com.jonathanev.review.ui.mapper.toInt
 import com.skydoves.colorpickerview.flag.BubbleFlag
 import com.skydoves.colorpickerview.flag.FlagMode
@@ -65,26 +61,6 @@ class FragmentCreatingFiles : Fragment() {
             "mode",
             FolderAction::class.java
         ) ?: FolderAction.None
-
-        /*val callback = object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                /* Rastrear pila de ventanas
-                val stack = findNavController().currentBackStack.value
-                Log.d("NavDebug", "--- Inicio del Stack (Tamaño: ${stack.size}) ---")
-                stack.forEachIndexed { index, entry ->
-                    val name = entry.destination.displayName.split("/").last()
-                    Log.d("NavDebug", "Posición [$index]: $name (ID: ${entry.destination.id})")
-                }
-                Log.d("NavDebug", "--- Fin del Stack ---")*/
-
-                // back real
-                findNavController().navigateUp()
-            }
-        }
-
-        requireActivity()
-            .onBackPressedDispatcher
-            .addCallback(viewLifecycleOwner, callback)*/
 
         // Animación cuando se esté seleccionando un color.
         val bubbleFlag = BubbleFlag(context)

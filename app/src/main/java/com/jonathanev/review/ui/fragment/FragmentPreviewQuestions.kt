@@ -53,6 +53,7 @@ class FragmentPreviewQuestions : Fragment() {
             viewModel.eventsPreviewMessages.collect { event ->
                 when (event) {
                     is GuidePreviewEvent.ShowMessage -> {
+                        findNavController().popBackStack()
                         showToast(event.text)
                     }
                 }

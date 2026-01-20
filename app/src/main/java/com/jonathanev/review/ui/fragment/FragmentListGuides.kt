@@ -124,6 +124,10 @@ class FragmentListGuides : Fragment() {
                     when (event) {
                         is GuideActionEvent.ShowMessage -> {
                             showToast(event.text)
+                        }
+
+                        is GuideActionEvent.Success -> {
+                            showToast(event.text)
 
                             findNavController().navigate(
                                 R.id.action_to_content_graph,
@@ -137,19 +141,6 @@ class FragmentListGuides : Fragment() {
                 }
             }
         }
-
-        /* otra manera de ejecuta el botón para atrás
-        val callback = object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() { // Si no consumes el evento, puedes volver atrás en la pila de Fragments. // Para esto, deshabilita y llama a la implementación por defecto.
-                viewModel.back()
-
-                isEnabled = true
-                requireActivity().onBackPressedDispatcher.onBackPressed()
-            }
-        }
-        // El 'this' como LifecycleOwner asegura que el callback se maneje correctamente // con el ciclo de vida del Fragment.
-
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)*/
 
         requireActivity().onBackPressedDispatcher.addCallback(
             viewLifecycleOwner,
@@ -173,11 +164,7 @@ class FragmentListGuides : Fragment() {
     private fun initListeners(mode: FolderAction) {
         binding.btnCreateGuide.setOnClickListener {
             if (mode is FolderAction.MovingFile) {
-                Toast.makeText(
-                    requireContext(),
-                    "Termina de mover la guia antes de realizar otra acción",
-                    Toast.LENGTH_SHORT
-                ).show()
+                showToast("Termina de mover la guia antes de realizar otra acción")
             } else {
                 findNavController().navigate(
                     R.id.action_to_create_graph,

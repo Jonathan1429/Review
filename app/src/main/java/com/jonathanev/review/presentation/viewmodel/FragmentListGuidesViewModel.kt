@@ -80,37 +80,29 @@ class FragmentListGuidesViewModel @Inject constructor(
     fun deleteGuide(nameGuide: String) {
         val guideDomainModel = cachedGuides.find { it.nameGuide == nameGuide }
         if (guideDomainModel == null) {
-            emitMessage("No se ha encontrado la guia")
+            emitMessage(GuideActionEvent.ShowMessage("No se ha encontrado la guia"))
             return
         }
 
         val response = deleteGuideUseCase.invoke(guideDomainModel)
         when (response) {
-            DeleteGuideResult.DeleteSuccess -> emitMessage("Guia borrada exitosamente")
-            DeleteGuideResult.Error -> emitMessage("Ocurrió un error al abrir la guia")
-            DeleteGuideResult.ErrorGuide -> emitMessage("Hubo un error al borrar la guia")
+            DeleteGuideResult.DeleteSuccess -> emitMessage(GuideActionEvent.Success("Guia borrada exitosamente"))
+            DeleteGuideResult.Error -> emitMessage(GuideActionEvent.ShowMessage("Ocurrió un error al abrir la guia"))
+            DeleteGuideResult.ErrorGuide -> emitMessage(GuideActionEvent.ShowMessage("Hubo un error al borrar la guia"))
             DeleteGuideResult.ErrorImage ->
-                emitMessage("Hubo inconvenientes en el borrado completo de archivos")
+                emitMessage(GuideActionEvent.ShowMessage("Hubo inconvenientes en el borrado completo de archivos"))
 
-            DeleteGuideResult.InvalidFormat -> emitMessage("La guia está dañada")
-            DeleteGuideResult.NotFound -> emitMessage("No se ha encontrado la guia")
-            DeleteGuideResult.UnknownError -> emitMessage("Error desconocido")
+            DeleteGuideResult.InvalidFormat -> emitMessage(GuideActionEvent.ShowMessage("La guia está dañada"))
+            DeleteGuideResult.NotFound -> emitMessage(GuideActionEvent.ShowMessage("No se ha encontrado la guia"))
+            DeleteGuideResult.UnknownError -> emitMessage(GuideActionEvent.ShowMessage("Error desconocido"))
         }
     }
 
-    private fun emitMessage(text: String) {
+    private fun emitMessage(guideActionEvent: GuideActionEvent) {
         viewModelScope.launch {
-            _eventsMessages.emit(GuideActionEvent.ShowMessage(text))
+            _eventsMessages.emit(guideActionEvent)
         }
     }
-
-    /*fun changeFilePathToMain() {
-        setMainPathUseCase.invoke()
-    }*/
-
-    /*fun getPaths(): Pair<String, String> {
-        return getCurrentFolderUseCase.invoke()
-    }*/
 
     fun movingGuide() {
         when (val context = getGuideMoveUseCase.invoke()) {
