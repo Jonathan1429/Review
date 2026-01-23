@@ -12,7 +12,7 @@ import com.jonathanev.review.presentation.model.QuestionItemUi
 fun PreviewQuestionDomain.toUi(): PreviewQuestionUi {
     return PreviewQuestionUi(
         this.question.toUi(),
-        noImages = this.noImages
+        noImages = this.noImages.toString()
     )
 }
 

@@ -1,8 +1,7 @@
 package com.jonathanev.review.domain
 
 import com.jonathanev.review.domain.model.GuideDomainModel
-import com.jonathanev.review.domain.model.GuideResultDomain
-import com.jonathanev.review.presentation.navigation.NavigationPathRepository
+import com.jonathanev.review.domain.result.GuideResultDomain
 import javax.inject.Inject
 
 class GetGuidePosicionUseCase @Inject constructor() {

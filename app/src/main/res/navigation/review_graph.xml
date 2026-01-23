@@ -66,7 +66,7 @@
         tools:layout="@layout/fragment_visor_imagen">
         <argument
             android:name="questionImage"
-            app:argType="com.jonathanev.review.domain.model.QuestionContentDomain$Image"
+            app:argType="com.jonathanev.review.presentation.model.QuestionContentUi$Image"
             app:nullable="false" />
     </fragment>
 
@@ -78,7 +78,7 @@
         tools:layout="@layout/fragment_visor_texto">
         <argument
             android:name="questionText"
-            app:argType="com.jonathanev.review.domain.model.QuestionContentDomain$Text"
+            app:argType="com.jonathanev.review.presentation.model.QuestionContentUi$Text"
             app:nullable="false" />
     </fragment>
 

@@ -1,21 +1,15 @@
 package com.jonathanev.review.domain.model
 
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
-
-@Parcelize
-sealed class QuestionContentDomain: Parcelable {
-    @Parcelize
+sealed class QuestionContentDomain {
     data object None : QuestionContentDomain()
-    @Parcelize
-    data class Text(val text: String, val colorRangeDomains:List<ColorRangeDomain>): QuestionContentDomain()
-    @Parcelize
-    data class Image(val uri: String, val nameFile: String): QuestionContentDomain()
+    data class Text(val text: String, val colorRangeDomains: List<ColorRangeDomain>) :
+        QuestionContentDomain()
+
+    data class Image(val uri: String, val nameFile: String) : QuestionContentDomain()
 }
 
-@Parcelize
 data class ColorRangeDomain(
     val start: Int,
     val end: Int,
     val color: Int
-): Parcelable
+)

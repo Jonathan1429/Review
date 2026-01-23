@@ -1,29 +1,28 @@
 package com.jonathanev.review.data.repository
 
 import com.jonathanev.review.data.JsonManager
+import com.jonathanev.review.data.filesystem.FilePathsProvider
 import com.jonathanev.review.data.mapper.json.toDomain
 import com.jonathanev.review.data.model.AttributesFolderDto
 import com.jonathanev.review.domain.factory.DefaultFolderAttributesProvider
-import com.jonathanev.review.data.filesystem.FilePathsProvider
 import com.jonathanev.review.domain.model.FolderAttributesDomain
 import com.jonathanev.review.domain.model.FolderDomainModel
 import com.jonathanev.review.domain.repository.FolderRepository
-import com.jonathanev.review.presentation.navigation.NavigationPathRepository
+import com.jonathanev.review.domain.repository.NavigationPathRepository
 import java.io.File
 import javax.inject.Inject
 
 class FolderRepositoryImpl @Inject constructor(
     private val jsonManager: JsonManager,
     private val navigationPathRepository: NavigationPathRepository,
-    private val defaultFolderAttributesProvider: DefaultFolderAttributesProvider,
     private val filePathsProvider: FilePathsProvider
 ) : FolderRepository {
     private fun loadFolderAttributes(nameFolder: String): FolderAttributesDomain {
         val currentPath =
-            filePathsProvider.buildFolder(navigationPathRepository.currentPathGuides, nameFolder)
+            filePathsProvider.buildFolder(navigationPathRepository.currentPathGuides.value, nameFolder)
 
         val file = File(currentPath, "screen.json")
-        if (!file.exists()) return defaultFolderAttributesProvider.default(nameFolder)
+        if (!file.exists()) return DefaultFolderAttributesProvider.default(nameFolder)
 
         val attributesFolderDto = jsonManager.read(file, AttributesFolderDto.serializer())
         val attributesFolderDomain = attributesFolderDto.toDomain()
@@ -33,9 +32,9 @@ class FolderRepositoryImpl @Inject constructor(
 
     override fun deleteFolder(nameFolder: String): Boolean {
         val pathGuides =
-            filePathsProvider.buildFolder(navigationPathRepository.currentPathGuides, nameFolder)
+            filePathsProvider.buildFolder(navigationPathRepository.currentPathGuides.value, nameFolder)
         val pathImages =
-            filePathsProvider.buildFolder(navigationPathRepository.currentPathImages, nameFolder)
+            filePathsProvider.buildFolder(navigationPathRepository.currentPathImages.value, nameFolder)
 
         return if (File(pathGuides).deleteRecursively()) {
             File(pathImages).deleteRecursively()
@@ -46,7 +45,7 @@ class FolderRepositoryImpl @Inject constructor(
     }
 
     override fun getFolders(): List<FolderDomainModel> {
-        return File(navigationPathRepository.currentPathGuides).listFiles()?.filter { it.isDirectory }
+        return File(navigationPathRepository.currentPathGuides.value).listFiles()?.filter { it.isDirectory }
             ?.map { item ->
                 val numGuidesCurrentFolder =
                     item.listFiles()?.filter { it.name != "screen.json" }?.size ?: 0

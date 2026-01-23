@@ -5,13 +5,11 @@ import android.os.Bundle
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.jonathanev.review.domain.model.QuestionContentDomain
+import androidx.fragment.app.Fragment
 import com.jonathanev.review.databinding.FragmentVisorTextoBinding
-import com.jonathanev.review.presentation.model.ColorRangeUi
 import com.jonathanev.review.presentation.model.QuestionContentUi
 
 class FragmentVisorTexto : Fragment() {

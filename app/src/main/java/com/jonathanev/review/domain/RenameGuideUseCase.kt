@@ -2,6 +2,9 @@ package com.jonathanev.review.domain
 
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
+import com.jonathanev.review.domain.model.GuideRenameContext
+import com.jonathanev.review.domain.model.QuestionContentDomain
+import com.jonathanev.review.domain.model.QuestionItemDomain
 import com.jonathanev.review.domain.repository.DirectoryManager
 import com.jonathanev.review.domain.repository.GuiaRepository
 import com.jonathanev.review.domain.repository.PathResolve
@@ -9,7 +12,8 @@ import com.jonathanev.review.domain.repository.ImagesRepository
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.RenamedGuideResult
 import com.jonathanev.review.presentation.mapper.GuidePreviewMapper
-import com.jonathanev.review.presentation.navigation.NavigationPathRepository
+import com.jonathanev.review.domain.repository.NavigationPathRepository
+import com.jonathanev.review.domain.service.FileNamingRules
 import javax.inject.Inject
 
 class RenameGuideUseCase @Inject constructor(
@@ -26,10 +30,12 @@ class RenameGuideUseCase @Inject constructor(
         newName: String,
         description: String
     ): RenamedGuideResult {
+        val oldFile = FileNamingRules.buildXmlFileName(guide.nameGuide)
+        val newFile = FileNamingRules.buildXmlFileName(guide.nameGuide)
         val context = GuideContext.Rename(
             guide = guide,
-            currentGuidePath = pathResolve.currentPathResolve(guide),
-            newGuidePath = pathResolve.newPathResolve(newName)
+            currentGuidePath = pathResolve.currentPathResolve(guide, oldFile),
+            newGuidePath = pathResolve.newPathResolve(newName, newFile)
         )
 
         return when (val result = obtenerDatosXMLUseCase.invoke(context)) {
@@ -52,11 +58,12 @@ class RenameGuideUseCase @Inject constructor(
                 if (!isRenamed) {
                     return RenamedGuideResult.RenamedError
                 }
-                val isSuccess = imagesRepository.reubicarImagenes(
-                    newName,
-                    questions,
-                    answers,
-                    result.guideDomainModel
+
+                val images = extractImages(questions, answers)
+
+                val isSuccess = imagesRepository.moveImages(
+                    images,
+                    GuideRenameContext(result.guideDomainModel, newName)
                 )
 
                 if (!isSuccess) {
@@ -72,5 +79,14 @@ class RenameGuideUseCase @Inject constructor(
             GetGuideResult.Error -> RenamedGuideResult.Error
             GetGuideResult.UnknownError -> RenamedGuideResult.UnknownError
         }
+    }
+
+    private fun extractImages(
+        preguntas: List<QuestionItemDomain>,
+        respuestas: List<QuestionItemDomain>
+    ): List<QuestionContentDomain.Image> {
+        return (preguntas + respuestas)
+            .flatMap { it.content }
+            .filterIsInstance<QuestionContentDomain.Image>()
     }
 }

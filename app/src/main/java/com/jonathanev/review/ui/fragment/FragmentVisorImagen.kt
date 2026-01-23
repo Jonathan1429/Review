@@ -2,13 +2,12 @@ package com.jonathanev.review.ui.fragment
 
 import android.os.Build
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.RequiresApi
+import androidx.fragment.app.Fragment
 import com.davemorrissey.labs.subscaleview.ImageSource
-import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.databinding.FragmentVisorImagenBinding
 import com.jonathanev.review.presentation.model.QuestionContentUi
 

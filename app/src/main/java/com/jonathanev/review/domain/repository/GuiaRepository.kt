@@ -12,7 +12,8 @@ interface GuiaRepository {
     fun getNumGuides(currentPathGuides: String): Int
     fun getXMLGuide(guideContext: GuideContext.Actual): GetGuideResult
     fun saveGuide(
-        nameGuide: String,
+        guideName: String,
+        guideFileName: String,
         description: String,
         version: GuideVersion,
         preguntas: List<QuestionItemDomain>,
@@ -29,9 +30,10 @@ interface GuiaRepository {
     ): Boolean
 
     fun deleteGuide(
+        guideFileName: String,
         guideDomainModel: GuideDomainModel,
         deleteGuide: GuideContext.DeleteGuide,
     ): Boolean
 
-    fun moveGuide(guideContext: GuideContext.Moving): Boolean
+    fun moveGuide(guideFileName: String, guideContext: GuideContext.Moving): Boolean
 }

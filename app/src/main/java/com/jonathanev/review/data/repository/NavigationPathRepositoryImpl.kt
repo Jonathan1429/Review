@@ -1,7 +1,8 @@
 package com.jonathanev.review.data.repository
 
 import com.jonathanev.review.data.filesystem.FilePathsProvider
-import com.jonathanev.review.presentation.navigation.NavigationPathRepository
+import com.jonathanev.review.domain.model.GuidePath
+import com.jonathanev.review.domain.repository.NavigationPathRepository
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -10,28 +11,28 @@ import javax.inject.Singleton
 class NavigationPathRepositoryImpl @Inject constructor(
     private val filePathsProvider: FilePathsProvider
 ): NavigationPathRepository {
-    private var _currentPathGuides: String = filePathsProvider.fileGuides
+    private var _currentPathGuides: GuidePath = GuidePath(filePathsProvider.fileGuides)
 
-    override val currentPathGuides: String
+    override val currentPathGuides: GuidePath
         get() = _currentPathGuides
 
-    private var _currentPathImages: String = filePathsProvider.fileImages
+    private var _currentPathImages: GuidePath = GuidePath(filePathsProvider.fileImages)
 
-    override val currentPathImages: String
+    override val currentPathImages: GuidePath
         get() = _currentPathImages
 
     override fun next(fileName: String) {
-        _currentPathGuides = filePathsProvider.buildFolder(currentPathGuides, fileName)
-        _currentPathImages = filePathsProvider.buildFolder(currentPathImages, fileName)
+        _currentPathGuides = GuidePath(filePathsProvider.buildFolder(currentPathGuides.value, fileName))
+        _currentPathImages = GuidePath(filePathsProvider.buildFolder(currentPathImages.value, fileName))
     }
 
     override fun back() {
-        _currentPathGuides = File(currentPathGuides).parentFile?.path ?: currentPathGuides
-        _currentPathImages = File(currentPathImages).parentFile?.path ?: currentPathImages
+        _currentPathGuides = GuidePath(File(currentPathGuides.value).parentFile?.path ?: currentPathGuides.value)
+        _currentPathImages = GuidePath(File(currentPathImages.value).parentFile?.path ?: currentPathImages.value)
     }
 
     override fun reset() {
-        _currentPathGuides = filePathsProvider.fileGuides
-        _currentPathImages = filePathsProvider.fileImages
+        _currentPathGuides = GuidePath(filePathsProvider.fileGuides)
+        _currentPathImages = GuidePath(filePathsProvider.fileImages)
     }
 }

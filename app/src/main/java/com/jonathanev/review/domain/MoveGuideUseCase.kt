@@ -11,7 +11,8 @@ import com.jonathanev.review.domain.repository.DirectoryManager
 import com.jonathanev.review.domain.repository.GuiaRepository
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.MoveGuideResponse
-import com.jonathanev.review.presentation.navigation.NavigationPathRepository
+import com.jonathanev.review.domain.repository.NavigationPathRepository
+import com.jonathanev.review.domain.service.FileNamingRules
 import javax.inject.Inject
 
 class MoveGuideUseCase @Inject constructor(
@@ -30,11 +31,13 @@ class MoveGuideUseCase @Inject constructor(
             return MoveGuideResponse.ErrorPathGuide
         }
 
+        val file = FileNamingRules.buildXmlFileName(context.guide.nameGuide)
         val moveGuide = guiaRepository.moveGuide(
+            file,
             GuideContext.Moving(
                 context.guide,
                 GuidePath(context.oldGuidePath.value),
-                GuidePath(navigationPathRepository.currentPathGuides),
+                GuidePath(navigationPathRepository.currentPathGuides.value),
                 GuidePath(context.oldImagePath.value),
             )
         )

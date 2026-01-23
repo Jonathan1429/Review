@@ -1,20 +1,24 @@
 package com.jonathanev.review.domain.repository
 
 import com.jonathanev.review.domain.model.GuideDomainModel
+import com.jonathanev.review.domain.model.GuideRenameContext
 import com.jonathanev.review.domain.model.QuestionContentDomain
-import com.jonathanev.review.domain.model.QuestionItemDomain
 
 interface ImagesRepository {
-    suspend fun save(image: QuestionContentDomain.Image, nameFolder: String)
-    fun reubicarImagenes(
-        fileName: String,
-        preguntas: List<QuestionItemDomain>,
-        respuestas: List<QuestionItemDomain>,
-        attributesGuide: GuideDomainModel
+    suspend fun save(
+        image: QuestionContentDomain.Image,
+        guide: GuideDomainModel
+    )
+
+    fun moveImages(
+        images: List<QuestionContentDomain.Image>,
+        guideRenameContext: GuideRenameContext
     ): Boolean
-    fun delete(
-        guideDomainModel: GuideDomainModel,
-        listImages: List<QuestionContentDomain.Image>
+
+    fun deleteImages(
+        guide: GuideDomainModel,
+        images: List<QuestionContentDomain.Image>
     ): Boolean
-    fun movingImagesToOtros()
+
+    fun moveUnassignedImages()
 }

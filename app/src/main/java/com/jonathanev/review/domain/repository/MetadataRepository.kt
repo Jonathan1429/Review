@@ -1,7 +1,7 @@
 package com.jonathanev.review.domain.repository
 
-import com.jonathanev.review.data.model.json.ScreenDataDto
+import com.jonathanev.review.domain.model.FolderScreenInfoDomain
 
 interface MetadataRepository {
-    fun saveMetadata(data: ScreenDataDto)
+    fun saveMetadata(data: FolderScreenInfoDomain)
 }

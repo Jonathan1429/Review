@@ -4,7 +4,8 @@ import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.repository.GuiaRepository
 import com.jonathanev.review.domain.model.QuestionItemDomain
 import com.jonathanev.review.domain.repository.DirectoryManager
-import com.jonathanev.review.presentation.navigation.NavigationPathRepository
+import com.jonathanev.review.domain.repository.NavigationPathRepository
+import com.jonathanev.review.domain.service.FileNamingRules
 import javax.inject.Inject
 
 class SetCrearXmlUseCase @Inject constructor(
@@ -23,6 +24,7 @@ class SetCrearXmlUseCase @Inject constructor(
         if (!path){
             return false
         }
-        return guiaRepository.saveGuide(nameGuide, description, version, preguntas, respuestas, navigationPathRepository.currentPathGuides)
+        val file = FileNamingRules.buildXmlFileName(nameGuide)
+        return guiaRepository.saveGuide(nameGuide, file, description, version, preguntas, respuestas, navigationPathRepository.currentPathGuides.value)
     }
 }

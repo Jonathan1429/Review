@@ -1,4 +1,4 @@
-package com.jonathanev.review.data.filesystem
+package com.jonathanev.review.domain.constants
 
 object Extensions {
     const val XML_EXTENSION = "xml"

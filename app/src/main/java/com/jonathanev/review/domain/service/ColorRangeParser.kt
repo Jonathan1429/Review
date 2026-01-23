@@ -8,7 +8,6 @@ class ColorRangeParser @Inject constructor() {
     operator fun invoke(originalText: String): QuestionContentDomain.Text{
         val colorRangeDomain = mutableListOf<ColorRangeDomain>()
         var text = originalText
-        var contColorPreg = 0
 
         while (text.contains("«")) {
             val startTag = text.indexOf("«")
@@ -25,8 +24,6 @@ class ColorRangeParser @Inject constructor() {
             text = text.replaceFirst("«.*?»".toRegex(), "")
 
             colorRangeDomain.add(ColorRangeDomain(startText, endText, color))
-
-            contColorPreg++
         }
 
         return QuestionContentDomain.Text(text, colorRangeDomain.toList())

@@ -1,6 +1,6 @@
-package com.jonathanev.review.domain.repository
+package com.jonathanev.review.domain.service
 
-import com.jonathanev.review.data.filesystem.Extensions
+import com.jonathanev.review.domain.constants.Extensions
 
 object FileNamingRules {
     fun buildXmlFileName(name: String): String {

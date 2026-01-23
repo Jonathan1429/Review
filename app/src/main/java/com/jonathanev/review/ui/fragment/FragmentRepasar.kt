@@ -17,7 +17,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.jonathanev.review.domain.model.TypeContent
+import com.jonathanev.review.domain.model.QAType
 import com.jonathanev.review.ui.adapter.ListItemPintarImagenesAdapter
 import com.jonathanev.review.ui.adapter.ListItemPintarTextosAdapter
 import com.jonathanev.review.R
@@ -81,7 +81,7 @@ class FragmentRepasar : Fragment() {
                 launch {
                     viewModel.uiState.collect { uiState ->
                         binding.lblPregResp.text =
-                            if (uiState.typeContent == TypeContent.QUESTION)
+                            if (uiState.qAType == QAType.QUESTION)
                                 getString(R.string.etPregunta)
                             else
                                 getString(R.string.etRespuesta)

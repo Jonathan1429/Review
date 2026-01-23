@@ -2,15 +2,16 @@ package com.jonathanev.review.data.repository
 
 import android.content.Context
 import android.net.Uri
-import com.jonathanev.review.data.filesystem.Extensions
+import com.jonathanev.review.domain.constants.Extensions
 import com.jonathanev.review.data.filesystem.FilePathsProvider
 import com.jonathanev.review.data.storage.StorageFolders
 import com.jonathanev.review.domain.model.GuideDomainModel
+import com.jonathanev.review.domain.model.GuideRenameContext
 import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.QuestionContentDomain
-import com.jonathanev.review.domain.model.QuestionItemDomain
 import com.jonathanev.review.domain.repository.ImagesRepository
-import com.jonathanev.review.presentation.navigation.NavigationPathRepository
+import com.jonathanev.review.domain.repository.NavigationPathRepository
+import com.jonathanev.review.domain.service.FileNamingRules
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import javax.inject.Inject
@@ -20,9 +21,9 @@ class ImagesRepositoryImpl @Inject constructor(
     private val filePathsProvider: FilePathsProvider,
     private val navigationPathRepository: NavigationPathRepository
 ) : ImagesRepository {
-    override suspend fun save(image: QuestionContentDomain.Image, nameFolder: String) {
+    override suspend fun save(image: QuestionContentDomain.Image, guide: GuideDomainModel) {
         val currentPath =
-            filePathsProvider.buildFolder(navigationPathRepository.currentPathImages, nameFolder)
+            filePathsProvider.buildFolder(navigationPathRepository.currentPathImages.value, guide.nameGuide)
         val uri = Uri.parse(image.uri)
         val fileName = image.nameFile
         val outputFile = File(currentPath, fileName)
@@ -34,14 +35,14 @@ class ImagesRepositoryImpl @Inject constructor(
         } ?: throw IllegalStateException("No se pudo abrir imagen")
     }
 
-    override fun movingImagesToOtros() {
-        val currentPathImages = File(navigationPathRepository.currentPathImages)
+    override fun moveUnassignedImages() {
+        val currentPathImages = File(navigationPathRepository.currentPathImages.value)
         val images = currentPathImages.listFiles()
             ?.filter { it.isFile && it.extension == Extensions.PNG_EXTENSION}
             ?: emptyList()
 
         if (images.isNotEmpty()){
-            val pathImageOtros = File(navigationPathRepository.currentPathImages, StorageFolders.OTROS)
+            val pathImageOtros = File(navigationPathRepository.currentPathImages.value, StorageFolders.OTROS)
 
             if (!pathImageOtros.exists()) {
                 pathImageOtros.mkdir()
@@ -55,17 +56,19 @@ class ImagesRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun delete(
-        guideDomainModel: GuideDomainModel,
-        listImages: List<QuestionContentDomain.Image>
+    override fun deleteImages(
+        guide: GuideDomainModel,
+        images: List<QuestionContentDomain.Image>
     ): Boolean {
 
-        if (guideDomainModel.version == GuideVersion.V1) {
-            val basePathImages = navigationPathRepository.currentPathImages
+        if (guide.version == GuideVersion.V1) {
+            val basePathImages = navigationPathRepository.currentPathImages.value
 
-            listImages.forEach { image ->
+            images.forEach { image ->
                 val noImage = File(image.uri.substringAfterLast("/")).nameWithoutExtension
-                val currentPath = File(filePathsProvider.buildImage(basePathImages, noImage))
+                val imagePng = FileNamingRules.buildPngFileName(noImage)
+                val currentPath = File(filePathsProvider.buildImage(basePathImages, imagePng))
+
                 if (currentPath.exists()) {
                     currentPath.delete()
                 }
@@ -74,44 +77,39 @@ class ImagesRepositoryImpl @Inject constructor(
             return true
         } else {
             val basePathImages = filePathsProvider.buildFolder(
-                navigationPathRepository.currentPathImages,
-                guideDomainModel.nameGuide
+                navigationPathRepository.currentPathImages.value,
+                guide.nameGuide
             )
 
             return File(basePathImages).deleteRecursively()
         }
     }
 
-    override fun reubicarImagenes(
-        fileName: String,
-        preguntas: List<QuestionItemDomain>,
-        respuestas: List<QuestionItemDomain>,
-        attributesGuide: GuideDomainModel
+    override fun moveImages(
+        images: List<QuestionContentDomain.Image>,
+        guideRenameContext: GuideRenameContext
     ): Boolean {
         val oldPathImages =
-            getSourceImagePath(navigationPathRepository.currentPathImages, attributesGuide)
+            getSourceImagePath(navigationPathRepository.currentPathImages.value, guideRenameContext.oldGuide)
 
         // Renamed folder
-        if (attributesGuide.version == GuideVersion.V2) {
-            val newPathImages = File(filePathsProvider.buildFolder(navigationPathRepository.currentPathImages, fileName))
+        if (guideRenameContext.oldGuide.version == GuideVersion.V2) {
+            val newPathImages = File(filePathsProvider.buildFolder(navigationPathRepository.currentPathImages.value, guideRenameContext.newName))
             return File(oldPathImages).renameTo(newPathImages)
         } else { // Version 1 a Version 2
-            val newPathImages = File(oldPathImages, fileName)
+            val newPathImages = File(oldPathImages, guideRenameContext.newName)
 
             if (!newPathImages.exists()) {
                 newPathImages.mkdir()
             }
 
-            val listImages = (preguntas + respuestas)
-                .flatMap { it.content }
-                .filterIsInstance<QuestionContentDomain.Image>()
-
             var isSuccess = true
-            listImages.forEach { image ->
+            images.forEach { image ->
                 val source = File(image.uri)
                 if (source.exists()) {
                     val noImage = File(image.uri.substringAfterLast("/")).nameWithoutExtension
-                    val newPathImage = filePathsProvider.buildImage(newPathImages.path, noImage)
+                    val imagePng = FileNamingRules.buildPngFileName(noImage)
+                    val newPathImage = filePathsProvider.buildImage(newPathImages.path, imagePng)
 
                     val isRenamed = File(image.uri).renameTo(File(newPathImage))
                     if (!isRenamed) isSuccess = false

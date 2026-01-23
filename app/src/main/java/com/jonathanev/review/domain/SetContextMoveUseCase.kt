@@ -1,6 +1,6 @@
 package com.jonathanev.review.domain
 
-import com.jonathanev.review.presentation.navigation.NavigationPathRepository
+import com.jonathanev.review.domain.repository.NavigationPathRepository
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuidePath
@@ -15,9 +15,9 @@ class SetContextMoveUseCase @Inject constructor(
         guideMoveRepository.start(
             GuideContext.Moving(
                 guideDomainModel,
-                GuidePath(navigationPathRepository.currentPathGuides),
-                GuidePath(navigationPathRepository.currentPathGuides),
-                GuidePath(navigationPathRepository.currentPathImages)
+                GuidePath(navigationPathRepository.currentPathGuides.value),
+                GuidePath(navigationPathRepository.currentPathGuides.value),
+                GuidePath(navigationPathRepository.currentPathImages.value)
             )
         )
 

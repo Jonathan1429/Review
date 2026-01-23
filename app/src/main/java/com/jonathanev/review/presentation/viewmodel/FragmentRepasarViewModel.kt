@@ -11,7 +11,7 @@ import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuidePath
 import com.jonathanev.review.domain.model.QAItemDomain
-import com.jonathanev.review.domain.model.TypeContent
+import com.jonathanev.review.domain.model.QAType
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.presentation.event.GuidePreviewEvent
 import com.jonathanev.review.presentation.event.GuideReviewEvent
@@ -57,7 +57,7 @@ class FragmentRepasarViewModel @Inject constructor(
     val imageList: StateFlow<List<QuestionContentUi.Image>> = _uiState
         .map { state ->
             val currentSource =
-                if (state.typeContent == TypeContent.QUESTION) state.preguntas else state.respuestas
+                if (state.qAType == QAType.QUESTION) state.preguntas else state.respuestas
             currentSource.getOrNull(state.contadorPregunta)
                 ?.content
                 ?.filterIsInstance<QuestionContentUi.Image>()
@@ -73,7 +73,7 @@ class FragmentRepasarViewModel @Inject constructor(
     val textList: StateFlow<List<QuestionContentUi.Text>> = _uiState
         .map { state ->
             val currentSource =
-                if (state.typeContent == TypeContent.QUESTION) state.preguntas else state.respuestas
+                if (state.qAType == QAType.QUESTION) state.preguntas else state.respuestas
             currentSource.getOrNull(state.contadorPregunta)
                 ?.content
                 ?.filterIsInstance<QuestionContentUi.Text>()
@@ -144,7 +144,7 @@ class FragmentRepasarViewModel @Inject constructor(
     fun swapTypeContent() {
         _uiState.update { uiState ->
             uiState.copy(
-                typeContent = if (uiState.typeContent == TypeContent.QUESTION) TypeContent.ANSWER else TypeContent.QUESTION,
+                qAType = if (uiState.qAType == QAType.QUESTION) QAType.ANSWER else QAType.QUESTION,
             )
         }
     }
@@ -160,7 +160,7 @@ class FragmentRepasarViewModel @Inject constructor(
 
         _uiState.update { uiState ->
             uiState.copy(
-                typeContent = TypeContent.QUESTION,
+                qAType = QAType.QUESTION,
                 contadorPregunta = uiState.contadorPregunta + 1
             )
         }
@@ -180,7 +180,7 @@ class FragmentRepasarViewModel @Inject constructor(
 
         _uiState.update { uiState ->
             uiState.copy(
-                typeContent = TypeContent.QUESTION,
+                qAType = QAType.QUESTION,
                 contadorPregunta = count - 1
             )
         }
@@ -195,7 +195,7 @@ class FragmentRepasarViewModel @Inject constructor(
             uiState.copy(
                 contadorPregunta = 0,
                 contadorContenido = -1,
-                typeContent = TypeContent.QUESTION
+                qAType = QAType.QUESTION
             )
         }
     }
@@ -203,7 +203,7 @@ class FragmentRepasarViewModel @Inject constructor(
     fun showQuestionClicked(position: Int) {
         _uiState.update { uiState ->
             uiState.copy(
-                typeContent = TypeContent.QUESTION,
+                qAType = QAType.QUESTION,
                 contadorPregunta = position
             )
         }

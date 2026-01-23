@@ -6,8 +6,8 @@ sealed class GuideContext {
     ) : GuideContext()
 
     data class Actual(
-        val guide: GuideDomainModel,
-        val currentGuidePath: GuidePath
+        val guide: GuideDomainModel
+        //val currentGuidePath: GuidePath
     ) : GuideContext()
 
     data class Moving(

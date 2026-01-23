@@ -3,7 +3,7 @@ package com.jonathanev.review.di
 import com.jonathanev.review.data.filesystem.DirectoryManagerImpl
 import com.jonathanev.review.data.filesystem.FilePathsProvider
 import com.jonathanev.review.domain.repository.DirectoryManager
-import com.jonathanev.review.presentation.navigation.NavigationPathRepository
+import com.jonathanev.review.domain.repository.NavigationPathRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -21,12 +21,4 @@ object FileHelperModule {
         filePathsProvider: FilePathsProvider,
     ): DirectoryManager =
         DirectoryManagerImpl(navigationPathRepository, filePathsProvider)
-
-    /*@Provides
-    @Singleton
-    fun provideFilesAndPath(
-        filePathsProvider: FilePathsProvider,
-    ): PathProvider {
-        return PathProviderImpl(filePathsProvider)
-    }*/
 }

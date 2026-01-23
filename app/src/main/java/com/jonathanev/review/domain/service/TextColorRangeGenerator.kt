@@ -24,10 +24,7 @@ class TextColorRangeGenerator @Inject constructor(
 
                         resultContent.add(modifiedText)
                     }
-                    is QuestionContentDomain.Image -> {
-                        resultContent.add(content)
-                    }
-                    QuestionContentDomain.None -> {
+                    else -> {
                         resultContent.add(content)
                     }
                 }

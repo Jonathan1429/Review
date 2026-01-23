@@ -1,7 +1,7 @@
 package com.jonathanev.review.presentation.mapper
 
 import com.jonathanev.review.domain.model.GuideDomainModel
-import com.jonathanev.review.domain.model.GuideResultDomain
+import com.jonathanev.review.domain.result.GuideResultDomain
 import com.jonathanev.review.presentation.files.model.GuideResultUi
 import com.jonathanev.review.presentation.files.model.GuideUiModel
 

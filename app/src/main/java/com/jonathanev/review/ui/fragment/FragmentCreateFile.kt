@@ -23,7 +23,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.jonathanev.review.R
 import com.jonathanev.review.databinding.FragmentCreateFileBinding
-import com.jonathanev.review.domain.model.TypeContent
+import com.jonathanev.review.domain.model.QAType
 import com.jonathanev.review.presentation.event.CreateGuideEvent
 import com.jonathanev.review.presentation.model.ActionGuide
 import com.jonathanev.review.presentation.model.IconType
@@ -129,7 +129,7 @@ class FragmentCreateFile : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { uiState ->
                     binding.lblPregResp.text =
-                        if (uiState.typeContent == TypeContent.QUESTION)
+                        if (uiState.qAType == QAType.QUESTION)
                             getString(R.string.etPregunta)
                         else
                             getString(R.string.etRespuesta)

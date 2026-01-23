@@ -1,6 +1,6 @@
 package com.jonathanev.review.domain
 
-import com.jonathanev.review.presentation.navigation.NavigationPathRepository
+import com.jonathanev.review.domain.repository.NavigationPathRepository
 import javax.inject.Inject
 
 class NextPathUseCase @Inject constructor(

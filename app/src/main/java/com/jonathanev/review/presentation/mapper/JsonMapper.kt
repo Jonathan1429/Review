@@ -1,10 +1,10 @@
 package com.jonathanev.review.presentation.mapper
 
-import com.jonathanev.review.domain.model.ScreenDataDomain
+import com.jonathanev.review.domain.model.FolderScreenInfoDomain
 import com.jonathanev.review.presentation.model.ScreenDataUi
 
-fun ScreenDataUi.toDomain(): ScreenDataDomain {
-    return ScreenDataDomain(
+fun ScreenDataUi.toDomain(): FolderScreenInfoDomain {
+    return FolderScreenInfoDomain(
         name = this.name,
         description = this.description,
         imgFolder = this.imgFolder.toIconKeys(),

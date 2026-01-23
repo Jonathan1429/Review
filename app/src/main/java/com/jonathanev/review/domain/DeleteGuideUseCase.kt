@@ -7,27 +7,27 @@ import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.ResponseDomain
 import com.jonathanev.review.domain.repository.GuiaRepository
 import com.jonathanev.review.domain.repository.ImagesRepository
+import com.jonathanev.review.domain.repository.NavigationPathRepository
 import com.jonathanev.review.domain.repository.PathResolve
 import com.jonathanev.review.domain.result.DeleteGuideResult
 import com.jonathanev.review.domain.result.GetGuideResult
+import com.jonathanev.review.domain.service.FileNamingRules
 import com.jonathanev.review.domain.service.TextColorRangeGenerator
-import com.jonathanev.review.presentation.navigation.NavigationPathRepository
 import javax.inject.Inject
 
 class DeleteGuideUseCase @Inject constructor(
     private val guiaRepository: GuiaRepository,
     private val imagesRepository: ImagesRepository,
-    private val navigationPathRepository: NavigationPathRepository,
-    private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
-    private val pathResolve: PathResolve,
     private val textColorRangeGenerator: TextColorRangeGenerator
 ) {
     operator fun invoke(
         guideDomainModel: GuideDomainModel
     ): DeleteGuideResult {
+        val file = FileNamingRules.buildXmlFileName(guideDomainModel.nameGuide)
+
         val context = GuideContext.Actual(
             guide = guideDomainModel,
-            currentGuidePath = pathResolve.currentPathResolve(guideDomainModel)
+            currentGuidePath = pathResolve.currentPathResolve(guideDomainModel, file)
         )
 
         return when (val result = getObtenerDatosXMLUseCase.invoke(context)) {
@@ -45,14 +45,14 @@ class DeleteGuideUseCase @Inject constructor(
                     .filterIsInstance<QuestionContentDomain.Image>()
 
                 val deleteGuide = guiaRepository.deleteGuide(
-                    guideDomainModel, GuideContext.DeleteGuide(
-                        GuidePath(navigationPathRepository.currentPathGuides)
+                    file, guideDomainModel, GuideContext.DeleteGuide(
+                        GuidePath(navigationPathRepository.currentPathGuides.value)
                     )
                 )
                 if (!deleteGuide) {
                     return DeleteGuideResult.ErrorGuide
                 }
-                val deleteImages = imagesRepository.delete(guideDomainModel, listImages)
+                val deleteImages = imagesRepository.deleteImages(guideDomainModel, listImages)
                 if (!deleteImages) {
                     return DeleteGuideResult.ErrorImage
                 }

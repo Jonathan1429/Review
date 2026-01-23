@@ -2,8 +2,9 @@ package com.jonathanev.review.data.filesystem
 
 import com.jonathanev.review.domain.repository.GuiaMigrationRepository
 import com.jonathanev.review.data.storage.StorageFolders
+import com.jonathanev.review.domain.constants.Extensions
 import com.jonathanev.review.domain.repository.ImagesRepository
-import com.jonathanev.review.presentation.navigation.NavigationPathRepository
+import com.jonathanev.review.domain.repository.NavigationPathRepository
 import java.io.File
 import javax.inject.Inject
 
@@ -12,7 +13,7 @@ class GuiaMigrationRepositoryImpl @Inject constructor(
     private val imagesRepository: ImagesRepository
 ): GuiaMigrationRepository {
     override fun moveGuides() {
-        val currentPath = File(navigationPathRepository.currentPathGuides)
+        val currentPath = File(navigationPathRepository.currentPathGuides.value)
 
         val guidesInDivice = currentPath.listFiles()
             ?.filter { it.isFile && it.extension == Extensions.XML_EXTENSION } ?: emptyList()
@@ -28,7 +29,7 @@ class GuiaMigrationRepositoryImpl @Inject constructor(
                 file.renameTo(newPath)
             }
 
-            imagesRepository.movingImagesToOtros()
+            imagesRepository.moveUnassignedImages()
         }
     }
 }

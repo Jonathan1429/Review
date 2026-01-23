@@ -4,7 +4,7 @@ import com.jonathanev.review.domain.model.PreviewQuestionDomain
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QAItemDomain
 import com.jonathanev.review.domain.model.ResponseDomain
-import com.jonathanev.review.presentation.navigation.NavigationPathRepository
+import com.jonathanev.review.domain.repository.NavigationPathRepository
 import javax.inject.Inject
 
 class GetPreviewQuestionsUseCase @Inject constructor(
@@ -15,7 +15,7 @@ class GetPreviewQuestionsUseCase @Inject constructor(
         domainItems: List<QAItemDomain>
     ): MutableList<PreviewQuestionDomain> {
         val previewQuestionDomain = mutableListOf<PreviewQuestionDomain>()
-        val currentPath = navigationPathRepository.currentPathGuides
+        val currentPath = navigationPathRepository.currentPathGuides.value
 
         domainItems.forEach { domainItem ->
             var primerTextoPregunta: QuestionContentDomain = QuestionContentDomain.None
@@ -56,7 +56,7 @@ class GetPreviewQuestionsUseCase @Inject constructor(
             previewQuestionDomain.add(
                 PreviewQuestionDomain(
                     question = primerTextoPregunta,
-                    noImages = (totalImgsPregunta + totalImgsRespuesta).toString()
+                    noImages = totalImgsPregunta + totalImgsRespuesta
                 )
             )
         }

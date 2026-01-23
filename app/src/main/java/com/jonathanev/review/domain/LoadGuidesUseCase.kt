@@ -2,7 +2,7 @@ package com.jonathanev.review.domain
 
 import com.jonathanev.review.domain.repository.GuiaRepository
 import com.jonathanev.review.domain.model.GuideDomainModel
-import com.jonathanev.review.presentation.navigation.NavigationPathRepository
+import com.jonathanev.review.domain.repository.NavigationPathRepository
 import javax.inject.Inject
 
 class LoadGuidesUseCase @Inject constructor(
@@ -10,7 +10,7 @@ class LoadGuidesUseCase @Inject constructor(
     private val navigationPathRepository: NavigationPathRepository
 ) {
     operator fun invoke(): List<GuideDomainModel> {
-        val guidesDomain = guiaRepository.getGuides(navigationPathRepository.currentPathGuides)
+        val guidesDomain = guiaRepository.getGuides(navigationPathRepository.currentPathGuides.value)
         return guidesDomain
     }
 }

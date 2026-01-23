@@ -1,7 +1,7 @@
 package com.jonathanev.review.presentation.state
 
 import android.net.Uri
-import com.jonathanev.review.domain.model.TypeContent
+import com.jonathanev.review.domain.model.QAType
 import com.jonathanev.review.presentation.model.QuestionItemUi
 
 data class GuideUiState(
@@ -9,7 +9,7 @@ data class GuideUiState(
     val respuestas: List<QuestionItemUi> = emptyList(),
     val contadorPregunta: Int = 0,
     val contadorContenido: Int = -1,
-    val typeContent: TypeContent = TypeContent.QUESTION,
+    val qAType: QAType = QAType.QUESTION,
     val fileName: String = "",
     val isEditing: Boolean = false,
     val actualUri: Uri? = null,

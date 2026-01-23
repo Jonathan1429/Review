@@ -3,7 +3,7 @@ package com.jonathanev.review.domain
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
-import com.jonathanev.review.presentation.navigation.NavigationPathRepository
+import com.jonathanev.review.domain.repository.NavigationPathRepository
 import com.jonathanev.review.domain.model.GuidePath
 import com.jonathanev.review.domain.model.ImageSource
 import com.jonathanev.review.domain.repository.DirectoryManager
@@ -30,7 +30,7 @@ class UpdateImagesUseCase @Inject constructor(
             val isSuccessMoveImages =
                 directoryManager.moveImages(
                     guideDomain,
-                    ImageSource.SaveGuide(GuidePath(navigationPathRepository.currentPathImages)),
+                    ImageSource.SaveGuide(GuidePath(navigationPathRepository.currentPathImages.value)),
                     listImages
                 )
             if (!isSuccessMoveImages) return false
@@ -42,7 +42,7 @@ class UpdateImagesUseCase @Inject constructor(
             listImages.filter { it.nameFile !in imagesInDevice && it.uri.isNotEmpty() }
 
         if (addImages.isNotEmpty()) {
-            saveGuideImagesUseCase.saveImagesInDevice(addImages, guideDomain.nameGuide)
+            saveGuideImagesUseCase.saveImagesInDevice(addImages, guideDomain)
         }
 
         // Borrar imagenes que se encuentren en el dispositivo y no en el archivo
