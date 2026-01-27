@@ -9,6 +9,6 @@ class GetGuidesCountUseCase @Inject constructor(
     private val navigationPathRepository: NavigationPathRepository
 ) {
     operator fun invoke(): Int {
-        return guiaRepository.getNumGuides(navigationPathRepository.currentPathGuides.value)
+        return guiaRepository.getNumGuides(navigationPathRepository.getPathGuides().value)
     }
 }

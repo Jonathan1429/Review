@@ -7,5 +7,4 @@ interface UserPreferencesRepository {
     suspend fun setImageCount(count: Int)
     suspend fun setDontAskDelete(value: Boolean)
     fun getDontAskDelete(): Flow<Boolean>
-
 }

@@ -6,5 +6,5 @@ import javax.inject.Inject
 class GetCurrentPathGuidesUseCase @Inject constructor(
     private val navigationPathRepository: NavigationPathRepository
 ) {
-    operator fun invoke() = navigationPathRepository.currentPathGuides.value
+    operator fun invoke() = navigationPathRepository.getPathGuides().value
 }

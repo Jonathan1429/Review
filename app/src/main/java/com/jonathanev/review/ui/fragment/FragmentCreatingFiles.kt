@@ -2,6 +2,7 @@ package com.jonathanev.review.ui.fragment
 
 import android.app.AlertDialog
 import android.content.res.ColorStateList
+import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
@@ -28,10 +29,12 @@ import com.jonathanev.review.presentation.files.model.GuideResultUi
 import com.jonathanev.review.presentation.files.viewmodel.CreateFilesViewModel
 import com.jonathanev.review.presentation.folders.model.FolderAction
 import com.jonathanev.review.presentation.model.ActionGuide
+import com.jonathanev.review.presentation.model.ColorType
 import com.jonathanev.review.presentation.model.ScreenDataUi
 import com.jonathanev.review.presentation.state.CreatingFileUiState
 import com.jonathanev.review.ui.adapter.ListarIconosAdapter
-import com.jonathanev.review.ui.mapper.toInt
+import com.jonathanev.review.ui.mapper.toDrawableRes
+import com.jonathanev.review.ui.mapper.toNav
 import com.skydoves.colorpickerview.flag.BubbleFlag
 import com.skydoves.colorpickerview.flag.FlagMode
 import com.skydoves.colorpickerview.listeners.ColorListener
@@ -91,7 +94,7 @@ class FragmentCreatingFiles : Fragment() {
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.eventsMessages.collect { event ->
-                    when(event){
+                    when (event) {
                         is RenameGuideEvent.ShowMessage -> {
                             showToast(event.message)
 
@@ -112,7 +115,7 @@ class FragmentCreatingFiles : Fragment() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
                     // Cargar íconos en el adapter si cambia la lista
-                    val drawableIcons = state.icons.map { it.toInt() }
+                    val drawableIcons = state.icons.map { it.toDrawableRes() }
 
                     iconsAdapter.submitList(drawableIcons)
                     iconsAdapter.handleItemClick(state.selectedIndex)
@@ -123,11 +126,18 @@ class FragmentCreatingFiles : Fragment() {
                         binding.fragmentCreate.prevCarpeta.bgCarpeta.background as GradientDrawable
                     binding.fragmentCreate.prevCarpeta.ivCarpeta.imageTintMode =
                         PorterDuff.Mode.SRC_ATOP
-                    val color50 = ColorUtils.setAlphaComponent(state.color.toInt(), 50)
+                    val color = when (state.color) {
+                        ColorType.Black -> Color.BLACK
+                        ColorType.Gray -> Color.GRAY
+                        ColorType.White -> Color.WHITE
+                        is ColorType.RandomColor -> state.color.color
+                    }
+
+                    val color50 = ColorUtils.setAlphaComponent(color, 50)
                     background.setColor(color50)
 
                     binding.fragmentCreate.prevCarpeta.ivCarpeta.imageTintList =
-                        ColorStateList.valueOf(state.color.toInt())
+                        ColorStateList.valueOf(color)
                 }
             }
         }
@@ -170,7 +180,7 @@ class FragmentCreatingFiles : Fragment() {
                 showFileUI()
                 viewModel.uploadCachedGuides()
 
-                when(val result = viewModel.fillFields(mode.fileName)){
+                when (val result = viewModel.fillFields(mode.fileName)) {
                     is GuideResultUi.Error -> showToast("No se ha encontrado la guia a cargar")
                     is GuideResultUi.Success -> {
                         binding.fragmentCreate.etNombre.setText(result.guideUiModel.nameGuide)
@@ -184,6 +194,7 @@ class FragmentCreatingFiles : Fragment() {
                 showFileUI()
                 viewModel.uploadCachedGuides()
             }
+
             FolderAction.None -> Log.e("Error", "No se pudieron cargar datos iniciales")
             is FolderAction.MovingFile -> Log.i("Moviendo: ", "Moviendo archivos")
         }
@@ -214,11 +225,7 @@ class FragmentCreatingFiles : Fragment() {
         when (mode) {
             FolderAction.CreatingFolder,
             FolderAction.RenamingFolder -> {
-                Toast.makeText(
-                    requireContext(),
-                    "Ya tienes una carpeta con el mismo nombre",
-                    Toast.LENGTH_SHORT
-                ).show()
+                showToast("Ya tienes una carpeta con el mismo nombre")
             }
 
             FolderAction.CreatingFile,
@@ -237,18 +244,12 @@ class FragmentCreatingFiles : Fragment() {
         val state = viewModel.uiState.value
 
         val icon = state.icons[state.selectedIndex]
-        /*val drawableIcon = when(icon){
-            IconType.LIGHTBULB -> R.drawable.ic_lightbulb_solid_full
-            IconType.ANCHOR_SOLID_FULL -> R.drawable.ic_anchor_solid_full
-            IconType.ANGELLIST_BRANDS_SOLID_FULL -> R.drawable.ic_angellist_brands_solid_full
-            IconType.BACTERIA_SOLID_FULL -> R.drawable.ic_bacteria_solid_full
-        }*/
 
         val data = ScreenDataUi(
             name = name,
             description = description,
             imgFolder = icon,
-            color = state.color.toInt()
+            color = state.color
         )
 
         when (mode) {
@@ -270,7 +271,7 @@ class FragmentCreatingFiles : Fragment() {
             R.id.action_to_create_file,
             bundleOf(
                 //"mode" to mode,
-                "screenData" to data,
+                "screenData" to data.toNav(),
                 "actionGuide" to ActionGuide.CREATE
             )
         )

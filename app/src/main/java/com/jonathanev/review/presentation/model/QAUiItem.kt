@@ -21,8 +21,8 @@ data class QuestionItemUi(
     val content: List<QuestionContentUi>
 ) : Parcelable
 
-@Parcelize
+/*@Parcelize
 data class QAUiItem(
     val preguntas: List<QuestionItemUi>,
     val respuestas: List<QuestionItemUi>,
-) : Parcelable
+) : Parcelable*/

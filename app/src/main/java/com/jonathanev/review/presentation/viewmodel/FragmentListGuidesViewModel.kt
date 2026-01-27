@@ -7,7 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.domain.DeleteGuideUseCase
 import com.jonathanev.review.domain.GetGuideMoveUseCase
 import com.jonathanev.review.domain.GetGuidePosicionUseCase
-import com.jonathanev.review.domain.GetObtenerDatosXMLUseCase
+import com.jonathanev.review.domain.GetGuideXmlDataUseCase
 import com.jonathanev.review.domain.LoadGuidesUseCase
 import com.jonathanev.review.domain.MoveGuideUseCase
 import com.jonathanev.review.domain.SetContextMoveUseCase
@@ -40,7 +40,7 @@ class FragmentListGuidesViewModel @Inject constructor(
     private val deleteGuideUseCase: DeleteGuideUseCase,
     private val setContextMoveUseCase: SetContextMoveUseCase,
     private val getGuideMoveUseCase: GetGuideMoveUseCase,
-    private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
+    private val getGuideXmlDataUseCase: GetGuideXmlDataUseCase,
     private val moveGuideUseCase: MoveGuideUseCase
 ) : ViewModel() {
     private var cachedGuides: List<GuideDomainModel> = emptyList()
@@ -128,7 +128,7 @@ class FragmentListGuidesViewModel @Inject constructor(
 
         when (val context = getGuideMoveUseCase.invoke()) {
             is GuideContext.Moving -> {
-                when (val guideData = getObtenerDatosXMLUseCase.invoke(context)) {
+                when (val guideData = getGuideXmlDataUseCase.invoke(context.guide)) {
                     is GetGuideResult.Success -> {
 
                         val response = moveGuideUseCase.invoke(guideData, context)

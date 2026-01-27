@@ -1,7 +1,7 @@
 package com.jonathanev.review.data.repository
 
-import com.jonathanev.review.data.filesystem.FilePathsProvider
 import com.jonathanev.review.domain.model.GuidePath
+import com.jonathanev.review.domain.provider.FilePathsProvider
 import com.jonathanev.review.domain.repository.NavigationPathRepository
 import java.io.File
 import javax.inject.Inject
@@ -12,14 +12,13 @@ class NavigationPathRepositoryImpl @Inject constructor(
     private val filePathsProvider: FilePathsProvider
 ): NavigationPathRepository {
     private var _currentPathGuides: GuidePath = GuidePath(filePathsProvider.fileGuides)
-
-    override val currentPathGuides: GuidePath
-        get() = _currentPathGuides
+    private val currentPathGuides: GuidePath get() = _currentPathGuides
 
     private var _currentPathImages: GuidePath = GuidePath(filePathsProvider.fileImages)
+    private val currentPathImages: GuidePath get() = _currentPathImages
 
-    override val currentPathImages: GuidePath
-        get() = _currentPathImages
+    override fun getPathImages() = GuidePath(currentPathImages.value)
+    override fun getPathGuides() = GuidePath(currentPathGuides.value)
 
     override fun next(fileName: String) {
         _currentPathGuides = GuidePath(filePathsProvider.buildFolder(currentPathGuides.value, fileName))

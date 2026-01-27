@@ -5,6 +5,7 @@ import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.ImageSource
 import com.jonathanev.review.domain.model.QuestionContentDomain
+import com.jonathanev.review.domain.provider.FilePathsProvider
 import com.jonathanev.review.domain.repository.DirectoryManager
 import com.jonathanev.review.domain.repository.NavigationPathRepository
 import java.io.File
@@ -18,7 +19,7 @@ class DirectoryManagerImpl @Inject constructor(
         val currentPath =
             File(
                 filePathsProvider.buildFolder(
-                    navigationPathRepository.currentPathImages.value,
+                    navigationPathRepository.getPathImages().value,
                     guideDomainModel.nameGuide
                 )
             )
@@ -60,7 +61,7 @@ class DirectoryManagerImpl @Inject constructor(
 
         images.forEach { image ->
             val oldPathImage = File(getPathImage(guideDomain, image, oldImagesPath))
-            val newPathImages = getSourceImagePath(navigationPathRepository.currentPathImages.value, guideDomain)
+            val newPathImages = getSourceImagePath(navigationPathRepository.getPathImages().value, guideDomain)
 
             if (oldPathImage.exists()) {
                 val destination = File(newPathImages, image.nameFile)
@@ -77,7 +78,7 @@ class DirectoryManagerImpl @Inject constructor(
         listImages: List<QuestionContentDomain.Image>
     ) {
         val currentPath =
-            filePathsProvider.buildFolder(navigationPathRepository.currentPathImages.value, nameGuide)
+            filePathsProvider.buildFolder(navigationPathRepository.getPathImages().value, nameGuide)
         // Borrar imagenes que ya no estén en el XML pero si en el dispositivo
         val currentDeviceNames =
             File(currentPath).listFiles()?.map { it.name }?.toSet() ?: emptySet()
@@ -95,7 +96,7 @@ class DirectoryManagerImpl @Inject constructor(
         val currentPath =
             File(
                 filePathsProvider.buildFolder(
-                    navigationPathRepository.currentPathGuides.value,
+                    navigationPathRepository.getPathGuides().value,
                     nameGuide
                 )
             )
@@ -108,7 +109,7 @@ class DirectoryManagerImpl @Inject constructor(
         val currentPath =
             File(
                 filePathsProvider.buildFolder(
-                    navigationPathRepository.currentPathGuides.value,
+                    navigationPathRepository.getPathGuides().value,
                     newName
                 )
             )
@@ -134,7 +135,7 @@ class DirectoryManagerImpl @Inject constructor(
 
     override fun deleteFolderEmpty(guideContext: GuideContext.Actual): Boolean {
         return if (guideContext.guide.version == GuideVersion.V2){
-            File(guideContext.currentGuidePath.value, guideContext.guide.nameGuide).delete()
+            File(navigationPathRepository.getPathGuides().value, guideContext.guide.nameGuide).delete()
         } else {
             true
         }
@@ -143,7 +144,7 @@ class DirectoryManagerImpl @Inject constructor(
     override fun getImagesInDevice(guideDomain: GuideDomainModel): Set<String> {
         val currentPath =
             filePathsProvider.buildFolder(
-                navigationPathRepository.currentPathImages.value,
+                navigationPathRepository.getPathImages().value,
                 guideDomain.nameGuide
             )
 

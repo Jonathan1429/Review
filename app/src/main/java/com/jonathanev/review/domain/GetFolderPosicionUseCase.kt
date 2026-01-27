@@ -1,8 +1,7 @@
 package com.jonathanev.review.domain
 
 import com.jonathanev.review.domain.model.FolderDomainModel
-import com.jonathanev.review.presentation.mapper.toUi
-import com.jonathanev.review.presentation.folders.model.FolderResultDomain
+import com.jonathanev.review.domain.result.FolderResultDomain
 import javax.inject.Inject
 
 class GetFolderPosicionUseCase @Inject constructor(){

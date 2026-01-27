@@ -1,10 +1,8 @@
 package com.jonathanev.review.presentation.viewmodel
 
-import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jonathanev.review.domain.GetCurrentPathGuidesUseCase
-import com.jonathanev.review.domain.GetObtenerDatosXMLUseCase
+import com.jonathanev.review.domain.GetGuideXmlDataUseCase
 import com.jonathanev.review.domain.GetSaveGuidesUseCase
 import com.jonathanev.review.domain.LoadGuidesUseCase
 import com.jonathanev.review.domain.SetColocarEtiquetasUseCase
@@ -13,18 +11,15 @@ import com.jonathanev.review.domain.SetCrearXmlUseCase
 import com.jonathanev.review.domain.SetDecodePathImageUseCase
 import com.jonathanev.review.domain.SetMainPathUseCase
 import com.jonathanev.review.domain.UpdateImagesUseCase
-import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
-import com.jonathanev.review.domain.model.GuidePath
 import com.jonathanev.review.domain.model.GuideVersion
+import com.jonathanev.review.domain.model.QAType
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
-import com.jonathanev.review.domain.model.QAType
 import com.jonathanev.review.domain.repository.UserPreferencesRepository
 import com.jonathanev.review.domain.result.GetGuideResult
-import com.jonathanev.review.domain.service.TextColorRangeGenerator
 import com.jonathanev.review.presentation.event.CreateGuideEvent
-import com.jonathanev.review.presentation.mapper.GuidePreviewMapper
+import com.jonathanev.review.domain.mapper.GuideQuestionExtractor
 import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.ColorRangeUi
@@ -50,15 +45,13 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     private val setContentUseCase: SetContentUseCase,
     private val setCrearXmlUseCase: SetCrearXmlUseCase,
     private val setDecodePathImageUseCase: SetDecodePathImageUseCase,
-    private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
+    private val getGuideXmlDataUseCase: GetGuideXmlDataUseCase,
     private val getSaveGuidesUseCase: GetSaveGuidesUseCase,
-    private val textColorRangeGenerator: TextColorRangeGenerator,
     private val updateImagesUseCase: UpdateImagesUseCase,
     private val setMainPathUseCase: SetMainPathUseCase,
     private val userPreferencesRepository: UserPreferencesRepository,
     private val loadGuidesUseCase: LoadGuidesUseCase,
-    private val getCurrentPathGuidesUseCase: GetCurrentPathGuidesUseCase,
-    private val guidePreviewMapper: GuidePreviewMapper
+    private val guideQuestionExtractor: GuideQuestionExtractor
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(GuideUiState())
     val uiState = _uiState.asStateFlow()
@@ -151,7 +144,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
     fun addImageContent() {
         _uiState.update { currentState ->
-            val uriAAgregar = currentState.actualUri?.toString() ?: return@update currentState
+            val uriAAgregar = currentState.actualUri ?: return@update currentState
 
             val isQuestion = currentState.qAType == QAType.QUESTION
             val sourceListUi = if (isQuestion) currentState.preguntas else currentState.respuestas
@@ -186,7 +179,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         }
     }
 
-    fun setActualUri(uri: Uri) {
+    fun setActualUri(uri: String) {
         _uiState.update {
             it.copy(actualUri = uri)
         }
@@ -409,9 +402,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         getSaveGuidesUseCase.invoke().find { it.nameGuide == nameGuide }
 
     private fun loadGuideXml(guide: GuideDomainModel): GetGuideResult =
-        getObtenerDatosXMLUseCase(
-            GuideContext.Actual(guide, GuidePath(getCurrentPathGuidesUseCase.invoke()))
-        )
+        getGuideXmlDataUseCase(guide)
 
     private fun handleGuideResult(
         result: GetGuideResult,
@@ -433,7 +424,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         result: GetGuideResult.Success,
         positionContent: Int
     ) {
-        val (questions, answers) = guidePreviewMapper.map(result)
+        val (questions, answers) = guideQuestionExtractor.map(result)
 
         _uiState.update { state ->
             state.copy(

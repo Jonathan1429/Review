@@ -17,17 +17,17 @@ import com.jonathanev.review.data.xml.XmlTagsV1
 import com.jonathanev.review.data.xml.XmlTagsV2
 import com.jonathanev.review.domain.constants.Extensions
 import com.jonathanev.review.domain.model.ContentType
-import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuideContext
+import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuidePath
 import com.jonathanev.review.domain.model.GuideSource
 import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.QAType
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
+import com.jonathanev.review.domain.provider.FilePathsProvider
 import com.jonathanev.review.domain.repository.GuiaRepository
 import com.jonathanev.review.domain.result.GetGuideResult
-import com.jonathanev.review.domain.service.FileNamingRules
 import com.jonathanev.review.domain.service.FilePathResolverService
 import org.w3c.dom.Document
 import org.w3c.dom.Element
@@ -54,7 +54,6 @@ class GuiaRepositoryImpl @Inject constructor(
     private val pathHandler: PathHandler,
     private val xmlSerializerFactory: XmlSerializerFactory,
     private val fileOutputStreamFactory: FileOutputStreamFactory,
-    private val filePathsProvider: FilePathsProvider,
     private val filePathResolverService: FilePathResolverService
 ) : GuiaRepository {
     private var _guidesRecovery = emptyList<GuideDomainModel>()
@@ -94,13 +93,14 @@ class GuiaRepositoryImpl @Inject constructor(
     }
 
     override fun renameGuide(
-        fileName: String,
-        description: String,
+        /*fileName: String,
+        description: String,*/
         preguntas: List<QuestionItemDomain>,
         respuestas: List<QuestionItemDomain>,
         guideContext: GuideContext.Rename
     ): Boolean {
-        val tempFile = File("${guideContext.currentGuidePath.value}.tmp")
+        val path = filePathResolverService.mapToFilePathRename(guideContext)
+        val tempFile = File("$path.tmp")
 
         return try {
             val serializer = xmlSerializerFactory.create()
@@ -119,8 +119,8 @@ class GuiaRepositoryImpl @Inject constructor(
             serializer.attribute("", Attributes.VERSION, "2.0")
 
             serializer.startTag("", Structure.CUESTIONARIO)
-            serializer.attribute("", Attributes.NOMBREGUIA, fileName)
-            serializer.attribute("", Attributes.DESCRIPCION, description)
+            serializer.attribute("", Attributes.NOMBREGUIA, guideContext.name.value)
+            serializer.attribute("", Attributes.DESCRIPCION, guideContext.description.value)
 
             writeQuestionsAnswers(serializer, preguntas, QAType.QUESTION.toTagXml())
             writeQuestionsAnswers(serializer, respuestas, QAType.ANSWER.toTagXml())
@@ -131,13 +131,13 @@ class GuiaRepositoryImpl @Inject constructor(
 
             fos.close()
 
-            val isRenamedGuide = tempFile.renameTo(File(guideContext.newGuidePath.value))
+            val isRenamedGuide = tempFile.renameTo(File(path))
             tempFile.delete()
             if (!isRenamedGuide) {
                 return false
             }
 
-            File(guideContext.currentGuidePath.value).delete()
+            //File(guideContext.currentGuidePath.value).delete()
             true
         } catch (e: Exception) {
             false
@@ -145,20 +145,11 @@ class GuiaRepositoryImpl @Inject constructor(
     }
 
     override fun saveGuide(
-        guideName: String,
-        guideFileName: String,
-        description: String,
-        version: GuideVersion,
+        guideDomainModel: GuideDomainModel,
         preguntas: List<QuestionItemDomain>,
         respuestas: List<QuestionItemDomain>,
-        currentPathGuides: String,
     ): Boolean {
-        val currentPath = filePathsProvider.buildFolderGuide(
-            currentPathGuides,
-            guideName,
-            guideFileName
-        )
-
+        val currentPath = filePathResolverService.mapToFilePathActual(GuideContext.Actual(guideDomainModel))
         val tempFile = File("$currentPath.tmp")
 
         return try {
@@ -178,8 +169,8 @@ class GuiaRepositoryImpl @Inject constructor(
             serializer.attribute("", Attributes.VERSION, "2.0")
 
             serializer.startTag("", Structure.CUESTIONARIO)
-            serializer.attribute("", Attributes.NOMBREGUIA, guideName)
-            serializer.attribute("", Attributes.DESCRIPCION, description)
+            serializer.attribute("", Attributes.NOMBREGUIA, guideDomainModel.nameGuide)
+            serializer.attribute("", Attributes.DESCRIPCION, guideDomainModel.description)
 
             writeQuestionsAnswers(serializer, preguntas, QAType.QUESTION.toTagXml())
             writeQuestionsAnswers(serializer, respuestas, QAType.ANSWER.toTagXml())
@@ -196,11 +187,8 @@ class GuiaRepositoryImpl @Inject constructor(
                 return false
             }
 
-            if (version == GuideVersion.V1) {
-                val pathV1 = filePathsProvider.buildGuide(
-                    currentPathGuides,
-                    guideFileName
-                )
+            if (guideDomainModel.version == GuideVersion.V1) {
+                val pathV1 = filePathResolverService.getPathGuidesV1(guideDomainModel)
 
                 File(pathV1).delete()
             }
@@ -212,11 +200,12 @@ class GuiaRepositoryImpl @Inject constructor(
     }
 
     override fun deleteGuide(
-        guideFileName: String,
-        guideDomainModel: GuideDomainModel,
+        /*guideFileName: String,
+        guideDomainModel: GuideDomainModel,*/
         deleteGuide: GuideContext.DeleteGuide
     ): Boolean {
-        val pathGuide = if (guideDomainModel.version == GuideVersion.V1) {
+        val pathGuide = filePathResolverService.mapToFilePathDelete(deleteGuide)
+        /*val pathGuide = if (guideDomainModel.version == GuideVersion.V1) {
             filePathsProvider.buildGuide(
                 deleteGuide.currentPath.value,
                 guideFileName
@@ -226,7 +215,7 @@ class GuiaRepositoryImpl @Inject constructor(
                 deleteGuide.currentPath.value,
                 guideDomainModel.nameGuide
             )
-        }
+        }*/
 
         return File(pathGuide).deleteRecursively()
     }
@@ -274,11 +263,12 @@ class GuiaRepositoryImpl @Inject constructor(
             }
 
             is GuideSource.CustomPath -> {
-                filePathsProvider.buildFolderGuide(
+                guideSource.path.value
+                /*filePathsProvider.buildFolderGuide(
                     guideSource.path.value,
                     guideDomainModel.nameGuide,
                     guideFileName
-                )
+                )*/
             }
         }
 
@@ -380,10 +370,11 @@ class GuiaRepositoryImpl @Inject constructor(
                 }
 
                 is GuideSource.CustomPath -> {
-                    filePathsProvider.buildGuide(
+                    guideSource.path.value
+                    /*filePathsProvider.buildGuide(
                         guideSource.path.value,
                         guideFileName
-                    )
+                    )*/
                 }
             }
 
@@ -465,23 +456,42 @@ class GuiaRepositoryImpl @Inject constructor(
     override fun getXMLGuide(guideContext: GuideContext.Actual): GetGuideResult {
         val version = guideContext.guide.version
 
-        val path = filePathResolverService.mapToFilePath(guideContext)
+        val path = filePathResolverService.mapToFilePathActual(guideContext)
         return if (version == GuideVersion.V1)
             obtenerDatosXMLV1(guideContext.guide, GuideSource.CurrentPath(GuidePath(path)))
         else
             obtenerDatosXMLV2(guideContext.guide, GuideSource.CurrentPath(GuidePath(path)))
     }
 
-    override fun moveGuide(guideFileName: String, guideContext: GuideContext.Moving): Boolean {
-        val guidePath = guideContext.currentGuidePath
-        val sourceGuidePath = guideContext.oldGuidePath
+    override fun moveGuide(guideContext: GuideContext.Moving): Boolean {
+        val guidePath = filePathResolverService.mapToTargetGuidePath(
+            GuideContext.Moving(
+                guideContext.guide,
+                guideContext.oldGuidePath,
+                guideContext.oldImagePath
+            )
+        )
 
-        val currentGuidePath = getGuidePath(guidePath.value, guideContext.guide, guideFileName)
-        val oldGuidePath = getGuidePath(sourceGuidePath.value, guideContext.guide, guideFileName)
-        return File(oldGuidePath).renameTo(File(currentGuidePath))
+        val sourceGuidePath = filePathResolverService.mapToSourceGuidePath(
+            GuideContext.Moving(
+                guideContext.guide,
+                guideContext.oldGuidePath,
+                guideContext.oldImagePath
+            )
+        )
+
+        //val guidePath = guideContext.currentGuidePath
+        //val sourceGuidePath = guideContext.oldGuidePath
+        //val currentGuidePath = getGuidePath(guidePath.value, guideContext.guide, guideFileName)
+        //val oldGuidePath = getGuidePath(sourceGuidePath.value, guideContext.guide, guideFileName)
+        return File(sourceGuidePath).renameTo(File(guidePath))
     }
 
-    private fun getGuidePath(sourceGuidePath: String, guideDomain: GuideDomainModel, guideFileName: String): String {
+    /*private fun getGuidePath(
+        sourceGuidePath: String,
+        guideDomain: GuideDomainModel,
+        guideFileName: String
+    ): String {
         return if (guideDomain.version == GuideVersion.V1) {
             filePathsProvider.buildGuide(
                 sourceGuidePath,
@@ -494,7 +504,7 @@ class GuiaRepositoryImpl @Inject constructor(
                 guideFileName
             )
         }
-    }
+    }*/
 
     private fun getAttributesGuide(file: File): GuideDomainModel {
         val db = DocumentBuilderFactory.newInstance().newDocumentBuilder()
@@ -522,7 +532,7 @@ class GuiaRepositoryImpl @Inject constructor(
         ).toDomain()
     }
 
-    private fun getCurrentPath(guideDomainModel: GuideDomainModel, basePath: String = navigationPathRepository.currentPathGuides.value) = if (guideDomainModel.version == GuideVersion.V1) {
+    /*private fun getCurrentPath(guideDomainModel: GuideDomainModel, basePath: String = navigationPathRepository.currentPathGuides.value) = if (guideDomainModel.version == GuideVersion.V1) {
         val file = FileNamingRules.buildXmlFileName(guideDomainModel.nameGuide)
         filePathsProvider.buildGuide(
             basePath,
@@ -535,5 +545,5 @@ class GuiaRepositoryImpl @Inject constructor(
             guideDomainModel.nameGuide,
             file
         )
-    }
+    }*/
 }

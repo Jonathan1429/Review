@@ -10,7 +10,6 @@ class LoadGuidesUseCase @Inject constructor(
     private val navigationPathRepository: NavigationPathRepository
 ) {
     operator fun invoke(): List<GuideDomainModel> {
-        val guidesDomain = guiaRepository.getGuides(navigationPathRepository.currentPathGuides.value)
-        return guidesDomain
+        return guiaRepository.getGuides(navigationPathRepository.getPathGuides().value)
     }
 }

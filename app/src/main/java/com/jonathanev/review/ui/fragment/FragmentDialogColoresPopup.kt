@@ -38,6 +38,7 @@ class FragmentDialogColoresPopup : DialogFragment() {
         // Animación cuando se esté seleccionando un color.
         val bubbleFlag = BubbleFlag(context)
         bubbleFlag.flagMode = FlagMode.FADE
+        binding.colorPickerView.setInitialColor(Color.WHITE)
         binding.colorPickerView.flagView = bubbleFlag
 
         // Observamos cambios de color desde el ViewModel

@@ -13,9 +13,9 @@ class GetPreviewQuestionsUseCase @Inject constructor(
 ) {
     operator fun invoke(
         domainItems: List<QAItemDomain>
-    ): MutableList<PreviewQuestionDomain> {
+    ): List<PreviewQuestionDomain> {
         val previewQuestionDomain = mutableListOf<PreviewQuestionDomain>()
-        val currentPath = navigationPathRepository.currentPathGuides.value
+        val currentPath = navigationPathRepository.getPathGuides().value
 
         domainItems.forEach { domainItem ->
             var primerTextoPregunta: QuestionContentDomain = QuestionContentDomain.None

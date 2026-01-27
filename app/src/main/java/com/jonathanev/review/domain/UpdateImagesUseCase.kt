@@ -30,7 +30,7 @@ class UpdateImagesUseCase @Inject constructor(
             val isSuccessMoveImages =
                 directoryManager.moveImages(
                     guideDomain,
-                    ImageSource.SaveGuide(GuidePath(navigationPathRepository.currentPathImages.value)),
+                    ImageSource.SaveGuide(navigationPathRepository.getPathImages()),
                     listImages
                 )
             if (!isSuccessMoveImages) return false

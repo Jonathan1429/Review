@@ -1,14 +1,16 @@
 package com.jonathanev.review.presentation.viewmodel
 
-import android.view.View
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jonathanev.review.domain.InitializeGuideStorageUseCase
+import com.jonathanev.review.presentation.model.ToolbarUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -17,17 +19,8 @@ class MainToolbarViewModel @Inject constructor(): ViewModel() {
     private var _title = MutableLiveData<String>()
     val title: LiveData<String> get() = _title
 
-    private val _isBackVisible = MutableLiveData<Int>()
-    val isBackVisible: LiveData<Int> get() = _isBackVisible
-
-    private val _isSaveVisible = MutableLiveData<Int>()
-    val isSaveVisible: LiveData<Int> get() = _isSaveVisible
-
-    private val _isCancelVisible = MutableLiveData<Int>()
-    val isCancelVisible: LiveData<Int> get() = _isCancelVisible
-
-    private val _isSuccessVisible = MutableLiveData<Int>()
-    val isSuccessVisible: LiveData<Int> get() = _isSuccessVisible
+    private val _uiState = MutableStateFlow(ToolbarUiState())
+    val uiState = _uiState.asStateFlow()
 
     private val _onSave = MutableSharedFlow<Unit>(replay = 0)
     val onSave = _onSave.asSharedFlow()
@@ -45,20 +38,28 @@ class MainToolbarViewModel @Inject constructor(): ViewModel() {
         _title.value = title
     }
 
-    fun isBtnCancelVisible(visible: Int){
-        _isCancelVisible.value = visible
+    fun isBtnCancelVisible(visible: Boolean){
+        _uiState.update { state ->
+            state.copy(showCancel = visible)
+        }
     }
 
-    fun isBtnSuccessVisible(visible: Int){
-        _isSuccessVisible.value = visible
+    fun isBtnSuccessVisible(visible: Boolean){
+        _uiState.update { state ->
+            state.copy(showSuccess = visible)
+        }
     }
 
-    fun isBtnBackVisible(visible: Int){
-        _isBackVisible.value = visible
+    fun isBtnBackVisible(visible: Boolean){
+        _uiState.update { state ->
+            state.copy(showBack = visible)
+        }
     }
 
-    fun isBtnSaveVisible(visible: Int){
-        _isSaveVisible.value = visible
+    fun isBtnSaveVisible(visible: Boolean){
+        _uiState.update { state ->
+            state.copy(showSave = visible)
+        }
     }
 
     fun init() {
@@ -67,10 +68,12 @@ class MainToolbarViewModel @Inject constructor(): ViewModel() {
     }
 
     fun initButtons() {
-        isBtnBackVisible(View.GONE)
-        isBtnSaveVisible(View.GONE)
-        isBtnSuccessVisible(View.GONE)
-        isBtnCancelVisible(View.GONE)
+        _uiState.value = ToolbarUiState(
+            showBack = false,
+            showSave = false,
+            showSuccess = false,
+            showCancel = false
+        )
     }
 
     fun btnSaveText(){

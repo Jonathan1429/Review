@@ -1,9 +1,7 @@
 package com.jonathanev.review.presentation.folders.model
 
 import android.os.Parcelable
-import com.jonathanev.review.domain.model.GuideDomainModel
 import kotlinx.parcelize.Parcelize
-import java.io.File
 
 @Parcelize
 sealed class FolderAction: Parcelable {

@@ -13,7 +13,7 @@ class GuiaMigrationRepositoryImpl @Inject constructor(
     private val imagesRepository: ImagesRepository
 ): GuiaMigrationRepository {
     override fun moveGuides() {
-        val currentPath = File(navigationPathRepository.currentPathGuides.value)
+        val currentPath = File(navigationPathRepository.getPathGuides().value)
 
         val guidesInDivice = currentPath.listFiles()
             ?.filter { it.isFile && it.extension == Extensions.XML_EXTENSION } ?: emptyList()

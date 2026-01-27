@@ -11,14 +11,11 @@ import com.jonathanev.review.domain.repository.DirectoryManager
 import com.jonathanev.review.domain.repository.GuiaRepository
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.MoveGuideResponse
-import com.jonathanev.review.domain.repository.NavigationPathRepository
-import com.jonathanev.review.domain.service.FileNamingRules
 import javax.inject.Inject
 
 class MoveGuideUseCase @Inject constructor(
     private val guiaRepository: GuiaRepository,
-    private val directoryManager: DirectoryManager,
-    private val navigationPathRepository: NavigationPathRepository
+    private val directoryManager: DirectoryManager
 ) {
     operator fun invoke(guideData: GetGuideResult.Success, context: GuideContext.Moving): MoveGuideResponse {
         var isExistPathGuide = true
@@ -31,24 +28,14 @@ class MoveGuideUseCase @Inject constructor(
             return MoveGuideResponse.ErrorPathGuide
         }
 
-        val file = FileNamingRules.buildXmlFileName(context.guide.nameGuide)
-        val moveGuide = guiaRepository.moveGuide(
-            file,
-            GuideContext.Moving(
-                context.guide,
-                GuidePath(context.oldGuidePath.value),
-                GuidePath(navigationPathRepository.currentPathGuides.value),
-                GuidePath(context.oldImagePath.value),
-            )
-        )
+        val moveGuide = guiaRepository.moveGuide(context)
         if (!moveGuide) {
             return MoveGuideResponse.ErrorMovingGuide
         }
 
         val isDeleteFolder = directoryManager.deleteFolderEmpty(
             GuideContext.Actual(
-                guide = context.guide,
-                currentGuidePath = GuidePath(context.oldGuidePath.value),
+                guide = context.guide
             )
         )
 

@@ -3,26 +3,23 @@ package com.jonathanev.review.domain
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuideRenameContext
+import com.jonathanev.review.domain.model.AttrGuide
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
 import com.jonathanev.review.domain.repository.DirectoryManager
 import com.jonathanev.review.domain.repository.GuiaRepository
-import com.jonathanev.review.domain.repository.PathResolve
 import com.jonathanev.review.domain.repository.ImagesRepository
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.RenamedGuideResult
-import com.jonathanev.review.presentation.mapper.GuidePreviewMapper
+import com.jonathanev.review.domain.mapper.GuideQuestionExtractor
 import com.jonathanev.review.domain.repository.NavigationPathRepository
-import com.jonathanev.review.domain.service.FileNamingRules
 import javax.inject.Inject
 
 class RenameGuideUseCase @Inject constructor(
-    private val obtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase,
     private val guiaRepository: GuiaRepository,
-    private val guidePreviewMapper: GuidePreviewMapper,
+    private val guideQuestionExtractor: GuideQuestionExtractor,
     private val imagesRepository: ImagesRepository,
     private val directoryManager: DirectoryManager,
-    private val pathResolve: PathResolve,
     private val navigationPathRepository: NavigationPathRepository
 ) {
     operator fun invoke(
@@ -30,17 +27,9 @@ class RenameGuideUseCase @Inject constructor(
         newName: String,
         description: String
     ): RenamedGuideResult {
-        val oldFile = FileNamingRules.buildXmlFileName(guide.nameGuide)
-        val newFile = FileNamingRules.buildXmlFileName(guide.nameGuide)
-        val context = GuideContext.Rename(
-            guide = guide,
-            currentGuidePath = pathResolve.currentPathResolve(guide, oldFile),
-            newGuidePath = pathResolve.newPathResolve(newName, newFile)
-        )
-
-        return when (val result = obtenerDatosXMLUseCase.invoke(context)) {
+        return when (val result = guiaRepository.getXMLGuide(GuideContext.Actual(guide))) {
             is GetGuideResult.Success -> {
-                val (questions, answers) = guidePreviewMapper.map(result)
+                val (questions, answers) = guideQuestionExtractor.map(result)
 
                 val isPathExist = directoryManager.prepareGuidePath(newName)
                 if (!isPathExist) {
@@ -48,11 +37,9 @@ class RenameGuideUseCase @Inject constructor(
                 }
 
                 val isRenamed = guiaRepository.renameGuide(
-                    newName,
-                    description,
                     questions,
                     answers,
-                    context
+                    GuideContext.Rename(guide,  AttrGuide(newName), AttrGuide(description))
                 )
 
                 if (!isRenamed) {

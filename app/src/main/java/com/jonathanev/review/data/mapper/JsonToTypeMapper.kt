@@ -1,4 +1,4 @@
-package com.jonathanev.review.presentation.mapper
+package com.jonathanev.review.data.mapper
 
 import com.jonathanev.review.data.serialization.IconKeys
 import com.jonathanev.review.presentation.model.ColorType

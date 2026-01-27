@@ -3,8 +3,6 @@ package com.jonathanev.review.presentation.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.jonathanev.review.presentation.model.ColorType
-import com.jonathanev.review.ui.mapper.toInt
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -21,6 +19,6 @@ class DialogColorsPopUpViewModel @Inject constructor(): ViewModel() {
 
     // Método para resetear al color por defecto
     fun resetColor() {
-        _colorSeleccionado.value = ColorType.White.toInt()
+        _colorSeleccionado.value = -1
     }
 }

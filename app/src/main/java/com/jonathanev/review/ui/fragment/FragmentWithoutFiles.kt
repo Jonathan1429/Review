@@ -138,8 +138,8 @@ class FragmentWithoutFiles : Fragment() {
 
     private fun initUI(mode: FolderAction) {
         if (mode is FolderAction.MovingFile) {
-            viewModelToolbar.isBtnCancelVisible(View.VISIBLE)
-            viewModelToolbar.isBtnSuccessVisible(View.VISIBLE)
+            viewModelToolbar.isBtnCancelVisible(true)
+            viewModelToolbar.isBtnSuccessVisible(true)
         }
     }
 }

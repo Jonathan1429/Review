@@ -24,8 +24,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.jonathanev.review.presentation.folders.model.FolderAction
 import com.jonathanev.review.presentation.event.UIMovingEvent
-import com.jonathanev.review.presentation.event.PrepareGuideEvent
-import com.jonathanev.review.data.filesystem.FilePathsProvider
+import com.jonathanev.review.data.filesystem.FilePathsProviderImpl
 import com.jonathanev.review.ui.adapter.ListFoldersAdapter
 import com.jonathanev.review.R
 import com.jonathanev.review.presentation.folders.viewmodel.FoldersListViewModel
@@ -48,7 +47,7 @@ class FragmentListFolders : DialogFragment() {
     private lateinit var adaptListFolders: ListFoldersAdapter
 
     @Inject
-    lateinit var filePathsProvider: FilePathsProvider
+    lateinit var filePathsProviderImpl: FilePathsProviderImpl
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -162,8 +161,8 @@ class FragmentListFolders : DialogFragment() {
 
     private fun initUI(mode: FolderAction) {
         if (mode is FolderAction.MovingFile) {
-            viewModelToolbar.isBtnCancelVisible(View.VISIBLE)
-            viewModelToolbar.isBtnSuccessVisible(View.GONE)
+            viewModelToolbar.isBtnCancelVisible(true)
+            viewModelToolbar.isBtnSuccessVisible(false)
         }
 
         viewModelToolbar.changeTitle("Carpetas")

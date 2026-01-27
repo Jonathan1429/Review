@@ -11,6 +11,7 @@ import com.bumptech.glide.load.DecodeFormat
 import com.jonathanev.review.R
 import com.jonathanev.review.databinding.ListItemFolderBinding
 import com.jonathanev.review.presentation.folders.model.FolderUiModel
+import com.jonathanev.review.ui.mapper.toColorRes
 import javax.inject.Inject
 
 class ListFoldersViewHolder @Inject constructor(
@@ -31,10 +32,10 @@ class ListFoldersViewHolder @Inject constructor(
 
         val background = binding.itemCarpeta.bgCarpeta.background as GradientDrawable
         binding.itemCarpeta.ivCarpeta.imageTintMode = PorterDuff.Mode.SRC_ATOP
-        val color50 = ColorUtils.setAlphaComponent(folder.folder.color, 50)
+        val color50 = ColorUtils.setAlphaComponent(folder.folder.color.toColorRes(), 50)
         background.setColor(color50)
 
-        binding.itemCarpeta.ivCarpeta.imageTintList = ColorStateList.valueOf(folder.folder.color)
+        binding.itemCarpeta.ivCarpeta.imageTintList = ColorStateList.valueOf(folder.folder.color.toColorRes())
         val lblNumGuides = "${folder.numGuides} ${ContextCompat.getString(binding.noFoldersDescription.context, R.string.lblGuides)}"
         binding.noFoldersDescription.text = lblNumGuides
 

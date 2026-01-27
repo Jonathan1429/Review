@@ -1,6 +1,5 @@
 package com.jonathanev.review.presentation.state
 
-import android.net.Uri
 import com.jonathanev.review.domain.model.QAType
 import com.jonathanev.review.presentation.model.QuestionItemUi
 
@@ -12,7 +11,6 @@ data class GuideUiState(
     val qAType: QAType = QAType.QUESTION,
     val fileName: String = "",
     val isEditing: Boolean = false,
-    val actualUri: Uri? = null,
+    val actualUri: String? = null,
     val isLastQuestion: Boolean? = null
 )
-

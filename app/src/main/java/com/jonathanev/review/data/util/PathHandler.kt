@@ -1,7 +1,6 @@
 package com.jonathanev.review.data.util
 
 import com.jonathanev.review.data.storage.StorageFolders
-import com.jonathanev.review.data.xml.Versions
 import com.jonathanev.review.domain.model.GuideVersion
 import javax.inject.Inject
 

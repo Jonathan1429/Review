@@ -4,6 +4,8 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.view.View
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
@@ -11,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -46,6 +49,21 @@ class MainActivity : AppCompatActivity() {
         ) == PackageManager.PERMISSION_GRANTED
 
         viewModel.checkIfNeedsPermission(hasPermission)
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModelToolbar.uiState.collect { uiState ->
+                    binding.barraSuperiorBack.imgvBack.visibility =
+                        if (uiState.showBack) View.VISIBLE else View.GONE
+                    binding.barraSuperiorBack.imgvSave.visibility =
+                        if (uiState.showSave) View.VISIBLE else View.GONE
+                    binding.barraSuperiorBack.btnSuccess.visibility =
+                        if (uiState.showSuccess) View.VISIBLE else View.GONE
+                    binding.barraSuperiorBack.btnCancel.visibility =
+                        if (uiState.showCancel) View.VISIBLE else View.GONE
+                }
+            }
+        }
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -88,24 +106,8 @@ class MainActivity : AppCompatActivity() {
             if (withoutPermission) requestReadPermission()
         }
 
-        viewModelToolbar.title.observe(this){ title ->
+        viewModelToolbar.title.observe(this) { title ->
             binding.barraSuperiorBack.tvTituloToolbar.text = title
-        }
-
-        viewModelToolbar.isSaveVisible.observe(this){ isVisibleBtnSave ->
-            binding.barraSuperiorBack.imgvSave.visibility = isVisibleBtnSave
-        }
-
-        viewModelToolbar.isBackVisible.observe(this){ isVisibleBtnBack ->
-            binding.barraSuperiorBack.imgvBack.visibility = isVisibleBtnBack
-        }
-
-        viewModelToolbar.isCancelVisible.observe(this){ isVisibleBtnCancel ->
-            binding.barraSuperiorBack.btnCancel.visibility = isVisibleBtnCancel
-        }
-
-        viewModelToolbar.isSuccessVisible.observe(this){ isVisibleBtnSuccess ->
-            binding.barraSuperiorBack.btnSuccess.visibility = isVisibleBtnSuccess
         }
     }
 

@@ -1,9 +1,9 @@
 package com.jonathanev.review.domain.service
 
-import com.jonathanev.review.data.filesystem.FilePathsProvider
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuideVersion
+import com.jonathanev.review.domain.provider.FilePathsProvider
 import com.jonathanev.review.domain.repository.NavigationPathRepository
 import javax.inject.Inject
 
@@ -11,9 +11,21 @@ class FilePathResolverService @Inject constructor(
     private val navigationPathRepository: NavigationPathRepository,
     private val filePathsProvider: FilePathsProvider
 ) {
-    fun mapToFilePath(guideContext: GuideContext.Actual) = getCurrentPath(guideContext.guide)
+    fun mapToFilePathActual(guideContext: GuideContext.Actual) = getCurrentPath(guideContext.guide, navigationPathRepository.getPathGuides().value)
+    fun mapToFilePathDelete(guideContext: GuideContext.DeleteGuide) = getCurrentPath(guideContext.guide, navigationPathRepository.getPathGuides().value)
+    fun mapToFilePathRename(guideContext: GuideContext.Rename) = getCurrentPath(guideContext.guide, navigationPathRepository.getPathGuides().value)
 
-    private fun getCurrentPath(guideDomainModel: GuideDomainModel, basePath: String = navigationPathRepository.currentPathGuides.value) = if (guideDomainModel.version == GuideVersion.V1) {
+    // Movimiento - ORIGEN
+    fun mapToSourceGuidePath(guideContext: GuideContext.Moving) = getCurrentPath(guideContext.guide, guideContext.oldGuidePath.value)
+    fun mapToSourceImagePath(guideContext: GuideContext.Moving) = getImagePath(guideContext.guide, guideContext.oldImagePath.value)
+
+    // Movimiento - DESTINO
+    fun mapToTargetGuidePath(guideContext: GuideContext.Moving) = getCurrentPath(guideContext.guide, navigationPathRepository.getPathGuides().value)
+
+    private fun getCurrentPath(
+        guideDomainModel: GuideDomainModel,
+        basePath: String
+    ) = if (guideDomainModel.version == GuideVersion.V1) {
         val file = FileNamingRules.buildXmlFileName(guideDomainModel.nameGuide)
         filePathsProvider.buildGuide(
             basePath,
@@ -24,6 +36,26 @@ class FilePathResolverService @Inject constructor(
         filePathsProvider.buildFolderGuide(
             basePath,
             guideDomainModel.nameGuide,
+            file
+        )
+    }
+
+    private fun getImagePath(
+        guideDomainModel: GuideDomainModel,
+        basePath: String
+    ) = if (guideDomainModel.version == GuideVersion.V1) {
+        basePath
+    } else {
+        filePathsProvider.buildImage(
+            basePath,
+            guideDomainModel.nameGuide
+        )
+    }
+
+    fun getPathGuidesV1(guideDomainModel: GuideDomainModel): String {
+        val file = FileNamingRules.buildXmlFileName(guideDomainModel.nameGuide)
+        return filePathsProvider.buildGuide(
+            navigationPathRepository.getPathGuides().value,
             file
         )
     }

@@ -86,8 +86,8 @@ class FragmentCreateImages : Fragment() {
             binding.ivImagen.setImage(ImageSource.uri(item.uri))
         }
 
-        viewModelToolbar.isBtnSaveVisible(View.VISIBLE)
-        viewModelToolbar.isBtnBackVisible(View.VISIBLE)
+        viewModelToolbar.isBtnSaveVisible(true)
+        viewModelToolbar.isBtnBackVisible(true)
     }
 
     private fun initListeners() {
@@ -114,7 +114,7 @@ class FragmentCreateImages : Fragment() {
         // Mostrar imagen sin crear archivo
         binding.ivImagen.setImage(ImageSource.uri(uri))
         // Guardas el URI para usarlo después al guardar todo
-        sharedViewModel.setActualUri(uri)
+        sharedViewModel.setActualUri(uri.toString())
         //processImage(uri)
     }
 

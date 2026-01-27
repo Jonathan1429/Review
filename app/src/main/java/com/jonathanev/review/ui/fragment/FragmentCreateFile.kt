@@ -26,12 +26,11 @@ import com.jonathanev.review.databinding.FragmentCreateFileBinding
 import com.jonathanev.review.domain.model.QAType
 import com.jonathanev.review.presentation.event.CreateGuideEvent
 import com.jonathanev.review.presentation.model.ActionGuide
-import com.jonathanev.review.presentation.model.IconType
-import com.jonathanev.review.presentation.model.ScreenDataUi
 import com.jonathanev.review.presentation.viewmodel.MainToolbarViewModel
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.ui.adapter.ListCreateImagesAdapter
 import com.jonathanev.review.ui.adapter.ListCreateTextsAdapter
+import com.jonathanev.review.ui.model.ScreenDataNav
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -44,7 +43,7 @@ class FragmentCreateFile : Fragment() {
 
     private lateinit var adaptListCreateTexts: ListCreateTextsAdapter
     private lateinit var adaptListCreateImages: ListCreateImagesAdapter
-    private lateinit var screenDataUi: ScreenDataUi
+    private lateinit var screenDataNav: ScreenDataNav
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -64,9 +63,9 @@ class FragmentCreateFile : Fragment() {
             requireArguments(), "actionGuide", ActionGuide::class.java
         ) ?: ActionGuide.NONE
 
-        screenDataUi = BundleCompat.getParcelable(
-            requireArguments(), "screenData", ScreenDataUi::class.java
-        ) ?: ScreenDataUi("", "", IconType.ANCHOR_SOLID_FULL, 0)
+        screenDataNav = BundleCompat.getParcelable(
+            requireArguments(), "screenData", ScreenDataNav::class.java
+        ) ?: ScreenDataNav("", "", R.drawable.ic_anchor_solid_full, R.color.black)
 
         val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -157,8 +156,8 @@ class FragmentCreateFile : Fragment() {
     }
 
     private fun initUI(actionGuide: ActionGuide) {
-        viewModelToolbar.isBtnSaveVisible(View.GONE)
-        viewModelToolbar.isBtnBackVisible(View.GONE)
+        viewModelToolbar.isBtnSaveVisible(false)
+        viewModelToolbar.isBtnBackVisible(false)
 
         adaptListCreateTexts = ListCreateTextsAdapter(
             onEditClicked = { position -> goEditText(position) },
@@ -261,8 +260,8 @@ class FragmentCreateFile : Fragment() {
         binding.btnSaveGuide.setOnClickListener {
             when (actionGuide) {
                 ActionGuide.CREATE -> viewModel.saveNewGuide(
-                    screenDataUi.name,
-                    screenDataUi.description
+                    screenDataNav.name,
+                    screenDataNav.description
                 )
 
                 is ActionGuide.EDIT -> viewModel.saveOldGuide(actionGuide.nameGuide)

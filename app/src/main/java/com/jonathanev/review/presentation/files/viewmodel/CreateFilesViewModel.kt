@@ -3,6 +3,7 @@ package com.jonathanev.review.presentation.files.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.domain.IsExistFileUseCase
+import com.jonathanev.review.domain.IsExistFolderUseCase
 import com.jonathanev.review.domain.LoadGuidesUseCase
 import com.jonathanev.review.domain.RenameGuideUseCase
 import com.jonathanev.review.domain.SaveMetadataUseCase
@@ -13,12 +14,12 @@ import com.jonathanev.review.presentation.event.RenameGuideEvent
 import com.jonathanev.review.presentation.files.model.GuideResultUi
 import com.jonathanev.review.presentation.folders.model.FolderAction
 import com.jonathanev.review.presentation.mapper.toDomain
+import com.jonathanev.review.domain.result.ValidateCreateFileResult
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.ColorType
 import com.jonathanev.review.presentation.model.IconType
 import com.jonathanev.review.presentation.model.QuestionItemUi
 import com.jonathanev.review.presentation.model.ScreenDataUi
-import com.jonathanev.review.domain.repository.NavigationPathRepository
 import com.jonathanev.review.presentation.state.CreatingFileUiState
 import com.jonathanev.review.presentation.state.PreviewState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -35,8 +36,8 @@ class CreateFilesViewModel @Inject constructor(
     private val validateCreateFileUseCase: ValidateCreateFileUseCase,
     private val saveMetadataUseCase: SaveMetadataUseCase,
     private val loadGuidesUseCase: LoadGuidesUseCase,
-    private val navigationPathRepository: NavigationPathRepository,
     private val isExistFileUseCase: IsExistFileUseCase,
+    private val isExistFolderUseCase: IsExistFolderUseCase
 ) : ViewModel() {
     private var cachedGuides: List<GuideDomainModel> = emptyList()
 
@@ -103,11 +104,15 @@ class CreateFilesViewModel @Inject constructor(
 
     fun processScreenData(name: String, description: String) {
         // Validación del nombre del archivo
-        val response = validateCreateFileUseCase.invoke(name, description)
-
         viewModelScope.launch {
             _messages.emit(
-                response
+                when (val response = validateCreateFileUseCase.invoke(name, description)) {
+                    is ValidateCreateFileResult.Error -> CreatingFileUiState.Message(response.message)
+                    is ValidateCreateFileResult.Success -> CreatingFileUiState.ContinuedProcess(
+                        response.name,
+                        description
+                    )
+                }
             )
         }
     }
@@ -170,7 +175,17 @@ class CreateFilesViewModel @Inject constructor(
     }
 
     fun fileExist(mode: FolderAction, name: String): Boolean {
-        return isExistFileUseCase.invoke(mode, cachedGuides, name)
+        return when(mode){
+            FolderAction.CreatingFile,
+            is FolderAction.RenamingFile -> {
+                isExistFileUseCase.invoke(cachedGuides, name)
+            }
+            FolderAction.CreatingFolder -> isExistFolderUseCase.invoke(name)
+            else -> {
+                emitMessage("Error inesperado")
+                true
+            }
+        }
     }
 
     fun onContinueProcess(confirmed: Boolean, name: String, description: String) {

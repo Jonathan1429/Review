@@ -1,4 +1,4 @@
-package com.jonathanev.review.presentation.mapper
+package com.jonathanev.review.domain.mapper
 
 import com.jonathanev.review.domain.model.QuestionItemDomain
 import com.jonathanev.review.domain.model.ResponseDomain
@@ -6,7 +6,7 @@ import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.service.TextColorRangeGenerator
 import javax.inject.Inject
 
-class GuidePreviewMapper @Inject constructor(
+class GuideQuestionExtractor @Inject constructor(
     private val textColorRangeGenerator: TextColorRangeGenerator
 ) {
     fun map(result: GetGuideResult.Success): Pair<List<QuestionItemDomain>, List<QuestionItemDomain>> {

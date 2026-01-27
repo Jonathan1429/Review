@@ -3,7 +3,7 @@ package com.jonathanev.review.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.domain.GetGuideMoveUseCase
-import com.jonathanev.review.domain.GetObtenerDatosXMLUseCase
+import com.jonathanev.review.domain.GetGuideXmlDataUseCase
 import com.jonathanev.review.domain.MoveGuideUseCase
 import com.jonathanev.review.domain.SetMainPathUseCase
 import com.jonathanev.review.domain.model.GuideContext
@@ -24,7 +24,7 @@ class FragmentWithoutFilesViewModel @Inject constructor(
     private val navigationPathRepository: NavigationPathRepository,
     private val setMainPathUseCase: SetMainPathUseCase,
     private val getGuideMoveUseCase: GetGuideMoveUseCase,
-    private val getObtenerDatosXMLUseCase: GetObtenerDatosXMLUseCase
+    private val getGuideXmlDataUseCase: GetGuideXmlDataUseCase
 ) : ViewModel() {
     private val _eventsMovingFiles = MutableSharedFlow<UIMovingEvent>()
     val eventsMovingFiles = _eventsMovingFiles.asSharedFlow()
@@ -56,7 +56,7 @@ class FragmentWithoutFilesViewModel @Inject constructor(
     fun movingGuide() {
         when (val context = getGuideMoveUseCase.invoke()) {
             is GuideContext.Moving -> {
-                when (val guideData = getObtenerDatosXMLUseCase.invoke(context)) {
+                when (val guideData = getGuideXmlDataUseCase.invoke(context.guide)) {
                     is GetGuideResult.Success -> {
                         val response = moveGuideUseCase.invoke(guideData, context)
                         when (response) {

@@ -12,28 +12,24 @@ interface GuiaRepository {
     fun getNumGuides(currentPathGuides: String): Int
     fun getXMLGuide(guideContext: GuideContext.Actual): GetGuideResult
     fun saveGuide(
-        guideName: String,
-        guideFileName: String,
-        description: String,
-        version: GuideVersion,
+        guideDomainModel: GuideDomainModel,
         preguntas: List<QuestionItemDomain>,
-        respuestas: List<QuestionItemDomain>,
-        currentPathGuides: String,
+        respuestas: List<QuestionItemDomain>
     ): Boolean
 
     fun renameGuide(
-        fileName: String,
-        description: String,
+        /*fileName: String,
+        description: String,*/
         preguntas: List<QuestionItemDomain>,
         respuestas: List<QuestionItemDomain>,
         guideContext: GuideContext.Rename,
     ): Boolean
 
     fun deleteGuide(
-        guideFileName: String,
-        guideDomainModel: GuideDomainModel,
+        //guideFileName: String,
+        //guideDomainModel: GuideDomainModel,
         deleteGuide: GuideContext.DeleteGuide,
     ): Boolean
 
-    fun moveGuide(guideFileName: String, guideContext: GuideContext.Moving): Boolean
+    fun moveGuide(guideContext: GuideContext.Moving): Boolean
 }

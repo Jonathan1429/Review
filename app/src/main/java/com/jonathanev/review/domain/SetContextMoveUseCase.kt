@@ -15,9 +15,8 @@ class SetContextMoveUseCase @Inject constructor(
         guideMoveRepository.start(
             GuideContext.Moving(
                 guideDomainModel,
-                GuidePath(navigationPathRepository.currentPathGuides.value),
-                GuidePath(navigationPathRepository.currentPathGuides.value),
-                GuidePath(navigationPathRepository.currentPathImages.value)
+                GuidePath(navigationPathRepository.getPathGuides().value),
+                GuidePath(navigationPathRepository.getPathImages().value)
             )
         )
 

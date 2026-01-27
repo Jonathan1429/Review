@@ -184,8 +184,8 @@ class FragmentListGuides : Fragment() {
         viewModelToolbar.changeTitle("Guias")
 
         if (mode is FolderAction.MovingFile) {
-            viewModelToolbar.isBtnCancelVisible(View.VISIBLE)
-            viewModelToolbar.isBtnSuccessVisible(View.VISIBLE)
+            viewModelToolbar.isBtnCancelVisible(true)
+            viewModelToolbar.isBtnSuccessVisible(true)
         }
 
         adaptListGuides = ListGuidesAdapter { position -> showGuideOptions(position, mode) }

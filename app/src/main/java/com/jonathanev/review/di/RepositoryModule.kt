@@ -3,15 +3,13 @@ package com.jonathanev.review.di
 import com.jonathanev.review.data.filesystem.GuiaRepositoryImpl
 import com.jonathanev.review.data.filesystem.GuideMoveRepositoryImpl
 import com.jonathanev.review.data.repository.FolderRepositoryImpl
-import com.jonathanev.review.domain.repository.GuiaRepository
 import com.jonathanev.review.data.repository.ImagesRepositoryImpl
 import com.jonathanev.review.data.repository.NavigationPathRepositoryImpl
-import com.jonathanev.review.data.repository.PathResolveImpl
 import com.jonathanev.review.domain.repository.FolderRepository
+import com.jonathanev.review.domain.repository.GuiaRepository
+import com.jonathanev.review.domain.repository.GuideMoveRepository
 import com.jonathanev.review.domain.repository.ImagesRepository
 import com.jonathanev.review.domain.repository.NavigationPathRepository
-import com.jonathanev.review.domain.repository.GuideMoveRepository
-import com.jonathanev.review.domain.repository.PathResolve
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -44,9 +42,4 @@ abstract class RepositoryModule {
     abstract fun bindGuiaRepository(
         impl: GuiaRepositoryImpl
     ): GuiaRepository
-
-    @Binds
-    abstract fun bindPathResolve(
-        impl: PathResolveImpl
-    ): PathResolve
 }

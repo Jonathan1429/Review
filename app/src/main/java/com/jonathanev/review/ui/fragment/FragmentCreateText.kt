@@ -99,8 +99,8 @@ class FragmentCreateText : Fragment() {
 
         setColor(Color.WHITE)
         viewModelToolbar.changeTitle("")
-        viewModelToolbar.isBtnBackVisible(View.VISIBLE)
-        viewModelToolbar.isBtnSaveVisible(View.VISIBLE)
+        viewModelToolbar.isBtnBackVisible(true)
+        viewModelToolbar.isBtnSaveVisible(true)
     }
 
     private fun initListeners() {
@@ -112,7 +112,7 @@ class FragmentCreateText : Fragment() {
         // Eliminar textos con colores
         binding.imgvQuitColor.setOnClickListener {
             val text = binding.etPregResp.text
-            val spannableStringBuilder: SpannableStringBuilder = SpannableStringBuilder(text)
+            val spannableStringBuilder = SpannableStringBuilder(text)
             spannableStringBuilder.clearSpans()
 
             binding.etPregResp.text = spannableStringBuilder
