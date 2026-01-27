@@ -12,6 +12,7 @@ import com.jonathanev.review.R
 import com.jonathanev.review.databinding.ListItemFolderBinding
 import com.jonathanev.review.presentation.folders.model.FolderUiModel
 import com.jonathanev.review.ui.mapper.toColorRes
+import com.jonathanev.review.ui.mapper.toDrawableRes
 import javax.inject.Inject
 
 class ListFoldersViewHolder @Inject constructor(
@@ -21,7 +22,7 @@ class ListFoldersViewHolder @Inject constructor(
 
     fun bind(folder: FolderUiModel) {
         Glide.with(binding.itemCarpeta.ivCarpeta.context)
-            .load(folder.folder.imgFolder)
+            .load(folder.folder.imgFolder.toDrawableRes())
             .override(80, 80)
             .centerCrop()
             .format(DecodeFormat.PREFER_RGB_565)

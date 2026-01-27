@@ -59,4 +59,21 @@ class FilePathResolverService @Inject constructor(
             file
         )
     }
+
+    fun getPathGuidesV2(guideDomainModel: GuideDomainModel): String {
+        val file = FileNamingRules.buildXmlFileName(guideDomainModel.nameGuide)
+        return filePathsProvider.buildFolderGuide(
+            navigationPathRepository.getPathGuides().value,
+            guideDomainModel.nameGuide,
+            file
+        )
+    }
+    fun renamePathGuidesV2(guideContext: GuideContext.Rename): String {
+        val file = FileNamingRules.buildXmlFileName(guideContext.name.value)
+        return filePathsProvider.buildFolderGuide(
+            navigationPathRepository.getPathGuides().value,
+            guideContext.name.value,
+            file
+        )
+    }
 }

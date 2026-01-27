@@ -25,7 +25,6 @@ import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.QAType
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
-import com.jonathanev.review.domain.provider.FilePathsProvider
 import com.jonathanev.review.domain.repository.GuiaRepository
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.service.FilePathResolverService
@@ -69,12 +68,11 @@ class GuiaRepositoryImpl @Inject constructor(
 
         val listFromFolders = File(currentPathGuides)
             .listFiles()
-            ?.filter { it.isDirectory }?.map { folder ->
-                folder.listFiles()?.find { file ->
-                    file.isFile &&
-                            file.extension == Extensions.XML_EXTENSION &&
-                            file.nameWithoutExtension == (file.parentFile?.name ?: "")
-                }
+            ?.filter { it.isDirectory }
+            ?.flatMap { folder ->
+                folder.listFiles()
+                    ?.filter { it.isFile && it.extension == Extensions.XML_EXTENSION }
+                    ?: emptyList()
             } ?: emptyList()
 
         return (listFiles + listFromFolders)
@@ -93,8 +91,6 @@ class GuiaRepositoryImpl @Inject constructor(
     }
 
     override fun renameGuide(
-        /*fileName: String,
-        description: String,*/
         preguntas: List<QuestionItemDomain>,
         respuestas: List<QuestionItemDomain>,
         guideContext: GuideContext.Rename
@@ -131,13 +127,15 @@ class GuiaRepositoryImpl @Inject constructor(
 
             fos.close()
 
-            val isRenamedGuide = tempFile.renameTo(File(path))
-            tempFile.delete()
-            if (!isRenamedGuide) {
+            val newPath = filePathResolverService.renamePathGuidesV2(guideContext)
+            val isRenamed = tempFile.renameTo(File(newPath))
+
+            if (!isRenamed){
+                tempFile.delete()
                 return false
             }
 
-            //File(guideContext.currentGuidePath.value).delete()
+            File(path).delete()
             true
         } catch (e: Exception) {
             false
@@ -181,18 +179,15 @@ class GuiaRepositoryImpl @Inject constructor(
 
             fos.close()
 
-            val isRenamed = tempFile.renameTo(File(currentPath))
-            if (!isRenamed) {
+            val newPath = filePathResolverService.getPathGuidesV2(guideDomainModel)
+            val isRenamed = tempFile.renameTo(File(newPath))
+
+            if (!isRenamed){
                 tempFile.delete()
                 return false
             }
 
-            if (guideDomainModel.version == GuideVersion.V1) {
-                val pathV1 = filePathResolverService.getPathGuidesV1(guideDomainModel)
-
-                File(pathV1).delete()
-            }
-
+            File(currentPath).delete()
             true
         } catch (e: Exception) {
             false
@@ -200,23 +195,9 @@ class GuiaRepositoryImpl @Inject constructor(
     }
 
     override fun deleteGuide(
-        /*guideFileName: String,
-        guideDomainModel: GuideDomainModel,*/
         deleteGuide: GuideContext.DeleteGuide
     ): Boolean {
         val pathGuide = filePathResolverService.mapToFilePathDelete(deleteGuide)
-        /*val pathGuide = if (guideDomainModel.version == GuideVersion.V1) {
-            filePathsProvider.buildGuide(
-                deleteGuide.currentPath.value,
-                guideFileName
-            )
-        } else {
-            filePathsProvider.buildFolder(
-                deleteGuide.currentPath.value,
-                guideDomainModel.nameGuide
-            )
-        }*/
-
         return File(pathGuide).deleteRecursively()
     }
 

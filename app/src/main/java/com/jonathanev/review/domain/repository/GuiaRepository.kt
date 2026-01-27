@@ -18,8 +18,6 @@ interface GuiaRepository {
     ): Boolean
 
     fun renameGuide(
-        /*fileName: String,
-        description: String,*/
         preguntas: List<QuestionItemDomain>,
         respuestas: List<QuestionItemDomain>,
         guideContext: GuideContext.Rename,

@@ -33,6 +33,7 @@ class RenameGuideUseCase @Inject constructor(
 
                 val isPathExist = directoryManager.prepareGuidePath(newName)
                 if (!isPathExist) {
+                    navigationPathRepository.reset()
                     return RenamedGuideResult.GuidePathError
                 }
 
@@ -43,6 +44,7 @@ class RenameGuideUseCase @Inject constructor(
                 )
 
                 if (!isRenamed) {
+                    navigationPathRepository.reset()
                     return RenamedGuideResult.RenamedError
                 }
 
@@ -53,11 +55,11 @@ class RenameGuideUseCase @Inject constructor(
                     GuideRenameContext(result.guideDomainModel, newName)
                 )
 
+                navigationPathRepository.reset()
                 if (!isSuccess) {
                     return RenamedGuideResult.ImageError
                 }
 
-                navigationPathRepository.reset()
                 return RenamedGuideResult.Success
             }
 

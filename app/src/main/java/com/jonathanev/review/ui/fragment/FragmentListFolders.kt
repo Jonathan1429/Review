@@ -90,7 +90,7 @@ class FragmentListFolders : DialogFragment() {
                     binding.progressBar.isVisible = uiState.isLoading
 
                     if (uiState.error != null) {
-                        Toast.makeText(requireContext(), uiState.error, Toast.LENGTH_LONG).show()
+                        showToast(uiState.error)
                     }
 
                     adaptListFolders.submitList(uiState.folders)
@@ -103,19 +103,11 @@ class FragmentListFolders : DialogFragment() {
                 viewModel.eventsMovingFiles.collect { message ->
                     when (message) {
                         is UIMovingEvent.ShowMessage -> {
-                            Toast.makeText(
-                                requireContext(),
-                                message.text,
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            showToast(message.text)
                         }
 
                         UIMovingEvent.ExistFile -> {
-                            Toast.makeText(
-                                requireContext(),
-                                "No es posible guardar una guia aquí",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            showToast("No es posible guardar una guia aquí")
                         }
                     }
                 }
@@ -145,11 +137,7 @@ class FragmentListFolders : DialogFragment() {
     private fun initListeners(mode: FolderAction) {
         binding.btnCreateGuide.setOnClickListener {
             if (mode is FolderAction.MovingFile) {
-                Toast.makeText(
-                    requireContext(),
-                    "Termina de mover la guia antes de realizar otra acción",
-                    Toast.LENGTH_SHORT
-                ).show()
+                showToast("Termina de mover la guia antes de realizar otra acción")
             } else {
                 findNavController().navigate(
                     R.id.action_to_create_graph,
@@ -223,8 +211,7 @@ class FragmentListFolders : DialogFragment() {
                         2 -> {
                             // Cuando cancela se ejecuta esta acción
                             dialog.dismiss()
-                            Toast.makeText(context, "Cancelaste la acción", Toast.LENGTH_SHORT)
-                                .show()
+                            showToast("Cancelaste la acción")
                         }
                     }
                 }
@@ -240,8 +227,6 @@ class FragmentListFolders : DialogFragment() {
     }
 
     private fun showToast(text: String) {
-        Toast.makeText(
-            requireContext(), text, Toast.LENGTH_LONG
-        ).show()
+        Toast.makeText(requireContext(), text, Toast.LENGTH_SHORT).show()
     }
 }
