@@ -187,7 +187,9 @@ class GuiaRepositoryImpl @Inject constructor(
                 return false
             }
 
-            File(currentPath).delete()
+            if (guideDomainModel.version == GuideVersion.V1){
+                File(currentPath).delete()
+            }
             true
         } catch (e: Exception) {
             false

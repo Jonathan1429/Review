@@ -24,8 +24,6 @@ interface GuiaRepository {
     ): Boolean
 
     fun deleteGuide(
-        //guideFileName: String,
-        //guideDomainModel: GuideDomainModel,
         deleteGuide: GuideContext.DeleteGuide,
     ): Boolean
 
