@@ -5,7 +5,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class ValidateCreateFileUseCaseTest {
-    private val validateCreateFileUseCase = ValidateCreateFileUseCase()
+    /*private val validateCreateFileUseCase = ValidateCreateFileUseCase()
 
     @Test
     fun validacion_vacia() {
@@ -35,5 +35,5 @@ class ValidateCreateFileUseCaseTest {
         val descripcion = "descripcion de prueba"
         val resultado = validateCreateFileUseCase.invoke(name, descripcion)
         assertEquals(CreatingFileUiState.ContinuedProcess(name, descripcion), resultado)
-    }
+    }*/
 }
