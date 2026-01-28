@@ -11,6 +11,7 @@ import com.bumptech.glide.load.DecodeFormat
 import com.jonathanev.review.R
 import com.jonathanev.review.databinding.ListItemFolderBinding
 import com.jonathanev.review.presentation.folders.model.FolderUiModel
+import com.jonathanev.review.presentation.model.ColorType
 import com.jonathanev.review.ui.mapper.toColorRes
 import com.jonathanev.review.ui.mapper.toDrawableRes
 import javax.inject.Inject
@@ -33,8 +34,13 @@ class ListFoldersViewHolder @Inject constructor(
 
         val background = binding.itemCarpeta.bgCarpeta.background as GradientDrawable
         binding.itemCarpeta.ivCarpeta.imageTintMode = PorterDuff.Mode.SRC_ATOP
-        val colorRes = folder.folder.color.toColorRes()
-        val color = ContextCompat.getColor(binding.itemCarpeta.ivCarpeta.context, colorRes)
+        val color = if (folder.folder.color !is ColorType.RandomColor){
+            val colorRes = folder.folder.color.toColorRes()
+            ContextCompat.getColor(binding.itemCarpeta.ivCarpeta.context, colorRes)
+        } else {
+            folder.folder.color.color
+        }
+
         val color50 = ColorUtils.setAlphaComponent(color, 50)
         background.setColor(color50)
 
