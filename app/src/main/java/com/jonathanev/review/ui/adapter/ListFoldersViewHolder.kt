@@ -33,10 +33,12 @@ class ListFoldersViewHolder @Inject constructor(
 
         val background = binding.itemCarpeta.bgCarpeta.background as GradientDrawable
         binding.itemCarpeta.ivCarpeta.imageTintMode = PorterDuff.Mode.SRC_ATOP
-        val color50 = ColorUtils.setAlphaComponent(folder.folder.color.toColorRes(), 50)
+        val colorRes = folder.folder.color.toColorRes()
+        val color = ContextCompat.getColor(binding.itemCarpeta.ivCarpeta.context, colorRes)
+        val color50 = ColorUtils.setAlphaComponent(color, 50)
         background.setColor(color50)
 
-        binding.itemCarpeta.ivCarpeta.imageTintList = ColorStateList.valueOf(folder.folder.color.toColorRes())
+        binding.itemCarpeta.ivCarpeta.imageTintList = ColorStateList.valueOf(color)
         val lblNumGuides = "${folder.numGuides} ${ContextCompat.getString(binding.noFoldersDescription.context, R.string.lblGuides)}"
         binding.noFoldersDescription.text = lblNumGuides
 

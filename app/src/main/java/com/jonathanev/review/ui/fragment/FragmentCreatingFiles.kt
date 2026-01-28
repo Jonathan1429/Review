@@ -68,6 +68,7 @@ class FragmentCreatingFiles : Fragment() {
         // Animación cuando se esté seleccionando un color.
         val bubbleFlag = BubbleFlag(context)
         bubbleFlag.flagMode = FlagMode.FADE
+        binding.fragmentCreate.colorPickerView.setInitialColor(Color.WHITE)
         binding.fragmentCreate.colorPickerView.flagView = bubbleFlag
 
         initUI(mode)
