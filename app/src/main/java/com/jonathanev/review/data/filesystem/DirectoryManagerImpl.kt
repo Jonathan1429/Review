@@ -8,11 +8,13 @@ import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.provider.FilePathsProvider
 import com.jonathanev.review.domain.repository.DirectoryManager
 import com.jonathanev.review.domain.repository.NavigationPathRepository
+import com.jonathanev.review.domain.service.FilePathResolverService
 import java.io.File
 import javax.inject.Inject
 
 class DirectoryManagerImpl @Inject constructor(
     private val navigationPathRepository: NavigationPathRepository,
+    private val filePathResolverService: FilePathResolverService,
     private val filePathsProvider: FilePathsProvider,
 ) : DirectoryManager {
     override fun createPathImages(guideDomainModel: GuideDomainModel, isNewFile: Boolean): Boolean {
@@ -55,13 +57,25 @@ class DirectoryManagerImpl @Inject constructor(
             is ImageSource.SaveGuide -> imageSource.currentPath
         }
 
-        val oldImagesPath = getSourceImagePath(pathImages.value, guideDomain)
+        val oldImagesPath = filePathResolverService.mapToSourceImagePath(
+            GuideContext.Moving(
+                guideDomain,
+                pathImages,
+                pathImages
+            )
+        )
 
         var isSuccess = true
 
         images.forEach { image ->
             val oldPathImage = File(getPathImage(guideDomain, image, oldImagesPath))
-            val newPathImages = getSourceImagePath(navigationPathRepository.getPathImages().value, guideDomain)
+            val newPathImages = filePathResolverService.mapToSourceImagePath(
+                GuideContext.Moving(
+                    guideDomain,
+                    pathImages,
+                    navigationPathRepository.getPathImages()
+                )
+            )
 
             if (oldPathImage.exists()) {
                 val destination = File(newPathImages, image.nameFile)
@@ -133,9 +147,9 @@ class DirectoryManagerImpl @Inject constructor(
         return !(!paths[0].exists() || !paths[1].exists())
     }
 
-    override fun deleteFolderEmpty(guideContext: GuideContext.Actual): Boolean {
-        return if (guideContext.guide.version == GuideVersion.V2){
-            File(navigationPathRepository.getPathGuides().value, guideContext.guide.nameGuide).delete()
+    override fun deleteFolderEmpty(context: GuideContext.Moving): Boolean {
+        return if (context.guide.version == GuideVersion.V2) {
+            File(context.oldGuidePath.value, context.guide.nameGuide).delete()
         } else {
             true
         }
@@ -161,20 +175,6 @@ class DirectoryManagerImpl @Inject constructor(
             "$oldImagesPath/$nameFile"
         } else {
             "$oldImagesPath/${image.nameFile}"
-        }
-    }
-
-    private fun getSourceImagePath(
-        sourceImagePath: String,
-        guideDomain: GuideDomainModel,
-    ): String {
-        return if (guideDomain.version == GuideVersion.V1) {
-            sourceImagePath
-        } else {
-            filePathsProvider.buildFolder(
-                sourceImagePath,
-                guideDomain.nameGuide
-            )
         }
     }
 }

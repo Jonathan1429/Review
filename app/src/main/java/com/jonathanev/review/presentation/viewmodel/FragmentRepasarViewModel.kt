@@ -12,6 +12,7 @@ import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.presentation.event.GuidePreviewEvent
 import com.jonathanev.review.presentation.event.GuideReviewEvent
 import com.jonathanev.review.domain.mapper.GuideQuestionExtractor
+import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.presentation.state.GuideUiState
@@ -92,7 +93,7 @@ class FragmentRepasarViewModel @Inject constructor(
             return
         }
         //Revisar como se obtienen los datos aqui, porque no se visualiza la imagen
-        when (val result = getGuideXmlDataUseCase.invoke(guideDomainModel)) {
+        when (val result = getGuideXmlDataUseCase.invoke(GuideContext.Actual(guideDomainModel))) {
             is GetGuideResult.Success -> {
                 val (questions, answers) = guideQuestionExtractor.map(result)
                 initUiPreviewQuestions(result.list)

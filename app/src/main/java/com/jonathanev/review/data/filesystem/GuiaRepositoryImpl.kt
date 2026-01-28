@@ -245,13 +245,8 @@ class GuiaRepositoryImpl @Inject constructor(
                 guideSource.path.value
             }
 
-            is GuideSource.CustomPath -> {
+            is GuideSource.SourcePath -> {
                 guideSource.path.value
-                /*filePathsProvider.buildFolderGuide(
-                    guideSource.path.value,
-                    guideDomainModel.nameGuide,
-                    guideFileName
-                )*/
             }
         }
 
@@ -352,12 +347,8 @@ class GuiaRepositoryImpl @Inject constructor(
                     guideSource.path.value
                 }
 
-                is GuideSource.CustomPath -> {
+                is GuideSource.SourcePath -> {
                     guideSource.path.value
-                    /*filePathsProvider.buildGuide(
-                        guideSource.path.value,
-                        guideFileName
-                    )*/
                 }
             }
 
@@ -436,14 +427,32 @@ class GuiaRepositoryImpl @Inject constructor(
         return GetGuideResult.Success(guideDomainModel, listaQA.map { it.toDomain() })
     }
 
-    override fun getXMLGuide(guideContext: GuideContext.Actual): GetGuideResult {
-        val version = guideContext.guide.version
-
-        val path = filePathResolverService.mapToFilePathActual(guideContext)
-        return if (version == GuideVersion.V1)
-            obtenerDatosXMLV1(guideContext.guide, GuideSource.CurrentPath(GuidePath(path)))
-        else
-            obtenerDatosXMLV2(guideContext.guide, GuideSource.CurrentPath(GuidePath(path)))
+    override fun getXMLGuide(context: GuideContext): GetGuideResult {
+        return when(context){
+            is GuideContext.Actual -> {
+                val version = context.guide.version
+                val path = filePathResolverService.mapToFilePathActual(context)
+                if (version == GuideVersion.V1)
+                    obtenerDatosXMLV1(context.guide, GuideSource.CurrentPath(GuidePath(path)))
+                else
+                    obtenerDatosXMLV2(context.guide, GuideSource.CurrentPath(GuidePath(path)))
+            }
+            is GuideContext.Moving -> {
+                val version = context.guide.version
+                val path = filePathResolverService.mapToSourceGuidePath(
+                    GuideContext.Moving(
+                        context.guide,
+                        context.oldGuidePath,
+                        context.oldImagePath
+                    )
+                )
+                if (version == GuideVersion.V1)
+                    obtenerDatosXMLV1(context.guide, GuideSource.SourcePath(GuidePath(path)))
+                else
+                    obtenerDatosXMLV2(context.guide, GuideSource.SourcePath(GuidePath(path)))
+            }
+            else -> GetGuideResult.Error
+        }
     }
 
     override fun moveGuide(guideContext: GuideContext.Moving): Boolean {
@@ -463,31 +472,8 @@ class GuiaRepositoryImpl @Inject constructor(
             )
         )
 
-        //val guidePath = guideContext.currentGuidePath
-        //val sourceGuidePath = guideContext.oldGuidePath
-        //val currentGuidePath = getGuidePath(guidePath.value, guideContext.guide, guideFileName)
-        //val oldGuidePath = getGuidePath(sourceGuidePath.value, guideContext.guide, guideFileName)
         return File(sourceGuidePath).renameTo(File(guidePath))
     }
-
-    /*private fun getGuidePath(
-        sourceGuidePath: String,
-        guideDomain: GuideDomainModel,
-        guideFileName: String
-    ): String {
-        return if (guideDomain.version == GuideVersion.V1) {
-            filePathsProvider.buildGuide(
-                sourceGuidePath,
-                guideFileName
-            )
-        } else {
-            filePathsProvider.buildFolderGuide(
-                sourceGuidePath,
-                guideDomain.nameGuide,
-                guideFileName
-            )
-        }
-    }*/
 
     private fun getAttributesGuide(file: File): GuideDomainModel {
         val db = DocumentBuilderFactory.newInstance().newDocumentBuilder()
@@ -514,19 +500,4 @@ class GuiaRepositoryImpl @Inject constructor(
             description = description
         ).toDomain()
     }
-
-    /*private fun getCurrentPath(guideDomainModel: GuideDomainModel, basePath: String = navigationPathRepository.currentPathGuides.value) = if (guideDomainModel.version == GuideVersion.V1) {
-        val file = FileNamingRules.buildXmlFileName(guideDomainModel.nameGuide)
-        filePathsProvider.buildGuide(
-            basePath,
-            file
-        )
-    } else {
-        val file = FileNamingRules.buildXmlFileName(guideDomainModel.nameGuide)
-        filePathsProvider.buildFolderGuide(
-            basePath,
-            guideDomainModel.nameGuide,
-            file
-        )
-    }*/
 }

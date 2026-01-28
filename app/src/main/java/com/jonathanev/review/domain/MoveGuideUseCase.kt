@@ -33,11 +33,7 @@ class MoveGuideUseCase @Inject constructor(
             return MoveGuideResponse.ErrorMovingGuide
         }
 
-        val isDeleteFolder = directoryManager.deleteFolderEmpty(
-            GuideContext.Actual(
-                guide = context.guide
-            )
-        )
+        val isDeleteFolder = directoryManager.deleteFolderEmpty(context)
 
         if (!isDeleteFolder) {
             return MoveGuideResponse.WarningDeleteFolder

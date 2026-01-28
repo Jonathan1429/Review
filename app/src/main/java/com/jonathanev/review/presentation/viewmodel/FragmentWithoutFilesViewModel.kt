@@ -56,7 +56,7 @@ class FragmentWithoutFilesViewModel @Inject constructor(
     fun movingGuide() {
         when (val context = getGuideMoveUseCase.invoke()) {
             is GuideContext.Moving -> {
-                when (val guideData = getGuideXmlDataUseCase.invoke(context.guide)) {
+                when (val guideData = getGuideXmlDataUseCase.invoke(context)) {
                     is GetGuideResult.Success -> {
                         val response = moveGuideUseCase.invoke(guideData, context)
                         when (response) {

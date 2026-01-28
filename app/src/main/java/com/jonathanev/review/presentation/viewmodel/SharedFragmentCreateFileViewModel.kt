@@ -20,6 +20,7 @@ import com.jonathanev.review.domain.repository.UserPreferencesRepository
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.presentation.event.CreateGuideEvent
 import com.jonathanev.review.domain.mapper.GuideQuestionExtractor
+import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.ColorRangeUi
@@ -402,7 +403,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         getSaveGuidesUseCase.invoke().find { it.nameGuide == nameGuide }
 
     private fun loadGuideXml(guide: GuideDomainModel): GetGuideResult =
-        getGuideXmlDataUseCase(guide)
+        getGuideXmlDataUseCase.invoke(GuideContext.Actual(guide))
 
     private fun handleGuideResult(
         result: GetGuideResult,
