@@ -5,7 +5,7 @@ import com.jonathanev.review.domain.model.GuideRenameContext
 import com.jonathanev.review.domain.model.QuestionContentDomain
 
 interface ImagesRepository {
-    suspend fun save(
+    fun save(
         image: QuestionContentDomain.Image,
         guide: GuideDomainModel
     )
