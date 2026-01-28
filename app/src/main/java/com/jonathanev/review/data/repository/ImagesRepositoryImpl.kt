@@ -21,7 +21,7 @@ class ImagesRepositoryImpl @Inject constructor(
     private val filePathsProvider: FilePathsProvider,
     private val navigationPathRepository: NavigationPathRepository
 ) : ImagesRepository {
-    override suspend fun save(image: QuestionContentDomain.Image, guide: GuideDomainModel) {
+    override fun save(image: QuestionContentDomain.Image, guide: GuideDomainModel) {
         val currentPath =
             filePathsProvider.buildFolder(navigationPathRepository.getPathImages().value, guide.nameGuide)
         val uri = Uri.parse(image.uri)
