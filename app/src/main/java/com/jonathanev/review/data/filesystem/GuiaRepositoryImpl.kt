@@ -377,7 +377,7 @@ class GuiaRepositoryImpl @Inject constructor(
                     QuestionContentXmlDto.Image(uri = decoded, nameFile = nameFile)
                 } else {
                     QuestionContentXmlDto.Text(
-                        text = ans,
+                        text = ques,
                         colorRangeXmlDto = emptyList()
                     )
                 }
