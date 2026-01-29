@@ -37,8 +37,7 @@ class SetPintarTextosUseCaseTest {
             ruta
         )
 
-        val resColorRange = colorRangeParser.invoke(textWithTags)
-        assertEquals(QuestionContentDomain.Text(textWithoutTags, list) ,resColorRange)
+        verify { colorRangeParser.invoke(textWithTags) }
         assertEquals(QuestionContentDomain.Text(textWithoutTags, list) ,response)
     }
 

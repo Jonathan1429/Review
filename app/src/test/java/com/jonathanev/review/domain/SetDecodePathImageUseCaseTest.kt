@@ -31,17 +31,15 @@ class SetDecodePathImageUseCaseTest {
         val newListContentA = listOf(
             QuestionContentDomain.Image(fakeUri, "3.png")
         )
-        every { userPreferencesRepository.getCountImage() } returns flowOf(1)
-        coEvery { userPreferencesRepository.setImageCount(any()) } just Runs
-
         val preguntas = QuestionItemDomain(listContent)
         val respuestas = QuestionItemDomain(listContent)
 
+        every { userPreferencesRepository.getCountImage() } returns flowOf(1)
+        coEvery { userPreferencesRepository.setImageCount(any()) } just Runs
+
         val response = setDecodePathImageUseCase.invoke(listOf(preguntas), listOf(respuestas))
 
-        val resCount = userPreferencesRepository.getCountImage().first()
-        assertEquals(1, resCount)
-
+        coVerify { userPreferencesRepository.getCountImage() }
         coVerify { userPreferencesRepository.setImageCount(any()) }
 
         assertEquals(
@@ -71,12 +69,9 @@ class SetDecodePathImageUseCaseTest {
 
         val preguntas = QuestionItemDomain(listContentQ)
         val respuestas = QuestionItemDomain(listContentA)
-
         val response = setDecodePathImageUseCase.invoke(listOf(preguntas), listOf(respuestas))
 
-        val resCount = userPreferencesRepository.getCountImage().first()
-        assertEquals(2, resCount)
-
+        coVerify { userPreferencesRepository.getCountImage() }
         coVerify { userPreferencesRepository.setImageCount(any()) }
 
         assertEquals(

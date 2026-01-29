@@ -54,6 +54,7 @@ class UpdateImagesUseCaseTest {
             isNewFile = true
         )
 
+        verify { directoryManager.createPathImages(guideDomain, true) }
         assertFalse(response)
     }
 
@@ -64,15 +65,14 @@ class UpdateImagesUseCaseTest {
         val guidePath = GuidePath("navegacion/fake")
         val question = QuestionItemDomain(listOf(image))
 
-        every { navigationPathRepository.getPathImages() } returns guidePath
 
+        every { directoryManager.createPathImages(guideDomain, false) } returns true
+        every { navigationPathRepository.getPathImages() } returns guidePath
         every {
             directoryManager.moveImages(
                 guideDomain, ImageSource.SaveGuide(guidePath), listOf(image)
             )
         } returns false
-
-        every { directoryManager.createPathImages(guideDomain, false) } returns true
 
         val response = useCase(
             guideDomain = guideDomain,
@@ -81,15 +81,15 @@ class UpdateImagesUseCaseTest {
             isNewFile = false
         )
 
-        val resPathImages = directoryManager.createPathImages(guideDomain, false)
-        assertTrue(resPathImages)
-
-        val resMoveImages = directoryManager.moveImages(
-            guideDomain,
-            ImageSource.SaveGuide(guidePath),
-            listOf(image)
-        )
-        assertFalse(resMoveImages)
+        verify { directoryManager.createPathImages(guideDomain, false) }
+        verify { navigationPathRepository.getPathImages() }
+        verify {
+            directoryManager.moveImages(
+                guideDomain,
+                ImageSource.SaveGuide(guidePath),
+                listOf(image)
+            )
+        }
         assertFalse(response)
     }
 
@@ -109,16 +109,9 @@ class UpdateImagesUseCaseTest {
             isNewFile = true
         )
 
-        val resDirMana = directoryManager.createPathImages(guideDomain, true)
-        assertTrue(resDirMana)
-
-        val resImagesInDevice = directoryManager.getImagesInDevice(guideDomain)
-        assertEquals(setOf("2.png"), resImagesInDevice)
-
-        verify(exactly = 1) {
-            imagesRepository.save(image, guideDomain)
-        }
-
+        verify { directoryManager.createPathImages(guideDomain, true) }
+        verify { directoryManager.getImagesInDevice(guideDomain) }
+        verify { imagesRepository.save(image, guideDomain) }
         verify {
             directoryManager.deleteLeftoverImagesInDevice(guideDomain.nameGuide, listOf(image))
         }
@@ -151,28 +144,21 @@ class UpdateImagesUseCaseTest {
             isNewFile = false
         )
 
-        val resDirMana = directoryManager.createPathImages(guideDomain, false)
-        assertTrue(resDirMana)
-
-        val resMoveImages = directoryManager.moveImages(
+        verify { navigationPathRepository.getPathImages() }
+        verify { directoryManager.getImagesInDevice(guideDomain) }
+        verify { directoryManager.createPathImages(guideDomain, false) }
+        verify { directoryManager.moveImages(
             guideDomain,
             ImageSource.SaveGuide(guidePath),
             images
-        )
-        assertTrue(resMoveImages)
-
-        val resImagesInDevice = directoryManager.getImagesInDevice(guideDomain)
-        assertEquals(setOf("2.png"), resImagesInDevice)
-
+        ) }
         verify(exactly = 1) {
             imagesRepository.save(image1, guideDomain)
         }
-
         verify(exactly = 0) {
             imagesRepository.save(image2, guideDomain)
             imagesRepository.save(image3, guideDomain)
         }
-
         verify {
             directoryManager.deleteLeftoverImagesInDevice(guideDomain.nameGuide, images)
         }

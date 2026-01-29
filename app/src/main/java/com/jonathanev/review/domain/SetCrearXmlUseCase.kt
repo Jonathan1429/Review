@@ -14,7 +14,7 @@ class SetCrearXmlUseCase @Inject constructor(
     operator fun invoke(
         nameGuide: String,
         description: String,
-        version: GuideVersion = GuideVersion.V2,
+        version: GuideVersion,
         preguntas: List<QuestionItemDomain>,
         respuestas: List<QuestionItemDomain>,
     ): Boolean {

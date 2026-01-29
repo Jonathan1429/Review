@@ -582,6 +582,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             val isSuccess = setCrearXmlUseCase.invoke(
                 nameGuide = nameGuide,
                 description = description,
+                version = GuideVersion.V2,
                 preguntas = dataWithTags.first,
                 respuestas = dataWithTags.second
             )
