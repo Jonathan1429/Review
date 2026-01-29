@@ -288,12 +288,12 @@ tasks.register("fullCoverageReport", JacocoReport) {
     group = "Reporting"
     description = "Genera el reporte de cobertura combinado (Unit + Android Tests)."
 
-    dependsOn "testDebugUnitTest", "transferAndroidCoverageData"
+    dependsOn "testDebugUnitTest" //",transferAndroidCoverageData" Agregar cuando tenga los AndroidTest
 
-    executionData.setFrom(
-            file("$buildDir/jacoco/testDebugUnitTest.exec"),
-            file("$buildDir/jacoco/androidTest.exec")
-    )
+            executionData.setFrom(
+                    file("$buildDir/jacoco/testDebugUnitTest.exec"),
+                    file("$buildDir/jacoco/androidTest.exec")
+            )
 
     // Directorios de clases compiladas (Java + Kotlin) con exclusión de la capa View
     classDirectories.setFrom(

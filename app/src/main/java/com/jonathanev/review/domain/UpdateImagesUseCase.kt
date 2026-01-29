@@ -21,7 +21,9 @@ class UpdateImagesUseCase @Inject constructor(
         isNewFile: Boolean,
     ): Boolean {
         // Preparar la carpeta para las imagenes.
-        directoryManager.createPathImages(guideDomain, isNewFile)
+        val pathImages = directoryManager.createPathImages(guideDomain, isNewFile)
+        if (!pathImages) return false
+
         val listImages = (preguntasProcesadas + respuestasProcesadas)
             .flatMap { it.content }
             .filterIsInstance<QuestionContentDomain.Image>()
