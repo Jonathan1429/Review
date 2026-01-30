@@ -20,5 +20,5 @@ interface ImagesRepository {
         images: List<QuestionContentDomain.Image>
     ): Boolean
 
-    fun moveUnassignedImages()
+    fun moveUnassignedImages(movedFiles: List<String>)
 }

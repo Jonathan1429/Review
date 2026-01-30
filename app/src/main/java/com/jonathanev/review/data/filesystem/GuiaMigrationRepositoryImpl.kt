@@ -1,35 +1,56 @@
 package com.jonathanev.review.data.filesystem
 
-import com.jonathanev.review.domain.repository.GuiaMigrationRepository
+import android.content.Context
+import android.util.Log
 import com.jonathanev.review.data.storage.StorageFolders
 import com.jonathanev.review.domain.constants.Extensions
-import com.jonathanev.review.domain.repository.ImagesRepository
-import com.jonathanev.review.domain.repository.NavigationPathRepository
+import com.jonathanev.review.domain.repository.GuiaMigrationRepository
+import com.jonathanev.review.domain.result.MigrationResult
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import javax.inject.Inject
 
 class GuiaMigrationRepositoryImpl @Inject constructor(
-    private val navigationPathRepository: NavigationPathRepository,
-    private val imagesRepository: ImagesRepository
-): GuiaMigrationRepository {
-    override fun moveGuides() {
-        val currentPath = File(navigationPathRepository.getPathGuides().value)
+    @ApplicationContext private val context: Context
+) : GuiaMigrationRepository {
+    override fun moveGuides(): MigrationResult {
+        val moved = mutableListOf<String>()
+        val failed = mutableListOf<String>()
 
-        val guidesInDivice = currentPath.listFiles()
+        val rootPath = File(context.filesDir, StorageFolders.GUIAS)
+        if (!rootPath.exists()) return MigrationResult(emptyList(), emptyList())
+
+        val guidesInDevice = rootPath.listFiles()
             ?.filter { it.isFile && it.extension == Extensions.XML_EXTENSION } ?: emptyList()
+        if (guidesInDevice.isEmpty()) return MigrationResult(emptyList(), emptyList())
 
-        if (guidesInDivice.isNotEmpty()) {
-            val otrosDir = File(currentPath, StorageFolders.OTROS)
-            if (!otrosDir.exists()) {
-                otrosDir.mkdir()
-            }
+        val otrosDir = File(rootPath, StorageFolders.OTROS)
+        val isFolderReady = otrosDir.exists() || otrosDir.mkdirs()
 
-            guidesInDivice.forEach { file ->
-                val newPath = File(otrosDir, file.name)
-                file.renameTo(newPath)
-            }
-
-            imagesRepository.moveUnassignedImages()
+        if (!isFolderReady) {
+            Log.e("MIGRATION", "No se pudo preparar la carpeta de destino.")
+            return MigrationResult(emptyList(), guidesInDevice.map { it.name })
         }
+
+        guidesInDevice.forEach { file ->
+            try {
+                val newPath = File(otrosDir, file.name)
+                if (newPath.exists()){
+                    Log.i("Migration: ", "Archivo existente: ${file.name}")
+                } else {
+                    val success = file.renameTo(newPath)
+                    if (success) {
+                        moved.add(file.name)
+                    } else {
+                        failed.add(file.name)
+                    }
+                }
+            } catch (e: Exception) {
+                failed.add(file.name)
+            }
+
+        }
+
+        return MigrationResult(moved, failed)
     }
 }
