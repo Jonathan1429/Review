@@ -521,12 +521,15 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 isNewFile = false
             )
 
+            val (dataWithTagsQ, dataWithTagsA) =
+                setColocarEtiquetasUseCase.invoke(preguntasProcesadas, respuestasProcesadas)
+
             val isSuccess = setCrearXmlUseCase.invoke(
                 nameGuide = guide.nameGuide,
                 description = guide.description,
                 version = guide.version,
-                preguntas = preguntasProcesadas,
-                respuestas = respuestasProcesadas
+                preguntas = dataWithTagsQ,
+                respuestas = dataWithTagsA
             )
 
             if (isSuccess) {
