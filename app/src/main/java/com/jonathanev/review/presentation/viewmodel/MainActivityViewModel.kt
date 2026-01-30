@@ -16,8 +16,8 @@ import javax.inject.Inject
 class MainActivityViewModel @Inject constructor(
     private val initializeGuideStorageUseCase: InitializeGuideStorageUseCase,
 ) : ViewModel() {
-    private val _shouldRequestPermission = MutableLiveData<Boolean>()
-    val shouldRequestPermission: LiveData<Boolean> get() = _shouldRequestPermission
+    /*private val _shouldRequestPermission = MutableLiveData<Boolean>()
+    val shouldRequestPermission: LiveData<Boolean> get() = _shouldRequestPermission*/
 
     private val _uiEvent = MutableSharedFlow<MainUiEvent>()
     val uiEvent = _uiEvent.asSharedFlow()
@@ -35,9 +35,9 @@ class MainActivityViewModel @Inject constructor(
         }
     }
 
-    fun checkIfNeedsPermission(hasPermission: Boolean) {
+    /*fun checkIfNeedsPermission(hasPermission: Boolean) {
         if (!hasPermission) {
             _shouldRequestPermission.value = true
         }
-    }
+    }*/
 }

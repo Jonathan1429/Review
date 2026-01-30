@@ -26,9 +26,9 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
-    companion object {
+    /*companion object {
         private const val REQUEST_PERMISSION_CODE = 123
-    }
+    }*/
 
     private lateinit var binding: ActivityMainBinding
     private val viewModel: MainActivityViewModel by viewModels()
@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity() {
             Manifest.permission.READ_EXTERNAL_STORAGE
         ) == PackageManager.PERMISSION_GRANTED
 
-        viewModel.checkIfNeedsPermission(hasPermission)
+        //viewModel.checkIfNeedsPermission(hasPermission)
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -102,9 +102,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun observers() {
         // Revisar permisos, sino hay se solicitan
-        viewModel.shouldRequestPermission.observe(this) { withoutPermission ->
+        /*viewModel.shouldRequestPermission.observe(this) { withoutPermission ->
             if (withoutPermission) requestReadPermission()
-        }
+        }*/
 
         viewModelToolbar.title.observe(this) { title ->
             binding.barraSuperiorBack.tvTituloToolbar.text = title
@@ -138,11 +138,11 @@ class MainActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    private fun requestReadPermission() {
+    /*private fun requestReadPermission() {
         ActivityCompat.requestPermissions(
             this,
             arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
             REQUEST_PERMISSION_CODE
         )
-    }
+    }*/
 }
