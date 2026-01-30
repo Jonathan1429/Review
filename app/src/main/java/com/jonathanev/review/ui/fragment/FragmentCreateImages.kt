@@ -122,28 +122,4 @@ class FragmentCreateImages : Fragment() {
         // Editing
         sharedViewModel.addImageContent()
     }
-
-    fun guardarTemporalmente() {
-
-    }
-
-    fun guardarImagenesFinal() {
-        /*for ((index, uri) in viewModel.imagenesUris.withIndex()) {
-
-            val input = requireContext().contentResolver.openInputStream(uri)
-                ?: continue
-
-            val filename = "imagen_$index.png"
-            val outFile = File(requireContext().filesDir, filename)
-
-            input.use { i ->
-                FileOutputStream(outFile).use { o ->
-                    i.copyTo(o)
-                }
-            }
-
-            // Aquí puedes cifrar o registrar la ruta final
-            // viewModel.registrarImagenGuardada(outFile.absolutePath)
-        }*/
-    }
 }

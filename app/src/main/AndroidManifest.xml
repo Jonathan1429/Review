@@ -4,36 +4,6 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
-    <!-- URGENTE
-         1.- Cuando se ponen colores seguidos o un color sobrepasa otro ocurren errores o cosas inesperadas.
-         Ejemplo: Pos 0-5 al 4-7
-
-         BUGS
-         1.- (CREENCIA) Probar copiar un texto de WhatsApp, creo que cuando se copia y se pega en la App
-             trae textos extraños.
-         NO COMPROBADO AÚN
-
-         2.- Ocurrió un error al momento de crear una guía: estuve copiando lo que estaba en chatGPT
-             y cambie de colores partes del texto
-
-         3.- Asegurarse que no puedas acceder a las imagenes si realmente el usuario no te dió permiso.
-
-         MEJORAS
-         1.- Usar la obtención de la variable mutable de una guia al dar click en una guia en específico.
-
-         2.- Mientras se esté cargando una imagen debe de salir un signo de carga
-
-         3.-Poder cambiarle el nombre a una carpeta
-
-         4.- Implementar un botón que limpie archivos basura, esto mas que nada porque cuando eliminas guias y demás las imagenes no se borran (Imagenes)
-
-         PRUEBAS
-
-         NOTAS
-         Debes restablecer tu teclado, ya que sino tendrás problemas en los colores de los textos,
-         si esto no funciona debes instalar Gboard de Google.
-
-    -->
     <application
         android:name=".ReviewApp"
         android:allowBackup="true"
@@ -45,9 +15,9 @@
         android:theme="@style/Theme.Review">
         <!-- Sample AdMob app ID: ca-app-pub-3940256099942544~3347511713 -->
         <!-- AdMob app ID: ca-app-pub-5116088101296740~9876600140 -->
-        <meta-data
+        <!--<meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713" />
+            android:value="ca-app-pub-3940256099942544~3347511713" />-->
 
         <activity
             android:name="com.jonathanev.review.ui.main.MainActivity"

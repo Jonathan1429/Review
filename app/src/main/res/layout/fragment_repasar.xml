@@ -1,136 +1,143 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background_app"
-    tools:context=".ui.fragment.FragmentRepasar">
+    tools:context=".ui.fragment.FragmentCreateFile">
 
-    <LinearLayout
-        android:id="@+id/optionsIcons"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:background="@color/background_app"
+        tools:context=".ui.fragment.FragmentRepasar">
 
-        <FrameLayout
+        <LinearLayout
+            android:id="@+id/optionsIcons"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-            <ImageView
-                android:id="@+id/btnPrevious"
-                android:layout_width="34dp"
-                android:layout_height="34dp"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:layout_margin="10dp"
-                android:padding="6dp"
-                android:src="@drawable/ic_circle_left_right"
-                tools:ignore="ContentDescription" />
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_gravity="end"
-                android:orientation="horizontal">
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
                 <ImageView
-                    android:id="@+id/btnPregResp"
+                    android:id="@+id/btnPrevious"
                     android:layout_width="34dp"
                     android:layout_height="34dp"
-                    android:layout_margin="10dp"
                     android:background="?android:attr/selectableItemBackgroundBorderless"
-                    android:padding="6dp"
-                    android:src="@drawable/ic_preg_resp"
-                    tools:ignore="ContentDescription" />
-
-                <ImageView
-                    android:id="@+id/btnNext"
-                    android:layout_width="34dp"
-                    android:layout_height="34dp"
                     android:layout_margin="10dp"
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
                     android:padding="6dp"
-                    android:rotationY="180"
                     android:src="@drawable/ic_circle_left_right"
                     tools:ignore="ContentDescription" />
-            </LinearLayout>
 
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="end"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/btnPregResp"
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
+                        android:layout_margin="10dp"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:padding="6dp"
+                        android:src="@drawable/ic_preg_resp"
+                        tools:ignore="ContentDescription" />
+
+                    <ImageView
+                        android:id="@+id/btnNext"
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
+                        android:layout_margin="10dp"
+                        android:background="?android:attr/selectableItemBackgroundBorderless"
+                        android:padding="6dp"
+                        android:rotationY="180"
+                        android:src="@drawable/ic_circle_left_right"
+                        tools:ignore="ContentDescription" />
+                </LinearLayout>
+
+            </FrameLayout>
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/lblPregResp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:gravity="center_horizontal"
+            android:text="Pregunta"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/optionsIcons" />
+
+        <TextView
+            android:id="@+id/lblTextos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:fontFamily="@font/inter"
+            android:text="Textos"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/lblPregResp" />
+
+        <FrameLayout
+            android:id="@+id/flContTexts"
+            android:layout_width="match_parent"
+            android:layout_height="230dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/lblTextos">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerTextos"
+                android:layout_width="match_parent"
+                android:layout_height="230dp"
+                android:layout_margin="8dp"
+                android:orientation="horizontal" />
         </FrameLayout>
 
-    </LinearLayout>
+        <TextView
+            android:id="@+id/lblImagenes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:fontFamily="@font/inter"
+            android:text="Imagenes"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/flContTexts" />
 
-    <TextView
-        android:id="@+id/lblPregResp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:gravity="center_horizontal"
-        android:text="Pregunta"
-        android:textColor="@color/white"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/optionsIcons" />
-
-    <TextView
-        android:id="@+id/lblTextos"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:fontFamily="@font/inter"
-        android:text="Textos"
-        android:textColor="@color/white"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/lblPregResp" />
-
-    <FrameLayout
-        android:id="@+id/flContTexts"
-        android:layout_width="match_parent"
-        android:layout_height="230dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/lblTextos">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerTextos"
+        <FrameLayout
+            android:id="@+id/flContImages"
             android:layout_width="match_parent"
             android:layout_height="230dp"
-            android:layout_margin="8dp"
-            android:orientation="horizontal" />
-    </FrameLayout>
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/lblImagenes">
 
-    <TextView
-        android:id="@+id/lblImagenes"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:fontFamily="@font/inter"
-        android:text="Imagenes"
-        android:textColor="@color/white"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/flContTexts" />
-
-    <FrameLayout
-        android:id="@+id/flContImages"
-        android:layout_width="match_parent"
-        android:layout_height="230dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/lblImagenes">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerImagenes"
-            android:layout_width="match_parent"
-            android:layout_height="230dp"
-            android:layout_margin="8dp"
-            android:orientation="horizontal" />
-    </FrameLayout>
-</androidx.constraintlayout.widget.ConstraintLayout>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerImagenes"
+                android:layout_width="match_parent"
+                android:layout_height="230dp"
+                android:layout_margin="8dp"
+                android:orientation="horizontal" />
+        </FrameLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
