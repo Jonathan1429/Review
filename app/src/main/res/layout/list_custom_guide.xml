@@ -4,10 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_margin="5dp"
     android:background="@drawable/contents"
     android:orientation="horizontal"
-    android:padding="10dp"
-    android:layout_margin="5dp">
+    android:padding="10dp">
 
     <ImageView
         android:id="@+id/ivStudyGuide"
@@ -15,10 +15,10 @@
         android:layout_height="50dp"
         android:padding="10dp"
         android:scaleType="centerCrop"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/contentDescTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_lightbulb_solid_full" />
 
     <LinearLayout
@@ -26,8 +26,8 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        app:layout_constraintStart_toEndOf="@id/ivStudyGuide"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/ivStudyGuide"
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
@@ -36,10 +36,12 @@
             android:layout_height="25dp"
             android:layout_marginStart="5dp"
             android:layout_weight="1"
-            android:textSize="18sp"
-            android:textColor="@color/white"
-            android:textStyle="bold"
+            android:ellipsize="end"
             android:fontFamily="@font/inter"
+            android:maxLines="1"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="bold"
             tools:text="Álgebra Lineal" />
 
         <TextView
@@ -48,8 +50,10 @@
             android:layout_height="20dp"
             android:layout_marginStart="5dp"
             android:layout_weight="1"
-            android:textColor="@color/text_gray"
+            android:ellipsize="end"
             android:fontFamily="@font/inter"
-            android:text="@string/lblWithoutDescription" />
+            android:maxLines="1"
+            android:text="@string/lblWithoutDescription"
+            android:textColor="@color/text_gray" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
