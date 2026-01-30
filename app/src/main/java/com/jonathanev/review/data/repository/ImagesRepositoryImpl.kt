@@ -2,8 +2,9 @@ package com.jonathanev.review.data.repository
 
 import android.content.Context
 import android.net.Uri
-import com.jonathanev.review.domain.constants.Extensions
+import android.util.Log
 import com.jonathanev.review.data.storage.StorageFolders
+import com.jonathanev.review.domain.constants.Extensions
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuideRenameContext
 import com.jonathanev.review.domain.model.GuideVersion
@@ -35,17 +36,20 @@ class ImagesRepositoryImpl @Inject constructor(
         } ?: throw IllegalStateException("No se pudo abrir imagen")
     }
 
-    override fun moveUnassignedImages() {
-        val currentPathImages = File(navigationPathRepository.getPathImages().value)
+    override fun moveUnassignedImages(movedFiles: List<String>) {
+        val currentPathImages = File(context.filesDir, StorageFolders.IMAGENES)
         val images = currentPathImages.listFiles()
             ?.filter { it.isFile && it.extension == Extensions.PNG_EXTENSION}
             ?: emptyList()
 
         if (images.isNotEmpty()){
-            val pathImageOtros = File(navigationPathRepository.getPathImages().value, StorageFolders.OTROS)
+            val pathImageOtros = File(currentPathImages, StorageFolders.OTROS)
 
-            if (!pathImageOtros.exists()) {
-                pathImageOtros.mkdir()
+            val isFolderReady = pathImageOtros.exists() || pathImageOtros.mkdirs()
+
+            if (!isFolderReady) {
+                Log.e("MIGRATION", "No se pudo preparar la carpeta de destino Otros.")
+                return
             }
 
             // Mover cada archivo imagen
