@@ -39,7 +39,7 @@ class ImagesRepositoryImpl @Inject constructor(
     override fun moveUnassignedImages(movedFiles: List<String>) {
         val currentPathImages = File(context.filesDir, StorageFolders.IMAGENES)
         val images = currentPathImages.listFiles()
-            ?.filter { it.isFile && it.extension == Extensions.PNG_EXTENSION}
+            ?.filter { it.isFile && it.extension == Extensions.PNG_EXTENSION }
             ?: emptyList()
 
         if (images.isNotEmpty()){

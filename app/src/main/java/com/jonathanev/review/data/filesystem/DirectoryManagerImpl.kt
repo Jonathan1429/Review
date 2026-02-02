@@ -1,5 +1,6 @@
 package com.jonathanev.review.data.filesystem
 
+import com.jonathanev.review.domain.constants.Extensions
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuideVersion
@@ -157,12 +158,12 @@ class DirectoryManagerImpl @Inject constructor(
 
     override fun getImagesInDevice(guideDomain: GuideDomainModel): Set<String> {
         val currentPath =
-            filePathsProvider.buildFolder(
-                navigationPathRepository.getPathImages().value,
-                guideDomain.nameGuide
-            )
+            filePathResolverService.mapToImagePathActual(GuideContext.Actual(guideDomain))
 
-        return File(currentPath).listFiles()?.map { it.name }?.toSet() ?: emptySet()
+        return File(currentPath).listFiles()
+            ?.filter { it.isFile && it.extension == Extensions.PNG_EXTENSION }
+            ?.map { it.name }
+            ?.toSet() ?: emptySet()
     }
 
     private fun getPathImage(

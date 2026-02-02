@@ -12,6 +12,8 @@ class FilePathResolverService @Inject constructor(
     private val filePathsProvider: FilePathsProvider
 ) {
     fun mapToFilePathActual(guideContext: GuideContext.Actual) = getCurrentPath(guideContext.guide, navigationPathRepository.getPathGuides().value)
+
+    fun mapToImagePathActual(guideContext: GuideContext.Actual) = getImagePath(guideContext.guide, navigationPathRepository.getPathImages().value)
     fun mapToFilePathDelete(guideContext: GuideContext.DeleteGuide) = getCurrentPath(guideContext.guide, navigationPathRepository.getPathGuides().value)
     fun mapToFilePathRename(guideContext: GuideContext.Rename) = getCurrentPath(guideContext.guide, navigationPathRepository.getPathGuides().value)
 
@@ -49,14 +51,6 @@ class FilePathResolverService @Inject constructor(
         filePathsProvider.buildImage(
             basePath,
             guideDomainModel.nameGuide
-        )
-    }
-
-    fun getPathGuidesV1(guideDomainModel: GuideDomainModel): String {
-        val file = FileNamingRules.buildXmlFileName(guideDomainModel.nameGuide)
-        return filePathsProvider.buildGuide(
-            navigationPathRepository.getPathGuides().value,
-            file
         )
     }
 
