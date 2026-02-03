@@ -59,7 +59,7 @@ class GuiaRepositoryImpl @Inject constructor(
     override val guidesRecovery: List<GuideDomainModel>
         get() = _guidesRecovery
 
-    private fun listGuides(currentPathGuides: String): List<File?> {
+    private fun listGuides(currentPathGuides: String): List<File> {
         val listFiles = File(currentPathGuides).listFiles()
             ?.filter { file ->
                 file.isFile &&
@@ -85,7 +85,7 @@ class GuiaRepositoryImpl @Inject constructor(
 
     override fun getGuides(currentPathGuides: String): List<GuideDomainModel> {
         val result = listGuides(currentPathGuides)
-        val resultGuides = result.map { file -> getAttributesGuide(file!!) }
+        val resultGuides = result.sortedBy { it.name }.map { file -> getAttributesGuide(file) }
         _guidesRecovery = resultGuides
         return resultGuides
     }

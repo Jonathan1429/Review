@@ -57,6 +57,7 @@ class FolderRepositoryImpl @Inject constructor(
     override fun getFolders(): List<FolderDomainModel> {
         return File(navigationPathRepository.getPathGuides().value).listFiles()
             ?.filter { it.isDirectory }
+            ?.sortedBy { it.name }
             ?.map { item ->
                 val guidesV1 =
                     item.listFiles()?.filter { file ->
