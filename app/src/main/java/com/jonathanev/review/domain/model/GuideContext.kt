@@ -17,7 +17,7 @@ sealed class GuideContext {
 
     data class Rename(
         val guide: GuideDomainModel,
-        val name: AttrGuide,
-        val description: AttrGuide
+        val name: RequiredAttrGuide,
+        val description: OptionalAttrGuide
     ) : GuideContext()
 }
