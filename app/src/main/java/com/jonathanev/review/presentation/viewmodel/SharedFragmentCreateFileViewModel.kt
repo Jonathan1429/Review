@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.domain.GetGuideXmlDataUseCase
 import com.jonathanev.review.domain.GetSaveGuidesUseCase
 import com.jonathanev.review.domain.LoadGuidesUseCase
-import com.jonathanev.review.domain.SetColocarEtiquetasUseCase
+import com.jonathanev.review.domain.SetLabelsUseCase
 import com.jonathanev.review.domain.SetContentUseCase
 import com.jonathanev.review.domain.SetCrearXmlUseCase
 import com.jonathanev.review.domain.SetDecodePathImageUseCase
@@ -42,7 +42,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SharedFragmentCreateFileViewModel @Inject constructor(
-    private val setColocarEtiquetasUseCase: SetColocarEtiquetasUseCase,
+    private val setLabelsUseCase: SetLabelsUseCase,
     private val setContentUseCase: SetContentUseCase,
     private val setCrearXmlUseCase: SetCrearXmlUseCase,
     private val setDecodePathImageUseCase: SetDecodePathImageUseCase,
@@ -522,7 +522,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             )
 
             val (dataWithTagsQ, dataWithTagsA) =
-                setColocarEtiquetasUseCase.invoke(preguntasProcesadas, respuestasProcesadas)
+                setLabelsUseCase.invoke(preguntasProcesadas, respuestasProcesadas)
 
             val isSuccess = setCrearXmlUseCase.invoke(
                 nameGuide = guide.nameGuide,
@@ -579,7 +579,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             )
 
             val dataWithTags =
-                setColocarEtiquetasUseCase.invoke(preguntasProcesadas, respuestasProcesadas)
+                setLabelsUseCase.invoke(preguntasProcesadas, respuestasProcesadas)
 
             // 6. Persistencia del XML
             val isSuccess = setCrearXmlUseCase.invoke(
