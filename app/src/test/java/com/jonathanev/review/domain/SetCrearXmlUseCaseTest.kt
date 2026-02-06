@@ -1,123 +1,287 @@
 package com.jonathanev.review.domain
 
+import com.jonathanev.review.domain.model.GuideDomainModel
+import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
+import com.jonathanev.review.domain.model.RelativeGuidePath
+import com.jonathanev.review.domain.model.SaveGuideMode
 import com.jonathanev.review.domain.repository.DirectoryManager
 import com.jonathanev.review.domain.repository.GuiaRepository
+import com.jonathanev.review.domain.result.GetSaveGuideResult
+import com.jonathanev.review.domain.result.SaveGuideError
+import com.jonathanev.review.domain.result.UpdateGuideResult
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Test
 
 class SetCrearXmlUseCaseTest {
-    private val guiaRepository = mockk<GuiaRepository>()
+    private val setDecodePathImageUseCase = mockk<SetDecodePathImageUseCase>()
+    private val loadGuidesUseCase = mockk<LoadGuidesUseCase>()
+    private val setLabelsUseCase = mockk<SetLabelsUseCase>()
+    private val updateImagesUseCase = mockk<UpdateImagesUseCase>()
     private val directoryManager = mockk<DirectoryManager>()
+    private val guiaRepository = mockk<GuiaRepository>()
+    private lateinit var setCrearXmlUseCase: SetCrearXmlUseCase
 
-    @Test
-    fun error_creating_guide_route() {
-        every { directoryManager.createPathGuide("Prueba") } returns false
+    private lateinit var nameGuide: String
+    private lateinit var description: String
+    private lateinit var preguntas: List<QuestionItemDomain>
+    private lateinit var respuestas: List<QuestionItemDomain>
+    private lateinit var guides: List<GuideDomainModel>
+    private var relativeGuidePath: RelativeGuidePath = RelativeGuidePath("init")
+    private lateinit var guideDomainModel: GuideDomainModel
 
-        val item =
-            listOf(QuestionItemDomain(listOf(QuestionContentDomain.Text("Texto 1", emptyList()))))
-
-        /*val response = setCrearXmlUseCase.invoke(
-            nameGuide = "Prueba",
-            description = "Sin descripcion",
-            version = GuideVersion.V2,
-            preguntas = item,
-            respuestas = item,
-            relativeGuidePath = RelativeGuidePath("relativeGuidePath")
+    @Before
+    fun setUp() {
+        val content = listOf(
+            QuestionItemDomain(
+                listOf(
+                    QuestionContentDomain.Text(
+                        "Texto de prueba",
+                        emptyList()
+                    )
+                )
+            )
         )
 
-        verify { directoryManager.createPathGuide("Prueba") }
-        Assert.assertFalse(response)*/
+        nameGuide = "Guia de prueba"
+        description = "Sin descripcion"
+        preguntas = content
+        respuestas = content
+        relativeGuidePath = RelativeGuidePath("Abap")
+        guideDomainModel = GuideDomainModel(GuideVersion.V2, "Guia de prueba", "Sin descripcion")
+
+        guides = listOf(
+            GuideDomainModel(GuideVersion.V2, "Prueba", "Sin descripcion"),
+            guideDomainModel
+        )
+
+        setCrearXmlUseCase = SetCrearXmlUseCase(
+            setDecodePathImageUseCase,
+            loadGuidesUseCase,
+            setLabelsUseCase,
+            updateImagesUseCase,
+            directoryManager,
+            guiaRepository
+        )
     }
 
     @Test
-    fun error_creating_guide() {
-        val item =
-            listOf(QuestionItemDomain(listOf(QuestionContentDomain.Text("Texto 1", emptyList()))))
+    fun error_update_guide() = runTest {
+        val localGuides = listOf(GuideDomainModel(GuideVersion.V2, "Prueba", "Sin descripcion"))
+        coEvery { setDecodePathImageUseCase.invoke(preguntas, respuestas) } returns Pair(
+            preguntas,
+            respuestas
+        )
+        every { loadGuidesUseCase.invoke(relativeGuidePath) } returns localGuides
 
-        every { directoryManager.createPathGuide("Prueba") } returns true
-        /*every {
-            guiaRepository.saveGuide(
-                guideDomainModel = GuideDomainModel(
-                    GuideVersion.V1,
-                    "Prueba",
-                    "Sin descripcion"
-                ),
-                preguntas = item,
-                respuestas = item,
-                relativeGuidePath = RelativeGuidePath("relativeGuidePath")
-            )
-        } returns false*/
+        val response = setCrearXmlUseCase.invoke(
+            nameGuide = nameGuide,
+            description = description,
+            preguntas = preguntas,
+            respuestas = respuestas,
+            relativeGuidePath = relativeGuidePath,
+            mode = SaveGuideMode.Create
+        )
 
-        /*val response = setCrearXmlUseCase.invoke(
-            nameGuide = "Prueba",
-            description = "Sin descripcion",
-            version = GuideVersion.V1,
-            preguntas = item,
-            respuestas = item,
-            relativeGuidePath = RelativeGuidePath("relativeGuidePath")
-        )*/
-
-        verify { directoryManager.createPathGuide("Prueba") }
-
-        /*verify { guiaRepository.saveGuide(
-            guideDomainModel = GuideDomainModel(
-                GuideVersion.V1,
-                "Prueba",
-                "Sin descripcion"
-            ),
-            preguntas = item,
-            respuestas = item,
-            relativeGuidePath = RelativeGuidePath("relativeGuidePath")
-        ) }
-
-        Assert.assertFalse(response)*/
+        coVerify { setDecodePathImageUseCase.invoke(preguntas, respuestas) }
+        verify { loadGuidesUseCase.invoke(relativeGuidePath) }
+        assertEquals(UpdateGuideResult.ErrorUpdateGuide, response)
     }
 
     @Test
-    fun success_creating_guide() {
-        val item =
-            listOf(QuestionItemDomain(listOf(QuestionContentDomain.Text("Texto 1", emptyList()))))
+    fun error_create_path_guide() = runTest {
+        coEvery {
+            setDecodePathImageUseCase.invoke(preguntas, respuestas)
+        } returns Pair(
+            preguntas,
+            respuestas
+        )
+        every { loadGuidesUseCase.invoke(relativeGuidePath) } returns guides
+        every {
+            setLabelsUseCase.invoke(preguntas, respuestas)
+        } returns Pair(preguntas, respuestas)
+        every { directoryManager.createPathGuide(nameGuide) } returns false
 
-        every { directoryManager.createPathGuide("Prueba") } returns true
-        /*every {
+        val response = setCrearXmlUseCase.invoke(
+            nameGuide = nameGuide,
+            description = description,
+            preguntas = preguntas,
+            respuestas = respuestas,
+            relativeGuidePath = relativeGuidePath,
+            mode = SaveGuideMode.Create
+        )
+
+        coVerify { setDecodePathImageUseCase.invoke(preguntas, respuestas) }
+        verify { loadGuidesUseCase.invoke(relativeGuidePath) }
+        verify { setLabelsUseCase.invoke(preguntas, respuestas) }
+        verify { directoryManager.createPathGuide(nameGuide) }
+
+        assertEquals(UpdateGuideResult.ErrorPath, response)
+    }
+
+    @Test
+    fun failure_create_guide() = runTest {
+        coEvery {
+            setDecodePathImageUseCase.invoke(preguntas, respuestas)
+        } returns Pair(
+            preguntas,
+            respuestas
+        )
+        every { loadGuidesUseCase.invoke(relativeGuidePath) } returns guides
+        every {
+            setLabelsUseCase.invoke(preguntas, respuestas)
+        } returns Pair(preguntas, respuestas)
+        every { directoryManager.createPathGuide(nameGuide) } returns true
+        every {
+            guiaRepository.saveGuide(guideDomainModel, preguntas, respuestas, relativeGuidePath)
+        } returns GetSaveGuideResult.Failure(SaveGuideError.ErrorSave)
+
+        setCrearXmlUseCase.invoke(
+            nameGuide = nameGuide,
+            description = description,
+            preguntas = preguntas,
+            respuestas = respuestas,
+            relativeGuidePath = relativeGuidePath,
+            mode = SaveGuideMode.Create
+        )
+
+        coVerify { setDecodePathImageUseCase.invoke(preguntas, respuestas) }
+        verify { loadGuidesUseCase.invoke(relativeGuidePath) }
+        verify { setLabelsUseCase.invoke(preguntas, respuestas) }
+        verify { directoryManager.createPathGuide(nameGuide) }
+        verify {
             guiaRepository.saveGuide(
-                guideDomainModel = GuideDomainModel(
-                    GuideVersion.V2,
-                    "Prueba",
-                    "Sin descripcion"
-                ),
-                preguntas = item,
-                respuestas = item,
-                relativeGuidePath = RelativeGuidePath("relativeGuidePath")
-            )
-        } returns true*/
-
-        /*val response = setCrearXmlUseCase.invoke(
-            nameGuide = "Prueba",
-            description = "Sin descripcion",
-            version = GuideVersion.V2,
-            preguntas = item,
-            respuestas = item,
-            relativeGuidePath = RelativeGuidePath("relativeGuidePath")
-        )*/
-
-        verify { directoryManager.createPathGuide("Prueba") }
-        /*verify {
-            guiaRepository.saveGuide(
-                guideDomainModel = GuideDomainModel(
-                    GuideVersion.V2,
-                    "Prueba",
-                    "Sin descripcion"
-                ),
-                preguntas = item,
-                respuestas = item,
-                relativeGuidePath = RelativeGuidePath("relativeGuidePath")
+                guideDomainModel,
+                preguntas,
+                respuestas,
+                relativeGuidePath
             )
         }
-        Assert.assertTrue(response)*/
+    }
+
+    @Test
+    fun failure_saved_images() = runTest {
+        coEvery {
+            setDecodePathImageUseCase.invoke(preguntas, respuestas)
+        } returns Pair(
+            preguntas,
+            respuestas
+        )
+        every { loadGuidesUseCase.invoke(relativeGuidePath) } returns guides
+        every {
+            setLabelsUseCase.invoke(preguntas, respuestas)
+        } returns Pair(preguntas, respuestas)
+        every { directoryManager.createPathGuide(nameGuide) } returns true
+        every {
+            guiaRepository.saveGuide(guideDomainModel, preguntas, respuestas, relativeGuidePath)
+        } returns GetSaveGuideResult.SaveGuide
+        every {
+            updateImagesUseCase.invoke(
+                guideDomainModel,
+                preguntas,
+                respuestas,
+                true,
+                relativeGuidePath
+            )
+        } returns false
+
+        val response = setCrearXmlUseCase.invoke(
+            nameGuide = nameGuide,
+            description = description,
+            preguntas = preguntas,
+            respuestas = respuestas,
+            relativeGuidePath = relativeGuidePath,
+            mode = SaveGuideMode.Create
+        )
+
+        coVerify { setDecodePathImageUseCase.invoke(preguntas, respuestas) }
+        verify { loadGuidesUseCase.invoke(relativeGuidePath) }
+        verify { setLabelsUseCase.invoke(preguntas, respuestas) }
+        verify { directoryManager.createPathGuide(nameGuide) }
+        verify {
+            guiaRepository.saveGuide(
+                guideDomainModel,
+                preguntas,
+                respuestas,
+                relativeGuidePath
+            )
+        }
+        verify {
+            updateImagesUseCase.invoke(
+                guideDomainModel,
+                preguntas,
+                respuestas,
+                true,
+                relativeGuidePath
+            )
+        }
+        assertEquals(UpdateGuideResult.ImagesFailed, response)
+    }
+
+    @Test
+    fun successful_process() = runTest {
+        coEvery {
+            setDecodePathImageUseCase.invoke(preguntas, respuestas)
+        } returns Pair(
+            preguntas,
+            respuestas
+        )
+        every { loadGuidesUseCase.invoke(relativeGuidePath) } returns guides
+        every {
+            setLabelsUseCase.invoke(preguntas, respuestas)
+        } returns Pair(preguntas, respuestas)
+        every { directoryManager.createPathGuide(nameGuide) } returns true
+        every {
+            guiaRepository.saveGuide(guideDomainModel, preguntas, respuestas, relativeGuidePath)
+        } returns GetSaveGuideResult.SaveGuide
+        every {
+            updateImagesUseCase.invoke(
+                guideDomainModel,
+                preguntas,
+                respuestas,
+                false,
+                relativeGuidePath
+            )
+        } returns true
+
+        val response = setCrearXmlUseCase.invoke(
+            nameGuide = nameGuide,
+            description = description,
+            preguntas = preguntas,
+            respuestas = respuestas,
+            relativeGuidePath = relativeGuidePath,
+            mode = SaveGuideMode.Update
+        )
+
+        coVerify { setDecodePathImageUseCase.invoke(preguntas, respuestas) }
+        verify { loadGuidesUseCase.invoke(relativeGuidePath) }
+        verify { setLabelsUseCase.invoke(preguntas, respuestas) }
+        verify { directoryManager.createPathGuide(nameGuide) }
+        verify {
+            guiaRepository.saveGuide(
+                guideDomainModel,
+                preguntas,
+                respuestas,
+                relativeGuidePath
+            )
+        }
+        verify {
+            updateImagesUseCase.invoke(
+                guideDomain = guideDomainModel,
+                preguntasProcesadas = preguntas,
+                respuestasProcesadas = respuestas,
+                isNewFile = false,
+                relativeGuidePath = relativeGuidePath
+            )
+        }
+        assertEquals(UpdateGuideResult.Success, response)
     }
 }
