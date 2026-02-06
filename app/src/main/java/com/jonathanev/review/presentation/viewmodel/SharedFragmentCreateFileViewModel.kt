@@ -1,29 +1,26 @@
 package com.jonathanev.review.presentation.viewmodel
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.domain.GetGuideXmlDataUseCase
 import com.jonathanev.review.domain.GetSaveGuidesUseCase
-import com.jonathanev.review.domain.LoadGuidesUseCase
 import com.jonathanev.review.domain.SetContentUseCase
 import com.jonathanev.review.domain.SetCrearXmlUseCase
-import com.jonathanev.review.domain.SetDecodePathImageUseCase
-import com.jonathanev.review.domain.SetLabelsUseCase
-import com.jonathanev.review.domain.UpdateImagesUseCase
 import com.jonathanev.review.domain.mapper.GuideQuestionExtractor
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
-import com.jonathanev.review.domain.model.GuidePath
-import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.QAType
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
 import com.jonathanev.review.domain.model.RelativeGuidePath
-import com.jonathanev.review.domain.repository.NavigationPathRepository
+import com.jonathanev.review.domain.model.SaveGuideMode
 import com.jonathanev.review.domain.repository.UserPreferencesRepository
 import com.jonathanev.review.domain.result.GetGuideResult
+import com.jonathanev.review.domain.result.SaveGuideError
+import com.jonathanev.review.domain.result.UpdateGuideResult
 import com.jonathanev.review.presentation.event.CreateGuideEvent
+import com.jonathanev.review.presentation.event.CreateGuideEvent.ShowMessage
+import com.jonathanev.review.presentation.event.CreateGuideEvent.SuccessGuideCreated
 import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.ColorRangeUi
@@ -45,18 +42,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SharedFragmentCreateFileViewModel @Inject constructor(
-    private val setLabelsUseCase: SetLabelsUseCase,
     private val setContentUseCase: SetContentUseCase,
-    private val setCrearXmlUseCase: SetCrearXmlUseCase,
-    private val setDecodePathImageUseCase: SetDecodePathImageUseCase,
     private val getGuideXmlDataUseCase: GetGuideXmlDataUseCase,
     private val getSaveGuidesUseCase: GetSaveGuidesUseCase,
-    private val updateImagesUseCase: UpdateImagesUseCase,
     private val userPreferencesRepository: UserPreferencesRepository,
-    private val loadGuidesUseCase: LoadGuidesUseCase,
     private val guideQuestionExtractor: GuideQuestionExtractor,
-    private val savedStateHandle: SavedStateHandle,
-    private val navigationPathRepository: NavigationPathRepository
+    private val setCrearXmlUseCase: SetCrearXmlUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(GuideUiState())
     val uiState = _uiState.asStateFlow()
@@ -104,30 +95,6 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             }
         }
     }*/
-
-    companion object {
-        private const val KEY_GUIDES_PATH = "guides_path"
-        private const val KEY_IMAGES_PATH = "images_path"
-    }
-
-    private val _guidesPath =
-        MutableStateFlow(
-            savedStateHandle[KEY_GUIDES_PATH]
-                ?: navigationPathRepository.getRootGuides()
-        )
-
-    private val _imagesPath =
-        MutableStateFlow(
-            savedStateHandle[KEY_IMAGES_PATH]
-                ?: navigationPathRepository.getRootImages()
-        )
-
-    val guidesPath: StateFlow<GuidePath> = _guidesPath
-
-    init {
-        savedStateHandle[KEY_GUIDES_PATH] = _guidesPath.value
-        savedStateHandle[KEY_IMAGES_PATH] = _imagesPath.value
-    }
 
     fun initUIState() {
         _uiState.value = GuideUiState()
@@ -430,7 +397,10 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     private fun findGuide(nameGuide: String): GuideDomainModel? =
         getSaveGuidesUseCase.invoke().find { it.nameGuide == nameGuide }
 
-    private fun loadGuideXml(guide: GuideDomainModel, relativeGuidePath: RelativeGuidePath): GetGuideResult =
+    private fun loadGuideXml(
+        guide: GuideDomainModel,
+        relativeGuidePath: RelativeGuidePath
+    ): GetGuideResult =
         getGuideXmlDataUseCase.invoke(GuideContext.Editing(guide, relativeGuidePath))
 
     private fun handleGuideResult(
@@ -516,83 +486,53 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         return this.content.any { it is QuestionContentDomain.Text }
     }
 
-    fun saveOldGuide(nameGuide: String, relativeGuidePath: RelativeGuidePath) {
+    fun saveGuide(nameGuide: String, description: String, relativeGuidePath: RelativeGuidePath, mode: SaveGuideMode) {
         if (!isDataValid()) {
             return
         }
 
         viewModelScope.launch {
-            val preguntasDomain = uiState.value.preguntas.map { it.toDomain() }
-            val respuestasDomain = uiState.value.respuestas.map { it.toDomain() }
-
-            // 1. Transformación de datos (Dominio)
-            // Generamos nombres de archivo antes de cualquier operación de archivos
-            val (preguntasProcesadas, respuestasProcesadas) = setDecodePathImageUseCase.invoke(
-                preguntasDomain,
-                respuestasDomain
+            val response = setCrearXmlUseCase.invoke(
+                nameGuide = nameGuide,
+                description = description,
+                preguntas = uiState.value.preguntas.map { it.toDomain() },
+                respuestas = uiState.value.respuestas.map { it.toDomain() },
+                relativeGuidePath = relativeGuidePath,
+                mode = mode
             )
 
-            val preguntasProcesadasUi = preguntasProcesadas.map { it.toUi() }
-            val respuestasProcesadasUi = respuestasProcesadas.map { it.toUi() }
+            when (response) {
+                UpdateGuideResult.ErrorPath ->
+                    sendNotification(ShowMessage("Error en la ruta inicial"))
 
-            // Actualizamos estado para que la UI y el proceso de guardado usen lo mismo
-            _uiState.update {
-                it.copy(
-                    preguntas = preguntasProcesadasUi,
-                    respuestas = respuestasProcesadasUi
-                )
-            }
+                UpdateGuideResult.ErrorUpdateGuide ->
+                    sendNotification(ShowMessage("Error al cargar datos de la guia"))
 
-            val guides = loadGuidesUseCase.invoke(relativeGuidePath)
-            val guide = guides.find { it.nameGuide == nameGuide }
-            if (guide == null){
-                sendNotification(CreateGuideEvent.ShowMessage("No se pudo actualizar la guia"))
-                return@launch
-            }
+                UpdateGuideResult.ImagesFailed ->
+                    sendNotification(SuccessGuideCreated("Guia guardada con imagenes corruptas"))
 
-            val (dataWithTagsQ, dataWithTagsA) =
-                setLabelsUseCase.invoke(preguntasProcesadas, respuestasProcesadas)
+                is UpdateGuideResult.SaveFailed -> {
+                    when (response.cause) {
+                        SaveGuideError.ErrorSave ->
+                            sendNotification(ShowMessage("Error al guardar la guia"))
 
-            val isSuccess = setCrearXmlUseCase.invoke(
-                nameGuide = guide.nameGuide,
-                description = guide.description,
-                version = guide.version,
-                preguntas = dataWithTagsQ,
-                respuestas = dataWithTagsA,
-                relativeGuidePath = relativeGuidePath
-            )
+                        SaveGuideError.IOException ->
+                            sendNotification(ShowMessage("Error de entrada/salida al guardar la guía"))
 
-            val updatedImages = updateImagesUseCase.invoke(
-                guideDomain = guide,
-                preguntasProcesadas = preguntasProcesadas,
-                respuestasProcesadas = respuestasProcesadas,
-                isNewFile = false,
-                relativeGuidePath = relativeGuidePath
-            )
+                        SaveGuideError.SecurityException ->
+                            sendNotification(ShowMessage("Permisos insuficientes para guardar la guía"))
+                    }
+                }
 
-            // estaria bueno que no solo regrese falso y verdadero...
-            if (isSuccess && updatedImages) {
-                initUIState()
-                setMainPath()
-                sendNotification(CreateGuideEvent.SuccessGuideCreated)
-            } else {
-                sendNotification(CreateGuideEvent.ErrorGuideCreated)
+                UpdateGuideResult.Success ->
+                    sendNotification(
+                        SuccessGuideCreated("Guia guardada satisfactoriamente")
+                    )
             }
         }
     }
 
-    private fun setMainPath() {
-        val rootGuides = navigationPathRepository.getRootGuides()
-        val rootImages = navigationPathRepository.getRootImages()
-
-        _guidesPath.value = rootGuides
-        _imagesPath.value = rootImages
-
-        savedStateHandle[KEY_GUIDES_PATH] = rootGuides
-        savedStateHandle[KEY_IMAGES_PATH] = rootImages
-    }
-
-    fun saveNewGuide(
+    /*fun saveNewGuide(
         nameGuide: String,
         description: String,
         relativeGuidePath: RelativeGuidePath
@@ -649,13 +589,12 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             // 7. Notificación de resultado y limpieza de navegación
             if (isSuccess) {
                 initUIState()
-                setMainPath()
-                sendNotification(CreateGuideEvent.SuccessGuideCreated)
+                sendNotification(SuccessGuideCreated)
             } else {
-                sendNotification(CreateGuideEvent.ErrorGuideCreated)
+                sendNotification(ErrorGuideCreated)
             }
         }
-    }
+    }*/
 
     fun deleteQuesAns() {
         _uiState.update { state ->

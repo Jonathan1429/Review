@@ -5,6 +5,7 @@ import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.QuestionItemDomain
 import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.result.GetGuideResult
+import com.jonathanev.review.domain.result.GetSaveGuideResult
 
 interface GuiaRepository {
     val guidesRecovery: List<GuideDomainModel>
@@ -16,7 +17,7 @@ interface GuiaRepository {
         preguntas: List<QuestionItemDomain>,
         respuestas: List<QuestionItemDomain>,
         relativeGuidePath: RelativeGuidePath
-    ): Boolean
+    ): GetSaveGuideResult
 
     fun renameGuide(
         preguntas: List<QuestionItemDomain>,

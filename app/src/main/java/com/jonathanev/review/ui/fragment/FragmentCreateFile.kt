@@ -25,6 +25,7 @@ import com.jonathanev.review.R
 import com.jonathanev.review.databinding.FragmentCreateFileBinding
 import com.jonathanev.review.domain.model.QAType
 import com.jonathanev.review.domain.model.RelativeGuidePath
+import com.jonathanev.review.domain.model.SaveGuideMode
 import com.jonathanev.review.presentation.event.CreateGuideEvent
 import com.jonathanev.review.presentation.model.ActionGuide
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
@@ -109,10 +110,22 @@ class FragmentCreateFile : Fragment() {
 
                         CreateGuideEvent.ErrorGuideCreated -> showToast("No se pudo crear la guia")
                         CreateGuideEvent.NotQuestionBefore -> showToast("Ya no hay preguntas anteriores")
-                        is CreateGuideEvent.ShowMessage -> showToast(createGuideEvent.text)
-                        CreateGuideEvent.SuccessGuideCreated -> {
+                        is CreateGuideEvent.ShowMessage -> {
+                            showToast(createGuideEvent.text)
+                            navStateViewModel.setMainPath()
+
+                            findNavController().navigate(
+                                R.id.fragmentsContent,
+                                null,
+                                NavOptions.Builder()
+                                    .setPopUpTo(R.id.fragmentsContent, true)
+                                    .build()
+                            )
+                        }
+                        is CreateGuideEvent.SuccessGuideCreated -> {
                             viewModel.initUIState()
-                            showToast("Guia creada correctamente")
+                            showToast(createGuideEvent.text)
+                            navStateViewModel.setMainPath()
 
                             findNavController().navigate(
                                 R.id.fragmentsContent,
@@ -265,16 +278,19 @@ class FragmentCreateFile : Fragment() {
             val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
 
             when (actionGuide) {
-                ActionGuide.CREATE -> viewModel.saveNewGuide(
+                ActionGuide.CREATE -> viewModel.saveGuide(
                     nameGuide = screenDataNav.name,
                     description = screenDataNav.description,
-                    relativeGuidePath = relativeGuidePath
+                    relativeGuidePath = relativeGuidePath,
+                    mode = SaveGuideMode.Create
                 )
 
                 is ActionGuide.EDIT -> {
-                    viewModel.saveOldGuide(
+                    viewModel.saveGuide(
                         nameGuide = actionGuide.nameGuide,
-                        relativeGuidePath = relativeGuidePath
+                        description = screenDataNav.description,
+                        relativeGuidePath = relativeGuidePath,
+                        mode = SaveGuideMode.Update
                     )
                 }
 

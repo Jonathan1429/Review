@@ -38,17 +38,6 @@ class MainActivityViewModel @Inject constructor(
                 ?: ""
         )
     val guidesPath: StateFlow<String> = _guidesPath
-
-    /*fun updateGuidesPath(path: GuidePath) {
-        _guidesPath.value = path
-        savedStateHandle[KEY_GUIDES_PATH] = path.value
-    }
-
-    init {
-        savedStateHandle[KEY_GUIDES_PATH] = _guidesPath.value.value
-        savedStateHandle[KEY_IMAGES_PATH] = _imagesPath.value.value
-    }*/
-
     fun createFolders() {
         val isSuccess = initializeGuideStorageUseCase.invoke()
         if (!isSuccess){

@@ -29,6 +29,8 @@ import com.jonathanev.review.domain.model.QuestionItemDomain
 import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.repository.GuiaRepository
 import com.jonathanev.review.domain.result.GetGuideResult
+import com.jonathanev.review.domain.result.GetSaveGuideResult
+import com.jonathanev.review.domain.result.SaveGuideError
 import com.jonathanev.review.domain.service.FilePathResolverService
 import org.w3c.dom.Document
 import org.w3c.dom.Element
@@ -38,6 +40,7 @@ import org.xmlpull.v1.XmlSerializer
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
+import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.xml.parsers.DocumentBuilderFactory
@@ -155,7 +158,7 @@ class GuiaRepositoryImpl @Inject constructor(
         preguntas: List<QuestionItemDomain>,
         respuestas: List<QuestionItemDomain>,
         relativeGuidePath: RelativeGuidePath,
-    ): Boolean {
+    ): GetSaveGuideResult {
         val currentPath =
             filePathResolverService.mapToFilePathSpecificGuide(
                 guideDomainModel = guideDomainModel,
@@ -166,47 +169,47 @@ class GuiaRepositoryImpl @Inject constructor(
 
         return try {
             val serializer = xmlSerializerFactory.create()
-            val fos = fileOutputStreamFactory.create(tempFile.path)
+            fileOutputStreamFactory.create(tempFile.path).use { fos ->
+                serializer.setOutput(fos, "UTF-8")
+                try {
+                    serializer.setFeature(
+                        "http://xmlpull.org/v1/doc/features.html#indent-output",
+                        true
+                    )
+                } catch (_: Exception) {
+                }
+                serializer.startDocument(null, true)
+                serializer.startTag("", Structure.GUIAESTUDIO)
+                serializer.attribute("", Attributes.VERSION, "2.0")
 
-            serializer.setOutput(fos, "UTF-8")
-            try {
-                serializer.setFeature(
-                    "http://xmlpull.org/v1/doc/features.html#indent-output",
-                    true
-                )
-            } catch (_: Exception) {
+                serializer.startTag("", Structure.CUESTIONARIO)
+                serializer.attribute("", Attributes.NOMBREGUIA, guideDomainModel.nameGuide)
+                serializer.attribute("", Attributes.DESCRIPCION, guideDomainModel.description)
+
+                writeQuestionsAnswers(serializer, preguntas, QAType.QUESTION.toTagXml())
+                writeQuestionsAnswers(serializer, respuestas, QAType.ANSWER.toTagXml())
+
+                serializer.endTag("", Structure.CUESTIONARIO)
+                serializer.endTag("", Structure.GUIAESTUDIO)
+                serializer.endDocument()
             }
-            serializer.startDocument(null, true)
-            serializer.startTag("", Structure.GUIAESTUDIO)
-            serializer.attribute("", Attributes.VERSION, "2.0")
-
-            serializer.startTag("", Structure.CUESTIONARIO)
-            serializer.attribute("", Attributes.NOMBREGUIA, guideDomainModel.nameGuide)
-            serializer.attribute("", Attributes.DESCRIPCION, guideDomainModel.description)
-
-            writeQuestionsAnswers(serializer, preguntas, QAType.QUESTION.toTagXml())
-            writeQuestionsAnswers(serializer, respuestas, QAType.ANSWER.toTagXml())
-
-            serializer.endTag("", Structure.CUESTIONARIO)
-            serializer.endTag("", Structure.GUIAESTUDIO)
-            serializer.endDocument()
-
-            fos.close()
 
             val newPath = filePathResolverService.getPathGuidesV2(guideDomainModel)
             val isRenamed = tempFile.renameTo(File(newPath))
 
             if (!isRenamed) {
                 tempFile.delete()
-                return false
+                return GetSaveGuideResult.Failure(SaveGuideError.ErrorSave)
             }
 
             if (guideDomainModel.version == GuideVersion.V1) {
                 File(currentPath.value).delete()
             }
-            true
-        } catch (e: Exception) {
-            false
+            GetSaveGuideResult.SaveGuide
+        } catch (_: IOException) {
+            return GetSaveGuideResult.Failure(SaveGuideError.IOException)
+        } catch (_: SecurityException) {
+            return GetSaveGuideResult.Failure(SaveGuideError.SecurityException)
         }
     }
 
