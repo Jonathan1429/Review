@@ -1,11 +1,11 @@
 package com.jonathanev.review.domain.repository
 
 import com.jonathanev.review.domain.model.GuidePath
+import com.jonathanev.review.domain.model.RelativeGuidePath
 
 interface NavigationPathRepository {
-    fun getPathImages(): GuidePath
-    fun getPathGuides(): GuidePath
-    fun next(fileName: String)
-    fun back()
-    fun reset()
+    fun getRootGuides(): GuidePath
+    fun getRootImages(): GuidePath
+    fun next(current: RelativeGuidePath, fileName: String): RelativeGuidePath
+    fun back(current: RelativeGuidePath): RelativeGuidePath
 }

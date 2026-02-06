@@ -32,6 +32,7 @@ import com.jonathanev.review.presentation.viewmodel.MainToolbarViewModel
 import com.jonathanev.review.databinding.FragmentListFoldersBinding
 import com.jonathanev.review.presentation.event.FolderActionEvent
 import com.jonathanev.review.presentation.model.FolderResultUi
+import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -43,6 +44,7 @@ class FragmentListFolders : DialogFragment() {
 
     private val viewModel by viewModels<FoldersListViewModel>()
     private val viewModelToolbar: MainToolbarViewModel by activityViewModels()
+    private val navStateViewModel: MainActivityViewModel by activityViewModels()
 
     private lateinit var adaptListFolders: ListFoldersAdapter
 
@@ -186,7 +188,7 @@ class FragmentListFolders : DialogFragment() {
                 ) { dialog, which ->
                     when (which) {
                         0 -> {
-                            viewModel.nextPath(folderResult.folderUi.folder.name)
+                            navStateViewModel.next(folderResult.folderUi.folder.name)
 
                             findNavController().navigate(
                                 R.id.action_to_review_graph,

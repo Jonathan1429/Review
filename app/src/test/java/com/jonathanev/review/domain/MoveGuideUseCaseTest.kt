@@ -2,12 +2,12 @@ package com.jonathanev.review.domain
 
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
-import com.jonathanev.review.domain.model.GuidePath
 import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.ImageSource
 import com.jonathanev.review.domain.model.QAItemDomain
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
+import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.model.ResponseDomain
 import com.jonathanev.review.domain.repository.DirectoryManager
 import com.jonathanev.review.domain.repository.GuiaRepository
@@ -56,8 +56,8 @@ class MoveGuideUseCaseTest {
         guideResult = GetGuideResult.Success(guideDomain, list)
         context = GuideContext.Moving(
             guideDomain,
-            GuidePath("path/old/guide"),
-            GuidePath("path/old/image")
+            RelativeGuidePath("path/old/guide"),
+            RelativeGuidePath("path/old/image")
         )
 
         moveGuideUseCase = MoveGuideUseCase(
@@ -83,8 +83,8 @@ class MoveGuideUseCaseTest {
     fun return_error_moving_guide() {
         val localContext = GuideContext.Moving(
             GuideDomainModel(GuideVersion.V1, "Archivo", ""),
-            GuidePath("path/old/guide"),
-            GuidePath("path/old/image")
+            RelativeGuidePath("path/old/guide"),
+            RelativeGuidePath("path/old/image")
         )
 
         every { guiaRepository.moveGuide(localContext) } returns false
@@ -143,17 +143,20 @@ class MoveGuideUseCaseTest {
     fun return_error_moving_images() {
         val localContext = GuideContext.Moving(
             GuideDomainModel(GuideVersion.V1, "Archivo", ""),
-            GuidePath("path/old/guide"),
-            GuidePath("path/old/image")
+            RelativeGuidePath("path/old/guide"),
+            RelativeGuidePath("path/old/image")
         )
 
         every { guiaRepository.moveGuide(localContext) } returns true
         every { directoryManager.deleteFolderEmpty(localContext) } returns true
         every {
             directoryManager.moveImages(
-                guideDomain = localContext.guide,
-                imageSource = ImageSource.MovingGuide(GuidePath(localContext.oldImagePath.value)),
-                images = any()
+                images = any(),
+                guideDomainModel = localContext.guide,
+                imageSource = ImageSource.MovingGuide(
+                    localContext.oldRelativeGuidePath,
+                    localContext.relativeGuidePath
+                )
             )
         } returns false
 
@@ -166,9 +169,12 @@ class MoveGuideUseCaseTest {
         verify { directoryManager.deleteFolderEmpty(localContext) }
         verify {
             directoryManager.moveImages(
-                guideDomain = localContext.guide,
-                imageSource = ImageSource.MovingGuide(GuidePath(localContext.oldImagePath.value)),
-                images = any()
+                images = any(),
+                guideDomainModel = localContext.guide,
+                imageSource = ImageSource.MovingGuide(
+                    localContext.oldRelativeGuidePath,
+                    localContext.relativeGuidePath
+                )
             )
         }
         assertEquals(MoveGuideResponse.ErrorMovingImages, response)
@@ -187,9 +193,12 @@ class MoveGuideUseCaseTest {
         } returns true
         every {
             directoryManager.moveImages(
-                guideDomain = context.guide,
-                imageSource = ImageSource.MovingGuide(GuidePath(context.oldImagePath.value)),
-                images = any()
+                images = any(),
+                guideDomainModel = context.guide,
+                imageSource = ImageSource.MovingGuide(
+                    context.oldRelativeGuidePath,
+                    context.relativeGuidePath
+                )
             )
         } returns true
 
@@ -209,9 +218,12 @@ class MoveGuideUseCaseTest {
         }
         verify {
             directoryManager.moveImages(
-                guideDomain = context.guide,
-                imageSource = ImageSource.MovingGuide(GuidePath(context.oldImagePath.value)),
-                images = any()
+                images = any(),
+                guideDomainModel = context.guide,
+                imageSource = ImageSource.MovingGuide(
+                    context.oldRelativeGuidePath,
+                    context.relativeGuidePath
+                )
             )
         }
         assertEquals(MoveGuideResponse.Success, response)

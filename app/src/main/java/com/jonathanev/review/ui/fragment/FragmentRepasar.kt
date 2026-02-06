@@ -24,6 +24,7 @@ import com.jonathanev.review.R
 import com.jonathanev.review.presentation.viewmodel.FragmentRepasarViewModel
 import com.jonathanev.review.databinding.FragmentRepasarBinding
 import com.jonathanev.review.presentation.event.GuideReviewEvent
+import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -32,7 +33,6 @@ class FragmentRepasar : Fragment() {
     private var _binding: FragmentRepasarBinding? = null
     private val binding get() = _binding!!
     private val viewModel: FragmentRepasarViewModel by activityViewModels()
-
     private lateinit var adaptListPintarTextos: ListItemPintarTextosAdapter
     private lateinit var adaptListPintarImagenes: ListItemPintarImagenesAdapter
 

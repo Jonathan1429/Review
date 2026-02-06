@@ -13,7 +13,7 @@ import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.RenamedGuideResult
 import com.jonathanev.review.domain.mapper.GuideQuestionExtractor
 import com.jonathanev.review.domain.model.OptionalAttrGuide
-import com.jonathanev.review.domain.repository.NavigationPathRepository
+import com.jonathanev.review.domain.model.RelativeGuidePath
 import javax.inject.Inject
 
 class RenameGuideUseCase @Inject constructor(
@@ -21,31 +21,36 @@ class RenameGuideUseCase @Inject constructor(
     private val guideQuestionExtractor: GuideQuestionExtractor,
     private val imagesRepository: ImagesRepository,
     private val directoryManager: DirectoryManager,
-    private val navigationPathRepository: NavigationPathRepository
 ) {
     operator fun invoke(
         guide: GuideDomainModel,
+        relativeGuidePath: RelativeGuidePath,
         newName: String,
         description: String
     ): RenamedGuideResult {
-        return when (val result = guiaRepository.getXMLGuide(GuideContext.Actual(guide))) {
+        return when (val result = guiaRepository.getXMLGuide(guide, relativeGuidePath)) {
             is GetGuideResult.Success -> {
                 val (questions, answers) = guideQuestionExtractor.map(result)
 
                 val isPathExist = directoryManager.prepareGuidePath(newName)
                 if (!isPathExist) {
-                    navigationPathRepository.reset()
+                    //navigationPathRepository.reset()
                     return RenamedGuideResult.GuidePathError
                 }
 
                 val isRenamed = guiaRepository.renameGuide(
-                    questions,
-                    answers,
-                    GuideContext.Rename(guide,  RequiredAttrGuide(newName), OptionalAttrGuide(description))
+                    preguntas = questions,
+                    respuestas = answers,
+                    guideContext = GuideContext.Rename(
+                        guide = guide,
+                        relativeGuidePath = relativeGuidePath,
+                        name = RequiredAttrGuide(newName),
+                        description = OptionalAttrGuide(description)
+                    )
                 )
 
                 if (!isRenamed) {
-                    navigationPathRepository.reset()
+                    //navigationPathRepository.reset()
                     return RenamedGuideResult.RenamedError
                 }
 
@@ -56,7 +61,7 @@ class RenameGuideUseCase @Inject constructor(
                     GuideRenameContext(result.guideDomainModel, newName)
                 )
 
-                navigationPathRepository.reset()
+                //navigationPathRepository.reset()
                 if (!isSuccess) {
                     return RenamedGuideResult.ImageError
                 }

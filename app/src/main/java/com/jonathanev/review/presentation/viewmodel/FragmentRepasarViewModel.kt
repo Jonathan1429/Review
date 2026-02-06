@@ -5,14 +5,15 @@ import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.domain.GetGuideXmlDataUseCase
 import com.jonathanev.review.domain.GetPreviewQuestionsUseCase
 import com.jonathanev.review.domain.GetSaveGuidesUseCase
+import com.jonathanev.review.domain.mapper.GuideQuestionExtractor
+import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.QAItemDomain
 import com.jonathanev.review.domain.model.QAType
+import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.presentation.event.GuidePreviewEvent
 import com.jonathanev.review.presentation.event.GuideReviewEvent
-import com.jonathanev.review.domain.mapper.GuideQuestionExtractor
-import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.presentation.state.GuideUiState
@@ -86,17 +87,22 @@ class FragmentRepasarViewModel @Inject constructor(
         _uiState.value = GuideUiState()
     }
 
-    fun getObtenerDatosXML(folderId: String) {
+    fun getObtenerDatosXML(folderId: String, relativeGuidePath: RelativeGuidePath) {
         val guideDomainModel = cachedGuides.find { it.nameGuide == folderId }
         if (guideDomainModel == null) {
             emitMessage("No se ha encontrado la guia a renombrar")
             return
         }
         //Revisar como se obtienen los datos aqui, porque no se visualiza la imagen
-        when (val result = getGuideXmlDataUseCase.invoke(GuideContext.Actual(guideDomainModel))) {
+        when (val result = getGuideXmlDataUseCase.invoke(
+            context = GuideContext.Browsing(
+                guide = guideDomainModel,
+                relativeGuidePath = relativeGuidePath
+            )
+        )) {
             is GetGuideResult.Success -> {
                 val (questions, answers) = guideQuestionExtractor.map(result)
-                initUiPreviewQuestions(result.list)
+                initUiPreviewQuestions(result.list, relativeGuidePath)
                 _uiState.update { currentState ->
                     currentState.copy(
                         preguntas = questions.map { it.toUi() },
@@ -123,8 +129,9 @@ class FragmentRepasarViewModel @Inject constructor(
 
     private fun initUiPreviewQuestions(
         domainItems: List<QAItemDomain>,
+        relativeGuidePath: RelativeGuidePath,
     ) {
-        val response = getPreviewQuestionsUseCase.invoke(domainItems)
+        val response = getPreviewQuestionsUseCase.invoke(domainItems, relativeGuidePath)
         val responseToUi = response.map { it.toUi() }
 
         _uiStatePreview.value = PreviewQuestionStateUi(

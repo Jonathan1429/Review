@@ -17,9 +17,9 @@ class MetadataRepositoryImpl @Inject constructor(
 ) : MetadataRepository {
     override fun saveMetadata(data: FolderScreenInfoDomain) {
         val guidesPath =
-            File(filePathsProviderImpl.buildFolder(navigationPathRepository.getPathGuides().value, data.name))
+            File(filePathsProviderImpl.buildFolder(navigationPathRepository.getRootGuides().value, data.name))
         val imagesPath =
-            File(filePathsProviderImpl.buildFolder(navigationPathRepository.getPathImages().value, data.name))
+            File(filePathsProviderImpl.buildFolder(navigationPathRepository.getRootImages().value, data.name))
         if (!guidesPath.exists()) {
             guidesPath.mkdir()
         }

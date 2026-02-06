@@ -1,7 +1,6 @@
 package com.jonathanev.review.ui.fragment
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,20 +9,18 @@ import androidx.activity.OnBackPressedCallback
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jonathanev.review.R
 import com.jonathanev.review.databinding.FragmentPreviewQuestionsBinding
+import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.presentation.event.GuidePreviewEvent
-import com.jonathanev.review.presentation.event.GuideReviewEvent
 import com.jonathanev.review.presentation.model.ActionGuide
 import com.jonathanev.review.presentation.viewmodel.FragmentRepasarViewModel
+import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
 import com.jonathanev.review.ui.adapter.ListPreviewQuestionsAdapter
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -32,6 +29,7 @@ class FragmentPreviewQuestions : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: FragmentRepasarViewModel by activityViewModels()
+    private val navStateViewModel: MainActivityViewModel by activityViewModels()
     private lateinit var adaptListPreviewQuestion: ListPreviewQuestionsAdapter
 
     override fun onCreateView(
@@ -110,7 +108,8 @@ class FragmentPreviewQuestions : Fragment() {
         binding.reciclerPreviewQuestions.adapter = adaptListPreviewQuestion
 
         viewModel.uploadCachedGuides()
-        viewModel.getObtenerDatosXML(folderId)
+        val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
+        viewModel.getObtenerDatosXML(folderId, relativeGuidePath)
     }
 
     private fun goEdit(position: Int, folderId: String) {

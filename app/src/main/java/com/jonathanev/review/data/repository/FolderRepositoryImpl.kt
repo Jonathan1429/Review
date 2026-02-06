@@ -21,7 +21,7 @@ class FolderRepositoryImpl @Inject constructor(
     private fun loadFolderAttributes(nameFolder: String): FolderAttributesDomain {
         val currentPath =
             filePathsProviderImpl.buildFolder(
-                navigationPathRepository.getPathGuides().value,
+                navigationPathRepository.getRootGuides().value,
                 nameFolder
             )
 
@@ -37,12 +37,12 @@ class FolderRepositoryImpl @Inject constructor(
     override fun deleteFolder(nameFolder: String): Boolean {
         val pathGuides =
             filePathsProviderImpl.buildFolder(
-                navigationPathRepository.getPathGuides().value,
+                navigationPathRepository.getRootGuides().value,
                 nameFolder
             )
         val pathImages =
             filePathsProviderImpl.buildFolder(
-                navigationPathRepository.getPathImages().value,
+                navigationPathRepository.getRootImages().value,
                 nameFolder
             )
 
@@ -55,7 +55,7 @@ class FolderRepositoryImpl @Inject constructor(
     }
 
     override fun getFolders(): List<FolderDomainModel> {
-        return File(navigationPathRepository.getPathGuides().value).listFiles()
+        return File(navigationPathRepository.getRootGuides().value).listFiles()
             ?.filter { it.isDirectory }
             ?.sortedBy { it.name }
             ?.map { item ->

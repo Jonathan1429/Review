@@ -24,7 +24,7 @@ class ImagesRepositoryImpl @Inject constructor(
 ) : ImagesRepository {
     override fun save(image: QuestionContentDomain.Image, guide: GuideDomainModel) {
         val currentPath =
-            filePathsProvider.buildFolder(navigationPathRepository.getPathImages().value, guide.nameGuide)
+            filePathsProvider.buildFolder(navigationPathRepository.getRootImages().value, guide.nameGuide)
         val uri = Uri.parse(image.uri)
         val fileName = image.nameFile
         val outputFile = File(currentPath, fileName)
@@ -66,7 +66,7 @@ class ImagesRepositoryImpl @Inject constructor(
     ): Boolean {
 
         if (guide.version == GuideVersion.V1) {
-            val basePathImages = navigationPathRepository.getPathImages().value
+            val basePathImages = navigationPathRepository.getRootImages().value
 
             images.forEach { image ->
                 val noImage = File(image.uri.substringAfterLast("/")).nameWithoutExtension
@@ -81,7 +81,7 @@ class ImagesRepositoryImpl @Inject constructor(
             return true
         } else {
             val basePathImages = filePathsProvider.buildFolder(
-                navigationPathRepository.getPathImages().value,
+                navigationPathRepository.getRootImages().value,
                 guide.nameGuide
             )
 
@@ -94,11 +94,11 @@ class ImagesRepositoryImpl @Inject constructor(
         guideRenameContext: GuideRenameContext
     ): Boolean {
         val oldPathImages =
-            getSourceImagePath(navigationPathRepository.getPathImages().value, guideRenameContext.oldGuide)
+            getSourceImagePath(navigationPathRepository.getRootImages().value, guideRenameContext.oldGuide)
 
         // Renamed folder
         if (guideRenameContext.oldGuide.version == GuideVersion.V2) {
-            val newPathImages = File(filePathsProvider.buildFolder(navigationPathRepository.getPathImages().value, guideRenameContext.newName))
+            val newPathImages = File(filePathsProvider.buildFolder(navigationPathRepository.getRootImages().value, guideRenameContext.newName))
             return File(oldPathImages).renameTo(newPathImages)
         } else { // Version 1 a Version 2
             val newPathImages = File(oldPathImages, guideRenameContext.newName)

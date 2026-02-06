@@ -6,13 +6,12 @@ import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.ImageSource
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
+import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.repository.DirectoryManager
 import com.jonathanev.review.domain.repository.ImagesRepository
-import com.jonathanev.review.domain.repository.NavigationPathRepository
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -21,19 +20,14 @@ import org.junit.Test
 class UpdateImagesUseCaseTest {
     private val directoryManager = mockk<DirectoryManager>(relaxed = true)
     private val imagesRepository = mockk<ImagesRepository>(relaxed = true)
-    private val navigationPathRepository = mockk<NavigationPathRepository>()
-
     private lateinit var useCase: UpdateImagesUseCase
-    private val guidePath = GuidePath("fake/path")
+    private val relativeGuidePath = RelativeGuidePath("fake/path")
 
     @Before
     fun setup() {
-        every { navigationPathRepository.getPathImages() } returns guidePath
-
         useCase = UpdateImagesUseCase(
             directoryManager,
             imagesRepository,
-            navigationPathRepository
         )
     }
 
@@ -51,7 +45,8 @@ class UpdateImagesUseCaseTest {
             guideDomain = guideDomain,
             preguntasProcesadas = listOf(question),
             respuestasProcesadas = emptyList(),
-            isNewFile = true
+            isNewFile = true,
+            relativeGuidePath = RelativeGuidePath("guide")
         )
 
         verify { directoryManager.createPathImages(guideDomain, true) }
@@ -62,15 +57,13 @@ class UpdateImagesUseCaseTest {
     fun error_relocating_existing_guide_images() {
         val image = QuestionContentDomain.Image("uri", "1.png")
         val guideDomain = GuideDomainModel(GuideVersion.V1, "Prueba", "Descripcion")
-        val guidePath = GuidePath("navegacion/fake")
         val question = QuestionItemDomain(listOf(image))
 
 
         every { directoryManager.createPathImages(guideDomain, false) } returns true
-        every { navigationPathRepository.getPathImages() } returns guidePath
         every {
             directoryManager.moveImages(
-                guideDomain, ImageSource.SaveGuide(guidePath), listOf(image)
+                guideDomain, ImageSource.Save(relativeGuidePath), listOf(image)
             )
         } returns false
 
@@ -78,15 +71,15 @@ class UpdateImagesUseCaseTest {
             guideDomain = guideDomain,
             preguntasProcesadas = listOf(question),
             respuestasProcesadas = emptyList(),
-            isNewFile = false
+            isNewFile = false,
+            relativeGuidePath = relativeGuidePath
         )
 
         verify { directoryManager.createPathImages(guideDomain, false) }
-        verify { navigationPathRepository.getPathImages() }
         verify {
             directoryManager.moveImages(
                 guideDomain,
-                ImageSource.SaveGuide(guidePath),
+                ImageSource.Save(relativeGuidePath),
                 listOf(image)
             )
         }
@@ -100,17 +93,18 @@ class UpdateImagesUseCaseTest {
 
         val question = QuestionItemDomain(listOf(image))
         every { directoryManager.createPathImages(guideDomain, true) } returns true
-        every { directoryManager.getImagesInDevice(guideDomain) } returns setOf("2.png")
+        every { directoryManager.getImagesInDevice(guideDomain, relativeGuidePath) } returns setOf("2.png")
 
         val response = useCase(
             guideDomain = guideDomain,
             preguntasProcesadas = listOf(question),
             respuestasProcesadas = emptyList(),
-            isNewFile = true
+            isNewFile = true,
+            relativeGuidePath = relativeGuidePath
         )
 
         verify { directoryManager.createPathImages(guideDomain, true) }
-        verify { directoryManager.getImagesInDevice(guideDomain) }
+        verify { directoryManager.getImagesInDevice(guideDomain, relativeGuidePath) }
         verify { imagesRepository.save(image, guideDomain) }
         verify {
             directoryManager.deleteLeftoverImagesInDevice(guideDomain.nameGuide, listOf(image))
@@ -121,37 +115,30 @@ class UpdateImagesUseCaseTest {
     @Test
     fun successful_process_with_old_file() {
         val guideDomain = GuideDomainModel(GuideVersion.V1, "Prueba", "Descripcion")
-        val guidePath = GuidePath("navegacion/fake")
         val image1 = QuestionContentDomain.Image("uri", "1.png")
         val image2 = QuestionContentDomain.Image("uri", "2.png")
         val image3 = QuestionContentDomain.Image("", "3.png")
         val images = listOf(image1, image2, image3)
 
         val question = QuestionItemDomain(images)
-        every { directoryManager.getImagesInDevice(guideDomain) } returns setOf("2.png")
-        every { navigationPathRepository.getPathImages() } returns guidePath
         every { directoryManager.createPathImages(guideDomain, false) } returns true
         every {
             directoryManager.moveImages(
-                guideDomain, ImageSource.SaveGuide(guidePath), images
+                guideDomain, ImageSource.Save(relativeGuidePath), images
             )
         } returns true
+        every { directoryManager.getImagesInDevice(guideDomain, relativeGuidePath) } returns setOf("2.png")
 
         val response = useCase(
             guideDomain = guideDomain,
             preguntasProcesadas = listOf(question),
             respuestasProcesadas = emptyList(),
-            isNewFile = false
+            isNewFile = false,
+            relativeGuidePath = relativeGuidePath
         )
 
-        verify { navigationPathRepository.getPathImages() }
-        verify { directoryManager.getImagesInDevice(guideDomain) }
         verify { directoryManager.createPathImages(guideDomain, false) }
-        verify { directoryManager.moveImages(
-            guideDomain,
-            ImageSource.SaveGuide(guidePath),
-            images
-        ) }
+        verify { directoryManager.getImagesInDevice(guideDomain, relativeGuidePath) }
         verify(exactly = 1) {
             imagesRepository.save(image1, guideDomain)
         }

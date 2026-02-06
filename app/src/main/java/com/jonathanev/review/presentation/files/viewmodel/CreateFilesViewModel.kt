@@ -9,6 +9,7 @@ import com.jonathanev.review.domain.RenameGuideUseCase
 import com.jonathanev.review.domain.SaveMetadataUseCase
 import com.jonathanev.review.domain.ValidateCreateFileUseCase
 import com.jonathanev.review.domain.model.GuideDomainModel
+import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.result.RenamedGuideResult
 import com.jonathanev.review.presentation.event.RenameGuideEvent
 import com.jonathanev.review.presentation.files.model.GuideResultUi
@@ -133,7 +134,12 @@ class CreateFilesViewModel @Inject constructor(
         return GuideResultUi.Success(guideDomainModel.toUi())
     }
 
-    fun renameFile(oldName: String, fileName: String, description: String) {
+    fun renameFile(
+        oldName: String,
+        fileName: String,
+        description: String,
+        relativeGuidePath: RelativeGuidePath
+    ) {
         val guide = cachedGuides.find { it.nameGuide == oldName }
         if (guide == null) {
             emitMessage("No se ha encontrado la guia a renombrar")
@@ -143,6 +149,7 @@ class CreateFilesViewModel @Inject constructor(
         viewModelScope.launch {
             when (renameGuideUseCase.invoke(
                 guide = guide,
+                relativeGuidePath = relativeGuidePath,
                 newName = fileName,
                 description = description
             )) {
@@ -194,7 +201,7 @@ class CreateFilesViewModel @Inject constructor(
         processScreenData(name, description)
     }
 
-    fun uploadCachedGuides() {
-        cachedGuides = loadGuidesUseCase.invoke()
+    fun uploadCachedGuides(relativeGuidePath: RelativeGuidePath) {
+        cachedGuides = loadGuidesUseCase.invoke(relativeGuidePath)
     }
 }

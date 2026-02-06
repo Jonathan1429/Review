@@ -1,25 +1,24 @@
 package com.jonathanev.review.domain
 
-import com.jonathanev.review.domain.repository.NavigationPathRepository
-import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuideContext
-import com.jonathanev.review.domain.model.GuidePath
+import com.jonathanev.review.domain.model.GuideDomainModel
+import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.repository.GuideMoveRepository
+import com.jonathanev.review.domain.repository.NavigationPathRepository
 import javax.inject.Inject
 
 class SetContextMoveUseCase @Inject constructor(
-    private val guideMoveRepository: GuideMoveRepository,
-    private val navigationPathRepository: NavigationPathRepository
+    private val guideMoveRepository: GuideMoveRepository
 ) {
-    operator fun invoke(guideDomainModel: GuideDomainModel) {
+    operator fun invoke(guideDomainModel: GuideDomainModel, relativeGuidePath: RelativeGuidePath) {
         guideMoveRepository.start(
             GuideContext.Moving(
-                guideDomainModel,
-                GuidePath(navigationPathRepository.getPathGuides().value),
-                GuidePath(navigationPathRepository.getPathImages().value)
+                guide = guideDomainModel,
+                oldRelativeGuidePath = relativeGuidePath,
+                relativeGuidePath = relativeGuidePath
             )
         )
 
-        navigationPathRepository.reset()
+        //navigationPathRepository.reset()
     }
 }

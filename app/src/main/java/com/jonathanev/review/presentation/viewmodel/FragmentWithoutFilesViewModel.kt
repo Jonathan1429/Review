@@ -5,13 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.domain.GetGuideMoveUseCase
 import com.jonathanev.review.domain.GetGuideXmlDataUseCase
 import com.jonathanev.review.domain.MoveGuideUseCase
-import com.jonathanev.review.domain.SetMainPathUseCase
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.MoveGuideResponse
 import com.jonathanev.review.presentation.event.UIMovingEvent
 import com.jonathanev.review.presentation.model.QuestionItemUi
-import com.jonathanev.review.domain.repository.NavigationPathRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -21,10 +19,8 @@ import javax.inject.Inject
 @HiltViewModel
 class FragmentWithoutFilesViewModel @Inject constructor(
     private val moveGuideUseCase: MoveGuideUseCase,
-    private val navigationPathRepository: NavigationPathRepository,
-    private val setMainPathUseCase: SetMainPathUseCase,
     private val getGuideMoveUseCase: GetGuideMoveUseCase,
-    private val getGuideXmlDataUseCase: GetGuideXmlDataUseCase
+    private val getGuideXmlDataUseCase: GetGuideXmlDataUseCase,
 ) : ViewModel() {
     private val _eventsMovingFiles = MutableSharedFlow<UIMovingEvent>()
     val eventsMovingFiles = _eventsMovingFiles.asSharedFlow()
@@ -34,14 +30,6 @@ class FragmentWithoutFilesViewModel @Inject constructor(
 
     private var _respuestas: MutableList<QuestionItemUi> = mutableListOf()
     val respuestas: List<QuestionItemUi> get() = _respuestas
-
-    fun back() {
-        navigationPathRepository.back()
-    }
-
-    fun setMainPath() {
-        setMainPathUseCase.invoke()
-    }
 
     private fun eventMovingFile(message: String) {
         viewModelScope.launch {

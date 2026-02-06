@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.domain.DeleteFolderUseCase
 import com.jonathanev.review.domain.GetFolderPosicionUseCase
 import com.jonathanev.review.domain.GetFoldersWithNumGuidesUseCase
-import com.jonathanev.review.domain.NextPathUseCase
 import com.jonathanev.review.domain.model.FolderDomainModel
 import com.jonathanev.review.presentation.event.FolderActionEvent
 import com.jonathanev.review.presentation.event.UIMovingEvent
@@ -24,8 +23,7 @@ import javax.inject.Inject
 class FoldersListViewModel @Inject constructor(
     private val getFolderPosicionUseCase: GetFolderPosicionUseCase,
     private val getFoldersWithNumGuidesUseCase: GetFoldersWithNumGuidesUseCase,
-    private val nextPathUseCase: NextPathUseCase,
-    private val deleteFolderUseCase: DeleteFolderUseCase
+    private val deleteFolderUseCase: DeleteFolderUseCase,
 ) : ViewModel() {
     private var _foldersUiState = MutableStateFlow(FoldersUiState())
     val foldersUiState = _foldersUiState.asStateFlow()
@@ -88,9 +86,5 @@ class FoldersListViewModel @Inject constructor(
         viewModelScope.launch {
             _eventsMovingFiles.emit(UIMovingEvent.ShowMessage("Se ha cancelado la acción"))
         }
-    }
-
-    fun nextPath(name: String) {
-        nextPathUseCase.invoke(name)
     }
 }

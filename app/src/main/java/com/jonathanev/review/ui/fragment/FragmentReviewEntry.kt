@@ -7,21 +7,25 @@ import android.view.ViewGroup
 import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.jonathanev.review.R
 import com.jonathanev.review.databinding.FragmentReviewEntryBinding
+import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.presentation.folders.model.FolderAction
 import com.jonathanev.review.presentation.viewmodel.FragReviewEntryViewModel
+import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlin.getValue
 
 @AndroidEntryPoint
 class FragmentReviewEntry : Fragment() {
     private var _binding: FragmentReviewEntryBinding? = null
     private val binding get() = _binding!!
-
     private val viewModel: FragReviewEntryViewModel by viewModels()
+    private val navStateViewModel: MainActivityViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,7 +48,8 @@ class FragmentReviewEntry : Fragment() {
     }
 
     private fun initUI(mode: FolderAction) {
-        val noGuides = viewModel.getGuides()
+        val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
+        val noGuides = viewModel.getGuides(relativeGuidePath)
         val navOptions = NavOptions.Builder()
             .setPopUpTo(R.id.fragmentReviewEntry, true)
             .build()

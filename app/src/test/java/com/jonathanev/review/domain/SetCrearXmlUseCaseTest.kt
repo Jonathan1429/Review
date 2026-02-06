@@ -4,6 +4,7 @@ import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
+import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.repository.DirectoryManager
 import com.jonathanev.review.domain.repository.GuiaRepository
 import io.mockk.every
@@ -29,7 +30,8 @@ class SetCrearXmlUseCaseTest {
             description = "Sin descripcion",
             version = GuideVersion.V2,
             preguntas = item,
-            respuestas = item
+            respuestas = item,
+            relativeGuidePath = RelativeGuidePath("relativeGuidePath")
         )
 
         verify { directoryManager.createPathGuide("Prueba") }
@@ -50,7 +52,8 @@ class SetCrearXmlUseCaseTest {
                     "Sin descripcion"
                 ),
                 preguntas = item,
-                respuestas = item
+                respuestas = item,
+                relativeGuidePath = RelativeGuidePath("relativeGuidePath")
             )
         } returns false
 
@@ -59,7 +62,8 @@ class SetCrearXmlUseCaseTest {
             description = "Sin descripcion",
             version = GuideVersion.V1,
             preguntas = item,
-            respuestas = item
+            respuestas = item,
+            relativeGuidePath = RelativeGuidePath("relativeGuidePath")
         )
 
         verify { directoryManager.createPathGuide("Prueba") }
@@ -71,7 +75,8 @@ class SetCrearXmlUseCaseTest {
                 "Sin descripcion"
             ),
             preguntas = item,
-            respuestas = item
+            respuestas = item,
+            relativeGuidePath = RelativeGuidePath("relativeGuidePath")
         ) }
 
         Assert.assertFalse(response)
@@ -91,7 +96,8 @@ class SetCrearXmlUseCaseTest {
                     "Sin descripcion"
                 ),
                 preguntas = item,
-                respuestas = item
+                respuestas = item,
+                relativeGuidePath = RelativeGuidePath("relativeGuidePath")
             )
         } returns true
 
@@ -100,7 +106,8 @@ class SetCrearXmlUseCaseTest {
             description = "Sin descripcion",
             version = GuideVersion.V2,
             preguntas = item,
-            respuestas = item
+            respuestas = item,
+            relativeGuidePath = RelativeGuidePath("relativeGuidePath")
         )
 
         verify { directoryManager.createPathGuide("Prueba") }
@@ -112,7 +119,8 @@ class SetCrearXmlUseCaseTest {
                     "Sin descripcion"
                 ),
                 preguntas = item,
-                respuestas = item
+                respuestas = item,
+                relativeGuidePath = RelativeGuidePath("relativeGuidePath")
             )
         }
         Assert.assertTrue(response)

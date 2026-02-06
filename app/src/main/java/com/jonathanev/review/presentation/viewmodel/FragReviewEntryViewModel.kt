@@ -1,15 +1,16 @@
 package com.jonathanev.review.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
-import com.jonathanev.review.domain.GetGuidesCountUseCase
+import com.jonathanev.review.domain.model.RelativeGuidePath
+import com.jonathanev.review.domain.repository.GuiaRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
 class FragReviewEntryViewModel @Inject constructor(
-    private val getGuidesCountUseCase: GetGuidesCountUseCase,
+    private val guiaRepository: GuiaRepository
 ) : ViewModel() {
-    fun getGuides(): Int {
-        return getGuidesCountUseCase.invoke()
+    fun getGuides(relativeGuidePath: RelativeGuidePath): Int {
+        return guiaRepository.getNumGuides(relativeGuidePath)
     }
 }

@@ -3,6 +3,7 @@ package com.jonathanev.review.domain
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.QuestionItemDomain
+import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.repository.DirectoryManager
 import com.jonathanev.review.domain.repository.GuiaRepository
 import javax.inject.Inject
@@ -17,6 +18,7 @@ class SetCrearXmlUseCase @Inject constructor(
         version: GuideVersion,
         preguntas: List<QuestionItemDomain>,
         respuestas: List<QuestionItemDomain>,
+        relativeGuidePath: RelativeGuidePath,
     ): Boolean {
         val path = directoryManager.createPathGuide(nameGuide)
         if (!path) {
@@ -26,6 +28,7 @@ class SetCrearXmlUseCase @Inject constructor(
             GuideDomainModel(version, nameGuide, description),
             preguntas,
             respuestas,
+            relativeGuidePath
         )
     }
 }

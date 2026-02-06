@@ -5,7 +5,9 @@ import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.ImageSource
+import com.jonathanev.review.domain.model.PathKind
 import com.jonathanev.review.domain.model.QuestionContentDomain
+import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.provider.FilePathsProvider
 import com.jonathanev.review.domain.repository.DirectoryManager
 import com.jonathanev.review.domain.repository.NavigationPathRepository
@@ -22,7 +24,7 @@ class DirectoryManagerImpl @Inject constructor(
         val currentPath =
             File(
                 filePathsProvider.buildFolder(
-                    navigationPathRepository.getPathImages().value,
+                    navigationPathRepository.getRootImages().value,
                     guideDomainModel.nameGuide
                 )
             )
@@ -49,38 +51,47 @@ class DirectoryManagerImpl @Inject constructor(
     }
 
     override fun moveImages(
-        guideDomain: GuideDomainModel,
+        guideDomainModel: GuideDomainModel,
         imageSource: ImageSource,
         images: List<QuestionContentDomain.Image>
     ): Boolean {
-        val pathImages = when (imageSource) {
-            is ImageSource.MovingGuide -> imageSource.oldPath
-            is ImageSource.SaveGuide -> imageSource.currentPath
+        val (oldImagesPath, newImagesPath) = when (imageSource) {
+            is ImageSource.MovingGuide -> {
+                val old = filePathResolverService.mapToFolderPathSpecificGuide(
+                    guideDomainModel = guideDomainModel,
+                    relativeGuidePath = imageSource.oldRelativeGuidePath,
+                    kind = PathKind.IMAGENES
+                )
+                val new = filePathResolverService.mapToFolderPathSpecificGuide(
+                    guideDomainModel = guideDomainModel,
+                    relativeGuidePath = imageSource.relativeGuidePath,
+                    kind = PathKind.IMAGENES
+                )
+                Pair(old, new)
+            }
+            is ImageSource.Save -> {
+                val old = filePathResolverService.mapToFolderPathSpecificGuide(
+                    guideDomainModel = guideDomainModel,
+                    relativeGuidePath = imageSource.relativeGuidePath,
+                    kind = PathKind.IMAGENES
+                )
+                val new = filePathResolverService.mapToFolderPathSpecificGuide(
+                    guideDomainModel = guideDomainModel,
+                    relativeGuidePath = imageSource.relativeGuidePath,
+                    kind = PathKind.IMAGENES
+                )
+                Pair(old, new)
+            }
         }
-
-        val oldImagesPath = filePathResolverService.mapToSourceImagePath(
-            GuideContext.Moving(
-                guideDomain,
-                pathImages,
-                pathImages
-            )
-        )
 
         var isSuccess = true
 
         images.forEach { image ->
-            val oldPathImage = File(getPathImage(guideDomain, image, oldImagesPath))
-            val newPathImages = filePathResolverService.mapToSourceImagePath(
-                GuideContext.Moving(
-                    guideDomain,
-                    pathImages,
-                    navigationPathRepository.getPathImages()
-                )
-            )
+            val oldPathImage = File(oldImagesPath.value, image.nameFile)
 
             if (oldPathImage.exists()) {
-                val destination = File(newPathImages, image.nameFile)
-                val successImage = oldPathImage.renameTo(destination)
+                val newPathImages = File(newImagesPath.value, image.nameFile)
+                val successImage = oldPathImage.renameTo(newPathImages)
                 if (!successImage) isSuccess = false
             }
         }
@@ -93,7 +104,7 @@ class DirectoryManagerImpl @Inject constructor(
         listImages: List<QuestionContentDomain.Image>
     ) {
         val currentPath =
-            filePathsProvider.buildFolder(navigationPathRepository.getPathImages().value, nameGuide)
+            filePathsProvider.buildFolder(navigationPathRepository.getRootImages().value, nameGuide)
         // Borrar imagenes que ya no estén en el XML pero si en el dispositivo
         val currentDeviceNames =
             File(currentPath).listFiles()?.map { it.name }?.toSet() ?: emptySet()
@@ -111,7 +122,7 @@ class DirectoryManagerImpl @Inject constructor(
         val currentPath =
             File(
                 filePathsProvider.buildFolder(
-                    navigationPathRepository.getPathGuides().value,
+                    navigationPathRepository.getRootGuides().value,
                     nameGuide
                 )
             )
@@ -124,7 +135,7 @@ class DirectoryManagerImpl @Inject constructor(
         val currentPath =
             File(
                 filePathsProvider.buildFolder(
-                    navigationPathRepository.getPathGuides().value,
+                    navigationPathRepository.getRootGuides().value,
                     newName
                 )
             )
@@ -150,32 +161,22 @@ class DirectoryManagerImpl @Inject constructor(
 
     override fun deleteFolderEmpty(context: GuideContext.Moving): Boolean {
         return if (context.guide.version == GuideVersion.V2) {
-            File(context.oldGuidePath.value, context.guide.nameGuide).delete()
+            File(context.oldRelativeGuidePath.value, context.guide.nameGuide).delete()
         } else {
             true
         }
     }
 
-    override fun getImagesInDevice(guideDomain: GuideDomainModel): Set<String> {
+    override fun getImagesInDevice(
+        guideDomain: GuideDomainModel,
+        relativeGuidePath: RelativeGuidePath
+    ): Set<String> {
         val currentPath =
-            filePathResolverService.mapToImagePathActual(GuideContext.Actual(guideDomain))
+            filePathResolverService.mapToFolderPathSpecificGuide(guideDomain, relativeGuidePath, PathKind.IMAGENES)
 
-        return File(currentPath).listFiles()
+        return File(currentPath.value).listFiles()
             ?.filter { it.isFile && it.extension == Extensions.PNG_EXTENSION }
             ?.map { it.name }
             ?.toSet() ?: emptySet()
-    }
-
-    private fun getPathImage(
-        guideDomain: GuideDomainModel,
-        image: QuestionContentDomain.Image,
-        oldImagesPath: String
-    ): String {
-        return if (guideDomain.version == GuideVersion.V1) {
-            val nameFile = image.uri.substringAfterLast("/")
-            "$oldImagesPath/$nameFile"
-        } else {
-            "$oldImagesPath/${image.nameFile}"
-        }
     }
 }

@@ -1,19 +1,20 @@
 package com.jonathanev.review.domain.repository
 
-import com.jonathanev.review.domain.model.ImageSource
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
+import com.jonathanev.review.domain.model.ImageSource
 import com.jonathanev.review.domain.model.QuestionContentDomain
+import com.jonathanev.review.domain.model.RelativeGuidePath
 
 interface DirectoryManager {
     fun createPathImages(guideDomainModel: GuideDomainModel, isNewFile: Boolean): Boolean
     fun moveImages(
-        guideDomain: GuideDomainModel,
+        guideDomainModel: GuideDomainModel,
         imageSource: ImageSource,
         images: List<QuestionContentDomain.Image>
     ): Boolean
 
-    fun getImagesInDevice(guideDomain: GuideDomainModel): Set<String>
+    fun getImagesInDevice(guideDomain: GuideDomainModel, relativeGuidePath: RelativeGuidePath): Set<String>
     fun deleteLeftoverImagesInDevice(
         nameGuide: String,
         listImages: List<QuestionContentDomain.Image>

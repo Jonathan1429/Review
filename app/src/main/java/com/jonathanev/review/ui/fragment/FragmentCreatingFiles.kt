@@ -15,6 +15,7 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -24,6 +25,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.jonathanev.review.R
 import com.jonathanev.review.databinding.FragmentCreateFilesBinding
+import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.presentation.event.RenameGuideEvent
 import com.jonathanev.review.presentation.files.model.GuideResultUi
 import com.jonathanev.review.presentation.files.viewmodel.CreateFilesViewModel
@@ -32,6 +34,7 @@ import com.jonathanev.review.presentation.model.ActionGuide
 import com.jonathanev.review.presentation.model.ColorType
 import com.jonathanev.review.presentation.model.ScreenDataUi
 import com.jonathanev.review.presentation.state.CreatingFileUiState
+import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
 import com.jonathanev.review.ui.adapter.ListarIconosAdapter
 import com.jonathanev.review.ui.mapper.toDrawableRes
 import com.jonathanev.review.ui.mapper.toNav
@@ -40,6 +43,7 @@ import com.skydoves.colorpickerview.flag.FlagMode
 import com.skydoves.colorpickerview.listeners.ColorListener
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import kotlin.getValue
 
 @AndroidEntryPoint
 class FragmentCreatingFiles : Fragment() {
@@ -47,6 +51,7 @@ class FragmentCreatingFiles : Fragment() {
     private val binding get() = _binding!!
     private lateinit var iconsAdapter: ListarIconosAdapter
     private val viewModel: CreateFilesViewModel by viewModels()
+    private val navStateViewModel: MainActivityViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -95,6 +100,8 @@ class FragmentCreatingFiles : Fragment() {
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.eventsMessages.collect { event ->
+                    navStateViewModel.setMainPath()
+
                     when (event) {
                         is RenameGuideEvent.ShowMessage -> {
                             showToast(event.message)
@@ -174,12 +181,13 @@ class FragmentCreatingFiles : Fragment() {
             GridLayoutManager(requireContext(), 6)
 
         viewModel.loadIconsFor(mode)
+        val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
 
         when (mode) {
             FolderAction.CreatingFolder -> showFolderUI()
             is FolderAction.RenamingFile -> {
                 showFileUI()
-                viewModel.uploadCachedGuides()
+                viewModel.uploadCachedGuides(relativeGuidePath)
 
                 when (val result = viewModel.fillFields(mode.fileName)) {
                     is GuideResultUi.Error -> showToast("No se ha encontrado la guia a cargar")
@@ -193,7 +201,7 @@ class FragmentCreatingFiles : Fragment() {
             FolderAction.RenamingFolder -> showFolderUI()
             FolderAction.CreatingFile -> {
                 showFileUI()
-                viewModel.uploadCachedGuides()
+                viewModel.uploadCachedGuides(relativeGuidePath)
             }
 
             FolderAction.None -> Log.e("Error", "No se pudieron cargar datos iniciales")
@@ -300,7 +308,9 @@ class FragmentCreatingFiles : Fragment() {
         val fileName = binding.fragmentCreate.etNombre.text.toString()
         val description =
             binding.fragmentCreate.fragmentComponentsFile.etDescription.text.toString()
-        viewModel.renameFile(oldName, fileName, description)
+
+        val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
+        viewModel.renameFile(oldName, fileName, description, relativeGuidePath)
     }
 
     // ---------------------------

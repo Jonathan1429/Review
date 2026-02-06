@@ -3,10 +3,10 @@ package com.jonathanev.review.domain
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.QuestionContentDomain
+import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.model.ResponseDomain
 import com.jonathanev.review.domain.repository.GuiaRepository
 import com.jonathanev.review.domain.repository.ImagesRepository
-import com.jonathanev.review.domain.repository.NavigationPathRepository
 import com.jonathanev.review.domain.result.DeleteGuideResult
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.service.TextColorRangeGenerator
@@ -15,15 +15,18 @@ import javax.inject.Inject
 class DeleteGuideUseCase @Inject constructor(
     private val guiaRepository: GuiaRepository,
     private val imagesRepository: ImagesRepository,
-    private val textColorRangeGenerator: TextColorRangeGenerator,
-    private val navigationPathRepository: NavigationPathRepository
+    private val textColorRangeGenerator: TextColorRangeGenerator
 ) {
     operator fun invoke(
-        guideDomainModel: GuideDomainModel
+        guideDomainModel: GuideDomainModel,
+        relativeGuidePath: RelativeGuidePath
     ): DeleteGuideResult {
 
         return when (val result =
-            guiaRepository.getXMLGuide(GuideContext.Actual(guideDomainModel))) {
+            guiaRepository.getXMLGuide(
+                guideDomainModel,
+                relativeGuidePath
+            )) {
             is GetGuideResult.Success -> {
                 val tempQuestions =
                     result.list.mapNotNull { (it.question as? ResponseDomain.Filled)?.item }
@@ -38,7 +41,9 @@ class DeleteGuideUseCase @Inject constructor(
                     .filterIsInstance<QuestionContentDomain.Image>()
 
                 val deleteGuide =
-                    guiaRepository.deleteGuide(GuideContext.DeleteGuide(guideDomainModel))
+                    guiaRepository.deleteGuide(
+                        deleteGuide = GuideContext.DeleteGuide(guideDomainModel, relativeGuidePath)
+                    )
                 if (!deleteGuide) {
                     return DeleteGuideResult.ErrorGuide
                 }
@@ -47,7 +52,7 @@ class DeleteGuideUseCase @Inject constructor(
                     return DeleteGuideResult.ErrorImage
                 }
 
-                navigationPathRepository.reset()
+                //navigationPathRepository.reset()
                 return DeleteGuideResult.DeleteSuccess
             }
 

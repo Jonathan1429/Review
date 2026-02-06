@@ -3,17 +3,19 @@ package com.jonathanev.review.domain.repository
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.QuestionItemDomain
+import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.result.GetGuideResult
 
 interface GuiaRepository {
     val guidesRecovery: List<GuideDomainModel>
-    fun getGuides(currentPathGuides: String): List<GuideDomainModel>
-    fun getNumGuides(currentPathGuides: String): Int
-    fun getXMLGuide(context: GuideContext): GetGuideResult
+    fun getGuides(relativeGuidePath: RelativeGuidePath): List<GuideDomainModel>
+    fun getNumGuides(relativeGuidePath: RelativeGuidePath): Int
+    fun getXMLGuide(guideDomainModel: GuideDomainModel, relativeGuidePath: RelativeGuidePath): GetGuideResult
     fun saveGuide(
         guideDomainModel: GuideDomainModel,
         preguntas: List<QuestionItemDomain>,
-        respuestas: List<QuestionItemDomain>
+        respuestas: List<QuestionItemDomain>,
+        relativeGuidePath: RelativeGuidePath
     ): Boolean
 
     fun renameGuide(

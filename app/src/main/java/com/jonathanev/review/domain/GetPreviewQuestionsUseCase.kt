@@ -1,21 +1,20 @@
 package com.jonathanev.review.domain
 
 import com.jonathanev.review.domain.model.PreviewQuestionDomain
-import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QAItemDomain
+import com.jonathanev.review.domain.model.QuestionContentDomain
+import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.model.ResponseDomain
-import com.jonathanev.review.domain.repository.NavigationPathRepository
 import javax.inject.Inject
 
 class GetPreviewQuestionsUseCase @Inject constructor(
-    private val navigationPathRepository: NavigationPathRepository,
     private val setPintarTextosUseCase: SetPintarTextosUseCase
 ) {
     operator fun invoke(
-        domainItems: List<QAItemDomain>
+        domainItems: List<QAItemDomain>,
+        relativeGuidePath: RelativeGuidePath
     ): List<PreviewQuestionDomain> {
         val previewQuestionDomain = mutableListOf<PreviewQuestionDomain>()
-        val currentPath = navigationPathRepository.getPathGuides().value
 
         domainItems.forEach { domainItem ->
             var primerTextoPregunta: QuestionContentDomain = QuestionContentDomain.None
@@ -23,7 +22,7 @@ class GetPreviewQuestionsUseCase @Inject constructor(
 
             if (domainItem.question is ResponseDomain.Filled) {
                 domainItem.question.item.content.forEach { item ->
-                    when (val result = setPintarTextosUseCase.invoke(item, currentPath)) {
+                    when (val result = setPintarTextosUseCase.invoke(item, relativeGuidePath.value)) {
                         is QuestionContentDomain.Image -> {
                             totalImgsPregunta++
                         }
@@ -45,7 +44,7 @@ class GetPreviewQuestionsUseCase @Inject constructor(
             var totalImgsRespuesta = 0
             if (domainItem.answer is ResponseDomain.Filled) {
                 domainItem.answer.item.content.forEach { item ->
-                    val result = setPintarTextosUseCase.invoke(item, currentPath)
+                    val result = setPintarTextosUseCase.invoke(item, relativeGuidePath.value)
 
                     if (result is QuestionContentDomain.Image) {
                         totalImgsRespuesta++

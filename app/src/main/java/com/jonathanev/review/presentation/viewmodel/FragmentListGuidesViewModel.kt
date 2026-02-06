@@ -11,12 +11,12 @@ import com.jonathanev.review.domain.GetGuideXmlDataUseCase
 import com.jonathanev.review.domain.LoadGuidesUseCase
 import com.jonathanev.review.domain.MoveGuideUseCase
 import com.jonathanev.review.domain.SetContextMoveUseCase
-import com.jonathanev.review.domain.SetMainPathUseCase
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
-import com.jonathanev.review.domain.result.GuideResultDomain
+import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.result.DeleteGuideResult
 import com.jonathanev.review.domain.result.GetGuideResult
+import com.jonathanev.review.domain.result.GuideResultDomain
 import com.jonathanev.review.domain.result.MoveGuideResponse
 import com.jonathanev.review.presentation.event.GuideActionEvent
 import com.jonathanev.review.presentation.event.UIMovingEvent
@@ -24,7 +24,6 @@ import com.jonathanev.review.presentation.files.model.GuideResultUi
 import com.jonathanev.review.presentation.files.model.GuideUiModel
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.QuestionItemUi
-import com.jonathanev.review.domain.repository.NavigationPathRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -35,13 +34,11 @@ import javax.inject.Inject
 class FragmentListGuidesViewModel @Inject constructor(
     private val loadGuidesUseCase: LoadGuidesUseCase,
     private val getGuidePosicionUseCase: GetGuidePosicionUseCase,
-    private val setMainPathUseCase: SetMainPathUseCase,
-    private val navigationPathRepository: NavigationPathRepository,
     private val deleteGuideUseCase: DeleteGuideUseCase,
     private val setContextMoveUseCase: SetContextMoveUseCase,
     private val getGuideMoveUseCase: GetGuideMoveUseCase,
     private val getGuideXmlDataUseCase: GetGuideXmlDataUseCase,
-    private val moveGuideUseCase: MoveGuideUseCase
+    private val moveGuideUseCase: MoveGuideUseCase,
 ) : ViewModel() {
     private var cachedGuides: List<GuideDomainModel> = emptyList()
     private var selectedGuideDomain: GuideDomainModel? = null
@@ -61,14 +58,14 @@ class FragmentListGuidesViewModel @Inject constructor(
     private var _respuestas: MutableList<QuestionItemUi> = mutableListOf()
     val respuestas: List<QuestionItemUi> get() = _respuestas
 
-    fun getAllGuides() {
-        cachedGuides = loadGuidesUseCase.invoke()
+    fun getAllGuides(relativeGuidePath: RelativeGuidePath) {
+        cachedGuides = loadGuidesUseCase.invoke(relativeGuidePath)
         val guidesUi = cachedGuides.map { guide -> guide.toUi() }
         _guides.postValue(guidesUi)
     }
 
     fun getGuideSelected(position: Int): GuideResultUi {
-        return when(val result = getGuidePosicionUseCase.invoke(position, cachedGuides)){
+        return when (val result = getGuidePosicionUseCase.invoke(position, cachedGuides)) {
             GuideResultDomain.Error -> result.toUi()
             is GuideResultDomain.Success -> {
                 selectedGuideDomain = result.guideDomainModel
@@ -77,16 +74,18 @@ class FragmentListGuidesViewModel @Inject constructor(
         }
     }
 
-    fun deleteGuide(nameGuide: String) {
+    fun deleteGuide(nameGuide: String, relativeGuidePath: RelativeGuidePath) {
         val guideDomainModel = cachedGuides.find { it.nameGuide == nameGuide }
         if (guideDomainModel == null) {
             emitMessage(GuideActionEvent.ShowMessage("No se ha encontrado la guia"))
             return
         }
 
-        val response = deleteGuideUseCase.invoke(guideDomainModel)
+        val response = deleteGuideUseCase.invoke(guideDomainModel, relativeGuidePath)
         when (response) {
-            DeleteGuideResult.DeleteSuccess -> emitMessage(GuideActionEvent.Success("Guia borrada exitosamente"))
+            DeleteGuideResult.DeleteSuccess -> {
+                emitMessage(GuideActionEvent.Success("Guia borrada exitosamente"))
+            }
             DeleteGuideResult.Error -> emitMessage(GuideActionEvent.ShowMessage("Ocurrió un error al abrir la guia"))
             DeleteGuideResult.ErrorGuide -> emitMessage(GuideActionEvent.ShowMessage("Hubo un error al borrar la guia"))
             DeleteGuideResult.ErrorImage ->
@@ -177,16 +176,8 @@ class FragmentListGuidesViewModel @Inject constructor(
         eventMovingFile("Se ha cancelado la acción")
     }
 
-    fun back() {
-        navigationPathRepository.back()
-    }
-
-    fun setMainPath() {
-        setMainPathUseCase.invoke()
-    }
-
-    fun setContext() {
+    fun setContext(relativeGuidePath: RelativeGuidePath) {
         val guide = selectedGuideDomain ?: return
-        setContextMoveUseCase.invoke(guide)
+        setContextMoveUseCase.invoke(guide, relativeGuidePath)
     }
 }

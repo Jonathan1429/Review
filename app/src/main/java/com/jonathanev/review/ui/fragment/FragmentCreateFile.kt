@@ -24,8 +24,10 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.jonathanev.review.R
 import com.jonathanev.review.databinding.FragmentCreateFileBinding
 import com.jonathanev.review.domain.model.QAType
+import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.presentation.event.CreateGuideEvent
 import com.jonathanev.review.presentation.model.ActionGuide
+import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
 import com.jonathanev.review.presentation.viewmodel.MainToolbarViewModel
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.ui.adapter.ListCreateImagesAdapter
@@ -39,6 +41,7 @@ class FragmentCreateFile : Fragment() {
     private var _binding: FragmentCreateFileBinding? = null
     private val binding get() = _binding!!
     private val viewModel: SharedFragmentCreateFileViewModel by activityViewModels()
+    private val navStateViewModel: MainActivityViewModel by activityViewModels()
     private val viewModelToolbar: MainToolbarViewModel by activityViewModels()
 
     private lateinit var adaptListCreateTexts: ListCreateTextsAdapter
@@ -178,10 +181,11 @@ class FragmentCreateFile : Fragment() {
         binding.recyclerImagenes.setHasFixedSize(true)
         binding.recyclerImagenes.adapter = adaptListCreateImages
 
+        val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
         when (actionGuide) {
             ActionGuide.CREATE -> Log.i("Crear", "Se está creando un archivo")
             is ActionGuide.EDIT -> {
-                viewModel.getObtenerDatosXML(actionGuide.posGuide, actionGuide.nameGuide)
+                viewModel.getObtenerDatosXML(actionGuide.posGuide, actionGuide.nameGuide, relativeGuidePath)
             }
 
             ActionGuide.NONE -> {
@@ -258,13 +262,22 @@ class FragmentCreateFile : Fragment() {
         }
 
         binding.btnSaveGuide.setOnClickListener {
+            val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
+
             when (actionGuide) {
                 ActionGuide.CREATE -> viewModel.saveNewGuide(
-                    screenDataNav.name,
-                    screenDataNav.description
+                    nameGuide = screenDataNav.name,
+                    description = screenDataNav.description,
+                    relativeGuidePath = relativeGuidePath
                 )
 
-                is ActionGuide.EDIT -> viewModel.saveOldGuide(actionGuide.nameGuide)
+                is ActionGuide.EDIT -> {
+                    viewModel.saveOldGuide(
+                        nameGuide = actionGuide.nameGuide,
+                        relativeGuidePath = relativeGuidePath
+                    )
+                }
+
                 ActionGuide.NONE -> Log.e("Error:", "NO se pudo guardar la guia")
             }
         }

@@ -56,9 +56,9 @@ class MoveGuideUseCase @Inject constructor(
 
         val isSuccessMoveImages =
             directoryManager.moveImages(
-                context.guide,
-                ImageSource.MovingGuide(GuidePath(context.oldImagePath.value)),
-                images
+                guideDomainModel = context.guide,
+                imageSource = ImageSource.MovingGuide(context.oldRelativeGuidePath, context.relativeGuidePath),
+                images = images
             )
 
         return if(isSuccessMoveImages) MoveGuideResponse.Success else MoveGuideResponse.ErrorMovingImages

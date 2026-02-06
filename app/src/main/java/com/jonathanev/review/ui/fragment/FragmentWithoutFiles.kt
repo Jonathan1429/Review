@@ -23,6 +23,7 @@ import com.jonathanev.review.R
 import com.jonathanev.review.presentation.viewmodel.FragmentWithoutFilesViewModel
 import com.jonathanev.review.presentation.viewmodel.MainToolbarViewModel
 import com.jonathanev.review.databinding.FragmentWithoutFilesBinding
+import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -33,6 +34,7 @@ class FragmentWithoutFiles : Fragment() {
 
     private val viewModel: FragmentWithoutFilesViewModel by viewModels()
     private val viewModelToolbar: MainToolbarViewModel by activityViewModels()
+    private val navStateViewModel: MainActivityViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -80,7 +82,7 @@ class FragmentWithoutFiles : Fragment() {
                 launch {
                     viewModelToolbar.onCancel.collect {
                         viewModelToolbar.initButtons()
-                        viewModel.setMainPath()
+                        navStateViewModel.setMainPath()
                         viewModel.moveFileCancel()
 
                         findNavController().navigate(
@@ -97,7 +99,7 @@ class FragmentWithoutFiles : Fragment() {
                     viewModelToolbar.onSuccess.collect {
                         viewModel.movingGuide()
                         viewModelToolbar.initButtons()
-                        viewModel.setMainPath()
+                        navStateViewModel.setMainPath()
 
                         findNavController().navigate(
                             R.id.action_to_content_graph,
@@ -113,7 +115,7 @@ class FragmentWithoutFiles : Fragment() {
 
         val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                viewModel.back()
+                navStateViewModel.back()
 
                 // Si no consumes el evento, puedes volver atrás en la pila de Fragments.
                 // Para esto, deshabilita y llama a la implementación por defecto.

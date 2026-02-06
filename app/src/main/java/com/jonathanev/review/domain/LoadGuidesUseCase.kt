@@ -1,15 +1,14 @@
 package com.jonathanev.review.domain
 
-import com.jonathanev.review.domain.repository.GuiaRepository
 import com.jonathanev.review.domain.model.GuideDomainModel
-import com.jonathanev.review.domain.repository.NavigationPathRepository
+import com.jonathanev.review.domain.model.RelativeGuidePath
+import com.jonathanev.review.domain.repository.GuiaRepository
 import javax.inject.Inject
 
 class LoadGuidesUseCase @Inject constructor(
     private val guiaRepository: GuiaRepository,
-    private val navigationPathRepository: NavigationPathRepository
 ) {
-    operator fun invoke(): List<GuideDomainModel> {
-        return guiaRepository.getGuides(navigationPathRepository.getPathGuides().value)
+    operator fun invoke(relativeGuidePath: RelativeGuidePath): List<GuideDomainModel> {
+        return guiaRepository.getGuides(relativeGuidePath)
     }
 }
