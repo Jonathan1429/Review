@@ -27,7 +27,7 @@ class FilePathResolverService @Inject constructor(
         kind: PathKind
     ) = getFolderPathSpecificGuide(guideDomainModel,relativeGuidePath, kind)
 
-    fun mapToJoinRelativePath(
+    override fun mapToJoinRelativePath(
         relativeGuidePath: RelativeGuidePath,
         nameFolder: String
     ) = getRelativePath(relativeGuidePath, nameFolder)
@@ -99,7 +99,7 @@ class FilePathResolverService @Inject constructor(
         }
 
         val pathRelative = if (guideDomainModel.version == GuideVersion.V2)
-            "$relativePath/${guideDomainModel.nameGuide}" else relativePath.value
+            "${relativePath.value}/${guideDomainModel.nameGuide}" else relativePath.value
         val path = filePathsProvider.buildFolder(
                 base = root.value,
                 folder = pathRelative
@@ -108,21 +108,31 @@ class FilePathResolverService @Inject constructor(
         return GuidePath(path)
     }
 
-    override fun getPathGuidesV2(guideDomainModel: GuideDomainModel): String {
+    override fun getPathGuidesV2(
+        guideDomainModel: GuideDomainModel,
+        kind: PathKind,
+        relativeGuidePath: RelativeGuidePath
+    ): String {
+        val root = when (kind) {
+            PathKind.GUIAS -> navigationPathRepository.getRootGuides()
+            PathKind.IMAGENES -> navigationPathRepository.getRootImages()
+        }
+
+        val relativeGuidePath = "${relativeGuidePath.value}/${guideDomainModel.nameGuide}"
         val file = FileNamingRules.buildXmlFileName(guideDomainModel.nameGuide)
         return filePathsProvider.buildFolderGuide(
-            navigationPathRepository.getRootGuides().value,
-            guideDomainModel.nameGuide,
+            root.value,
+            relativeGuidePath,
             file
         )
     }
 
-    override fun renamePathGuidesV2(guideContext: GuideContext.Rename): String {
+    /*override fun renamePathGuidesV2(guideContext: GuideContext.Rename): String {
         val file = FileNamingRules.buildXmlFileName(guideContext.name.value)
         return filePathsProvider.buildFolderGuide(
             base = navigationPathRepository.getRootGuides().value,
             folder = guideContext.name.value,
             file = file
         )
-    }
+    }*/
 }

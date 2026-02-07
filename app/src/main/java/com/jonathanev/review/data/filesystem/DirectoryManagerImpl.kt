@@ -3,14 +3,12 @@ package com.jonathanev.review.data.filesystem
 import com.jonathanev.review.domain.constants.Extensions
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
-import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.ImageSource
 import com.jonathanev.review.domain.model.PathKind
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.provider.FilePathsProvider
 import com.jonathanev.review.domain.repository.DirectoryManager
-import com.jonathanev.review.domain.repository.NavigationPathRepository
 import com.jonathanev.review.domain.service.FilePathResolverService
 import java.io.File
 import javax.inject.Inject
@@ -27,7 +25,7 @@ class DirectoryManagerImpl @Inject constructor(
         val relativePath =
             filePathResolverService.mapToJoinRelativePath(relativePath, guideDomainModel.nameGuide)
         val currentPath =
-            File(filePathResolverService.mapToFolderPath(relativePath, PathKind.GUIAS).value)
+            File(filePathResolverService.mapToFolderPath(relativePath, PathKind.IMAGENES).value)
 
         when {
             isNewFile -> {
@@ -146,11 +144,29 @@ class DirectoryManagerImpl @Inject constructor(
         return !(!paths[0].exists() || !paths[1].exists())
     }
 
-    override fun deleteFolderEmpty(context: GuideContext.Moving): Boolean {
-        return if (context.guide.version == GuideVersion.V2) {
-            File(context.oldRelativeGuidePath.value, context.guide.nameGuide).delete()
-        } else {
-            true
+    override fun deleteFolderEmpty(context: GuideContext.Moving) {
+        val relativePath = filePathResolverService.mapToJoinRelativePath(
+            context.oldRelativeGuidePath,
+            context.guide.nameGuide
+        )
+
+        val pathGuides =
+            File(
+                filePathResolverService.mapToFolderPath(
+                    relativeGuidePath = relativePath,
+                    kind = PathKind.GUIAS
+                ).value
+            )
+        val pathImages =
+            File(
+                filePathResolverService.mapToFolderPath(
+                    relativeGuidePath = relativePath,
+                    kind = PathKind.IMAGENES
+                ).value
+            )
+
+        if (pathGuides.delete()) {
+            pathImages.delete()
         }
     }
 

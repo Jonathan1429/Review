@@ -5,6 +5,5 @@ sealed class MoveGuideResponse {
     data object ErrorPathImages: MoveGuideResponse()
     data object ErrorMovingGuide: MoveGuideResponse()
     data object ErrorMovingImages: MoveGuideResponse()
-    data object WarningDeleteFolder: MoveGuideResponse()
     data object Success: MoveGuideResponse()
 }

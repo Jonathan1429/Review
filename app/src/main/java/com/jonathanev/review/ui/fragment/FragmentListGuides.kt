@@ -266,9 +266,9 @@ class FragmentListGuides : Fragment() {
                         }
 
                         3 -> {
-                            navStateViewModel.setMainPath()
                             val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
                             viewModel.setContext(relativeGuidePath)
+                            navStateViewModel.setMainPath()
                             findNavController().navigate(
                                 R.id.action_to_content_graph,
                                 bundleOf("mode" to FolderAction.MovingFile)

@@ -146,9 +146,6 @@ class FragmentListGuidesViewModel @Inject constructor(
 
                             MoveGuideResponse.Success ->
                                 eventMovingFile("Guia movida exitosamente")
-
-                            MoveGuideResponse.WarningDeleteFolder ->
-                                eventMovingFile("Hubo inconveniente en el paso de todos los archivos")
                         }
                     }
 

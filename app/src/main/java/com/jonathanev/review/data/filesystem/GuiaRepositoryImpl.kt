@@ -64,7 +64,7 @@ class GuiaRepositoryImpl @Inject constructor(
                         file.extension == Extensions.XML_EXTENSION
             } ?: emptyList()
 
-        val listFromFolders = File(relativeGuidePath.value)
+        val listFromFolders = File(path.value)
             .listFiles()
             ?.filter { it.isDirectory }
             ?.flatMap { folder ->
@@ -130,7 +130,15 @@ class GuiaRepositoryImpl @Inject constructor(
 
             fos.close()
 
-            val newPath = filePathResolver.renamePathGuidesV2(guideContext)
+            val newPath = filePathResolver.getPathGuidesV2(
+                GuideDomainModel(
+                    GuideVersion.V2,
+                    guideContext.name.value,
+                    guideContext.description.value
+                ),
+                PathKind.GUIAS,
+                guideContext.relativeGuidePath
+            )
             val isRenamed = tempFile.renameTo(File(newPath))
 
             if (!isRenamed) {
@@ -140,7 +148,7 @@ class GuiaRepositoryImpl @Inject constructor(
 
             File(path.value).delete()
             true
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
     }
@@ -199,7 +207,11 @@ class GuiaRepositoryImpl @Inject constructor(
                 serializer.endDocument()
             }
 
-            val newPath = filePathResolver.getPathGuidesV2(guideDomainModel)
+            val newPath = filePathResolver.getPathGuidesV2(
+                guideDomainModel,
+                PathKind.GUIAS,
+                relativeGuidePath
+            )
             val isRenamed = tempFile.renameTo(File(newPath))
 
             if (!isRenamed) {
@@ -221,10 +233,23 @@ class GuiaRepositoryImpl @Inject constructor(
     override fun deleteGuide(
         deleteGuide: GuideContext.DeleteGuide
     ): Boolean {
-        val pathGuide = filePathResolver.mapToFilePathSpecificGuide(
-            deleteGuide.guide, deleteGuide.relativeGuidePath,
-            PathKind.GUIAS
-        )
+        val pathGuide =
+            if (deleteGuide.guide.version == GuideVersion.V2) {
+                val relativeGuidePath = filePathResolver.mapToJoinRelativePath(
+                    deleteGuide.relativeGuidePath,
+                    deleteGuide.guide.nameGuide
+                )
+                filePathResolver.mapToFolderPath(
+                    relativeGuidePath,
+                    PathKind.GUIAS
+                )
+            } else {
+                filePathResolver.mapToFilePathSpecificGuide(
+                    deleteGuide.guide, deleteGuide.relativeGuidePath,
+                    PathKind.GUIAS
+                )
+            }
+
         return File(pathGuide.value).deleteRecursively()
     }
 

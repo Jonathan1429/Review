@@ -19,11 +19,16 @@ class MoveGuideUseCase @Inject constructor(
 ) {
     operator fun invoke(
         guideData: GetGuideResult.Success,
-        context: GuideContext.Moving,
+        contextMoving: GuideContext.Moving,
         relativeGuidePath: RelativeGuidePath
     ): MoveGuideResponse {
         var isExistPathGuide = true
 
+        val context = GuideContext.Moving(
+            contextMoving.guide,
+            contextMoving.oldRelativeGuidePath,
+            relativeGuidePath
+        )
         if (context.guide.version == GuideVersion.V2) {
             isExistPathGuide = directoryManager.createPathGuide(
                 relativeGuidePath,
@@ -40,13 +45,7 @@ class MoveGuideUseCase @Inject constructor(
             return MoveGuideResponse.ErrorMovingGuide
         }
 
-        val isDeleteFolder = directoryManager.deleteFolderEmpty(context)
-
-        if (!isDeleteFolder) {
-            return MoveGuideResponse.WarningDeleteFolder
-        }
-
-        var isSuccessFolderImages =  true
+        var isSuccessFolderImages = true
 
         if (context.guide.version == GuideVersion.V2) {
             isSuccessFolderImages = directoryManager.createPathImages(
@@ -65,11 +64,15 @@ class MoveGuideUseCase @Inject constructor(
         val isSuccessMoveImages =
             directoryManager.moveImages(
                 guideDomainModel = context.guide,
-                imageSource = ImageSource.MovingGuide(context.oldRelativeGuidePath, context.relativeGuidePath),
+                imageSource = ImageSource.MovingGuide(
+                    context.oldRelativeGuidePath,
+                    context.relativeGuidePath
+                ),
                 images = images
             )
 
-        return if(isSuccessMoveImages) MoveGuideResponse.Success else MoveGuideResponse.ErrorMovingImages
+        directoryManager.deleteFolderEmpty(context)
+        return if (isSuccessMoveImages) MoveGuideResponse.Success else MoveGuideResponse.ErrorMovingImages
     }
 
     private fun extractImagesFromData(data: List<QAItemDomain>): List<QuestionContentDomain.Image> {

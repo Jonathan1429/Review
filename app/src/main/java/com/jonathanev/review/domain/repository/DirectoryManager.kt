@@ -27,6 +27,6 @@ interface DirectoryManager {
 
     fun existPath(path: String): Boolean
     fun createPathGuide(relativeGuidePath: RelativeGuidePath, nameGuide: String): Boolean
-    fun deleteFolderEmpty(context: GuideContext.Moving): Boolean
+    fun deleteFolderEmpty(context: GuideContext.Moving)
     fun createFoldersMain(): Boolean
 }

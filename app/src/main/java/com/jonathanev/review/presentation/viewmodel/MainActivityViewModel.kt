@@ -53,7 +53,7 @@ class MainActivityViewModel @Inject constructor(
 
     fun setMainPath() {
         _guidesPath.value = ""
-        savedStateHandle[KEY_GUIDES_PATH] = guidesPath
+        savedStateHandle[KEY_GUIDES_PATH] = ""
     }
 
     fun next(folder: String) {

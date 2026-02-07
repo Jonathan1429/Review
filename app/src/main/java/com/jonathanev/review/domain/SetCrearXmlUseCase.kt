@@ -1,6 +1,7 @@
 package com.jonathanev.review.domain
 
 import com.jonathanev.review.domain.model.GuideDomainModel
+import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.QuestionItemDomain
 import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.model.SaveGuideMode
@@ -30,11 +31,13 @@ class SetCrearXmlUseCase @Inject constructor(
             preguntas,
             respuestas
         )
+        if (mode == SaveGuideMode.Update){
+            val guides = loadGuidesUseCase.invoke(relativeGuidePath)
+            val guide = guides.find { it.nameGuide == nameGuide }
 
-        val guides = loadGuidesUseCase.invoke(relativeGuidePath)
-        val guide = guides.find { it.nameGuide == nameGuide }
-        if (guide == null) {
-            return UpdateGuideResult.ErrorUpdateGuide
+            if (guide == null) {
+                return UpdateGuideResult.ErrorUpdateGuide
+            }
         }
 
         val (dataWithTagsQ, dataWithTagsA) =
@@ -46,7 +49,7 @@ class SetCrearXmlUseCase @Inject constructor(
         }
 
         val resultGuide = guiaRepository.saveGuide(
-            guideDomainModel = GuideDomainModel(guide.version, nameGuide, description),
+            guideDomainModel = GuideDomainModel(GuideVersion.V2, nameGuide, description),
             preguntas = dataWithTagsQ,
             respuestas = dataWithTagsA,
             relativeGuidePath = relativeGuidePath
@@ -56,8 +59,9 @@ class SetCrearXmlUseCase @Inject constructor(
             return UpdateGuideResult.SaveFailed(resultGuide.error)
         }
 
+        val version = if (mode == SaveGuideMode.Create) GuideVersion.V2 else GuideVersion.V1
         val imagesUpdated = updateImagesUseCase.invoke(
-            guideDomain = guide,
+            guideDomain =  GuideDomainModel(version, nameGuide, description),
             preguntasProcesadas = preguntasProcesadas,
             respuestasProcesadas = respuestasProcesadas,
             isNewFile = mode != SaveGuideMode.Update,

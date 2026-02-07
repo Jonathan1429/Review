@@ -74,8 +74,6 @@ class ImagesRepositoryImpl @Inject constructor(
     ): Boolean {
 
         if (guide.version == GuideVersion.V1) {
-            val relativeGuidePath =
-                filePathResolverService.mapToJoinRelativePath(relativeGuidePath, guide.nameGuide)
             val basePathImages = filePathResolverService.mapToFolderPath(
                 relativeGuidePath,
                 PathKind.IMAGENES
@@ -122,22 +120,21 @@ class ImagesRepositoryImpl @Inject constructor(
             ).value
         )
 
+        val relativeGuidePath = filePathResolverService.mapToJoinRelativePath(
+            relativeGuidePath,
+            guideRenameContext.newName
+        )
+        val newPathImages = File(
+            filePathResolverService.mapToFolderPath(
+                relativeGuidePath,
+                PathKind.IMAGENES
+            ).value
+        )
+
         // Renamed folder
         if (guideRenameContext.oldGuide.version == GuideVersion.V2) {
-            val relativeGuidePath = filePathResolverService.mapToJoinRelativePath(
-                relativeGuidePath,
-                guideRenameContext.newName
-            )
-            val newPathImages = File(
-                filePathResolverService.mapToFolderPath(
-                    relativeGuidePath,
-                    PathKind.IMAGENES
-                ).value
-            )
             return oldPathImages.renameTo(newPathImages)
         } else { // Version 1 a Version 2
-            val newPathImages = File(oldPathImages, guideRenameContext.newName)
-
             if (!newPathImages.exists()) {
                 newPathImages.mkdir()
             }

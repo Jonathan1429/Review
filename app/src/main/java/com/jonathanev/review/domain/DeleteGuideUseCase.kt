@@ -2,6 +2,7 @@ package com.jonathanev.review.domain
 
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
+import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.model.ResponseDomain

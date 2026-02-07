@@ -13,12 +13,21 @@ interface FilePathResolver {
         kind: PathKind
     ): GuidePath
 
+    fun mapToJoinRelativePath(
+        relativeGuidePath: RelativeGuidePath,
+        nameFolder: String
+    ): RelativeGuidePath
+
     fun mapToFolderPath(
         relativeGuidePath: RelativeGuidePath,
         kind: PathKind
     ): GuidePath
 
-    fun renamePathGuidesV2(guideContext: GuideContext.Rename): String
+    //fun renamePathGuidesV2(guideContext: GuideContext.Rename): String
 
-    fun getPathGuidesV2(guideDomainModel: GuideDomainModel): String
+    fun getPathGuidesV2(
+        guideDomainModel: GuideDomainModel,
+        kind: PathKind,
+        relativeGuidePath: RelativeGuidePath
+    ): String
 }
