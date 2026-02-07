@@ -16,18 +16,18 @@ import java.io.File
 import javax.inject.Inject
 
 class DirectoryManagerImpl @Inject constructor(
-    private val navigationPathRepository: NavigationPathRepository,
     private val filePathResolverService: FilePathResolverService,
     private val filePathsProvider: FilePathsProvider,
 ) : DirectoryManager {
-    override fun createPathImages(guideDomainModel: GuideDomainModel, isNewFile: Boolean): Boolean {
+    override fun createPathImages(
+        guideDomainModel: GuideDomainModel,
+        isNewFile: Boolean,
+        relativePath: RelativeGuidePath
+    ): Boolean {
+        val relativePath =
+            filePathResolverService.mapToJoinRelativePath(relativePath, guideDomainModel.nameGuide)
         val currentPath =
-            File(
-                filePathsProvider.buildFolder(
-                    navigationPathRepository.getRootImages().value,
-                    guideDomainModel.nameGuide
-                )
-            )
+            File(filePathResolverService.mapToFolderPath(relativePath, PathKind.GUIAS).value)
 
         when {
             isNewFile -> {
@@ -69,6 +69,7 @@ class DirectoryManagerImpl @Inject constructor(
                 )
                 Pair(old, new)
             }
+
             is ImageSource.Save -> {
                 val old = filePathResolverService.mapToFolderPathSpecificGuide(
                     guideDomainModel = guideDomainModel,
@@ -101,13 +102,16 @@ class DirectoryManagerImpl @Inject constructor(
 
     override fun deleteLeftoverImagesInDevice(
         nameGuide: String,
-        listImages: List<QuestionContentDomain.Image>
+        listImages: List<QuestionContentDomain.Image>,
+        relativeGuidePath: RelativeGuidePath
     ) {
+        val relativePath =
+            filePathResolverService.mapToJoinRelativePath(relativeGuidePath, nameGuide)
         val currentPath =
-            filePathsProvider.buildFolder(navigationPathRepository.getRootImages().value, nameGuide)
+            File(filePathResolverService.mapToFolderPath(relativePath, PathKind.IMAGENES).value)
         // Borrar imagenes que ya no estén en el XML pero si en el dispositivo
         val currentDeviceNames =
-            File(currentPath).listFiles()?.map { it.name }?.toSet() ?: emptySet()
+            currentPath.listFiles()?.map { it.name }?.toSet() ?: emptySet()
         val listDelete = currentDeviceNames - listImages.map { it.nameFile }.toSet()
 
         listDelete.forEach { image ->
@@ -118,30 +122,13 @@ class DirectoryManagerImpl @Inject constructor(
         }
     }
 
-    override fun createPathGuide(nameGuide: String): Boolean {
-        val currentPath =
-            File(
-                filePathsProvider.buildFolder(
-                    navigationPathRepository.getRootGuides().value,
-                    nameGuide
-                )
-            )
+    override fun createPathGuide(relativeGuidePath: RelativeGuidePath, nameGuide: String): Boolean {
+        val pathRelative =
+            filePathResolverService.mapToJoinRelativePath(relativeGuidePath, nameGuide)
+        val currentPath = filePathResolverService.mapToFolderPath(pathRelative, PathKind.GUIAS)
 
-        currentPath.mkdir()
-        return currentPath.exists()
-    }
-
-    override fun prepareGuidePath(newName: String): Boolean {
-        val currentPath =
-            File(
-                filePathsProvider.buildFolder(
-                    navigationPathRepository.getRootGuides().value,
-                    newName
-                )
-            )
-
-        currentPath.mkdir()
-        return currentPath.exists()
+        File(currentPath.value).mkdir()
+        return File(currentPath.value).exists()
     }
 
     override fun createFoldersMain(): Boolean {
@@ -172,7 +159,11 @@ class DirectoryManagerImpl @Inject constructor(
         relativeGuidePath: RelativeGuidePath
     ): Set<String> {
         val currentPath =
-            filePathResolverService.mapToFolderPathSpecificGuide(guideDomain, relativeGuidePath, PathKind.IMAGENES)
+            filePathResolverService.mapToFolderPathSpecificGuide(
+                guideDomain,
+                relativeGuidePath,
+                PathKind.IMAGENES
+            )
 
         return File(currentPath.value).listFiles()
             ?.filter { it.isFile && it.extension == Extensions.PNG_EXTENSION }

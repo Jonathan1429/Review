@@ -7,14 +7,15 @@ import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.PathKind
 import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.provider.FilePathsProvider
+import com.jonathanev.review.domain.repository.FilePathResolver
 import com.jonathanev.review.domain.repository.NavigationPathRepository
 import javax.inject.Inject
 
 class FilePathResolverService @Inject constructor(
     private val navigationPathRepository: NavigationPathRepository,
     private val filePathsProvider: FilePathsProvider
-) {
-    fun mapToFilePathSpecificGuide(
+): FilePathResolver {
+    override fun mapToFilePathSpecificGuide(
         guideDomainModel: GuideDomainModel,
         relativeGuidePath: RelativeGuidePath,
         kind: PathKind
@@ -26,7 +27,17 @@ class FilePathResolverService @Inject constructor(
         kind: PathKind
     ) = getFolderPathSpecificGuide(guideDomainModel,relativeGuidePath, kind)
 
-    fun mapToFolderPath(
+    fun mapToJoinRelativePath(
+        relativeGuidePath: RelativeGuidePath,
+        nameFolder: String
+    ) = getRelativePath(relativeGuidePath, nameFolder)
+
+    private fun getRelativePath(
+        relativeGuidePath: RelativeGuidePath,
+        nameFolder: String
+    ) = RelativeGuidePath("${relativeGuidePath.value}/$nameFolder")
+
+    override fun mapToFolderPath(
         relativeGuidePath: RelativeGuidePath,
         kind: PathKind
     ) = getFolderPath(relativeGuidePath, kind)
@@ -97,19 +108,7 @@ class FilePathResolverService @Inject constructor(
         return GuidePath(path)
     }
 
-    private fun getImagePath(
-        guideDomainModel: GuideDomainModel,
-        basePath: String
-    ) = if (guideDomainModel.version == GuideVersion.V1) {
-        basePath
-    } else {
-        filePathsProvider.buildImage(
-            basePath,
-            guideDomainModel.nameGuide
-        )
-    }
-
-    fun getPathGuidesV2(guideDomainModel: GuideDomainModel): String {
+    override fun getPathGuidesV2(guideDomainModel: GuideDomainModel): String {
         val file = FileNamingRules.buildXmlFileName(guideDomainModel.nameGuide)
         return filePathsProvider.buildFolderGuide(
             navigationPathRepository.getRootGuides().value,
@@ -118,7 +117,7 @@ class FilePathResolverService @Inject constructor(
         )
     }
 
-    fun renamePathGuidesV2(guideContext: GuideContext.Rename): String {
+    override fun renamePathGuidesV2(guideContext: GuideContext.Rename): String {
         val file = FileNamingRules.buildXmlFileName(guideContext.name.value)
         return filePathsProvider.buildFolderGuide(
             base = navigationPathRepository.getRootGuides().value,

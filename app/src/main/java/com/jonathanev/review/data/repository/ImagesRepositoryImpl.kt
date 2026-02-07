@@ -1,31 +1,39 @@
 package com.jonathanev.review.data.repository
 
 import android.content.Context
-import android.net.Uri
 import android.util.Log
+import androidx.core.net.toUri
 import com.jonathanev.review.data.storage.StorageFolders
 import com.jonathanev.review.domain.constants.Extensions
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuideRenameContext
 import com.jonathanev.review.domain.model.GuideVersion
+import com.jonathanev.review.domain.model.PathKind
 import com.jonathanev.review.domain.model.QuestionContentDomain
+import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.provider.FilePathsProvider
 import com.jonathanev.review.domain.repository.ImagesRepository
-import com.jonathanev.review.domain.repository.NavigationPathRepository
 import com.jonathanev.review.domain.service.FileNamingRules
+import com.jonathanev.review.domain.service.FilePathResolverService
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import javax.inject.Inject
 
 class ImagesRepositoryImpl @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     private val filePathsProvider: FilePathsProvider,
-    private val navigationPathRepository: NavigationPathRepository
+    private val filePathResolverService: FilePathResolverService
 ) : ImagesRepository {
-    override fun save(image: QuestionContentDomain.Image, guide: GuideDomainModel) {
+    override fun save(
+        image: QuestionContentDomain.Image,
+        guide: GuideDomainModel,
+        relativeGuidePath: RelativeGuidePath
+    ) {
+        val relativeGuidePath =
+            filePathResolverService.mapToJoinRelativePath(relativeGuidePath, guide.nameGuide)
         val currentPath =
-            filePathsProvider.buildFolder(navigationPathRepository.getRootImages().value, guide.nameGuide)
-        val uri = Uri.parse(image.uri)
+            filePathResolverService.mapToFolderPath(relativeGuidePath, PathKind.IMAGENES).value
+        val uri = image.uri.toUri()
         val fileName = image.nameFile
         val outputFile = File(currentPath, fileName)
 
@@ -42,9 +50,8 @@ class ImagesRepositoryImpl @Inject constructor(
             ?.filter { it.isFile && it.extension == Extensions.PNG_EXTENSION }
             ?: emptyList()
 
-        if (images.isNotEmpty()){
+        if (images.isNotEmpty()) {
             val pathImageOtros = File(currentPathImages, StorageFolders.OTROS)
-
             val isFolderReady = pathImageOtros.exists() || pathImageOtros.mkdirs()
 
             if (!isFolderReady) {
@@ -62,11 +69,17 @@ class ImagesRepositoryImpl @Inject constructor(
 
     override fun deleteImages(
         guide: GuideDomainModel,
-        images: List<QuestionContentDomain.Image>
+        images: List<QuestionContentDomain.Image>,
+        relativeGuidePath: RelativeGuidePath
     ): Boolean {
 
         if (guide.version == GuideVersion.V1) {
-            val basePathImages = navigationPathRepository.getRootImages().value
+            val relativeGuidePath =
+                filePathResolverService.mapToJoinRelativePath(relativeGuidePath, guide.nameGuide)
+            val basePathImages = filePathResolverService.mapToFolderPath(
+                relativeGuidePath,
+                PathKind.IMAGENES
+            ).value
 
             images.forEach { image ->
                 val noImage = File(image.uri.substringAfterLast("/")).nameWithoutExtension
@@ -80,26 +93,48 @@ class ImagesRepositoryImpl @Inject constructor(
 
             return true
         } else {
-            val basePathImages = filePathsProvider.buildFolder(
-                navigationPathRepository.getRootImages().value,
-                guide.nameGuide
+            val relativeGuidePath =
+                filePathResolverService.mapToJoinRelativePath(relativeGuidePath, guide.nameGuide)
+            val basePathImages = File(
+                filePathResolverService.mapToFolderPath(
+                    relativeGuidePath,
+                    PathKind.IMAGENES
+                ).value
             )
 
-            return File(basePathImages).deleteRecursively()
+            return basePathImages.deleteRecursively()
         }
     }
 
     override fun moveImages(
         images: List<QuestionContentDomain.Image>,
-        guideRenameContext: GuideRenameContext
+        guideRenameContext: GuideRenameContext,
+        relativeGuidePath: RelativeGuidePath
     ): Boolean {
-        val oldPathImages =
-            getSourceImagePath(navigationPathRepository.getRootImages().value, guideRenameContext.oldGuide)
+        val oldRelativeGuidePath = filePathResolverService.mapToJoinRelativePath(
+            relativeGuidePath,
+            guideRenameContext.oldGuide.nameGuide
+        )
+        val oldPathImages = File(
+            filePathResolverService.mapToFolderPath(
+                oldRelativeGuidePath,
+                PathKind.IMAGENES
+            ).value
+        )
 
         // Renamed folder
         if (guideRenameContext.oldGuide.version == GuideVersion.V2) {
-            val newPathImages = File(filePathsProvider.buildFolder(navigationPathRepository.getRootImages().value, guideRenameContext.newName))
-            return File(oldPathImages).renameTo(newPathImages)
+            val relativeGuidePath = filePathResolverService.mapToJoinRelativePath(
+                relativeGuidePath,
+                guideRenameContext.newName
+            )
+            val newPathImages = File(
+                filePathResolverService.mapToFolderPath(
+                    relativeGuidePath,
+                    PathKind.IMAGENES
+                ).value
+            )
+            return oldPathImages.renameTo(newPathImages)
         } else { // Version 1 a Version 2
             val newPathImages = File(oldPathImages, guideRenameContext.newName)
 
@@ -121,20 +156,6 @@ class ImagesRepositoryImpl @Inject constructor(
             }
 
             return isSuccess
-        }
-    }
-
-    private fun getSourceImagePath(
-        sourceImagePath: String,
-        guideDomain: GuideDomainModel,
-    ): String {
-        return if (guideDomain.version == GuideVersion.V1) {
-            sourceImagePath
-        } else {
-            filePathsProvider.buildFolder(
-                sourceImagePath,
-                guideDomain.nameGuide
-            )
         }
     }
 }

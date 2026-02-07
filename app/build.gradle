@@ -216,6 +216,7 @@ dependencies {
     }*/
 
     testImplementation "androidx.arch.core:core-testing:2.2.0" // LiveData test
+    testImplementation "net.sf.kxml:kxml2:2.3.0"
 }
 
 // Configuración de Jacoco

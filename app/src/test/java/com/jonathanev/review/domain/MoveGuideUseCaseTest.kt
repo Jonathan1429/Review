@@ -26,6 +26,7 @@ class MoveGuideUseCaseTest {
     private lateinit var moveGuideUseCase: MoveGuideUseCase
     private lateinit var guideResult: GetGuideResult.Success
     private lateinit var context: GuideContext.Moving
+    private var relativeGuidePath: RelativeGuidePath = RelativeGuidePath("init")
 
     @Before
     fun setUp() {
@@ -53,11 +54,12 @@ class MoveGuideUseCaseTest {
             )
         )
 
+        relativeGuidePath = RelativeGuidePath("path/old/guide")
         guideResult = GetGuideResult.Success(guideDomain, list)
         context = GuideContext.Moving(
             guideDomain,
-            RelativeGuidePath("path/old/guide"),
-            RelativeGuidePath("path/old/image")
+            relativeGuidePath,
+            relativeGuidePath
         )
 
         moveGuideUseCase = MoveGuideUseCase(
@@ -68,14 +70,15 @@ class MoveGuideUseCaseTest {
 
     @Test
     fun return_error_path_guide() {
-        every { directoryManager.createPathGuide(context.guide.nameGuide) } returns false
+        every { directoryManager.createPathGuide(relativeGuidePath, context.guide.nameGuide) } returns false
 
         val response = moveGuideUseCase.invoke(
             guideData = guideResult,
-            context = context
+            context = context,
+            relativeGuidePath = relativeGuidePath
         )
 
-        verify { directoryManager.createPathGuide(context.guide.nameGuide) }
+        verify { directoryManager.createPathGuide(relativeGuidePath, context.guide.nameGuide) }
         assertEquals(MoveGuideResponse.ErrorPathGuide, response)
     }
 
@@ -91,7 +94,8 @@ class MoveGuideUseCaseTest {
 
         val response = moveGuideUseCase.invoke(
             guideData = guideResult,
-            context = localContext
+            context = localContext,
+            relativeGuidePath = relativeGuidePath
         )
 
         verify { guiaRepository.moveGuide(localContext) }
@@ -100,16 +104,17 @@ class MoveGuideUseCaseTest {
 
     @Test
     fun return_warning_delete_folder() {
-        every { directoryManager.createPathGuide(context.guide.nameGuide) } returns true
+        every { directoryManager.createPathGuide(relativeGuidePath, context.guide.nameGuide) } returns true
         every { guiaRepository.moveGuide(context) } returns true
         every { directoryManager.deleteFolderEmpty(context) } returns false
 
         val response = moveGuideUseCase.invoke(
             guideData = guideResult,
-            context = context
+            context = context,
+            relativeGuidePath = relativeGuidePath
         )
 
-        verify { directoryManager.createPathGuide(context.guide.nameGuide) }
+        verify { directoryManager.createPathGuide(relativeGuidePath, context.guide.nameGuide) }
         verify { guiaRepository.moveGuide(context) }
         verify { directoryManager.deleteFolderEmpty(context) }
         assertEquals(MoveGuideResponse.WarningDeleteFolder, response)
@@ -117,25 +122,27 @@ class MoveGuideUseCaseTest {
 
     @Test
     fun return_error_path_images() {
-        every { directoryManager.createPathGuide(context.guide.nameGuide) } returns true
+        every { directoryManager.createPathGuide(relativeGuidePath, context.guide.nameGuide) } returns true
         every { guiaRepository.moveGuide(context) } returns true
         every { directoryManager.deleteFolderEmpty(context) } returns true
         every {
             directoryManager.createPathImages(
                 guideDomainModel = context.guide,
-                isNewFile = true
+                isNewFile = true,
+                relativePath = relativeGuidePath
             )
         } returns false
 
         val response = moveGuideUseCase.invoke(
             guideData = guideResult,
-            context = context
+            context = context,
+            relativeGuidePath = relativeGuidePath
         )
 
-        verify { directoryManager.createPathGuide(context.guide.nameGuide) }
+        verify { directoryManager.createPathGuide(relativeGuidePath, context.guide.nameGuide) }
         verify { guiaRepository.moveGuide(context) }
         verify { directoryManager.deleteFolderEmpty(context) }
-        verify { directoryManager.createPathImages(guideResult.guideDomainModel, true) }
+        verify { directoryManager.createPathImages(guideResult.guideDomainModel, true, relativeGuidePath) }
         assertEquals(MoveGuideResponse.ErrorPathImages, response)
     }
 
@@ -162,7 +169,8 @@ class MoveGuideUseCaseTest {
 
         val response = moveGuideUseCase.invoke(
             guideData = guideResult,
-            context = localContext
+            context = localContext,
+            relativeGuidePath = relativeGuidePath
         )
 
         verify { guiaRepository.moveGuide(localContext) }
@@ -182,13 +190,14 @@ class MoveGuideUseCaseTest {
 
     @Test
     fun move_guide_successful() {
-        every { directoryManager.createPathGuide(context.guide.nameGuide) } returns true
+        every { directoryManager.createPathGuide(relativeGuidePath, context.guide.nameGuide) } returns true
         every { guiaRepository.moveGuide(context) } returns true
         every { directoryManager.deleteFolderEmpty(context) } returns true
         every {
             directoryManager.createPathImages(
                 guideDomainModel = context.guide,
-                isNewFile = true
+                isNewFile = true,
+                relativePath = relativeGuidePath
             )
         } returns true
         every {
@@ -204,16 +213,18 @@ class MoveGuideUseCaseTest {
 
         val response = moveGuideUseCase.invoke(
             guideData = guideResult,
-            context = context
+            context = context,
+            relativeGuidePath = relativeGuidePath
         )
 
-        verify { directoryManager.createPathGuide(context.guide.nameGuide) }
+        verify { directoryManager.createPathGuide(relativeGuidePath, context.guide.nameGuide) }
         verify { guiaRepository.moveGuide(context) }
         verify { directoryManager.deleteFolderEmpty(context) }
         verify {
             directoryManager.createPathImages(
                 guideDomainModel = guideResult.guideDomainModel,
-                isNewFile = true
+                isNewFile = true,
+                relativePath = relativeGuidePath
             )
         }
         verify {

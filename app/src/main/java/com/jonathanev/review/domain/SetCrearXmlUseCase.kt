@@ -40,7 +40,7 @@ class SetCrearXmlUseCase @Inject constructor(
         val (dataWithTagsQ, dataWithTagsA) =
             setLabelsUseCase.invoke(preguntasProcesadas, respuestasProcesadas)
 
-        val path = directoryManager.createPathGuide(nameGuide)
+        val path = directoryManager.createPathGuide(relativeGuidePath, nameGuide)
         if (!path) {
             return UpdateGuideResult.ErrorPath
         }

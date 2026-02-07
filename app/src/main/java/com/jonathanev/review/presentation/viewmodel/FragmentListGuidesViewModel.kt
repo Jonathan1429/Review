@@ -103,7 +103,7 @@ class FragmentListGuidesViewModel @Inject constructor(
         }
     }
 
-    fun movingGuide() {
+    fun movingGuide(relativeGuidePath: RelativeGuidePath) {
         when (val context = getGuideMoveUseCase.invoke()) {
             is GuideContext.Moving -> {
                 val guideDomainModel = cachedGuides.find { it.nameGuide == context.guide.nameGuide }
@@ -115,14 +115,14 @@ class FragmentListGuidesViewModel @Inject constructor(
                     return
                 }
 
-                onContinueProcess(true)
+                onContinueProcess(true, relativeGuidePath)
             }
 
             else -> eventMovingFile("Error inesperado")
         }
     }
 
-    fun onContinueProcess(confirmed: Boolean) {
+    fun onContinueProcess(confirmed: Boolean, relativeGuidePath: RelativeGuidePath) {
         if (!confirmed) return
 
         when (val context = getGuideMoveUseCase.invoke()) {
@@ -130,7 +130,7 @@ class FragmentListGuidesViewModel @Inject constructor(
                 when (val guideData = getGuideXmlDataUseCase.invoke(context)) {
                     is GetGuideResult.Success -> {
 
-                        val response = moveGuideUseCase.invoke(guideData, context)
+                        val response = moveGuideUseCase.invoke(guideData, context, relativeGuidePath)
                         when (response) {
                             MoveGuideResponse.ErrorMovingGuide ->
                                 eventMovingFile("Error al intentar mover la guia")

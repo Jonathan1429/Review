@@ -21,7 +21,7 @@ class UpdateImagesUseCase @Inject constructor(
         relativeGuidePath: RelativeGuidePath
     ): Boolean {
         // Preparar la carpeta para las imagenes.
-        val pathImages = directoryManager.createPathImages(guideDomain, isNewFile)
+        val pathImages = directoryManager.createPathImages(guideDomain, isNewFile, relativeGuidePath)
         if (!pathImages) return false
 
         val listImages = (preguntasProcesadas + respuestasProcesadas)
@@ -45,11 +45,11 @@ class UpdateImagesUseCase @Inject constructor(
             listImages.filter { it.nameFile !in imagesInDevice && it.uri.isNotEmpty() }
 
         addImages.forEach { image ->
-            imagesRepository.save(image, guideDomain)
+            imagesRepository.save(image, guideDomain, relativeGuidePath)
         }
 
         // Borrar imagenes que se encuentren en el dispositivo y no en el archivo
-        directoryManager.deleteLeftoverImagesInDevice(guideDomain.nameGuide, listImages)
+        directoryManager.deleteLeftoverImagesInDevice(guideDomain.nameGuide, listImages, relativeGuidePath)
 
         return true
     }

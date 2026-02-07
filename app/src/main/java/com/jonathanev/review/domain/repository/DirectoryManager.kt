@@ -7,7 +7,11 @@ import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.RelativeGuidePath
 
 interface DirectoryManager {
-    fun createPathImages(guideDomainModel: GuideDomainModel, isNewFile: Boolean): Boolean
+    fun createPathImages(
+        guideDomainModel: GuideDomainModel,
+        isNewFile: Boolean,
+        relativePath: RelativeGuidePath
+    ): Boolean
     fun moveImages(
         guideDomainModel: GuideDomainModel,
         imageSource: ImageSource,
@@ -17,12 +21,12 @@ interface DirectoryManager {
     fun getImagesInDevice(guideDomain: GuideDomainModel, relativeGuidePath: RelativeGuidePath): Set<String>
     fun deleteLeftoverImagesInDevice(
         nameGuide: String,
-        listImages: List<QuestionContentDomain.Image>
+        listImages: List<QuestionContentDomain.Image>,
+        relativeGuidePath: RelativeGuidePath
     )
 
     fun existPath(path: String): Boolean
-    fun createPathGuide(nameGuide: String): Boolean
-    fun prepareGuidePath(newName: String): Boolean
+    fun createPathGuide(relativeGuidePath: RelativeGuidePath, nameGuide: String): Boolean
     fun deleteFolderEmpty(context: GuideContext.Moving): Boolean
     fun createFoldersMain(): Boolean
 }

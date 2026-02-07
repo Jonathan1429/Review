@@ -4,7 +4,6 @@ import com.jonathanev.review.domain.mapper.GuideQuestionExtractor
 import com.jonathanev.review.domain.model.RequiredAttrGuide
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
-import com.jonathanev.review.domain.model.GuidePath
 import com.jonathanev.review.domain.model.GuideRenameContext
 import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.OptionalAttrGuide
@@ -142,7 +141,7 @@ class RenameGuideTest {
         } returns Pair(listOf(questionItemDomain), listOf(answerItemDomain))
 
         every {
-            directoryManager.prepareGuidePath(newName)
+            directoryManager.createPathGuide(oldRelativeGuidePath, newName)
         } returns false
 
         val response =
@@ -152,7 +151,7 @@ class RenameGuideTest {
 
         verify { guideQuestionExtractor.map(success) }
 
-        verify { directoryManager.prepareGuidePath(newName) }
+        verify { directoryManager.createPathGuide(oldRelativeGuidePath, newName) }
 
         assertEquals(RenamedGuideResult.GuidePathError, response)
     }
@@ -169,7 +168,7 @@ class RenameGuideTest {
         } returns Pair(listOf(questionItemDomain), listOf(answerItemDomain))
 
         every {
-            directoryManager.prepareGuidePath(newName)
+            directoryManager.createPathGuide(oldRelativeGuidePath, newName)
         } returns true
 
         every {
@@ -192,7 +191,7 @@ class RenameGuideTest {
 
         verify { guideQuestionExtractor.map(success) }
 
-        verify { directoryManager.prepareGuidePath(newName) }
+        verify { directoryManager.createPathGuide(oldRelativeGuidePath, newName) }
 
         verify {
             guiaRepository.renameGuide(
@@ -222,7 +221,7 @@ class RenameGuideTest {
         } returns Pair(listOf(questionItemDomain), listOf(answerItemDomain))
 
         every {
-            directoryManager.prepareGuidePath(newName)
+            directoryManager.createPathGuide(oldRelativeGuidePath, newName)
         } returns true
 
         every {
@@ -241,7 +240,8 @@ class RenameGuideTest {
         every {
             imagesRepository.moveImages(
                 images = any(),
-                guideRenameContext = GuideRenameContext(guideDomain, newName)
+                guideRenameContext = GuideRenameContext(guideDomain, newName),
+                relativeGuidePath = oldRelativeGuidePath
             )
         } returns false
 
@@ -252,7 +252,7 @@ class RenameGuideTest {
 
         verify { guideQuestionExtractor.map(success) }
 
-        verify { directoryManager.prepareGuidePath(newName) }
+        verify { directoryManager.createPathGuide(oldRelativeGuidePath, newName) }
 
         verify {
             guiaRepository.renameGuide(
@@ -270,7 +270,8 @@ class RenameGuideTest {
         verify {
             imagesRepository.moveImages(
                 images = any(),
-                guideRenameContext = GuideRenameContext(guideDomain, newName)
+                guideRenameContext = GuideRenameContext(guideDomain, newName),
+                relativeGuidePath = oldRelativeGuidePath
             )
         }
 
@@ -289,7 +290,7 @@ class RenameGuideTest {
         } returns Pair(listOf(questionItemDomain), listOf(answerItemDomain))
 
         every {
-            directoryManager.prepareGuidePath(newName)
+            directoryManager.createPathGuide(oldRelativeGuidePath, newName)
         } returns true
 
         every {
@@ -308,7 +309,8 @@ class RenameGuideTest {
         every {
             imagesRepository.moveImages(
                 images = any(),
-                guideRenameContext = GuideRenameContext(guideDomain, newName)
+                guideRenameContext = GuideRenameContext(guideDomain, newName),
+                relativeGuidePath = oldRelativeGuidePath
             )
         } returns true
 
@@ -319,7 +321,7 @@ class RenameGuideTest {
 
         verify { guideQuestionExtractor.map(success) }
 
-        verify { directoryManager.prepareGuidePath(newName) }
+        verify { directoryManager.createPathGuide(oldRelativeGuidePath, newName) }
 
         verify {
             guiaRepository.renameGuide(
@@ -337,7 +339,8 @@ class RenameGuideTest {
         verify {
             imagesRepository.moveImages(
                 images = any(),
-                guideRenameContext = GuideRenameContext(guideDomain, newName)
+                guideRenameContext = GuideRenameContext(guideDomain, newName),
+                relativeGuidePath = oldRelativeGuidePath
             )
         }
 

@@ -1,11 +1,11 @@
 package com.jonathanev.review.domain
 
 import com.jonathanev.review.domain.model.GuideContext
-import com.jonathanev.review.domain.model.GuidePath
 import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.ImageSource
 import com.jonathanev.review.domain.model.QAItemDomain
 import com.jonathanev.review.domain.model.QuestionContentDomain
+import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.model.ResponseDomain
 import com.jonathanev.review.domain.repository.DirectoryManager
 import com.jonathanev.review.domain.repository.GuiaRepository
@@ -17,11 +17,18 @@ class MoveGuideUseCase @Inject constructor(
     private val guiaRepository: GuiaRepository,
     private val directoryManager: DirectoryManager
 ) {
-    operator fun invoke(guideData: GetGuideResult.Success, context: GuideContext.Moving): MoveGuideResponse {
+    operator fun invoke(
+        guideData: GetGuideResult.Success,
+        context: GuideContext.Moving,
+        relativeGuidePath: RelativeGuidePath
+    ): MoveGuideResponse {
         var isExistPathGuide = true
 
         if (context.guide.version == GuideVersion.V2) {
-            isExistPathGuide = directoryManager.createPathGuide(context.guide.nameGuide)
+            isExistPathGuide = directoryManager.createPathGuide(
+                relativeGuidePath,
+                context.guide.nameGuide
+            )
         }
 
         if (!isExistPathGuide) {
@@ -44,7 +51,8 @@ class MoveGuideUseCase @Inject constructor(
         if (context.guide.version == GuideVersion.V2) {
             isSuccessFolderImages = directoryManager.createPathImages(
                 guideDomainModel = context.guide,
-                isNewFile = true
+                isNewFile = true,
+                relativePath = relativeGuidePath
             )
         }
 

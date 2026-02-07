@@ -1,26 +1,30 @@
 package com.jonathanev.review.data.repository
 
 import com.jonathanev.review.data.JsonManager
-import com.jonathanev.review.data.filesystem.FilePathsProviderImpl
 import com.jonathanev.review.data.mapper.json.toDomain
 import com.jonathanev.review.data.model.AttributesFolderDto
 import com.jonathanev.review.domain.constants.Extensions
 import com.jonathanev.review.domain.factory.DefaultFolderAttributesProvider
 import com.jonathanev.review.domain.model.FolderAttributesDomain
 import com.jonathanev.review.domain.model.FolderDomainModel
+import com.jonathanev.review.domain.model.PathKind
+import com.jonathanev.review.domain.model.RelativeGuidePath
+import com.jonathanev.review.domain.provider.FilePathsProvider
 import com.jonathanev.review.domain.repository.FolderRepository
 import com.jonathanev.review.domain.repository.NavigationPathRepository
+import com.jonathanev.review.domain.service.FilePathResolverService
 import java.io.File
 import javax.inject.Inject
 
 class FolderRepositoryImpl @Inject constructor(
     private val jsonManager: JsonManager,
     private val navigationPathRepository: NavigationPathRepository,
-    private val filePathsProviderImpl: FilePathsProviderImpl
+    private val filePathsProvider: FilePathsProvider,
+    private val filePathResolverService: FilePathResolverService
 ) : FolderRepository {
     private fun loadFolderAttributes(nameFolder: String): FolderAttributesDomain {
         val currentPath =
-            filePathsProviderImpl.buildFolder(
+            filePathsProvider.buildFolder(
                 navigationPathRepository.getRootGuides().value,
                 nameFolder
             )
@@ -36,18 +40,12 @@ class FolderRepositoryImpl @Inject constructor(
 
     override fun deleteFolder(nameFolder: String): Boolean {
         val pathGuides =
-            filePathsProviderImpl.buildFolder(
-                navigationPathRepository.getRootGuides().value,
-                nameFolder
-            )
+            File(filePathResolverService.mapToFolderPath(RelativeGuidePath(nameFolder), PathKind.GUIAS).value)
         val pathImages =
-            filePathsProviderImpl.buildFolder(
-                navigationPathRepository.getRootImages().value,
-                nameFolder
-            )
+            File(filePathResolverService.mapToFolderPath(RelativeGuidePath(nameFolder), PathKind.IMAGENES).value)
 
-        return if (File(pathGuides).deleteRecursively()) {
-            File(pathImages).deleteRecursively()
+        return if (pathGuides.deleteRecursively()) {
+            pathImages.deleteRecursively()
             true
         } else {
             false

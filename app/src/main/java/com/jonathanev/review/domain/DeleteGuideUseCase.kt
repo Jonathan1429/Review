@@ -47,7 +47,7 @@ class DeleteGuideUseCase @Inject constructor(
                 if (!deleteGuide) {
                     return DeleteGuideResult.ErrorGuide
                 }
-                val deleteImages = imagesRepository.deleteImages(guideDomainModel, listImages)
+                val deleteImages = imagesRepository.deleteImages(guideDomainModel, listImages, relativeGuidePath)
                 if (!deleteImages) {
                     return DeleteGuideResult.ErrorImage
                 }

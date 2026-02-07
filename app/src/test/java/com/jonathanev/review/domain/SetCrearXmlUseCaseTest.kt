@@ -108,7 +108,7 @@ class SetCrearXmlUseCaseTest {
         every {
             setLabelsUseCase.invoke(preguntas, respuestas)
         } returns Pair(preguntas, respuestas)
-        every { directoryManager.createPathGuide(nameGuide) } returns false
+        every { directoryManager.createPathGuide(relativeGuidePath, nameGuide) } returns false
 
         val response = setCrearXmlUseCase.invoke(
             nameGuide = nameGuide,
@@ -122,7 +122,7 @@ class SetCrearXmlUseCaseTest {
         coVerify { setDecodePathImageUseCase.invoke(preguntas, respuestas) }
         verify { loadGuidesUseCase.invoke(relativeGuidePath) }
         verify { setLabelsUseCase.invoke(preguntas, respuestas) }
-        verify { directoryManager.createPathGuide(nameGuide) }
+        verify { directoryManager.createPathGuide(relativeGuidePath, nameGuide) }
 
         assertEquals(UpdateGuideResult.ErrorPath, response)
     }
@@ -139,7 +139,7 @@ class SetCrearXmlUseCaseTest {
         every {
             setLabelsUseCase.invoke(preguntas, respuestas)
         } returns Pair(preguntas, respuestas)
-        every { directoryManager.createPathGuide(nameGuide) } returns true
+        every { directoryManager.createPathGuide(relativeGuidePath, nameGuide) } returns true
         every {
             guiaRepository.saveGuide(guideDomainModel, preguntas, respuestas, relativeGuidePath)
         } returns GetSaveGuideResult.Failure(SaveGuideError.ErrorSave)
@@ -156,7 +156,7 @@ class SetCrearXmlUseCaseTest {
         coVerify { setDecodePathImageUseCase.invoke(preguntas, respuestas) }
         verify { loadGuidesUseCase.invoke(relativeGuidePath) }
         verify { setLabelsUseCase.invoke(preguntas, respuestas) }
-        verify { directoryManager.createPathGuide(nameGuide) }
+        verify { directoryManager.createPathGuide(relativeGuidePath, nameGuide) }
         verify {
             guiaRepository.saveGuide(
                 guideDomainModel,
@@ -179,7 +179,7 @@ class SetCrearXmlUseCaseTest {
         every {
             setLabelsUseCase.invoke(preguntas, respuestas)
         } returns Pair(preguntas, respuestas)
-        every { directoryManager.createPathGuide(nameGuide) } returns true
+        every { directoryManager.createPathGuide(relativeGuidePath, nameGuide) } returns true
         every {
             guiaRepository.saveGuide(guideDomainModel, preguntas, respuestas, relativeGuidePath)
         } returns GetSaveGuideResult.SaveGuide
@@ -205,7 +205,7 @@ class SetCrearXmlUseCaseTest {
         coVerify { setDecodePathImageUseCase.invoke(preguntas, respuestas) }
         verify { loadGuidesUseCase.invoke(relativeGuidePath) }
         verify { setLabelsUseCase.invoke(preguntas, respuestas) }
-        verify { directoryManager.createPathGuide(nameGuide) }
+        verify { directoryManager.createPathGuide(relativeGuidePath, nameGuide) }
         verify {
             guiaRepository.saveGuide(
                 guideDomainModel,
@@ -238,7 +238,7 @@ class SetCrearXmlUseCaseTest {
         every {
             setLabelsUseCase.invoke(preguntas, respuestas)
         } returns Pair(preguntas, respuestas)
-        every { directoryManager.createPathGuide(nameGuide) } returns true
+        every { directoryManager.createPathGuide(relativeGuidePath, nameGuide) } returns true
         every {
             guiaRepository.saveGuide(guideDomainModel, preguntas, respuestas, relativeGuidePath)
         } returns GetSaveGuideResult.SaveGuide
@@ -264,7 +264,7 @@ class SetCrearXmlUseCaseTest {
         coVerify { setDecodePathImageUseCase.invoke(preguntas, respuestas) }
         verify { loadGuidesUseCase.invoke(relativeGuidePath) }
         verify { setLabelsUseCase.invoke(preguntas, respuestas) }
-        verify { directoryManager.createPathGuide(nameGuide) }
+        verify { directoryManager.createPathGuide(relativeGuidePath, nameGuide) }
         verify {
             guiaRepository.saveGuide(
                 guideDomainModel,

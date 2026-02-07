@@ -68,7 +68,8 @@ class FragmentListGuides : Fragment() {
                     when (event) {
                         UIMovingEvent.ExistFile -> {
                             alertDialog { confirmed ->
-                                viewModel.onContinueProcess(confirmed)
+                                val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
+                                viewModel.onContinueProcess(confirmed, relativeGuidePath)
 
                                 findNavController().navigate(
                                     R.id.action_to_content_graph,
@@ -106,7 +107,8 @@ class FragmentListGuides : Fragment() {
 
                 launch {
                     viewModelToolbar.onSuccess.collect {
-                        viewModel.movingGuide()
+                        val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
+                        viewModel.movingGuide(relativeGuidePath)
                         viewModelToolbar.initButtons()
                         navStateViewModel.setMainPath()
                         findNavController().navigate(

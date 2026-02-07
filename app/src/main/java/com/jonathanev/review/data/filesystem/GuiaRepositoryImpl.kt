@@ -1,7 +1,6 @@
 package com.jonathanev.review.data.filesystem
 
 import android.util.Log
-import android.util.Xml
 import com.jonathanev.review.core.media.MediaPaths
 import com.jonathanev.review.data.mapper.xml.toDomain
 import com.jonathanev.review.data.mapper.xml.toTagXml
@@ -27,11 +26,13 @@ import com.jonathanev.review.domain.model.QAType
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
 import com.jonathanev.review.domain.model.RelativeGuidePath
+import com.jonathanev.review.domain.repository.FileOutputStreamFactory
+import com.jonathanev.review.domain.repository.FilePathResolver
 import com.jonathanev.review.domain.repository.GuiaRepository
+import com.jonathanev.review.domain.repository.XmlSerializerFactory
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.GetSaveGuideResult
 import com.jonathanev.review.domain.result.SaveGuideError
-import com.jonathanev.review.domain.service.FilePathResolverService
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.NodeList
@@ -39,33 +40,24 @@ import org.xml.sax.SAXException
 import org.xmlpull.v1.XmlSerializer
 import java.io.File
 import java.io.FileNotFoundException
-import java.io.FileOutputStream
 import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.xml.parsers.DocumentBuilderFactory
-
-open class XmlSerializerFactory @Inject constructor() {
-    fun create(): XmlSerializer = Xml.newSerializer()
-}
-
-class FileOutputStreamFactory @Inject constructor() {
-    fun create(path: String): FileOutputStream = FileOutputStream(path)
-}
 
 @Singleton
 class GuiaRepositoryImpl @Inject constructor(
     private val pathHandler: PathHandler,
     private val xmlSerializerFactory: XmlSerializerFactory,
     private val fileOutputStreamFactory: FileOutputStreamFactory,
-    private val filePathResolverService: FilePathResolverService
+    private val filePathResolver: FilePathResolver
 ) : GuiaRepository {
     private var _guidesRecovery = emptyList<GuideDomainModel>()
     override val guidesRecovery: List<GuideDomainModel>
         get() = _guidesRecovery
 
     private fun listGuides(relativeGuidePath: RelativeGuidePath): List<File> {
-        val path = filePathResolverService.mapToFolderPath(relativeGuidePath, PathKind.GUIAS)
+        val path = filePathResolver.mapToFolderPath(relativeGuidePath, PathKind.GUIAS)
         val listFiles = File(path.value).listFiles()
             ?.filter { file ->
                 file.isFile &&
@@ -101,7 +93,7 @@ class GuiaRepositoryImpl @Inject constructor(
         respuestas: List<QuestionItemDomain>,
         guideContext: GuideContext.Rename
     ): Boolean {
-        val path = filePathResolverService.mapToFilePathSpecificGuide(
+        val path = filePathResolver.mapToFilePathSpecificGuide(
             guideDomainModel = guideContext.guide,
             relativeGuidePath = guideContext.relativeGuidePath,
             kind = PathKind.GUIAS
@@ -138,7 +130,7 @@ class GuiaRepositoryImpl @Inject constructor(
 
             fos.close()
 
-            val newPath = filePathResolverService.renamePathGuidesV2(guideContext)
+            val newPath = filePathResolver.renamePathGuidesV2(guideContext)
             val isRenamed = tempFile.renameTo(File(newPath))
 
             if (!isRenamed) {
@@ -160,12 +152,25 @@ class GuiaRepositoryImpl @Inject constructor(
         relativeGuidePath: RelativeGuidePath,
     ): GetSaveGuideResult {
         val currentPath =
-            filePathResolverService.mapToFilePathSpecificGuide(
+            filePathResolver.mapToFilePathSpecificGuide(
                 guideDomainModel = guideDomainModel,
                 relativeGuidePath = relativeGuidePath,
                 kind = PathKind.GUIAS
             )
-        val tempFile = File("$currentPath.tmp")
+
+        val finalFile = File(currentPath.value)
+
+        val parentDir = finalFile.parentFile
+            ?: throw IllegalStateException("El archivo no tiene directorio padre")
+
+        if (!parentDir.exists()) {
+            val created = parentDir.mkdirs()
+            if (!created) {
+                throw IOException("No se pudo crear el directorio: ${parentDir.absolutePath}")
+            }
+        }
+
+        val tempFile = File("$finalFile.tmp")
 
         return try {
             val serializer = xmlSerializerFactory.create()
@@ -194,7 +199,7 @@ class GuiaRepositoryImpl @Inject constructor(
                 serializer.endDocument()
             }
 
-            val newPath = filePathResolverService.getPathGuidesV2(guideDomainModel)
+            val newPath = filePathResolver.getPathGuidesV2(guideDomainModel)
             val isRenamed = tempFile.renameTo(File(newPath))
 
             if (!isRenamed) {
@@ -216,7 +221,7 @@ class GuiaRepositoryImpl @Inject constructor(
     override fun deleteGuide(
         deleteGuide: GuideContext.DeleteGuide
     ): Boolean {
-        val pathGuide = filePathResolverService.mapToFilePathSpecificGuide(
+        val pathGuide = filePathResolver.mapToFilePathSpecificGuide(
             deleteGuide.guide, deleteGuide.relativeGuidePath,
             PathKind.GUIAS
         )
@@ -445,7 +450,7 @@ class GuiaRepositoryImpl @Inject constructor(
         relativeGuidePath: RelativeGuidePath
     ): GetGuideResult {
         val version = guideDomainModel.version
-        val path = filePathResolverService.mapToFilePathSpecificGuide(
+        val path = filePathResolver.mapToFilePathSpecificGuide(
             guideDomainModel,
             relativeGuidePath,
             PathKind.GUIAS
@@ -457,13 +462,13 @@ class GuiaRepositoryImpl @Inject constructor(
     }
 
     override fun moveGuide(guideContext: GuideContext.Moving): Boolean {
-        val newGuidePath = filePathResolverService.mapToFilePathSpecificGuide(
+        val newGuidePath = filePathResolver.mapToFilePathSpecificGuide(
             guideDomainModel = guideContext.guide,
             relativeGuidePath = guideContext.relativeGuidePath,
             kind = PathKind.GUIAS
         )
 
-        val oldGuidePath = filePathResolverService.mapToFilePathSpecificGuide(
+        val oldGuidePath = filePathResolver.mapToFilePathSpecificGuide(
             guideDomainModel = guideContext.guide,
             relativeGuidePath = guideContext.oldRelativeGuidePath,
             kind = PathKind.GUIAS

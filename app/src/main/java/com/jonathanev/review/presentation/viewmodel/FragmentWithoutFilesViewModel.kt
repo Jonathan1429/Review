@@ -6,6 +6,7 @@ import com.jonathanev.review.domain.GetGuideMoveUseCase
 import com.jonathanev.review.domain.GetGuideXmlDataUseCase
 import com.jonathanev.review.domain.MoveGuideUseCase
 import com.jonathanev.review.domain.model.GuideContext
+import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.MoveGuideResponse
 import com.jonathanev.review.presentation.event.UIMovingEvent
@@ -41,12 +42,12 @@ class FragmentWithoutFilesViewModel @Inject constructor(
         eventMovingFile("Se ha cancelado la acción")
     }
 
-    fun movingGuide() {
+    fun movingGuide(relativePath: RelativeGuidePath) {
         when (val context = getGuideMoveUseCase.invoke()) {
             is GuideContext.Moving -> {
                 when (val guideData = getGuideXmlDataUseCase.invoke(context)) {
                     is GetGuideResult.Success -> {
-                        val response = moveGuideUseCase.invoke(guideData, context)
+                        val response = moveGuideUseCase.invoke(guideData, context, relativePath)
                         when (response) {
                             MoveGuideResponse.ErrorMovingGuide ->
                                 eventMovingFile("Error al intentar mover la guia")

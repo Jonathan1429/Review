@@ -32,9 +32,8 @@ class RenameGuideUseCase @Inject constructor(
             is GetGuideResult.Success -> {
                 val (questions, answers) = guideQuestionExtractor.map(result)
 
-                val isPathExist = directoryManager.prepareGuidePath(newName)
+                val isPathExist = directoryManager.createPathGuide(relativeGuidePath, newName)
                 if (!isPathExist) {
-                    //navigationPathRepository.reset()
                     return RenamedGuideResult.GuidePathError
                 }
 
@@ -58,7 +57,8 @@ class RenameGuideUseCase @Inject constructor(
 
                 val isSuccess = imagesRepository.moveImages(
                     images,
-                    GuideRenameContext(result.guideDomainModel, newName)
+                    GuideRenameContext(result.guideDomainModel, newName),
+                    relativeGuidePath
                 )
 
                 //navigationPathRepository.reset()
