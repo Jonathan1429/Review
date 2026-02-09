@@ -1,6 +1,7 @@
 package com.jonathanev.review.data.filesystem
 
 import com.jonathanev.review.domain.provider.FilePathsProvider
+import java.io.File
 
 class FakeFilePathsProvider(
     override val fileGuides: String
@@ -21,7 +22,8 @@ class FakeFilePathsProvider(
         folder: String,
         file: String
     ): String {
-        return "$base/$folder/$file"
+        return File(File(base, folder), file).path
+        //return "$base/$folder/$file"
     }
 
     override fun buildFolder(base: String, folder: String): String {

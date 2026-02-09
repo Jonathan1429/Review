@@ -4,6 +4,7 @@ import android.content.Context
 import com.jonathanev.review.data.storage.StorageFolders
 import com.jonathanev.review.domain.provider.FilePathsProvider
 import dagger.hilt.android.qualifiers.ApplicationContext
+import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -27,7 +28,8 @@ class FilePathsProviderImpl @Inject constructor(
     }
 
     override fun buildFolderGuide(base: String, folder: String, file: String): String {
-        return "$base/$folder/$file"
+        return File(File(base, folder), file).path
+        //return "$base/$folder/$file"
     }
 
     override fun buildFolder(base: String, folder: String): String {

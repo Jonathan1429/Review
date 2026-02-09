@@ -33,6 +33,7 @@ import com.jonathanev.review.domain.repository.XmlSerializerFactory
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.GetSaveGuideResult
 import com.jonathanev.review.domain.result.SaveGuideError
+import okio.Path.Companion.toPath
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.NodeList
@@ -41,6 +42,8 @@ import org.xmlpull.v1.XmlSerializer
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.xml.parsers.DocumentBuilderFactory
@@ -212,16 +215,23 @@ class GuiaRepositoryImpl @Inject constructor(
                 PathKind.GUIAS,
                 relativeGuidePath
             )
-            val isRenamed = tempFile.renameTo(File(newPath))
 
-            if (!isRenamed) {
+            try {
+                Files.move(
+                    tempFile.toPath(),
+                    File(newPath).toPath(),
+                    StandardCopyOption.REPLACE_EXISTING,
+                    StandardCopyOption.ATOMIC_MOVE
+                )
+            } catch (_: Exception) {
                 tempFile.delete()
                 return GetSaveGuideResult.Failure(SaveGuideError.ErrorSave)
             }
 
-            if (guideDomainModel.version == GuideVersion.V1) {
-                File(currentPath.value).delete()
+            if (finalFile.exists() && finalFile.path != File(newPath).path) {
+                finalFile.delete()
             }
+
             GetSaveGuideResult.SaveGuide
         } catch (_: IOException) {
             return GetSaveGuideResult.Failure(SaveGuideError.IOException)
