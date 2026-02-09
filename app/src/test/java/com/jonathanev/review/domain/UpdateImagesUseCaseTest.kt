@@ -40,12 +40,12 @@ class UpdateImagesUseCaseTest {
         }*/
         every { directoryManager.createPathImages(guideDomain, true, relativeGuidePath) } returns false
 
-        val response = useCase(
+        val response = useCase.invoke(
             guideDomain = guideDomain,
             preguntasProcesadas = listOf(question),
             respuestasProcesadas = emptyList(),
             isNewFile = true,
-            relativeGuidePath = RelativeGuidePath("guide")
+            relativeGuidePath = relativeGuidePath
         )
 
         verify { directoryManager.createPathImages(guideDomain, true, relativeGuidePath) }

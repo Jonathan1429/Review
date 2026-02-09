@@ -59,9 +59,8 @@ class SetCrearXmlUseCase @Inject constructor(
             return UpdateGuideResult.SaveFailed(resultGuide.error)
         }
 
-        val version = if (mode == SaveGuideMode.Create) GuideVersion.V2 else GuideVersion.V1
         val imagesUpdated = updateImagesUseCase.invoke(
-            guideDomain =  GuideDomainModel(version, nameGuide, description),
+            guideDomain =  GuideDomainModel(GuideVersion.V2, nameGuide, description),
             preguntasProcesadas = preguntasProcesadas,
             respuestasProcesadas = respuestasProcesadas,
             isNewFile = mode != SaveGuideMode.Update,

@@ -13,7 +13,9 @@ import com.jonathanev.review.domain.repository.DirectoryManager
 import com.jonathanev.review.domain.repository.GuiaRepository
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.MoveGuideResponse
+import io.mockk.Runs
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.Assert.assertEquals
@@ -74,7 +76,7 @@ class MoveGuideUseCaseTest {
 
         val response = moveGuideUseCase.invoke(
             guideData = guideResult,
-            context = context,
+            contextMoving = context,
             relativeGuidePath = relativeGuidePath
         )
 
@@ -87,14 +89,14 @@ class MoveGuideUseCaseTest {
         val localContext = GuideContext.Moving(
             GuideDomainModel(GuideVersion.V1, "Archivo", ""),
             RelativeGuidePath("path/old/guide"),
-            RelativeGuidePath("path/old/image")
+            RelativeGuidePath("path/old/guide")
         )
 
         every { guiaRepository.moveGuide(localContext) } returns false
 
         val response = moveGuideUseCase.invoke(
             guideData = guideResult,
-            context = localContext,
+            contextMoving = localContext,
             relativeGuidePath = relativeGuidePath
         )
 
@@ -103,28 +105,9 @@ class MoveGuideUseCaseTest {
     }
 
     @Test
-    fun return_warning_delete_folder() {
-        every { directoryManager.createPathGuide(relativeGuidePath, context.guide.nameGuide) } returns true
-        every { guiaRepository.moveGuide(context) } returns true
-        every { directoryManager.deleteFolderEmpty(context) } returns false
-
-        val response = moveGuideUseCase.invoke(
-            guideData = guideResult,
-            context = context,
-            relativeGuidePath = relativeGuidePath
-        )
-
-        verify { directoryManager.createPathGuide(relativeGuidePath, context.guide.nameGuide) }
-        verify { guiaRepository.moveGuide(context) }
-        verify { directoryManager.deleteFolderEmpty(context) }
-        assertEquals(MoveGuideResponse.WarningDeleteFolder, response)
-    }
-
-    @Test
     fun return_error_path_images() {
         every { directoryManager.createPathGuide(relativeGuidePath, context.guide.nameGuide) } returns true
         every { guiaRepository.moveGuide(context) } returns true
-        every { directoryManager.deleteFolderEmpty(context) } returns true
         every {
             directoryManager.createPathImages(
                 guideDomainModel = context.guide,
@@ -135,13 +118,12 @@ class MoveGuideUseCaseTest {
 
         val response = moveGuideUseCase.invoke(
             guideData = guideResult,
-            context = context,
+            contextMoving = context,
             relativeGuidePath = relativeGuidePath
         )
 
         verify { directoryManager.createPathGuide(relativeGuidePath, context.guide.nameGuide) }
         verify { guiaRepository.moveGuide(context) }
-        verify { directoryManager.deleteFolderEmpty(context) }
         verify { directoryManager.createPathImages(guideResult.guideDomainModel, true, relativeGuidePath) }
         assertEquals(MoveGuideResponse.ErrorPathImages, response)
     }
@@ -151,11 +133,10 @@ class MoveGuideUseCaseTest {
         val localContext = GuideContext.Moving(
             GuideDomainModel(GuideVersion.V1, "Archivo", ""),
             RelativeGuidePath("path/old/guide"),
-            RelativeGuidePath("path/old/image")
+            RelativeGuidePath("path/old/guide")
         )
 
         every { guiaRepository.moveGuide(localContext) } returns true
-        every { directoryManager.deleteFolderEmpty(localContext) } returns true
         every {
             directoryManager.moveImages(
                 images = any(),
@@ -167,14 +148,15 @@ class MoveGuideUseCaseTest {
             )
         } returns false
 
+        every { directoryManager.deleteFolderEmpty(localContext) } just Runs
+
         val response = moveGuideUseCase.invoke(
             guideData = guideResult,
-            context = localContext,
+            contextMoving = localContext,
             relativeGuidePath = relativeGuidePath
         )
 
         verify { guiaRepository.moveGuide(localContext) }
-        verify { directoryManager.deleteFolderEmpty(localContext) }
         verify {
             directoryManager.moveImages(
                 images = any(),
@@ -185,6 +167,7 @@ class MoveGuideUseCaseTest {
                 )
             )
         }
+        verify { directoryManager.deleteFolderEmpty(localContext) }
         assertEquals(MoveGuideResponse.ErrorMovingImages, response)
     }
 
@@ -192,7 +175,6 @@ class MoveGuideUseCaseTest {
     fun move_guide_successful() {
         every { directoryManager.createPathGuide(relativeGuidePath, context.guide.nameGuide) } returns true
         every { guiaRepository.moveGuide(context) } returns true
-        every { directoryManager.deleteFolderEmpty(context) } returns true
         every {
             directoryManager.createPathImages(
                 guideDomainModel = context.guide,
@@ -211,15 +193,16 @@ class MoveGuideUseCaseTest {
             )
         } returns true
 
+        every { directoryManager.deleteFolderEmpty(context) } just Runs
+
         val response = moveGuideUseCase.invoke(
             guideData = guideResult,
-            context = context,
+            contextMoving = context,
             relativeGuidePath = relativeGuidePath
         )
 
         verify { directoryManager.createPathGuide(relativeGuidePath, context.guide.nameGuide) }
         verify { guiaRepository.moveGuide(context) }
-        verify { directoryManager.deleteFolderEmpty(context) }
         verify {
             directoryManager.createPathImages(
                 guideDomainModel = guideResult.guideDomainModel,
@@ -237,6 +220,7 @@ class MoveGuideUseCaseTest {
                 )
             )
         }
+        verify { directoryManager.deleteFolderEmpty(context) }
         assertEquals(MoveGuideResponse.Success, response)
     }
 }

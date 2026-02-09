@@ -9,7 +9,7 @@ import javax.inject.Singleton
 
 @Singleton
 class FilePathsProviderImpl @Inject constructor(
-    @ApplicationContext private val context: Context
+    @param:ApplicationContext private val context: Context
 ): FilePathsProvider {
     private val basePath: String = context.filesDir.path
 

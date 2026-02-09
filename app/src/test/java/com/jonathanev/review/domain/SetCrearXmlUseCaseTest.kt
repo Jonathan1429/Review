@@ -83,12 +83,12 @@ class SetCrearXmlUseCaseTest {
         every { loadGuidesUseCase.invoke(relativeGuidePath) } returns localGuides
 
         val response = setCrearXmlUseCase.invoke(
-            nameGuide = nameGuide,
+            nameGuide = "Matematicas",
             description = description,
             preguntas = preguntas,
             respuestas = respuestas,
             relativeGuidePath = relativeGuidePath,
-            mode = SaveGuideMode.Create
+            mode = SaveGuideMode.Update
         )
 
         coVerify { setDecodePathImageUseCase.invoke(preguntas, respuestas) }
@@ -116,7 +116,7 @@ class SetCrearXmlUseCaseTest {
             preguntas = preguntas,
             respuestas = respuestas,
             relativeGuidePath = relativeGuidePath,
-            mode = SaveGuideMode.Create
+            mode = SaveGuideMode.Update
         )
 
         coVerify { setDecodePathImageUseCase.invoke(preguntas, respuestas) }
@@ -150,7 +150,7 @@ class SetCrearXmlUseCaseTest {
             preguntas = preguntas,
             respuestas = respuestas,
             relativeGuidePath = relativeGuidePath,
-            mode = SaveGuideMode.Create
+            mode = SaveGuideMode.Update
         )
 
         coVerify { setDecodePathImageUseCase.invoke(preguntas, respuestas) }
@@ -175,7 +175,6 @@ class SetCrearXmlUseCaseTest {
             preguntas,
             respuestas
         )
-        every { loadGuidesUseCase.invoke(relativeGuidePath) } returns guides
         every {
             setLabelsUseCase.invoke(preguntas, respuestas)
         } returns Pair(preguntas, respuestas)
@@ -185,7 +184,7 @@ class SetCrearXmlUseCaseTest {
         } returns GetSaveGuideResult.SaveGuide
         every {
             updateImagesUseCase.invoke(
-                guideDomainModel,
+                GuideDomainModel(GuideVersion.V2, nameGuide, description),
                 preguntas,
                 respuestas,
                 true,
@@ -203,7 +202,6 @@ class SetCrearXmlUseCaseTest {
         )
 
         coVerify { setDecodePathImageUseCase.invoke(preguntas, respuestas) }
-        verify { loadGuidesUseCase.invoke(relativeGuidePath) }
         verify { setLabelsUseCase.invoke(preguntas, respuestas) }
         verify { directoryManager.createPathGuide(relativeGuidePath, nameGuide) }
         verify {
@@ -244,7 +242,7 @@ class SetCrearXmlUseCaseTest {
         } returns GetSaveGuideResult.SaveGuide
         every {
             updateImagesUseCase.invoke(
-                guideDomainModel,
+                GuideDomainModel(GuideVersion.V2, nameGuide, description),
                 preguntas,
                 respuestas,
                 false,

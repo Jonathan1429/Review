@@ -3,6 +3,7 @@ package com.jonathanev.review.data.filesystem
 import com.jonathanev.review.data.infraestructure.RealFileOutputStreamFactory
 import com.jonathanev.review.data.util.PathHandler
 import com.jonathanev.review.domain.model.GuideDomainModel
+import com.jonathanev.review.domain.model.GuidePath
 import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.result.GetSaveGuideResult
@@ -22,10 +23,14 @@ class GuiaRepositoryImplTest {
     lateinit var tempDir: File
     private lateinit var guideDir: File
     private lateinit var repository: GuiaRepositoryImpl
+    private lateinit var navigationPathRepository: FakeNavigationPathRepository
+    private lateinit var filePathsProvider: FakeFilePathsProvider
 
     @Before
     fun setup() {
         tempDir = Files.createTempDirectory("test-guides").toFile()
+        filePathsProvider = FakeFilePathsProvider(tempDir.absolutePath)
+        navigationPathRepository = FakeNavigationPathRepository(GuidePath(tempDir.absolutePath))
         guideDir = File(tempDir, "GuiaTest")
         guideDir.mkdirs()
 
@@ -37,7 +42,11 @@ class GuiaRepositoryImplTest {
             pathHandler = pathHandler,
             xmlSerializerFactory = xmlSerializerFactory,
             fileOutputStreamFactory = fileOutputStreamFactory,
-            filePathResolver = FakeFilePathResolverService(tempDir)
+            filePathResolver = FakeFilePathResolverService(
+                tempDir,
+                navigationPathRepository,
+                filePathsProvider
+            )
         )
     }
 
