@@ -267,7 +267,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     fun rollPregResp() {
         // 1. Validación de Negocio
         if (textList.value.isEmpty()) {
-            showMessage("Debes tener al menos un texto")
+            sendNotification(CreateGuideEvent.WithoutText)
             return
         }
 
@@ -299,7 +299,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         }
 
         if (textList.value.isEmpty()) {
-            showMessage("Debes tener al menos un texto")
+            sendNotification(CreateGuideEvent.WithoutText)
             return
         }
 
@@ -314,7 +314,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             ?.any { it is QuestionContentDomain.Text } ?: false
 
         if (!hasCounterpartText) {
-            emitShowMessage() // Mantiene tu lógica de mostrar mensaje si no hay contraparte
+            sendNotification(CreateGuideEvent.WithoutTextQA)
             return
         }
 
@@ -348,7 +348,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         val currentState = uiState.value
 
         if (textList.value.isEmpty()) {
-            showMessage("Debes tener al menos un texto")
+            sendNotification(CreateGuideEvent.WithoutText)
             return
         }
 
@@ -362,7 +362,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             ?.any { it is QuestionContentDomain.Text } ?: false
 
         if (!hasCounterpart) {
-            emitShowMessage()
+            sendNotification(CreateGuideEvent.WithoutTextQA)
             return
         }
 
@@ -385,12 +385,6 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 isEditing = false,
                 contadorContenido = -1,
             )
-        }
-    }
-
-    private fun emitShowMessage() {
-        viewModelScope.launch {
-            _createGuideEvent.emit(CreateGuideEvent.ShowMessage("Debes tener al menos un texto en pregunta/respuesta"))
         }
     }
 
@@ -474,7 +468,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
         if (!currentQuestionHasText || !currentAnswerHasText) {
             // Usamos el mensaje genérico que ya tenías definido
-            emitShowMessage()
+            sendNotification(CreateGuideEvent.WithoutTextQA)
             return false
         }
 
@@ -486,7 +480,12 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         return this.content.any { it is QuestionContentDomain.Text }
     }
 
-    fun saveGuide(nameGuide: String, description: String, relativeGuidePath: RelativeGuidePath, mode: SaveGuideMode) {
+    fun saveGuide(
+        nameGuide: String,
+        description: String,
+        relativeGuidePath: RelativeGuidePath,
+        mode: SaveGuideMode
+    ) {
         if (!isDataValid()) {
             return
         }

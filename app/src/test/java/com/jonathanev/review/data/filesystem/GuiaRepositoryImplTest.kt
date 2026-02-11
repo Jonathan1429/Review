@@ -5,7 +5,6 @@ import com.jonathanev.review.data.util.PathHandler
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuidePath
 import com.jonathanev.review.domain.model.GuideVersion
-import com.jonathanev.review.domain.model.PathKind
 import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.result.GetSaveGuideResult
 import org.junit.After
@@ -22,7 +21,6 @@ import java.nio.file.Files
  */
 class GuiaRepositoryImplTest {
     lateinit var tempDir: File
-    private lateinit var guideDir: File
     private lateinit var repository: GuiaRepositoryImpl
     private lateinit var navigationPathRepository: FakeNavigationPathRepository
     private lateinit var filePathsProvider: FakeFilePathsProvider

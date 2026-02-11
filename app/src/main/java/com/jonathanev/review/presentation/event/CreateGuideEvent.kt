@@ -4,6 +4,8 @@ sealed class CreateGuideEvent {
     data object NotQuestionBefore: CreateGuideEvent()
     data object AddMoreQuestions: CreateGuideEvent()
     data class SuccessGuideCreated(val text: String): CreateGuideEvent()
+    data object WithoutText: CreateGuideEvent()
+    data object WithoutTextQA: CreateGuideEvent()
     data object ErrorGuideCreated: CreateGuideEvent()
     data class ShowMessage(val text: String): CreateGuideEvent()
 }

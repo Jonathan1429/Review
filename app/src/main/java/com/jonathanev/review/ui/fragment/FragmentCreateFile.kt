@@ -110,6 +110,8 @@ class FragmentCreateFile : Fragment() {
 
                         CreateGuideEvent.ErrorGuideCreated -> showToast("No se pudo crear la guia")
                         CreateGuideEvent.NotQuestionBefore -> showToast("Ya no hay preguntas anteriores")
+                        CreateGuideEvent.WithoutText -> showToast("Debes tener al menos un texto")
+                        CreateGuideEvent.WithoutTextQA -> showToast("Debes tener al menos un texto en pregunta/respuesta")
                         is CreateGuideEvent.ShowMessage -> {
                             showToast(createGuideEvent.text)
                             navStateViewModel.setMainPath()

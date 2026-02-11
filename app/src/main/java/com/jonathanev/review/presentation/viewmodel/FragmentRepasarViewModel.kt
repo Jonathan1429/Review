@@ -90,7 +90,7 @@ class FragmentRepasarViewModel @Inject constructor(
     fun getObtenerDatosXML(folderId: String, relativeGuidePath: RelativeGuidePath) {
         val guideDomainModel = cachedGuides.find { it.nameGuide == folderId }
         if (guideDomainModel == null) {
-            emitMessage("No se ha encontrado la guia a renombrar")
+            emitMessage("No se ha encontrado la guia")
             return
         }
         //Revisar como se obtienen los datos aqui, porque no se visualiza la imagen
