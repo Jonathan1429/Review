@@ -300,15 +300,7 @@ class GuiaRepositoryImpl @Inject constructor(
         guideDomainModel: GuideDomainModel,
         guidePath: GuidePath
     ): GetGuideResult {
-        val currentPath = guidePath.value /*when (guidePath) {
-            is GuideSource.CurrentPath -> {
-                guidePath.path.value
-            }
-
-            is GuideSource.SourcePath -> {
-                guidePath.path.value
-            }
-        }*/
+        val currentPath = guidePath.value
 
         val qaItemXmlDto = mutableListOf<QAItemXmlDto>()
         val db = DocumentBuilderFactory.newInstance().newDocumentBuilder()
@@ -332,11 +324,11 @@ class GuiaRepositoryImpl @Inject constructor(
             )
 
             return GetGuideResult.Success(guideDomainModel, qaItemXmlDto.map { it.toDomain() })
-        } catch (e: FileNotFoundException) {
+        } catch (_: FileNotFoundException) {
             return GetGuideResult.NotFound
-        } catch (e: SAXException) {
+        } catch (_: SAXException) {
             return GetGuideResult.InvalidFormat
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             return GetGuideResult.UnknownError
         }
     }

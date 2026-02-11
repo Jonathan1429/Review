@@ -66,8 +66,6 @@ class FragmentWithoutFilesViewModel @Inject constructor(
                         }
                     }
 
-                    GetGuideResult.Error -> eventMovingFile("Ocurrió un error al abrir la guia")
-
                     GetGuideResult.InvalidFormat -> eventMovingFile("La guia está dañada")
 
                     GetGuideResult.NotFound -> eventMovingFile("No se ha encontrado la guia")

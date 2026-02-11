@@ -22,6 +22,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.junit.Assert.assertEquals
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 
 class RenameGuideTest {
@@ -90,17 +91,6 @@ class RenameGuideTest {
         every {
             guiaRepository.getXMLGuide(context.guide, context.relativeGuidePath)
         } returns GetGuideResult.UnknownError
-
-        renameGuideUseCase.invoke(guideDomain, oldRelativeGuidePath, newName, "")
-
-        verify { guiaRepository.getXMLGuide(context.guide, context.relativeGuidePath) }
-    }
-
-    @Test
-    fun error_in_get_xml_guide() {
-        every {
-            guiaRepository.getXMLGuide(context.guide, context.relativeGuidePath)
-        } returns GetGuideResult.Error
 
         renameGuideUseCase.invoke(guideDomain, oldRelativeGuidePath, newName, "")
 

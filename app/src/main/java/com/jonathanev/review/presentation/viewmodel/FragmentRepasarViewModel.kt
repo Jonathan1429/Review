@@ -111,8 +111,6 @@ class FragmentRepasarViewModel @Inject constructor(
                 }
             }
 
-            GetGuideResult.Error -> emitMessage("Ocurrió un error al abrir la guia")
-
             GetGuideResult.InvalidFormat -> emitMessage("La guia está dañada")
 
             GetGuideResult.NotFound -> emitMessage("No se ha encontrado la guia")

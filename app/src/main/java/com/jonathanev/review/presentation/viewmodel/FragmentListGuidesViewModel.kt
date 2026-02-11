@@ -86,14 +86,10 @@ class FragmentListGuidesViewModel @Inject constructor(
             DeleteGuideResult.DeleteSuccess -> {
                 emitMessage(GuideActionEvent.Success("Guia borrada exitosamente"))
             }
-            DeleteGuideResult.Error -> emitMessage(GuideActionEvent.ShowMessage("Ocurrió un error al abrir la guia"))
             DeleteGuideResult.ErrorGuide -> emitMessage(GuideActionEvent.ShowMessage("Hubo un error al borrar la guia"))
             DeleteGuideResult.ErrorImage ->
                 emitMessage(GuideActionEvent.ShowMessage("Hubo inconvenientes en el borrado completo de archivos"))
-
-            DeleteGuideResult.InvalidFormat -> emitMessage(GuideActionEvent.ShowMessage("La guia está dañada"))
-            DeleteGuideResult.NotFound -> emitMessage(GuideActionEvent.ShowMessage("No se ha encontrado la guia"))
-            DeleteGuideResult.UnknownError -> emitMessage(GuideActionEvent.ShowMessage("Error desconocido"))
+            else -> emitMessage(GuideActionEvent.ShowMessage("Ocurrió un error al eliminar la guia"))
         }
     }
 
@@ -148,8 +144,6 @@ class FragmentListGuidesViewModel @Inject constructor(
                                 eventMovingFile("Guia movida exitosamente")
                         }
                     }
-
-                    GetGuideResult.Error -> eventMovingFile("Ocurrió un error al abrir la guia")
 
                     GetGuideResult.InvalidFormat -> eventMovingFile("La guia está dañada")
 

@@ -13,7 +13,7 @@ class GetGuideXmlDataUseCase @Inject constructor(
             is GuideContext.Browsing -> guiaRepository.getXMLGuide(context.guide, context.relativeGuidePath)
             is GuideContext.Editing -> guiaRepository.getXMLGuide(context.guide, context.relativeGuidePath)
             is GuideContext.Moving -> guiaRepository.getXMLGuide(context.guide, context.oldRelativeGuidePath)
-            else -> GetGuideResult.Error
+            else -> GetGuideResult.NotFound
         }
         //return guiaRepository.getXMLGuide(context)
     }

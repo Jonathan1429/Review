@@ -71,7 +71,6 @@ class RenameGuideUseCase @Inject constructor(
 
             GetGuideResult.NotFound -> RenamedGuideResult.NotFound
             GetGuideResult.InvalidFormat -> RenamedGuideResult.InvalidFormat
-            GetGuideResult.Error -> RenamedGuideResult.Error
             GetGuideResult.UnknownError -> RenamedGuideResult.UnknownError
         }
     }

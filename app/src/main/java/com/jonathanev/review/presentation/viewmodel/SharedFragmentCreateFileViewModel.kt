@@ -403,9 +403,6 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     ) {
         when (result) {
             is GetGuideResult.Success -> updateUiWithContent(result, positionContent)
-            GetGuideResult.Error ->
-                showMessage("Ocurrió un error al abrir la guia")
-
             GetGuideResult.InvalidFormat -> showMessage("La guia está dañada")
             GetGuideResult.NotFound -> showMessage("No se ha encontrado la guia")
             GetGuideResult.UnknownError -> showMessage("Error desconocido")

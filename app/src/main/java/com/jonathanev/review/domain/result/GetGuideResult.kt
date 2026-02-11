@@ -8,5 +8,4 @@ sealed class GetGuideResult {
     data object NotFound : GetGuideResult()
     data object InvalidFormat : GetGuideResult()
     data object UnknownError : GetGuideResult()
-    data object Error : GetGuideResult()
 }
