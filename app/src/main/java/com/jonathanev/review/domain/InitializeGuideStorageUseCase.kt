@@ -19,9 +19,11 @@ class InitializeGuideStorageUseCase @Inject constructor(
         }
 
         val result = migrationRepository.moveGuides()
-        if (result.hasSuccess){
-            imagesRepository.moveUnassignedImages(result.movedFiles)
+        if (!result.hasSuccess){
+            return false
         }
+
+        imagesRepository.moveUnassignedImages(result.movedFiles)
 
         if (result.failedFiles.isNotEmpty()) {
             Log.e("MIGRATION", "Fallaron archivos: ${result.failedFiles}")
