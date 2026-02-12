@@ -27,22 +27,23 @@ class GetPreviewQuestionsUseCase @Inject constructor(
                     }
 
                     is QuestionContentDomain.Text -> {
-                        primerTextoPregunta = QuestionContentDomain.Text(
-                            result.text,
-                            result.colorRangeDomains
-                        )
+                        if (primerTextoPregunta == null) {
+                            primerTextoPregunta = QuestionContentDomain.Text(
+                                result.text,
+                                result.colorRangeDomains
+                            )
+                        }
                     }
                 }
             }
 
             var totalImgsRespuesta = 0
-                domainItem.answer.content.forEach { item ->
-                    val result = setPintarTextosUseCase.invoke(item, relativeGuidePath.value)
 
-                    if (result is QuestionContentDomain.Image) {
-                        totalImgsRespuesta++
-                    }
+            domainItem.answer.content.forEach { item ->
+                if (item is QuestionContentDomain.Image) {
+                    totalImgsRespuesta++
                 }
+            }
 
             previewQuestionDomain.add(
                 PreviewQuestionDomain(
