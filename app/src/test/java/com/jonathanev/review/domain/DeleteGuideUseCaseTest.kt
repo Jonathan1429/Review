@@ -7,7 +7,6 @@ import com.jonathanev.review.domain.model.QAItemDomain
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
 import com.jonathanev.review.domain.model.RelativeGuidePath
-import com.jonathanev.review.domain.model.ResponseDomain
 import com.jonathanev.review.domain.repository.GuiaRepository
 import com.jonathanev.review.domain.repository.ImagesRepository
 import com.jonathanev.review.domain.result.DeleteGuideResult
@@ -32,18 +31,14 @@ class DeleteGuideUseCaseTest {
         guideDomainModel = GuideDomainModel(GuideVersion.V2, "Guia a eliminar", "")
         relativeGuidePath = RelativeGuidePath("Kotlin")
         qaItemDomain = QAItemDomain(
-            question = ResponseDomain.Filled(
-                QuestionItemDomain(
-                    listOf(
-                        QuestionContentDomain.Text("Pregunta", emptyList())
-                    )
+            question = QuestionItemDomain(
+                listOf(
+                    QuestionContentDomain.Text("Pregunta", emptyList())
                 )
             ),
-            answer = ResponseDomain.Filled(
-                QuestionItemDomain(
-                    listOf(
-                        QuestionContentDomain.Text("Respuesta", emptyList())
-                    )
+            answer = QuestionItemDomain(
+                listOf(
+                    QuestionContentDomain.Text("Respuesta", emptyList())
                 )
             )
         )
@@ -114,7 +109,13 @@ class DeleteGuideUseCaseTest {
             )
         } returns true
 
-        every { imagesRepository.deleteImages(guideDomainModel, emptyList(), relativeGuidePath) } returns false
+        every {
+            imagesRepository.deleteImages(
+                guideDomainModel,
+                emptyList(),
+                relativeGuidePath
+            )
+        } returns false
 
         val response = deleteGuideUseCase.invoke(guideDomainModel, relativeGuidePath)
 
@@ -138,7 +139,7 @@ class DeleteGuideUseCaseTest {
     }
 
     @Test
-    fun success_deliting_the_guide(){
+    fun success_deliting_the_guide() {
         every {
             guiaRepository.getXMLGuide(
                 guideDomainModel,
@@ -155,7 +156,13 @@ class DeleteGuideUseCaseTest {
             )
         } returns true
 
-        every { imagesRepository.deleteImages(guideDomainModel, emptyList(), relativeGuidePath) } returns true
+        every {
+            imagesRepository.deleteImages(
+                guideDomainModel,
+                emptyList(),
+                relativeGuidePath
+            )
+        } returns true
 
         val response = deleteGuideUseCase.invoke(guideDomainModel, relativeGuidePath)
 

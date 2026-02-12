@@ -7,9 +7,9 @@ import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.verify
 import io.mockk.just
 import io.mockk.mockk
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -56,23 +56,20 @@ class SetDecodePathImageUseCaseTest {
         val listContentQ = listOf(
             QuestionContentDomain.Text("hola", emptyList()),
             QuestionContentDomain.Image("adios", "1.png"),
-            QuestionContentDomain.None,
         )
         val listContentA = listOf(
             QuestionContentDomain.Text("hola", emptyList()),
             QuestionContentDomain.Image("adios", "2.png"),
-            QuestionContentDomain.None,
         )
 
         every { userPreferencesRepository.getCountImage() } returns flowOf(2)
-        coEvery { userPreferencesRepository.setImageCount(any()) } just Runs
+        coEvery { userPreferencesRepository.setImageCount(2) } just Runs
 
         val preguntas = QuestionItemDomain(listContentQ)
         val respuestas = QuestionItemDomain(listContentA)
         val response = setDecodePathImageUseCase.invoke(listOf(preguntas), listOf(respuestas))
 
-        coVerify { userPreferencesRepository.getCountImage() }
-        coVerify { userPreferencesRepository.setImageCount(any()) }
+        coVerify { userPreferencesRepository.setImageCount(2) }
 
         assertEquals(
             Pair(listOf(QuestionItemDomain(listContentQ)), listOf(QuestionItemDomain(listContentA))),

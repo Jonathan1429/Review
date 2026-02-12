@@ -8,7 +8,6 @@ import com.jonathanev.review.domain.model.QAItemDomain
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
 import com.jonathanev.review.domain.model.RelativeGuidePath
-import com.jonathanev.review.domain.model.ResponseDomain
 import com.jonathanev.review.domain.repository.DirectoryManager
 import com.jonathanev.review.domain.repository.GuiaRepository
 import com.jonathanev.review.domain.result.GetGuideResult
@@ -39,18 +38,14 @@ class MoveGuideUseCaseTest {
         )
         val list = listOf(
             QAItemDomain(
-                question = ResponseDomain.Filled(
-                    QuestionItemDomain(
-                        listOf(
-                            QuestionContentDomain.Text("Texto", emptyList())
-                        )
+                question = QuestionItemDomain(
+                    listOf(
+                        QuestionContentDomain.Text("Texto", emptyList())
                     )
                 ),
-                answer = ResponseDomain.Filled(
-                    QuestionItemDomain(
-                        listOf(
-                            QuestionContentDomain.Text("Texto2", emptyList())
-                        )
+                answer = QuestionItemDomain(
+                    listOf(
+                        QuestionContentDomain.Text("Texto2", emptyList())
                     )
                 )
             )
@@ -72,7 +67,12 @@ class MoveGuideUseCaseTest {
 
     @Test
     fun return_error_path_guide() {
-        every { directoryManager.createPathGuide(relativeGuidePath, context.guide.nameGuide) } returns false
+        every {
+            directoryManager.createPathGuide(
+                relativeGuidePath,
+                context.guide.nameGuide
+            )
+        } returns false
 
         val response = moveGuideUseCase.invoke(
             guideData = guideResult,
@@ -106,7 +106,12 @@ class MoveGuideUseCaseTest {
 
     @Test
     fun return_error_path_images() {
-        every { directoryManager.createPathGuide(relativeGuidePath, context.guide.nameGuide) } returns true
+        every {
+            directoryManager.createPathGuide(
+                relativeGuidePath,
+                context.guide.nameGuide
+            )
+        } returns true
         every { guiaRepository.moveGuide(context) } returns true
         every {
             directoryManager.createPathImages(
@@ -124,7 +129,13 @@ class MoveGuideUseCaseTest {
 
         verify { directoryManager.createPathGuide(relativeGuidePath, context.guide.nameGuide) }
         verify { guiaRepository.moveGuide(context) }
-        verify { directoryManager.createPathImages(guideResult.guideDomainModel, true, relativeGuidePath) }
+        verify {
+            directoryManager.createPathImages(
+                guideResult.guideDomainModel,
+                true,
+                relativeGuidePath
+            )
+        }
         assertEquals(MoveGuideResponse.ErrorPathImages, response)
     }
 
@@ -173,7 +184,12 @@ class MoveGuideUseCaseTest {
 
     @Test
     fun move_guide_successful() {
-        every { directoryManager.createPathGuide(relativeGuidePath, context.guide.nameGuide) } returns true
+        every {
+            directoryManager.createPathGuide(
+                relativeGuidePath,
+                context.guide.nameGuide
+            )
+        } returns true
         every { guiaRepository.moveGuide(context) } returns true
         every {
             directoryManager.createPathImages(

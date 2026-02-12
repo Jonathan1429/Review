@@ -38,13 +38,6 @@ class SetPintarTextosUseCaseTest {
         )
 
         verify { colorRangeParser.invoke(textWithTags) }
-        assertEquals(QuestionContentDomain.Text(textWithoutTags, list) ,response)
-    }
-
-    @Test
-    fun to_processing_anything() {
-        val result = setPintarTextosUseCase.invoke(QuestionContentDomain.None, ruta)
-
-        assertEquals(QuestionContentDomain.None, result)
+        assertEquals(QuestionContentDomain.Text(textWithoutTags, list), response)
     }
 }

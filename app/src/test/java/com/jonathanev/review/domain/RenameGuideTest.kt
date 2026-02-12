@@ -1,7 +1,6 @@
 package com.jonathanev.review.domain
 
 import com.jonathanev.review.domain.mapper.GuideQuestionExtractor
-import com.jonathanev.review.domain.model.RequiredAttrGuide
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuideRenameContext
@@ -11,7 +10,7 @@ import com.jonathanev.review.domain.model.QAItemDomain
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
 import com.jonathanev.review.domain.model.RelativeGuidePath
-import com.jonathanev.review.domain.model.ResponseDomain
+import com.jonathanev.review.domain.model.RequiredAttrGuide
 import com.jonathanev.review.domain.repository.DirectoryManager
 import com.jonathanev.review.domain.repository.GuiaRepository
 import com.jonathanev.review.domain.repository.ImagesRepository
@@ -22,7 +21,6 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.junit.Assert.assertEquals
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 
 class RenameGuideTest {
@@ -78,8 +76,8 @@ class RenameGuideTest {
 
         result = listOf(
             QAItemDomain(
-                question = ResponseDomain.Filled(questionItemDomain),
-                answer = ResponseDomain.Filled(answerItemDomain)
+                question = questionItemDomain,
+                answer = answerItemDomain
             )
         )
 
