@@ -25,9 +25,9 @@ class InitializeGuideStorageUseCase @Inject constructor(
 
         imagesRepository.moveUnassignedImages(result.movedFiles)
 
-        if (result.failedFiles.isNotEmpty()) {
+        /*if (result.failedFiles.isNotEmpty()) {
             Log.e("MIGRATION", "Fallaron archivos: ${result.failedFiles}")
-        }
+        }*/
         return true
     }
 }
