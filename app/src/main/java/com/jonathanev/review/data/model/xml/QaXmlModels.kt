@@ -1,8 +1,8 @@
 package com.jonathanev.review.data.model.xml
 
 data class QAItemXmlDto(
-    val question: ResponseXmlDto = ResponseXmlDto.Empty,
-    val answer: ResponseXmlDto = ResponseXmlDto.Empty
+    val question: QuestionItemXmlDto,
+    val answer: QuestionItemXmlDto
 )
 
 sealed class ResponseXmlDto {

@@ -6,7 +6,6 @@ import com.jonathanev.review.domain.model.ImageSource
 import com.jonathanev.review.domain.model.QAItemDomain
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.RelativeGuidePath
-import com.jonathanev.review.domain.model.ResponseDomain
 import com.jonathanev.review.domain.repository.DirectoryManager
 import com.jonathanev.review.domain.repository.GuiaRepository
 import com.jonathanev.review.domain.result.GetGuideResult
@@ -78,8 +77,7 @@ class MoveGuideUseCase @Inject constructor(
     private fun extractImagesFromData(data: List<QAItemDomain>): List<QuestionContentDomain.Image> {
         // Esta lógica de filtrado SÍ puede estar aquí porque usa modelos de Dominio
         return data.flatMap { listOf(it.question, it.answer) }
-            .filterIsInstance<ResponseDomain.Filled>()
-            .flatMap { it.item.content }
+            .flatMap { it.content }
             .filterIsInstance<QuestionContentDomain.Image>()
     }
 }

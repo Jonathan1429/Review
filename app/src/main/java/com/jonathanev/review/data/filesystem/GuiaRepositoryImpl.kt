@@ -8,7 +8,6 @@ import com.jonathanev.review.data.model.xml.GuideXmlDto
 import com.jonathanev.review.data.model.xml.QAItemXmlDto
 import com.jonathanev.review.data.model.xml.QuestionContentXmlDto
 import com.jonathanev.review.data.model.xml.QuestionItemXmlDto
-import com.jonathanev.review.data.model.xml.ResponseXmlDto
 import com.jonathanev.review.data.util.PathHandler
 import com.jonathanev.review.data.xml.Attributes
 import com.jonathanev.review.data.xml.Structure
@@ -33,7 +32,6 @@ import com.jonathanev.review.domain.repository.XmlSerializerFactory
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.GetSaveGuideResult
 import com.jonathanev.review.domain.result.SaveGuideError
-import okio.Path.Companion.toPath
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.NodeList
@@ -372,12 +370,16 @@ class GuiaRepositoryImpl @Inject constructor(
                 )
             }
 
-            val item = QuestionItemXmlDto(contentList)
             if (typeContent == QAType.QUESTION.toTagXml()) {
-                qaItemDomain.add(QAItemXmlDto(question = ResponseXmlDto.Filled(item)))
+                qaItemDomain.add(
+                    QAItemXmlDto(
+                        question = QuestionItemXmlDto(content = contentList),
+                        answer = QuestionItemXmlDto(content = emptyList())
+                    )
+                )
             } else {
                 val current = qaItemDomain[i]
-                qaItemDomain[i] = current.copy(answer = ResponseXmlDto.Filled(item))
+                qaItemDomain[i] = current.copy(answer = QuestionItemXmlDto(content = contentList))
             }
         }
     }
@@ -426,7 +428,6 @@ class GuiaRepositoryImpl @Inject constructor(
                 }
 
                 preguntaContent.add(preguntaProcesada)
-                val preguntaItem = QuestionItemXmlDto(preguntaContent.toList())
 
                 // ---- RESPUESTA ----
                 val respuestaContent = mutableListOf<QuestionContentXmlDto>()
@@ -448,13 +449,11 @@ class GuiaRepositoryImpl @Inject constructor(
                 }
 
                 respuestaContent.add(respuestaProcesada)
-                val respuestaItem = QuestionItemXmlDto(respuestaContent.toList())
-
 
                 listaQA.add(
                     QAItemXmlDto(
-                        question = ResponseXmlDto.Filled(preguntaItem),
-                        answer = ResponseXmlDto.Filled(respuestaItem)
+                        question = QuestionItemXmlDto(content = preguntaContent.toList()),
+                        answer = QuestionItemXmlDto(content = respuestaContent.toList())
                     )
                 )
             }

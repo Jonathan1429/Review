@@ -5,25 +5,23 @@ import com.jonathanev.review.data.model.xml.GuideXmlDto
 import com.jonathanev.review.data.model.xml.QAItemXmlDto
 import com.jonathanev.review.data.model.xml.QuestionContentXmlDto
 import com.jonathanev.review.data.model.xml.QuestionItemXmlDto
-import com.jonathanev.review.data.model.xml.ResponseXmlDto
 import com.jonathanev.review.domain.model.ColorRangeDomain
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.QAItemDomain
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
-import com.jonathanev.review.domain.model.ResponseDomain
 
 fun QAItemXmlDto.toDomain(): QAItemDomain {
     return QAItemDomain(this.question.toDomain(), this.answer.toDomain())
 }
 
-fun ResponseXmlDto.toDomain(): ResponseDomain {
+/*fun QAItemXmlDto.toDomain(): ResponseDomain {
     return when (this) {
         ResponseXmlDto.Empty -> ResponseDomain.Empty
         is ResponseXmlDto.Filled -> ResponseDomain.Filled(this.item.toDomain())
     }
-}
+}*/
 
 fun QuestionItemXmlDto.toDomain(): QuestionItemDomain {
     return QuestionItemDomain(this.content.map { it.toDomain() })

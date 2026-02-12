@@ -4,7 +4,6 @@ import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.RelativeGuidePath
-import com.jonathanev.review.domain.model.ResponseDomain
 import com.jonathanev.review.domain.repository.GuiaRepository
 import com.jonathanev.review.domain.repository.ImagesRepository
 import com.jonathanev.review.domain.result.DeleteGuideResult
@@ -27,10 +26,9 @@ class DeleteGuideUseCase @Inject constructor(
             )) {
             is GetGuideResult.Success -> {
                 val tempQuestions =
-                    result.list.mapNotNull { (it.question as? ResponseDomain.Filled)?.item }
-                        .toList()
+                    result.list.map { it.question }.toList()
                 val tempAnswers =
-                    result.list.mapNotNull { (it.answer as? ResponseDomain.Filled)?.item }.toList()
+                    result.list.map { it.answer }.toList()
 
 
                 val listImages = (tempQuestions + tempAnswers).flatMap { it.content }
