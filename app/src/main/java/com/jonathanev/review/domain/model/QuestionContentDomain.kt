@@ -1,7 +1,6 @@
 package com.jonathanev.review.domain.model
 
 sealed class QuestionContentDomain {
-    data object None : QuestionContentDomain()
     data class Text(val text: String, val colorRangeDomains: List<ColorRangeDomain>) :
         QuestionContentDomain()
 

@@ -32,7 +32,6 @@ fun QuestionItemXmlDto.toDomain(): QuestionItemDomain {
 fun QuestionContentXmlDto.toDomain(): QuestionContentDomain {
     return when (this) {
         is QuestionContentXmlDto.Image -> QuestionContentDomain.Image(this.uri, this.nameFile)
-        QuestionContentXmlDto.None -> QuestionContentDomain.None
         is QuestionContentXmlDto.Text -> QuestionContentDomain.Text(
             this.text,
             this.colorRangeXmlDto.map { it.toDomain() })

@@ -17,26 +17,23 @@ class GetPreviewQuestionsUseCase @Inject constructor(
         val previewQuestionDomain = mutableListOf<PreviewQuestionDomain>()
 
         domainItems.forEach { domainItem ->
-            var primerTextoPregunta: QuestionContentDomain = QuestionContentDomain.None
+            var primerTextoPregunta: QuestionContentDomain.Text? = null
             var totalImgsPregunta = 0
 
             if (domainItem.question is ResponseDomain.Filled) {
                 domainItem.question.item.content.forEach { item ->
-                    when (val result = setPintarTextosUseCase.invoke(item, relativeGuidePath.value)) {
+                    when (val result =
+                        setPintarTextosUseCase.invoke(item, relativeGuidePath.value)) {
                         is QuestionContentDomain.Image -> {
                             totalImgsPregunta++
                         }
 
                         is QuestionContentDomain.Text -> {
-                            if (primerTextoPregunta == QuestionContentDomain.None) {
-                                primerTextoPregunta = QuestionContentDomain.Text(
-                                    result.text,
-                                    result.colorRangeDomains
-                                )
-                            }
+                            primerTextoPregunta = QuestionContentDomain.Text(
+                                result.text,
+                                result.colorRangeDomains
+                            )
                         }
-
-                        QuestionContentDomain.None -> Unit
                     }
                 }
             }
@@ -54,7 +51,10 @@ class GetPreviewQuestionsUseCase @Inject constructor(
 
             previewQuestionDomain.add(
                 PreviewQuestionDomain(
-                    question = primerTextoPregunta,
+                    question = primerTextoPregunta ?: QuestionContentDomain.Text(
+                        "No se encuentra texto a cargar",
+                        emptyList()
+                    ),
                     noImages = totalImgsPregunta + totalImgsRespuesta
                 )
             )

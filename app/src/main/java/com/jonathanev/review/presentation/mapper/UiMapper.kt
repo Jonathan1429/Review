@@ -38,7 +38,6 @@ fun QuestionContentDomain.Image.toUi(): QuestionContentUi.Image {
 
 fun QuestionContentDomain.toUi(): QuestionContentUi {
     return when (this) {
-        is QuestionContentDomain.None -> QuestionContentUi.None
         is QuestionContentDomain.Text -> QuestionContentUi.Text(
             text = this.text,
             colorRanges = this.colorRangeDomains.map { it.toUi() }
@@ -53,7 +52,7 @@ fun QuestionContentDomain.toUi(): QuestionContentUi {
 
 fun QuestionContentUi.toDomain(): QuestionContentDomain {
     return when (this) {
-        is QuestionContentUi.None -> QuestionContentDomain.None
+        is QuestionContentUi.None ->  error("Estado invalido: None no puede pasar a domain")
         is QuestionContentUi.Text -> QuestionContentDomain.Text(
             text = this.text,
             colorRangeDomains = this.colorRanges.map { it.toDomain() }

@@ -18,8 +18,6 @@ class SetPintarTextosUseCase @Inject constructor(
             is QuestionContentDomain.Text -> {
                 colorRangeParser.invoke(item.text)
             }
-
-            is QuestionContentDomain.None -> QuestionContentDomain.None
         }
     }
 }

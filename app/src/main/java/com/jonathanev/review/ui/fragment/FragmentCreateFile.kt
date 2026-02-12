@@ -204,7 +204,15 @@ class FragmentCreateFile : Fragment() {
             }
 
             ActionGuide.NONE -> {
-                Log.e("Error", "No se pudo realizar alguna acción")
+                showToast("No se pudo realizar alguna acción")
+
+                findNavController().navigate(
+                    R.id.fragmentsContent,
+                    null,
+                    NavOptions.Builder()
+                        .setPopUpTo(R.id.fragmentsContent, true)
+                        .build()
+                )
             }
         }
     }

@@ -15,7 +15,6 @@ data class QuestionItemXmlDto(
 )
 
 sealed class QuestionContentXmlDto {
-    data object None : QuestionContentXmlDto()
     data class Text(val text: String, val colorRangeXmlDto:List<ColorRangeXmlDto>): QuestionContentXmlDto()
     data class Image(val uri: String, val nameFile: String): QuestionContentXmlDto()
 }

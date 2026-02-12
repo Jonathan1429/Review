@@ -282,8 +282,6 @@ class GuiaRepositoryImpl @Inject constructor(
                         serializer.endTag("", XmlTagsV2.IMAGEN)
                     }
 
-                    QuestionContentDomain.None -> Unit
-
                     is QuestionContentDomain.Text -> {
                         serializer.startTag("", ContentType.TEXT.toTagXml())
                         serializer.attribute("", XmlTagsV2.TEXTO, content.text)
