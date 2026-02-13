@@ -6,13 +6,25 @@ import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuidePath
 import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.RelativeGuidePath
+import com.jonathanev.review.domain.repository.FileOutputStreamFactory
+import com.jonathanev.review.domain.repository.XmlSerializerFactory
 import com.jonathanev.review.domain.result.GetSaveGuideResult
+import com.jonathanev.review.domain.result.SaveGuideError
+import com.jonathanev.review.domain.service.FilePathResolverService
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
 import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.xmlpull.v1.XmlSerializer
 import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 
 /**
  * Integration test:
@@ -168,4 +180,39 @@ class GuiaRepositoryImplTest {
         assertTrue(xml.contains("version=\"2.0\""))
     }
 
+    /*@Test
+    fun saveGuide_returns_failure_when_ioexception_occurs() {
+        val xmlSerializerFactory = mockk<XmlSerializerFactory>()
+        val fileOutputStreamFactory = mockk<FileOutputStreamFactory>()
+        val filePathResolver = mockk<FilePathResolverService>()
+
+        // Path válido
+        every {
+            filePathResolver.mapToFilePathSpecificGuide(any(), any(), any())
+        } returns GuidePath("test/Guia.xml")
+
+        // Forzamos IOException aquí 👇
+        every {
+            fileOutputStreamFactory.create(any())
+        } throws IOException()
+
+        val repository = GuiaRepositoryImpl(
+            pathHandler = PathHandler(),
+            xmlSerializerFactory = xmlSerializerFactory,
+            fileOutputStreamFactory = fileOutputStreamFactory,
+            filePathResolver = filePathResolver
+        )
+
+        val result = repository.saveGuide(
+            guideDomainModel = GuideDomainModel(GuideVersion.V2, "Test", ""),
+            preguntas = emptyList(),
+            respuestas = emptyList(),
+            relativeGuidePath = RelativeGuidePath("")
+        )
+
+        assertTrue(result is GetSaveGuideResult.Failure)
+        assertTrue(
+            (result as GetSaveGuideResult.Failure).error == SaveGuideError.IOException
+        )
+    }*/
 }
