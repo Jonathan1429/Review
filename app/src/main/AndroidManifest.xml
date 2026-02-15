@@ -6,7 +6,6 @@
         android:allowBackup="true"
         android:icon="@drawable/img_inicio"
         android:label="@string/nameApp"
-        android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Review">
