@@ -2,8 +2,8 @@ package com.jonathanev.review.presentation.mapper
 
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.result.GuideResultDomain
-import com.jonathanev.review.presentation.files.model.GuideResultUi
-import com.jonathanev.review.presentation.files.model.GuideUiModel
+import com.jonathanev.review.presentation.model.GuideResultUi
+import com.jonathanev.review.presentation.model.GuideUiModel
 
 fun GuideResultDomain.toUi(): GuideResultUi {
     return when (this) {

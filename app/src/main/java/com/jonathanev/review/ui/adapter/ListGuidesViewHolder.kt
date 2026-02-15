@@ -2,7 +2,7 @@ package com.jonathanev.review.ui.adapter
 
 import androidx.recyclerview.widget.RecyclerView
 import com.jonathanev.review.databinding.ListCustomGuideBinding
-import com.jonathanev.review.presentation.files.model.GuideUiModel
+import com.jonathanev.review.presentation.model.GuideUiModel
 import javax.inject.Inject
 
 class ListGuidesViewHolder @Inject constructor(

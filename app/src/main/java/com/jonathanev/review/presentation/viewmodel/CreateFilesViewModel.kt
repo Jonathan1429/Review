@@ -1,4 +1,4 @@
-package com.jonathanev.review.presentation.files.viewmodel
+package com.jonathanev.review.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,13 +11,13 @@ import com.jonathanev.review.domain.ValidateCreateFileUseCase
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.result.RenamedGuideResult
-import com.jonathanev.review.presentation.event.RenameGuideEvent
-import com.jonathanev.review.presentation.files.model.GuideResultUi
-import com.jonathanev.review.presentation.folders.model.FolderAction
-import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.domain.result.ValidateCreateFileResult
+import com.jonathanev.review.presentation.event.RenameGuideEvent
+import com.jonathanev.review.presentation.model.GuideResultUi
+import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.ColorType
+import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.presentation.model.IconType
 import com.jonathanev.review.presentation.model.QuestionItemUi
 import com.jonathanev.review.presentation.model.ScreenDataUi

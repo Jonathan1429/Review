@@ -10,7 +10,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DecodeFormat
 import com.jonathanev.review.R
 import com.jonathanev.review.databinding.ListItemFolderBinding
-import com.jonathanev.review.presentation.folders.model.FolderUiModel
+import com.jonathanev.review.presentation.model.FolderUiModel
 import com.jonathanev.review.presentation.model.ColorType
 import com.jonathanev.review.ui.mapper.toColorRes
 import com.jonathanev.review.ui.mapper.toDrawableRes

@@ -1,4 +1,4 @@
-package com.jonathanev.review.presentation.folders.model
+package com.jonathanev.review.presentation.model
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize

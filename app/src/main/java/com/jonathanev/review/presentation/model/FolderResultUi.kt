@@ -1,6 +1,6 @@
 package com.jonathanev.review.presentation.model
 
-import com.jonathanev.review.presentation.folders.model.FolderUiModel
+import com.jonathanev.review.presentation.model.FolderUiModel
 
 sealed class FolderResultUi {
     data class Success(val folderUi: FolderUiModel) : FolderResultUi()

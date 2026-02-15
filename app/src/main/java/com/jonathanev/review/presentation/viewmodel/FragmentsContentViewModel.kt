@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.jonathanev.review.domain.GetFoldersWithNumGuidesUseCase
-import com.jonathanev.review.presentation.folders.model.FolderUiModel
+import com.jonathanev.review.presentation.model.FolderUiModel
 import com.jonathanev.review.presentation.mapper.toUi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject

@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import com.jonathanev.review.databinding.ListCustomGuideBinding
-import com.jonathanev.review.presentation.files.model.GuideUiModel
+import com.jonathanev.review.presentation.model.GuideUiModel
 
 class ListGuidesAdapter(
     private val posClicked: (Int) -> Unit

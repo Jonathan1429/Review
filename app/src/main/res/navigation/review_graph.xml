@@ -13,7 +13,7 @@
 
         <argument
             android:name="mode"
-            app:argType="com.jonathanev.review.presentation.folders.model.FolderAction"
+            app:argType="com.jonathanev.review.presentation.model.FolderAction"
             app:nullable="false" />
 
         <action
@@ -90,7 +90,7 @@
 
         <argument
             android:name="mode"
-            app:argType="com.jonathanev.review.presentation.folders.model.FolderAction"
+            app:argType="com.jonathanev.review.presentation.model.FolderAction"
             app:nullable="false" />
 
         <action
@@ -109,7 +109,7 @@
         tools:layout="@layout/fragment_without_files">
         <argument
             android:name="mode"
-            app:argType="com.jonathanev.review.presentation.folders.model.FolderAction"
+            app:argType="com.jonathanev.review.presentation.model.FolderAction"
             app:nullable="false" />
         <action
             android:id="@+id/action_to_create_graph"

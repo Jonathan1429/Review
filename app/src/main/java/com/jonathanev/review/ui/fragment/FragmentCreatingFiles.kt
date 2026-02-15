@@ -27,9 +27,9 @@ import com.jonathanev.review.R
 import com.jonathanev.review.databinding.FragmentCreateFilesBinding
 import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.presentation.event.RenameGuideEvent
-import com.jonathanev.review.presentation.files.model.GuideResultUi
-import com.jonathanev.review.presentation.files.viewmodel.CreateFilesViewModel
-import com.jonathanev.review.presentation.folders.model.FolderAction
+import com.jonathanev.review.presentation.model.GuideResultUi
+import com.jonathanev.review.presentation.viewmodel.CreateFilesViewModel
+import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.presentation.model.ActionGuide
 import com.jonathanev.review.presentation.model.ColorType
 import com.jonathanev.review.presentation.model.ScreenDataUi

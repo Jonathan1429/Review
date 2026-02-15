@@ -20,8 +20,8 @@ import com.jonathanev.review.domain.result.GuideResultDomain
 import com.jonathanev.review.domain.result.MoveGuideResponse
 import com.jonathanev.review.presentation.event.GuideActionEvent
 import com.jonathanev.review.presentation.event.UIMovingEvent
-import com.jonathanev.review.presentation.files.model.GuideResultUi
-import com.jonathanev.review.presentation.files.model.GuideUiModel
+import com.jonathanev.review.presentation.model.GuideResultUi
+import com.jonathanev.review.presentation.model.GuideUiModel
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.QuestionItemUi
 import dagger.hilt.android.lifecycle.HiltViewModel

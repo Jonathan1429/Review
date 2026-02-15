@@ -17,7 +17,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
-import com.jonathanev.review.presentation.folders.model.FolderAction
+import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.presentation.event.UIMovingEvent
 import com.jonathanev.review.R
 import com.jonathanev.review.presentation.viewmodel.FragmentWithoutFilesViewModel

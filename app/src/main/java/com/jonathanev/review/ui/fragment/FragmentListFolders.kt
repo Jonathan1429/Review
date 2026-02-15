@@ -22,12 +22,12 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
-import com.jonathanev.review.presentation.folders.model.FolderAction
+import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.presentation.event.UIMovingEvent
 import com.jonathanev.review.data.filesystem.FilePathsProviderImpl
 import com.jonathanev.review.ui.adapter.ListFoldersAdapter
 import com.jonathanev.review.R
-import com.jonathanev.review.presentation.folders.viewmodel.FoldersListViewModel
+import com.jonathanev.review.presentation.viewmodel.FoldersListViewModel
 import com.jonathanev.review.presentation.viewmodel.MainToolbarViewModel
 import com.jonathanev.review.databinding.FragmentListFoldersBinding
 import com.jonathanev.review.domain.model.RelativeGuidePath

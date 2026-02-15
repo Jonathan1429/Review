@@ -23,8 +23,8 @@ import com.jonathanev.review.databinding.FragmentListGuidesBinding
 import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.presentation.event.GuideActionEvent
 import com.jonathanev.review.presentation.event.UIMovingEvent
-import com.jonathanev.review.presentation.files.model.GuideResultUi
-import com.jonathanev.review.presentation.folders.model.FolderAction
+import com.jonathanev.review.presentation.model.GuideResultUi
+import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.presentation.viewmodel.FragmentListGuidesViewModel
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
 import com.jonathanev.review.presentation.viewmodel.MainToolbarViewModel

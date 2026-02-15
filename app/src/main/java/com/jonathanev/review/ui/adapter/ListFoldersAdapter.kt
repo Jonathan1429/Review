@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import com.jonathanev.review.databinding.ListItemFolderBinding
-import com.jonathanev.review.presentation.folders.model.FolderUiModel
+import com.jonathanev.review.presentation.model.FolderUiModel
 
 class ListFoldersAdapter(
     private val posClicked: (Int) -> Unit

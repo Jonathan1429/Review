@@ -11,7 +11,7 @@
         tools:layout="@layout/fragment_create_files">
         <argument
             android:name="mode"
-            app:argType="com.jonathanev.review.presentation.folders.model.FolderAction"
+            app:argType="com.jonathanev.review.presentation.model.FolderAction"
             app:nullable="false" />
 
         <argument
@@ -78,7 +78,7 @@
         tools:layout="@layout/fragment_fragments_content">
         <argument
             android:name="mode"
-            app:argType="com.jonathanev.review.presentation.folders.model.FolderAction"
+            app:argType="com.jonathanev.review.presentation.model.FolderAction"
             app:nullable="false" />
 
         <argument

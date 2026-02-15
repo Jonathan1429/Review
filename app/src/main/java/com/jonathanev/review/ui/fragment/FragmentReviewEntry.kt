@@ -14,7 +14,7 @@ import androidx.navigation.fragment.findNavController
 import com.jonathanev.review.R
 import com.jonathanev.review.databinding.FragmentReviewEntryBinding
 import com.jonathanev.review.domain.model.RelativeGuidePath
-import com.jonathanev.review.presentation.folders.model.FolderAction
+import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.presentation.viewmodel.FragReviewEntryViewModel
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
 import dagger.hilt.android.AndroidEntryPoint

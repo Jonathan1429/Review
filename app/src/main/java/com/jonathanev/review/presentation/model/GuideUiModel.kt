@@ -1,4 +1,4 @@
-package com.jonathanev.review.presentation.files.model
+package com.jonathanev.review.presentation.model
 
 data class GuideUiModel(
     val nameGuide: String,
