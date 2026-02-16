@@ -11,6 +11,20 @@ Funciona como un híbrido entre un bloc de notas de alto nivel y un sistema de r
 
 ---
 
+## 📑 Índice
+
+- [✨ Características Principales](#-características-principales)
+- [📱 Vista de la Aplicación](#-vista-de-la-aplicación)
+- [🏗️ Arquitectura y Diseño](#️-arquitectura-y-diseño)
+- [🛠️ Stack Tecnológico](#️-stack-tecnológico)
+- [🧪 Calidad de Software (Testing)](#-calidad-de-software-testing)
+- [🚀 Instalación](#-instalación)
+- [🧠 Aprendizajes Clave](#-aprendizajes-clave)
+- [👤 Autor](#-autor)
+- [📩 Contacto y Colaboración](#-contacto-y-colaboración)
+
+---
+
 ## ✨ Características Principales
 
 * **📁 Organización Jerárquica:** Creación de carpetas personalizadas con iconos y colores únicos.
@@ -18,6 +32,26 @@ Funciona como un híbrido entre un bloc de notas de alto nivel y un sistema de r
 * **📝 Editor Enriquecido:** Agrega texto con colores personalizados e integra imágenes en tus apuntes.
 * **🌙 Experiencia Nativa:** Modo oscuro por defecto y diseño basado en Material Design.
 * **💾 Privacidad Total:** Persistencia 100% local en el dispositivo (funciona sin conexión).
+
+---
+
+## 📱 Vista de la Aplicación
+
+<p align="left">
+  <img src="assets/readme/Samsung Galaxy Tab S7 Screenshot 1.png" width="250"/>
+  <img src="assets/readme/Samsung Galaxy Tab S7 Screenshot 2.png" width="250"/>
+  <img src="assets/readme/Samsung Galaxy Tab S7 Screenshot 3.png" width="250"/>
+</p>
+
+<p align="left">
+  <img src="assets/readme/Samsung Galaxy Tab S7 Screenshot 4.png" width="250"/>
+  <img src="assets/readme/Samsung Galaxy Tab S7 Screenshot 5.png" width="250"/>
+  <img src="assets/readme/Samsung Galaxy Tab S7 Screenshot 6.png" width="250"/>
+</p>
+
+<p align="left">
+   <img src="assets/readme/Samsung Galaxy Tab S7 Screenshot 7.png" width="250"/>
+</p>
 
 ---
 
