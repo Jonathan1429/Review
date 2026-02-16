@@ -87,9 +87,6 @@ Este proyecto marcó un hito en mi formación como desarrollador, permitiéndome
 ## 📩 Contacto y Colaboración
 Estoy en búsqueda activa de oportunidades como **Android Developer**. Si te interesa mi perfil o quieres charlar sobre arquitectura móvil, ¡no dudes en contactarme!
 
-[📩 Enviar Correo](mailto:jona142959@gmail.com) | [💼 LinkedIn](https://www.linkedin.com/in/tu-perfil)
-
-* [LinkedIn](https://www.linkedin.com/in/tu-perfil)
-* [GitHub](https://github.com/tu-usuario)
+[📩 Enviar Correo](mailto:jona142959@gmail.com) | [💼 LinkedIn](https://www.linkedin.com/in/jonathan-escobar-5315a0206/) | [GitHub](https://github.com/Jonathan1429)
 
 ---
