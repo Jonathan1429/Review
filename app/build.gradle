@@ -46,7 +46,7 @@ android {
             signingConfig signingConfigs.debug
 
             ndk {
-                debugSymbolLevel 'FULL'
+                debugSymbolLevel = 'FULL'
             }
         }
 
