@@ -44,6 +44,10 @@ android {
             resValue("string", "nameApp", "Review")
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.debug
+
+            ndk {
+                debugSymbolLevel 'FULL'
+            }
         }
 
         debug {
