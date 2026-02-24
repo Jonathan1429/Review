@@ -22,6 +22,7 @@ class ListItemPintarImagenesAdapter(
 
     override fun onBindViewHolder(holder: ListItemPintarImagenesViewHolder, position: Int) {
         val image = getItem(position)
-        holder.bind(image)
+        val position = (position + 1).toString()
+        holder.bind(image, position)
     }
 }
