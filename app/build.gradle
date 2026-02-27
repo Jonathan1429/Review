@@ -71,9 +71,10 @@ android {
     }
 
     buildFeatures {
-        dataBinding true
-        viewBinding true
+        dataBinding = true
+        viewBinding = true
         buildConfig = false
+        compose = true
     }
 
     android {
@@ -107,6 +108,13 @@ dependencies {
     String daggerHilt = "2.48"
     String mockkVersion = "1.13.12"
     String navVersion = "2.9.6"
+
+    implementation platform('androidx.compose:compose-bom:2026.02.00')
+
+    implementation 'androidx.compose.ui:ui'
+    implementation 'androidx.compose.ui:ui-graphics'
+    implementation 'androidx.compose.material3:material3'
+    implementation 'androidx.activity:activity-compose'
 
     implementation 'androidx.appcompat:appcompat:1.4.1'
     implementation 'com.google.android.material:material:1.5.0'
