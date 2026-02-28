@@ -31,11 +31,10 @@ android {
 
     defaultConfig {
         applicationId "com.jonathanev.review"
-        // minSdk 21
         minSdk 26
         targetSdk 35
-        versionCode 15
-        versionName "2.6"
+        versionCode 16
+        versionName "2.7"
 
         // Con TestRunner personalizado, falta investigar mas este punto
         //testInstrumentationRunner "com.jonathanev.review.CustomTestRunner"
