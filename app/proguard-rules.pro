@@ -20,6 +20,9 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
--keep class com.jonathanev.review.Core.*
--keep class com.google.android.gms.** { *; }
--keep class com.google.firebase.** { *; }
+# Modelos usados en Navigation
+-keep class com.jonathanev.review.presentation.model.** { *; }
+-keep class com.jonathanev.review.ui.model.** { *; }
+
+-keepattributes *Annotation*
+-keepattributes Signature

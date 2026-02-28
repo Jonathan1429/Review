@@ -19,6 +19,13 @@ plugins {
     //id 'org.jetbrains.kotlinx.kover'
 }
 
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file("key.properties")
+
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
     compileSdk 35
 
@@ -36,6 +43,15 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        release {
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled true // Optimisation, reduction, ofuscation
@@ -43,7 +59,7 @@ android {
             debuggable false
             resValue("string", "nameApp", "Review")
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
 
             ndk {
                 debugSymbolLevel = 'FULL'
@@ -52,6 +68,7 @@ android {
 
         debug {
             minifyEnabled false // Optimisation, reduction, ofuscation
+            shrinkResources false // Reduction about resources (Image)
             debuggable true
             resValue("string", "nameApp", "Review [DEBUG]")
 
