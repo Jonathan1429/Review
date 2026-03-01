@@ -17,6 +17,7 @@ class ListItemPintarTextosAdapter(
 
     override fun onBindViewHolder(holder: ListItemPintarTextosViewHolder, position: Int) {
         val text = getItem(position)
-        holder.bind(text)
+        val positionItem: String = (position + 1).toString()
+        holder.bind(text, positionItem)
     }
 }

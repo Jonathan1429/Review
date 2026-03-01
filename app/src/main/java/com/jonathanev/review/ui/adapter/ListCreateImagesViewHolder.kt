@@ -11,7 +11,9 @@ class ListCreateImagesViewHolder(
     private val onEditClicked: (Int) -> Unit,
     private val onDeleteClicked: (Int) -> Unit
 ): RecyclerView.ViewHolder(binding.root) {
-    fun bind(image: QuestionContentUi.Image) {
+    fun bind(image: QuestionContentUi.Image, itemPosition: String) {
+        binding.noPosition.text = itemPosition
+
         Glide.with(binding.ivImagen.context)
             .load(image.uri)
             .centerCrop()
