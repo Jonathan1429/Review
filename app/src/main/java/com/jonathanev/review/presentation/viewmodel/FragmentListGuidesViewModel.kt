@@ -140,8 +140,9 @@ class FragmentListGuidesViewModel @Inject constructor(
                             MoveGuideResponse.ErrorPathImages ->
                                 eventMovingFile("No existe una ruta para guardar las imagenes")
 
-                            MoveGuideResponse.Success ->
+                            MoveGuideResponse.Success ->{
                                 eventMovingFile("Guia movida exitosamente")
+                            }
                         }
                     }
 

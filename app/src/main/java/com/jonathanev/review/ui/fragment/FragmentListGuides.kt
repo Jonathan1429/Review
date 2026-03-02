@@ -71,8 +71,14 @@ class FragmentListGuides : Fragment() {
                                 val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
                                 viewModel.onContinueProcess(confirmed, relativeGuidePath)
 
+                                if (!confirmed) {
+                                    showToast("Se ha cancelado la acción")
+                                }
+
+                                viewModelToolbar.initButtons()
+                                navStateViewModel.setMainPath()
                                 findNavController().navigate(
-                                    R.id.action_to_content_graph,
+                                    R.id.fragmentsContent,
                                     null,
                                     NavOptions.Builder()
                                         .setPopUpTo(R.id.fragmentsContent, inclusive = true)
@@ -81,7 +87,19 @@ class FragmentListGuides : Fragment() {
                             }
                         }
 
-                        is UIMovingEvent.ShowMessage -> showToast(event.text)
+                        is UIMovingEvent.ShowMessage -> {
+                            showToast(event.text)
+
+                            viewModelToolbar.initButtons()
+                            navStateViewModel.setMainPath()
+                            findNavController().navigate(
+                                R.id.action_to_content_graph,
+                                null,
+                                NavOptions.Builder()
+                                    .setPopUpTo(R.id.fragmentsContent, inclusive = true)
+                                    .build()
+                            )
+                        }
                     }
                 }
             }
@@ -109,7 +127,7 @@ class FragmentListGuides : Fragment() {
                     viewModelToolbar.onSuccess.collect {
                         val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
                         viewModel.movingGuide(relativeGuidePath)
-                        viewModelToolbar.initButtons()
+                        /*viewModelToolbar.initButtons()
                         navStateViewModel.setMainPath()
                         findNavController().navigate(
                             R.id.action_to_content_graph,
@@ -117,7 +135,7 @@ class FragmentListGuides : Fragment() {
                             NavOptions.Builder()
                                 .setPopUpTo(R.id.fragmentsContent, inclusive = true)
                                 .build()
-                        )
+                        )*/
                     }
                 }
             }
