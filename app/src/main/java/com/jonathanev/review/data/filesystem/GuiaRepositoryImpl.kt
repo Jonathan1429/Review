@@ -147,7 +147,10 @@ class GuiaRepositoryImpl @Inject constructor(
                 return false
             }
 
-            File(path.value).delete()
+            if (newPath != path.value){
+                File(path.value).delete()
+            }
+
             true
         } catch (_: Exception) {
             false
