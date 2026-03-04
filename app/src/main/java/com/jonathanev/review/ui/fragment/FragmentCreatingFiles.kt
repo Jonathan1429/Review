@@ -305,9 +305,9 @@ class FragmentCreatingFiles : Fragment() {
     }
 
     private fun renameFile(oldName: String) {
-        val fileName = binding.fragmentCreate.etNombre.text.toString()
+        val fileName = binding.fragmentCreate.etNombre.text.toString().trim()
         val description =
-            binding.fragmentCreate.fragmentComponentsFile.etDescription.text.toString()
+            binding.fragmentCreate.fragmentComponentsFile.etDescription.text.toString().trim()
 
         val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
         viewModel.renameFile(oldName, fileName, description, relativeGuidePath)
