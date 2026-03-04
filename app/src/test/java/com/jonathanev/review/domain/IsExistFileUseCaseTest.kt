@@ -23,14 +23,14 @@ class IsExistFileUseCaseTest {
 
     @Test
     fun the_guide_does_not_exist(){
-        val response = isExistFileUseCase.invoke(cachedGuides, "Testing")
+        val response = isExistFileUseCase.invoke(cachedGuides, "Testing", mode.fileName)
 
         assertFalse(response)
     }
 
     @Test
     fun the_guide_exists(){
-        val response = isExistFileUseCase.invoke(cachedGuides, "Kotlin")
+        val response = isExistFileUseCase.invoke(cachedGuides, "Kotlin", mode.fileName)
 
         assertTrue(response)
     }
