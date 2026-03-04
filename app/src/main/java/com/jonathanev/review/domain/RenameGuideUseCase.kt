@@ -1,19 +1,19 @@
 package com.jonathanev.review.domain
 
+import com.jonathanev.review.domain.mapper.GuideQuestionExtractor
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuideRenameContext
-import com.jonathanev.review.domain.model.RequiredAttrGuide
+import com.jonathanev.review.domain.model.OptionalAttrGuide
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
+import com.jonathanev.review.domain.model.RelativeGuidePath
+import com.jonathanev.review.domain.model.RequiredAttrGuide
 import com.jonathanev.review.domain.repository.DirectoryManager
 import com.jonathanev.review.domain.repository.GuiaRepository
 import com.jonathanev.review.domain.repository.ImagesRepository
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.RenamedGuideResult
-import com.jonathanev.review.domain.mapper.GuideQuestionExtractor
-import com.jonathanev.review.domain.model.OptionalAttrGuide
-import com.jonathanev.review.domain.model.RelativeGuidePath
 import javax.inject.Inject
 
 class RenameGuideUseCase @Inject constructor(
@@ -65,6 +65,7 @@ class RenameGuideUseCase @Inject constructor(
                 if (!isSuccess) {
                     return RenamedGuideResult.ImageError
                 }
+
 
                 return RenamedGuideResult.Success
             }

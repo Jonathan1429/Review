@@ -29,6 +29,7 @@ import com.jonathanev.review.domain.repository.FileOutputStreamFactory
 import com.jonathanev.review.domain.repository.FilePathResolver
 import com.jonathanev.review.domain.repository.GuiaRepository
 import com.jonathanev.review.domain.repository.XmlSerializerFactory
+import com.jonathanev.review.domain.result.ExistGuideV1Result
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.GetSaveGuideResult
 import com.jonathanev.review.domain.result.SaveGuideError
@@ -147,7 +148,7 @@ class GuiaRepositoryImpl @Inject constructor(
                 return false
             }
 
-            if (newPath != path.value){
+            if (newPath != path.value) {
                 File(path.value).delete()
             }
 
@@ -486,6 +487,34 @@ class GuiaRepositoryImpl @Inject constructor(
             obtenerDatosXMLV1(guideDomainModel, path)
         else
             obtenerDatosXMLV2(guideDomainModel, path)
+    }
+
+    override fun existXMLGuideV1(
+        guideDomainModel: GuideDomainModel,
+        relativeGuidePath: RelativeGuidePath
+    ): ExistGuideV1Result {
+        val path = filePathResolver.mapToFolderPath(relativeGuidePath, PathKind.GUIAS)
+
+        if (!File(path.value).exists() || !File(path.value).isDirectory) {
+            return ExistGuideV1Result.Error
+        }
+
+        val listGuides = File(path.value).listFiles() ?: emptyArray<File>()
+        if (listGuides.isEmpty()) {
+            return ExistGuideV1Result.Error
+        }
+
+        val file =
+            listGuides.find {
+                it.extension == Extensions.XML_EXTENSION
+                        && it.nameWithoutExtension == guideDomainModel.nameGuide
+            }
+
+        return if (file != null && getAttributesGuide(file).version == GuideVersion.V1) {
+            ExistGuideV1Result.ExistGuide
+        } else {
+            ExistGuideV1Result.NoExistGuide
+        }
     }
 
     override fun moveGuide(guideContext: GuideContext.Moving): Boolean {

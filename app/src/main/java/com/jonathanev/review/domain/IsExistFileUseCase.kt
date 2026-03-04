@@ -6,9 +6,14 @@ import javax.inject.Inject
 class IsExistFileUseCase @Inject constructor() {
     operator fun invoke(
         cachedGuides: List<GuideDomainModel>,
-        name: String
+        name: String,
+        oldName: String
     ): Boolean {
-        val guideDomainModel = cachedGuides.find { it.nameGuide == name }
-        return guideDomainModel != null
+        return if (name == oldName){
+            false
+        } else {
+            val guideDomainModel = cachedGuides.find { it.nameGuide == name }
+            return guideDomainModel != null
+        }
     }
 }
