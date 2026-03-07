@@ -4,7 +4,9 @@ import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.View
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.os.bundleOf
 import androidx.core.view.WindowCompat
 import androidx.navigation.fragment.findNavController
@@ -21,15 +23,20 @@ class FragmentMain : Fragment(R.layout.fragment_compose_container) {
 
         val composeView = view.findViewById<ComposeView>(R.id.composeView)
 
+        // Termina el ciclo de vida correctamente en Compose
+        composeView.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+
         val window = requireActivity().window
-        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         composeView.setContent {
             val isDark = isSystemInDarkTheme()
 
             // Controla los iconos de la status bar
             val controller = WindowCompat.getInsetsController(window, window.decorView)
-            controller.isAppearanceLightStatusBars = !isDark
+
+            SideEffect {
+                controller.isAppearanceLightStatusBars = !isDark
+            }
 
             ReviewTheme(darkTheme = isDark) {
                 MainScreen(
