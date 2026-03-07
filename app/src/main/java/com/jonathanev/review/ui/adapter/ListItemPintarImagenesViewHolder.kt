@@ -10,7 +10,9 @@ class ListItemPintarImagenesViewHolder(
     private val binding: ListPintarImagenesRepasarBinding,
     private val posClicked: (Int) -> Unit
 ): RecyclerView.ViewHolder(binding.root) {
-    fun bind(image: QuestionContentUi.Image){
+    fun bind(image: QuestionContentUi.Image, positionItem: String){
+        binding.noPosition.text = positionItem
+
         Glide.with(binding.ivImagen.context)
             .load(image.uri)
             .centerCrop()

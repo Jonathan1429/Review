@@ -1,7 +1,10 @@
 package com.jonathanev.review.presentation.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jonathanev.review.domain.DeleteGuideUseCase
+import com.jonathanev.review.domain.ExistXMLGuideV1UseCase
 import com.jonathanev.review.domain.IsExistFileUseCase
 import com.jonathanev.review.domain.IsExistFolderUseCase
 import com.jonathanev.review.domain.LoadGuidesUseCase
@@ -9,15 +12,18 @@ import com.jonathanev.review.domain.RenameGuideUseCase
 import com.jonathanev.review.domain.SaveMetadataUseCase
 import com.jonathanev.review.domain.ValidateCreateFileUseCase
 import com.jonathanev.review.domain.model.GuideDomainModel
+import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.RelativeGuidePath
+import com.jonathanev.review.domain.result.DeleteGuideResult
+import com.jonathanev.review.domain.result.ExistGuideV1Result
 import com.jonathanev.review.domain.result.RenamedGuideResult
 import com.jonathanev.review.domain.result.ValidateCreateFileResult
 import com.jonathanev.review.presentation.event.RenameGuideEvent
-import com.jonathanev.review.presentation.model.GuideResultUi
 import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.ColorType
 import com.jonathanev.review.presentation.model.FolderAction
+import com.jonathanev.review.presentation.model.GuideResultUi
 import com.jonathanev.review.presentation.model.IconType
 import com.jonathanev.review.presentation.model.QuestionItemUi
 import com.jonathanev.review.presentation.model.ScreenDataUi
@@ -38,7 +44,9 @@ class CreateFilesViewModel @Inject constructor(
     private val saveMetadataUseCase: SaveMetadataUseCase,
     private val loadGuidesUseCase: LoadGuidesUseCase,
     private val isExistFileUseCase: IsExistFileUseCase,
-    private val isExistFolderUseCase: IsExistFolderUseCase
+    private val isExistFolderUseCase: IsExistFolderUseCase,
+    private val deleteGuideUseCase: DeleteGuideUseCase,
+    private val existXMLGuideV1UseCase: ExistXMLGuideV1UseCase
 ) : ViewModel() {
     private var cachedGuides: List<GuideDomainModel> = emptyList()
 
@@ -159,8 +167,47 @@ class CreateFilesViewModel @Inject constructor(
                 RenamedGuideResult.RenamedError ->
                     emitMessage("No se ha podido renombrar la guia")
 
-                RenamedGuideResult.Success ->
+                RenamedGuideResult.Success -> {
                     emitMessage("Guia renombrada exitosamente")
+
+                    val xmlGuideV1 = GuideDomainModel(GuideVersion.V1, fileName, description)
+
+                    when (existXMLGuideV1UseCase.invoke(xmlGuideV1, relativeGuidePath)) {
+                        ExistGuideV1Result.Error ->
+                            Log.d("RenameGuide", "Error al validar la guia V1")
+
+                        ExistGuideV1Result.ExistGuide -> {
+                            when (deleteGuideUseCase.invoke(
+                                guideDomainModel = xmlGuideV1,
+                                relativeGuidePath = relativeGuidePath
+                            )) {
+                                DeleteGuideResult.DeleteSuccess ->
+                                    Log.d("RenameGuide", "Guia V1 eliminada correctamente")
+
+                                DeleteGuideResult.Error ->
+                                    Log.d("RenameGuide", "Error general al eliminar la Guia V1")
+
+                                DeleteGuideResult.ErrorGuide ->
+                                    Log.d("RenameGuide", "Error eliminando archivo de la Guia V1")
+
+                                DeleteGuideResult.ErrorImage ->
+                                    Log.d("RenameGuide", "Error eliminando imagenes de la Guia V1")
+
+                                DeleteGuideResult.InvalidFormat ->
+                                    Log.d("RenameGuide", "Formato invalido de la Guia V1")
+
+                                DeleteGuideResult.NotFound ->
+                                    Log.d("RenameGuide", "Guia V1 no encontrada")
+
+                                DeleteGuideResult.UnknownError ->
+                                    Log.d("RenameGuide", "Error desconocido de la Guia V1")
+                            }
+                        }
+
+                        ExistGuideV1Result.NoExistGuide ->
+                            Log.d("RenameGuide", "No existe Guia V1")
+                    }
+                }
 
                 RenamedGuideResult.Error -> emitMessage("Ocurrió un error al abrir la guia")
 
@@ -182,11 +229,21 @@ class CreateFilesViewModel @Inject constructor(
     }
 
     fun fileExist(mode: FolderAction, name: String): Boolean {
-        return when(mode){
-            FolderAction.CreatingFile,
+        return when (mode) {
+            FolderAction.CreatingFile -> isExistFileUseCase.invoke(
+                cachedGuides = cachedGuides,
+                name = name,
+                oldName = ""
+            )
+
             is FolderAction.RenamingFile -> {
-                isExistFileUseCase.invoke(cachedGuides, name)
+                isExistFileUseCase.invoke(
+                    cachedGuides = cachedGuides,
+                    name = name,
+                    oldName = mode.fileName
+                )
             }
+
             FolderAction.CreatingFolder -> isExistFolderUseCase.invoke(name)
             else -> {
                 emitMessage("Error inesperado")

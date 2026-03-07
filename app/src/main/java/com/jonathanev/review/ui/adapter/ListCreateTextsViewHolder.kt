@@ -9,8 +9,9 @@ class ListCreateTextsViewHolder(
     private val onEditClicked: (Int) -> Unit,
     private val onDeleteClicked: (Int) -> Unit
 ) : RecyclerView.ViewHolder(binding.root) {
-    fun bind(content: QuestionContentUi.Text) {
+    fun bind(content: QuestionContentUi.Text, itemPosition: String) {
         binding.lblText.text = content.text
+        binding.noPosition.text = itemPosition
 
         binding.btnEdit.setOnClickListener {
             onEditClicked(layoutPosition)

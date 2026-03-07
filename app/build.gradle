@@ -21,21 +21,36 @@ plugins {
     id 'org.jetbrains.kotlin.plugin.compose'
 }
 
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file("key.properties")
+
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
     compileSdk 35
 
     defaultConfig {
         applicationId "com.jonathanev.review"
-        // minSdk 21
         minSdk 26
         targetSdk 35
-        versionCode 15
-        versionName "2.6"
+        versionCode 18
+        versionName "2.9"
 
         // Con TestRunner personalizado, falta investigar mas este punto
         //testInstrumentationRunner "com.jonathanev.review.CustomTestRunner"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        release {
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+        }
     }
 
     buildTypes {
@@ -45,7 +60,7 @@ android {
             debuggable false
             resValue("string", "nameApp", "Review")
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
 
             ndk {
                 debugSymbolLevel = 'FULL'
@@ -54,6 +69,7 @@ android {
 
         debug {
             minifyEnabled false // Optimisation, reduction, ofuscation
+            shrinkResources false // Reduction about resources (Image)
             debuggable true
             resValue("string", "nameApp", "Review [DEBUG]")
 

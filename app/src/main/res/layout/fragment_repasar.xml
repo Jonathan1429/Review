@@ -5,13 +5,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background_app"
-    tools:context=".ui.fragment.FragmentCreateFile">
+    tools:context=".ui.fragment.FragmentRepasar">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/background_app"
-        tools:context=".ui.fragment.FragmentRepasar">
+        android:background="@color/background_app">
 
         <LinearLayout
             android:id="@+id/optionsIcons"
@@ -30,8 +29,8 @@
                     android:id="@+id/btnPrevious"
                     android:layout_width="34dp"
                     android:layout_height="34dp"
-                    android:background="?android:attr/selectableItemBackgroundBorderless"
                     android:layout_margin="10dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
                     android:padding="6dp"
                     android:src="@drawable/ic_circle_left_right"
                     tools:ignore="ContentDescription" />

@@ -18,6 +18,7 @@ class ListCreateImagesAdapter(
 
     override fun onBindViewHolder(holder: ListCreateImagesViewHolder, position: Int) {
         val item = getItem(position)
-        holder.bind(item)
+        val itemPosition = (position + 1).toString()
+        holder.bind(item, itemPosition)
     }
 }

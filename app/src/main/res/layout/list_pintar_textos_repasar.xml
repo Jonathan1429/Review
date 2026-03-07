@@ -9,10 +9,21 @@
     android:background="@drawable/contents">
 
     <TextView
+        android:id="@+id/noPosition"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="1"
+        android:textColor="@color/white"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <TextView
         android:id="@+id/titleVisor"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Visor"
+        android:textColor="@color/white"
         android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
@@ -24,6 +35,7 @@
         android:layout_height="wrap_content"
         android:text="Previsualización"
         android:textStyle="bold"
+        android:textColor="@color/white"
         app:layout_constraintTop_toBottomOf="@+id/titleVisor" />
 
     <ScrollView
@@ -39,6 +51,7 @@
             android:id="@+id/lblText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            tools:text="Texto de ejemplo del visor..." />
+            tools:text="Texto de ejemplo del visor..."
+            android:textColor="@color/white"/>
     </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

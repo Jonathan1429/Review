@@ -8,6 +8,16 @@
     android:background="@drawable/content_in_content"
     android:padding="8dp">
 
+    <TextView
+        android:id="@+id/noPosition"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/white"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="1" />
+
     <ImageView
         android:id="@+id/btnEdit"
         android:layout_width="30dp"
@@ -37,6 +47,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Previsualización"
+        android:textColor="@color/white"
         android:textStyle="bold"
         app:layout_constraintTop_toBottomOf="@+id/btnEdit" />
 
@@ -53,6 +64,7 @@
             android:id="@+id/lblText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textColor="@color/white"
             tools:text="Texto de ejemplo del visor..." />
     </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -9,8 +9,9 @@ class ListItemPintarTextosViewHolder @Inject constructor(
     private val binding: ListPintarTextosRepasarBinding,
     private val posClicked: (Int) -> Unit
 ): RecyclerView.ViewHolder(binding.root) {
-    fun bind(text: QuestionContentUi.Text) {
+    fun bind(text: QuestionContentUi.Text, positionItem: String) {
         binding.lblText.text = text.text
+        binding.noPosition.text = positionItem
 
         binding.titleVisor.setOnClickListener {
             posClicked(layoutPosition)

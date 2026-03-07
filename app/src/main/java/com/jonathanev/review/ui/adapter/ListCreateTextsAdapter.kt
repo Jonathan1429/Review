@@ -18,6 +18,7 @@ class ListCreateTextsAdapter(
 
     override fun onBindViewHolder(holder: ListCreateTextsViewHolder, position: Int) {
         val text = getItem(position)
-        holder.bind(text)
+        val itemPosition = (position + 1).toString()
+        holder.bind(text, itemPosition)
     }
 }
