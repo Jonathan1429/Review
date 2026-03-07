@@ -16,7 +16,6 @@ import androidx.navigation.fragment.findNavController
 import com.jonathanev.review.R
 import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.presentation.viewmodel.FragmentsContentViewModel
-import com.jonathanev.review.databinding.FragmentFragmentsContentBinding
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
