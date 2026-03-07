@@ -26,8 +26,7 @@
 
     <fragment
         android:id="@+id/fragmentMainActivity"
-        android:name="com.jonathanev.review.ui.main.FragmentMain"
-        tools:layout="@layout/fragment_main_activity">
+        android:name="com.jonathanev.review.ui.main.FragmentMain">
 
         <action
             android:id="@+id/action_to_create_graph"
@@ -36,8 +35,7 @@
 
     <fragment
         android:id="@+id/fragmentListFolders"
-        android:name="com.jonathanev.review.ui.fragment.FragmentListFolders"
-        tools:layout="@layout/fragment_list_folders">
+        android:name="com.jonathanev.review.ui.fragment.FragmentListFolders">
 
         <argument
             android:name="mode"

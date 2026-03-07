@@ -26,19 +26,8 @@ class FragmentMain : Fragment(R.layout.fragment_compose_container) {
         // Termina el ciclo de vida correctamente en Compose
         composeView.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
 
-        val window = requireActivity().window
-
         composeView.setContent {
-            val isDark = isSystemInDarkTheme()
-
-            // Controla los iconos de la status bar
-            val controller = WindowCompat.getInsetsController(window, window.decorView)
-
-            SideEffect {
-                controller.isAppearanceLightStatusBars = !isDark
-            }
-
-            ReviewTheme(darkTheme = isDark) {
+            ReviewTheme {
                 MainScreen(
                     onCreateFolderClick = {
                         findNavController().navigate(

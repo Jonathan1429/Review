@@ -42,7 +42,12 @@ import com.jonathanev.review.ui.theme.Inter
 import com.jonathanev.review.ui.theme.TextGray
 import com.jonathanev.review.ui.theme.cardStepBackground
 
-@OptIn(ExperimentalMaterial3Api::class)
+@Preview
+@Composable
+fun PreviewMainScreen(){
+    MainScreen(onCreateFolderClick = {} )
+}
+
 @Composable
 fun MainScreen(
     onCreateFolderClick: () -> Unit
@@ -135,7 +140,6 @@ fun BasePasos(image: Int, title: Int, description: Int) {
     }
 }
 
-@Preview(showBackground = true)
 @Composable
 fun SinFolders() {
     Column(
