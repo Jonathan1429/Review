@@ -7,8 +7,7 @@
 
     <fragment
         android:id="@+id/fragmentsContent"
-        android:name="com.jonathanev.review.ui.fragment.FragmentsContent"
-        tools:layout="@layout/fragment_fragments_content">
+        android:name="com.jonathanev.review.ui.fragment.FragmentsContent">
 
         <argument
             android:name="mode"
