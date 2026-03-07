@@ -175,6 +175,7 @@ class SetCrearXmlUseCaseTest {
             preguntas,
             respuestas
         )
+        every { loadGuidesUseCase.invoke(relativeGuidePath) } returns guides
         every {
             setLabelsUseCase.invoke(preguntas, respuestas)
         } returns Pair(preguntas, respuestas)
@@ -202,6 +203,7 @@ class SetCrearXmlUseCaseTest {
         )
 
         coVerify { setDecodePathImageUseCase.invoke(preguntas, respuestas) }
+        verify { loadGuidesUseCase.invoke(relativeGuidePath) }
         verify { setLabelsUseCase.invoke(preguntas, respuestas) }
         verify { directoryManager.createPathGuide(relativeGuidePath, nameGuide) }
         verify {
