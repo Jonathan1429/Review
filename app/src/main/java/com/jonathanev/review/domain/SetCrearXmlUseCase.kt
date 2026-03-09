@@ -31,6 +31,15 @@ class SetCrearXmlUseCase @Inject constructor(
             preguntas,
             respuestas
         )
+
+        val version = loadGuidesUseCase.invoke(relativeGuidePath)
+            .find { it.nameGuide == nameGuide }
+            ?.version
+
+        if (mode == SaveGuideMode.Update && version == null) {
+            return UpdateGuideResult.ErrorUpdateGuide
+        }
+
         if (mode == SaveGuideMode.Update){
             val guides = loadGuidesUseCase.invoke(relativeGuidePath)
             val guide = guides.find { it.nameGuide == nameGuide }
@@ -49,7 +58,7 @@ class SetCrearXmlUseCase @Inject constructor(
         }
 
         val resultGuide = guiaRepository.saveGuide(
-            guideDomainModel = GuideDomainModel(GuideVersion.V2, nameGuide, description),
+            guideDomainModel = GuideDomainModel(version ?: GuideVersion.V2, nameGuide, description),
             preguntas = dataWithTagsQ,
             respuestas = dataWithTagsA,
             relativeGuidePath = relativeGuidePath
@@ -60,7 +69,7 @@ class SetCrearXmlUseCase @Inject constructor(
         }
 
         val imagesUpdated = updateImagesUseCase.invoke(
-            guideDomain =  GuideDomainModel(GuideVersion.V2, nameGuide, description),
+            guideDomain =  GuideDomainModel(version ?: GuideVersion.V2, nameGuide, description),
             preguntasProcesadas = preguntasProcesadas,
             respuestasProcesadas = respuestasProcesadas,
             isNewFile = mode != SaveGuideMode.Update,
