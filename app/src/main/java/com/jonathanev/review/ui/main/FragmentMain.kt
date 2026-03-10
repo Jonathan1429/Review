@@ -1,17 +1,20 @@
 package com.jonathanev.review.ui.main
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
+import android.util.Log
 import android.view.View
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.os.bundleOf
-import androidx.core.view.WindowCompat
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.jonathanev.review.R
 import com.jonathanev.review.presentation.model.FolderAction
+import com.jonathanev.review.ui.screens.CreateFiles
 import com.jonathanev.review.ui.screens.MainScreen
 import com.jonathanev.review.ui.theme.ReviewTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -36,7 +39,6 @@ class FragmentMain : Fragment(R.layout.fragment_compose_container) {
                         )
                     }
                 )
-
             }
         }
     }

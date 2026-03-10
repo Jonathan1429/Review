@@ -8,8 +8,11 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.os.BundleCompat
@@ -25,24 +28,22 @@ import androidx.navigation.fragment.findNavController
 import com.jonathanev.review.R
 import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.presentation.event.RenameGuideEvent
-import com.jonathanev.review.presentation.model.GuideResultUi
-import com.jonathanev.review.presentation.viewmodel.CreateFilesViewModel
-import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.presentation.model.ActionGuide
 import com.jonathanev.review.presentation.model.ColorType
+import com.jonathanev.review.presentation.model.FolderAction
+import com.jonathanev.review.presentation.model.GuideResultUi
 import com.jonathanev.review.presentation.model.ScreenDataUi
-import com.jonathanev.review.presentation.state.CreatingFileUiState
+import com.jonathanev.review.presentation.viewmodel.CreateFilesViewModel
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
 import com.jonathanev.review.ui.adapter.ListarIconosAdapter
 import com.jonathanev.review.ui.mapper.toDrawableRes
 import com.jonathanev.review.ui.mapper.toNav
-import com.jonathanev.review.ui.screens.MainScreen
+import com.jonathanev.review.ui.screens.CreateFiles
 import com.jonathanev.review.ui.theme.ReviewTheme
 import com.skydoves.colorpickerview.flag.BubbleFlag
 import com.skydoves.colorpickerview.flag.FlagMode
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import kotlin.getValue
 
 @AndroidEntryPoint
 class FragmentCreatingFiles : Fragment(R.layout.fragment_compose_container) {
@@ -66,14 +67,16 @@ class FragmentCreatingFiles : Fragment(R.layout.fragment_compose_container) {
 
         composeView.setContent {
             ReviewTheme {
-                MainScreen(
-                    onCreateFolderClick = {
-                        findNavController().navigate(
-                            R.id.action_to_create_graph,
-                            bundleOf("mode" to FolderAction.CreatingFolder)
-                        )
-                    }
+                var name by rememberSaveable { mutableStateOf("") }
+
+                CreateFiles(name) { name = it }
+                /*onCreateFolderClick = {
+                findNavController().navigate(
+                    R.id.action_to_create_graph,
+                    bundleOf("mode" to FolderAction.CreatingFolder)
                 )
+            }*/
+
 
             }
         }
