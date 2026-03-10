@@ -126,11 +126,11 @@ class CreateFilesViewModel @Inject constructor(
         }
     }
 
-    fun saveMetadata(data: ScreenDataUi) {
+    /*fun saveMetadata(data: ScreenDataUi) {
         val screenDataDomain = data.toDomain()
 
         saveMetadataUseCase.invoke(screenDataDomain)
-    }
+    }*/
 
     fun fillFields(fileName: String): GuideResultUi {
         val guideDomainModel = cachedGuides.find { it.nameGuide == fileName }

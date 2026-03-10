@@ -1,12 +1,18 @@
 package com.jonathanev.review.ui.mapper
 
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import com.jonathanev.review.R
 import com.jonathanev.review.data.mapper.toColorType
 import com.jonathanev.review.presentation.model.ColorType
 import com.jonathanev.review.presentation.model.IconType
 import com.jonathanev.review.presentation.model.ScreenDataUi
 import com.jonathanev.review.ui.model.ScreenDataNav
+import com.jonathanev.review.ui.theme.White
 
+@Composable
 fun ScreenDataUi.toNav(): ScreenDataNav = ScreenDataNav(
     name = name,
     description = description,
@@ -24,7 +30,7 @@ fun ScreenDataNav.toUi(): ScreenDataUi = ScreenDataUi(
 )
 
 fun Int.toIconType(): IconType {
-    return when(this) {
+    return when (this) {
         R.drawable.ic_lightbulb_solid_full -> IconType.LIGHTBULB
         R.drawable.ic_anchor_solid_full -> IconType.ANCHOR_SOLID_FULL
         R.drawable.ic_angellist_brands_solid_full -> IconType.ANGELLIST_BRANDS_SOLID_FULL
@@ -34,7 +40,7 @@ fun Int.toIconType(): IconType {
 }
 
 fun IconType.toInt(): Int {
-    return when(this){
+    return when (this) {
         IconType.LIGHTBULB -> R.drawable.ic_lightbulb_solid_full
         IconType.ANCHOR_SOLID_FULL -> R.drawable.ic_anchor_solid_full
         IconType.ANGELLIST_BRANDS_SOLID_FULL -> R.drawable.ic_angellist_brands_solid_full
@@ -42,25 +48,35 @@ fun IconType.toInt(): Int {
     }
 }
 
+@Composable
 fun ColorType.toInt(): Int {
-    return when(this){
-        ColorType.Black -> R.color.black
-        ColorType.Gray -> R.color.text_gray
+    val isDark = isSystemInDarkTheme()
+
+    return when (this) {
+        ColorType.Black -> Color.Black.toArgb()
+        ColorType.Gray -> Color.Gray.toArgb()
         is ColorType.RandomColor -> this.color
-        ColorType.White -> R.color.white
+        ColorType.White -> White.toArgb()
+        ColorType.Default -> if (isDark) Color.White.toArgb() else Color.Black.toArgb()
     }
 }
 
-fun IconType.toDrawableRes(): Int = when(this) {
+fun IconType.toDrawableRes(): Int = when (this) {
     IconType.LIGHTBULB -> R.drawable.ic_lightbulb_solid_full
     IconType.ANCHOR_SOLID_FULL -> R.drawable.ic_anchor_solid_full
     IconType.ANGELLIST_BRANDS_SOLID_FULL -> R.drawable.ic_angellist_brands_solid_full
     IconType.BACTERIA_SOLID_FULL -> R.drawable.ic_bacteria_solid_full
 }
 
-fun ColorType.toColorRes(): Int = when(this) {
-    ColorType.Black -> R.color.black
-    ColorType.Gray -> R.color.text_gray
-    ColorType.White -> R.color.white
-    is ColorType.RandomColor -> color
+@Composable
+fun ColorType.toColorRes(): Color {
+    val isDark = isSystemInDarkTheme()
+
+    return when (this) {
+        ColorType.Black -> Color.Black
+        ColorType.Gray -> Color.Gray
+        ColorType.White -> Color.White //R.color.white
+        is ColorType.RandomColor -> Color(this.color)
+        ColorType.Default -> if (isDark) Color.White else Color.Black
+    }
 }

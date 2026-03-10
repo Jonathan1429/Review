@@ -1,19 +1,17 @@
 package com.jonathanev.review.ui.fragment
 
 import android.app.AlertDialog
-import android.content.res.ColorStateList
+import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Color
-import android.graphics.PorterDuff
-import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.core.graphics.ColorUtils
 import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
@@ -24,9 +22,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.GridLayoutManager
 import com.jonathanev.review.R
-import com.jonathanev.review.databinding.FragmentCreateFilesBinding
 import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.presentation.event.RenameGuideEvent
 import com.jonathanev.review.presentation.model.GuideResultUi
@@ -44,7 +40,6 @@ import com.jonathanev.review.ui.screens.MainScreen
 import com.jonathanev.review.ui.theme.ReviewTheme
 import com.skydoves.colorpickerview.flag.BubbleFlag
 import com.skydoves.colorpickerview.flag.FlagMode
-import com.skydoves.colorpickerview.listeners.ColorListener
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import kotlin.getValue
@@ -92,12 +87,12 @@ class FragmentCreatingFiles : Fragment(R.layout.fragment_compose_container) {
         initUI(mode)
         //initListeners(mode)
 
-        lifecycleScope.launch {
+        /*lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.messages.collect { values ->
                     when (values) {
                         is CreatingFileUiState.ContinuedProcess -> {
-                            folderAction(mode, values.name, values.description)
+                            FolderAction(mode, values.name, values.description)
                         }
 
                         is CreatingFileUiState.Message -> Toast.makeText(
@@ -108,7 +103,7 @@ class FragmentCreatingFiles : Fragment(R.layout.fragment_compose_container) {
                     }
                 }
             }
-        }
+        }*/
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -147,11 +142,15 @@ class FragmentCreatingFiles : Fragment(R.layout.fragment_compose_container) {
                         binding.fragmentCreate.prevCarpeta.bgCarpeta.background as GradientDrawable
                     binding.fragmentCreate.prevCarpeta.ivCarpeta.imageTintMode =
                         PorterDuff.Mode.SRC_ATOP*/
+
+                    val isDark = requireContext().isDarkTheme()
+
                     val color = when (state.color) {
                         ColorType.Black -> Color.BLACK
                         ColorType.Gray -> Color.GRAY
                         ColorType.White -> Color.WHITE
                         is ColorType.RandomColor -> state.color.color
+                        ColorType.Default -> if (isDark) Color.WHITE else Color.BLACK
                     }
 
                     /*val color50 = ColorUtils.setAlphaComponent(color, 50)
@@ -162,6 +161,13 @@ class FragmentCreatingFiles : Fragment(R.layout.fragment_compose_container) {
                 }
             }
         }
+    }
+
+    fun Context.isDarkTheme(): Boolean {
+        val nightModeFlags = resources.configuration.uiMode and
+                Configuration.UI_MODE_NIGHT_MASK
+
+        return nightModeFlags == Configuration.UI_MODE_NIGHT_YES
     }
 
     private fun alertDialog(onResult: (Boolean) -> Unit) {
@@ -263,7 +269,8 @@ class FragmentCreatingFiles : Fragment(R.layout.fragment_compose_container) {
         }
     }
 
-    private fun folderAction(mode: FolderAction, name: String, description: String) {
+    /*@Composable
+    private fun FolderAction(mode: FolderAction, name: String, description: String) {
         val state = viewModel.uiState.value
 
         val icon = state.icons[state.selectedIndex]
@@ -283,13 +290,14 @@ class FragmentCreatingFiles : Fragment(R.layout.fragment_compose_container) {
                 "Aun no se aplica la funcion renombrar folder"
             )
 
-            FolderAction.CreatingFile -> onCreateGuideConfirmed(data)
+            FolderAction.CreatingFile -> OnCreateGuideConfirmed(data)
             FolderAction.None -> Log.e("Error", "No se pudo crear el archivo")
             is FolderAction.MovingFile -> Log.i("Moviendo: ", "Moviendo archivos")
         }
-    }
+    }*/
 
-    private fun onCreateGuideConfirmed(data: ScreenDataUi) {
+    @Composable
+    private fun OnCreateGuideConfirmed(data: ScreenDataUi) {
         findNavController().navigate(
             R.id.action_to_create_file,
             bundleOf(
@@ -300,7 +308,7 @@ class FragmentCreatingFiles : Fragment(R.layout.fragment_compose_container) {
         )
     }
 
-    private fun onCreateFolderConfirmed(data: ScreenDataUi) {
+    /*private fun onCreateFolderConfirmed(data: ScreenDataUi) {
         viewModel.saveMetadata(data)
 
         Toast.makeText(
@@ -316,7 +324,7 @@ class FragmentCreatingFiles : Fragment(R.layout.fragment_compose_container) {
                 .setPopUpTo(R.id.content_graph, true) // Limpia el historial
                 .build()
         )
-    }
+    }*/
 
     private fun renameFile(oldName: String) {
         /*val fileName = binding.fragmentCreate.etNombre.text.toString().trim()

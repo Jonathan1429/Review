@@ -27,6 +27,14 @@ val cardStepBackground: Color
     else
         ContentsLight
 
+val cardListBackground: Color
+    @Composable
+    get() = if (isSystemInDarkTheme())
+        ContentsLight
+    else
+        ContentsDark
+
+
 val textColor: Color
     @Composable
     get() = if (isSystemInDarkTheme())

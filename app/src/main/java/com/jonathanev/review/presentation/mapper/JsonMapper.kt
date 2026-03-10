@@ -1,10 +1,12 @@
 package com.jonathanev.review.presentation.mapper
 
+import androidx.compose.runtime.Composable
 import com.jonathanev.review.data.mapper.toIconKeys
 import com.jonathanev.review.domain.model.FolderScreenInfoDomain
 import com.jonathanev.review.presentation.model.ScreenDataUi
 import com.jonathanev.review.ui.mapper.toInt
 
+@Composable
 fun ScreenDataUi.toDomain(): FolderScreenInfoDomain {
     return FolderScreenInfoDomain(
         name = this.name,

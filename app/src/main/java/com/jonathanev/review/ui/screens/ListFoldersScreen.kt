@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -31,7 +32,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.graphics.ColorUtils
 import com.jonathanev.review.presentation.model.ColorType
 import com.jonathanev.review.presentation.model.FolderAttributesUi
 import com.jonathanev.review.presentation.model.FolderUiModel
@@ -125,9 +125,13 @@ fun GuiaItem(
     guia: FolderUiModel,
     onClick: () -> Unit
 ) {
-    val color50 = ColorUtils.setAlphaComponent(guia.folder.color.toColorRes(), 50)
+    //val color50 = ColorUtils.setAlphaComponent(guia.folder.color.toColorRes(), 50)
+    val color50 = guia.folder.color.toColorRes().copy(alpha = 0.2f)
 
     Card(
+        colors = CardDefaults.cardColors(
+            containerColor = Color.Transparent
+        ),
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
@@ -136,23 +140,22 @@ fun GuiaItem(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-                .background(cardStepBackground)
-                //.background(Color(color50))
                 .clip(RectangleShape)
                 .fillMaxWidth()
+                .background(cardStepBackground)
                 .padding(horizontal = 6.dp, vertical = 8.dp)
         ) {
             Image(
                 modifier = Modifier
                     .size(70.dp)
                     .clip(RoundedCornerShape(10.dp))
-                    .background(Color(color50))
+                    .background(color50)
                     .padding(12.dp),
                 painter = painterResource(guia.folder.imgFolder.toDrawableRes()),
-                colorFilter = ColorFilter.tint(Color(guia.folder.color.toColorRes())),
+                colorFilter = ColorFilter.tint(guia.folder.color.toColorRes()),
                 contentDescription = "añadir carpeta"
             )
-            HorizontalDivider(Modifier.size(8.dp))
+            HorizontalDivider(Modifier.size(8.dp), color = Color.Transparent)
             Text(
                 text = guia.folder.name,
                 modifier = Modifier.fillMaxWidth(),
