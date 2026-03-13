@@ -42,6 +42,7 @@ import com.jonathanev.review.ui.theme.ColorBotones
 import com.jonathanev.review.ui.theme.Inter
 import com.jonathanev.review.ui.theme.cardStepBackground
 import com.jonathanev.review.ui.theme.textColor
+import com.skydoves.compose.stability.runtime.TraceRecomposition
 
 
 @Preview
@@ -85,6 +86,7 @@ fun PreviewListFolder() {
     ListFoldersScreen(listGuides, onCreateFolderClick = {}, onFolderClick = {})
 }
 
+@TraceRecomposition(tag = "Prueba")
 @Composable
 fun ListFoldersScreen(
     guias: List<FolderUiModel>,

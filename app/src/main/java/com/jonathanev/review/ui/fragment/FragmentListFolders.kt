@@ -65,11 +65,11 @@ class FragmentListFolders : Fragment(R.layout.fragment_compose_container) {
 
         composeView.setContent {
             ReviewTheme {
-                var name by rememberSaveable { mutableStateOf("") }
+                /*var name by rememberSaveable { mutableStateOf("") }
 
-                CreateFiles(name) { name = it }
+                CreateFiles(name) { name = it }*/
 
-                /*val uiState by viewModel.foldersUiState.collectAsState()
+                val uiState by viewModel.foldersUiState.collectAsState()
                 val error = uiState.error
 
                 if (error != null) {
@@ -91,7 +91,7 @@ class FragmentListFolders : Fragment(R.layout.fragment_compose_container) {
                             )
                         }
                     }
-                )*/
+                )
             }
         }
 
