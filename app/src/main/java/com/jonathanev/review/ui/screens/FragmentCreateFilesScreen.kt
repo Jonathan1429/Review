@@ -9,12 +9,17 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -43,8 +48,10 @@ import com.jonathanev.review.R
 import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.presentation.model.IconType
 import com.jonathanev.review.presentation.viewmodel.CreateFilesViewModel
+import com.jonathanev.review.ui.theme.ColorBotones
 import com.jonathanev.review.ui.theme.baseColor
 import com.jonathanev.review.ui.theme.cardStepBackground
+import com.jonathanev.review.ui.theme.iconBackground
 import com.skydoves.compose.stability.runtime.TraceRecomposition
 
 @Preview(showBackground = true)
@@ -75,7 +82,22 @@ fun PropertiesFilesContent(
     mode: FolderAction,
 ) {
     Scaffold(
-        //topBar = { TopAppBar(title = { Text("Carpetas") }) },
+        modifier = Modifier.fillMaxSize(),
+        bottomBar = {
+            Button(
+                onClick = { /* Tu lógica de guardado */ },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    //.navigationBarsPadding(), // Respeta la barra de navegación del sistema
+                    .imePadding(), // Sube con el teclado de forma fija
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = ColorBotones)
+            ) {
+                Text("Aplicar")
+            }
+        }
+    //topBar = { TopAppBar(title = { Text("Carpetas") }) },
         /*floatingActionButton = {
             FloatingActionButton(
                 onClick = { onCreateFolderClick() },
@@ -116,7 +138,6 @@ fun PropertiesFilesContent(
                 Text("Selecciona el color de la carpeta")
                 PreviewColorFolder { color = it }
             }
-            Box(Modifier.size(20.dp).background(color))
         }
     }
 }
@@ -145,7 +166,7 @@ fun LayeredSelectedIcon(
     onClick: () -> Unit
 ) {
     // Definimos los colores (puedes usar tus colores de Theme.kt)
-    val itemIconColor = Color(0xFF6200EE) // Equivalente a @color/item_icon
+    val itemIconColor = Color(0xFF6370E7) // Equivalente a @color/item_icon
     val backgroundColor = Color(0xFFF5F5F5) // Equivalente a @color/bg_edittext
     val iconDrawable = when (icon) {
         IconType.LIGHTBULB -> R.drawable.ic_lightbulb_solid_full
@@ -174,7 +195,7 @@ fun LayeredSelectedIcon(
                             RoundedCornerShape(6.dp)
                         ) // Capa interior (Capa 3)
                 } else {
-                    Modifier.background(cardStepBackground) // Estado normal
+                    Modifier.background(iconBackground) // Estado normal
                 }
             ),
         contentAlignment = Alignment.Center
