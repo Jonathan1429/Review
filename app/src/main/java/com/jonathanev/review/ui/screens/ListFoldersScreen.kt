@@ -41,7 +41,7 @@ import com.jonathanev.review.ui.mapper.toDrawableRes
 import com.jonathanev.review.ui.theme.ColorBotones
 import com.jonathanev.review.ui.theme.Inter
 import com.jonathanev.review.ui.theme.cardStepBackground
-import com.jonathanev.review.ui.theme.textColor
+import com.jonathanev.review.ui.theme.baseColor
 import com.skydoves.compose.stability.runtime.TraceRecomposition
 
 
@@ -165,13 +165,13 @@ fun GuiaItem(
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = Inter,
-                color = textColor
+                color = baseColor
             )
             Text(
                 text = "${guia.numGuides} Guias",
                 modifier = Modifier.fillMaxWidth(),
                 maxLines = 1,
-                color = textColor
+                color = baseColor
             )
         }
     }

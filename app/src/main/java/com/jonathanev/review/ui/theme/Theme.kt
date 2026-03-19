@@ -35,7 +35,7 @@ val cardListBackground: Color
         ContentsDark
 
 
-val textColor: Color
+val baseColor: Color
     @Composable
     get() = if (isSystemInDarkTheme())
         White

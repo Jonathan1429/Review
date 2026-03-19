@@ -38,7 +38,7 @@ import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
 import com.jonathanev.review.ui.adapter.ListarIconosAdapter
 import com.jonathanev.review.ui.mapper.toDrawableRes
 import com.jonathanev.review.ui.mapper.toNav
-import com.jonathanev.review.ui.screens.CreateFiles
+import com.jonathanev.review.ui.screens.PropertiesFiles
 import com.jonathanev.review.ui.theme.ReviewTheme
 import com.skydoves.colorpickerview.flag.BubbleFlag
 import com.skydoves.colorpickerview.flag.FlagMode
@@ -67,9 +67,9 @@ class FragmentCreatingFiles : Fragment(R.layout.fragment_compose_container) {
 
         composeView.setContent {
             ReviewTheme {
-                var name by rememberSaveable { mutableStateOf("") }
-
-                CreateFiles(name) { name = it }
+                PropertiesFiles(
+                    mode = mode
+                )
                 /*onCreateFolderClick = {
                 findNavController().navigate(
                     R.id.action_to_create_graph,

@@ -8,9 +8,6 @@ import android.view.View
 import android.widget.Toast
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.os.BundleCompat
@@ -32,7 +29,6 @@ import com.jonathanev.review.presentation.model.FolderResultUi
 import com.jonathanev.review.presentation.viewmodel.FoldersListViewModel
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
 import com.jonathanev.review.presentation.viewmodel.MainToolbarViewModel
-import com.jonathanev.review.ui.screens.CreateFiles
 import com.jonathanev.review.ui.screens.ListFoldersScreen
 import com.jonathanev.review.ui.theme.ReviewTheme
 import dagger.hilt.android.AndroidEntryPoint
