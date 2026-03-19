@@ -110,7 +110,7 @@ fun PropertiesFilesContent(
                 ) { description = it }
             }
             Spacer(Modifier.size(8.dp))
-            IconsFiles(icons, selectedIcon) {  }
+            IconsFiles(icons, selectedIcon) { selectedIcon = it }
             Spacer(Modifier.size(8.dp))
             if (mode is FolderAction.CreatingFolder){
                 Text("Selecciona el color de la carpeta")
