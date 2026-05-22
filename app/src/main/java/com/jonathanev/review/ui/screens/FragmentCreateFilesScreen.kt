@@ -1,5 +1,6 @@
 package com.jonathanev.review.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -10,49 +11,50 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.github.skydoves.colorpicker.compose.ColorEnvelope
 import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import com.jonathanev.review.R
+import com.jonathanev.review.presentation.event.CreateFilesEvent
 import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.presentation.model.IconType
+import com.jonathanev.review.presentation.model.ScreenDataUi
+import com.jonathanev.review.presentation.state.CreatingFileUiState
+import com.jonathanev.review.presentation.state.PreviewState
 import com.jonathanev.review.presentation.viewmodel.CreateFilesViewModel
+import com.jonathanev.review.ui.mapper.toInt
 import com.jonathanev.review.ui.theme.ColorBotones
 import com.jonathanev.review.ui.theme.baseColor
-import com.jonathanev.review.ui.theme.cardStepBackground
 import com.jonathanev.review.ui.theme.iconBackground
 import com.skydoves.compose.stability.runtime.TraceRecomposition
+import kotlinx.coroutines.flow.collectLatest
 
 @Preview(showBackground = true)
 @Composable
@@ -62,7 +64,17 @@ fun PreviewPropertiesFiles() {
         IconType.ANGELLIST_BRANDS_SOLID_FULL,
         IconType.BACTERIA_SOLID_FULL
     )
-    PropertiesFilesContent(iconsFolders, FolderAction.CreatingFolder)
+
+    PropertiesFilesContent(
+        PreviewState(icons = iconsFolders, selectedIndex = 1),
+        FolderAction.CreatingFolder,
+        {},
+        {},
+        {},
+        {},
+        { _, _ -> },
+        {}
+    )
 }
 
 @Composable
@@ -70,22 +82,88 @@ fun PropertiesFiles(
     viewModel: CreateFilesViewModel = viewModel(),
     mode: FolderAction
 ) {
-    val state by viewModel.uiState.collectAsStateWithLifecycle()
-    viewModel.loadIconsFor(mode)
+    //val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val state = viewModel.uiStateComposable
+    val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
 
-    PropertiesFilesContent(state.icons, mode)
+    LaunchedEffect(mode) {
+        viewModel.initWithMode(mode)
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.events.collectLatest { event ->
+            when(event){
+                CreateFilesEvent.CreatingFolder -> {
+                    val data = ScreenDataUi(state.name, state.description, state.icon, state.color)
+                    viewModel.saveMetadata(data)
+                }
+
+                is CreateFilesEvent.ShowMessage ->
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+
+                CreateFilesEvent.CreateFile -> TODO()
+                CreateFilesEvent.RenamingFile -> TODO()
+            }
+        }
+        /*viewModel.messages.collectLatest { event ->
+            when (event) {
+                is CreatingFileUiState.ContinuedProcess ->{
+                    val data = ScreenDataUi(state.name, state.description, state.icon, state.color)
+                    viewModel.saveMetadata(data)
+                }
+
+                is CreatingFileUiState.Message ->
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+            }
+        }*/
+    }
+
+    PropertiesFilesContent(
+        state, mode,
+        onClickApply = {
+            focusManager.clearFocus()
+            //viewModel.prepareScreenData()
+            viewModel.validateData()
+        },
+        onNameChange = { viewModel.onNameChange(it) },
+        onDescriptionChange = { viewModel.onDescriptionChange(it) },
+        onConfirmDialog = { viewModel.onConfirmAlertDialog(it) },
+        onChangeIcon = { position, icon -> viewModel.changeIconSelected(position, icon) },
+        onChangeColor = { color -> viewModel.changeColorSelected(color) }
+    )
 }
 
 @Composable
 fun PropertiesFilesContent(
-    icons: List<IconType>,
+    state: PreviewState,
     mode: FolderAction,
+    onClickApply: () -> Unit,
+    onNameChange: (String) -> Unit,
+    onDescriptionChange: (String) -> Unit,
+    onConfirmDialog: (Boolean) -> Unit,
+    onChangeIcon: (Int, IconType) -> Unit,
+    onChangeColor: (Int) -> Unit
 ) {
+    if (state.showDialog) {
+        AlertDialog(
+            onDismissRequest = { onConfirmDialog(false) },
+            confirmButton = {
+                TextButton(onClick = { onConfirmDialog(true) }) { Text("Continuar") }
+            },
+            dismissButton = {
+                TextButton(onClick = { onConfirmDialog(false) }) { Text("Cancelar") }
+            },
+            title = { Text("Archivo existente") },
+            text = { Text("Ya existe un archivo con ese nombre. ¿Deseas continuar?") }
+        )
+    }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
             Button(
-                onClick = { /* Tu lógica de guardado */ },
+                onClick = onClickApply,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
@@ -97,7 +175,7 @@ fun PropertiesFilesContent(
                 Text("Aplicar")
             }
         }
-    //topBar = { TopAppBar(title = { Text("Carpetas") }) },
+        //topBar = { TopAppBar(title = { Text("Carpetas") }) },
         /*floatingActionButton = {
             FloatingActionButton(
                 onClick = { onCreateFolderClick() },
@@ -111,11 +189,6 @@ fun PropertiesFilesContent(
             }
         }*/
     ) { padding ->
-        var name by rememberSaveable { mutableStateOf("") }
-        var description by rememberSaveable { mutableStateOf("") }
-        var selectedIcon by rememberSaveable { mutableIntStateOf(0) }
-        var color by remember { mutableStateOf(Color.Black) }
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -123,27 +196,40 @@ fun PropertiesFilesContent(
                 //.padding(padding)
                 .padding(8.dp)
         ) {
-            PersonalizationTF(name, "Nombra tu carpeta") { name = it }
-            Spacer(Modifier.size(4.dp))
-            if (mode is FolderAction.RenamingFile || mode == FolderAction.CreatingFile){
+            PersonalizationTF(state.name, "Nombra tu carpeta") { onNameChange(it) }
+            if (mode is FolderAction.RenamingFile || mode == FolderAction.CreatingFile) {
+                Spacer(Modifier.size(12.dp))
                 PersonalizationTF(
-                    description,
+                    state.description,
                     "Descripción (Opcional)"
-                ) { description = it }
+                ) { onDescriptionChange(it) }
             }
-            Spacer(Modifier.size(8.dp))
-            IconsFiles(icons, selectedIcon) { selectedIcon = it }
-            Spacer(Modifier.size(8.dp))
-            if (mode is FolderAction.CreatingFolder){
+            Spacer(Modifier.size(12.dp))
+            IconsFiles(state.icons, state.selectedIndex) { position, icon ->
+                onChangeIcon(position, icon)
+            }
+            if (mode is FolderAction.CreatingFolder) {
+                Spacer(Modifier.size(12.dp))
                 Text("Selecciona el color de la carpeta")
-                PreviewColorFolder { color = it }
+                PreviewColorFolder { onChangeColor(it) }
+                Spacer(Modifier.size(12.dp))
+                Text("Previsualizacion:")
+                PreviewFolder(
+                    state.color.toInt(),
+                    state.icon.toInt(),
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
             }
         }
     }
 }
 
 @Composable
-fun IconsFiles(icons: List<IconType>, selectedIcon:Int, onChangeIcon:(Int) -> Unit) {
+fun IconsFiles(
+    icons: List<IconType>,
+    positionIcon: Int,
+    onChangeIcon: (Int, IconType) -> Unit,
+) {
     LazyHorizontalGrid(
         rows = GridCells.Fixed(1),
         modifier = Modifier.height(50.dp),
@@ -151,9 +237,9 @@ fun IconsFiles(icons: List<IconType>, selectedIcon:Int, onChangeIcon:(Int) -> Un
     ) {
         itemsIndexed(icons) { index, icon ->
             LayeredSelectedIcon(
-                isSelected = selectedIcon == index,
-                icon = icon
-            ) { onChangeIcon(index) }
+                isSelected = positionIcon == index,
+                icon = icon,
+            ) { onChangeIcon(index, icon) }
         }
     }
 }
@@ -226,7 +312,7 @@ fun PersonalizationTF(name: String, label: String, onValueChange: (String) -> Un
 @Composable
 fun PreviewIconFile() {
     val icons = listOf(IconType.LIGHTBULB)
-    IconsFiles(icons, 0){ }
+    IconsFiles(icons, 0) { _, _ -> }
 }
 
 @Preview(showBackground = true)
@@ -237,11 +323,11 @@ fun PreviewIconFolder() {
         IconType.ANGELLIST_BRANDS_SOLID_FULL,
         IconType.BACTERIA_SOLID_FULL
     )
-    IconsFiles(icons, 1){ }
+    IconsFiles(icons, 1) { _, _ -> }
 }
 
 @Composable
-fun PreviewColorFolder(onChangeColor:(Color) -> Unit) {
+fun PreviewColorFolder(onChangeColor: (Int) -> Unit) {
     val controller = rememberColorPickerController()
     val color = baseColor
 
@@ -256,7 +342,32 @@ fun PreviewColorFolder(onChangeColor:(Color) -> Unit) {
             .padding(10.dp),
         controller = controller,
         onColorChanged = { colorEnvelope: ColorEnvelope ->
-            onChangeColor(colorEnvelope.color)
+            onChangeColor(colorEnvelope.color.toArgb())
         },
     )
+}
+
+@Composable
+fun PreviewFolder(
+    folderColor: Int, // Este es el color sólido que viene del picker
+    iconRes: Int,       // El ID del recurso del icono
+    modifier: Modifier = Modifier
+) {
+    val backgroundColor = Color(folderColor).copy(alpha = 50f / 255f)
+
+    Box(
+        modifier = modifier
+            .size(150.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(backgroundColor), // Fondo con transparencia
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            painter = painterResource(id = iconRes),
+            contentDescription = "Preview Folder Icon",
+            modifier = Modifier.size(75.dp),
+            // 2. El icono lleva el color sólido seleccionado
+            tint = Color(folderColor)
+        )
+    }
 }
