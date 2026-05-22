@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.Spannable
 import android.text.SpannableStringBuilder
+import android.text.Spanned
 import android.text.TextWatcher
 import android.text.style.ForegroundColorSpan
 import android.view.LayoutInflater
@@ -28,7 +29,6 @@ import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.presentation.model.SpanPalabraModel
 import com.jonathanev.review.presentation.viewmodel.MainToolbarViewModel
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 class FragmentCreateText : Fragment() {
@@ -122,39 +122,89 @@ class FragmentCreateText : Fragment() {
         }
 
         binding.etPregResp.addTextChangedListener(object : TextWatcher {
-            private var textoAnterior: String = ""
             private var seAgregoSaltoDeLinea = false
-            private var caracteresAntesDelCambio = 0
+            private var startChange = 0
+            private var countChange = 0
+            private var beforeChange = 0
 
-            override fun beforeTextChanged(
-                s: CharSequence?, start: Int, count: Int, after: Int
-            ) {
-                // Guarda el texto antes del cambio
-                textoAnterior = s?.toString() ?: ""
-                caracteresAntesDelCambio = binding.etPregResp.text.toString().length
+            // Aquí guardaremos una copia de seguridad de los estilos EN TIEMPO REAL
+            private var copiaEstilos = SpannableStringBuilder()
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                // Antes de que el teclado rompa algo, le tomamos una foto exacta a TODO el texto con sus colores
+                if (s is Spannable) {
+                    copiaEstilos = SpannableStringBuilder(s)
+                }
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                // Aquí puedes verificar si se ha añadido un salto de línea en este momento
-                seAgregoSaltoDeLinea =
-                    count > before && s?.subSequence(start, start + count)?.contains("\n") == true
+                startChange = start
+                countChange = count
+                beforeChange = before
+
+                seAgregoSaltoDeLinea = count > before &&
+                        s?.subSequence(start, start + count)?.contains("\n") == true
             }
 
             override fun afterTextChanged(texto: Editable?) {
-                if ((binding.etPregResp.text.toString().length - caracteresAntesDelCambio) == 1
-                    && !seAgregoSaltoDeLinea
-                    && (colorActual != Color.WHITE)) {
-                    // Si hay un salto de linea o es color negro no se pinta nada
-                    val cursorPosition = binding.etPregResp.selectionStart
+                if (texto == null || seAgregoSaltoDeLinea) return
 
-                    binding.etPregResp.post {
-                        texto!!.toPaintingLetters(cursorPosition, colorActual)
+                val esBorrado = beforeChange >= countChange
+
+                binding.etPregResp.removeTextChangedListener(this)
+
+                try {
+                    if (esBorrado) {
+                        // Si borró, la copia anterior ya no sirve para adelante.
+                        // Actualizamos la copia con lo que sobrevivió al borrado.
+                        copiaEstilos = SpannableStringBuilder(texto)
+                    } else {
+                        // 1️⃣ RESTAURAR LO ANTERIOR:
+                        // Traemos los colores guardados en la "foto" (antes del cambio) y los re-estampamos.
+                        // Esto recupera instantáneamente lo que Gboard haya borrado de la palabra actual.
+                        val finViejo = minOf(copiaEstilos.length, texto.length)
+                        val spansViejos = copiaEstilos.getSpans(0, finViejo, ForegroundColorSpan::class.java)
+
+                        for (span in spansViejos) {
+                            val start = copiaEstilos.getSpanStart(span)
+                            val end = copiaEstilos.getSpanEnd(span)
+                            if (start < texto.length && end <= texto.length) {
+                                texto.setSpan(
+                                    ForegroundColorSpan(span.foregroundColor),
+                                    start,
+                                    end,
+                                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                                )
+                            }
+                        }
+
+                        // 2️⃣ PINTAR LO NUEVO:
+                        // Ahora que lo viejo está a salvo, pintamos el rango nuevo con el color actual letra por letra
+                        if (colorActual != Color.WHITE) {
+                            val finDelCambio = startChange + countChange
+                            val letrasNuevasReales = countChange - beforeChange
+                            val inicioPintadoReal = maxOf(startChange, finDelCambio - letrasNuevasReales)
+
+                            for (i in inicioPintadoReal until finDelCambio) {
+                                if (i >= 0 && i < texto.length) {
+                                    texto.setSpan(
+                                        ForegroundColorSpan(colorActual),
+                                        i,
+                                        i + 1,
+                                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                                    )
+                                }
+                            }
+                        }
+
+                        // 3️⃣ Guardamos el estado actual en la copia para la siguiente pulsación de tecla
+                        copiaEstilos = SpannableStringBuilder(texto)
                     }
-                    /*viewModel.setPintarLetra(
-                        texto,
-                        cursorPosition,
-                        colorActual
-                    )*/
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                } finally {
+                    binding.etPregResp.addTextChangedListener(this)
                 }
             }
         })
@@ -175,153 +225,94 @@ class FragmentCreateText : Fragment() {
         colorActual = color
     }
 
+    fun Editable.consolidarSpansDeColor() {
+        // 1️⃣ Obtenemos todos los spans de color actuales
+        val spans = getSpans(0, length, ForegroundColorSpan::class.java) ?: return
+        if (spans.isEmpty()) return
+
+        // 2️⃣ Agrupamos los spans que tienen exactamente el mismo color
+        val gruposPorColor = spans.groupBy { it.foregroundColor }
+
+        for ((color, listaSpans) in gruposPorColor) {
+            // Encontramos los bloques continuos de este color
+            val rangos = listaSpans.map { span ->
+                getSpanStart(span) to getSpanEnd(span)
+            }.sortedBy { it.first } // Los ordenamos por su posición de inicio
+
+            if (rangos.isEmpty()) continue
+
+            // Removemos TODOS los spans viejos de este color para limpiar la casa
+            listaSpans.forEach { removeSpan(it) }
+
+            // 3️⃣ Fusionamos los rangos contiguos (ej. si uno termina en 2 y el otro empieza en 2)
+            var inicioActual = rangos.first().first
+            var finActual = rangos.first().second
+
+            for (i in 1 until rangos.size) {
+                val (s, e) = rangos[i]
+                if (s <= finActual) {
+                    // Si se tocan o se enciman, extendemos el final del bloque
+                    finActual = maxOf(finActual, e)
+                } else {
+                    // Si hay un hueco, cerramos el bloque anterior, lo pintamos y abrimos uno nuevo
+                    setSpan(ForegroundColorSpan(color), inicioActual, finActual, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                    inicioActual = s
+                    finActual = e
+                }
+            }
+            // Pintamos el último bloque consolidado
+            setSpan(ForegroundColorSpan(color), inicioActual, finActual, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+    }
     private fun saveCurrentQuestion(): SpanPalabraModel {
+        binding.etPregResp.text?.consolidarSpansDeColor()
         val editable = binding.etPregResp.text
 
-        val colorSpans: Array<ForegroundColorSpan> =
-            editable!!.getSpans(0, editable.length, ForegroundColorSpan::class.java)
-        val oldEditable = editable
-        val sortedSpans = colorSpans.sortedBy { editable.getSpanStart(it) }
-
-        var start = -1
-        var end = 0
-        var endAnterior = 0
-        var isColNuevo = false
-        var colorAnterior = 0
-        var colorNuevo = 0
-        var isDoubleColors = false
-        var toCleaningColors = false
-
-        for (colorSpan: ForegroundColorSpan in sortedSpans) {
-            if (start == -1) {
-                start = editable.getSpanStart(colorSpan)
-            }
-
-            if (end > editable.getSpanStart(colorSpan)) {
-                isDoubleColors = true
-                toCleaningColors = true
-            }
-
-            end = editable.getSpanEnd(colorSpan)
-            colorNuevo = colorSpan.foregroundColor
-
-            if (colorAnterior != colorNuevo) {
-                if (colorAnterior == 0) {
-                    isColNuevo = false
-                    colorAnterior = colorNuevo
-                    endAnterior = end - 1
-                } else {
-                    isColNuevo = true
-                }
-            }
-
-            //if ((end - endAnterior) != 1) {
-            // Limpiar colores encimados
-            if (toCleaningColors) {
-                // Obtener los spans dentro del rango especificado
-                val spansToRemove = oldEditable.getSpans(
-                    start, endAnterior, ForegroundColorSpan::class.java
+        val listSpans = editable?.let { text ->
+            val totalLength = text.length
+            text.getSpans(0, totalLength, ForegroundColorSpan::class.java).map { span ->
+                ColorRangeUi(
+                    start = text.getSpanStart(span),
+                    end = text.getSpanEnd(span),
+                    color = span.foregroundColor
                 )
-
-                for (span in spansToRemove) {
-                    if (span.foregroundColor == colorAnterior) {
-                        editable.removeSpan(span)
-                    }
-                }
-
-                start = editable.getSpanStart(colorSpan)
-                endAnterior = end
-
-                colorAnterior = colorNuevo
-                isColNuevo = false
-                toCleaningColors = false
-            } else if (isColNuevo || (end - endAnterior) != 1) {
-                // Obtener los spans dentro del rango especificado
-                val spansToRemove = oldEditable.getSpans(
-                    start, endAnterior, ForegroundColorSpan::class.java
-                )
-
-                for (span in spansToRemove) {
-                    if (span.foregroundColor == colorAnterior) {
-                        editable.removeSpan(span)
-                    }
-                }
-
-                editable.setSpan(
-                    ForegroundColorSpan(colorAnterior),
-                    start,
-                    endAnterior,
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
-
-                start = editable.getSpanStart(colorSpan)
-                endAnterior = end
-
-                colorAnterior = colorNuevo
-                isColNuevo = false
-                // toCleaningColors = false
-            } else {
-                endAnterior = end
             }
-        }
-
-        // Remove old spans
-        if (colorSpans.isNotEmpty()) {
-            val spansToRemove =
-                oldEditable.getSpans(start, endAnterior, ForegroundColorSpan::class.java)
-
-            for (span in spansToRemove) {
-                if (span.foregroundColor == colorAnterior) {
-                    editable.removeSpan(span)
-                }
-            }
-
-            editable.setSpan(
-                ForegroundColorSpan(colorAnterior),
-                start,
-                endAnterior,
-                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-            )
-        }
-
-        val listSpans = binding.etPregResp.text!!.getSpans(
-            0, editable.length, ForegroundColorSpan::class.java
-        ).map { span ->
-            ColorRangeUi(
-                start = editable.getSpanStart(span),
-                end = editable.getSpanEnd(span),
-                color = span.foregroundColor
-            )
-        }
+        } ?: emptyList()
 
         /*val resColocarEtiquetas =
             sharedViewModel.setColocarEtiquetas(editable.toString(), listSpans)*/
         sharedViewModel.addTextContent(editable.toString(), listSpans)
 
-        return if (isDoubleColors) {
+        return SpanPalabraModel()
+        /*return if (isDoubleColors) {
             SpanPalabraModel(
                 message = "Sobreescribiste colores y mantuvimos los últimos seleccionados",
                 isDoubleColors = true
             )
         } else {
             SpanPalabraModel()
-        }
+        }*/
     }
 
-    private fun Editable.toPaintingLetters(positionCursor: Int, color: Int){
-        if (positionCursor <= 0) return
-        val start = positionCursor - 1
+    private fun Editable.toPaintingLetters(start: Int, end: Int, color: Int) {
+        if (start < 0 || end > this.length || start >= end) return
 
-        // 1️⃣ Quitar spans de color previos en esa posición
-        getSpans(start, positionCursor, ForegroundColorSpan::class.java)
-            .forEach { removeSpan(it) }
+        // Pintamos letra por letra en el rango especificado
+        for (i in start until end) {
+            // Removemos Spans de color previos estrictamente en esta posición de 1 carácter
+            val spansViejos = getSpans(i, i + 1, ForegroundColorSpan::class.java)
+            for (span in spansViejos) {
+                removeSpan(span)
+            }
 
-        setSpan(
-            ForegroundColorSpan(color),
-            positionCursor - 1,    // Painting color - start
-            positionCursor,        // Painting color - end
-            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-        )
+            // Aplicamos el color de forma quirúrgica a esta única letra
+            setSpan(
+                ForegroundColorSpan(color),
+                i,
+                i + 1,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE // Al ser exclusivo en ambos lados, no se estira ni contamina vecinos
+            )
+        }
     }
 
     private fun QuestionContentUi.Text.toSpannable(
