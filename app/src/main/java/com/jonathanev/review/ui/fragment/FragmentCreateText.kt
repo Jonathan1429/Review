@@ -94,6 +94,7 @@ class FragmentCreateText : Fragment() {
             QuestionContentUi.None -> Unit
             is QuestionContentUi.Text -> {
                 val builder = data.toSpannable(data.text, data.colorRanges)
+                segments = data.colorRanges.toMutableList()
                 binding.etPregResp.text = builder
             }
         }
