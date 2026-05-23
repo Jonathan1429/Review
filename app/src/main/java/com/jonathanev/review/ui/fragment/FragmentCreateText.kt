@@ -152,13 +152,31 @@ class FragmentCreateText : Fragment() {
 
                 val delta = countChange - beforeChange
 
+                // =========================
+                // INSERTAR
+                // =========================
+
                 if (delta > 0) {
-                    val realStart = binding.etPregResp.selectionStart - delta
+
+                    val realStart =
+                        binding.etPregResp.selectionStart - delta
 
                     insertColoredText(
                         start = realStart,
                         length = delta,
                         color = colorActual
+                    )
+                }
+
+                // =========================
+                // BORRAR
+                // =========================
+
+                else if (delta < 0) {
+
+                    removeTextRange(
+                        start = startChange,
+                        length = -delta
                     )
                 }
 
@@ -170,6 +188,77 @@ class FragmentCreateText : Fragment() {
             val color = bundle.getInt("color")
             setColor(color)
         }
+    }
+
+    private fun removeTextRange(
+        start: Int,
+        length: Int
+    ) {
+
+        val end = start + length
+
+        val newSegments = mutableListOf<ColorRangeUi>()
+
+        segments.forEach { segment ->
+
+            // =========================
+            // COMPLETAMENTE ANTES
+            // =========================
+
+            if (segment.end <= start) {
+
+                newSegments.add(segment)
+            }
+
+            // =========================
+            // COMPLETAMENTE DESPUÉS
+            // =========================
+
+            else if (segment.start >= end) {
+
+                newSegments.add(
+                    segment.copy(
+                        start = segment.start - length,
+                        end = segment.end - length
+                    )
+                )
+            }
+
+            // =========================
+            // INTERSECCIÓN
+            // =========================
+
+            else {
+
+                // Parte izquierda
+                if (segment.start < start) {
+
+                    newSegments.add(
+                        segment.copy(
+                            end = start
+                        )
+                    )
+                }
+
+                // Parte derecha
+                if (segment.end > end) {
+
+                    newSegments.add(
+                        segment.copy(
+                            start = start,
+                            end = segment.end - length
+                        )
+                    )
+                }
+            }
+        }
+
+        segments = newSegments
+            .filter { it.start < it.end }
+            .sortedBy { it.start }
+            .toMutableList()
+
+        mergeSegments()
     }
 
     private fun insertColoredText(
