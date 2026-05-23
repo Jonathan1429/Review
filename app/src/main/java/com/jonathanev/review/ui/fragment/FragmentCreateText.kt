@@ -153,9 +153,10 @@ class FragmentCreateText : Fragment() {
                 val delta = countChange - beforeChange
 
                 if (delta > 0) {
+                    val realStart = binding.etPregResp.selectionStart - delta
 
                     insertColoredText(
-                        start = startChange,
+                        start = realStart,
                         length = delta,
                         color = colorActual
                     )
@@ -183,13 +184,19 @@ class FragmentCreateText : Fragment() {
 
         segments.forEach { segment ->
 
-            // Segmento completamente antes
+            // =========================
+            // COMPLETAMENTE ANTES
+            // =========================
+
             if (segment.end <= start) {
 
                 newSegments.add(segment)
             }
 
-            // Segmento completamente después
+            // =========================
+            // COMPLETAMENTE DESPUÉS
+            // =========================
+
             else if (segment.start >= start) {
 
                 newSegments.add(
@@ -200,7 +207,10 @@ class FragmentCreateText : Fragment() {
                 )
             }
 
-            // Inserción dentro del segmento
+            // =========================
+            // INTERSECCIÓN
+            // =========================
+
             else {
 
                 // Parte izquierda
@@ -226,20 +236,51 @@ class FragmentCreateText : Fragment() {
             }
         }
 
-        // Nuevo segmento insertado
-        newSegments.add(
-            ColorRangeUi(
-                start = start,
-                end = end,
-                color = color
+        // =========================
+        // NUEVO SEGMENTO
+        // =========================
+
+        val expandable = newSegments.indexOfLast {
+
+            it.color == color &&
+                    it.end == start
+        }
+
+        if (expandable != -1) {
+
+            val old = newSegments[expandable]
+
+            newSegments[expandable] = old.copy(
+                end = end
             )
-        )
+
+        } else {
+
+            newSegments.add(
+                ColorRangeUi(
+                    start = start,
+                    end = end,
+                    color = color
+                )
+            )
+        }
 
         segments = newSegments
-            .sortedBy { it.start }
-            .toMutableList()
+
+        normalizeSegments()
 
         mergeSegments()
+    }
+
+    private fun normalizeSegments() {
+
+        segments = segments
+            .filter { it.start < it.end }
+            .distinctBy {
+                Triple(it.start, it.end, it.color)
+            }
+            .sortedBy { it.start }
+            .toMutableList()
     }
 
     private fun renderSegments(editable: Editable) {
