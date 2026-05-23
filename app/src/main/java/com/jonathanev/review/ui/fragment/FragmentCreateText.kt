@@ -37,6 +37,7 @@ class FragmentCreateText : Fragment() {
     private val viewModelToolbar: MainToolbarViewModel by activityViewModels()
     private val sharedViewModel: SharedFragmentCreateFileViewModel by activityViewModels()
     private var colorActual: Int = 0
+    private var segments = mutableListOf<ColorRangeUi>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -122,90 +123,45 @@ class FragmentCreateText : Fragment() {
         }
 
         binding.etPregResp.addTextChangedListener(object : TextWatcher {
-            private var seAgregoSaltoDeLinea = false
             private var startChange = 0
-            private var countChange = 0
             private var beforeChange = 0
+            private var countChange = 0
 
-            // Aquí guardaremos una copia de seguridad de los estilos EN TIEMPO REAL
-            private var copiaEstilos = SpannableStringBuilder()
+            override fun beforeTextChanged(
+                s: CharSequence?,
+                start: Int,
+                count: Int,
+                after: Int
+            ) {
 
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                // Antes de que el teclado rompa algo, le tomamos una foto exacta a TODO el texto con sus colores
-                if (s is Spannable) {
-                    copiaEstilos = SpannableStringBuilder(s)
-                }
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 startChange = start
-                countChange = count
-                beforeChange = before
-
-                seAgregoSaltoDeLinea = count > before &&
-                        s?.subSequence(start, start + count)?.contains("\n") == true
+                beforeChange = count
+                countChange = after
             }
 
-            override fun afterTextChanged(texto: Editable?) {
-                if (texto == null || seAgregoSaltoDeLinea) return
+            override fun onTextChanged(
+                s: CharSequence?,
+                start: Int,
+                before: Int,
+                count: Int
+            ) = Unit
 
-                val esBorrado = beforeChange >= countChange
+            override fun afterTextChanged(editable: Editable?) {
 
-                binding.etPregResp.removeTextChangedListener(this)
+                editable ?: return
 
-                try {
-                    if (esBorrado) {
-                        // Si borró, la copia anterior ya no sirve para adelante.
-                        // Actualizamos la copia con lo que sobrevivió al borrado.
-                        copiaEstilos = SpannableStringBuilder(texto)
-                    } else {
-                        // 1️⃣ RESTAURAR LO ANTERIOR:
-                        // Traemos los colores guardados en la "foto" (antes del cambio) y los re-estampamos.
-                        // Esto recupera instantáneamente lo que Gboard haya borrado de la palabra actual.
-                        val finViejo = minOf(copiaEstilos.length, texto.length)
-                        val spansViejos = copiaEstilos.getSpans(0, finViejo, ForegroundColorSpan::class.java)
+                val delta = countChange - beforeChange
 
-                        for (span in spansViejos) {
-                            val start = copiaEstilos.getSpanStart(span)
-                            val end = copiaEstilos.getSpanEnd(span)
-                            if (start < texto.length && end <= texto.length) {
-                                texto.setSpan(
-                                    ForegroundColorSpan(span.foregroundColor),
-                                    start,
-                                    end,
-                                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-                                )
-                            }
-                        }
+                if (delta > 0) {
 
-                        // 2️⃣ PINTAR LO NUEVO:
-                        // Ahora que lo viejo está a salvo, pintamos el rango nuevo con el color actual letra por letra
-                        if (colorActual != Color.WHITE) {
-                            val finDelCambio = startChange + countChange
-                            val letrasNuevasReales = countChange - beforeChange
-                            val inicioPintadoReal = maxOf(startChange, finDelCambio - letrasNuevasReales)
-
-                            for (i in inicioPintadoReal until finDelCambio) {
-                                if (i >= 0 && i < texto.length) {
-                                    texto.setSpan(
-                                        ForegroundColorSpan(colorActual),
-                                        i,
-                                        i + 1,
-                                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-                                    )
-                                }
-                            }
-                        }
-
-                        // 3️⃣ Guardamos el estado actual en la copia para la siguiente pulsación de tecla
-                        copiaEstilos = SpannableStringBuilder(texto)
-                    }
-
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                } finally {
-                    binding.etPregResp.addTextChangedListener(this)
+                    insertColoredText(
+                        start = startChange,
+                        length = delta,
+                        color = colorActual
+                    )
                 }
+
+                renderSegments(editable)
             }
         })
 
@@ -213,6 +169,136 @@ class FragmentCreateText : Fragment() {
             val color = bundle.getInt("color")
             setColor(color)
         }
+    }
+
+    private fun insertColoredText(
+        start: Int,
+        length: Int,
+        color: Int
+    ) {
+
+        val end = start + length
+
+        val newSegments = mutableListOf<ColorRangeUi>()
+
+        segments.forEach { segment ->
+
+            // Segmento completamente antes
+            if (segment.end <= start) {
+
+                newSegments.add(segment)
+            }
+
+            // Segmento completamente después
+            else if (segment.start >= start) {
+
+                newSegments.add(
+                    segment.copy(
+                        start = segment.start + length,
+                        end = segment.end + length
+                    )
+                )
+            }
+
+            // Inserción dentro del segmento
+            else {
+
+                // Parte izquierda
+                if (segment.start < start) {
+
+                    newSegments.add(
+                        segment.copy(
+                            end = start
+                        )
+                    )
+                }
+
+                // Parte derecha
+                if (segment.end > start) {
+
+                    newSegments.add(
+                        segment.copy(
+                            start = end,
+                            end = segment.end + length
+                        )
+                    )
+                }
+            }
+        }
+
+        // Nuevo segmento insertado
+        newSegments.add(
+            ColorRangeUi(
+                start = start,
+                end = end,
+                color = color
+            )
+        )
+
+        segments = newSegments
+            .sortedBy { it.start }
+            .toMutableList()
+
+        mergeSegments()
+    }
+
+    private fun renderSegments(editable: Editable) {
+
+        val oldSpans = editable.getSpans(
+            0,
+            editable.length,
+            ForegroundColorSpan::class.java
+        )
+
+        oldSpans.forEach {
+            editable.removeSpan(it)
+        }
+
+        segments.forEach { segment ->
+
+            if (
+                segment.start >= 0 &&
+                segment.end <= editable.length &&
+                segment.start < segment.end
+            ) {
+
+                editable.setSpan(
+                    ForegroundColorSpan(segment.color),
+                    segment.start,
+                    segment.end,
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+            }
+        }
+    }
+
+    private fun mergeSegments() {
+
+        segments.sortBy { it.start }
+
+        val merged = mutableListOf<ColorRangeUi>()
+
+        for (segment in segments) {
+
+            val last = merged.lastOrNull()
+
+            if (
+                last != null &&
+                last.end == segment.start &&
+                last.color == segment.color
+            ) {
+
+                merged[merged.lastIndex] = last.copy(
+                    end = segment.end
+                )
+
+            } else {
+
+                merged.add(segment)
+            }
+        }
+
+        segments = merged
     }
 
     private fun setColor(@ColorInt color: Int?) {
@@ -255,15 +341,26 @@ class FragmentCreateText : Fragment() {
                     finActual = maxOf(finActual, e)
                 } else {
                     // Si hay un hueco, cerramos el bloque anterior, lo pintamos y abrimos uno nuevo
-                    setSpan(ForegroundColorSpan(color), inicioActual, finActual, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                    setSpan(
+                        ForegroundColorSpan(color),
+                        inicioActual,
+                        finActual,
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
                     inicioActual = s
                     finActual = e
                 }
             }
             // Pintamos el último bloque consolidado
-            setSpan(ForegroundColorSpan(color), inicioActual, finActual, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            setSpan(
+                ForegroundColorSpan(color),
+                inicioActual,
+                finActual,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
         }
     }
+
     private fun saveCurrentQuestion(): SpanPalabraModel {
         binding.etPregResp.text?.consolidarSpansDeColor()
         val editable = binding.etPregResp.text
