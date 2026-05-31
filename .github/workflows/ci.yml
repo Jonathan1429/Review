@@ -22,13 +22,16 @@ jobs:
 
       - name: Decode Keystore
         run: |
-          echo -n "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode --ignore-garbage > app/release-keystore.jks
+          echo -n "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > app/release-keystore.jks
 
-      - name: Create keystore.properties
+      - name: Create key.properties
         run: |
-          echo "storeFile=release-keystore.jks" > key.properties
-          echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" >> key.properties
-          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> key.properties
-          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> key.properties
+          cat << 'EOF' > key.properties
+          storeFile=release-keystore.jks
+          storePassword=${{ secrets.KEYSTORE_PASSWORD }}
+          keyAlias=${{ secrets.KEY_ALIAS }}
+          keyPassword=${{ secrets.KEY_PASSWORD }}
+          EOF
+
       - name: Build app
         run: ./gradlew assemble
