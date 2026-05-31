@@ -45,10 +45,18 @@ android {
     signingConfigs {
         release {
             if (keystoreProperties != null && keystoreProperties['storeFile'] != null) {
+                // LINEAS DE DIAGNÓSTICO:
+                println "🔍 [DIAGNOSTIC] storeFile leído: ${keystoreProperties['storeFile']}"
+                println "🔍 [DIAGNOSTIC] Largo de storePassword: ${keystoreProperties['storePassword']?.length()}"
+                println "🔍 [DIAGNOSTIC] keyAlias leído: ${keystoreProperties['keyAlias']}"
+                println "🔍 [DIAGNOSTIC] Largo de keyPassword: ${keystoreProperties['keyPassword']?.length()}"
+
                 storeFile file(keystoreProperties['storeFile'])
                 storePassword keystoreProperties['storePassword']
                 keyAlias keystoreProperties['keyAlias']
                 keyPassword keystoreProperties['keyPassword']
+            } else {
+                println "🔍 [DIAGNOSTIC] El if falló, las propiedades son nulas."
             }
         }
     }
