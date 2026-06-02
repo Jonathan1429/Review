@@ -1,6 +1,7 @@
 package com.jonathanev.review.domain
 
 import com.jonathanev.review.domain.model.GuideDomainModel
+import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.ImageSource
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
@@ -21,7 +22,15 @@ class UpdateImagesUseCase @Inject constructor(
         relativeGuidePath: RelativeGuidePath
     ): Boolean {
         // Preparar la carpeta para las imagenes.
-        val pathImages = directoryManager.createPathImages(guideDomain, isNewFile, relativeGuidePath)
+        val pathImages = directoryManager.createPathImages(
+            guideDomainModel = GuideDomainModel(
+                version = GuideVersion.V2,
+                nameGuide = guideDomain.nameGuide,
+                description = guideDomain.description
+            ),
+            isNewFile = isNewFile,
+            relativePath = relativeGuidePath
+        )
         if (!pathImages) return false
 
         val listImages = (preguntasProcesadas + respuestasProcesadas)
@@ -39,7 +48,13 @@ class UpdateImagesUseCase @Inject constructor(
             if (!isSuccessMoveImages) return false
         }
 
-        val imagesInDevice = directoryManager.getImagesInDevice(guideDomain, relativeGuidePath)
+        val imagesInDevice = directoryManager.getImagesInDevice(
+            GuideDomainModel(
+                version = GuideVersion.V2,
+                nameGuide = guideDomain.nameGuide,
+                description = guideDomain.description
+            ), relativeGuidePath
+        )
 
         val addImages =
             listImages.filter { it.nameFile !in imagesInDevice && it.uri.isNotEmpty() }
@@ -49,7 +64,11 @@ class UpdateImagesUseCase @Inject constructor(
         }
 
         // Borrar imagenes que se encuentren en el dispositivo y no en el archivo
-        directoryManager.deleteLeftoverImagesInDevice(guideDomain.nameGuide, listImages, relativeGuidePath)
+        directoryManager.deleteLeftoverImagesInDevice(
+            guideDomain.nameGuide,
+            listImages,
+            relativeGuidePath
+        )
 
         return true
     }

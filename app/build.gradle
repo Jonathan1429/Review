@@ -33,8 +33,8 @@ android {
         applicationId "com.jonathanev.review"
         minSdk 26
         targetSdk 35
-        versionCode 18
-        versionName "2.9"
+        versionCode 20
+        versionName "2.11"
 
         // Con TestRunner personalizado, falta investigar mas este punto
         //testInstrumentationRunner "com.jonathanev.review.CustomTestRunner"
@@ -44,10 +44,20 @@ android {
 
     signingConfigs {
         release {
-            storeFile file(keystoreProperties['storeFile'])
-            storePassword keystoreProperties['storePassword']
-            keyAlias keystoreProperties['keyAlias']
-            keyPassword keystoreProperties['keyPassword']
+            if (keystoreProperties != null && keystoreProperties['storeFile'] != null) {
+                // LINEAS DE DIAGNÓSTICO:
+                println "🔍 [DIAGNOSTIC] storeFile leído: ${keystoreProperties['storeFile']}"
+                println "🔍 [DIAGNOSTIC] Largo de storePassword: ${keystoreProperties['storePassword']?.length()}"
+                println "🔍 [DIAGNOSTIC] keyAlias leído: ${keystoreProperties['keyAlias']}"
+                println "🔍 [DIAGNOSTIC] Largo de keyPassword: ${keystoreProperties['keyPassword']?.length()}"
+
+                storeFile file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            } else {
+                println "🔍 [DIAGNOSTIC] El if falló, las propiedades son nulas."
+            }
         }
     }
 

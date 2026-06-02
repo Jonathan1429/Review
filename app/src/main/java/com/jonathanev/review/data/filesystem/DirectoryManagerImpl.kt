@@ -3,6 +3,7 @@ package com.jonathanev.review.data.filesystem
 import com.jonathanev.review.domain.constants.Extensions
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
+import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.ImageSource
 import com.jonathanev.review.domain.model.PathKind
 import com.jonathanev.review.domain.model.QuestionContentDomain
@@ -75,7 +76,11 @@ class DirectoryManagerImpl @Inject constructor(
                     kind = PathKind.IMAGENES
                 )
                 val new = filePathResolverService.mapToFolderPathSpecificGuide(
-                    guideDomainModel = guideDomainModel,
+                    guideDomainModel = GuideDomainModel(
+                        version = GuideVersion.V2,
+                        nameGuide = guideDomainModel.nameGuide,
+                        description = guideDomainModel.description
+                    ),
                     relativeGuidePath = imageSource.relativeGuidePath,
                     kind = PathKind.IMAGENES
                 )
