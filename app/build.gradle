@@ -15,6 +15,8 @@ plugins {
     // @Parcelize
     id 'kotlin-parcelize'
 
+    id "org.jetbrains.kotlinx.kover"
+
     // 🔑 CLAVE: Aplicar el plugin aquí.
     //id 'org.jetbrains.kotlinx.kover'
 }
@@ -191,6 +193,13 @@ dependencies {
     // InstantTaskExecutorRule
     testImplementation 'androidx.arch.core:core-testing:2.2.0'
     testImplementation 'net.sf.kxml:kxml2:2.3.0'
+
+    // Robolectric
+    testImplementation "org.robolectric:robolectric:4.12"
+
+    // Opcional pero muy recomendado para testing de arquitectura:
+    /*testImplementation "androidx.test:core-ktx:1.6.1"
+    testImplementation "androidx.test.ext:junit-ktx:1.2.1"*/
 }
 
 // Configuración de Jacoco
@@ -293,6 +302,28 @@ tasks.register("fullCoverageReport", JacocoReport) {
 
     doLast {
         println "✅ Reporte completo generado (sin incluir View Layer)."
+    }
+}
+
+koverReport {
+    defaults {
+        filters {
+            excludes {
+                // 🚀 CORRECCIÓN: Usamos 'packages' en lugar de 'byDeclaringPackage'
+                packages("com.jonathanev.review.UI.View")
+
+                // Si quieres excluir subpaquetes de forma recursiva, puedes usar comodines:
+                // packages("com.jonathanev.review.UI.View.*")
+
+                // Para excluir clases específicas por nombre o anotación:
+                classes("*Generated*")
+            }
+        }
+
+        html {
+            title = "Reporte de Cobertura con Kover"
+            setReportDir(layout.buildDirectory.dir("reports/kover/html"))
+        }
     }
 }
 
