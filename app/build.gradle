@@ -9,12 +9,10 @@ plugins {
     // Serializable
     id 'org.jetbrains.kotlin.plugin.serialization'
 
-    // Test con jacoco - Reporte
-    id 'jacoco'
-
     // @Parcelize
     id 'kotlin-parcelize'
 
+    // Kover
     id "org.jetbrains.kotlinx.kover"
 
     // 🔑 CLAVE: Aplicar el plugin aquí.
@@ -202,109 +200,6 @@ dependencies {
     testImplementation "androidx.test.ext:junit-ktx:1.2.1"*/
 }
 
-// Configuración de Jacoco
-// ========================================
-// 1. Configuración general de Jacoco
-// ========================================
-jacoco {
-    toolVersion = "0.8.12"
-    reportsDirectory = layout.buildDirectory.dir("customJacocoReportDir")
-}
-
-// ========================================
-// 0. Variables y filtros Jacoco
-// ========================================
-def coverageExclusions = [
-        // Exclusiones estándar y de código generado
-        '**/R.class',
-        '**/R$*.class',
-        '**/BuildConfig.*',
-        '**/Manifest*.*',
-        '**/*_Impl.*',
-        '**/*$Lambda$*.class',
-        '**/databinding/**',
-        '**/BR.class',
-        '**/DataBinderMapperImpl.class',
-        '**/*Module.class',
-        '**/*Factory.class',
-]
-
-// Directorios de código fuente para el reporte HTML
-def appSourceDirss = files(android.sourceSets.main.java.srcDirs, android.sourceSets.main.kotlin.srcDirs)
-
-// ========================================
-// 1. Tarea para Transferir .ec de AndroidTest a .exec
-// ========================================
-tasks.register("transferAndroidCoverageData") {
-    group = "Reporting"
-    description = "Mueve el archivo .ec de AndroidTest a un archivo .exec fijo para Jacoco."
-
-    dependsOn "connectedDebugAndroidTest"
-
-    doLast {
-        def ecFiles = fileTree("$buildDir/outputs/code_coverage/debugAndroidTest/connected") {
-            include("**/*.ec")
-        }.files
-
-        if (ecFiles.isEmpty()) {
-            println "Advertencia: No se encontró el archivo .ec de AndroidTest. Los tests deben ejecutarse primero."
-            return
-        }
-
-        def ecFile = ecFiles.first()
-        def targetExec = file("$buildDir/jacoco/androidTest.exec")
-
-        copy {
-            from ecFile
-            into targetExec.parentFile
-            rename { targetExec.name }
-        }
-
-        println "Archivo .ec copiado/transferido a: ${targetExec}"
-    }
-}
-
-
-// ========================================
-// 2. Reporte Completo Combinado (Unit + Android Tests)
-// ========================================
-tasks.register("fullCoverageReport", JacocoReport) {
-    group = "Reporting"
-    description = "Genera el reporte de cobertura combinado (Unit + Android Tests)."
-
-    dependsOn "testDebugUnitTest" //",transferAndroidCoverageData" Agregar cuando tenga los AndroidTest
-
-            executionData.setFrom(
-                    file("$buildDir/jacoco/testDebugUnitTest.exec"),
-                    file("$buildDir/jacoco/androidTest.exec")
-            )
-
-    // Directorios de clases compiladas (Java + Kotlin) con exclusión de la capa View
-    classDirectories.setFrom(
-            fileTree("$buildDir/intermediates/javac/debug/classes") {
-                exclude coverageExclusions
-                exclude "com/jonathanev/review/UI/View/**"
-            },
-            fileTree("$buildDir/tmp/kotlin-classes/debug") {
-                exclude coverageExclusions
-                exclude "com/jonathanev/review/UI/View/**"
-            }
-    )
-
-    sourceDirectories.setFrom(appSourceDirss)
-
-    reports {
-        html.required.set(true)
-        html.outputLocation.set(file("$buildDir/reports/jacoco/fullReport/html"))
-        xml.required.set(true)
-        xml.outputLocation.set(file("$buildDir/reports/jacoco/fullReport/report.xml"))
-    }
-
-    doLast {
-        println "✅ Reporte completo generado (sin incluir View Layer)."
-    }
-}
-
 koverReport {
     filters {
         excludes {
@@ -348,41 +243,3 @@ tasks.named("koverHtmlReport") {
             "**.*_Factory\$*"
     ]
 }
-
-// ========================================
-// 3. Reporte Filtrado por Capa (Solo View) - USANDO API ESTABLE NO FUNCIONA EL COVERAGE AÚN
-// ========================================
-/*def viewClassDirsFiltered = files(
-        fileTree("$buildDir/intermediates/javac/debug/classes") {*/
-//            include "com/jonathanev/review/UI/View/**/*.class"
-/*            exclude coverageExclusions
-        },
-        fileTree("$buildDir/tmp/kotlin-classes/debug") {*/
-//            include "com/jonathanev/review/UI/View/**/*.class"
-/*            exclude coverageExclusions
-        }
-)
-
-tasks.register('viewLayerCoverageReport', JacocoReport) {
-    group = "Reporting"
-    description = "Genera reporte filtrado usando la API estable de JacocoReport (Solo View Layer)."
-
-    // Sigue dependiendo de la ejecución de Android Tests para los datos de cobertura
-    dependsOn "transferAndroidCoverageData"
-
-    executionData.setFrom(
-            // Sólo necesitamos los datos de Android Test (androidTest.exec) para la capa View
-            file("$buildDir/jacoco/androidTest.exec")
-    )
-
-    classDirectories.setFrom(viewClassDirsFiltered)
-
-    sourceDirectories.setFrom(appSourceDirs)
-
-    reports {
-        html.required.set(true)
-        html.outputLocation.set(file("$buildDir/reports/jacoco/viewLayerReport/html"))
-        xml.required.set(true)
-        xml.outputLocation.set(file("$buildDir/reports/jacoco/viewLayerReport/report.xml"))
-    }
-}*/
