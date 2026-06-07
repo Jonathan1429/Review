@@ -71,10 +71,11 @@ class TestGuiaRepositoryImpl {
 
         every {
             filePathResolver.mapToFolderPath(rutaPrueba, PathKind.GUIAS)
-        } returns GuidePath(rootPathValue)
+        } returns GuidePath("$rootPathValue/Kotlin")
 
-        temporaryFolder.newFile("Kotlin.${Extensions.XML_EXTENSION}")
-        temporaryFolder.newFile("Abap.${Extensions.XML_EXTENSION}")
+        val folderCreated = temporaryFolder.newFolder("Kotlin")
+        File(folderCreated, "Test.${Extensions.XML_EXTENSION}").createNewFile()
+        File(folderCreated, "Documentacion.${Extensions.XML_EXTENSION}").createNewFile()
 
         val resultado = repository.getNumGuides(rutaPrueba)
 
@@ -87,10 +88,21 @@ class TestGuiaRepositoryImpl {
 
         every {
             filePathResolver.mapToFolderPath(rutaPrueba, PathKind.GUIAS)
-        } returns GuidePath(rootPathValue)
+        } returns GuidePath("$rootPathValue/Kotlin")
 
-        temporaryFolder.newFolder("PRD")
-        temporaryFolder.newFile("Kotlin.${Extensions.PNG_EXTENSION}")
+        temporaryFolder.newFolder("Kotlin")
+        temporaryFolder.newFile(
+            File(
+                "Kotlin",
+                "Test.${Extensions.PNG_EXTENSION}"
+            ).absolutePath
+        )
+        temporaryFolder.newFile(
+            File(
+                "Kotlin",
+                "Documentacion.${Extensions.PNG_EXTENSION}"
+            ).absolutePath
+        )
 
         val resultado = repository.getNumGuides(rutaPrueba)
 
