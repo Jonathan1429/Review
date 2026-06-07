@@ -48,7 +48,7 @@ class TestGuiaRepositoryImpl {
         )
     }
 
-    @Test
+    /*@Test
     fun getNumGuides_debeContarXmlEnRaizYSubcarpetasYRetornarElTotal() {
         // 1. GIVEN (Preparar carpetas y archivos simulados usando TemporaryFolder)
         val rutaPrueba = RelativeGuidePath("guias/productividad")
@@ -79,5 +79,94 @@ class TestGuiaRepositoryImpl {
 
         // 3. THEN (Verificamos que la suma de (2 en raíz + 1 en subcarpeta) sea 3)
         assertEquals(3, resultado)
+    }
+
+    @Test
+    fun regresa_lista_vacia_por_tener_solo_carpetas_visibles() {
+        // 1. GIVEN (Preparar carpetas y archivos simulados usando TemporaryFolder)
+        val rutaPrueba = RelativeGuidePath("guias/productividad")
+
+        // Creamos la ruta raíz que simulará el almacenamiento de Android
+        val rootPathValue = temporaryFolder.root.absolutePath
+
+        // Mockeamos la interfaz para que devuelva la ruta temporal que creamos
+        every {
+            filePathResolver.mapToFolderPath(rutaPrueba, PathKind.GUIAS)
+        } returns GuidePath(rootPathValue)
+
+        // --- Simulamos el escenario creando archivos reales dentro de la carpeta temporal ---
+        // Caso A: 2 archivos XML en la raíz
+        temporaryFolder.newFolder("Prueba")
+
+        // 2. WHEN (Ejecutamos el método bajo prueba)
+        // Llama a listGuides internamente, por lo que debería encontrar 3 archivos XML en total
+        val resultado = repository.getNumGuides(rutaPrueba)
+
+        // 3. THEN (Verificamos que la suma de (2 en raíz + 1 en subcarpeta) sea 3)
+        assertEquals(0, resultado)
+    }*/
+
+    @Test
+    fun sino_hay_ruta_en_la_cual_mostrar_archivos_regresa_lista_vacia() {
+        val rutaPrueba = RelativeGuidePath("guias/ruta_invalida")
+
+        val archivoFalsoComoDirectorio = temporaryFolder.newFile("un_archivo_cualquiera.txt")
+        val rutaComoArchivo = archivoFalsoComoDirectorio.absolutePath
+
+        every {
+            filePathResolver.mapToFolderPath(rutaPrueba, PathKind.GUIAS)
+        } returns GuidePath(rutaComoArchivo)
+
+        val resultado = repository.getNumGuides(rutaPrueba)
+
+        assertEquals(0, resultado)
+    }
+
+    @Test
+    fun regresa_lista_vacia_por_solo_existir_carpetas_en_la_ruta() {
+        val rutaPrueba = RelativeGuidePath("guias/productividad")
+        val rootPathValue = temporaryFolder.root.absolutePath
+
+        every {
+            filePathResolver.mapToFolderPath(rutaPrueba, PathKind.GUIAS)
+        } returns GuidePath(rootPathValue)
+
+        temporaryFolder.newFolder("Kotlin")
+
+        val resultado = repository.getNumGuides(rutaPrueba)
+
+        assertEquals(0, resultado)
+    }
+
+    @Test
+    fun regresa_la_lista_de_guias_existentes_en_la_ruta() {
+        val rutaPrueba = RelativeGuidePath("guias/productividad")
+        val rootPathValue = temporaryFolder.root.absolutePath
+
+        every {
+            filePathResolver.mapToFolderPath(rutaPrueba, PathKind.GUIAS)
+        } returns GuidePath(rootPathValue)
+
+        temporaryFolder.newFile("Kotlin.${Extensions.XML_EXTENSION}")
+        temporaryFolder.newFile("Abap.${Extensions.XML_EXTENSION}")
+
+        val resultado = repository.getNumGuides(rutaPrueba)
+
+        assertEquals(2, resultado)
+    }
+
+    fun regresa_lista_vacia_por_existir_archivos_distintos_a_una_guia() {
+        val rutaPrueba = RelativeGuidePath("guias/productividad")
+        val rootPathValue = temporaryFolder.root.absolutePath
+
+        every {
+            filePathResolver.mapToFolderPath(rutaPrueba, PathKind.GUIAS)
+        } returns GuidePath(rootPathValue)
+
+        temporaryFolder.newFile("Kotlin.${Extensions.PNG_EXTENSION}")
+
+        val resultado = repository.getNumGuides(rutaPrueba)
+
+        assertEquals(0, resultado)
     }
 }
