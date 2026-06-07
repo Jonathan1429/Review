@@ -305,14 +305,6 @@ tasks.register("fullCoverageReport", JacocoReport) {
     }
 }
 
-kover {
-    htmlReport {
-        title = "Reporte de Cobertura con Kover"
-        reportDir = file("${buildDir}/reports/kover/html")
-    }
-}
-
-// 🎯 Esta es la sintaxis exacta y oficial para filtros en Kover 0.7.x usando Groovy
 koverReport {
     filters {
         excludes {
@@ -329,6 +321,13 @@ koverReport {
                     "com.jonathanev.review.UI.View",
                     "com.jonathanev.review.UI.View.**"
             ])
+        }
+    }
+
+    defaults {
+        html {
+            title = "Reporte de Cobertura con Kover"
+            setReportDir(layout.buildDirectory.dir("reports/kover/html"))
         }
     }
 }
