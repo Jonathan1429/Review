@@ -71,7 +71,8 @@ class GuiaRepositoryImpl @Inject constructor(
             ?.filter { it.isDirectory }
             ?.flatMap { folder ->
                 folder.listFiles()
-                    ?.filter { it.isFile && it.extension == Extensions.XML_EXTENSION }
+                    ?.filter { file -> file.isFile }
+                    ?.filter { file -> file.extension == Extensions.XML_EXTENSION }
                     ?: emptyList()
             } ?: emptyList()
 
