@@ -149,4 +149,139 @@ class TestGuiaRepositoryImpl {
 
         assertEquals(listGuideDomainModel, resultado)
     }
+
+    // existXMLGuideV1
+    @Test
+    fun muestra_cuando_no_existe_una_guia_v1() {
+        val rutaPrueba = RelativeGuidePath("guias/productividad")
+        val rootPathValue = temporaryFolder.root.absolutePath
+        val guideDomain = GuideDomainModel(
+            version = GuideVersion.V1,
+            nameGuide = "Sintaxis",
+            description = ""
+        )
+
+        every {
+            filePathResolver.getPathGuidesV1(guideDomain, PathKind.GUIAS, rutaPrueba)
+        } returns "$rootPathValue/Kotlin/Sintaxis.xml"
+
+        val pathGuideTest = temporaryFolder.newFolder("Kotlin", "Test")
+
+        val xmlTest = """
+        <${Structure.GUIAESTUDIO} ${Attributes.VERSION}="${Versions.VERSION2}">
+            <${Structure.CUESTIONARIO} 
+                ${Attributes.DESCRIPCION}="Descripcion de test" 
+                ${Attributes.NOMBREGUIA}="Test">
+            </${Structure.CUESTIONARIO}>
+        </${Structure.GUIAESTUDIO}>
+    """.trimIndent()
+
+        val xmlSintaxis = """
+        <${Structure.GUIAESTUDIO} ${Attributes.VERSION}="${Versions.VERSION2}">
+            <${Structure.CUESTIONARIO} 
+                ${Attributes.DESCRIPCION}="Descripcion de sintaxis" 
+                ${Attributes.NOMBREGUIA}="Sintaxis">
+            </${Structure.CUESTIONARIO}>
+        </${Structure.GUIAESTUDIO}>
+    """.trimIndent()
+
+        val fileTest = File(pathGuideTest, "Test.${Extensions.XML_EXTENSION}")
+        fileTest.writeText(xmlTest)
+
+        val fileSintaxis =
+            File("$rootPathValue/Kotlin", "Sintaxis.${Extensions.XML_EXTENSION}")
+        fileSintaxis.writeText(xmlSintaxis)
+
+        val resultado = repository.existXMLGuideV1(guideDomain, rutaPrueba)
+
+        assertEquals(ExistGuideV1Result.NoExistGuide, resultado)
+    }
+
+    @Test
+    fun muestra_cuando_existe_una_guia_v1() {
+        val rutaPrueba = RelativeGuidePath("guias/productividad")
+        val rootPathValue = temporaryFolder.root.absolutePath
+        val guideDomain = GuideDomainModel(
+            version = GuideVersion.V1,
+            nameGuide = "Sintaxis",
+            description = ""
+        )
+
+        every {
+            filePathResolver.getPathGuidesV1(guideDomain, PathKind.GUIAS, rutaPrueba)
+        } returns "$rootPathValue/Kotlin/Sintaxis.xml"
+
+        val pathGuideTest = temporaryFolder.newFolder("Kotlin", "Test")
+
+        val xmlTest = """
+        <${Structure.GUIAESTUDIO} ${Attributes.VERSION}="${Versions.VERSION2}">
+            <${Structure.CUESTIONARIO} 
+                ${Attributes.DESCRIPCION}="Descripcion de test" 
+                ${Attributes.NOMBREGUIA}="Test">
+            </${Structure.CUESTIONARIO}>
+        </${Structure.GUIAESTUDIO}>
+    """.trimIndent()
+
+        val xmlSintaxis = """
+        <${Structure.GUIAESTUDIO} ${Attributes.VERSION}="${Versions.VERSION1}">
+            <${Structure.CUESTIONARIO} 
+                ${Attributes.DESCRIPCION}="Descripcion de sintaxis" 
+                ${Attributes.NOMBREGUIA}="Sintaxis">
+            </${Structure.CUESTIONARIO}>
+        </${Structure.GUIAESTUDIO}>
+    """.trimIndent()
+
+        val fileTest = File(pathGuideTest, "Test.${Extensions.XML_EXTENSION}")
+        fileTest.writeText(xmlTest)
+
+        val fileSintaxis =
+            File("$rootPathValue/Kotlin", "Sintaxis.${Extensions.XML_EXTENSION}")
+        fileSintaxis.writeText(xmlSintaxis)
+
+        val resultado = repository.existXMLGuideV1(guideDomain, rutaPrueba)
+
+        assertEquals(ExistGuideV1Result.ExistGuide, resultado)
+    }
+
+    @Test
+    fun si_es_un_directorio_regresa_que_la_guia_no_existe() {
+        val rutaPrueba = RelativeGuidePath("guias/productividad")
+        val rootPathValue = temporaryFolder.root.absolutePath
+        val guideDomain = GuideDomainModel(
+            version = GuideVersion.V1,
+            nameGuide = "Test",
+            description = ""
+        )
+
+        every {
+            filePathResolver.getPathGuidesV1(guideDomain, PathKind.GUIAS, rutaPrueba)
+        } returns "$rootPathValue/Kotlin/Test"
+
+        temporaryFolder.newFolder("Kotlin", "Test")
+
+        val resultado = repository.existXMLGuideV1(guideDomain, rutaPrueba)
+
+        assertEquals(ExistGuideV1Result.NoExistGuide, resultado)
+    }
+
+    @Test
+    fun si_no_existe_la_guia_v1_regresa_que_la_guia_no_existe() {
+        val rutaPrueba = RelativeGuidePath("guias/productividad")
+        val rootPathValue = temporaryFolder.root.absolutePath
+        val guideDomain = GuideDomainModel(
+            version = GuideVersion.V1,
+            nameGuide = "Test",
+            description = ""
+        )
+
+        every {
+            filePathResolver.getPathGuidesV1(guideDomain, PathKind.GUIAS, rutaPrueba)
+        } returns "$rootPathValue/Kotlin/Test.xml"
+
+        temporaryFolder.newFolder("Kotlin")
+
+        val resultado = repository.existXMLGuideV1(guideDomain, rutaPrueba)
+
+        assertEquals(ExistGuideV1Result.NoExistGuide, resultado)
+    }
 }
