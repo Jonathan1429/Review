@@ -1,8 +1,13 @@
 package com.jonathanev.review.data.filesystem
 
 import com.jonathanev.review.data.util.PathHandler
+import com.jonathanev.review.data.xml.Attributes
+import com.jonathanev.review.data.xml.Structure
+import com.jonathanev.review.data.xml.Versions
 import com.jonathanev.review.domain.constants.Extensions
+import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuidePath
+import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.PathKind
 import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.repository.FileOutputStreamFactory
@@ -88,5 +93,59 @@ class TestGuiaRepositoryImpl {
         val resultado = repository.getNumGuides(rutaPrueba)
 
         assertEquals(2, resultado)
+    }
+
+    // getGuides
+    @Test
+    fun no_regresa_guias_en_la_ruta_actual() {
+        val rutaPrueba = RelativeGuidePath("guias/productividad")
+        val rootPathValue = temporaryFolder.root.absolutePath
+        val listGuideDomainModel = listOf(
+            GuideDomainModel(
+                version = GuideVersion.V1,
+                nameGuide = "Sintaxis",
+                description = "Descripcion de sintaxis"
+            ),
+            GuideDomainModel(
+                version = GuideVersion.V2,
+                nameGuide = "Test",
+                description = "Descripcion de test"
+            )
+        )
+
+        every {
+            filePathResolver.mapToFolderPath(rutaPrueba, PathKind.GUIAS)
+        } returns GuidePath("$rootPathValue/Kotlin")
+
+        val pathGuideTest = temporaryFolder.newFolder("Kotlin", "Test")
+
+        val xmlTest = """
+        <${Structure.GUIAESTUDIO} ${Attributes.VERSION}="${Versions.VERSION2}">
+            <${Structure.CUESTIONARIO} 
+                ${Attributes.DESCRIPCION}="Descripcion de test" 
+                ${Attributes.NOMBREGUIA}="Test">
+            </${Structure.CUESTIONARIO}>
+        </${Structure.GUIAESTUDIO}>
+    """.trimIndent()
+
+        val xmlSintaxis = """
+        <${Structure.GUIAESTUDIO} ${Attributes.VERSION}="${Versions.VERSION1}">
+            <${Structure.CUESTIONARIO} 
+                ${Attributes.DESCRIPCION}="Descripcion de sintaxis" 
+                ${Attributes.NOMBREGUIA}="Sintaxis">
+            </${Structure.CUESTIONARIO}>
+        </${Structure.GUIAESTUDIO}>
+    """.trimIndent()
+
+        val fileTest = File(pathGuideTest, "Test.${Extensions.XML_EXTENSION}")
+        fileTest.writeText(xmlTest)
+
+        val fileSintaxis =
+            File("$rootPathValue/Kotlin", "Sintaxis.${Extensions.XML_EXTENSION}")
+        fileSintaxis.writeText(xmlSintaxis)
+
+        val resultado = repository.getGuides(rutaPrueba)
+
+        assertEquals(listGuideDomainModel, resultado)
     }
 }
