@@ -495,8 +495,13 @@ class GuiaRepositoryImpl @Inject constructor(
         guideDomainModel: GuideDomainModel,
         relativeGuidePath: RelativeGuidePath
     ): ExistGuideV1Result {
-        val path = File(filePathResolver.mapToFolderPath(relativeGuidePath, PathKind.GUIAS).value)
-        val pathComplete = File(path, guideDomainModel.nameGuide)
+        val pathComplete = File(
+            filePathResolver.getPathGuidesV1(
+                guideDomainModel,
+                PathKind.GUIAS,
+                relativeGuidePath
+            )
+        )
 
         return if (pathComplete.isValidGuideV1()) {
             ExistGuideV1Result.ExistGuide

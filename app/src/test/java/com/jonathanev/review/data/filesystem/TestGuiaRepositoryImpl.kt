@@ -13,6 +13,7 @@ import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.repository.FileOutputStreamFactory
 import com.jonathanev.review.domain.repository.FilePathResolver
 import com.jonathanev.review.domain.repository.XmlSerializerFactory
+import com.jonathanev.review.domain.result.ExistGuideV1Result
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
