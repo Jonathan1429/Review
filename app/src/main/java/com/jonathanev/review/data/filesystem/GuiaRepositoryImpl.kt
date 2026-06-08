@@ -488,28 +488,17 @@ class GuiaRepositoryImpl @Inject constructor(
             obtenerDatosXMLV2(guideDomainModel, path)
     }
 
+    private fun File.isValidGuideV1(): Boolean =
+        exists() && isFile && getAttributesGuide(this).version == GuideVersion.V1
+
     override fun existXMLGuideV1(
         guideDomainModel: GuideDomainModel,
         relativeGuidePath: RelativeGuidePath
     ): ExistGuideV1Result {
-        val path = filePathResolver.mapToFolderPath(relativeGuidePath, PathKind.GUIAS)
+        val path = File(filePathResolver.mapToFolderPath(relativeGuidePath, PathKind.GUIAS).value)
+        val pathComplete = File(path, guideDomainModel.nameGuide)
 
-        if (!File(path.value).exists() || !File(path.value).isDirectory) {
-            return ExistGuideV1Result.Error
-        }
-
-        val listGuides = File(path.value).listFiles() ?: emptyArray<File>()
-        if (listGuides.isEmpty()) {
-            return ExistGuideV1Result.Error
-        }
-
-        val file =
-            listGuides.find {
-                it.extension == Extensions.XML_EXTENSION
-                        && it.nameWithoutExtension == guideDomainModel.nameGuide
-            }
-
-        return if (file != null && getAttributesGuide(file).version == GuideVersion.V1) {
+        return if (pathComplete.isValidGuideV1()) {
             ExistGuideV1Result.ExistGuide
         } else {
             ExistGuideV1Result.NoExistGuide
