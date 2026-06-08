@@ -49,23 +49,7 @@ class TestGuiaRepositoryImpl {
     }
 
     @Test
-    fun sino_hay_ruta_en_la_cual_mostrar_archivos_regresa_lista_vacia() {
-        val rutaPrueba = RelativeGuidePath("guias/ruta_invalida")
-
-        val archivoFalsoComoDirectorio = temporaryFolder.newFile("un_archivo_cualquiera.txt")
-        val rutaComoArchivo = archivoFalsoComoDirectorio.absolutePath
-
-        every {
-            filePathResolver.mapToFolderPath(rutaPrueba, PathKind.GUIAS)
-        } returns GuidePath(rutaComoArchivo)
-
-        val resultado = repository.getNumGuides(rutaPrueba)
-
-        assertEquals(0, resultado)
-    }
-
-    @Test
-    fun regresa_la_lista_de_guias_existentes_en_la_ruta() {
+    fun regresa_la_lista_de_solo_guias_en_la_ruta() {
         val rutaPrueba = RelativeGuidePath("guias/productividad")
         val rootPathValue = temporaryFolder.root.absolutePath
 
@@ -76,13 +60,17 @@ class TestGuiaRepositoryImpl {
         val folderCreated = temporaryFolder.newFolder("Kotlin")
         File(folderCreated, "Test.${Extensions.XML_EXTENSION}").createNewFile()
         File(folderCreated, "Documentacion.${Extensions.XML_EXTENSION}").createNewFile()
+        File(folderCreated, "Imagen1.${Extensions.PNG_EXTENSION}").createNewFile()
+        File(folderCreated, "Imagen2.${Extensions.PNG_EXTENSION}").createNewFile()
 
         val resultado = repository.getNumGuides(rutaPrueba)
 
         assertEquals(2, resultado)
     }
 
-    fun regresa_lista_vacia_por_existir_archivos_distintos_a_una_guia() {
+    // ListFile interno de listGuides
+    @Test
+    fun sino_hay_ruta_en_la_cual_mostrar_archivos_regresa_lista_vacia_sublistado_listFromFolders() {
         val rutaPrueba = RelativeGuidePath("guias/productividad")
         val rootPathValue = temporaryFolder.root.absolutePath
 
@@ -90,19 +78,10 @@ class TestGuiaRepositoryImpl {
             filePathResolver.mapToFolderPath(rutaPrueba, PathKind.GUIAS)
         } returns GuidePath("$rootPathValue/Kotlin")
 
-        temporaryFolder.newFolder("Kotlin")
-        temporaryFolder.newFile(
-            File(
-                "Kotlin",
-                "Test.${Extensions.PNG_EXTENSION}"
-            ).absolutePath
-        )
-        temporaryFolder.newFile(
-            File(
-                "Kotlin",
-                "Documentacion.${Extensions.PNG_EXTENSION}"
-            ).absolutePath
-        )
+        val pathGuideTest = temporaryFolder.newFolder("Kotlin", "Test")
+        val pathGuideSintaxis = temporaryFolder.newFolder("Kotlin", "Sintaxis")
+        File(pathGuideTest, "Test.${Extensions.PNG_EXTENSION}").createNewFile()
+        File(pathGuideSintaxis, "Sintaxis.${Extensions.PNG_EXTENSION}").createNewFile()
 
         val resultado = repository.getNumGuides(rutaPrueba)
 
