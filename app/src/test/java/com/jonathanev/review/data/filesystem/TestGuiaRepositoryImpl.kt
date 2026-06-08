@@ -48,6 +48,8 @@ class TestGuiaRepositoryImpl {
         )
     }
 
+    // getNumGuides
+    // Guias V1
     @Test
     fun regresa_la_lista_de_solo_guias_en_la_ruta() {
         val rutaPrueba = RelativeGuidePath("guias/productividad")
@@ -68,7 +70,7 @@ class TestGuiaRepositoryImpl {
         assertEquals(2, resultado)
     }
 
-    // ListFile interno de listGuides
+    // ListFile interno de listGuides - Guias V2
     @Test
     fun sino_hay_ruta_en_la_cual_mostrar_archivos_regresa_lista_vacia_sublistado_listFromFolders() {
         val rutaPrueba = RelativeGuidePath("guias/productividad")
@@ -80,11 +82,11 @@ class TestGuiaRepositoryImpl {
 
         val pathGuideTest = temporaryFolder.newFolder("Kotlin", "Test")
         val pathGuideSintaxis = temporaryFolder.newFolder("Kotlin", "Sintaxis")
-        File(pathGuideTest, "Test.${Extensions.PNG_EXTENSION}").createNewFile()
-        File(pathGuideSintaxis, "Sintaxis.${Extensions.PNG_EXTENSION}").createNewFile()
+        File(pathGuideTest, "Test.${Extensions.XML_EXTENSION}").createNewFile()
+        File(pathGuideSintaxis, "Sintaxis.${Extensions.XML_EXTENSION}").createNewFile()
 
         val resultado = repository.getNumGuides(rutaPrueba)
 
-        assertEquals(0, resultado)
+        assertEquals(2, resultado)
     }
 }
