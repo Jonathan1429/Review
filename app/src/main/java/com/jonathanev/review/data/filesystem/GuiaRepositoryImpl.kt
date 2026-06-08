@@ -488,8 +488,12 @@ class GuiaRepositoryImpl @Inject constructor(
             obtenerDatosXMLV2(guideDomainModel, path)
     }
 
-    private fun File.isValidGuideV1(): Boolean =
-        exists() && isFile && getAttributesGuide(this).version == GuideVersion.V1
+    private fun File.isValidGuideV1(): Boolean {
+        if (!exists()) return false
+        if (isDirectory) return false
+        return getAttributesGuide(this).version == GuideVersion.V1
+    }
+
 
     override fun existXMLGuideV1(
         guideDomainModel: GuideDomainModel,
