@@ -5,6 +5,7 @@ import com.jonathanev.review.data.xml.Attributes
 import com.jonathanev.review.data.xml.Structure
 import com.jonathanev.review.data.xml.Versions
 import com.jonathanev.review.domain.constants.Extensions
+import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuidePath
 import com.jonathanev.review.domain.model.GuideVersion
@@ -17,6 +18,8 @@ import com.jonathanev.review.domain.result.ExistGuideV1Result
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -283,5 +286,103 @@ class TestGuiaRepositoryImpl {
         val resultado = repository.existXMLGuideV1(guideDomain, rutaPrueba)
 
         assertEquals(ExistGuideV1Result.NoExistGuide, resultado)
+    }
+
+    // moveGuide
+    @Test
+    fun mover_la_guia_exitosamente() {
+        val oldRelativeGuidePath = RelativeGuidePath("Kotlin")
+        val newRelativeGuidePath = RelativeGuidePath("Abap")
+        val guideDomain = GuideDomainModel(
+            version = GuideVersion.V2,
+            nameGuide = "Test",
+            description = ""
+        )
+        val rootPathValue = temporaryFolder.root.absolutePath
+        val oldPath = "$rootPathValue/Kotlin/Test.xml"
+        val newPath = "$rootPathValue/Abap/Test.xml"
+
+        temporaryFolder.newFolder("Abap")
+        val createOldPath = temporaryFolder.newFolder("Kotlin")
+        File(createOldPath, "Test.xml").createNewFile()
+
+        every {
+            filePathResolver.mapToFilePathSpecificGuide(any(), oldRelativeGuidePath, any())
+        } returns GuidePath(oldPath)
+
+        every {
+            filePathResolver.mapToFilePathSpecificGuide(any(), newRelativeGuidePath, any())
+        } returns GuidePath(newPath)
+
+        val resultado = repository.moveGuide(
+            GuideContext.Moving(guideDomain, oldRelativeGuidePath, newRelativeGuidePath)
+        )
+
+        assertTrue("El repositorio debería devolver true al mover con éxito", resultado)
+        assertTrue("El archivo debería existir ahora en la ruta nueva", File(newPath).exists())
+    }
+
+    @Test
+    fun sino_existe_la_ruta_donde_mover_el_archivo_regresa_false(){
+        val oldRelativeGuidePath = RelativeGuidePath("Kotlin")
+        val newRelativeGuidePath = RelativeGuidePath("Abap")
+        val guideDomain = GuideDomainModel(
+            version = GuideVersion.V2,
+            nameGuide = "Test",
+            description = ""
+        )
+        val rootPathValue = temporaryFolder.root.absolutePath
+        val oldPath = "$rootPathValue/Kotlin/Test.xml"
+        val newPath = "$rootPathValue/Abap/Test.xml"
+
+        val createOldPath = temporaryFolder.newFolder("Kotlin")
+        File(createOldPath, "Test.xml").createNewFile()
+
+        every {
+            filePathResolver.mapToFilePathSpecificGuide(any(), oldRelativeGuidePath, any())
+        } returns GuidePath(oldPath)
+
+        every {
+            filePathResolver.mapToFilePathSpecificGuide(any(), newRelativeGuidePath, any())
+        } returns GuidePath(newPath)
+
+        val resultado = repository.moveGuide(
+            GuideContext.Moving(guideDomain, oldRelativeGuidePath, newRelativeGuidePath)
+        )
+
+        assertFalse("El repositorio debería devolver false al NO mover con éxito", resultado)
+        assertFalse("El archivo NO debería existir ahora en la ruta nueva", File(newPath).exists())
+    }
+
+    @Test
+    fun si_el_archivo_que_vas_a_mover_no_existe_regresa_false(){
+        val oldRelativeGuidePath = RelativeGuidePath("Kotlin")
+        val newRelativeGuidePath = RelativeGuidePath("Abap")
+        val guideDomain = GuideDomainModel(
+            version = GuideVersion.V2,
+            nameGuide = "Test",
+            description = ""
+        )
+        val rootPathValue = temporaryFolder.root.absolutePath
+        val oldPath = "$rootPathValue/Kotlin/Test.xml"
+        val newPath = "$rootPathValue/Abap/Test.xml"
+
+        temporaryFolder.newFolder("Kotlin")
+        temporaryFolder.newFolder("Abap")
+
+        every {
+            filePathResolver.mapToFilePathSpecificGuide(any(), oldRelativeGuidePath, any())
+        } returns GuidePath(oldPath)
+
+        every {
+            filePathResolver.mapToFilePathSpecificGuide(any(), newRelativeGuidePath, any())
+        } returns GuidePath(newPath)
+
+        val resultado = repository.moveGuide(
+            GuideContext.Moving(guideDomain, oldRelativeGuidePath, newRelativeGuidePath)
+        )
+
+        assertFalse("El repositorio debería devolver false al NO mover con éxito", resultado)
+        assertFalse("El archivo NO debería existir ahora en la ruta nueva", File(newPath).exists())
     }
 }
