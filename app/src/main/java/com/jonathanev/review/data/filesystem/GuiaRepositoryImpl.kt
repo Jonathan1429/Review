@@ -396,12 +396,8 @@ class GuiaRepositoryImpl @Inject constructor(
 
         try {
             val db = dbf.newDocumentBuilder()
-
             val currentPath = guidePath.value
-            Log.d("PATH", currentPath)
-
             val doc = db.parse(File(currentPath))
-
             val cuestionario: NodeList = doc.getElementsByTagName(XmlTagsV2.INTERROGANTE)
 
             for (i in 0 until cuestionario.length) {
