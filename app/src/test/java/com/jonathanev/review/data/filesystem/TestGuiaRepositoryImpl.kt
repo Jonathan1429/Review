@@ -1,5 +1,6 @@
 package com.jonathanev.review.data.filesystem
 
+import com.jonathanev.review.core.media.MediaPaths
 import com.jonathanev.review.data.storage.StorageFolders
 import com.jonathanev.review.data.util.PathHandler
 import com.jonathanev.review.data.xml.Attributes
@@ -394,9 +395,10 @@ class TestGuiaRepositoryImpl {
     // getXMLGuide
     @Test
     fun recuperacion_de_guia_v1() {
+        val separator = File.separator
         val guideDomainModel = GuideDomainModel(GuideVersion.V1, "Test", "")
         val relativeGuidePath = RelativeGuidePath("Kotlin")
-        val rootPathValue = temporaryFolder.root.absolutePath
+        val rootPathValue = "${temporaryFolder.root}${separator}files${separator}guias"
         val itemsResponse = listOf(
             QAItemDomain(
                 question = QuestionItemDomain(
@@ -413,30 +415,73 @@ class TestGuiaRepositoryImpl {
             QAItemDomain(
                 question = QuestionItemDomain(
                     content = listOf(
-                        QuestionContentDomain.Image("Kotlin/1.png", "1.png")
+                        QuestionContentDomain.Image(
+                            uri = "${rootPathValue}${separator}${relativeGuidePath.value}${separator}1.png",
+                            nameFile = "1.png"
+                        )
                     )
                 ),
                 answer = QuestionItemDomain(
                     content = listOf(
-                        QuestionContentDomain.Image("Kotlin/2.png", "2.png")
+                        QuestionContentDomain.Image(
+                            uri = "${rootPathValue}${separator}${relativeGuidePath.value}${separator}2.png",
+                            nameFile = "2.png"
+                        )
                     )
                 )
             )
         )
 
-        temporaryFolder.newFolder("Kotlin")
+        temporaryFolder.newFolder("files${separator}guias${separator}Kotlin")
 
         every {
             filePathResolver.mapToFilePathSpecificGuide(
                 guideDomainModel, relativeGuidePath,
                 PathKind.GUIAS
             )
-        } returns GuidePath("$rootPathValue/${relativeGuidePath.value}/Test.xml")
+        } returns GuidePath("$rootPathValue${separator}${relativeGuidePath.value}${separator}Test.xml")
 
         val xmlTest = """
         <${Structure.GUIAESTUDIO} ${Attributes.VERSION}="${Versions.VERSION1}">
             <${Structure.CUESTIONARIO} ${Attributes.NOMBREGUIA}="Test">
                 <${XmlTagsV2.INTERROGANTE} ${XmlTagsV1.PREGUNTA}="Pregunta 1" ${XmlTagsV1.RESPUESTA}="Respuesta 1"/>
+                <${XmlTagsV2.INTERROGANTE} 
+                frqwhqw://phgld/slfnhu/gdwd/gdwd/frp.mrqdwkdqhy.uhylhz/ilohv/lpdjhqhv/Hvwxgldu dfwxdohv/42.sqj
+                    ${XmlTagsV1.PREGUNTA}="${MediaPaths.ENCRYPTED_IMAGE_BASE_PATH}orqx/fjxdbkbp/1.sqj" 
+                    ${XmlTagsV1.RESPUESTA}="frqwhqw://phgld/slfnhu/orqx/fjxdbkbp/2.sqj"/>
+            </${Structure.CUESTIONARIO}>
+        </${Structure.GUIAESTUDIO}>
+    """.trimIndent()
+
+        val fileSintaxis =
+            File("$rootPathValue${separator}${relativeGuidePath.value}", "Test.${Extensions.XML_EXTENSION}")
+        fileSintaxis.writeText(xmlTest)
+
+        val response = repository.getXMLGuide(guideDomainModel, relativeGuidePath)
+
+        assertEquals(GetGuideResult.Success(guideDomainModel, itemsResponse), response)
+    }
+
+    @Test
+    fun recuperacion_de_guia_v1_formato_invalido() {
+        val separator = File.separator
+        val guideDomainModel = GuideDomainModel(GuideVersion.V1, "Test", "")
+        val relativeGuidePath = RelativeGuidePath("Kotlin")
+        val rootPathValue = "${temporaryFolder.root}${separator}files${separator}guias"
+
+        temporaryFolder.newFolder("files${separator}guias${separator}Kotlin")
+
+        every {
+            filePathResolver.mapToFilePathSpecificGuide(
+                guideDomainModel, relativeGuidePath,
+                PathKind.GUIAS
+            )
+        } returns GuidePath("$rootPathValue${separator}${relativeGuidePath.value}${separator}Test.xml")
+
+        val xmlTest = """
+        <${Structure.GUIAESTUDIO} ${Attributes.VERSION}="${Versions.VERSION1}">
+            <${Structure.CUESTIONARIO} ${Attributes.NOMBREGUIA}="Test">
+                <${XmlTagsV2.INTERROGANTE} ${XmlTagsV1.PREGUNTA}="Pregunta 1" ${XmlTagsV1.RESPUESTA}="Respuesta 1"//>
                 <${XmlTagsV2.INTERROGANTE} ${XmlTagsV1.PREGUNTA}="frqwhqw://phgld/slfnhu/orqx/fjxdbkbp/1.sqj" ${XmlTagsV1.RESPUESTA}="frqwhqw://phgld/slfnhu/orqx/fjxdbkbp/2.sqj"/>
             </${Structure.CUESTIONARIO}>
         </${Structure.GUIAESTUDIO}>
@@ -448,10 +493,129 @@ class TestGuiaRepositoryImpl {
 
         val response = repository.getXMLGuide(guideDomainModel, relativeGuidePath)
 
-        assertEquals(GetGuideResult.Success(guideDomainModel, itemsResponse), response)
+        assertEquals(GetGuideResult.InvalidFormat, response)
     }
 
     @Test
+    fun recuperacion_de_guia_v1_archivo_no_encontrado() {
+        val guideDomainModel = GuideDomainModel(GuideVersion.V1, "Test", "")
+        val relativeGuidePath = RelativeGuidePath("Kotlin")
+        val rootPathValue = temporaryFolder.root.absolutePath
+
+        every {
+            filePathResolver.mapToFilePathSpecificGuide(
+                guideDomainModel, relativeGuidePath, PathKind.GUIAS
+            )
+        } returns GuidePath("$rootPathValue/$relativeGuidePath/Test.xml")
+
+        val response = repository.getXMLGuide(guideDomainModel, relativeGuidePath)
+
+        assertEquals(GetGuideResult.NotFound, response)
+    }
+
+    @Test
+    fun recuperacion_de_guia_v1_error_desconocido_con_mock() {
+        val guideDomainModel = GuideDomainModel(GuideVersion.V1, "Test", "")
+        val relativeGuidePath = RelativeGuidePath("")
+        val pathHandlerMock = mockk<PathHandler>()
+        repository = GuiaRepositoryImpl(
+            pathHandler = pathHandlerMock,
+            xmlSerializerFactory = xmlSerializerFactory,
+            fileOutputStreamFactory = fileOutputStreamFactory,
+            filePathResolver = filePathResolver
+        )
+        val carpetaKotlin = temporaryFolder.newFolder("Kotlin")
+        val fileSintaxis = File(carpetaKotlin, "Test.${Extensions.XML_EXTENSION}")
+
+        val xmlTest = """
+        <${Structure.GUIAESTUDIO} ${Attributes.VERSION}="${Versions.VERSION1}">
+            <${Structure.CUESTIONARIO} ${Attributes.NOMBREGUIA}="Test">
+                <${XmlTagsV2.INTERROGANTE} ${XmlTagsV1.PREGUNTA}="Pregunta 1" ${XmlTagsV1.RESPUESTA}="Respuesta 1"/>
+                <${XmlTagsV2.INTERROGANTE} ${XmlTagsV1.PREGUNTA}="frqwhqw://phgld/slfnhu/orqx/fjxdbkbp/1.sqj" ${XmlTagsV1.RESPUESTA}="frqwhqw://phgld/slfnhu/orqx/fjxdbkbp/2.sqj"/>
+            </${Structure.CUESTIONARIO}>
+        </${Structure.GUIAESTUDIO}>
+    """.trimIndent()
+        fileSintaxis.writeText(xmlTest)
+
+        every {
+            filePathResolver.mapToFilePathSpecificGuide(any(), any(), any())
+        } returns GuidePath(fileSintaxis.absolutePath)
+
+        every {
+            pathHandlerMock.encrypt(any())
+        } throws Exception("Fallo forzado para UnknownError")
+
+        val response = repository.getXMLGuide(guideDomainModel, relativeGuidePath)
+
+        assertEquals(GetGuideResult.UnknownError, response)
+    }
+
+    @Test
+    fun recuperacion_de_guia_v2() {
+        val separator = File.separator
+        val guideDomainModel = GuideDomainModel(GuideVersion.V2, "Configuracion", "")
+        val relativeGuidePath = RelativeGuidePath("GIT${separator}Configuracion")
+        val rootPathValue = "${temporaryFolder.root}${separator}files${separator}guias"
+        val itemsResponse = listOf(
+            QAItemDomain(
+                question = QuestionItemDomain(
+                    content = listOf(
+                        QuestionContentDomain.Text("Pregunta 1", emptyList()),
+                        QuestionContentDomain.Image(
+                            "${rootPathValue.replace(StorageFolders.GUIAS, StorageFolders.IMAGENES)}\\${relativeGuidePath.value}\\1.png",
+                            "1.png"
+                        )
+                    )
+                ),
+                answer = QuestionItemDomain(
+                    content = listOf(
+                        QuestionContentDomain.Text("Respuesta 1", emptyList()),
+                        QuestionContentDomain.Image(
+                            "${rootPathValue.replace(StorageFolders.GUIAS, StorageFolders.IMAGENES)}${separator}${relativeGuidePath.value}${separator}2.png",
+                            "2.png"
+                        )
+                    )
+                )
+            )
+        )
+
+        temporaryFolder.newFolder("files${separator}guias${separator}${relativeGuidePath.value}")
+
+        every {
+            filePathResolver.mapToFilePathSpecificGuide(
+                guideDomainModel, relativeGuidePath,
+                PathKind.GUIAS
+            )
+        } returns GuidePath("${rootPathValue}${separator}${relativeGuidePath.value}${separator}Configuracion.xml")
+
+        val xmlTest = """
+        <${Structure.GUIAESTUDIO} ${Attributes.VERSION}="${Versions.VERSION2}">
+            <${Structure.CUESTIONARIO} ${Attributes.NOMBREGUIA}="Configuracion">
+                <${XmlTagsV2.QUESTION} posQuestion="0">  
+                    <${XmlTagsV2.TEXTO} ${XmlTagsV2.TEXTO}= "Pregunta 1"/>
+                    <${XmlTagsV2.IMAGEN} ${Attributes.URI}= "" ${Attributes.NAMEFILE}="1.png"/>
+                </${XmlTagsV2.QUESTION}> 
+                <${XmlTagsV2.ANSWER} posAnswer="0"> 
+                    <${XmlTagsV2.TEXTO} ${XmlTagsV2.TEXTO}= "Respuesta 1"/>
+                    <${XmlTagsV2.IMAGEN} ${Attributes.URI}= "" ${Attributes.NAMEFILE}="2.png"/>
+                </${XmlTagsV2.ANSWER}>
+            </${Structure.CUESTIONARIO}>
+        </${Structure.GUIAESTUDIO}>
+    """.trimIndent()
+
+        val fileSintaxis =
+            File(
+                "$rootPathValue${separator}${relativeGuidePath.value}",
+                "Configuracion.${Extensions.XML_EXTENSION}"
+            )
+        fileSintaxis.writeText(xmlTest)
+
+        val response = repository.getXMLGuide(guideDomainModel, relativeGuidePath)
+
+        assertEquals(GetGuideResult.Success(guideDomainModel, itemsResponse), response)
+    }
+
+    /*@Test
     fun recuperacion_de_guia_v1_formato_invalido() {
         val guideDomainModel = GuideDomainModel(GuideVersion.V1, "Test", "")
         val relativeGuidePath = RelativeGuidePath("Kotlin")
@@ -536,5 +700,5 @@ class TestGuiaRepositoryImpl {
         val response = repository.getXMLGuide(guideDomainModel, relativeGuidePath)
 
         assertEquals(GetGuideResult.UnknownError, response)
-    }
+    }*/
 }
