@@ -2,7 +2,6 @@ package com.jonathanev.review.data.util
 
 import com.jonathanev.review.data.storage.StorageFolders
 import com.jonathanev.review.domain.model.GuideVersion
-import java.io.File
 import javax.inject.Inject
 
 class PathHandler @Inject constructor() {
@@ -23,15 +22,21 @@ class PathHandler @Inject constructor() {
         return resultado.toString()
     }
 
-    fun getSubstringPath(path: String, decoded: String = "", version: GuideVersion, nameFile: String = ""): String{
-        var newPath = path
-        val separator = File.separator
+    fun getSubstringPath(
+        path: String,
+        decoded: String = "",
+        version: GuideVersion,
+        nameFile: String = ""
+    ): String {
+        var newPath = path.replace("\\", "/")
+        val newDecoded = decoded.replace("\\", "/")
+        val separator = "/"
 
         newPath = if (version == GuideVersion.V1) {
-            newPath = path.substringAfter(separator)
+            newPath = newPath.substringAfter(separator)
             newPath = newPath.replace(StorageFolders.GUIAS, StorageFolders.IMAGENES)
             newPath = newPath.substringBeforeLast(separator)
-            val image = decoded.substringAfterLast(separator)
+            val image = newDecoded.substringAfterLast(separator)
             "$newPath$separator$image"
         } else {
             newPath = newPath.replace(StorageFolders.GUIAS, StorageFolders.IMAGENES)
