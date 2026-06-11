@@ -1,5 +1,6 @@
 package com.jonathanev.review.data.filesystem
 
+import com.jonathanev.review.data.storage.StorageFolders
 import com.jonathanev.review.data.util.PathHandler
 import com.jonathanev.review.data.xml.Attributes
 import com.jonathanev.review.data.xml.Structure
