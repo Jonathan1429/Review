@@ -395,10 +395,14 @@ class TestGuiaRepositoryImpl {
     // getXMLGuide
     @Test
     fun recuperacion_de_guia_v1() {
-        val separator = File.separator
+        val separator = "/"
         val guideDomainModel = GuideDomainModel(GuideVersion.V1, "Test", "")
         val relativeGuidePath = RelativeGuidePath("Kotlin")
-        val rootPathValue = "${temporaryFolder.root}${separator}files${separator}guias"
+        val rootPathValue =
+            "${temporaryFolder.root.absolutePath}${separator}files${separator}${StorageFolders.GUIAS}".replace(
+                "\\",
+                "/"
+            )
         val itemsResponse = listOf(
             QAItemDomain(
                 question = QuestionItemDomain(
@@ -416,7 +420,11 @@ class TestGuiaRepositoryImpl {
                 question = QuestionItemDomain(
                     content = listOf(
                         QuestionContentDomain.Image(
-                            uri = "${rootPathValue}${separator}${relativeGuidePath.value}${separator}1.png",
+                            uri = "${rootPathValue}${separator}${relativeGuidePath.value}${separator}1.png"
+                                .replace(
+                                    oldValue = StorageFolders.GUIAS,
+                                    newValue = StorageFolders.IMAGENES
+                                ),
                             nameFile = "1.png"
                         )
                     )
@@ -424,7 +432,11 @@ class TestGuiaRepositoryImpl {
                 answer = QuestionItemDomain(
                     content = listOf(
                         QuestionContentDomain.Image(
-                            uri = "${rootPathValue}${separator}${relativeGuidePath.value}${separator}2.png",
+                            uri = "${rootPathValue}${separator}${relativeGuidePath.value}${separator}2.png"
+                                .replace(
+                                    oldValue = StorageFolders.GUIAS,
+                                    newValue = StorageFolders.IMAGENES
+                                ),
                             nameFile = "2.png"
                         )
                     )
@@ -446,15 +458,17 @@ class TestGuiaRepositoryImpl {
             <${Structure.CUESTIONARIO} ${Attributes.NOMBREGUIA}="Test">
                 <${XmlTagsV2.INTERROGANTE} ${XmlTagsV1.PREGUNTA}="Pregunta 1" ${XmlTagsV1.RESPUESTA}="Respuesta 1"/>
                 <${XmlTagsV2.INTERROGANTE} 
-                frqwhqw://phgld/slfnhu/gdwd/gdwd/frp.mrqdwkdqhy.uhylhz/ilohv/lpdjhqhv/Hvwxgldu dfwxdohv/42.sqj
-                    ${XmlTagsV1.PREGUNTA}="${MediaPaths.ENCRYPTED_IMAGE_BASE_PATH}orqx/fjxdbkbp/1.sqj" 
-                    ${XmlTagsV1.RESPUESTA}="frqwhqw://phgld/slfnhu/orqx/fjxdbkbp/2.sqj"/>
+                    ${XmlTagsV1.PREGUNTA}="${MediaPaths.ENCRYPTED_IMAGE_BASE_PATH}gdwd/gdwd/frp.mrqdwkdqhy.uhylhz/ilohv/lpdjhqhv/Nrwolq/1.sqj" 
+                    ${XmlTagsV1.RESPUESTA}="${MediaPaths.ENCRYPTED_IMAGE_BASE_PATH}gdwd/gdwd/frp.mrqdwkdqhy.uhylhz/ilohv/lpdjhqhv/Nrwolq/2.sqj"/>
             </${Structure.CUESTIONARIO}>
         </${Structure.GUIAESTUDIO}>
     """.trimIndent()
 
         val fileSintaxis =
-            File("$rootPathValue${separator}${relativeGuidePath.value}", "Test.${Extensions.XML_EXTENSION}")
+            File(
+                "$rootPathValue${separator}${relativeGuidePath.value}",
+                "Test.${Extensions.XML_EXTENSION}"
+            )
         fileSintaxis.writeText(xmlTest)
 
         val response = repository.getXMLGuide(guideDomainModel, relativeGuidePath)
@@ -552,17 +566,26 @@ class TestGuiaRepositoryImpl {
 
     @Test
     fun recuperacion_de_guia_v2() {
-        val separator = File.separator
+        val separator = "/"
         val guideDomainModel = GuideDomainModel(GuideVersion.V2, "Configuracion", "")
         val relativeGuidePath = RelativeGuidePath("GIT${separator}Configuracion")
-        val rootPathValue = "${temporaryFolder.root}${separator}files${separator}guias"
+        val rootPathValue =
+            "${temporaryFolder.root.absolutePath}${separator}files${separator}${StorageFolders.GUIAS}".replace(
+                "\\",
+                "/"
+            )
         val itemsResponse = listOf(
             QAItemDomain(
                 question = QuestionItemDomain(
                     content = listOf(
                         QuestionContentDomain.Text("Pregunta 1", emptyList()),
                         QuestionContentDomain.Image(
-                            "${rootPathValue.replace(StorageFolders.GUIAS, StorageFolders.IMAGENES)}\\${relativeGuidePath.value}\\1.png",
+                            "${
+                                rootPathValue.replace(
+                                    StorageFolders.GUIAS,
+                                    StorageFolders.IMAGENES
+                                )
+                            }${separator}${relativeGuidePath.value}${separator}1.png",
                             "1.png"
                         )
                     )
@@ -571,7 +594,12 @@ class TestGuiaRepositoryImpl {
                     content = listOf(
                         QuestionContentDomain.Text("Respuesta 1", emptyList()),
                         QuestionContentDomain.Image(
-                            "${rootPathValue.replace(StorageFolders.GUIAS, StorageFolders.IMAGENES)}${separator}${relativeGuidePath.value}${separator}2.png",
+                            "${
+                                rootPathValue.replace(
+                                    StorageFolders.GUIAS,
+                                    StorageFolders.IMAGENES
+                                )
+                            }${separator}${relativeGuidePath.value}${separator}2.png",
                             "2.png"
                         )
                     )

@@ -33,7 +33,7 @@ class PathHandler @Inject constructor() {
         val separator = "/"
 
         newPath = if (version == GuideVersion.V1) {
-            newPath = newPath.substringAfter(separator)
+            //newPath = newPath.substringAfter(separator)
             newPath = newPath.replace(StorageFolders.GUIAS, StorageFolders.IMAGENES)
             newPath = newPath.substringBeforeLast(separator)
             val image = newDecoded.substringAfterLast(separator)
