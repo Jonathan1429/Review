@@ -299,26 +299,26 @@ class GuiaRepositoryImpl @Inject constructor(
         guideDomainModel: GuideDomainModel,
         guidePath: GuidePath
     ): GetGuideResult {
-        val currentPath = guidePath.value
+        val currentPath = File(guidePath.value)
 
         val qaItemXmlDto = mutableListOf<QAItemXmlDto>()
         val db = DocumentBuilderFactory.newInstance().newDocumentBuilder()
 
         try {
-            val doc = db.parse(File(currentPath))
+            val doc = db.parse(currentPath)
 
             getQAXML(
                 qaItemXmlDto,
                 doc,
                 QAType.QUESTION.toTagXml(),
-                (File(currentPath).parent ?: ""),
+                currentPath.absolutePath,
                 guideDomainModel.version
             )
             getQAXML(
                 qaItemXmlDto,
                 doc,
                 QAType.ANSWER.toTagXml(),
-                (File(currentPath).parent ?: ""),
+                currentPath.absolutePath,
                 guideDomainModel.version
             )
 
