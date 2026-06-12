@@ -40,6 +40,7 @@ class PathHandler @Inject constructor() {
             "$newPath$separator$image"
         } else {
             newPath = newPath.replace(StorageFolders.GUIAS, StorageFolders.IMAGENES)
+            newPath = newPath.substringBeforeLast(separator)
             "$newPath$separator$nameFile"
         }
 
