@@ -757,4 +757,28 @@ class TestGuiaRepositoryImpl {
 
         assertEquals(GetGuideResult.UnknownError, response)
     }
+
+    @Test
+    fun borrar_guia_v1(){
+        val guideDomainModel = GuideDomainModel(GuideVersion.V1, "Test", "")
+        val relativeGuidePath = RelativeGuidePath("Kotlin")
+
+        val pathFolder = temporaryFolder.newFolder("files", StorageFolders.GUIAS, "Kotlin")
+        val archivoGuia = File(pathFolder, "Test.xml").apply { createNewFile() }
+
+        val rutaNativaCompleta = archivoGuia.absolutePath
+
+        every {
+            filePathResolver.mapToFilePathSpecificGuide(
+                guideDomainModel, relativeGuidePath, PathKind.GUIAS
+            )
+        } returns GuidePath(rutaNativaCompleta)
+
+        assertTrue("El archivo debería existir antes de la eliminación", archivoGuia.exists())
+
+        val response = repository.deleteGuide(GuideContext.DeleteGuide(guideDomainModel, relativeGuidePath))
+
+        assertTrue("El método debería retornar true al eliminar con éxito", response)
+        assertFalse("El archivo físico debería haber sido borrado del disco", archivoGuia.exists())
+    }
 }
