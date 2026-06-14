@@ -61,6 +61,14 @@ class FakeFilePathResolverService @Inject constructor(
         )
     }
 
+    override fun getPathGuidesV1(
+        guideDomainModel: GuideDomainModel,
+        kind: PathKind,
+        relativeGuidePath: RelativeGuidePath
+    ): String {
+        TODO("Not yet implemented")
+    }
+
     private fun getRelativePath(
         relativeGuidePath: RelativeGuidePath,
         nameFolder: String
