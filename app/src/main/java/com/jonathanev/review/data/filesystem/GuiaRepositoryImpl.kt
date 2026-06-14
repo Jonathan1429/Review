@@ -60,16 +60,18 @@ class GuiaRepositoryImpl @Inject constructor(
 
     private fun listGuides(relativeGuidePath: RelativeGuidePath): List<File> {
         val path = File(filePathResolver.mapToFolderPath(relativeGuidePath, PathKind.GUIAS).value)
-        val listFiles = path.listFiles().orEmpty()
+        val allItems = path.listFiles().orEmpty()
+
+        val listFiles = allItems
             .filter { file -> file.isFile }
             .filter { file ->
                 file.extension == Extensions.XML_EXTENSION
             }
 
-        val listFromFolders = path.listFiles().orEmpty()
+        val listFromFolders = allItems
             .filter { it.isDirectory }
             .flatMap { folder ->
-                (folder.listFiles().orEmpty())
+                folder.listFiles().orEmpty()
                     .filter { file -> file.isFile }
                     .filter { file -> file.extension == Extensions.XML_EXTENSION }
             }
