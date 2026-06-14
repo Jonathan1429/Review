@@ -103,7 +103,7 @@ class TestGuiaRepositoryImpl {
     @Test
     fun regresa_la_lista_de_guias_V1_y_V2_dentro_de_la_ruta() {
         val relativePath = RelativeGuidePath(folderKotlin)
-        val pathKotlin = temporaryFolder.newFolder(folderKotlin)
+        val pathKotlin = temporaryFolder.newFolder(folderFiles, folderGuides, folderKotlin)
         val folderTest = File(pathKotlin, folderTest)
         folderTest.mkdirs()
 
@@ -131,7 +131,7 @@ class TestGuiaRepositoryImpl {
     @Test
     fun regresa_la_lista_vacia_sino_se_encuentran_guias_V1_o_V2() {
         val relativePath = RelativeGuidePath(folderKotlin)
-        val pathKotlin = temporaryFolder.newFolder(folderKotlin)
+        val pathKotlin = temporaryFolder.newFolder(folderFiles, folderGuides, folderKotlin)
         val folderTest = File(pathKotlin, folderTest)
         folderTest.mkdirs()
 
@@ -150,6 +150,42 @@ class TestGuiaRepositoryImpl {
         val resultado = repository.getNumGuides(relativePath)
 
         assertEquals(0, resultado)
+    }
+
+    @Test
+    fun regresa_lista_vacia_si_la_ruta_principal_devuelve_null_o_falla() {
+        val relativePath = RelativeGuidePath(folderKotlin)
+        val rootPath = temporaryFolder.newFolder(folderFiles, folderGuides)
+        val pathNonExistent = File(rootPath, folderKotlin).absolutePath
+
+        every {
+            filePathResolver.mapToFolderPath(relativePath, PathKind.GUIAS)
+        } returns GuidePath(pathNonExistent)
+
+        val resultado = repository.getNumGuides(relativePath)
+
+        assertEquals(0, resultado)
+    }
+
+    @Test
+    fun solamente_regresa_guias_v1_si_la_ruta_para_guias_v2_es_null_o_falla() {
+        val relativePath = RelativeGuidePath(folderKotlin)
+        val pathKotlin =
+            temporaryFolder.newFolder(folderFiles, folderGuides, folderKotlin).absolutePath
+
+        every {
+            filePathResolver.mapToFolderPath(relativePath, PathKind.GUIAS)
+        } returns GuidePath(pathKotlin)
+
+        // Archivos GuiaV1
+        File(pathKotlin, "Sintaxis.${Extensions.XML_EXTENSION}").createNewFile()
+        File(pathKotlin, "Documentacion.${Extensions.XML_EXTENSION}").createNewFile()
+        File(pathKotlin, "Imagen1.${Extensions.PNG_EXTENSION}").createNewFile()
+        File(pathKotlin, "Imagen2.${Extensions.PNG_EXTENSION}").createNewFile()
+
+        val resultado = repository.getNumGuides(relativePath)
+
+        assertEquals(2, resultado)
     }
 
     // getGuides
@@ -436,8 +472,14 @@ class TestGuiaRepositoryImpl {
             temporaryFolder.newFolder("files", StorageFolders.GUIAS, relativeGuidePath.value)
         val pathFolderImagesKotlin =
             temporaryFolder.newFolder("files", StorageFolders.IMAGENES, relativeGuidePath.value)
-        val rutaImagen1 = File(pathFolderImagesKotlin, "1${Extensions.POINT_PNG_EXTENSION}").absolutePath.toSlashPath()
-        val rutaImagen2 = File(pathFolderImagesKotlin, "2${Extensions.POINT_PNG_EXTENSION}").absolutePath.toSlashPath()
+        val rutaImagen1 = File(
+            pathFolderImagesKotlin,
+            "1${Extensions.POINT_PNG_EXTENSION}"
+        ).absolutePath.toSlashPath()
+        val rutaImagen2 = File(
+            pathFolderImagesKotlin,
+            "2${Extensions.POINT_PNG_EXTENSION}"
+        ).absolutePath.toSlashPath()
 
         val itemsResponse = listOf(
             QAItemDomain(
@@ -587,7 +629,12 @@ class TestGuiaRepositoryImpl {
         val pathFolderGuidesConfiguracion =
             temporaryFolder.newFolder("files", StorageFolders.GUIAS, folderGit, folderConfiguracion)
         val pathFolderImagesConfiguracion =
-            temporaryFolder.newFolder("files", StorageFolders.IMAGENES, folderGit, folderConfiguracion)
+            temporaryFolder.newFolder(
+                "files",
+                StorageFolders.IMAGENES,
+                folderGit,
+                folderConfiguracion
+            )
         val rutaImagen1 = File(
             pathFolderImagesConfiguracion,
             "1${Extensions.POINT_PNG_EXTENSION}"
@@ -779,5 +826,6 @@ class TestGuiaRepositoryImpl {
     }
 
     private fun String.toSlashPath(): String = this.replace("\\", "/")
-    private fun String.toXMLInvalid(): String = this.replace("</${Structure.GUIAESTUDIO}>", "<//${Structure.GUIAESTUDIO}>")
+    private fun String.toXMLInvalid(): String =
+        this.replace("</${Structure.GUIAESTUDIO}>", "<//${Structure.GUIAESTUDIO}>")
 }
