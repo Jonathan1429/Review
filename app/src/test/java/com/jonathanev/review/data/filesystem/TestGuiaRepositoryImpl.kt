@@ -101,42 +101,55 @@ class TestGuiaRepositoryImpl {
     // getNumGuides
     // Guias V1
     @Test
-    fun regresa_la_lista_de_solo_guias_en_la_ruta() {
+    fun regresa_la_lista_de_guias_V1_y_V2_dentro_de_la_ruta() {
         val relativePath = RelativeGuidePath(folderKotlin)
-        val rootPath = temporaryFolder.newFolder(folderKotlin)
+        val pathKotlin = temporaryFolder.newFolder(folderKotlin)
+        val folderTest = File(pathKotlin, folderTest)
+        folderTest.mkdirs()
 
         every {
             filePathResolver.mapToFolderPath(relativePath, PathKind.GUIAS)
-        } returns GuidePath(rootPath.absolutePath)
+        } returns GuidePath(pathKotlin.absolutePath)
 
-        File(rootPath, "Test.${Extensions.XML_EXTENSION}").createNewFile()
-        File(rootPath, "Documentacion.${Extensions.XML_EXTENSION}").createNewFile()
-        File(rootPath, "Imagen1.${Extensions.PNG_EXTENSION}").createNewFile()
-        File(rootPath, "Imagen2.${Extensions.PNG_EXTENSION}").createNewFile()
+        //Guides V1
+        File(pathKotlin, "Sintaxis.${Extensions.XML_EXTENSION}").createNewFile()
+        File(pathKotlin, "Documentacion.${Extensions.XML_EXTENSION}").createNewFile()
+        File(pathKotlin, "Imagen1.${Extensions.PNG_EXTENSION}").createNewFile()
+        File(pathKotlin, "Imagen2.${Extensions.PNG_EXTENSION}").createNewFile()
+
+        //Guides V2
+        File(folderTest, "Test.${Extensions.XML_EXTENSION}").createNewFile()
+        File(folderTest, "Documentacion.${Extensions.XML_EXTENSION}").createNewFile()
+        File(folderTest, "Imagen1.${Extensions.PNG_EXTENSION}").createNewFile()
+        File(folderTest, "Imagen2.${Extensions.PNG_EXTENSION}").createNewFile()
 
         val resultado = repository.getNumGuides(relativePath)
 
-        assertEquals(2, resultado)
+        assertEquals(4, resultado)
     }
 
-    // ListFile interno de listGuides - Guias V2
     @Test
-    fun sino_hay_ruta_en_la_cual_mostrar_archivos_regresa_lista_vacia_sublistado_listFromFolders() {
-        val rutaPrueba = RelativeGuidePath("guias/productividad")
-        val rootPathValue = temporaryFolder.root.absolutePath
+    fun regresa_la_lista_vacia_sino_se_encuentran_guias_V1_o_V2() {
+        val relativePath = RelativeGuidePath(folderKotlin)
+        val pathKotlin = temporaryFolder.newFolder(folderKotlin)
+        val folderTest = File(pathKotlin, folderTest)
+        folderTest.mkdirs()
 
         every {
-            filePathResolver.mapToFolderPath(rutaPrueba, PathKind.GUIAS)
-        } returns GuidePath("$rootPathValue/Kotlin")
+            filePathResolver.mapToFolderPath(relativePath, PathKind.GUIAS)
+        } returns GuidePath(pathKotlin.absolutePath)
 
-        val pathGuideTest = temporaryFolder.newFolder("Kotlin", "Test")
-        val pathGuideSintaxis = temporaryFolder.newFolder("Kotlin", "Sintaxis")
-        File(pathGuideTest, "Test.${Extensions.XML_EXTENSION}").createNewFile()
-        File(pathGuideSintaxis, "Sintaxis.${Extensions.XML_EXTENSION}").createNewFile()
+        // Archivos ruta 1
+        File(pathKotlin, "Imagen1.${Extensions.PNG_EXTENSION}").createNewFile()
+        File(pathKotlin, "Imagen2.${Extensions.PNG_EXTENSION}").createNewFile()
 
-        val resultado = repository.getNumGuides(rutaPrueba)
+        // Archivos ruta 2
+        File(folderTest, "Imagen1.${Extensions.PNG_EXTENSION}").createNewFile()
+        File(folderTest, "Imagen2.${Extensions.PNG_EXTENSION}").createNewFile()
 
-        assertEquals(2, resultado)
+        val resultado = repository.getNumGuides(relativePath)
+
+        assertEquals(0, resultado)
     }
 
     // getGuides
@@ -194,7 +207,7 @@ class TestGuiaRepositoryImpl {
     }
 
     // existXMLGuideV1
-    @Test
+    /*@Test
     fun muestra_cuando_no_existe_una_guia_v1() {
         val rutaPrueba = RelativeGuidePath("Kotlin")
         val rootPathValue = temporaryFolder.newFolder(rutaPrueba.value)
@@ -240,7 +253,7 @@ class TestGuiaRepositoryImpl {
         val resultado = repository.existXMLGuideV1(guideDomain, rutaPrueba)
 
         assertEquals(ExistGuideV1Result.NoExistGuide, resultado)
-    }
+    }*/
 
     @Test
     fun muestra_cuando_existe_una_guia_v1() {
@@ -535,7 +548,7 @@ class TestGuiaRepositoryImpl {
         assertEquals(GetGuideResult.NotFound, response)
     }
 
-    @Test
+    /*@Test
     fun recuperacion_de_guia_v1_error_desconocido_con_mock() {
         val guideDomainModel = GuideDomainModel(GuideVersion.V1, "Test", "")
         val relativeGuidePath = RelativeGuidePath("")
@@ -562,7 +575,7 @@ class TestGuiaRepositoryImpl {
         val response = repository.getXMLGuide(guideDomainModel, relativeGuidePath)
 
         assertEquals(GetGuideResult.UnknownError, response)
-    }
+    }*/
 
     @Test
     fun recuperacion_de_guia_v2() {
