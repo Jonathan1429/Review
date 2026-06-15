@@ -1,6 +1,7 @@
 package com.jonathanev.review.data.filesystem
 
 import android.util.Log
+import com.bumptech.glide.load.engine.Resource
 import com.jonathanev.review.core.media.MediaPaths
 import com.jonathanev.review.data.mapper.xml.toDomain
 import com.jonathanev.review.data.mapper.xml.toTagXml
@@ -32,6 +33,8 @@ import com.jonathanev.review.domain.repository.XmlSerializerFactory
 import com.jonathanev.review.domain.result.ExistGuideV1Result
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.GetSaveGuideResult
+import com.jonathanev.review.domain.result.GuideError
+import com.jonathanev.review.domain.result.ReadResource
 import com.jonathanev.review.domain.result.SaveGuideError
 import org.w3c.dom.Document
 import org.w3c.dom.Element
@@ -46,6 +49,7 @@ import java.nio.file.StandardCopyOption
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.xml.parsers.DocumentBuilderFactory
+import javax.xml.parsers.ParserConfigurationException
 
 @Singleton
 class GuiaRepositoryImpl @Inject constructor(
@@ -86,7 +90,12 @@ class GuiaRepositoryImpl @Inject constructor(
 
     override fun getGuides(relativeGuidePath: RelativeGuidePath): List<GuideDomainModel> {
         val result = listGuides(relativeGuidePath)
-        val resultGuides = result.sortedBy { it.name }.map { file -> getAttributesGuide(file) }
+        val resultGuides = result.sortedBy { it.name }.mapNotNull { file ->
+            when(val guideDomainModel: ReadResource<GuideDomainModel> = getAttributesGuide(file)){
+                is ReadResource.Error -> null
+                is ReadResource.Success -> guideDomainModel.data
+            }
+        }
         _guidesRecovery = resultGuides
         return resultGuides
     }
@@ -489,7 +498,14 @@ class GuiaRepositoryImpl @Inject constructor(
     private fun File.isValidGuideV1(): Boolean {
         if (!exists()) return false
         if (isDirectory) return false
-        return getAttributesGuide(this).version == GuideVersion.V1
+        val guideDomainModel: ReadResource<GuideDomainModel> = getAttributesGuide(this)
+        return when(guideDomainModel){
+            is ReadResource.Error -> false
+            is ReadResource.Success -> {
+                val version = guideDomainModel.data.version
+                version == GuideVersion.V1
+            }
+        }
     }
 
 
@@ -528,29 +544,49 @@ class GuiaRepositoryImpl @Inject constructor(
         return File(oldGuidePath.value).renameTo(File(newGuidePath.value))
     }
 
-    private fun getAttributesGuide(file: File): GuideDomainModel {
-        val db = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-        val doc = db.parse(file)
-        val cuestionarioNode = doc
-            .getElementsByTagName(Structure.CUESTIONARIO)
-            .item(0) as Element
+    private fun getAttributesGuide(file: File): ReadResource<GuideDomainModel> {
+        return try {
+            val db = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+            val doc = db.parse(file)
 
-        val guiaEstudioNode = doc
-            .getElementsByTagName(Structure.GUIAESTUDIO)
-            .item(0) as Element
+            // Normaliza el documento XML (que solo contienen espacios o saltos de línea sueltos entre etiquetas)
+            doc.documentElement.normalize()
 
-        val description = cuestionarioNode.getAttribute(Attributes.DESCRIPCION)
-        val version = guiaEstudioNode.getAttribute(Attributes.VERSION)
-        val name = if (version == Versions.VERSION1) {
-            file.name.replace(Extensions.POINT_XML_EXTENSION, "")
-        } else {
-            cuestionarioNode.getAttribute(Attributes.NOMBREGUIA)
+            // Si la etiqueta no existe, item(0) devuelve null. Usamos as? para evitar un NullPointerException al castear.
+            val cuestionarioNode = doc
+                .getElementsByTagName(Structure.CUESTIONARIO)
+                .item(0) as? Element
+
+            val guiaEstudioNode = doc
+                .getElementsByTagName(Structure.GUIAESTUDIO)
+                .item(0) as? Element
+
+            val description = cuestionarioNode?.getAttribute(Attributes.DESCRIPCION).orEmpty()
+            val version = guiaEstudioNode?.getAttribute(Attributes.VERSION).orEmpty()
+
+            val name = if (version == Versions.VERSION1) {
+                file.name.replace(Extensions.POINT_XML_EXTENSION, "")
+            } else { // Version 2
+                cuestionarioNode?.getAttribute(Attributes.NOMBREGUIA).orEmpty()
+            }
+
+            if (version.isEmpty() && name.isEmpty()){
+                return ReadResource.Error(GuideError.EmptyOrCorruptFile)
+            }
+
+            val domainModel = GuideXmlDto(
+                version = version,
+                nameGuide = name,
+                description = description
+            ).toDomain()
+
+            ReadResource.Success(domainModel)
+        } catch (_: FileNotFoundException) {
+            ReadResource.Error(GuideError.FileNotFound)
+        } catch (_: SAXException){
+            ReadResource.Error(GuideError.InvalidXmlFormat)
+        } catch (e: Exception){
+            ReadResource.Error(GuideError.UnknownError(e.localizedMessage))
         }
-
-        return GuideXmlDto(
-            version = version,
-            nameGuide = name,
-            description = description
-        ).toDomain()
     }
 }
