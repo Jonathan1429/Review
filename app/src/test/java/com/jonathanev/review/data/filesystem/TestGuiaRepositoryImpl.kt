@@ -200,10 +200,11 @@ class TestGuiaRepositoryImpl {
         val secondaryPathTest = File(pathRootKotlin, folderTest)
         secondaryPathTest.mkdirs()
 
-        val pathGuideSintaxis = File(pathRootKotlin,"Sintaxis${Extensions.POINT_XML_EXTENSION}")
-        val pathGuideBucles = File(pathRootKotlin,"Bucles${Extensions.POINT_XML_EXTENSION}")
+        val pathGuideSintaxis = File(pathRootKotlin, "Sintaxis${Extensions.POINT_XML_EXTENSION}")
+        val pathGuideBucles = File(pathRootKotlin, "Bucles${Extensions.POINT_XML_EXTENSION}")
         val pathGuideTest = File(secondaryPathTest, "Test${Extensions.POINT_XML_EXTENSION}")
-        val pathGuideTestIntegracion = File(secondaryPathTest, "Test Integracion${Extensions.POINT_XML_EXTENSION}")
+        val pathGuideTestIntegracion =
+            File(secondaryPathTest, "Test Integracion${Extensions.POINT_XML_EXTENSION}")
 
         val listGuideDomainModel = listOf(
             GuideDomainModel(
@@ -318,53 +319,84 @@ class TestGuiaRepositoryImpl {
     }
 
     // existXMLGuideV1
-    /*@Test
-    fun muestra_cuando_no_existe_una_guia_v1() {
-        val rutaPrueba = RelativeGuidePath("Kotlin")
-        val rootPathValue = temporaryFolder.newFolder(rutaPrueba.value)
-        val pathGuide = File(rootPathValue, "Sintaxis${Extensions.POINT_XML_EXTENSION}")
-        val pathGuideNat = pathGuide.absolutePath
+    @Test
+    fun sino_existe_el_archivo_regresa_que_no_existe_la_guia() {
+        val relativePath = RelativeGuidePath(folderKotlin)
+        val pathKotlin =
+            temporaryFolder.newFolder(folderFiles, folderGuides, folderKotlin)
+        val pathGuide = File(pathKotlin, "Test Integracion${Extensions.POINT_XML_EXTENSION}").absolutePath
         val guideDomain = GuideDomainModel(
             version = GuideVersion.V1,
-            nameGuide = "Sintaxis",
+            nameGuide = "Test",
+            description = ""
+        )
+
+        every {
+            filePathResolver.getPathGuidesV1(guideDomain, PathKind.GUIAS, relativePath)
+        } returns pathGuide
+
+        // Archivos GuiaV1
+        val pathGuideTestIntegracion =
+            File(pathKotlin, "Test Integracion${Extensions.POINT_XML_EXTENSION}")
+        File(pathKotlin, "Imagen1${Extensions.POINT_PNG_EXTENSION}").createNewFile()
+        File(pathKotlin, "Imagen2${Extensions.POINT_PNG_EXTENSION}").createNewFile()
+
+        pathGuideTestIntegracion.writeText(xmlTestIntegracionV2)
+
+        val resultado = repository.existXMLGuideV1(guideDomain, relativePath)
+
+        assertEquals(ExistGuideV1Result.NoExistGuide, resultado)
+    }
+
+    @Test
+    fun si_es_un_directorio_regresa_que_la_guia_no_existe() {
+        val rutaPrueba = RelativeGuidePath(folderKotlin)
+        val rootKotlin = temporaryFolder.newFolder(rutaPrueba.value)
+        val guideDomain = GuideDomainModel(
+            version = GuideVersion.V1,
+            nameGuide = "Test",
             description = ""
         )
 
         every {
             filePathResolver.getPathGuidesV1(guideDomain, PathKind.GUIAS, rutaPrueba)
-        } returns pathGuideNat
-
-        val pathGuideTest = temporaryFolder.newFolder("Kotlin", "Test")
-
-        val xmlTest = """
-        <${Structure.GUIAESTUDIO} ${Attributes.VERSION}="${Versions.VERSION2}">
-            <${Structure.CUESTIONARIO} 
-                ${Attributes.DESCRIPCION}="Descripcion de test" 
-                ${Attributes.NOMBREGUIA}="Test">
-            </${Structure.CUESTIONARIO}>
-        </${Structure.GUIAESTUDIO}>
-    """.trimIndent()
-
-        val xmlSintaxis = """
-        <${Structure.GUIAESTUDIO} ${Attributes.VERSION}="${Versions.VERSION2}">
-            <${Structure.CUESTIONARIO} 
-                ${Attributes.DESCRIPCION}="Descripcion de sintaxis" 
-                ${Attributes.NOMBREGUIA}="Sintaxis">
-            </${Structure.CUESTIONARIO}>
-        </${Structure.GUIAESTUDIO}>
-    """.trimIndent()
-
-        val fileTest = File(pathGuideTest, "Test.${Extensions.XML_EXTENSION}")
-        fileTest.writeText(xmlTest)
-
-        val fileSintaxis =
-            File("$rootPathValue/Kotlin", "Sintaxis.${Extensions.XML_EXTENSION}")
-        fileSintaxis.writeText(xmlSintaxis)
+        } returns rootKotlin.absolutePath
 
         val resultado = repository.existXMLGuideV1(guideDomain, rutaPrueba)
 
         assertEquals(ExistGuideV1Result.NoExistGuide, resultado)
-    }*/
+    }
+
+    @Test
+    fun si_la_guia_es_v2_regresa_que_no_existe_la_guia() {
+        val relativePath = RelativeGuidePath(folderKotlin)
+        val pathKotlin =
+            temporaryFolder.newFolder(folderFiles, folderGuides, folderKotlin)
+        val pathGuideV2 = File(pathKotlin, "Test").absolutePath
+        val guideDomain = GuideDomainModel(
+            version = GuideVersion.V1,
+            nameGuide = "Test",
+            description = ""
+        )
+
+        every {
+            filePathResolver.getPathGuidesV1(guideDomain, PathKind.GUIAS, relativePath)
+        } returns pathGuideV2
+
+        // Archivos GuiaV1
+        val pathGuideSintaxis =
+            File(pathKotlin, "Test Integracion${Extensions.POINT_XML_EXTENSION}")
+        val pathGuideBucles = File(pathKotlin, "Test${Extensions.POINT_XML_EXTENSION}")
+        File(pathKotlin, "Imagen1${Extensions.POINT_PNG_EXTENSION}").createNewFile()
+        File(pathKotlin, "Imagen2${Extensions.POINT_PNG_EXTENSION}").createNewFile()
+
+        pathGuideSintaxis.writeText(xmlTestIntegracionV2)
+        pathGuideBucles.writeText(xmlTestV2)
+
+        val resultado = repository.existXMLGuideV1(guideDomain, relativePath)
+
+        assertEquals(ExistGuideV1Result.NoExistGuide, resultado)
+    }
 
     @Test
     fun muestra_cuando_existe_una_guia_v1() {
@@ -373,12 +405,9 @@ class TestGuiaRepositoryImpl {
         val pathKotlin = File(rootPath, folderKotlin)
         pathKotlin.mkdirs()
 
-        val pathTest = File(pathKotlin, folderTest)
-        pathTest.mkdirs()
-
         val pathGuideSintaxis = File(pathKotlin, "Sintaxis${Extensions.POINT_XML_EXTENSION}")
         val pathGuideSintaxisNat = pathGuideSintaxis.absolutePath
-        val pathGuideTest = File(pathTest, "Test${Extensions.POINT_XML_EXTENSION}")
+        val pathGuideTest = File(pathKotlin, "Test${Extensions.POINT_XML_EXTENSION}")
 
         val guideDomain = GuideDomainModel(
             version = GuideVersion.V1,
@@ -396,48 +425,6 @@ class TestGuiaRepositoryImpl {
         val resultado = repository.existXMLGuideV1(guideDomain, relativeGuidePath)
 
         assertEquals(ExistGuideV1Result.ExistGuide, resultado)
-    }
-
-    @Test
-    fun si_es_un_directorio_regresa_que_la_guia_no_existe() {
-        val rutaPrueba = RelativeGuidePath("guias/productividad")
-        val rootPathValue = temporaryFolder.root.absolutePath
-        val guideDomain = GuideDomainModel(
-            version = GuideVersion.V1,
-            nameGuide = "Test",
-            description = ""
-        )
-
-        every {
-            filePathResolver.getPathGuidesV1(guideDomain, PathKind.GUIAS, rutaPrueba)
-        } returns "$rootPathValue/Kotlin/Test"
-
-        temporaryFolder.newFolder("Kotlin", "Test")
-
-        val resultado = repository.existXMLGuideV1(guideDomain, rutaPrueba)
-
-        assertEquals(ExistGuideV1Result.NoExistGuide, resultado)
-    }
-
-    @Test
-    fun si_no_existe_la_guia_v1_regresa_que_la_guia_no_existe() {
-        val rutaPrueba = RelativeGuidePath("guias/productividad")
-        val rootPathValue = temporaryFolder.root.absolutePath
-        val guideDomain = GuideDomainModel(
-            version = GuideVersion.V1,
-            nameGuide = "Test",
-            description = ""
-        )
-
-        every {
-            filePathResolver.getPathGuidesV1(guideDomain, PathKind.GUIAS, rutaPrueba)
-        } returns "$rootPathValue/Kotlin/Test.xml"
-
-        temporaryFolder.newFolder("Kotlin")
-
-        val resultado = repository.existXMLGuideV1(guideDomain, rutaPrueba)
-
-        assertEquals(ExistGuideV1Result.NoExistGuide, resultado)
     }
 
     // moveGuide
