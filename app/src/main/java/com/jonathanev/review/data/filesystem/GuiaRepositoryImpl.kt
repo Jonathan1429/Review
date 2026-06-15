@@ -13,6 +13,7 @@ import com.jonathanev.review.data.util.PathHandler
 import com.jonathanev.review.data.xml.Attributes
 import com.jonathanev.review.data.xml.Structure
 import com.jonathanev.review.data.xml.Versions
+import com.jonathanev.review.data.xml.XmlCorruptException
 import com.jonathanev.review.data.xml.XmlTagsV1
 import com.jonathanev.review.data.xml.XmlTagsV2
 import com.jonathanev.review.domain.constants.Extensions
@@ -585,6 +586,7 @@ class GuiaRepositoryImpl @Inject constructor(
             ReadResource.Error(GuideError.FileNotFound)
         } catch (_: SAXException){
             ReadResource.Error(GuideError.InvalidXmlFormat)
+            throw XmlCorruptException()
         } catch (e: Exception){
             ReadResource.Error(GuideError.UnknownError(e.localizedMessage))
         }
