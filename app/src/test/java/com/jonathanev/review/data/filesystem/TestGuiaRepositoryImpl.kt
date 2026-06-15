@@ -53,7 +53,9 @@ class TestGuiaRepositoryImpl {
     private val fileOutputStreamFactory: FileOutputStreamFactory = mockk()
     private val filePathResolver: FilePathResolver = mockk()
     private lateinit var xmlTestV2: String
+    private lateinit var xmlTestIntegracionV2: String
     private lateinit var xmlSintaxisV1: String
+    private lateinit var xmlBuclesV1: String
     private lateinit var folderKotlin: String
     private lateinit var folderTest: String
     private lateinit var folderFiles: String
@@ -65,7 +67,6 @@ class TestGuiaRepositoryImpl {
         folderTest = "Test"
         folderFiles = "files"
         folderGuides = "guides"
-
         xmlSintaxisV1 = """
         <${Structure.GUIAESTUDIO} ${Attributes.VERSION}="${Versions.VERSION1}">
             <${Structure.CUESTIONARIO} ${Attributes.NOMBREGUIA}="Sintaxis">
@@ -74,10 +75,10 @@ class TestGuiaRepositoryImpl {
             </${Structure.CUESTIONARIO}>
         </${Structure.GUIAESTUDIO}>
     """.trimIndent()
-
+        xmlBuclesV1 = xmlSintaxisV1.replace("Sintaxis", "Bucles")
         xmlTestV2 = """
         <${Structure.GUIAESTUDIO} ${Attributes.VERSION}="${Versions.VERSION2}">
-            <${Structure.CUESTIONARIO} ${Attributes.NOMBREGUIA}="Configuracion">
+            <${Structure.CUESTIONARIO} ${Attributes.NOMBREGUIA}="Test">
                 <${XmlTagsV2.QUESTION} posQuestion="0">  
                     <${XmlTagsV2.TEXTO} ${XmlTagsV2.TEXTO}= "Pregunta 1"/>
                     <${XmlTagsV2.IMAGEN} ${Attributes.URI}= "" ${Attributes.NAMEFILE}="1${Extensions.POINT_PNG_EXTENSION}"/>
@@ -89,7 +90,7 @@ class TestGuiaRepositoryImpl {
             </${Structure.CUESTIONARIO}>
         </${Structure.GUIAESTUDIO}>
     """.trimIndent()
-
+        xmlTestIntegracionV2 = xmlTestV2.replace("Test", "Test Integracion")
         repository = GuiaRepositoryImpl(
             pathHandler = pathHandler,
             xmlSerializerFactory = xmlSerializerFactory,
@@ -101,7 +102,7 @@ class TestGuiaRepositoryImpl {
     // getNumGuides
     // Guias V1
     @Test
-    fun regresa_la_lista_de_guias_V1_y_V2_dentro_de_la_ruta() {
+    fun regresa_el_num_de_guias_V1_y_V2_dentro_de_la_ruta() {
         val relativePath = RelativeGuidePath(folderKotlin)
         val pathKotlin = temporaryFolder.newFolder(folderFiles, folderGuides, folderKotlin)
         val folderTest = File(pathKotlin, folderTest)
@@ -129,7 +130,7 @@ class TestGuiaRepositoryImpl {
     }
 
     @Test
-    fun regresa_la_lista_vacia_sino_se_encuentran_guias_V1_o_V2() {
+    fun regresa_0_ya_que_no_se_encuentran_guias_V1_o_V2() {
         val relativePath = RelativeGuidePath(folderKotlin)
         val pathKotlin = temporaryFolder.newFolder(folderFiles, folderGuides, folderKotlin)
         val folderTest = File(pathKotlin, folderTest)
@@ -153,7 +154,7 @@ class TestGuiaRepositoryImpl {
     }
 
     @Test
-    fun regresa_lista_vacia_si_la_ruta_principal_devuelve_null_o_falla() {
+    fun regresa_0_si_la_ruta_principal_devuelve_null_o_falla() {
         val relativePath = RelativeGuidePath(folderKotlin)
         val rootPath = temporaryFolder.newFolder(folderFiles, folderGuides)
         val pathNonExistent = File(rootPath, folderKotlin).absolutePath
@@ -168,7 +169,7 @@ class TestGuiaRepositoryImpl {
     }
 
     @Test
-    fun solamente_regresa_guias_v1_si_la_ruta_para_guias_v2_es_null_o_falla() {
+    fun regresa_solamente_2_guias_v1_si_la_ruta_para_guias_v2_es_null_o_falla() {
         val relativePath = RelativeGuidePath(folderKotlin)
         val pathKotlin =
             temporaryFolder.newFolder(folderFiles, folderGuides, folderKotlin).absolutePath
@@ -190,54 +191,128 @@ class TestGuiaRepositoryImpl {
 
     // getGuides
     @Test
-    fun no_regresa_guias_en_la_ruta_actual() {
-        val rutaPrueba = RelativeGuidePath("guias/productividad")
-        val rootPathValue = temporaryFolder.root.absolutePath
+    fun regresa_las_guias_v1_y_v2() {
+        val relativeGuidePath = RelativeGuidePath(folderKotlin)
+        val rootPath = temporaryFolder.newFolder(folderFiles, folderGuides)
+        val pathRootKotlin = File(rootPath, folderKotlin)
+        pathRootKotlin.mkdirs()
+
+        val secondaryPathTest = File(pathRootKotlin, folderTest)
+        secondaryPathTest.mkdirs()
+
+        val pathGuideSintaxis = File(pathRootKotlin,"Sintaxis${Extensions.POINT_XML_EXTENSION}")
+        val pathGuideBucles = File(pathRootKotlin,"Bucles${Extensions.POINT_XML_EXTENSION}")
+        val pathGuideTest = File(secondaryPathTest, "Test${Extensions.POINT_XML_EXTENSION}")
+        val pathGuideTestIntegracion = File(secondaryPathTest, "Test Integracion${Extensions.POINT_XML_EXTENSION}")
+
         val listGuideDomainModel = listOf(
             GuideDomainModel(
                 version = GuideVersion.V1,
+                nameGuide = "Bucles",
+                description = ""
+            ),
+            GuideDomainModel(
+                version = GuideVersion.V1,
                 nameGuide = "Sintaxis",
-                description = "Descripcion de sintaxis"
+                description = ""
+            ),
+            GuideDomainModel(
+                version = GuideVersion.V2,
+                nameGuide = "Test Integracion",
+                description = ""
             ),
             GuideDomainModel(
                 version = GuideVersion.V2,
                 nameGuide = "Test",
-                description = "Descripcion de test"
+                description = ""
             )
         )
 
         every {
-            filePathResolver.mapToFolderPath(rutaPrueba, PathKind.GUIAS)
-        } returns GuidePath("$rootPathValue/Kotlin")
+            filePathResolver.mapToFolderPath(relativeGuidePath, PathKind.GUIAS)
+        } returns GuidePath(pathRootKotlin.absolutePath)
 
-        val pathGuideTest = temporaryFolder.newFolder("Kotlin", "Test")
+        pathGuideSintaxis.writeText(xmlSintaxisV1)
+        pathGuideBucles.writeText(xmlBuclesV1)
+        pathGuideTest.writeText(xmlTestV2)
+        pathGuideTestIntegracion.writeText(xmlTestIntegracionV2)
 
-        val xmlTest = """
-        <${Structure.GUIAESTUDIO} ${Attributes.VERSION}="${Versions.VERSION2}">
-            <${Structure.CUESTIONARIO} 
-                ${Attributes.DESCRIPCION}="Descripcion de test" 
-                ${Attributes.NOMBREGUIA}="Test">
-            </${Structure.CUESTIONARIO}>
-        </${Structure.GUIAESTUDIO}>
-    """.trimIndent()
+        val resultado = repository.getGuides(relativeGuidePath)
 
-        val xmlSintaxis = """
-        <${Structure.GUIAESTUDIO} ${Attributes.VERSION}="${Versions.VERSION1}">
-            <${Structure.CUESTIONARIO} 
-                ${Attributes.DESCRIPCION}="Descripcion de sintaxis" 
-                ${Attributes.NOMBREGUIA}="Sintaxis">
-            </${Structure.CUESTIONARIO}>
-        </${Structure.GUIAESTUDIO}>
-    """.trimIndent()
+        assertEquals(listGuideDomainModel, resultado)
+    }
 
-        val fileTest = File(pathGuideTest, "Test.${Extensions.XML_EXTENSION}")
-        fileTest.writeText(xmlTest)
+    @Test
+    fun regresa_la_lista_vacia_sino_se_encuentran_guias_V1_o_V2() {
+        val relativePath = RelativeGuidePath(folderKotlin)
+        val pathKotlin = temporaryFolder.newFolder(folderFiles, folderGuides, folderKotlin)
+        val folderTest = File(pathKotlin, folderTest)
+        folderTest.mkdirs()
 
-        val fileSintaxis =
-            File("$rootPathValue/Kotlin", "Sintaxis.${Extensions.XML_EXTENSION}")
-        fileSintaxis.writeText(xmlSintaxis)
+        every {
+            filePathResolver.mapToFolderPath(relativePath, PathKind.GUIAS)
+        } returns GuidePath(pathKotlin.absolutePath)
 
-        val resultado = repository.getGuides(rutaPrueba)
+        // Archivos ruta 1
+        File(pathKotlin, "Imagen1${Extensions.POINT_PNG_EXTENSION}").createNewFile()
+        File(pathKotlin, "Imagen2${Extensions.POINT_PNG_EXTENSION}").createNewFile()
+
+        // Archivos ruta 2
+        File(folderTest, "Imagen1${Extensions.POINT_PNG_EXTENSION}").createNewFile()
+        File(folderTest, "Imagen2${Extensions.POINT_PNG_EXTENSION}").createNewFile()
+
+        val resultado = repository.getGuides(relativePath)
+
+        assertEquals(emptyList<GuideDomainModel>(), resultado)
+    }
+
+    @Test
+    fun regresa_una_lista_vacia_si_la_ruta_principal_devuelve_null_o_falla() {
+        val relativePath = RelativeGuidePath(folderKotlin)
+        val rootPath = temporaryFolder.newFolder(folderFiles, folderGuides)
+        val pathNonExistent = File(rootPath, folderKotlin).absolutePath
+
+        every {
+            filePathResolver.mapToFolderPath(relativePath, PathKind.GUIAS)
+        } returns GuidePath(pathNonExistent)
+
+        val resultado = repository.getGuides(relativePath)
+
+        assertEquals(emptyList<GuideDomainModel>(), resultado)
+    }
+
+    @Test
+    fun regresa_una_lista_con_2_guias_v1_si_la_ruta_para_guias_v2_es_null_o_falla() {
+        val relativePath = RelativeGuidePath(folderKotlin)
+        val pathKotlin =
+            temporaryFolder.newFolder(folderFiles, folderGuides, folderKotlin)
+        val listGuideDomainModel = listOf(
+            GuideDomainModel(
+                version = GuideVersion.V1,
+                nameGuide = "Bucles",
+                description = ""
+            ),
+            GuideDomainModel(
+                version = GuideVersion.V1,
+                nameGuide = "Sintaxis",
+                description = ""
+            )
+        )
+
+        every {
+            filePathResolver.mapToFolderPath(relativePath, PathKind.GUIAS)
+        } returns GuidePath(pathKotlin.absolutePath)
+
+        // Archivos GuiaV1
+        val pathGuideSintaxis = File(pathKotlin, "Sintaxis${Extensions.POINT_XML_EXTENSION}")
+        val pathGuideBucles = File(pathKotlin, "Bucles${Extensions.POINT_XML_EXTENSION}")
+        File(pathKotlin, "Imagen1${Extensions.POINT_PNG_EXTENSION}").createNewFile()
+        File(pathKotlin, "Imagen2${Extensions.POINT_PNG_EXTENSION}").createNewFile()
+
+        pathGuideSintaxis.writeText(xmlSintaxisV1)
+        pathGuideBucles.writeText(xmlBuclesV1)
+
+        val resultado = repository.getGuides(relativePath)
 
         assertEquals(listGuideDomainModel, resultado)
     }
