@@ -496,20 +496,6 @@ class GuiaRepositoryImpl @Inject constructor(
             obtenerDatosXMLV2(guideDomainModel, path)
     }
 
-    private fun File.isValidGuideV1(): Boolean {
-        if (!exists()) return false
-        if (isDirectory) return false
-        val guideDomainModel: ReadResource<GuideDomainModel> = getAttributesGuide(this)
-        return when(guideDomainModel){
-            is ReadResource.Error -> false
-            is ReadResource.Success -> {
-                val version = guideDomainModel.data.version
-                version == GuideVersion.V1
-            }
-        }
-    }
-
-
     override fun existXMLGuideV1(
         guideDomainModel: GuideDomainModel,
         relativeGuidePath: RelativeGuidePath
@@ -522,10 +508,13 @@ class GuiaRepositoryImpl @Inject constructor(
             )
         )
 
-        return if (pathComplete.isValidGuideV1()) {
-            ExistGuideV1Result.ExistGuide
-        } else {
-            ExistGuideV1Result.NoExistGuide
+        return when(val guideDomainModel: ReadResource<GuideDomainModel> = getAttributesGuide(pathComplete)){
+            is ReadResource.Error -> ExistGuideV1Result.NoExistGuide
+            is ReadResource.Success -> {
+                val version = guideDomainModel.data.version
+                if (version != GuideVersion.V1) return ExistGuideV1Result.NoExistGuide
+                ExistGuideV1Result.ExistGuide
+            }
         }
     }
 
