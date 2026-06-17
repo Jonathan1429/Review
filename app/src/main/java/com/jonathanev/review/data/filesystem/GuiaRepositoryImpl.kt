@@ -1,7 +1,5 @@
 package com.jonathanev.review.data.filesystem
 
-import android.util.Log
-import com.bumptech.glide.load.engine.Resource
 import com.jonathanev.review.core.media.MediaPaths
 import com.jonathanev.review.data.mapper.xml.toDomain
 import com.jonathanev.review.data.mapper.xml.toTagXml
@@ -13,7 +11,6 @@ import com.jonathanev.review.data.util.PathHandler
 import com.jonathanev.review.data.xml.Attributes
 import com.jonathanev.review.data.xml.Structure
 import com.jonathanev.review.data.xml.Versions
-import com.jonathanev.review.data.xml.XmlCorruptException
 import com.jonathanev.review.data.xml.XmlTagsV1
 import com.jonathanev.review.data.xml.XmlTagsV2
 import com.jonathanev.review.domain.constants.Extensions
@@ -50,7 +47,6 @@ import java.nio.file.StandardCopyOption
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.xml.parsers.DocumentBuilderFactory
-import javax.xml.parsers.ParserConfigurationException
 
 @Singleton
 class GuiaRepositoryImpl @Inject constructor(
@@ -556,11 +552,11 @@ class GuiaRepositoryImpl @Inject constructor(
 
             val name = if (version == Versions.VERSION1) {
                 file.name.replace(Extensions.POINT_XML_EXTENSION, "")
-            } else { // Version 2
+            } else { // Diferente a V1
                 cuestionarioNode?.getAttribute(Attributes.NOMBREGUIA).orEmpty()
             }
 
-            if (version.isEmpty() && name.isEmpty()){
+            if (listOf(version, name).any { it.isEmpty() }) {
                 return ReadResource.Error(GuideError.EmptyOrCorruptFile)
             }
 
@@ -575,7 +571,6 @@ class GuiaRepositoryImpl @Inject constructor(
             ReadResource.Error(GuideError.FileNotFound)
         } catch (_: SAXException){
             ReadResource.Error(GuideError.InvalidXmlFormat)
-            throw XmlCorruptException()
         } catch (e: Exception){
             ReadResource.Error(GuideError.UnknownError(e.localizedMessage))
         }

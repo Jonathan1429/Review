@@ -25,6 +25,8 @@ import com.jonathanev.review.domain.result.ExistGuideV1Result
 import com.jonathanev.review.domain.result.GetGuideResult
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -35,7 +37,14 @@ import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import org.w3c.dom.Element
+import java.io.ByteArrayInputStream
 import java.io.File
+import java.io.StringWriter
+import javax.xml.parsers.DocumentBuilderFactory
+import javax.xml.transform.TransformerFactory
+import javax.xml.transform.dom.DOMSource
+import javax.xml.transform.stream.StreamResult
 
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE, sdk = [33])
@@ -320,14 +329,14 @@ class TestGuiaRepositoryImpl {
 
     // existXMLGuideV1
     @Test
-    fun sino_existe_el_archivo_regresa_que_no_existe_la_guia() {
+    fun si_la_guia_v1_no_existe_regresa_NoExistGuide() {
         val relativePath = RelativeGuidePath(folderKotlin)
         val pathKotlin =
-            temporaryFolder.newFolder(folderFiles, folderGuides, folderKotlin)
-        val pathGuide = File(pathKotlin, "Test Integracion${Extensions.POINT_XML_EXTENSION}").absolutePath
+            temporaryFolder.newFolder(folderFiles, folderGuides, folderKotlin).absolutePath
+        val pathGuide = File(pathKotlin, "Bucles${Extensions.POINT_XML_EXTENSION}").absolutePath
         val guideDomain = GuideDomainModel(
             version = GuideVersion.V1,
-            nameGuide = "Test",
+            nameGuide = "Bucles",
             description = ""
         )
 
@@ -338,10 +347,12 @@ class TestGuiaRepositoryImpl {
         // Archivos GuiaV1
         val pathGuideTestIntegracion =
             File(pathKotlin, "Test Integracion${Extensions.POINT_XML_EXTENSION}")
+        val pathGuideTest = File(pathKotlin, "Test${Extensions.POINT_XML_EXTENSION}")
         File(pathKotlin, "Imagen1${Extensions.POINT_PNG_EXTENSION}").createNewFile()
         File(pathKotlin, "Imagen2${Extensions.POINT_PNG_EXTENSION}").createNewFile()
 
         pathGuideTestIntegracion.writeText(xmlTestIntegracionV2)
+        pathGuideTest.writeText(xmlTestV2)
 
         val resultado = repository.existXMLGuideV1(guideDomain, relativePath)
 
@@ -349,49 +360,128 @@ class TestGuiaRepositoryImpl {
     }
 
     @Test
-    fun si_es_un_directorio_regresa_que_la_guia_no_existe() {
-        val rutaPrueba = RelativeGuidePath(folderKotlin)
-        val rootKotlin = temporaryFolder.newFolder(rutaPrueba.value)
-        val guideDomain = GuideDomainModel(
-            version = GuideVersion.V1,
-            nameGuide = "Test",
-            description = ""
-        )
-
-        every {
-            filePathResolver.getPathGuidesV1(guideDomain, PathKind.GUIAS, rutaPrueba)
-        } returns rootKotlin.absolutePath
-
-        val resultado = repository.existXMLGuideV1(guideDomain, rutaPrueba)
-
-        assertEquals(ExistGuideV1Result.NoExistGuide, resultado)
-    }
-
-    @Test
-    fun si_la_guia_es_v2_regresa_que_no_existe_la_guia() {
+    fun si_la_guia_v1_tiene_un_formato_invalido_regresa_NoExistGuide() {
         val relativePath = RelativeGuidePath(folderKotlin)
         val pathKotlin =
-            temporaryFolder.newFolder(folderFiles, folderGuides, folderKotlin)
-        val pathGuideV2 = File(pathKotlin, "Test").absolutePath
+            temporaryFolder.newFolder(folderFiles, folderGuides, folderKotlin).absolutePath
+        val pathGuide = File(pathKotlin, "Bucles${Extensions.POINT_XML_EXTENSION}").absolutePath
         val guideDomain = GuideDomainModel(
             version = GuideVersion.V1,
-            nameGuide = "Test",
+            nameGuide = "Bucles",
             description = ""
         )
 
         every {
             filePathResolver.getPathGuidesV1(guideDomain, PathKind.GUIAS, relativePath)
-        } returns pathGuideV2
+        } returns pathGuide
 
         // Archivos GuiaV1
-        val pathGuideSintaxis =
+        val pathGuideTestIntegracion =
             File(pathKotlin, "Test Integracion${Extensions.POINT_XML_EXTENSION}")
-        val pathGuideBucles = File(pathKotlin, "Test${Extensions.POINT_XML_EXTENSION}")
+        val pathGuideBucles = File(pathKotlin, "Bucles${Extensions.POINT_XML_EXTENSION}")
         File(pathKotlin, "Imagen1${Extensions.POINT_PNG_EXTENSION}").createNewFile()
         File(pathKotlin, "Imagen2${Extensions.POINT_PNG_EXTENSION}").createNewFile()
 
-        pathGuideSintaxis.writeText(xmlTestIntegracionV2)
-        pathGuideBucles.writeText(xmlTestV2)
+        pathGuideTestIntegracion.writeText(xmlTestIntegracionV2)
+        pathGuideBucles.writeText(xmlBuclesV1.toXMLInvalid())
+
+        val resultado = repository.existXMLGuideV1(guideDomain, relativePath)
+
+        assertEquals(ExistGuideV1Result.NoExistGuide, resultado)
+    }
+
+    @Test
+    fun recuperacion_de_guia_v1_y_tira_un_error_desconocido_regresa_NoExistGuide() {
+        val relativePath = RelativeGuidePath(folderKotlin)
+        val pathKotlin =
+            temporaryFolder.newFolder(folderFiles, folderGuides, folderKotlin).absolutePath
+        val pathGuide = File(pathKotlin, "Bucles${Extensions.POINT_XML_EXTENSION}").absolutePath
+        val guideDomain = GuideDomainModel(
+            version = GuideVersion.V1,
+            nameGuide = "Bucles",
+            description = ""
+        )
+
+        val fileBucles = File(pathGuide)
+        fileBucles.writeText(xmlBuclesV1)
+
+        every {
+            filePathResolver.getPathGuidesV1(guideDomain, PathKind.GUIAS, relativePath)
+        } returns pathGuide
+
+        mockkStatic(DocumentBuilderFactory::class)
+        val mockFactory = mockk<DocumentBuilderFactory>()
+
+        every { DocumentBuilderFactory.newInstance() } returns mockFactory
+        every { mockFactory.newDocumentBuilder() } throws RuntimeException("Fallo forzado para UnknownError")
+
+        val resultado = repository.existXMLGuideV1(guideDomain, relativePath)
+
+        unmockkStatic(DocumentBuilderFactory::class)
+
+        assertEquals(ExistGuideV1Result.NoExistGuide, resultado)
+    }
+
+    @Test
+    fun si_la_etiqueta_CUESTIONARIO_es_null_es_un_archivo_corrupo_y_regresa_NoExistGuide() {
+        val relativePath = RelativeGuidePath(folderKotlin)
+        val pathKotlin =
+            temporaryFolder.newFolder(folderFiles, folderGuides, folderKotlin).absolutePath
+        val pathGuide = File(pathKotlin, "Bucles${Extensions.POINT_XML_EXTENSION}").absolutePath
+        val guideDomain = GuideDomainModel(
+            version = GuideVersion.V1,
+            nameGuide = "Bucles",
+            description = ""
+        )
+
+        every {
+            filePathResolver.getPathGuidesV1(guideDomain, PathKind.GUIAS, relativePath)
+        } returns pathGuide
+
+        // Archivos GuiaV1
+        val pathGuideTestIntegracion =
+            File(pathKotlin, "Test Integracion${Extensions.POINT_XML_EXTENSION}")
+        val pathGuideBucles = File(pathKotlin, "Bucles${Extensions.POINT_XML_EXTENSION}")
+        File(pathKotlin, "Imagen1${Extensions.POINT_PNG_EXTENSION}").createNewFile()
+        File(pathKotlin, "Imagen2${Extensions.POINT_PNG_EXTENSION}").createNewFile()
+
+        pathGuideTestIntegracion.writeText(xmlTestIntegracionV2)
+        pathGuideBucles.writeText(
+            xmlBuclesV1
+                .withoutTagCuestionario()
+                .withoutTagGuiaEstudio()
+        )
+
+        val resultado = repository.existXMLGuideV1(guideDomain, relativePath)
+
+        assertEquals(ExistGuideV1Result.NoExistGuide, resultado)
+    }
+
+    @Test
+    fun si_la_guia_es_v2_debe_de_regresar_NoExistGuide() {
+        val relativePath = RelativeGuidePath(folderKotlin)
+        val pathKotlin =
+            temporaryFolder.newFolder(folderFiles, folderGuides, folderKotlin).absolutePath
+        val pathGuide = File(pathKotlin, "Test Integracion${Extensions.POINT_XML_EXTENSION}").absolutePath
+        val guideDomain = GuideDomainModel(
+            version = GuideVersion.V2,
+            nameGuide = "Test Integracion",
+            description = ""
+        )
+
+        every {
+            filePathResolver.getPathGuidesV1(guideDomain, PathKind.GUIAS, relativePath)
+        } returns pathGuide
+
+        // Archivos GuiaV1
+        val pathGuideTestIntegracion =
+            File(pathKotlin, "Test Integracion${Extensions.POINT_XML_EXTENSION}")
+        val pathGuideBucles = File(pathKotlin, "Bucles${Extensions.POINT_XML_EXTENSION}")
+        File(pathKotlin, "Imagen1${Extensions.POINT_PNG_EXTENSION}").createNewFile()
+        File(pathKotlin, "Imagen2${Extensions.POINT_PNG_EXTENSION}").createNewFile()
+
+        pathGuideTestIntegracion.writeText(xmlTestIntegracionV2)
+        pathGuideBucles.writeText(xmlBuclesV1.toXMLInvalid())
 
         val resultado = repository.existXMLGuideV1(guideDomain, relativePath)
 
@@ -890,4 +980,29 @@ class TestGuiaRepositoryImpl {
     private fun String.toSlashPath(): String = this.replace("\\", "/")
     private fun String.toXMLInvalid(): String =
         this.replace("</${Structure.GUIAESTUDIO}>", "<//${Structure.GUIAESTUDIO}>")
+
+    fun String.withoutTagGuiaEstudio(): String = this
+        .replace(Structure.GUIAESTUDIO, "${Structure.GUIAESTUDIO}O")
+
+    fun String.withoutTagCuestionario(): String = this
+        .replace(Structure.CUESTIONARIO, "${Structure.CUESTIONARIO}O")
+
+    fun String.withoutElement(tagName: String): String {
+        val dbFactory = DocumentBuilderFactory.newInstance()
+        val dBuilder = dbFactory.newDocumentBuilder()
+        // Parseamos el XML que sí es válido
+        val doc = dBuilder.parse(ByteArrayInputStream(this.toByteArray(Charsets.UTF_8)))
+
+        val element = doc.getElementsByTagName(tagName).item(0) as? Element
+        // Si existe, lo removemos de su padre
+        element?.parentNode?.removeChild(element)
+
+        // Convertimos el documento modificado de vuelta a String
+        val tf = TransformerFactory.newInstance()
+        val transformer = tf.newTransformer()
+        val writer = StringWriter()
+        transformer.transform(DOMSource(doc), StreamResult(writer))
+
+        return writer.toString()
+    }
 }
