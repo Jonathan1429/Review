@@ -1,6 +1,5 @@
 package com.jonathanev.review.data.filesystem
 
-import com.jonathanev.review.core.media.MediaPaths
 import com.jonathanev.review.data.storage.StorageFolders
 import com.jonathanev.review.data.util.PathHandler
 import com.jonathanev.review.data.xml.Attributes
@@ -68,14 +67,12 @@ class TestGuiaRepositoryImpl {
     private lateinit var folderKotlin: String
     private lateinit var folderTest: String
     private lateinit var folderFiles: String
-    private lateinit var folderGuides: String
 
     @Before
     fun setUp() {
         folderKotlin = "Kotlin"
         folderTest = "Test"
         folderFiles = "files"
-        folderGuides = "guides"
         xmlSintaxisV1 = """
         <${Structure.GUIAESTUDIO} ${Attributes.VERSION}="${Versions.VERSION1}">
             <${Structure.CUESTIONARIO} ${Attributes.NOMBREGUIA}="Sintaxis">
@@ -113,7 +110,7 @@ class TestGuiaRepositoryImpl {
     @Test
     fun regresa_el_num_de_guias_V1_y_V2_dentro_de_la_ruta() {
         val relativePath = RelativeGuidePath(folderKotlin)
-        val pathKotlin = temporaryFolder.newFolder(folderFiles, folderGuides, folderKotlin)
+        val pathKotlin = temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS, folderKotlin)
         val folderTest = File(pathKotlin, folderTest)
         folderTest.mkdirs()
 
@@ -141,7 +138,7 @@ class TestGuiaRepositoryImpl {
     @Test
     fun regresa_0_ya_que_no_se_encuentran_guias_V1_o_V2() {
         val relativePath = RelativeGuidePath(folderKotlin)
-        val pathKotlin = temporaryFolder.newFolder(folderFiles, folderGuides, folderKotlin)
+        val pathKotlin = temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS, folderKotlin)
         val folderTest = File(pathKotlin, folderTest)
         folderTest.mkdirs()
 
@@ -165,7 +162,7 @@ class TestGuiaRepositoryImpl {
     @Test
     fun regresa_0_si_la_ruta_principal_devuelve_null_o_falla() {
         val relativePath = RelativeGuidePath(folderKotlin)
-        val rootPath = temporaryFolder.newFolder(folderFiles, folderGuides)
+        val rootPath = temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS)
         val pathNonExistent = File(rootPath, folderKotlin).absolutePath
 
         every {
@@ -181,7 +178,7 @@ class TestGuiaRepositoryImpl {
     fun regresa_solamente_2_guias_v1_si_la_ruta_para_guias_v2_es_null_o_falla() {
         val relativePath = RelativeGuidePath(folderKotlin)
         val pathKotlin =
-            temporaryFolder.newFolder(folderFiles, folderGuides, folderKotlin).absolutePath
+            temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS, folderKotlin).absolutePath
 
         every {
             filePathResolver.mapToFolderPath(relativePath, PathKind.GUIAS)
@@ -202,7 +199,7 @@ class TestGuiaRepositoryImpl {
     @Test
     fun regresa_las_guias_v1_y_v2() {
         val relativeGuidePath = RelativeGuidePath(folderKotlin)
-        val rootPath = temporaryFolder.newFolder(folderFiles, folderGuides)
+        val rootPath = temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS)
         val pathRootKotlin = File(rootPath, folderKotlin)
         pathRootKotlin.mkdirs()
 
@@ -255,7 +252,7 @@ class TestGuiaRepositoryImpl {
     @Test
     fun regresa_la_lista_vacia_sino_se_encuentran_guias_V1_o_V2() {
         val relativePath = RelativeGuidePath(folderKotlin)
-        val pathKotlin = temporaryFolder.newFolder(folderFiles, folderGuides, folderKotlin)
+        val pathKotlin = temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS, folderKotlin)
         val folderTest = File(pathKotlin, folderTest)
         folderTest.mkdirs()
 
@@ -279,7 +276,7 @@ class TestGuiaRepositoryImpl {
     @Test
     fun regresa_una_lista_vacia_si_la_ruta_principal_devuelve_null_o_falla() {
         val relativePath = RelativeGuidePath(folderKotlin)
-        val rootPath = temporaryFolder.newFolder(folderFiles, folderGuides)
+        val rootPath = temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS)
         val pathNonExistent = File(rootPath, folderKotlin).absolutePath
 
         every {
@@ -295,7 +292,7 @@ class TestGuiaRepositoryImpl {
     fun regresa_una_lista_con_2_guias_v1_si_la_ruta_para_guias_v2_es_null_o_falla() {
         val relativePath = RelativeGuidePath(folderKotlin)
         val pathKotlin =
-            temporaryFolder.newFolder(folderFiles, folderGuides, folderKotlin)
+            temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS, folderKotlin)
         val listGuideDomainModel = listOf(
             GuideDomainModel(
                 version = GuideVersion.V1,
@@ -332,7 +329,7 @@ class TestGuiaRepositoryImpl {
     fun si_la_guia_v1_no_existe_regresa_NoExistGuide() {
         val relativePath = RelativeGuidePath(folderKotlin)
         val pathKotlin =
-            temporaryFolder.newFolder(folderFiles, folderGuides, folderKotlin).absolutePath
+            temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS, folderKotlin).absolutePath
         val pathGuide = File(pathKotlin, "Bucles${Extensions.POINT_XML_EXTENSION}").absolutePath
         val guideDomain = GuideDomainModel(
             version = GuideVersion.V1,
@@ -363,7 +360,7 @@ class TestGuiaRepositoryImpl {
     fun si_la_guia_v1_tiene_un_formato_invalido_regresa_NoExistGuide() {
         val relativePath = RelativeGuidePath(folderKotlin)
         val pathKotlin =
-            temporaryFolder.newFolder(folderFiles, folderGuides, folderKotlin).absolutePath
+            temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS, folderKotlin).absolutePath
         val pathGuide = File(pathKotlin, "Bucles${Extensions.POINT_XML_EXTENSION}").absolutePath
         val guideDomain = GuideDomainModel(
             version = GuideVersion.V1,
@@ -394,7 +391,7 @@ class TestGuiaRepositoryImpl {
     fun recuperacion_de_guia_v1_y_tira_un_error_desconocido_regresa_NoExistGuide() {
         val relativePath = RelativeGuidePath(folderKotlin)
         val pathKotlin =
-            temporaryFolder.newFolder(folderFiles, folderGuides, folderKotlin).absolutePath
+            temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS, folderKotlin).absolutePath
         val pathGuide = File(pathKotlin, "Bucles${Extensions.POINT_XML_EXTENSION}").absolutePath
         val guideDomain = GuideDomainModel(
             version = GuideVersion.V1,
@@ -423,10 +420,10 @@ class TestGuiaRepositoryImpl {
     }
 
     @Test
-    fun si_la_etiqueta_CUESTIONARIO_es_null_es_un_archivo_corrupo_y_regresa_NoExistGuide() {
+    fun si_la_etiqueta_CUESTIONARIO_es_null_es_un_archivo_corrupto_y_regresa_NoExistGuide() {
         val relativePath = RelativeGuidePath(folderKotlin)
         val pathKotlin =
-            temporaryFolder.newFolder(folderFiles, folderGuides, folderKotlin).absolutePath
+            temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS, folderKotlin).absolutePath
         val pathGuide = File(pathKotlin, "Bucles${Extensions.POINT_XML_EXTENSION}").absolutePath
         val guideDomain = GuideDomainModel(
             version = GuideVersion.V1,
@@ -461,8 +458,9 @@ class TestGuiaRepositoryImpl {
     fun si_la_guia_es_v2_debe_de_regresar_NoExistGuide() {
         val relativePath = RelativeGuidePath(folderKotlin)
         val pathKotlin =
-            temporaryFolder.newFolder(folderFiles, folderGuides, folderKotlin).absolutePath
-        val pathGuide = File(pathKotlin, "Test Integracion${Extensions.POINT_XML_EXTENSION}").absolutePath
+            temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS, folderKotlin).absolutePath
+        val pathGuide =
+            File(pathKotlin, "Test Integracion${Extensions.POINT_XML_EXTENSION}").absolutePath
         val guideDomain = GuideDomainModel(
             version = GuideVersion.V2,
             nameGuide = "Test Integracion",
@@ -491,7 +489,7 @@ class TestGuiaRepositoryImpl {
     @Test
     fun muestra_cuando_existe_una_guia_v1() {
         val relativeGuidePath = RelativeGuidePath(folderKotlin)
-        val rootPath = temporaryFolder.newFolder(folderFiles, folderGuides)
+        val rootPath = temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS)
         val pathKotlin = File(rootPath, folderKotlin)
         pathKotlin.mkdirs()
 
@@ -520,20 +518,21 @@ class TestGuiaRepositoryImpl {
     // moveGuide
     @Test
     fun mover_la_guia_exitosamente() {
-        val oldRelativeGuidePath = RelativeGuidePath("Kotlin")
-        val newRelativeGuidePath = RelativeGuidePath("Abap")
+        val folderAbap = "Abap"
+        val oldRelativeGuidePath = RelativeGuidePath(folderKotlin)
+        val newRelativeGuidePath = RelativeGuidePath(folderAbap)
         val guideDomain = GuideDomainModel(
             version = GuideVersion.V2,
             nameGuide = "Test",
             description = ""
         )
-        val rootPathValue = temporaryFolder.root.absolutePath
-        val oldPath = "$rootPathValue/Kotlin/Test.xml"
-        val newPath = "$rootPathValue/Abap/Test.xml"
+        val rootPathKotlin =
+            temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS, folderKotlin)
+        val rootPathAbap = temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS, folderAbap)
+        val oldPath = File(rootPathKotlin, "Test${Extensions.POINT_XML_EXTENSION}").absolutePath
+        val newPath = File(rootPathAbap, "Test${Extensions.POINT_XML_EXTENSION}").absolutePath
 
-        temporaryFolder.newFolder("Abap")
-        val createOldPath = temporaryFolder.newFolder("Kotlin")
-        File(createOldPath, "Test.xml").createNewFile()
+        File(rootPathKotlin, "Test.xml").createNewFile()
 
         every {
             filePathResolver.mapToFilePathSpecificGuide(any(), oldRelativeGuidePath, any())
@@ -553,19 +552,21 @@ class TestGuiaRepositoryImpl {
 
     @Test
     fun sino_existe_la_ruta_donde_mover_el_archivo_regresa_false() {
-        val oldRelativeGuidePath = RelativeGuidePath("Kotlin")
-        val newRelativeGuidePath = RelativeGuidePath("Abap")
+        val folderAbap = "Abap"
+        val oldRelativeGuidePath = RelativeGuidePath(folderKotlin)
+        val newRelativeGuidePath = RelativeGuidePath(folderAbap)
         val guideDomain = GuideDomainModel(
             version = GuideVersion.V2,
             nameGuide = "Test",
             description = ""
         )
-        val rootPathValue = temporaryFolder.root.absolutePath
-        val oldPath = "$rootPathValue/Kotlin/Test.xml"
-        val newPath = "$rootPathValue/Abap/Test.xml"
+        val pathKotlin = temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS, folderKotlin)
+        val rootPath = File(folderFiles, StorageFolders.GUIAS)
+        val abapFolder = File(rootPath, folderAbap)
+        val oldPath = File(pathKotlin, "Test${Extensions.POINT_XML_EXTENSION}").absolutePath
+        val newPath = File(abapFolder, "Test${Extensions.POINT_XML_EXTENSION}").absolutePath
 
-        val createOldPath = temporaryFolder.newFolder("Kotlin")
-        File(createOldPath, "Test.xml").createNewFile()
+        File(pathKotlin, "Test${Extensions.POINT_XML_EXTENSION}").createNewFile()
 
         every {
             filePathResolver.mapToFilePathSpecificGuide(any(), oldRelativeGuidePath, any())
@@ -585,19 +586,19 @@ class TestGuiaRepositoryImpl {
 
     @Test
     fun si_el_archivo_que_vas_a_mover_no_existe_regresa_false() {
-        val oldRelativeGuidePath = RelativeGuidePath("Kotlin")
-        val newRelativeGuidePath = RelativeGuidePath("Abap")
+        val folderAbap = "Abap"
+        val oldRelativeGuidePath = RelativeGuidePath(folderKotlin)
+        val newRelativeGuidePath = RelativeGuidePath(folderAbap)
         val guideDomain = GuideDomainModel(
             version = GuideVersion.V2,
             nameGuide = "Test",
             description = ""
         )
-        val rootPathValue = temporaryFolder.root.absolutePath
-        val oldPath = "$rootPathValue/Kotlin/Test.xml"
-        val newPath = "$rootPathValue/Abap/Test.xml"
-
-        temporaryFolder.newFolder("Kotlin")
-        temporaryFolder.newFolder("Abap")
+        val kotlinFolder =
+            temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS, folderKotlin)
+        val abapFolder = temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS, folderAbap)
+        val oldPath = File(kotlinFolder, "Test${Extensions.POINT_XML_EXTENSION}").absolutePath
+        val newPath = File(abapFolder, "Test${Extensions.POINT_XML_EXTENSION}").absolutePath
 
         every {
             filePathResolver.mapToFilePathSpecificGuide(any(), oldRelativeGuidePath, any())
@@ -618,12 +619,12 @@ class TestGuiaRepositoryImpl {
     // getXMLGuide
     @Test
     fun recuperacion_de_guia_v1() {
-        val guideDomainModel = GuideDomainModel(GuideVersion.V1, "Test", "")
-        val relativeGuidePath = RelativeGuidePath("Kotlin")
+        val guideDomainModel = GuideDomainModel(GuideVersion.V1, "Bucles", "")
+        val relativeGuidePath = RelativeGuidePath(folderKotlin)
         val pathFolderGuiasKotlin =
-            temporaryFolder.newFolder("files", StorageFolders.GUIAS, relativeGuidePath.value)
+            temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS, relativeGuidePath.value)
         val pathFolderImagesKotlin =
-            temporaryFolder.newFolder("files", StorageFolders.IMAGENES, relativeGuidePath.value)
+            temporaryFolder.newFolder(folderFiles, StorageFolders.IMAGENES, relativeGuidePath.value)
         val rutaImagen1 = File(
             pathFolderImagesKotlin,
             "1${Extensions.POINT_PNG_EXTENSION}"
@@ -666,7 +667,10 @@ class TestGuiaRepositoryImpl {
             )
         )
 
-        val archivoGuia = File(pathFolderGuiasKotlin, "Test.xml").apply { createNewFile() }
+        val archivoGuia = File(
+            pathFolderGuiasKotlin,
+            "Bucles${Extensions.POINT_XML_EXTENSION}"
+        ).apply { createNewFile() }
         val rutaNativaCompleta = archivoGuia.absolutePath
 
         every {
@@ -676,18 +680,7 @@ class TestGuiaRepositoryImpl {
             )
         } returns GuidePath(rutaNativaCompleta)
 
-        val xmlTest = """
-        <${Structure.GUIAESTUDIO} ${Attributes.VERSION}="${Versions.VERSION1}">
-            <${Structure.CUESTIONARIO} ${Attributes.NOMBREGUIA}="Test">
-                <${XmlTagsV2.INTERROGANTE} ${XmlTagsV1.PREGUNTA}="Pregunta 1" ${XmlTagsV1.RESPUESTA}="Respuesta 1"/>
-                <${XmlTagsV2.INTERROGANTE} 
-                    ${XmlTagsV1.PREGUNTA}="${MediaPaths.ENCRYPTED_IMAGE_BASE_PATH}gdwd/gdwd/frp.mrqdwkdqhy.uhylhz/ilohv/lpdjhqhv/Nrwolq/1.sqj" 
-                    ${XmlTagsV1.RESPUESTA}="${MediaPaths.ENCRYPTED_IMAGE_BASE_PATH}gdwd/gdwd/frp.mrqdwkdqhy.uhylhz/ilohv/lpdjhqhv/Nrwolq/2.sqj"/>
-            </${Structure.CUESTIONARIO}>
-        </${Structure.GUIAESTUDIO}>
-    """.trimIndent()
-
-        archivoGuia.writeText(xmlTest)
+        archivoGuia.writeText(xmlBuclesV1)
 
         val response = repository.getXMLGuide(guideDomainModel, relativeGuidePath)
 
@@ -696,10 +689,11 @@ class TestGuiaRepositoryImpl {
 
     @Test
     fun recuperacion_de_guia_v1_formato_invalido() {
-        val guideDomainModel = GuideDomainModel(GuideVersion.V1, "Test", "")
-        val relativeGuidePath = RelativeGuidePath("Kotlin")
-        val rootPathValue = temporaryFolder.newFolder("files", "guias", relativeGuidePath.value)
-        val pathGuide = File(rootPathValue, "Test${Extensions.POINT_XML_EXTENSION}")
+        val guideDomainModel = GuideDomainModel(GuideVersion.V1, "Bucles", "")
+        val relativeGuidePath = RelativeGuidePath(folderKotlin)
+        val rootPathValue =
+            temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS, relativeGuidePath.value)
+        val pathGuide = File(rootPathValue, "Bucles${Extensions.POINT_XML_EXTENSION}")
         val pathGuideNat = pathGuide.absolutePath
 
         every {
@@ -709,16 +703,7 @@ class TestGuiaRepositoryImpl {
             )
         } returns GuidePath(pathGuideNat)
 
-        val xmlTest = """
-        <${Structure.GUIAESTUDIO} ${Attributes.VERSION}="${Versions.VERSION1}">
-            <${Structure.CUESTIONARIO} ${Attributes.NOMBREGUIA}="Test">
-                <${XmlTagsV2.INTERROGANTE} ${XmlTagsV1.PREGUNTA}="Pregunta 1" ${XmlTagsV1.RESPUESTA}="Respuesta 1"//>
-                <${XmlTagsV2.INTERROGANTE} ${XmlTagsV1.PREGUNTA}="frqwhqw://phgld/slfnhu/orqx/fjxdbkbp/1.sqj" ${XmlTagsV1.RESPUESTA}="frqwhqw://phgld/slfnhu/orqx/fjxdbkbp/2.sqj"/>
-            </${Structure.CUESTIONARIO}>
-        </${Structure.GUIAESTUDIO}>
-    """.trimIndent()
-
-        pathGuide.writeText(xmlTest)
+        pathGuide.writeText(xmlBuclesV1.toXMLInvalid())
 
         val response = repository.getXMLGuide(guideDomainModel, relativeGuidePath)
 
@@ -726,78 +711,90 @@ class TestGuiaRepositoryImpl {
     }
 
     @Test
-    fun recuperacion_de_guia_v1_archivo_no_encontrado() {
+    fun recuperacion_de_guia_v1_inexistente_y_regresa_NotFound() {
         val guideDomainModel = GuideDomainModel(GuideVersion.V1, "Test", "")
-        val relativeGuidePath = RelativeGuidePath("Kotlin")
-        val rootPathValue = temporaryFolder.root.absolutePath
+        val relativeGuidePath = RelativeGuidePath(folderKotlin)
+        val pathKotlin =
+            temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS, relativeGuidePath.value)
+        val pathFile = File(pathKotlin, "Test${Extensions.POINT_XML_EXTENSION}").absolutePath
 
         every {
             filePathResolver.mapToFilePathSpecificGuide(
                 guideDomainModel, relativeGuidePath, PathKind.GUIAS
             )
-        } returns GuidePath("$rootPathValue/$relativeGuidePath/Test.xml")
+        } returns GuidePath(pathFile)
 
         val response = repository.getXMLGuide(guideDomainModel, relativeGuidePath)
 
         assertEquals(GetGuideResult.NotFound, response)
     }
 
-    /*@Test
-    fun recuperacion_de_guia_v1_error_desconocido_con_mock() {
-        val guideDomainModel = GuideDomainModel(GuideVersion.V1, "Test", "")
-        val relativeGuidePath = RelativeGuidePath("")
+    @Test
+    fun al_recuperar_la_guia_v1_tira_error_desconocido_y_regresa_UnknownError() {
+        val guideDomainModel = GuideDomainModel(GuideVersion.V1, "Bucles", "")
+        val relativeFile = File(folderKotlin, folderTest)
+        val relativeGuidePath = RelativeGuidePath(relativeFile.absolutePath)
         val pathHandlerMock = mockk<PathHandler>()
+
         repository = GuiaRepositoryImpl(
             pathHandler = pathHandlerMock,
             xmlSerializerFactory = xmlSerializerFactory,
             fileOutputStreamFactory = fileOutputStreamFactory,
             filePathResolver = filePathResolver
         )
-        val carpetaKotlin = temporaryFolder.newFolder("Kotlin")
-        val fileSintaxis = File(carpetaKotlin, "Test.${Extensions.XML_EXTENSION}")
 
-        fileSintaxis.writeText(xmlTestV2)
+        val carpetaKotlin =
+            temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS, folderKotlin)
+        val fileSintaxis = File(carpetaKotlin, "Bucles.${Extensions.XML_EXTENSION}")
+
+        fileSintaxis.writeText(xmlBuclesV1)
 
         every {
-            filePathResolver.mapToFilePathSpecificGuide(any(), any(), any())
+            filePathResolver.mapToFilePathSpecificGuide(
+                guideDomainModel, relativeGuidePath,
+                PathKind.GUIAS
+            )
         } returns GuidePath(fileSintaxis.absolutePath)
 
         every {
-            pathHandlerMock.encrypt(any())
+            pathHandlerMock.getSubstringPath(any(), any(), any(), any())
         } throws Exception("Fallo forzado para UnknownError")
 
         val response = repository.getXMLGuide(guideDomainModel, relativeGuidePath)
 
         assertEquals(GetGuideResult.UnknownError, response)
-    }*/
+    }
 
     @Test
     fun recuperacion_de_guia_v2() {
-        val guideDomainModel = GuideDomainModel(GuideVersion.V2, "Configuracion", "")
-        val folderGit = "Git"
-        val folderConfiguracion = "Configuracion"
-        val relativeNative = File(folderGit, folderConfiguracion).absolutePath
-        val relativeGuidePath = RelativeGuidePath(relativeNative)
-        val pathFolderGuidesConfiguracion =
-            temporaryFolder.newFolder("files", StorageFolders.GUIAS, folderGit, folderConfiguracion)
-        val pathFolderImagesConfiguracion =
+        val guideDomainModel = GuideDomainModel(GuideVersion.V2, "Test", "")
+        val relativeGuidePath = RelativeGuidePath(File(folderKotlin, folderTest).absolutePath)
+        val pathFolderTest =
             temporaryFolder.newFolder(
-                "files",
-                StorageFolders.IMAGENES,
-                folderGit,
-                folderConfiguracion
+                folderFiles,
+                StorageFolders.GUIAS,
+                folderKotlin,
+                folderTest
             )
+        val pathFolderTestImages =
+            temporaryFolder.newFolder(
+                folderFiles,
+                StorageFolders.IMAGENES,
+                folderKotlin,
+                folderTest
+            )
+
         val rutaImagen1 = File(
-            pathFolderImagesConfiguracion,
+            pathFolderTestImages,
             "1${Extensions.POINT_PNG_EXTENSION}"
         ).absolutePath.toSlashPath()
         val rutaImagen2 = File(
-            pathFolderImagesConfiguracion,
+            pathFolderTestImages,
             "2${Extensions.POINT_PNG_EXTENSION}"
         ).absolutePath.toSlashPath()
 
         val rutaCompleta =
-            File(pathFolderGuidesConfiguracion, "Configuracion${Extensions.POINT_XML_EXTENSION}")
+            File(pathFolderTest, "Test${Extensions.POINT_XML_EXTENSION}")
         val rutaCompletaNativa = rutaCompleta.absolutePath
 
         val itemsResponse = listOf(
@@ -830,22 +827,7 @@ class TestGuiaRepositoryImpl {
             )
         } returns GuidePath(rutaCompletaNativa)
 
-        val xmlTest = """
-        <${Structure.GUIAESTUDIO} ${Attributes.VERSION}="${Versions.VERSION2}">
-            <${Structure.CUESTIONARIO} ${Attributes.NOMBREGUIA}="Configuracion">
-                <${XmlTagsV2.QUESTION} posQuestion="0">  
-                    <${XmlTagsV2.TEXTO} ${XmlTagsV2.TEXTO}= "Pregunta 1"/>
-                    <${XmlTagsV2.IMAGEN} ${Attributes.URI}= "" ${Attributes.NAMEFILE}="1${Extensions.POINT_PNG_EXTENSION}"/>
-                </${XmlTagsV2.QUESTION}> 
-                <${XmlTagsV2.ANSWER} posAnswer="0"> 
-                    <${XmlTagsV2.TEXTO} ${XmlTagsV2.TEXTO}= "Respuesta 1"/>
-                    <${XmlTagsV2.IMAGEN} ${Attributes.URI}= "" ${Attributes.NAMEFILE}="2${Extensions.POINT_PNG_EXTENSION}"/>
-                </${XmlTagsV2.ANSWER}>
-            </${Structure.CUESTIONARIO}>
-        </${Structure.GUIAESTUDIO}>
-    """.trimIndent()
-
-        rutaCompleta.writeText(xmlTest)
+        rutaCompleta.writeText(xmlTestV2)
 
         val response = repository.getXMLGuide(guideDomainModel, relativeGuidePath)
 
@@ -855,12 +837,10 @@ class TestGuiaRepositoryImpl {
     @Test
     fun recuperacion_de_guia_v2_formato_invalido() {
         val guideDomainModel = GuideDomainModel(GuideVersion.V2, "Test", "")
-        val folderKotlin = "Kotlin"
-        val folderTest = "Test"
         val relativeNative = File(folderKotlin, folderTest).absolutePath
         val relativeGuidePath = RelativeGuidePath(relativeNative)
         val pathFolderGuiasTest =
-            temporaryFolder.newFolder("files", StorageFolders.GUIAS, folderKotlin, folderTest)
+            temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS, folderKotlin, folderTest)
         val pathGuidesComplete = File(pathFolderGuiasTest, "Test${Extensions.POINT_XML_EXTENSION}")
         val pathGuidesCompleteNat = pathGuidesComplete.absolutePath
 
@@ -871,22 +851,7 @@ class TestGuiaRepositoryImpl {
             )
         } returns GuidePath(pathGuidesCompleteNat)
 
-        val xmlTest = """
-        <${Structure.GUIAESTUDIO} ${Attributes.VERSION}="${Versions.VERSION2}">
-            <${Structure.CUESTIONARIO} ${Attributes.NOMBREGUIA}="Configuracion">
-                <${XmlTagsV2.QUESTION} posQuestion="0">  
-                    <${XmlTagsV2.TEXTO} ${XmlTagsV2.TEXTO}= "Pregunta 1"/>
-                    <${XmlTagsV2.IMAGEN} ${Attributes.URI}= "" ${Attributes.NAMEFILE}="1${Extensions.POINT_PNG_EXTENSION}"//>
-                </${XmlTagsV2.QUESTION}> 
-                <${XmlTagsV2.ANSWER} posAnswer="0"> 
-                    <${XmlTagsV2.TEXTO} ${XmlTagsV2.TEXTO}= "Respuesta 1"/>
-                    <${XmlTagsV2.IMAGEN} ${Attributes.URI}= "" ${Attributes.NAMEFILE}="2${Extensions.POINT_PNG_EXTENSION}"/>
-                </${XmlTagsV2.ANSWER}>
-            </${Structure.CUESTIONARIO}>
-        </${Structure.GUIAESTUDIO}>
-    """.trimIndent()
-
-        pathGuidesComplete.writeText(xmlTest)
+        pathGuidesComplete.writeText(xmlTestV2.toXMLInvalid())
 
         val response = repository.getXMLGuide(guideDomainModel, relativeGuidePath)
 
@@ -919,7 +884,7 @@ class TestGuiaRepositoryImpl {
     @Test
     fun recuperacion_de_guia_v2_error_desconocido_con_mock() {
         val guideDomainModel = GuideDomainModel(GuideVersion.V2, "Test", "")
-        val relativeGuidePath = RelativeGuidePath("Kotlin/Test")
+        val relativeGuidePath = RelativeGuidePath(File(folderKotlin, folderTest).absolutePath)
         val pathHandlerMock = mockk<PathHandler>()
 
         repository = GuiaRepositoryImpl(
@@ -929,10 +894,8 @@ class TestGuiaRepositoryImpl {
             filePathResolver = filePathResolver
         )
 
-        val carpetaKotlin = temporaryFolder.newFolder("Kotlin", "Test")
+        val carpetaKotlin = temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS, folderKotlin, folderTest)
         val fileSintaxis = File(carpetaKotlin, "Test.${Extensions.XML_EXTENSION}")
-
-
 
         fileSintaxis.writeText(xmlTestV2)
 
@@ -955,10 +918,10 @@ class TestGuiaRepositoryImpl {
     @Test
     fun borrar_guia_v1() {
         val guideDomainModel = GuideDomainModel(GuideVersion.V1, "Test", "")
-        val relativeGuidePath = RelativeGuidePath("Kotlin")
+        val relativeGuidePath = RelativeGuidePath(folderKotlin)
 
-        val pathFolder = temporaryFolder.newFolder("files", StorageFolders.GUIAS, "Kotlin")
-        val archivoGuia = File(pathFolder, "Test.xml").apply { createNewFile() }
+        val pathFolder = temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS, folderKotlin)
+        val archivoGuia = File(pathFolder, "Test${Extensions.POINT_XML_EXTENSION}").apply { createNewFile() }
 
         val rutaNativaCompleta = archivoGuia.absolutePath
 

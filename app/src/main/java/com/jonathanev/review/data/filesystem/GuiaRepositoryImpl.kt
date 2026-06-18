@@ -465,11 +465,11 @@ class GuiaRepositoryImpl @Inject constructor(
                 )
             }
 
-        } catch (e: FileNotFoundException) {
+        } catch (_: FileNotFoundException) {
             return GetGuideResult.NotFound
-        } catch (e: SAXException) {
+        } catch (_: SAXException) {
             return GetGuideResult.InvalidFormat
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             return GetGuideResult.UnknownError
         }
 
