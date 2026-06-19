@@ -42,6 +42,14 @@ sealed interface ReadGuideError {
     data class UnknownErrorRead(val message: String?) : ReadGuideError
 }
 
+sealed interface UpdateGuideError {
+    data object NotFound : UpdateGuideError
+    data object InvalidFormat : UpdateGuideError
+    data object WriteError : UpdateGuideError
+    data object InvalidData : UpdateGuideError
+    data object UnknownError : UpdateGuideError
+}
+
 /**
  * ¿Que eviqueta el tener un tipo T de salida?
  * sealed interface ResourceGuide {

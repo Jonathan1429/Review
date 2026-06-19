@@ -7,6 +7,8 @@ import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.result.ExistGuideV1Result
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.GetSaveGuideResult
+import com.jonathanev.review.domain.result.GuideResource
+import com.jonathanev.review.domain.result.UpdateGuideError
 
 interface GuiaRepository {
     val guidesRecovery: List<GuideDomainModel>
@@ -25,7 +27,7 @@ interface GuiaRepository {
         preguntas: List<QuestionItemDomain>,
         respuestas: List<QuestionItemDomain>,
         guideContext: GuideContext.Rename,
-    ): Boolean
+    ): GuideResource<GuideDomainModel, UpdateGuideError>
 
     fun deleteGuide(
         deleteGuide: GuideContext.DeleteGuide,

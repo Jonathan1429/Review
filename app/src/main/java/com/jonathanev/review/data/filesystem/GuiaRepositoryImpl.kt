@@ -31,9 +31,10 @@ import com.jonathanev.review.domain.repository.XmlSerializerFactory
 import com.jonathanev.review.domain.result.ExistGuideV1Result
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.GetSaveGuideResult
-import com.jonathanev.review.domain.result.ReadGuideError
 import com.jonathanev.review.domain.result.GuideResource
+import com.jonathanev.review.domain.result.ReadGuideError
 import com.jonathanev.review.domain.result.SaveGuideError
+import com.jonathanev.review.domain.result.UpdateGuideError
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.NodeList
@@ -88,7 +89,8 @@ class GuiaRepositoryImpl @Inject constructor(
     override fun getGuides(relativeGuidePath: RelativeGuidePath): List<GuideDomainModel> {
         val result = listGuides(relativeGuidePath)
         val resultGuides = result.sortedBy { it.name }.mapNotNull { file ->
-            when(val guideDomainModel: GuideResource<GuideDomainModel, ReadGuideError> = getAttributesGuide(file)){
+            when (val guideDomainModel: GuideResource<GuideDomainModel, ReadGuideError> =
+                getAttributesGuide(file)) {
                 is GuideResource.Error -> null
                 is GuideResource.Success -> guideDomainModel.data
             }
@@ -101,7 +103,7 @@ class GuiaRepositoryImpl @Inject constructor(
         preguntas: List<QuestionItemDomain>,
         respuestas: List<QuestionItemDomain>,
         guideContext: GuideContext.Rename
-    ): Boolean {
+    ): GuideResource<GuideDomainModel, UpdateGuideError> {
         val path = filePathResolver.mapToFilePathSpecificGuide(
             guideDomainModel = guideContext.guide,
             relativeGuidePath = guideContext.relativeGuidePath,
@@ -152,16 +154,20 @@ class GuiaRepositoryImpl @Inject constructor(
 
             if (!isRenamed) {
                 tempFile.delete()
-                return false
+                GuideResource.Error(UpdateGuideError.WriteError)
             }
 
             if (newPath != path.value) {
                 File(path.value).delete()
             }
 
-            true
+            GuideResource.Success(guideContext.guide)
+        } catch (_: FileNotFoundException) {
+            GuideResource.Error(UpdateGuideError.NotFound)
+        } catch (_: SAXException) {
+            GuideResource.Error(UpdateGuideError.InvalidFormat)
         } catch (_: Exception) {
-            false
+            GuideResource.Error(UpdateGuideError.UnknownError)
         }
     }
 
@@ -508,7 +514,8 @@ class GuiaRepositoryImpl @Inject constructor(
             )
         )
 
-        return when(val guideDomainModel: GuideResource<GuideDomainModel, ReadGuideError> = getAttributesGuide(pathComplete)){
+        return when (val guideDomainModel: GuideResource<GuideDomainModel, ReadGuideError> =
+            getAttributesGuide(pathComplete)) {
             is GuideResource.Error -> ExistGuideV1Result.NoExistGuide
             is GuideResource.Success -> {
                 val version = guideDomainModel.data.version
@@ -573,9 +580,9 @@ class GuiaRepositoryImpl @Inject constructor(
             GuideResource.Success(domainModel)
         } catch (_: FileNotFoundException) {
             GuideResource.Error(ReadGuideError.FileNotFound)
-        } catch (_: SAXException){
+        } catch (_: SAXException) {
             GuideResource.Error(ReadGuideError.InvalidXmlFormat)
-        } catch (e: Exception){
+        } catch (e: Exception) {
             GuideResource.Error(ReadGuideError.UnknownErrorRead(e.localizedMessage))
         }
     }
