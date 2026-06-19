@@ -5,7 +5,7 @@ package com.jonathanev.review.domain.result
  * El modificador 'out' indica que esta interfaz solo producirá (hará salir) datos de tipo T.
  * El tipo T es implementado solo para el caso de Exito
  */
-sealed interface ReadResource<out T> {
+sealed interface GuideResource<out T, out E> {
 
     /**
      * Estado de Éxito.
@@ -16,7 +16,7 @@ sealed interface ReadResource<out T> {
      * T = data
      * data = GuideDomainModel
      */
-    data class Success<out T>(val data: T) : ReadResource<T>
+    data class Success<out T>(val data: T) : GuideResource<T, Nothing>
 
     /**
      * Estado de Error.
@@ -24,10 +24,10 @@ sealed interface ReadResource<out T> {
      * porque estaríamos obligados a regresa algo referente a la Guía, lo cual no existe.
      *
      * Por lo tanto, usamos 'ReadResource<Nothing>' para desconectar esta rama del canal oficial
-     * de la data. Al cerrar esa puerta, somos libres de regresar nuestra propia clase ([GuideError])
+     * de la data. Al cerrar esa puerta, somos libres de regresar nuestra propia clase ([ReadGuideError])
      * a través de una variable interna privada ([exception]) para manejarla posteriormente libremente.
      */
-    data class Error(val exception: GuideError) : ReadResource<Nothing>
+    data class Error<out E>(val exception: E) : GuideResource<Nothing, E>
 }
 
 /**
@@ -35,11 +35,11 @@ sealed interface ReadResource<out T> {
  * Permite al ViewModel saber exactamente qué falló (si el archivo no existe o está corrupto)
  * para tomar una acción en la UI sin cerrar la aplicación.
  */
-sealed interface GuideError {
-    data object FileNotFound : GuideError
-    data object InvalidXmlFormat : GuideError
-    data object EmptyOrCorruptFile : GuideError
-    data class UnknownError(val message: String?) : GuideError
+sealed interface ReadGuideError {
+    data object FileNotFound : ReadGuideError
+    data object InvalidXmlFormat : ReadGuideError
+    data object EmptyOrCorruptFile : ReadGuideError
+    data class UnknownErrorRead(val message: String?) : ReadGuideError
 }
 
 /**

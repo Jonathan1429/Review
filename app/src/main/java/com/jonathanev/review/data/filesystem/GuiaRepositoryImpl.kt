@@ -31,8 +31,8 @@ import com.jonathanev.review.domain.repository.XmlSerializerFactory
 import com.jonathanev.review.domain.result.ExistGuideV1Result
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.GetSaveGuideResult
-import com.jonathanev.review.domain.result.GuideError
-import com.jonathanev.review.domain.result.ReadResource
+import com.jonathanev.review.domain.result.ReadGuideError
+import com.jonathanev.review.domain.result.GuideResource
 import com.jonathanev.review.domain.result.SaveGuideError
 import org.w3c.dom.Document
 import org.w3c.dom.Element
@@ -88,9 +88,9 @@ class GuiaRepositoryImpl @Inject constructor(
     override fun getGuides(relativeGuidePath: RelativeGuidePath): List<GuideDomainModel> {
         val result = listGuides(relativeGuidePath)
         val resultGuides = result.sortedBy { it.name }.mapNotNull { file ->
-            when(val guideDomainModel: ReadResource<GuideDomainModel> = getAttributesGuide(file)){
-                is ReadResource.Error -> null
-                is ReadResource.Success -> guideDomainModel.data
+            when(val guideDomainModel: GuideResource<GuideDomainModel, ReadGuideError> = getAttributesGuide(file)){
+                is GuideResource.Error -> null
+                is GuideResource.Success -> guideDomainModel.data
             }
         }
         _guidesRecovery = resultGuides
@@ -508,9 +508,9 @@ class GuiaRepositoryImpl @Inject constructor(
             )
         )
 
-        return when(val guideDomainModel: ReadResource<GuideDomainModel> = getAttributesGuide(pathComplete)){
-            is ReadResource.Error -> ExistGuideV1Result.NoExistGuide
-            is ReadResource.Success -> {
+        return when(val guideDomainModel: GuideResource<GuideDomainModel, ReadGuideError> = getAttributesGuide(pathComplete)){
+            is GuideResource.Error -> ExistGuideV1Result.NoExistGuide
+            is GuideResource.Success -> {
                 val version = guideDomainModel.data.version
                 if (version != GuideVersion.V1) return ExistGuideV1Result.NoExistGuide
                 ExistGuideV1Result.ExistGuide
@@ -534,7 +534,7 @@ class GuiaRepositoryImpl @Inject constructor(
         return File(oldGuidePath.value).renameTo(File(newGuidePath.value))
     }
 
-    private fun getAttributesGuide(file: File): ReadResource<GuideDomainModel> {
+    private fun getAttributesGuide(file: File): GuideResource<GuideDomainModel, ReadGuideError> {
         return try {
             val db = DocumentBuilderFactory.newInstance().newDocumentBuilder()
             val doc = db.parse(file)
@@ -561,7 +561,7 @@ class GuiaRepositoryImpl @Inject constructor(
             }
 
             if (listOf(version, name).any { it.isEmpty() }) {
-                return ReadResource.Error(GuideError.EmptyOrCorruptFile)
+                return GuideResource.Error(ReadGuideError.EmptyOrCorruptFile)
             }
 
             val domainModel = GuideXmlDto(
@@ -570,13 +570,13 @@ class GuiaRepositoryImpl @Inject constructor(
                 description = description
             ).toDomain()
 
-            ReadResource.Success(domainModel)
+            GuideResource.Success(domainModel)
         } catch (_: FileNotFoundException) {
-            ReadResource.Error(GuideError.FileNotFound)
+            GuideResource.Error(ReadGuideError.FileNotFound)
         } catch (_: SAXException){
-            ReadResource.Error(GuideError.InvalidXmlFormat)
+            GuideResource.Error(ReadGuideError.InvalidXmlFormat)
         } catch (e: Exception){
-            ReadResource.Error(GuideError.UnknownError(e.localizedMessage))
+            GuideResource.Error(ReadGuideError.UnknownErrorRead(e.localizedMessage))
         }
     }
 }
