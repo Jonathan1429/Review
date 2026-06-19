@@ -948,14 +948,141 @@ class TestGuiaRepositoryImpl {
         assertEquals(GetGuideResult.UnknownError, response)
     }
 
+    // deleteGuide
     @Test
-    fun borrar_guia_v1() {
-        val guideDomainModel = GuideDomainModel(GuideVersion.V1, "Test", "")
+    fun sino_existe_la_guia_v1_regresa_false() {
+        val guideDomainModel = GuideDomainModel(GuideVersion.V1, "Bucles", "")
         val relativeGuidePath = RelativeGuidePath(folderKotlin)
 
         val pathFolder = temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS, folderKotlin)
         val archivoGuia =
-            File(pathFolder, "Test${Extensions.POINT_XML_EXTENSION}").apply { createNewFile() }
+            File(pathFolder, "Bucles${Extensions.POINT_XML_EXTENSION}")
+
+        val rutaNativaCompleta = archivoGuia.absolutePath
+
+        every {
+            filePathResolver.mapToFilePathSpecificGuide(
+                guideDomainModel, relativeGuidePath, PathKind.GUIAS
+            )
+        } returns GuidePath(rutaNativaCompleta)
+
+        assertFalse("El archivo NO debería existir antes de la eliminación", archivoGuia.exists())
+
+        val response =
+            repository.deleteGuide(GuideContext.DeleteGuide(guideDomainModel, relativeGuidePath))
+
+        assertFalse("La ruta del archivo NO existe por lo tanto regresará false", response)
+        assertFalse("El archivo JAMAS existió y seguirá regresando que no existe", archivoGuia.exists())
+    }
+
+    @Test
+    fun sino_existe_la_carpeta_ni_la_guia_v2_regresa_false() {
+        val guideDomainModel = GuideDomainModel(GuideVersion.V2, "Test", "")
+        val relaGuidePathInitial = RelativeGuidePath(folderKotlin)
+        val relativeGuidePath =
+            RelativeGuidePath(File(folderKotlin, folderTest).absolutePath)
+
+        val pathFolderKotlin =
+            temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS, folderKotlin)
+        val pathFolderTest = File(pathFolderKotlin, folderTest)
+        val archivoGuia =
+            File(pathFolderTest, "Test${Extensions.POINT_XML_EXTENSION}")
+
+        every {
+            filePathResolver.mapToJoinRelativePath(
+                relaGuidePathInitial,
+                guideDomainModel.nameGuide
+            )
+        } returns relativeGuidePath
+
+        every {
+            filePathResolver.mapToFolderPath(relativeGuidePath, PathKind.GUIAS)
+        } returns GuidePath(pathFolderTest.absolutePath)
+
+        assertFalse("El archivo NO debería existir, incluso antes de la eliminación", archivoGuia.exists())
+
+        val response =
+            repository.deleteGuide(GuideContext.DeleteGuide(guideDomainModel, relaGuidePathInitial))
+
+        assertFalse("La base de la ruta no existe por lo tanto regresará false", response)
+        assertFalse("El archivo JAMAS existió y seguirá regresando que no existe", archivoGuia.exists())
+        assertFalse("Si la carpeta existe se borra", pathFolderTest.exists())
+    }
+
+    @Test
+    fun sino_existe_la_guia_v2_borra_la_carpeta_y_regresa_true() {
+        val guideDomainModel = GuideDomainModel(GuideVersion.V2, "Test", "")
+        val relaGuidePathInitial = RelativeGuidePath(folderKotlin)
+        val relativeGuidePath =
+            RelativeGuidePath(File(folderKotlin, folderTest).absolutePath)
+
+        val pathFolderTest =
+            temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS, folderKotlin, folderTest)
+        val archivoGuia =
+            File(pathFolderTest, "Test${Extensions.POINT_XML_EXTENSION}")
+
+        every {
+            filePathResolver.mapToJoinRelativePath(
+                relaGuidePathInitial,
+                guideDomainModel.nameGuide
+            )
+        } returns relativeGuidePath
+
+        every {
+            filePathResolver.mapToFolderPath(relativeGuidePath, PathKind.GUIAS)
+        } returns GuidePath(pathFolderTest.absolutePath)
+
+        assertFalse("El archivo NO debería existir, incluso antes de la eliminación", archivoGuia.exists())
+
+        val response =
+            repository.deleteGuide(GuideContext.DeleteGuide(guideDomainModel, relaGuidePathInitial))
+
+        assertTrue("Va a borrar si existe algo en la ruta y regresará true", response)
+        assertFalse("El archivo JAMAS existió y seguirá regresando que no existe", archivoGuia.exists())
+        assertFalse("Si la carpeta existe se borra", pathFolderTest.exists())
+    }
+
+    @Test
+    fun se_borra_una_guia_v2() {
+        val guideDomainModel = GuideDomainModel(GuideVersion.V2, "Test", "")
+        val relaGuidePathInitial = RelativeGuidePath(folderKotlin)
+        val relativeGuidePath =
+            RelativeGuidePath(File(folderKotlin, folderTest).absolutePath)
+
+        val pathFolderTest =
+            temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS, folderKotlin, folderTest)
+        val archivoGuia =
+            File(pathFolderTest, "Test${Extensions.POINT_XML_EXTENSION}").apply { createNewFile() }
+
+        every {
+            filePathResolver.mapToJoinRelativePath(
+                relaGuidePathInitial,
+                guideDomainModel.nameGuide
+            )
+        } returns relativeGuidePath
+
+        every {
+            filePathResolver.mapToFolderPath(relativeGuidePath, PathKind.GUIAS)
+        } returns GuidePath(pathFolderTest.absolutePath)
+
+        assertTrue("El archivo debería existir antes de la eliminación", archivoGuia.exists())
+
+        val response =
+            repository.deleteGuide(GuideContext.DeleteGuide(guideDomainModel, relaGuidePathInitial))
+
+        assertTrue("El método debería retornar true al eliminar con éxito", response)
+        assertFalse("El archivo físico debería haber sido borrado del disco", archivoGuia.exists())
+        assertFalse("La carpeta no debería haber sido borrada del disco", pathFolderTest.exists())
+    }
+
+    @Test
+    fun borrar_guia_v1() {
+        val guideDomainModel = GuideDomainModel(GuideVersion.V1, "Bucles", "")
+        val relativeGuidePath = RelativeGuidePath(folderKotlin)
+
+        val pathFolder = temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS, folderKotlin)
+        val archivoGuia =
+            File(pathFolder, "Bucles${Extensions.POINT_XML_EXTENSION}").apply { createNewFile() }
 
         val rutaNativaCompleta = archivoGuia.absolutePath
 

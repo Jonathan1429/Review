@@ -269,7 +269,11 @@ class GuiaRepositoryImpl @Inject constructor(
                 )
             }
 
-        return File(pathGuide.value).deleteRecursively()
+        val pathGuideFile = File(pathGuide.value)
+
+        if (!pathGuideFile.exists()) return false
+
+        return pathGuideFile.deleteRecursively()
     }
 
     private fun writeQuestionsAnswers(
