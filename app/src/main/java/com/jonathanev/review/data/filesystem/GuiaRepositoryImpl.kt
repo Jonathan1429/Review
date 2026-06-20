@@ -44,6 +44,7 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.nio.file.Files
+import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -142,34 +143,40 @@ class GuiaRepositoryImpl @Inject constructor(
                 serializer.endDocument()
             }
 
+            val newGuideDomain = GuideDomainModel(
+                GuideVersion.V2,
+                guideContext.name.value,
+                guideContext.description.value
+            )
             val newPath = filePathResolver.getPathGuidesV2(
-                GuideDomainModel(
-                    GuideVersion.V2,
-                    guideContext.name.value,
-                    guideContext.description.value
-                ),
-                PathKind.GUIAS,
-                guideContext.relativeGuidePath
+                guideDomainModel = newGuideDomain,
+                kind = PathKind.GUIAS,
+                relativeGuidePath = guideContext.relativeGuidePath
             )
 
-            val isRenamed = tempFile.renameTo(File(newPath))
-
-            if (!isRenamed) {
+            try {
+                Files.move(
+                    /* source = */ tempFile.toPath(),
+                    /* target = */ Paths.get(newPath),
+                    /* ...options = */ StandardCopyOption.REPLACE_EXISTING
+                )
+            } catch (_: IOException) {
                 tempFile.delete()
                 return GuideResource.Error(UpdateGuideError.WriteError)
             }
 
             if (newPath != path.value) {
-                File(path.value).delete()
+                try {
+                    File(path.value).delete()
+                } catch (_: Exception) {
+
+                }
             }
 
-            GuideResource.Success(guideContext.guide)
+            GuideResource.Success(newGuideDomain)
         } catch (_: FileNotFoundException) {
             tempFile.delete()
             GuideResource.Error(UpdateGuideError.NotFound)
-        } catch (_: IOException) {
-            tempFile.delete()
-            GuideResource.Error(UpdateGuideError.InvalidFormat)
         } catch (_: Exception) {
             tempFile.delete()
             GuideResource.Error(UpdateGuideError.UnknownError)
