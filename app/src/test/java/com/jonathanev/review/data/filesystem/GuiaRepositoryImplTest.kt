@@ -24,6 +24,7 @@ import com.jonathanev.review.domain.repository.FilePathResolver
 import com.jonathanev.review.domain.repository.XmlSerializerFactory
 import com.jonathanev.review.domain.result.ExistGuideV1Result
 import com.jonathanev.review.domain.result.GetGuideResult
+import com.jonathanev.review.domain.result.GetSaveGuideResult
 import com.jonathanev.review.domain.result.GuideResource
 import com.jonathanev.review.domain.result.UpdateGuideError
 import io.mockk.every
@@ -43,7 +44,9 @@ import org.robolectric.annotation.Config
 import org.w3c.dom.Element
 import org.xmlpull.v1.XmlSerializer
 import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileOutputStream
 import java.io.StringWriter
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.transform.TransformerFactory
@@ -1191,15 +1194,15 @@ class GuiaRepositoryImplTest {
             xmlSerializerFactory.create()
         } throws Exception("Fallo forzado para UnknownError")
 
-        assertTrue("Debe existir el archivo con el nombre anterior",oldGuidePath.exists())
-        assertFalse("No debe existir el archivo con el nuevo nombre",newGuidePath.exists())
-        assertFalse("No debe existir el archivo temporal",tempGuidePath.exists())
+        assertTrue("Debe existir el archivo con el nombre anterior", oldGuidePath.exists())
+        assertFalse("No debe existir el archivo con el nuevo nombre", newGuidePath.exists())
+        assertFalse("No debe existir el archivo temporal", tempGuidePath.exists())
 
         val response = repository.renameGuide(preguntas, respuestas, guideContext)
 
-        assertTrue("Debe existir el archivo con el nombre anterior",oldGuidePath.exists())
-        assertFalse("No debe existir el archivo con el nuevo nombre",newGuidePath.exists())
-        assertFalse("No debe existir el archivo temporal",tempGuidePath.exists())
+        assertTrue("Debe existir el archivo con el nombre anterior", oldGuidePath.exists())
+        assertFalse("No debe existir el archivo con el nuevo nombre", newGuidePath.exists())
+        assertFalse("No debe existir el archivo temporal", tempGuidePath.exists())
         assertEquals(GuideResource.Error(UpdateGuideError.UnknownError), response)
     }
 
@@ -1272,18 +1275,18 @@ class GuiaRepositoryImplTest {
         every { xmlSerializerFactory.create() } returns mockSerializer
 
         // No crea ningún archivo real, lo crea en memoria RAM
-        val mockOutputStream = java.io.ByteArrayOutputStream()
+        val mockOutputStream = ByteArrayOutputStream()
         every { fileOutputStreamFactory.create(any()) } returns mockOutputStream
 
-        assertTrue("Debe existir el archivo con el nombre anterior",oldGuidePath.exists())
-        assertFalse("No debe existir el archivo con el nuevo nombre",newGuidePath.exists())
-        assertFalse("No debe existir el archivo temporal",tempGuidePath.exists())
+        assertTrue("Debe existir el archivo con el nombre anterior", oldGuidePath.exists())
+        assertFalse("No debe existir el archivo con el nuevo nombre", newGuidePath.exists())
+        assertFalse("No debe existir el archivo temporal", tempGuidePath.exists())
 
         val response = repository.renameGuide(preguntas, respuestas, guideContext)
 
-        assertTrue("Debe existir el archivo con el nombre anterior",oldGuidePath.exists())
-        assertFalse("No debe existir el archivo con el nuevo nombre",newGuidePath.exists())
-        assertFalse("No debe existir el archivo temporal",tempGuidePath.exists())
+        assertTrue("Debe existir el archivo con el nombre anterior", oldGuidePath.exists())
+        assertFalse("No debe existir el archivo con el nuevo nombre", newGuidePath.exists())
+        assertFalse("No debe existir el archivo temporal", tempGuidePath.exists())
         assertEquals(GuideResource.Error(UpdateGuideError.WriteError), response)
     }
 
@@ -1357,13 +1360,13 @@ class GuiaRepositoryImplTest {
         // En lugar de usar ByteArrayOutputStream en memoria, usa un FileOutputStream real
         every { fileOutputStreamFactory.create(any()) } answers {
             val filePath = firstArg<String>()
-            java.io.FileOutputStream(filePath)
+            FileOutputStream(filePath)
         }
 
-        assertFalse("No debe existir el archivo temporal",tempGuidePath.exists())
+        assertFalse("No debe existir el archivo temporal", tempGuidePath.exists())
         val response = repository.renameGuide(preguntas, respuestas, guideContext)
 
-        assertFalse("No debe existir el archivo temporal",tempGuidePath.exists())
+        assertFalse("No debe existir el archivo temporal", tempGuidePath.exists())
         assertEquals(GuideResource.Error(UpdateGuideError.NotFound), response)
     }
 
@@ -1438,18 +1441,18 @@ class GuiaRepositoryImplTest {
         // En lugar de usar ByteArrayOutputStream en memoria, usa un FileOutputStream real
         every { fileOutputStreamFactory.create(any()) } answers {
             val filePath = firstArg<String>()
-            java.io.FileOutputStream(filePath)
+            FileOutputStream(filePath)
         }
 
-        assertTrue("Debe existir el archivo con el nombre anterior",oldGuidePath.exists())
-        assertFalse("No debe existir el archivo con el nuevo nombre",newGuidePath.exists())
-        assertFalse("No debe existir el archivo temporal",tempGuidePath.exists())
+        assertTrue("Debe existir el archivo con el nombre anterior", oldGuidePath.exists())
+        assertFalse("No debe existir el archivo con el nuevo nombre", newGuidePath.exists())
+        assertFalse("No debe existir el archivo temporal", tempGuidePath.exists())
 
         val response = repository.renameGuide(preguntas, respuestas, guideContext)
 
-        assertFalse("No debe existir el archivo con el nombre anterior",oldGuidePath.exists())
-        assertFalse("No debe existir el archivo temporal",tempGuidePath.exists())
-        assertTrue("Debe existir el archivo con el nuevo nombre",newGuidePath.exists())
+        assertFalse("No debe existir el archivo con el nombre anterior", oldGuidePath.exists())
+        assertFalse("No debe existir el archivo temporal", tempGuidePath.exists())
+        assertTrue("Debe existir el archivo con el nuevo nombre", newGuidePath.exists())
         assertEquals(GuideResource.Success(newGuideDomain), response)
     }
 
@@ -1524,18 +1527,27 @@ class GuiaRepositoryImplTest {
         // En lugar de usar ByteArrayOutputStream en memoria, usa un FileOutputStream real
         every { fileOutputStreamFactory.create(any()) } answers {
             val filePath = firstArg<String>()
-            java.io.FileOutputStream(filePath)
+            FileOutputStream(filePath)
         }
 
-        assertTrue("Debe existir el archivo con el nombre anterior",oldGuidePath.exists())
-        assertTrue("Debe existir el archivo ya que es el mismo nombre y ruta",newGuidePath.exists())
-        assertFalse("No debe existir el archivo temporal",tempGuidePath.exists())
+        assertTrue("Debe existir el archivo con el nombre anterior", oldGuidePath.exists())
+        assertTrue(
+            "Debe existir el archivo ya que es el mismo nombre y ruta",
+            newGuidePath.exists()
+        )
+        assertFalse("No debe existir el archivo temporal", tempGuidePath.exists())
 
         val response = repository.renameGuide(preguntas, respuestas, guideContext)
 
-        assertTrue("Debe existir el archivo con el mismo nombre porque es igual que la nueva",oldGuidePath.exists())
-        assertFalse("No debe existir el archivo temporal",tempGuidePath.exists())
-        assertTrue("Debe existir el archivo con el mismo nombre porque es igual que el viejo",newGuidePath.exists())
+        assertTrue(
+            "Debe existir el archivo con el mismo nombre porque es igual que la nueva",
+            oldGuidePath.exists()
+        )
+        assertFalse("No debe existir el archivo temporal", tempGuidePath.exists())
+        assertTrue(
+            "Debe existir el archivo con el mismo nombre porque es igual que el viejo",
+            newGuidePath.exists()
+        )
         assertEquals(GuideResource.Success(newGuideDomain), response)
     }
 
