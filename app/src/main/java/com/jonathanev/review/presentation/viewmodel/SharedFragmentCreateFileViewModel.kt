@@ -17,6 +17,7 @@ import com.jonathanev.review.domain.model.SaveGuideMode
 import com.jonathanev.review.domain.repository.UserPreferencesRepository
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.SaveGuideError
+import com.jonathanev.review.domain.result.SaveGuideErrors
 import com.jonathanev.review.domain.result.UpdateGuideResult
 import com.jonathanev.review.presentation.event.CreateGuideEvent
 import com.jonathanev.review.presentation.event.CreateGuideEvent.ShowMessage
@@ -509,13 +510,11 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
                 is UpdateGuideResult.SaveFailed -> {
                     when (response.cause) {
-                        SaveGuideError.ErrorSave ->
+                        SaveGuideErrors.CommitChangesFailed ->
                             sendNotification(ShowMessage("Error al guardar la guia"))
-
-                        SaveGuideError.IOException ->
+                        SaveGuideErrors.InsufficientStorageOrDiskError ->
                             sendNotification(ShowMessage("Error de entrada/salida al guardar la guía"))
-
-                        SaveGuideError.SecurityException ->
+                        SaveGuideErrors.StoragePermissionDenied ->
                             sendNotification(ShowMessage("Permisos insuficientes para guardar la guía"))
                     }
                 }

@@ -34,6 +34,7 @@ import com.jonathanev.review.domain.result.GetSaveGuideResult
 import com.jonathanev.review.domain.result.GuideResource
 import com.jonathanev.review.domain.result.ReadGuideError
 import com.jonathanev.review.domain.result.SaveGuideError
+import com.jonathanev.review.domain.result.SaveGuideErrors
 import com.jonathanev.review.domain.result.UpdateGuideError
 import org.w3c.dom.Document
 import org.w3c.dom.Element
@@ -188,7 +189,7 @@ class GuiaRepositoryImpl @Inject constructor(
         preguntas: List<QuestionItemDomain>,
         respuestas: List<QuestionItemDomain>,
         relativeGuidePath: RelativeGuidePath,
-    ): GetSaveGuideResult {
+    ): GuideResource<GuideDomainModel, SaveGuideErrors> {
         val currentPath = filePathResolver.mapToFilePathSpecificGuide(
             guideDomainModel = guideDomainModel,
             relativeGuidePath = relativeGuidePath,
@@ -255,20 +256,20 @@ class GuiaRepositoryImpl @Inject constructor(
             }
 
             if (!moveSuccessful) {
-                GetSaveGuideResult.Failure(SaveGuideError.ErrorSave)
+                GuideResource.Error(SaveGuideErrors.CommitChangesFailed)
             } else {
                 if (finalFile.exists() && finalFile.path != File(newPath).path) {
                     finalFile.delete()
                 }
-                GetSaveGuideResult.SaveGuide
+                GuideResource.Success(guideDomainModel)
             }
 
         } catch (_: IOException) {
             tempFile.delete()
-            GetSaveGuideResult.Failure(SaveGuideError.IOException)
+            GuideResource.Error(SaveGuideErrors.InsufficientStorageOrDiskError)
         } catch (_: SecurityException) {
             tempFile.delete()
-            GetSaveGuideResult.Failure(SaveGuideError.SecurityException)
+            GuideResource.Error(SaveGuideErrors.StoragePermissionDenied)
         }
     }
 

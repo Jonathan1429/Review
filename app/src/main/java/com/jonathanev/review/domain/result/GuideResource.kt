@@ -46,8 +46,13 @@ sealed interface UpdateGuideError {
     data object NotFound : UpdateGuideError
     data object InvalidFormat : UpdateGuideError
     data object WriteError : UpdateGuideError
-    data object InvalidData : UpdateGuideError
     data object UnknownError : UpdateGuideError
+}
+
+sealed interface SaveGuideErrors {
+    data object StoragePermissionDenied : SaveGuideErrors
+    data object InsufficientStorageOrDiskError : SaveGuideErrors
+    data object CommitChangesFailed : SaveGuideErrors
 }
 
 /**
