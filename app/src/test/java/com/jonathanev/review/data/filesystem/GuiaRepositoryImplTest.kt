@@ -24,7 +24,6 @@ import com.jonathanev.review.domain.repository.FilePathResolver
 import com.jonathanev.review.domain.repository.XmlSerializerFactory
 import com.jonathanev.review.domain.result.ExistGuideV1Result
 import com.jonathanev.review.domain.result.GetGuideResult
-import com.jonathanev.review.domain.result.GetSaveGuideResult
 import com.jonathanev.review.domain.result.GuideResource
 import com.jonathanev.review.domain.result.UpdateGuideError
 import io.mockk.every
@@ -1553,7 +1552,7 @@ class GuiaRepositoryImplTest {
 
     // saveGuide
     @Test
-    fun guardar_guia_satisfactoriamente_guia_v1_a_guia_v2() {
+    fun actualizar_satisfactoriamente_guia_v1_a_guia_v2() {
         val guideDomainModel = GuideDomainModel(GuideVersion.V1, "Bucles", "")
         val newGuideDomainModel = GuideDomainModel(GuideVersion.V2, "Bucles", "")
 
@@ -1641,6 +1640,178 @@ class GuiaRepositoryImplTest {
         assertEquals(
             /* message = */ "Debe de regresar que se guardó la guia correctamente",
             /* expected = */GuideResource.Success(newGuideDomainModel),
+            /* actual = */response
+        )
+    }
+
+    @Test
+    fun actualizar_satisfactoriamente_guia_v2() {
+        val guideDomainModel = GuideDomainModel(GuideVersion.V2, "Test", "")
+
+        val preguntas = listOf(
+            element = QuestionItemDomain(
+                content = listOf(
+                    QuestionContentDomain.Text("Pregunta 1", emptyList()),
+                    QuestionContentDomain.Image("", "1${Extensions.POINT_PNG_EXTENSION}")
+                )
+            )
+        )
+        val respuestas = listOf(
+            element = QuestionItemDomain(
+                content = listOf(
+                    QuestionContentDomain.Text("Respuesta 1", emptyList()),
+                    QuestionContentDomain.Image("", "2${Extensions.POINT_PNG_EXTENSION}")
+                )
+            )
+        )
+
+        val relativeGuidePath = RelativeGuidePath(folderKotlin)
+        val basePath =
+            temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS, folderKotlin)
+        val basePathV2 =
+            temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS, folderKotlin, folderTest)
+        val oldPathGuideV2 = File(basePath, "Test${Extensions.POINT_XML_EXTENSION}")
+        oldPathGuideV2.createNewFile()
+        val newPathGuideV2 = File(basePathV2, "Test${Extensions.POINT_XML_EXTENSION}")
+        val mockSerializer = mockk<XmlSerializer>(relaxed = true)
+        val tempGuidePath = File(oldPathGuideV2, "Test${Extensions.POINT_XML_EXTENSION}.tmp")
+
+        // 2. Le decimos a la fábrica que devuelva nuestro mock
+        every { xmlSerializerFactory.create() } returns mockSerializer
+
+        // En lugar de usar ByteArrayOutputStream en memoria, usa un FileOutputStream real
+        every { fileOutputStreamFactory.create(any()) } answers {
+            val filePath = firstArg<String>()
+            FileOutputStream(filePath)
+        }
+
+        every {
+            filePathResolver.mapToFilePathSpecificGuide(
+                guideDomainModel = guideDomainModel,
+                relativeGuidePath = relativeGuidePath,
+                kind = PathKind.GUIAS
+            )
+        } returns GuidePath(oldPathGuideV2.absolutePath)
+
+        every {
+            filePathResolver.getPathGuidesV2(
+                guideDomainModel = guideDomainModel,
+                kind = PathKind.GUIAS,
+                relativeGuidePath = relativeGuidePath
+            )
+        } returns newPathGuideV2.absolutePath
+
+        assertTrue(
+            /* message = */ "Debe existir el archivo con el nombre anterior",
+            /* condition = */ oldPathGuideV2.exists()
+        )
+        assertFalse(
+            /* message = */ "No debe existir el archivo con el nuevo nombre y ruta nueva",
+            /* condition = */ newPathGuideV2.exists()
+        )
+        assertFalse(
+            /* message = */ "No debe existir el archivo temporal",
+            /* condition = */tempGuidePath.exists()
+        )
+
+        val response = repository.saveGuide(guideDomainModel, preguntas, respuestas, relativeGuidePath)
+
+        assertFalse(
+            /* message = */ "No debe existir el archivo con el nombre anterior",
+            /* condition = */ oldPathGuideV2.exists()
+        )
+        assertTrue(
+            /* message = */ "Debe existir el archivo con el nuevo nombre y ruta nueva",
+            /* condition = */ newPathGuideV2.exists()
+        )
+        assertFalse(
+            /* message = */ "No debe existir el archivo temporal",
+            /* condition = */tempGuidePath.exists()
+        )
+
+        assertEquals(
+            /* message = */ "Debe de regresar que se guardó la guia correctamente",
+            /* expected = */GuideResource.Success(guideDomainModel),
+            /* actual = */response
+        )
+    }
+
+    @Test
+    fun guardar_satisfactoriamente_guia_v2() {
+        val guideDomainModel = GuideDomainModel(GuideVersion.V2, "Test", "")
+
+        val preguntas = listOf(
+            element = QuestionItemDomain(
+                content = listOf(
+                    QuestionContentDomain.Text("Pregunta 1", emptyList()),
+                    QuestionContentDomain.Image("", "1${Extensions.POINT_PNG_EXTENSION}")
+                )
+            )
+        )
+        val respuestas = listOf(
+            element = QuestionItemDomain(
+                content = listOf(
+                    QuestionContentDomain.Text("Respuesta 1", emptyList()),
+                    QuestionContentDomain.Image("", "2${Extensions.POINT_PNG_EXTENSION}")
+                )
+            )
+        )
+
+        val relativeGuidePath = RelativeGuidePath(folderKotlin)
+        val basePath =
+            temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS, folderKotlin, folderTest)
+        val pathGuideV2 = File(basePath, "Test${Extensions.POINT_XML_EXTENSION}")
+        val tempGuidePath = File(pathGuideV2, "Test${Extensions.POINT_XML_EXTENSION}.tmp")
+        val mockSerializer = mockk<XmlSerializer>(relaxed = true)
+
+        // 2. Le decimos a la fábrica que devuelva nuestro mock
+        every { xmlSerializerFactory.create() } returns mockSerializer
+
+        // En lugar de usar ByteArrayOutputStream en memoria, usa un FileOutputStream real
+        every { fileOutputStreamFactory.create(any()) } answers {
+            val filePath = firstArg<String>()
+            FileOutputStream(filePath)
+        }
+
+        every {
+            filePathResolver.mapToFilePathSpecificGuide(
+                guideDomainModel = guideDomainModel,
+                relativeGuidePath = relativeGuidePath,
+                kind = PathKind.GUIAS
+            )
+        } returns GuidePath(pathGuideV2.absolutePath)
+
+        every {
+            filePathResolver.getPathGuidesV2(
+                guideDomainModel = guideDomainModel,
+                kind = PathKind.GUIAS,
+                relativeGuidePath = relativeGuidePath
+            )
+        } returns pathGuideV2.absolutePath
+
+        assertFalse(
+            /* message = */ "No debe existir el archivo con el nuevo nombre y ruta nueva",
+            /* condition = */ pathGuideV2.exists()
+        )
+        assertFalse(
+            /* message = */ "No debe existir el archivo temporal",
+            /* condition = */tempGuidePath.exists()
+        )
+
+        val response = repository.saveGuide(guideDomainModel, preguntas, respuestas, relativeGuidePath)
+
+        assertTrue(
+            /* message = */ "Debe existir el archivo con el nuevo nombre y ruta nueva",
+            /* condition = */ pathGuideV2.exists()
+        )
+        assertFalse(
+            /* message = */ "No debe existir el archivo temporal",
+            /* condition = */tempGuidePath.exists()
+        )
+
+        assertEquals(
+            /* message = */ "Debe de regresar que se guardó la guia correctamente",
+            /* expected = */GuideResource.Success(guideDomainModel),
             /* actual = */response
         )
     }
