@@ -30,10 +30,8 @@ import com.jonathanev.review.domain.repository.GuiaRepository
 import com.jonathanev.review.domain.repository.XmlSerializerFactory
 import com.jonathanev.review.domain.result.ExistGuideV1Result
 import com.jonathanev.review.domain.result.GetGuideResult
-import com.jonathanev.review.domain.result.GetSaveGuideResult
 import com.jonathanev.review.domain.result.GuideResource
 import com.jonathanev.review.domain.result.ReadGuideError
-import com.jonathanev.review.domain.result.SaveGuideError
 import com.jonathanev.review.domain.result.SaveGuideErrors
 import com.jonathanev.review.domain.result.UpdateGuideError
 import org.w3c.dom.Document
@@ -261,7 +259,13 @@ class GuiaRepositoryImpl @Inject constructor(
                 if (finalFile.exists() && finalFile.path != File(newPath).path) {
                     finalFile.delete()
                 }
-                GuideResource.Success(guideDomainModel)
+                GuideResource.Success(
+                    GuideDomainModel(
+                        GuideVersion.V2,
+                        guideDomainModel.nameGuide,
+                        guideDomainModel.description
+                    )
+                )
             }
 
         } catch (_: IOException) {

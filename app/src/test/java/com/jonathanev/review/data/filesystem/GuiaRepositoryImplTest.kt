@@ -1551,6 +1551,100 @@ class GuiaRepositoryImplTest {
         assertEquals(GuideResource.Success(newGuideDomain), response)
     }
 
+    // saveGuide
+    @Test
+    fun guardar_guia_satisfactoriamente_guia_v1_a_guia_v2() {
+        val guideDomainModel = GuideDomainModel(GuideVersion.V1, "Bucles", "")
+        val newGuideDomainModel = GuideDomainModel(GuideVersion.V2, "Bucles", "")
+
+        val preguntas = listOf(
+            element = QuestionItemDomain(
+                content = listOf(
+                    QuestionContentDomain.Text("Pregunta 1", emptyList()),
+                    QuestionContentDomain.Image("", "1${Extensions.POINT_PNG_EXTENSION}")
+                )
+            )
+        )
+        val respuestas = listOf(
+            element = QuestionItemDomain(
+                content = listOf(
+                    QuestionContentDomain.Text("Respuesta 1", emptyList()),
+                    QuestionContentDomain.Image("", "2${Extensions.POINT_PNG_EXTENSION}")
+                )
+            )
+        )
+
+        val relativeGuidePath = RelativeGuidePath(folderKotlin)
+        val basePath =
+            temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS, folderKotlin)
+        val basePathV2 =
+            temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS, folderKotlin, folderTest)
+        val oldPathGuideV1 = File(basePath, "Bucles${Extensions.POINT_XML_EXTENSION}")
+        oldPathGuideV1.createNewFile()
+        val newPathGuideV2 = File(basePathV2, "Bucles${Extensions.POINT_XML_EXTENSION}")
+        val mockSerializer = mockk<XmlSerializer>(relaxed = true)
+        val tempGuidePath = File(oldPathGuideV1, "Bucles${Extensions.POINT_XML_EXTENSION}.tmp")
+
+        // 2. Le decimos a la fábrica que devuelva nuestro mock
+        every { xmlSerializerFactory.create() } returns mockSerializer
+
+        // En lugar de usar ByteArrayOutputStream en memoria, usa un FileOutputStream real
+        every { fileOutputStreamFactory.create(any()) } answers {
+            val filePath = firstArg<String>()
+            FileOutputStream(filePath)
+        }
+
+        every {
+            filePathResolver.mapToFilePathSpecificGuide(
+                guideDomainModel = guideDomainModel,
+                relativeGuidePath = relativeGuidePath,
+                kind = PathKind.GUIAS
+            )
+        } returns GuidePath(oldPathGuideV1.absolutePath)
+
+        every {
+            filePathResolver.getPathGuidesV2(
+                guideDomainModel = guideDomainModel,
+                kind = PathKind.GUIAS,
+                relativeGuidePath = relativeGuidePath
+            )
+        } returns newPathGuideV2.absolutePath
+
+        assertTrue(
+            /* message = */ "Debe existir el archivo con el nombre anterior",
+            /* condition = */ oldPathGuideV1.exists()
+        )
+        assertFalse(
+            /* message = */ "No debe existir el archivo con el nuevo nombre y ruta nueva",
+            /* condition = */ newPathGuideV2.exists()
+        )
+        assertFalse(
+            /* message = */ "No debe existir el archivo temporal",
+            /* condition = */tempGuidePath.exists()
+        )
+
+        val response = repository.saveGuide(guideDomainModel, preguntas, respuestas, relativeGuidePath)
+
+        assertFalse(
+            /* message = */ "No debe existir el archivo con el nombre anterior",
+            /* condition = */ oldPathGuideV1.exists()
+        )
+        assertTrue(
+            /* message = */ "Debe existir el archivo con el nuevo nombre y ruta nueva",
+            /* condition = */ newPathGuideV2.exists()
+        )
+        assertFalse(
+            /* message = */ "No debe existir el archivo temporal",
+            /* condition = */tempGuidePath.exists()
+        )
+
+        assertEquals(
+            /* message = */ "Debe de regresar que se guardó la guia correctamente",
+            /* expected = */GuideResource.Success(newGuideDomainModel),
+            /* actual = */response
+        )
+    }
+
     private fun String.toSlashPath(): String = this.replace("\\", "/")
     private fun String.toXMLInvalid(): String =
         this.replace("</${Structure.GUIAESTUDIO}>", "<//${Structure.GUIAESTUDIO}>")
