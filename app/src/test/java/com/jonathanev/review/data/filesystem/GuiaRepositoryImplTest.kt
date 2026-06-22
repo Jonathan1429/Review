@@ -28,11 +28,17 @@ import com.jonathanev.review.domain.result.GuideResource
 import com.jonathanev.review.domain.result.UpdateGuideError
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkConstructor
 import io.mockk.mockkStatic
+import io.mockk.spyk
+import io.mockk.unmockkConstructor
 import io.mockk.unmockkStatic
+import okio.Path
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -46,6 +52,7 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
+import java.io.IOException
 import java.io.StringWriter
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.transform.TransformerFactory
@@ -1551,6 +1558,157 @@ class GuiaRepositoryImplTest {
     }
 
     // saveGuide
+
+    @Test
+    fun lanzar_excepcion_cuando_archivo_no_tiene_directorio_padre() {
+        val guideDomainModel = GuideDomainModel(GuideVersion.V2, "Test", "")
+        val relativeGuidePath = RelativeGuidePath(folderKotlin)
+
+        every { xmlSerializerFactory.create() } returns mockk(relaxed = true)
+
+        every {
+            filePathResolver.mapToFilePathSpecificGuide(
+                guideDomainModel = guideDomainModel,
+                relativeGuidePath = relativeGuidePath,
+                kind = PathKind.GUIAS
+            )
+        } returns GuidePath("*")
+
+        every {
+            filePathResolver.getPathGuidesV2(
+                guideDomainModel = guideDomainModel,
+                kind = PathKind.GUIAS,
+                relativeGuidePath = relativeGuidePath
+            )
+        } returns "*"
+
+        try {
+            repository.saveGuide(guideDomainModel, emptyList(), emptyList(), relativeGuidePath)
+            fail("Se esperaba IllegalStateException debido a la falta de directorio padre")
+        } catch (e: IllegalStateException) {
+            assertEquals(
+                /* message = */ "El mensaje de error debe ser el esperado",
+                /* expected = */ "El archivo no tiene directorio padre",
+                /* actual = */ e.message
+            )
+        }
+    }
+
+    @Test
+    fun crear_directorio_padre_satisfactoriamente_si_no_existe() {
+        val preguntas = listOf(
+            element = QuestionItemDomain(
+                content = listOf(
+                    QuestionContentDomain.Text("Pregunta 1", emptyList()),
+                    QuestionContentDomain.Image("", "1${Extensions.POINT_PNG_EXTENSION}")
+                )
+            )
+        )
+        val respuestas = listOf(
+            element = QuestionItemDomain(
+                content = listOf(
+                    QuestionContentDomain.Text("Respuesta 1", emptyList()),
+                    QuestionContentDomain.Image("", "2${Extensions.POINT_PNG_EXTENSION}")
+                )
+            )
+        )
+        val guideDomainModel = GuideDomainModel(GuideVersion.V2, "Test", "")
+        val relativeGuidePath = RelativeGuidePath(File(folderKotlin, folderTest).path)
+
+        val basePath = temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS)
+        val fullBasePath = File(basePath, relativeGuidePath.value)
+        val pathGuideV2 = File(fullBasePath, "Test${Extensions.POINT_XML_EXTENSION}")
+        val mockSerializer = mockk<XmlSerializer>(relaxed = true)
+
+        every { xmlSerializerFactory.create() } returns mockSerializer
+
+        every { fileOutputStreamFactory.create(any()) } answers {
+            val filePath = firstArg<String>()
+            FileOutputStream(filePath)
+        }
+
+        every {
+            filePathResolver.mapToFilePathSpecificGuide(guideDomainModel, relativeGuidePath, PathKind.GUIAS)
+        } returns GuidePath(pathGuideV2.absolutePath)
+
+        every {
+            filePathResolver.getPathGuidesV2(
+                guideDomainModel = guideDomainModel,
+                kind = PathKind.GUIAS,
+                relativeGuidePath = relativeGuidePath
+            )
+        } returns pathGuideV2.absolutePath
+
+        assertFalse(
+            /* message = */ "El directorio padre no debería existir en el disco antes de llamar al repositorio",
+            /* condition = */ fullBasePath.exists()
+        )
+
+        val response = repository.saveGuide(guideDomainModel, preguntas, respuestas, relativeGuidePath)
+
+        assertTrue(
+            /* message = */ "El repositorio debió haber creado el directorio padre con mkdirs()",
+            /* condition = */ fullBasePath.exists()
+        )
+        assertTrue(
+            /* message = */ "El archivo final debió crearse dentro del nuevo directorio",
+            /* condition = */ pathGuideV2.exists()
+        )
+        assertEquals(
+            /* message = */ "Debe retornar que se guardó exitosamente",
+            /* expected = */ GuideResource.Success(guideDomainModel),
+            /* actual = */ response
+        )
+    }
+
+    @Test
+    fun lanzar_IOException_si_no_se_puede_crear_el_directorio_padre() {
+        val guideDomainModel = GuideDomainModel(GuideVersion.V2, "Test", "")
+        val relativeGuidePath =
+            RelativeGuidePath(File(folderKotlin, "$folderTest\u0000").path)
+
+        val basePath = temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS)
+        val fullBasePath = File(basePath, relativeGuidePath.value)
+        val pathGuideV2 = File(fullBasePath, "Test${Extensions.POINT_XML_EXTENSION}")
+
+        val mockSerializer = mockk<XmlSerializer>(relaxed = true)
+        every { xmlSerializerFactory.create() } returns mockSerializer
+
+        every { fileOutputStreamFactory.create(any()) } answers {
+            val filePath = firstArg<String>()
+            FileOutputStream(filePath)
+        }
+
+        every {
+            filePathResolver.mapToFilePathSpecificGuide(
+                guideDomainModel = guideDomainModel,
+                relativeGuidePath = relativeGuidePath,
+                kind = PathKind.GUIAS
+            )
+        } returns GuidePath(pathGuideV2.absolutePath)
+
+        every {
+            filePathResolver.getPathGuidesV2(
+                guideDomainModel = guideDomainModel,
+                kind = PathKind.GUIAS,
+                relativeGuidePath = relativeGuidePath
+            )
+        } returns pathGuideV2.absolutePath
+
+        assertFalse(pathGuideV2.exists())
+
+        val excepcionLanzada = assertThrows(IOException::class.java) {
+            repository.saveGuide(guideDomainModel, emptyList(), emptyList(), relativeGuidePath)
+        }
+
+        val mensajeEsperado = "No se pudo crear el directorio: ${fullBasePath.absolutePath}"
+        assertEquals(
+            /* message = */ "No debe crearse el directorio y lanzar una excepcion",
+            /* expected = */ mensajeEsperado,
+            /* actual = */ excepcionLanzada.message
+        )
+    }
+
     @Test
     fun actualizar_satisfactoriamente_guia_v1_a_guia_v2() {
         val guideDomainModel = GuideDomainModel(GuideVersion.V1, "Bucles", "")

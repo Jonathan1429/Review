@@ -198,11 +198,8 @@ class GuiaRepositoryImpl @Inject constructor(
         val parentDir = finalFile.parentFile
             ?: throw IllegalStateException("El archivo no tiene directorio padre")
 
-        if (!parentDir.exists()) {
-            val created = parentDir.mkdirs()
-            if (!created) {
-                throw IOException("No se pudo crear el directorio: ${parentDir.absolutePath}")
-            }
+        if (!parentDir.exists() && !parentDir.mkdirs()) {
+            throw IOException("No se pudo crear el directorio: ${parentDir.absolutePath}")
         }
 
         val tempFile = File("$finalFile.tmp")
