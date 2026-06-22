@@ -237,24 +237,19 @@ class GuiaRepositoryImpl @Inject constructor(
                 relativeGuidePath
             )
 
-            val moveSuccessful = try {
+            try {
                 Files.move(
                     tempFile.toPath(),
                     File(newPath).toPath(),
                     StandardCopyOption.REPLACE_EXISTING,
                     StandardCopyOption.ATOMIC_MOVE
                 )
-                true
-            } catch (_: Exception) {
-                tempFile.delete()
-                false
-            }
 
-            if (!moveSuccessful) {
-                GuideResource.Error(SaveGuideErrors.CommitChangesFailed)
-            } else {
-                if (finalFile.exists() && finalFile.path != File(newPath).path) {
-                    finalFile.delete()
+                if (finalFile.path != File(newPath).path) {
+                    try {
+                        finalFile.delete()
+                    } catch (_: Exception) {
+                    }
                 }
                 GuideResource.Success(
                     GuideDomainModel(
@@ -263,8 +258,10 @@ class GuiaRepositoryImpl @Inject constructor(
                         guideDomainModel.description
                     )
                 )
+            } catch (_: Exception) {
+                tempFile.delete()
+                GuideResource.Error(SaveGuideErrors.CommitChangesFailed)
             }
-
         } catch (_: IOException) {
             tempFile.delete()
             GuideResource.Error(SaveGuideErrors.InsufficientStorageOrDiskError)
