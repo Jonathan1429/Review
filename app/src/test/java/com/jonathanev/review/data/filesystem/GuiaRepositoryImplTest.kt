@@ -1719,57 +1719,37 @@ class GuiaRepositoryImplTest {
         assertEquals(GuideResource.Error(SaveGuideErrors.CommitChangesFailed), response)
     }
 
-    /*@Test
+    @Test
     fun no_hay_suficiente_espacio_al_guardar_una_guia_y_regresa_InsufficientStorageOrDiskError() {
-        val preguntas = listOf(
-            element = QuestionItemDomain(
-                content = listOf(
-                    QuestionContentDomain.Text("Pregunta 1", emptyList()),
-                    QuestionContentDomain.Image("", "1${Extensions.POINT_PNG_EXTENSION}")
-                )
-            )
-        )
-        val respuestas = listOf(
-            element = QuestionItemDomain(
-                content = listOf(
-                    QuestionContentDomain.Text("Respuesta 1", emptyList()),
-                    QuestionContentDomain.Image("", "2${Extensions.POINT_PNG_EXTENSION}")
-                )
-            )
-        )
-
         val guideDomainModel = GuideDomainModel(GuideVersion.V2, "Test", "")
-        val relGuidePathFile = temporaryFolder.newFolder(
+        val relGuideFile = File(folderKotlin, folderTest)
+        val baseTestFolder = temporaryFolder.newFolder(
             folderFiles,
             StorageFolders.GUIAS,
             folderKotlin,
             folderTest
         ).absolutePath
-        val relativeGuidePath = RelativeGuidePath(relGuidePathFile)
+        val relativeGuidePath = RelativeGuidePath(relGuideFile.path)
         val newGuidePath =
             File(
-                relGuidePathFile,
-                "${guideContext.name.value}${Extensions.POINT_XML_EXTENSION}"
+                baseTestFolder,
+                "${guideDomainModel.nameGuide}${Extensions.POINT_XML_EXTENSION}"
             )
-        val tempGuidePath = File(relGuidePathFile, "Test${Extensions.POINT_XML_EXTENSION}.tmp")
-
-        val newGuideDomain = GuideDomainModel(
-            version = GuideVersion.V2,
-            nameGuide = guideContext.name.value,
-            description = guideContext.description.value
-        )
+        newGuidePath.createNewFile()
+        val tempGuidePath =
+            File(baseTestFolder, "${guideDomainModel.nameGuide}${Extensions.POINT_XML_EXTENSION}.tmp")
 
         every {
             filePathResolver.mapToFilePathSpecificGuide(
-                guideDomainModel = guideContext.guide,
-                relativeGuidePath = guideContext.relativeGuidePath,
+                guideDomainModel = guideDomainModel,
+                relativeGuidePath = relativeGuidePath,
                 kind = PathKind.GUIAS
             )
-        } returns GuidePath(oldGuidePath.absolutePath)
+        } returns GuidePath(newGuidePath.absolutePath)
 
         every {
             filePathResolver.getPathGuidesV2(
-                guideDomainModel = newGuideDomain,
+                guideDomainModel = guideDomainModel,
                 kind = PathKind.GUIAS,
                 relativeGuidePath = relativeGuidePath
             )
@@ -1777,19 +1757,67 @@ class GuiaRepositoryImplTest {
 
         every {
             xmlSerializerFactory.create()
-        } throws Exception("Fallo forzado para UnknownError")
+        } throws IOException("Fallo forzado de espacio insuficiente")
 
-        assertTrue("Debe existir el archivo con el nombre anterior", oldGuidePath.exists())
-        assertFalse("No debe existir el archivo con el nuevo nombre", newGuidePath.exists())
+        assertTrue("Debe existir el archivo con el nombre anterior", newGuidePath.exists())
         assertFalse("No debe existir el archivo temporal", tempGuidePath.exists())
 
-        val response = repository.saveGuide(guideDomainModel,preguntas, respuestas, relativeGuidePath)
+        val response = repository.saveGuide(guideDomainModel, emptyList(), emptyList(), relativeGuidePath)
 
-        assertTrue("Debe existir el archivo con el nombre anterior", oldGuidePath.exists())
-        assertFalse("No debe existir el archivo con el nuevo nombre", newGuidePath.exists())
+        assertTrue("Debe existir el archivo con el nombre anterior", newGuidePath.exists())
         assertFalse("No debe existir el archivo temporal", tempGuidePath.exists())
-        assertEquals(GuideResource.Error(UpdateGuideError.UnknownError), response)
-    }*/
+        assertEquals(GuideResource.Error(SaveGuideErrors.InsufficientStorageOrDiskError), response)
+    }
+
+    @Test
+    fun sino_hay_permisos_de_escritura_disponibles_regresa_StoragePermissionDenied() {
+        val guideDomainModel = GuideDomainModel(GuideVersion.V2, "Test", "")
+        val relGuideFile = File(folderKotlin, folderTest)
+        val baseTestFolder = temporaryFolder.newFolder(
+            folderFiles,
+            StorageFolders.GUIAS,
+            folderKotlin,
+            folderTest
+        ).absolutePath
+        val relativeGuidePath = RelativeGuidePath(relGuideFile.path)
+        val newGuidePath =
+            File(
+                baseTestFolder,
+                "${guideDomainModel.nameGuide}${Extensions.POINT_XML_EXTENSION}"
+            )
+        newGuidePath.createNewFile()
+        val tempGuidePath =
+            File(baseTestFolder, "${guideDomainModel.nameGuide}${Extensions.POINT_XML_EXTENSION}.tmp")
+
+        every {
+            filePathResolver.mapToFilePathSpecificGuide(
+                guideDomainModel = guideDomainModel,
+                relativeGuidePath = relativeGuidePath,
+                kind = PathKind.GUIAS
+            )
+        } returns GuidePath(newGuidePath.absolutePath)
+
+        every {
+            filePathResolver.getPathGuidesV2(
+                guideDomainModel = guideDomainModel,
+                kind = PathKind.GUIAS,
+                relativeGuidePath = relativeGuidePath
+            )
+        } returns newGuidePath.absolutePath
+
+        every {
+            xmlSerializerFactory.create()
+        } throws SecurityException("Fallo forzado de StoragePermissionDenied")
+
+        assertTrue("Debe existir el archivo con el nombre anterior", newGuidePath.exists())
+        assertFalse("No debe existir el archivo temporal", tempGuidePath.exists())
+
+        val response = repository.saveGuide(guideDomainModel, emptyList(), emptyList(), relativeGuidePath)
+
+        assertTrue("Debe existir el archivo con el nombre anterior", newGuidePath.exists())
+        assertFalse("No debe existir el archivo temporal", tempGuidePath.exists())
+        assertEquals(GuideResource.Error(SaveGuideErrors.StoragePermissionDenied), response)
+    }
 
     @Test
     fun actualizar_satisfactoriamente_guia_v1_a_guia_v2() {
