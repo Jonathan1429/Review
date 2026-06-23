@@ -6,6 +6,6 @@ sealed class UpdateGuideResult {
     object ErrorUpdateGuide: UpdateGuideResult()
     object ImagesFailed: UpdateGuideResult()
     data class SaveFailed(
-        val cause: SaveGuideError
+        val cause: SaveGuideErrors
     ) : UpdateGuideResult()
 }

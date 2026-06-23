@@ -15,7 +15,9 @@ import com.jonathanev.review.domain.repository.DirectoryManager
 import com.jonathanev.review.domain.repository.GuiaRepository
 import com.jonathanev.review.domain.repository.ImagesRepository
 import com.jonathanev.review.domain.result.GetGuideResult
+import com.jonathanev.review.domain.result.GuideResource
 import com.jonathanev.review.domain.result.RenamedGuideResult
+import com.jonathanev.review.domain.result.UpdateGuideError
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -170,7 +172,7 @@ class RenameGuideTest {
                     description = OptionalAttrGuide("")
                 )
             )
-        } returns false
+        } returns GuideResource.Error(UpdateGuideError.UnknownError)
 
         val response =
             renameGuideUseCase.invoke(guideDomain, oldRelativeGuidePath, newName, "")
@@ -223,7 +225,7 @@ class RenameGuideTest {
                     description = OptionalAttrGuide("")
                 )
             )
-        } returns true
+        } returns GuideResource.Success(guideDomain)
 
         every {
             imagesRepository.moveImages(
@@ -292,7 +294,7 @@ class RenameGuideTest {
                     description = OptionalAttrGuide("")
                 )
             )
-        } returns true
+        } returns GuideResource.Success(guideDomain)
 
         every {
             imagesRepository.moveImages(

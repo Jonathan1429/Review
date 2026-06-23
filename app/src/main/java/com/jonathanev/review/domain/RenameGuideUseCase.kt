@@ -13,6 +13,7 @@ import com.jonathanev.review.domain.repository.DirectoryManager
 import com.jonathanev.review.domain.repository.GuiaRepository
 import com.jonathanev.review.domain.repository.ImagesRepository
 import com.jonathanev.review.domain.result.GetGuideResult
+import com.jonathanev.review.domain.result.GuideResource
 import com.jonathanev.review.domain.result.RenamedGuideResult
 import javax.inject.Inject
 
@@ -48,8 +49,7 @@ class RenameGuideUseCase @Inject constructor(
                     )
                 )
 
-                if (!isRenamed) {
-                    //navigationPathRepository.reset()
+                if (isRenamed is GuideResource.Error) {
                     return RenamedGuideResult.RenamedError
                 }
 

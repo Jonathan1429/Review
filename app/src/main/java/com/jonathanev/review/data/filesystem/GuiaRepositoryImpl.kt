@@ -1,6 +1,5 @@
 package com.jonathanev.review.data.filesystem
 
-import android.util.Log
 import com.jonathanev.review.core.media.MediaPaths
 import com.jonathanev.review.data.mapper.xml.toDomain
 import com.jonathanev.review.data.mapper.xml.toTagXml
@@ -31,8 +30,10 @@ import com.jonathanev.review.domain.repository.GuiaRepository
 import com.jonathanev.review.domain.repository.XmlSerializerFactory
 import com.jonathanev.review.domain.result.ExistGuideV1Result
 import com.jonathanev.review.domain.result.GetGuideResult
-import com.jonathanev.review.domain.result.GetSaveGuideResult
-import com.jonathanev.review.domain.result.SaveGuideError
+import com.jonathanev.review.domain.result.GuideResource
+import com.jonathanev.review.domain.result.ReadGuideError
+import com.jonathanev.review.domain.result.SaveGuideErrors
+import com.jonathanev.review.domain.result.UpdateGuideError
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.NodeList
@@ -42,6 +43,7 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.nio.file.Files
+import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -59,21 +61,22 @@ class GuiaRepositoryImpl @Inject constructor(
         get() = _guidesRecovery
 
     private fun listGuides(relativeGuidePath: RelativeGuidePath): List<File> {
-        val path = filePathResolver.mapToFolderPath(relativeGuidePath, PathKind.GUIAS)
-        val listFiles = File(path.value).listFiles()
-            ?.filter { file ->
-                file.isFile &&
-                        file.extension == Extensions.XML_EXTENSION
-            } ?: emptyList()
+        val path = File(filePathResolver.mapToFolderPath(relativeGuidePath, PathKind.GUIAS).value)
+        val allItems = path.listFiles().orEmpty()
 
-        val listFromFolders = File(path.value)
-            .listFiles()
-            ?.filter { it.isDirectory }
-            ?.flatMap { folder ->
-                folder.listFiles()
-                    ?.filter { it.isFile && it.extension == Extensions.XML_EXTENSION }
-                    ?: emptyList()
-            } ?: emptyList()
+        val listFiles = allItems
+            .filter { file -> file.isFile }
+            .filter { file ->
+                file.extension == Extensions.XML_EXTENSION
+            }
+
+        val listFromFolders = allItems
+            .filter { it.isDirectory }
+            .flatMap { folder ->
+                folder.listFiles().orEmpty()
+                    .filter { file -> file.isFile }
+                    .filter { file -> file.extension == Extensions.XML_EXTENSION }
+            }
 
         return (listFiles + listFromFolders)
     }
@@ -85,7 +88,13 @@ class GuiaRepositoryImpl @Inject constructor(
 
     override fun getGuides(relativeGuidePath: RelativeGuidePath): List<GuideDomainModel> {
         val result = listGuides(relativeGuidePath)
-        val resultGuides = result.sortedBy { it.name }.map { file -> getAttributesGuide(file) }
+        val resultGuides = result.sortedBy { it.name }.mapNotNull { file ->
+            when (val guideDomainModel: GuideResource<GuideDomainModel, ReadGuideError> =
+                getAttributesGuide(file)) {
+                is GuideResource.Error -> null
+                is GuideResource.Success -> guideDomainModel.data
+            }
+        }
         _guidesRecovery = resultGuides
         return resultGuides
     }
@@ -94,7 +103,7 @@ class GuiaRepositoryImpl @Inject constructor(
         preguntas: List<QuestionItemDomain>,
         respuestas: List<QuestionItemDomain>,
         guideContext: GuideContext.Rename
-    ): Boolean {
+    ): GuideResource<GuideDomainModel, UpdateGuideError> {
         val path = filePathResolver.mapToFilePathSpecificGuide(
             guideDomainModel = guideContext.guide,
             relativeGuidePath = guideContext.relativeGuidePath,
@@ -105,56 +114,71 @@ class GuiaRepositoryImpl @Inject constructor(
 
         return try {
             val serializer = xmlSerializerFactory.create()
-            val fos = fileOutputStreamFactory.create(tempFile.path)
 
-            serializer.setOutput(fos, "UTF-8")
-            try {
-                serializer.setFeature(
-                    "http://xmlpull.org/v1/doc/features.html#indent-output",
-                    true
-                )
-            } catch (_: Exception) {
+            fileOutputStreamFactory.create(tempFile.path).use { fos ->
+                serializer.setOutput(fos, "UTF-8")
+
+                try {
+                    serializer.setFeature(
+                        "http://xmlpull.org/v1/doc/features.html#indent-output",
+                        true
+                    )
+                } catch (_: IllegalStateException) {
+                }
+
+                serializer.startDocument(null, true)
+                serializer.startTag("", Structure.GUIAESTUDIO)
+                serializer.attribute("", Attributes.VERSION, Versions.VERSION2)
+
+                serializer.startTag("", Structure.CUESTIONARIO)
+                serializer.attribute("", Attributes.NOMBREGUIA, guideContext.name.value)
+                serializer.attribute("", Attributes.DESCRIPCION, guideContext.description.value)
+
+                writeQuestionsAnswers(serializer, preguntas, QAType.QUESTION.toTagXml())
+                writeQuestionsAnswers(serializer, respuestas, QAType.ANSWER.toTagXml())
+
+                serializer.endTag("", Structure.CUESTIONARIO)
+                serializer.endTag("", Structure.GUIAESTUDIO)
+                serializer.endDocument()
             }
-            serializer.startDocument(null, true)
-            serializer.startTag("", Structure.GUIAESTUDIO)
-            serializer.attribute("", Attributes.VERSION, "2.0")
 
-            serializer.startTag("", Structure.CUESTIONARIO)
-            serializer.attribute("", Attributes.NOMBREGUIA, guideContext.name.value)
-            serializer.attribute("", Attributes.DESCRIPCION, guideContext.description.value)
-
-            writeQuestionsAnswers(serializer, preguntas, QAType.QUESTION.toTagXml())
-            writeQuestionsAnswers(serializer, respuestas, QAType.ANSWER.toTagXml())
-
-            serializer.endTag("", Structure.CUESTIONARIO)
-            serializer.endTag("", Structure.GUIAESTUDIO)
-            serializer.endDocument()
-
-            fos.close()
-
-            val newPath = filePathResolver.getPathGuidesV2(
-                GuideDomainModel(
-                    GuideVersion.V2,
-                    guideContext.name.value,
-                    guideContext.description.value
-                ),
-                PathKind.GUIAS,
-                guideContext.relativeGuidePath
+            val newGuideDomain = GuideDomainModel(
+                GuideVersion.V2,
+                guideContext.name.value,
+                guideContext.description.value
             )
-            val isRenamed = tempFile.renameTo(File(newPath))
+            val newPath = filePathResolver.getPathGuidesV2(
+                guideDomainModel = newGuideDomain,
+                kind = PathKind.GUIAS,
+                relativeGuidePath = guideContext.relativeGuidePath
+            )
 
-            if (!isRenamed) {
+            try {
+                Files.move(
+                    /* source = */ tempFile.toPath(),
+                    /* target = */ Paths.get(newPath),
+                    /* ...options = */ StandardCopyOption.REPLACE_EXISTING
+                )
+            } catch (_: IOException) {
                 tempFile.delete()
-                return false
+                return GuideResource.Error(UpdateGuideError.WriteError)
             }
 
             if (newPath != path.value) {
-                File(path.value).delete()
+                try {
+                    File(path.value).delete()
+                } catch (_: Exception) {
+
+                }
             }
 
-            true
+            GuideResource.Success(newGuideDomain)
+        } catch (_: FileNotFoundException) {
+            tempFile.delete()
+            GuideResource.Error(UpdateGuideError.NotFound)
         } catch (_: Exception) {
-            false
+            tempFile.delete()
+            GuideResource.Error(UpdateGuideError.UnknownError)
         }
     }
 
@@ -163,24 +187,19 @@ class GuiaRepositoryImpl @Inject constructor(
         preguntas: List<QuestionItemDomain>,
         respuestas: List<QuestionItemDomain>,
         relativeGuidePath: RelativeGuidePath,
-    ): GetSaveGuideResult {
-        val currentPath =
-            filePathResolver.mapToFilePathSpecificGuide(
-                guideDomainModel = guideDomainModel,
-                relativeGuidePath = relativeGuidePath,
-                kind = PathKind.GUIAS
-            )
+    ): GuideResource<GuideDomainModel, SaveGuideErrors> {
+        val currentPath = filePathResolver.mapToFilePathSpecificGuide(
+            guideDomainModel = guideDomainModel,
+            relativeGuidePath = relativeGuidePath,
+            kind = PathKind.GUIAS
+        )
 
         val finalFile = File(currentPath.value)
-
         val parentDir = finalFile.parentFile
             ?: throw IllegalStateException("El archivo no tiene directorio padre")
 
-        if (!parentDir.exists()) {
-            val created = parentDir.mkdirs()
-            if (!created) {
-                throw IOException("No se pudo crear el directorio: ${parentDir.absolutePath}")
-            }
+        if (!parentDir.exists() && !parentDir.mkdirs()) {
+            throw IOException("No se pudo crear el directorio: ${parentDir.absolutePath}")
         }
 
         val tempFile = File("$finalFile.tmp")
@@ -194,11 +213,11 @@ class GuiaRepositoryImpl @Inject constructor(
                         "http://xmlpull.org/v1/doc/features.html#indent-output",
                         true
                     )
-                } catch (_: Exception) {
+                } catch (_: IllegalStateException) {
                 }
                 serializer.startDocument(null, true)
                 serializer.startTag("", Structure.GUIAESTUDIO)
-                serializer.attribute("", Attributes.VERSION, "2.0")
+                serializer.attribute("", Attributes.VERSION, Versions.VERSION2)
 
                 serializer.startTag("", Structure.CUESTIONARIO)
                 serializer.attribute("", Attributes.NOMBREGUIA, guideDomainModel.nameGuide)
@@ -225,20 +244,30 @@ class GuiaRepositoryImpl @Inject constructor(
                     StandardCopyOption.REPLACE_EXISTING,
                     StandardCopyOption.ATOMIC_MOVE
                 )
+
+                if (finalFile.path != File(newPath).path) {
+                    try {
+                        finalFile.delete()
+                    } catch (_: Exception) {
+                    }
+                }
+                GuideResource.Success(
+                    GuideDomainModel(
+                        GuideVersion.V2,
+                        guideDomainModel.nameGuide,
+                        guideDomainModel.description
+                    )
+                )
             } catch (_: Exception) {
                 tempFile.delete()
-                return GetSaveGuideResult.Failure(SaveGuideError.ErrorSave)
+                GuideResource.Error(SaveGuideErrors.CommitChangesFailed)
             }
-
-            if (finalFile.exists() && finalFile.path != File(newPath).path) {
-                finalFile.delete()
-            }
-
-            GetSaveGuideResult.SaveGuide
         } catch (_: IOException) {
-            return GetSaveGuideResult.Failure(SaveGuideError.IOException)
+            tempFile.delete()
+            GuideResource.Error(SaveGuideErrors.InsufficientStorageOrDiskError)
         } catch (_: SecurityException) {
-            return GetSaveGuideResult.Failure(SaveGuideError.SecurityException)
+            tempFile.delete()
+            GuideResource.Error(SaveGuideErrors.StoragePermissionDenied)
         }
     }
 
@@ -262,7 +291,11 @@ class GuiaRepositoryImpl @Inject constructor(
                 )
             }
 
-        return File(pathGuide.value).deleteRecursively()
+        val pathGuideFile = File(pathGuide.value)
+
+        if (!pathGuideFile.exists()) return false
+
+        return pathGuideFile.deleteRecursively()
     }
 
     private fun writeQuestionsAnswers(
@@ -300,26 +333,26 @@ class GuiaRepositoryImpl @Inject constructor(
         guideDomainModel: GuideDomainModel,
         guidePath: GuidePath
     ): GetGuideResult {
-        val currentPath = guidePath.value
+        val currentPath = File(guidePath.value)
 
         val qaItemXmlDto = mutableListOf<QAItemXmlDto>()
         val db = DocumentBuilderFactory.newInstance().newDocumentBuilder()
 
         try {
-            val doc = db.parse(File(currentPath))
+            val doc = db.parse(currentPath)
 
             getQAXML(
                 qaItemXmlDto,
                 doc,
                 QAType.QUESTION.toTagXml(),
-                (File(currentPath).parent ?: ""),
+                currentPath.absolutePath,
                 guideDomainModel.version
             )
             getQAXML(
                 qaItemXmlDto,
                 doc,
                 QAType.ANSWER.toTagXml(),
-                (File(currentPath).parent ?: ""),
+                currentPath.absolutePath,
                 guideDomainModel.version
             )
 
@@ -397,12 +430,8 @@ class GuiaRepositoryImpl @Inject constructor(
 
         try {
             val db = dbf.newDocumentBuilder()
-
             val currentPath = guidePath.value
-            Log.d("PATH", currentPath)
-
             val doc = db.parse(File(currentPath))
-
             val cuestionario: NodeList = doc.getElementsByTagName(XmlTagsV2.INTERROGANTE)
 
             for (i in 0 until cuestionario.length) {
@@ -462,11 +491,11 @@ class GuiaRepositoryImpl @Inject constructor(
                 )
             }
 
-        } catch (e: FileNotFoundException) {
+        } catch (_: FileNotFoundException) {
             return GetGuideResult.NotFound
-        } catch (e: SAXException) {
+        } catch (_: SAXException) {
             return GetGuideResult.InvalidFormat
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             return GetGuideResult.UnknownError
         }
 
@@ -493,27 +522,22 @@ class GuiaRepositoryImpl @Inject constructor(
         guideDomainModel: GuideDomainModel,
         relativeGuidePath: RelativeGuidePath
     ): ExistGuideV1Result {
-        val path = filePathResolver.mapToFolderPath(relativeGuidePath, PathKind.GUIAS)
+        val pathComplete = File(
+            filePathResolver.getPathGuidesV1(
+                guideDomainModel,
+                PathKind.GUIAS,
+                relativeGuidePath
+            )
+        )
 
-        if (!File(path.value).exists() || !File(path.value).isDirectory) {
-            return ExistGuideV1Result.Error
-        }
-
-        val listGuides = File(path.value).listFiles() ?: emptyArray<File>()
-        if (listGuides.isEmpty()) {
-            return ExistGuideV1Result.Error
-        }
-
-        val file =
-            listGuides.find {
-                it.extension == Extensions.XML_EXTENSION
-                        && it.nameWithoutExtension == guideDomainModel.nameGuide
+        return when (val guideDomainModel: GuideResource<GuideDomainModel, ReadGuideError> =
+            getAttributesGuide(pathComplete)) {
+            is GuideResource.Error -> ExistGuideV1Result.NoExistGuide
+            is GuideResource.Success -> {
+                val version = guideDomainModel.data.version
+                if (version != GuideVersion.V1) return ExistGuideV1Result.NoExistGuide
+                ExistGuideV1Result.ExistGuide
             }
-
-        return if (file != null && getAttributesGuide(file).version == GuideVersion.V1) {
-            ExistGuideV1Result.ExistGuide
-        } else {
-            ExistGuideV1Result.NoExistGuide
         }
     }
 
@@ -533,29 +557,49 @@ class GuiaRepositoryImpl @Inject constructor(
         return File(oldGuidePath.value).renameTo(File(newGuidePath.value))
     }
 
-    private fun getAttributesGuide(file: File): GuideDomainModel {
-        val db = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-        val doc = db.parse(file)
-        val cuestionarioNode = doc
-            .getElementsByTagName(Structure.CUESTIONARIO)
-            .item(0) as Element
+    private fun getAttributesGuide(file: File): GuideResource<GuideDomainModel, ReadGuideError> {
+        return try {
+            val db = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+            val doc = db.parse(file)
 
-        val guiaEstudioNode = doc
-            .getElementsByTagName(Structure.GUIAESTUDIO)
-            .item(0) as Element
+            // Normaliza el documento XML (que solo contienen espacios o saltos de línea sueltos entre etiquetas)
+            doc.documentElement.normalize()
 
-        val description = cuestionarioNode.getAttribute(Attributes.DESCRIPCION)
-        val version = guiaEstudioNode.getAttribute(Attributes.VERSION)
-        val name = if (version == Versions.VERSION1) {
-            file.name.replace(Extensions.POINT_XML_EXTENSION, "")
-        } else {
-            cuestionarioNode.getAttribute(Attributes.NOMBREGUIA)
+            // Si la etiqueta no existe, item(0) devuelve null. Usamos as? para evitar un NullPointerException al castear.
+            val cuestionarioNode = doc
+                .getElementsByTagName(Structure.CUESTIONARIO)
+                .item(0) as? Element
+
+            val guiaEstudioNode = doc
+                .getElementsByTagName(Structure.GUIAESTUDIO)
+                .item(0) as? Element
+
+            val description = cuestionarioNode?.getAttribute(Attributes.DESCRIPCION).orEmpty()
+            val version = guiaEstudioNode?.getAttribute(Attributes.VERSION).orEmpty()
+
+            val name = if (version == Versions.VERSION1) {
+                file.name.replace(Extensions.POINT_XML_EXTENSION, "")
+            } else { // Diferente a V1
+                cuestionarioNode?.getAttribute(Attributes.NOMBREGUIA).orEmpty()
+            }
+
+            if (listOf(version, name).any { it.isEmpty() }) {
+                return GuideResource.Error(ReadGuideError.EmptyOrCorruptFile)
+            }
+
+            val domainModel = GuideXmlDto(
+                version = version,
+                nameGuide = name,
+                description = description
+            ).toDomain()
+
+            GuideResource.Success(domainModel)
+        } catch (_: FileNotFoundException) {
+            GuideResource.Error(ReadGuideError.FileNotFound)
+        } catch (_: SAXException) {
+            GuideResource.Error(ReadGuideError.InvalidXmlFormat)
+        } catch (e: Exception) {
+            GuideResource.Error(ReadGuideError.UnknownErrorRead(e.localizedMessage))
         }
-
-        return GuideXmlDto(
-            version = version,
-            nameGuide = name,
-            description = description
-        ).toDomain()
     }
 }
