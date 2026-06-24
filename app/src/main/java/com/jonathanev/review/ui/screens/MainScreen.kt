@@ -31,7 +31,9 @@ import com.jonathanev.review.ui.theme.ReviewTheme
 @DevicePreviews
 @Composable
 fun PreviewMainScreen() {
-    MainScreen(onCreateFolderClick = {})
+    ReviewTheme {
+        MainScreen(onCreateFolderClick = {})
+    }
 }
 
 @DevicePreviews
