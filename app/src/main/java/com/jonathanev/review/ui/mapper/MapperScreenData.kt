@@ -1,7 +1,5 @@
 package com.jonathanev.review.ui.mapper
 
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.jonathanev.review.R
@@ -12,12 +10,11 @@ import com.jonathanev.review.presentation.model.ScreenDataUi
 import com.jonathanev.review.ui.model.ScreenDataNav
 import com.jonathanev.review.ui.theme.White
 
-@Composable
-fun ScreenDataUi.toNav(): ScreenDataNav = ScreenDataNav(
+fun ScreenDataUi.toNav(isDark: Boolean): ScreenDataNav = ScreenDataNav(
     name = name,
     description = description,
     imgFolder = imgFolder.toInt(),
-    color = color.toInt(),
+    color = color.toInt(isDark),
     version = version
 )
 
@@ -48,10 +45,7 @@ fun IconType.toInt(): Int {
     }
 }
 
-@Composable
-fun ColorType.toInt(): Int {
-    val isDark = isSystemInDarkTheme()
-
+fun ColorType.toInt(isDark: Boolean): Int {
     return when (this) {
         ColorType.Black -> Color.Black.toArgb()
         ColorType.Gray -> Color.Gray.toArgb()
@@ -68,10 +62,7 @@ fun IconType.toDrawableRes(): Int = when (this) {
     IconType.BACTERIA_SOLID_FULL -> R.drawable.ic_bacteria_solid_full
 }
 
-@Composable
-fun ColorType.toColorRes(): Color {
-    val isDark = isSystemInDarkTheme()
-
+fun ColorType.toColorRes(isDark: Boolean): Color {
     return when (this) {
         ColorType.Black -> Color.Black
         ColorType.Gray -> Color.Gray

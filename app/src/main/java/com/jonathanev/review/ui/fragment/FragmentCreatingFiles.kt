@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -304,11 +305,13 @@ class FragmentCreatingFiles : Fragment(R.layout.fragment_compose_container) {
 
     @Composable
     private fun OnCreateGuideConfirmed(data: ScreenDataUi) {
+        val isDark = isSystemInDarkTheme()
+
         findNavController().navigate(
             R.id.action_to_create_file,
             bundleOf(
                 //"mode" to mode,
-                "screenData" to data.toNav(),
+                "screenData" to data.toNav(isDark),
                 "actionGuide" to ActionGuide.CREATE
             )
         )

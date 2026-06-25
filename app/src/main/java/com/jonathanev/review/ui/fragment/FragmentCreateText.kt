@@ -28,7 +28,6 @@ import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.presentation.model.SpanPalabraModel
 import com.jonathanev.review.presentation.viewmodel.MainToolbarViewModel
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 class FragmentCreateText : Fragment() {

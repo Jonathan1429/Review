@@ -3,6 +3,7 @@ package com.jonathanev.review.ui.components
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -36,7 +37,8 @@ fun GuiaItem(
     onClick: () -> Unit
 ) {
     //val color50 = ColorUtils.setAlphaComponent(guia.folder.color.toColorRes(), 50)
-    val color50 = guia.folder.color.toColorRes().copy(alpha = 0.2f)
+    val isDark = isSystemInDarkTheme()
+    val color50 = guia.folder.color.toColorRes(isDark).copy(alpha = 0.2f)
 
     Card(
         colors = CardDefaults.cardColors(
@@ -62,7 +64,7 @@ fun GuiaItem(
                     .background(color50)
                     .padding(12.dp),
                 painter = painterResource(guia.folder.imgFolder.toDrawableRes()),
-                colorFilter = ColorFilter.tint(guia.folder.color.toColorRes()),
+                colorFilter = ColorFilter.tint(guia.folder.color.toColorRes(isDark)),
                 contentDescription = "añadir carpeta"
             )
             HorizontalDivider(Modifier.size(8.dp), color = Color.Transparent)
