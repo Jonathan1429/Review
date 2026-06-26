@@ -16,10 +16,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.jonathanev.review.R
+import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.ui.components.BasePasos
 import com.jonathanev.review.ui.components.SinFolders
 import com.jonathanev.review.ui.preview.DevicePreviews
@@ -32,7 +32,7 @@ import com.jonathanev.review.ui.theme.ReviewTheme
 @Composable
 fun PreviewMainScreen() {
     ReviewTheme {
-        MainScreen(onCreateFolderClick = {})
+        MainScreen(onNavCreateFilesProperties = {})
     }
 }
 
@@ -60,13 +60,13 @@ fun PreviewSinFolders(){
 
 @Composable
 fun MainScreen(
-    onCreateFolderClick: () -> Unit
+    onNavCreateFilesProperties: (FolderAction) -> Unit
 ) {
     Scaffold(
         //topBar = { TopAppBar(title = { Text("Carpetas") }) },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { onCreateFolderClick() },
+                onClick = { onNavCreateFilesProperties(FolderAction.CreatingFolder) },
                 containerColor = ColorBotones
             ) {
                 Icon(

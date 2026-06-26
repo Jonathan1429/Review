@@ -32,13 +32,13 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    compileSdk 35
+    compileSdk 36
     namespace 'com.jonathanev.review'
 
     defaultConfig {
         applicationId "com.jonathanev.review"
         minSdk 26
-        targetSdk 35
+        targetSdk 36
         versionCode 19
         versionName "2.10"
 
@@ -78,7 +78,7 @@ android {
             resValue("string", "nameApp", "Review [DEBUG]")
 
             enableAndroidTestCoverage true
-            testCoverageEnabled true // Habilita cobertura en AndroidTest
+            // Habilita cobertura en AndroidTest
             enableUnitTestCoverage true
         }
     }
@@ -155,6 +155,10 @@ dependencies {
     //NavComponent
     implementation "androidx.navigation:navigation-fragment-ktx:2.9.6"
     implementation "androidx.navigation:navigation-ui-ktx:2.9.6"
+
+    // Navegacion 3
+    implementation 'androidx.navigation3:navigation3-runtime:1.1.3'
+    implementation 'androidx.navigation3:navigation3-ui:1.1.3'
 
     // JSON
     implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3'

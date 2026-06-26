@@ -1,6 +1,5 @@
 package com.jonathanev.review.ui.screens
 
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -17,20 +16,16 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.jonathanev.review.presentation.event.CreateFilesEvent
 import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.presentation.model.IconType
-import com.jonathanev.review.presentation.model.ScreenDataUi
 import com.jonathanev.review.presentation.state.PreviewState
 import com.jonathanev.review.presentation.viewmodel.CreateFilesViewModel
 import com.jonathanev.review.ui.components.BoxItemFolder
@@ -52,15 +47,14 @@ import com.jonathanev.review.ui.preview.providers.PropertiesItemFolder
 import com.jonathanev.review.ui.preview.providers.PropertiesTF
 import com.jonathanev.review.ui.theme.ColorBotones
 import com.jonathanev.review.ui.theme.ReviewTheme
-import kotlinx.coroutines.flow.collectLatest
 
 @DevicePreviews
 @Composable
-fun PreviewCreateFilesScreen(
+fun PreviewCreateFilesPropertiesScreen(
     @PreviewParameter(CreateFilesScreenDataProvider::class) data: PropertiesCreateFilesScreen
 ) {
     ReviewTheme {
-        CreateFilesScreen(
+        CreateFilesPropertiesScreen(
             PreviewState(icons = data.listIcons, selectedIndex = data.state.selectedIndex),
             data.state.mode,
             {},
@@ -132,7 +126,7 @@ fun PreviewLayeredSelectedIcon(
 }
 
 @Composable
-fun PropertiesFiles(
+fun CreateFilesPropertiesRoute(
     viewModel: CreateFilesViewModel = viewModel(),
     mode: FolderAction
 ) {
@@ -141,7 +135,7 @@ fun PropertiesFiles(
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
 
-    LaunchedEffect(mode) {
+    /*LaunchedEffect(mode) {
         viewModel.initWithMode(mode)
     }
 
@@ -160,7 +154,7 @@ fun PropertiesFiles(
                 CreateFilesEvent.RenamingFile -> TODO()
             }
         }
-        /*viewModel.messages.collectLatest { event ->
+        viewModel.messages.collectLatest { event ->
             when (event) {
                 is CreatingFileUiState.ContinuedProcess ->{
                     val data = ScreenDataUi(state.name, state.description, state.icon, state.color)
@@ -170,10 +164,10 @@ fun PropertiesFiles(
                 is CreatingFileUiState.Message ->
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
             }
-        }*/
-    }
+        }
+    }*/
 
-    CreateFilesScreen(
+    CreateFilesPropertiesScreen(
         state = state,
         mode = mode,
         onClickApply = {
@@ -190,7 +184,7 @@ fun PropertiesFiles(
 }
 
 @Composable
-fun CreateFilesScreen(
+fun CreateFilesPropertiesScreen(
     state: PreviewState,
     mode: FolderAction,
     onClickApply: () -> Unit,

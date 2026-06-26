@@ -14,14 +14,10 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.jonathanev.review.R
 import com.jonathanev.review.domain.model.RelativeGuidePath
-import com.jonathanev.review.presentation.event.RenameGuideEvent
 import com.jonathanev.review.presentation.model.ActionGuide
 import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.presentation.model.GuideResultUi
@@ -29,10 +25,7 @@ import com.jonathanev.review.presentation.model.ScreenDataUi
 import com.jonathanev.review.presentation.viewmodel.CreateFilesViewModel
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
 import com.jonathanev.review.ui.mapper.toNav
-import com.jonathanev.review.ui.screens.PropertiesFiles
-import com.jonathanev.review.ui.theme.ReviewTheme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class FragmentCreatingFiles : Fragment(R.layout.fragment_compose_container) {

@@ -26,7 +26,7 @@ class FragmentMain : Fragment(R.layout.fragment_compose_container) {
         composeView.setContent {
             ReviewTheme {
                 MainScreen(
-                    onCreateFolderClick = {
+                    onNavCreateFilesProperties = {
                         findNavController().navigate(
                             R.id.action_to_create_graph,
                             bundleOf("mode" to FolderAction.CreatingFolder)
