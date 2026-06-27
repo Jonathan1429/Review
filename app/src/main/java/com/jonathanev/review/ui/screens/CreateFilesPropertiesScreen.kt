@@ -28,6 +28,7 @@ import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.presentation.model.IconType
 import com.jonathanev.review.presentation.state.PreviewState
 import com.jonathanev.review.presentation.viewmodel.CreateFilesViewModel
+import com.jonathanev.review.presentation.viewmodel.NavigationViewModel
 import com.jonathanev.review.ui.components.BoxItemFolder
 import com.jonathanev.review.ui.components.CustomTextField
 import com.jonathanev.review.ui.components.IconsForSelect
@@ -127,7 +128,8 @@ fun PreviewLayeredSelectedIcon(
 
 @Composable
 fun CreateFilesPropertiesRoute(
-    viewModel: CreateFilesViewModel = viewModel(),
+    viewModel: CreateFilesViewModel,
+    viewModelNavigation: NavigationViewModel,
     mode: FolderAction
 ) {
     //val state by viewModel.uiState.collectAsStateWithLifecycle()

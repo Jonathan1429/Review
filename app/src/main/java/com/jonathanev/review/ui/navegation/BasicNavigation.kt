@@ -16,6 +16,7 @@ import androidx.navigation3.ui.NavDisplay
 import com.jonathanev.review.presentation.event.MainUiEvent
 import com.jonathanev.review.presentation.viewmodel.CreateFilesViewModel
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
+import com.jonathanev.review.presentation.viewmodel.NavigationViewModel
 import com.jonathanev.review.ui.screens.CreateFilesPropertiesRoute
 import com.jonathanev.review.ui.screens.CreateFilesPropertiesScreen
 import com.jonathanev.review.ui.screens.MainScreen
@@ -93,9 +94,11 @@ fun BasicNavigation() {
 
             entry<AppRoutes.CreateFilesPropertiesScreen> { typeAction ->
                 val viewModel: CreateFilesViewModel = viewModel()
+                val viewModelNavigation: NavigationViewModel = viewModel()
 
                 CreateFilesPropertiesRoute(
                     viewModel = viewModel,
+                    viewModelNavigation = viewModelNavigation,
                     mode = typeAction.folderAction
                 )
             }
