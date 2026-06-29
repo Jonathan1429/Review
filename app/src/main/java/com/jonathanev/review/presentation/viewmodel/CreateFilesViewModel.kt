@@ -1,9 +1,6 @@
 package com.jonathanev.review.presentation.viewmodel
 
 import android.util.Log
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.data.mapper.toColorType
@@ -22,7 +19,7 @@ import com.jonathanev.review.domain.result.DeleteGuideResult
 import com.jonathanev.review.domain.result.ExistGuideV1Result
 import com.jonathanev.review.domain.result.RenamedGuideResult
 import com.jonathanev.review.domain.result.ValidateCreateFileResult
-import com.jonathanev.review.presentation.event.CreateFilesEvent
+import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.ColorType
 import com.jonathanev.review.presentation.model.FolderAction
@@ -30,13 +27,19 @@ import com.jonathanev.review.presentation.model.GuideResultUi
 import com.jonathanev.review.presentation.model.IconType
 import com.jonathanev.review.presentation.model.QuestionItemUi
 import com.jonathanev.review.presentation.model.ScreenDataUi
-import com.jonathanev.review.presentation.state.CreatingFileUiState
+import com.jonathanev.review.presentation.state.CreatingUIState
+import com.jonathanev.review.presentation.state.CreatingUIState.CreateFile
+import com.jonathanev.review.presentation.state.CreatingUIState.CreateFolder
+import com.jonathanev.review.presentation.state.CreatingUIState.Message
+import com.jonathanev.review.presentation.state.CreatingUIState.RenameFile
+import com.jonathanev.review.presentation.state.CreatingUIState.RenameFolder
 import com.jonathanev.review.presentation.state.PreviewState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -53,19 +56,16 @@ class CreateFilesViewModel @Inject constructor(
 ) : ViewModel() {
     private var cachedGuides: List<GuideDomainModel> = emptyList()
 
-    var uiStateComposable by mutableStateOf(PreviewState())
-        private set
+    private val _uiStateComposable = MutableStateFlow(PreviewState())
+    val uiStateComposable = _uiStateComposable.asStateFlow()
 
-    private val _uiState = MutableStateFlow(PreviewState())
-    val uiState = _uiState.asStateFlow()
-
-    private val _events = MutableSharedFlow<CreateFilesEvent>()
-    val events = _events.asSharedFlow()
+    private val _eventUI = MutableSharedFlow<CreatingUIState>()
+    val eventUI = _eventUI.asSharedFlow()
 
     /*private val _eventsMessages = MutableSharedFlow<RenameGuideEvent>()
     val eventsMessages = _eventsMessages.asSharedFlow()*/
 
-    private val _messages = MutableSharedFlow<CreatingFileUiState>()
+    private val _messages = MutableSharedFlow<CreatingUIState>()
     val messages = _messages.asSharedFlow()
 
     private var _preguntas = mutableListOf<QuestionItemUi>()
@@ -95,66 +95,47 @@ class CreateFilesViewModel @Inject constructor(
             is FolderAction.MovingFile -> emptyList()
         }
 
-        uiStateComposable = uiStateComposable.copy(
-            icons = icons,
-            selectedIndex = 0,
-            icon = icons.first(),
-            color = ColorType.Gray
-        )
-    }
-
-    fun onIconSelected(position: Int) {
-        val current = _uiState.value
-        _uiState.value = current.copy(
-            selectedIndex = position,
-            icon = current.icons[position]
-        )
-    }
-
-    fun changeIconSelected(position: Int, icon: IconType) {
-        uiStateComposable = uiStateComposable.copy(
-            selectedIndex = position,
-            icon = icon
-        )
-    }
-
-    fun changeColorSelected(color: Int) {
-        uiStateComposable = uiStateComposable.copy(
-            color = color.toColorType()
-        )
-    }
-
-    fun setColor(color: Int) {
-        val randomColor = ColorType.RandomColor(color)
-
-        _uiState.value =
-            _uiState.value.copy(
-                color = randomColor
+        _uiStateComposable.update { currentState ->
+            currentState.copy(
+                icons = icons,
+                selectedIndex = 0,
+                icon = icons.first(),
+                color = ColorType.Gray
             )
-    }
-
-    fun validateData() {
-        val state = uiStateComposable
-
-        // Validación del nombre del archivo
-        viewModelScope.launch {
-
-            when (val response = validateCreateFileUseCase.invoke(state.name, state.description)) {
-                is ValidateCreateFileResult.Error -> _events.emit(
-                    CreateFilesEvent.ShowMessage(
-                        response.message
-                    )
-                ) //CreatingFileUiState.Message(response.message)
-                is ValidateCreateFileResult.Success -> prepareScreenData()
-            }
         }
     }
 
-    fun saveMetadata(data: ScreenDataUi) {
-        // Esto estaba descomentado
-        //val screenDataDomain = data.toDomain()
+    fun changeIconSelected(position: Int, icon: IconType) {
+        _uiStateComposable.update { currentState ->
+            currentState.copy(
+                selectedIndex = position,
+                icon = icon
+            )
+        }
+    }
 
-        //saveMetadataUseCase.invoke(screenDataDomain)
+    fun changeColorSelected(color: Int) {
+        _uiStateComposable.update { currentState ->
+            currentState.copy(
+                color = color.toColorType()
+            )
+        }
+    }
+
+    fun saveMetadata(isDarkTheme: Boolean) {
+        val state = uiStateComposable.value
+
+        val icon = state.icons[state.selectedIndex]
+        val data = ScreenDataUi(
+            name = state.name,
+            description = state.description,
+            imgFolder = icon,
+            color = state.color
+        )
+
+        val screenDataDomain = data.toDomain(isDarkTheme)
+
+        saveMetadataUseCase.invoke(screenDataDomain)
     }
 
     fun fillFields(fileName: String): GuideResultUi {
@@ -171,40 +152,40 @@ class CreateFilesViewModel @Inject constructor(
         oldName: String,
         fileName: String,
         description: String,
-        relativeGuidePath: RelativeGuidePath
+        relativeGuidePath: String
     ) {
         val guide = cachedGuides.find { it.nameGuide == oldName }
         if (guide == null) {
-            emitMessage("No se ha encontrado la guia a renombrar")
+            emitEvent(Message("No se ha encontrado la guia a renombrar"))
             return
         }
 
         viewModelScope.launch {
             when (renameGuideUseCase.invoke(
                 guide = guide,
-                relativeGuidePath = relativeGuidePath,
+                relativeGuidePath = RelativeGuidePath(relativeGuidePath),
                 newName = fileName,
                 description = description
             )) {
                 RenamedGuideResult.ImageError ->
-                    emitMessage("No se pasaron correctamente todas las imagenes")
+                    emitEvent(Message("No se pasaron correctamente todas las imagenes"))
 
                 RenamedGuideResult.RenamedError ->
-                    emitMessage("No se ha podido renombrar la guia")
+                    emitEvent(Message("No se ha podido renombrar la guia"))
 
                 RenamedGuideResult.Success -> {
-                    emitMessage("Guia renombrada exitosamente")
+                    emitEvent(Message("Guia renombrada exitosamente"))
 
                     val xmlGuideV1 = GuideDomainModel(GuideVersion.V1, fileName, description)
 
-                    when (existXMLGuideV1UseCase.invoke(xmlGuideV1, relativeGuidePath)) {
+                    when (existXMLGuideV1UseCase.invoke(xmlGuideV1, RelativeGuidePath(relativeGuidePath))) {
                         ExistGuideV1Result.Error ->
                             Log.d("RenameGuide", "Error al validar la guia V1")
 
                         ExistGuideV1Result.ExistGuide -> {
                             when (deleteGuideUseCase.invoke(
                                 guideDomainModel = xmlGuideV1,
-                                relativeGuidePath = relativeGuidePath
+                                relativeGuidePath = RelativeGuidePath(relativeGuidePath)
                             )) {
                                 DeleteGuideResult.DeleteSuccess ->
                                     Log.d("RenameGuide", "Guia V1 eliminada correctamente")
@@ -234,28 +215,28 @@ class CreateFilesViewModel @Inject constructor(
                     }
                 }
 
-                RenamedGuideResult.Error -> emitMessage("Ocurrió un error al abrir la guia")
+                RenamedGuideResult.Error -> emitEvent(Message("Ocurrió un error al abrir la guia"))
 
-                RenamedGuideResult.InvalidFormat -> emitMessage("La guia está dañada")
+                RenamedGuideResult.InvalidFormat -> emitEvent(Message("La guia está dañada"))
 
-                RenamedGuideResult.NotFound -> emitMessage("No se ha encontrado la guia")
+                RenamedGuideResult.NotFound -> emitEvent(Message("No se ha encontrado la guia"))
 
-                RenamedGuideResult.UnknownError -> emitMessage("Error desconocido")
+                RenamedGuideResult.UnknownError -> emitEvent(Message("Error desconocido"))
                 RenamedGuideResult.GuidePathError ->
-                    emitMessage("No fue posible renombrar la guia en la ruta actual")
+                    emitEvent(Message("No fue posible renombrar la guia en la ruta actual"))
             }
         }
     }
 
-    private fun emitMessage(text: String) {
+    private fun emitEvent(state: CreatingUIState) {
         viewModelScope.launch {
-            _events.emit(CreateFilesEvent.ShowMessage(text))
-        }
-    }
+            when (state) {
+                CreateFile, CreateFolder, RenameFile, RenameFolder ->
+                    _eventUI.emit(state)
 
-    private fun emitMessages(text: String) {
-        viewModelScope.launch {
-            _messages.emit(CreatingFileUiState.Message(text))
+                is Message ->
+                    _eventUI.emit(state)
+            }
         }
     }
 
@@ -277,93 +258,165 @@ class CreateFilesViewModel @Inject constructor(
 
             FolderAction.CreatingFolder -> isExistFolderUseCase.invoke(name)
             else -> {
-                emitMessage("Error inesperado")
+                emitEvent(Message("Error inesperado"))
                 true
             }
         }
     }
 
     // Esto no se estaba usando pero hay verificar nuevamente esto
-    fun onContinueProcess(confirmed: Boolean, name: String, description: String) {
+    /*fun onContinueProcess(confirmed: Boolean, name: String, description: String) {
         if (!confirmed) return
         // Esto estaba descomentado
         //validateData(name, description)
-    }
+    }*/
 
     fun uploadCachedGuides(relativeGuidePath: RelativeGuidePath) {
         cachedGuides = loadGuidesUseCase.invoke(relativeGuidePath)
     }
 
-    fun prepareScreenData() {
-        viewModelScope.launch {
-            val state = uiStateComposable
+    fun dataUniqueScreen(): Boolean {
+        val state = uiStateComposable.value
+        val isExistFile = fileExist(state.mode, state.name)
 
-            val isExistFile = fileExist(state.mode, state.name)
-
-            when (state.mode) {
-                FolderAction.CreatingFolder -> {
-                    if (isExistFile) {
-                        //_events.emit(CreateFilesEvent.ShowMessage("Ya tienes una carpeta con el mismo nombre"))
-                        emitMessage("Ya tienes una carpeta con el mismo nombre")
-                    } else {
-                        _events.emit(CreateFilesEvent.CreatingFolder)
-                    }
-                }
-
-                FolderAction.RenamingFolder -> emitMessage("Renombrar archivos es una opción no habilitada")
-
-                FolderAction.CreatingFile -> {
-                    if (isExistFile) {
-                        uiStateComposable = state.copy(
-                            showDialog = true
+        when (state.mode) {
+            FolderAction.CreatingFolder, is FolderAction.RenamingFile -> {
+                if (isExistFile) {
+                    _uiStateComposable.update { currentState ->
+                        currentState.copy(
+                            showOverwriteDialogFile = true
                         )
-                    } else {
-                        _events.emit(CreateFilesEvent.CreateFile)
                     }
-                }
 
-                is FolderAction.RenamingFile -> {
-                    if (isExistFile) {
-                        uiStateComposable = state.copy(
-                            showDialog = true
+                    return false
+                }
+            }
+
+            FolderAction.CreatingFolder -> {
+                if (isExistFile) {
+                    _uiStateComposable.update { currentState ->
+                        currentState.copy(
+                            showOverwriteDialogFolder = true
                         )
-                    } else {
-                        _events.emit(CreateFilesEvent.RenamingFile)
                     }
+                    return false
                 }
+            }
 
-                FolderAction.None -> emitMessage("No se puede procesar esta solicitud")
-                is FolderAction.MovingFile -> Log.i("Moviendo: ", "Moviendo archivos")
+            else -> {
+                emitEvent(Message("No fue posible procesar los datos"))
+                return false
             }
         }
+
+        return true
     }
 
     // Función para cuando el usuario pulsa "Confirmar" o "Cancelar"
-    fun onConfirmAlertDialog(confirmed: Boolean) {
+    /*fun onConfirmAlertDialog(confirmed: Boolean) {
         val state = uiStateComposable
         // Cerramos el diálogo primero
-        uiStateComposable = uiStateComposable.copy(showDialog = false)
+        uiStateComposable = uiStateComposable.copy(showOverwriteDialogFile = false)
 
         if (confirmed) {
-            // Esto estaba descomentado
-            //validateData(state.name, state.description)
+            onContinueProcess()
+            //validateData()
         }
-    }
+    }*/
 
     fun initWithMode(mode: FolderAction) {
         // Solo inicializamos si el modo es diferente al actual
         // para evitar reinicios innecesarios
-        if (uiStateComposable.mode != mode) {
-            uiStateComposable = uiStateComposable.copy(mode = mode)
+        if (uiStateComposable.value.mode != mode) {
+            _uiStateComposable.update { currentState ->
+                currentState.copy(
+                    mode = mode
+                )
+            }
             loadIconsFor(mode)
         }
     }
 
     fun onNameChange(newName: String) {
-        uiStateComposable = uiStateComposable.copy(name = newName)
+        _uiStateComposable.update { currentState ->
+            currentState.copy(
+                name = newName
+            )
+        }
     }
 
     fun onDescriptionChange(newDesc: String) {
-        uiStateComposable = uiStateComposable.copy(description = newDesc)
+
+        _uiStateComposable.update { currentState ->
+            currentState.copy(
+                description = newDesc
+            )
+        }
+    }
+
+    fun processSaveRequest() {
+        viewModelScope.launch {
+            val dataUniqueScreen = dataUniqueScreen()
+
+            // Si no existe el archivo (canContinue = true), guardamos directamente
+            if (dataUniqueScreen) {
+                proceedWithSave()
+            }
+            // Si existe (canContinue = false), prepareScreenData ya abrió el diálogo
+            // y este hilo se detiene aquí.
+        }
+    }
+
+    private fun proceedWithSave() {
+        if (validateData()) {
+            saveData()
+        }
+    }
+
+    fun saveData() {
+        val state = uiStateComposable.value
+        /*val icon = state.icons[state.selectedIndex]
+
+        val data = ScreenDataUi(
+            name = uiStateComposable.name,
+            description = uiStateComposable.description,
+            imgFolder = icon,
+            color = state.color
+        )*/
+
+        when (state.mode) {
+            FolderAction.CreatingFolder -> emitEvent(CreateFolder) //onCreateFolderConfirmed(data)
+            is FolderAction.RenamingFile -> emitEvent(RenameFile)//renameFile(state.mode.fileName)
+            FolderAction.RenamingFolder ->
+                emitEvent(Message("Aun no se aplica la funcion renombrar folder"))
+
+            FolderAction.CreatingFile -> emitEvent(CreateFile) //OnCreateGuideConfirmed(data)
+            FolderAction.MovingFile -> emitEvent(Message("No se pudo crear el archivo"))
+            FolderAction.None -> emitEvent(Message("No se pudo crear el archivo"))
+        }
+    }
+
+    fun validateData(): Boolean {
+        val state = uiStateComposable.value
+
+        // Validate Folder y File
+        return when (val response =
+            validateCreateFileUseCase.invoke(state.name, state.description, state.mode)) {
+            is ValidateCreateFileResult.Error -> {
+                emitEvent(Message(response.message))
+                false
+            }
+
+            is ValidateCreateFileResult.Success -> true
+        }
+    }
+
+    fun dismissOverwriteDialog() {
+        _uiStateComposable.update { currentState ->
+            currentState.copy(
+                showOverwriteDialogFile = false,
+                showOverwriteDialogFolder = false
+            )
+        }
     }
 }

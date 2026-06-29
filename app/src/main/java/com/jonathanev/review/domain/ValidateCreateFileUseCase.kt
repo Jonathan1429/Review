@@ -2,11 +2,11 @@ package com.jonathanev.review.domain
 
 import com.jonathanev.review.data.storage.StorageFolders
 import com.jonathanev.review.domain.result.ValidateCreateFileResult
-import com.jonathanev.review.presentation.state.CreatingFileUiState
+import com.jonathanev.review.presentation.model.FolderAction
 import javax.inject.Inject
 
 class ValidateCreateFileUseCase @Inject constructor() {
-    operator fun invoke(name: String, description: String): ValidateCreateFileResult {
+    operator fun invoke(name: String, description: String, mode: FolderAction): ValidateCreateFileResult {
         val invalidChars = listOf("/", ".")
         val invalidNames = listOf(
             StorageFolders.DATASTORE,
@@ -17,7 +17,13 @@ class ValidateCreateFileUseCase @Inject constructor() {
         )
 
         val message = when {
-            name.isBlank() -> "Debes tener un nombre de archivo"
+            name.isBlank() -> {
+                if (mode == FolderAction.CreatingFolder) {
+                    "Debes tener un nombre de carpeta"
+                } else {
+                    "Debes tener un nombre de archivo"
+                }
+            }
 
             invalidChars.any { char -> name.contains(char) } ->
                 "No puede haber caracteres como / o . en el nombre"

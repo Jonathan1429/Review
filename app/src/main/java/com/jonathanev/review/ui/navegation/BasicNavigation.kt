@@ -14,6 +14,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.jonathanev.review.presentation.event.MainUiEvent
+import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.presentation.viewmodel.CreateFilesViewModel
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
 import com.jonathanev.review.presentation.viewmodel.NavigationViewModel
@@ -66,7 +67,7 @@ fun BasicNavigation() {
                     viewModel.createFolders()
 
                     viewModel.uiEvent.collect { event ->
-                        when(event){
+                        when (event) {
                             MainUiEvent.ShowCreateFoldersError -> {
                                 AlertDialog.Builder(context).apply {
                                     setTitle("Error")
@@ -96,11 +97,27 @@ fun BasicNavigation() {
                 val viewModel: CreateFilesViewModel = viewModel()
                 val viewModelNavigation: NavigationViewModel = viewModel()
 
-                CreateFilesPropertiesRoute(
-                    viewModel = viewModel,
-                    viewModelNavigation = viewModelNavigation,
-                    mode = typeAction.folderAction
-                )
+                if (typeAction.folderAction == FolderAction.None
+                    || typeAction.folderAction == FolderAction.MovingFile) {
+                    LaunchedEffect(Unit) {
+                        Toast.makeText(
+                            context,
+                            "No se puede procesar la solicitud",
+                            Toast.LENGTH_SHORT).show()
+                        backStack.removeLastOrNull()
+                    }
+                } else {
+                    LaunchedEffect(typeAction.folderAction) {
+                        viewModel.initWithMode(typeAction.folderAction)
+                    }
+
+                    CreateFilesPropertiesRoute(
+                        viewModel = viewModel,
+                        viewModelNavigation = viewModelNavigation,
+                        mode = typeAction.folderAction,
+                        onNavigateBack = { backStack.removeLastOrNull() }
+                    )
+                }
             }
             /*entry<AppRoutes.NotificationScreen> {
                 NotificationScreen(

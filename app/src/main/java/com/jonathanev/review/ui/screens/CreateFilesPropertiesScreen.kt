@@ -1,6 +1,8 @@
 package com.jonathanev.review.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,6 +18,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,9 +27,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.presentation.model.IconType
+import com.jonathanev.review.presentation.state.CreatingUIState
 import com.jonathanev.review.presentation.state.PreviewState
 import com.jonathanev.review.presentation.viewmodel.CreateFilesViewModel
 import com.jonathanev.review.presentation.viewmodel.NavigationViewModel
@@ -63,6 +68,8 @@ fun PreviewCreateFilesPropertiesScreen(
             {},
             {},
             { _, _ -> },
+            {},
+            {},
             {}
         )
     }
@@ -130,18 +137,70 @@ fun PreviewLayeredSelectedIcon(
 fun CreateFilesPropertiesRoute(
     viewModel: CreateFilesViewModel,
     viewModelNavigation: NavigationViewModel,
-    mode: FolderAction
+    mode: FolderAction,
+    onNavBack: () -> Unit,
+    onNavFillingGuide: () -> Unit
 ) {
-    //val state by viewModel.uiState.collectAsStateWithLifecycle()
-    val state = viewModel.uiStateComposable
+    val state by viewModel.uiStateComposable.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
-
-    /*LaunchedEffect(mode) {
-        viewModel.initWithMode(mode)
-    }
+    val isDarkTheme = isSystemInDarkTheme()
 
     LaunchedEffect(Unit) {
+        viewModel.eventUI.collect { event ->
+            when (event) {
+                is CreatingUIState.CreateFile -> {
+                    //Navegar a la siguiente pantalla
+                }
+                is CreatingUIState.RenameFile -> {
+                    val relativeGuidePath = viewModelNavigation.guidesPath.value
+
+                    viewModel.renameFile(
+                        oldName = "",
+                        fileName = state.name,
+                        description = state.description,
+                        relativeGuidePath = relativeGuidePath
+                    )
+                    // Falta regresar al inicial
+                }
+                is CreatingUIState.CreateFolder -> {
+                    viewModel.saveMetadata(isDarkTheme)
+                    // Falta regresar al inicial
+                }
+                is CreatingUIState.RenameFolder -> {
+                    //Aún no está implementada esta parte
+                }
+                is CreatingUIState.Message -> {
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    CreateFilesPropertiesScreen(
+        state = state,
+        mode = mode,
+        onClickApply = {
+            focusManager.clearFocus()
+            viewModel.dismissOverwriteDialog()
+            viewModel.processSaveRequest()
+            /*viewModel.prepareScreenData() // Ver si existe carpeta o archivo
+            viewModel.validateData() // Ver que pasen validaciones*/
+        },
+        onNameChange = { viewModel.onNameChange(it) },
+        onDescriptionChange = { viewModel.onDescriptionChange(it) },
+        onConfirmDialog = { response ->
+            if (response) {
+                viewModel.validateData()
+            }
+        },
+        onChangeIcon = { position, icon -> viewModel.changeIconSelected(position, icon) },
+        onChangeColor = { color -> viewModel.changeColorSelected(color) },
+        onShowToast = { message -> Toast.makeText(context, message, Toast.LENGTH_SHORT).show() },
+        onDismissDialogs = { viewModel.dismissOverwriteDialog() }
+    )
+
+    /*LaunchedEffect(Unit) {
         viewModel.events.collectLatest { event ->
             when (event) {
                 CreateFilesEvent.CreatingFolder -> {
@@ -168,22 +227,37 @@ fun CreateFilesPropertiesRoute(
             }
         }
     }*/
+}
 
-    CreateFilesPropertiesScreen(
-        state = state,
-        mode = mode,
-        onClickApply = {
-            focusManager.clearFocus()
-            //viewModel.prepareScreenData()
-            viewModel.validateData()
-        },
-        onNameChange = { viewModel.onNameChange(it) },
-        onDescriptionChange = { viewModel.onDescriptionChange(it) },
-        onConfirmDialog = { viewModel.onConfirmAlertDialog(it) },
-        onChangeIcon = { position, icon -> viewModel.changeIconSelected(position, icon) },
-        onChangeColor = { color -> viewModel.changeColorSelected(color) }
+/*@Composable
+private fun OnCreateGuideConfirmed(data: ScreenDataUi) {
+    val isDark = isSystemInDarkTheme()
+
+    findNavController().navigate(
+        R.id.action_to_create_file,
+        bundleOf(
+            //"mode" to mode,
+            "screenData" to data.toNav(isDark),
+            "actionGuide" to ActionGuide.CREATE
+        )
     )
 }
+
+private fun onCreateFolderConfirmed(data: ScreenDataUi) {
+    Toast.makeText(
+        requireContext(),
+        "Carpeta creada exitosamente",
+        Toast.LENGTH_SHORT
+    ).show()
+
+    findNavController().navigate(
+        R.id.fragmentsContent,
+        null,
+        NavOptions.Builder()
+            .setPopUpTo(R.id.content_graph, true) // Limpia el historial
+            .build()
+    )
+}*/
 
 @Composable
 fun CreateFilesPropertiesScreen(
@@ -194,20 +268,32 @@ fun CreateFilesPropertiesScreen(
     onDescriptionChange: (String) -> Unit,
     onConfirmDialog: (Boolean) -> Unit,
     onChangeIcon: (Int, IconType) -> Unit,
-    onChangeColor: (Int) -> Unit
+    onChangeColor: (Int) -> Unit,
+    onShowToast: (String) -> Unit,
+    onDismissDialogs: () -> Unit
 ) {
-    if (state.showDialog) {
+    if (state.showOverwriteDialogFile) {
         AlertDialog(
             onDismissRequest = { onConfirmDialog(false) },
             confirmButton = {
-                TextButton(onClick = { onConfirmDialog(true) }) { Text("Continuar") }
+                TextButton(onClick = {
+                    onConfirmDialog(true)
+                    onDismissDialogs()
+                }) { Text("Continuar") }
             },
             dismissButton = {
-                TextButton(onClick = { onConfirmDialog(false) }) { Text("Cancelar") }
+                TextButton(onClick = {
+                    onConfirmDialog(false)
+                    onDismissDialogs()
+                }) { Text("Cancelar") }
             },
             title = { Text("Archivo existente") },
             text = { Text("Ya existe un archivo con ese nombre. ¿Deseas continuar?") }
         )
+    }
+
+    if (state.showOverwriteDialogFolder) {
+        onShowToast("Ya existe un folder con ese nombre")
     }
 
     Scaffold(

@@ -33,7 +33,7 @@ class CreateFilesScreenDataProvider : PreviewParameterProvider<PropertiesCreateF
                         IconType.ANGELLIST_BRANDS_SOLID_FULL,
                         IconType.BACTERIA_SOLID_FULL
                     ),
-                    showDialog = false
+                    showOverwriteDialogFile = false
                 ),
                 mode = FolderAction.CreatingFolder
             )

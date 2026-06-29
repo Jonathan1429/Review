@@ -12,5 +12,6 @@ data class PreviewState(
     val color: ColorType = ColorType.Black,
     val selectedIndex: Int = -1,
     val icons: List<IconType> = emptyList(),
-    val showDialog: Boolean = false
+    val showOverwriteDialogFile: Boolean = false,
+    val showOverwriteDialogFolder: Boolean = false
 )

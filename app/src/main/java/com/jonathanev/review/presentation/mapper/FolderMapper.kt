@@ -30,3 +30,4 @@ fun FolderResultDomain.toUi(): FolderResultUi {
         is FolderResultDomain.Success -> FolderResultUi.Success(this.folderDomain.toUi())
     }
 }
+
