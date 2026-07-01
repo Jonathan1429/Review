@@ -4,11 +4,11 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.jonathanev.review.presentation.model.ColorType
 import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.presentation.model.IconType
-import com.jonathanev.review.presentation.state.PreviewState
+import com.jonathanev.review.presentation.state.PropertiesFilesState
 
 data class PropertiesCreateFilesScreen(
     val listIcons: List<IconType>,
-    val state: PreviewState,
+    val state: PropertiesFilesState,
     val mode: FolderAction
 )
 
@@ -21,7 +21,7 @@ class CreateFilesScreenDataProvider : PreviewParameterProvider<PropertiesCreateF
                     IconType.ANGELLIST_BRANDS_SOLID_FULL,
                     IconType.BACTERIA_SOLID_FULL
                 ),
-                state = PreviewState(
+                state = PropertiesFilesState(
                     name = "",
                     description = "",
                     mode = FolderAction.CreatingFolder,

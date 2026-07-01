@@ -29,9 +29,10 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jonathanev.review.presentation.model.FolderAction
+import com.jonathanev.review.presentation.model.GuideResultUi
 import com.jonathanev.review.presentation.model.IconType
 import com.jonathanev.review.presentation.state.CreatingUIState
-import com.jonathanev.review.presentation.state.PreviewState
+import com.jonathanev.review.presentation.state.PropertiesFilesState
 import com.jonathanev.review.presentation.viewmodel.CreateFilesViewModel
 import com.jonathanev.review.presentation.viewmodel.NavigationViewModel
 import com.jonathanev.review.ui.components.BoxItemFolder
@@ -39,6 +40,7 @@ import com.jonathanev.review.ui.components.CustomTextField
 import com.jonathanev.review.ui.components.IconsForSelect
 import com.jonathanev.review.ui.components.LayeredSelectedIcon
 import com.jonathanev.review.ui.components.SelectedPickerColor
+import com.jonathanev.review.ui.model.PropertiesGuide
 import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.BoxItemFolderDataProvider
 import com.jonathanev.review.ui.preview.providers.CreateFilesScreenDataProvider
@@ -61,7 +63,7 @@ fun PreviewCreateFilesPropertiesScreen(
 ) {
     ReviewTheme {
         CreateFilesPropertiesScreen(
-            PreviewState(icons = data.listIcons, selectedIndex = data.state.selectedIndex),
+            PropertiesFilesState(icons = data.listIcons, selectedIndex = data.state.selectedIndex),
             data.state.mode,
             {},
             {},
@@ -139,7 +141,7 @@ fun CreateFilesPropertiesRoute(
     viewModelNavigation: NavigationViewModel,
     mode: FolderAction,
     onNavBack: () -> Unit,
-    onNavFillingGuide: () -> Unit
+    onNavFillingGuide: (PropertiesGuide) -> Unit
 ) {
     val state by viewModel.uiStateComposable.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -150,26 +152,36 @@ fun CreateFilesPropertiesRoute(
         viewModel.eventUI.collect { event ->
             when (event) {
                 is CreatingUIState.CreateFile -> {
-                    //Navegar a la siguiente pantalla
+                    onNavFillingGuide(PropertiesGuide(state.name, state.description))
                 }
+
                 is CreatingUIState.RenameFile -> {
                     val relativeGuidePath = viewModelNavigation.guidesPath.value
 
+                    viewModel.uploadCachedGuides(relativeGuidePath)
+
                     viewModel.renameFile(
-                        oldName = "",
+                        oldName = state.oldName,
                         fileName = state.name,
                         description = state.description,
                         relativeGuidePath = relativeGuidePath
                     )
-                    // Falta regresar al inicial
+                    onNavBack()
                 }
+
                 is CreatingUIState.CreateFolder -> {
                     viewModel.saveMetadata(isDarkTheme)
-                    // Falta regresar al inicial
+                    onNavBack()
                 }
+
                 is CreatingUIState.RenameFolder -> {
-                    //Aún no está implementada esta parte
+                    Toast.makeText(
+                        context,
+                        "No se encuentra implementada esta opción",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
+
                 is CreatingUIState.Message -> {
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                 }
@@ -261,7 +273,7 @@ private fun onCreateFolderConfirmed(data: ScreenDataUi) {
 
 @Composable
 fun CreateFilesPropertiesScreen(
-    state: PreviewState,
+    state: PropertiesFilesState,
     mode: FolderAction,
     onClickApply: () -> Unit,
     onNameChange: (String) -> Unit,

@@ -15,11 +15,14 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.jonathanev.review.presentation.event.MainUiEvent
 import com.jonathanev.review.presentation.model.FolderAction
+import com.jonathanev.review.presentation.model.GuideResultUi
+import com.jonathanev.review.presentation.state.CreatingUIState.Message
 import com.jonathanev.review.presentation.viewmodel.CreateFilesViewModel
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
 import com.jonathanev.review.presentation.viewmodel.NavigationViewModel
+import com.jonathanev.review.ui.model.PropertiesGuide
 import com.jonathanev.review.ui.screens.CreateFilesPropertiesRoute
-import com.jonathanev.review.ui.screens.CreateFilesPropertiesScreen
+import com.jonathanev.review.ui.screens.FillingGuideScreen
 import com.jonathanev.review.ui.screens.MainScreen
 
 @Composable
@@ -97,28 +100,60 @@ fun BasicNavigation() {
                 val viewModel: CreateFilesViewModel = viewModel()
                 val viewModelNavigation: NavigationViewModel = viewModel()
 
-                if (typeAction.folderAction == FolderAction.None
-                    || typeAction.folderAction == FolderAction.MovingFile) {
-                    LaunchedEffect(Unit) {
-                        Toast.makeText(
-                            context,
-                            "No se puede procesar la solicitud",
-                            Toast.LENGTH_SHORT).show()
-                        backStack.removeLastOrNull()
-                    }
-                } else {
-                    LaunchedEffect(typeAction.folderAction) {
-                        viewModel.initWithMode(typeAction.folderAction)
-                    }
+                LaunchedEffect(Unit) {
+                    when (typeAction.folderAction) {
+                        FolderAction.CreatingFile -> {
+                            viewModel.initWithMode(typeAction.folderAction)
+                        }
 
-                    CreateFilesPropertiesRoute(
-                        viewModel = viewModel,
-                        viewModelNavigation = viewModelNavigation,
-                        mode = typeAction.folderAction,
-                        onNavigateBack = { backStack.removeLastOrNull() }
-                    )
+                        FolderAction.CreatingFolder -> {
+                            viewModel.initWithMode(typeAction.folderAction)
+                        }
+
+                        is FolderAction.RenamingFile -> {
+                            viewModel.initWithMode(typeAction.folderAction)
+
+                            val oldName = typeAction.folderAction.fileName
+                            val responseFillFields = viewModel.fillFields(oldName)
+                            if (!responseFillFields){
+                                backStack.removeLastOrNull()
+                            }
+                        }
+
+                        FolderAction.RenamingFolder -> {
+                            Toast.makeText(
+                                context,
+                                "No se encuentra disponible el renombrar un folder",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            backStack.removeLastOrNull()
+                        }
+
+                        FolderAction.MovingFile, FolderAction.None -> {
+                            Toast.makeText(
+                                context,
+                                "No se puede procesar la solicitud",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            backStack.removeLastOrNull()
+                        }
+                    }
                 }
+
+                CreateFilesPropertiesRoute(
+                    viewModel = viewModel,
+                    viewModelNavigation = viewModelNavigation,
+                    mode = typeAction.folderAction,
+                    onNavBack = { backStack.removeLastOrNull() },
+                    onNavFillingGuide = { propertiesGuide ->
+                        backStack.add(AppRoutes.FillingGuideScreen(propertiesGuide))
+                    }
+                )
             }
+            entry<AppRoutes.FillingGuideScreen> { propertiesGuide ->
+                FillingGuideScreen()
+            }
+
             /*entry<AppRoutes.NotificationScreen> {
                 NotificationScreen(
                     navigateUp = {

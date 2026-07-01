@@ -206,22 +206,22 @@ class FragmentCreatingFiles : Fragment(R.layout.fragment_compose_container) {
             FolderAction.CreatingFolder -> showToast("Sección implementada")//showFolderUI()
             is FolderAction.RenamingFile -> {
                 //showFileUI()
-                viewModel.uploadCachedGuides(relativeGuidePath)
+                viewModel.uploadCachedGuides(relativeGuidePath.value)
 
-                when (val result = viewModel.fillFields(mode.fileName)) {
+                /*when (val result = viewModel.fillFields(mode.fileName)) {
                     is GuideResultUi.Error -> showToast("No se ha encontrado la guia a cargar")
                     is GuideResultUi.Success -> {
                         /*binding.fragmentCreate.etNombre.setText(result.guideUiModel.nameGuide)
                         binding.fragmentCreate.fragmentComponentsFile.etDescription.setText(result.guideUiModel.description)*/
                     }
-                }
+                }*/
             }
 
             FolderAction.RenamingFolder -> showToast("Sección aún no implementada 2") //showFolderUI()
             FolderAction.CreatingFile -> {
                 showToast("Sección aún no implementada3")
                 //showFileUI()
-                viewModel.uploadCachedGuides(relativeGuidePath)
+                viewModel.uploadCachedGuides(relativeGuidePath.value)
             }
 
             FolderAction.None -> Log.e("Error", "No se pudieron cargar datos iniciales")
@@ -300,14 +300,14 @@ class FragmentCreatingFiles : Fragment(R.layout.fragment_compose_container) {
     private fun OnCreateGuideConfirmed(data: ScreenDataUi) {
         val isDark = isSystemInDarkTheme()
 
-        findNavController().navigate(
+        /*findNavController().navigate(
             R.id.action_to_create_file,
             bundleOf(
                 //"mode" to mode,
                 "screenData" to data.toNav(isDark),
                 "actionGuide" to ActionGuide.CREATE
             )
-        )
+        )*/
     }
 
     private fun onCreateFolderConfirmed(data: ScreenDataUi) {

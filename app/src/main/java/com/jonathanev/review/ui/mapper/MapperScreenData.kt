@@ -7,24 +7,21 @@ import com.jonathanev.review.data.mapper.toColorType
 import com.jonathanev.review.presentation.model.ColorType
 import com.jonathanev.review.presentation.model.IconType
 import com.jonathanev.review.presentation.model.ScreenDataUi
-import com.jonathanev.review.ui.model.ScreenDataNav
+import com.jonathanev.review.ui.model.PropertiesGuide
 import com.jonathanev.review.ui.theme.White
 
-fun ScreenDataUi.toNav(isDark: Boolean): ScreenDataNav = ScreenDataNav(
+fun ScreenDataUi.toNav(): PropertiesGuide = PropertiesGuide(
     name = name,
-    description = description,
-    imgFolder = imgFolder.toInt(),
-    color = color.toInt(isDark),
-    version = version
+    description = description
 )
 
-fun ScreenDataNav.toUi(): ScreenDataUi = ScreenDataUi(
+/*fun PropertiesGuide.toUi(): ScreenDataUi = ScreenDataUi(
     name = name,
     description = description,
     imgFolder = imgFolder.toIconType(),
     color = color.toColorType(),
     version = version
-)
+)*/
 
 fun Int.toIconType(): IconType {
     return when (this) {

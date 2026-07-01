@@ -33,7 +33,7 @@ import com.jonathanev.review.presentation.state.CreatingUIState.CreateFolder
 import com.jonathanev.review.presentation.state.CreatingUIState.Message
 import com.jonathanev.review.presentation.state.CreatingUIState.RenameFile
 import com.jonathanev.review.presentation.state.CreatingUIState.RenameFolder
-import com.jonathanev.review.presentation.state.PreviewState
+import com.jonathanev.review.presentation.state.PropertiesFilesState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -56,7 +56,7 @@ class CreateFilesViewModel @Inject constructor(
 ) : ViewModel() {
     private var cachedGuides: List<GuideDomainModel> = emptyList()
 
-    private val _uiStateComposable = MutableStateFlow(PreviewState())
+    private val _uiStateComposable = MutableStateFlow(PropertiesFilesState())
     val uiStateComposable = _uiStateComposable.asStateFlow()
 
     private val _eventUI = MutableSharedFlow<CreatingUIState>()
@@ -138,14 +138,22 @@ class CreateFilesViewModel @Inject constructor(
         saveMetadataUseCase.invoke(screenDataDomain)
     }
 
-    fun fillFields(fileName: String): GuideResultUi {
+    fun fillFields(fileName: String): Boolean {
         val guideDomainModel = cachedGuides.find { it.nameGuide == fileName }
 
         if (guideDomainModel == null) {
-            return GuideResultUi.Error
+            emitEvent(Message("Ocurrió un error al intentar renombrar"))
+            return false
         }
 
-        return GuideResultUi.Success(guideDomainModel.toUi())
+        _uiStateComposable.update { currentState ->
+            currentState.copy(
+                oldName = guideDomainModel.nameGuide,
+                oldDescription = guideDomainModel.description
+            )
+        }
+
+        return true
     }
 
     fun renameFile(
@@ -231,9 +239,10 @@ class CreateFilesViewModel @Inject constructor(
     private fun emitEvent(state: CreatingUIState) {
         viewModelScope.launch {
             when (state) {
-                CreateFile, CreateFolder, RenameFile, RenameFolder ->
+                CreateFile, RenameFile, CreateFolder, RenameFolder->
                     _eventUI.emit(state)
 
+                // RenameFolder and Message
                 is Message ->
                     _eventUI.emit(state)
             }
@@ -271,8 +280,8 @@ class CreateFilesViewModel @Inject constructor(
         //validateData(name, description)
     }*/
 
-    fun uploadCachedGuides(relativeGuidePath: RelativeGuidePath) {
-        cachedGuides = loadGuidesUseCase.invoke(relativeGuidePath)
+    fun uploadCachedGuides(relativeGuidePath: String) {
+        cachedGuides = loadGuidesUseCase.invoke(RelativeGuidePath(relativeGuidePath))
     }
 
     fun dataUniqueScreen(): Boolean {
@@ -333,6 +342,7 @@ class CreateFilesViewModel @Inject constructor(
                     mode = mode
                 )
             }
+
             loadIconsFor(mode)
         }
     }
