@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.jonathanev.review.presentation.model.ColorType
+import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.presentation.model.FolderAttributesUi
 import com.jonathanev.review.presentation.model.FolderUiModel
 import com.jonathanev.review.presentation.model.IconType
@@ -49,14 +50,14 @@ fun PreviewGuiaItem(
 @Composable
 fun ListFoldersScreen(
     guias: List<FolderUiModel>,
-    onCreateFolderClick: () -> Unit,
+    onCreateFolderClick: (FolderAction) -> Unit,
     onFolderClick: (Int) -> Unit
 ) {
     Scaffold(
         //topBar = { TopAppBar(title = { Text("Carpetas") }) },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { onCreateFolderClick() },
+                onClick = { onCreateFolderClick(FolderAction.CreatingFolder) },
                 containerColor = ColorBotones
             ) {
                 Icon(

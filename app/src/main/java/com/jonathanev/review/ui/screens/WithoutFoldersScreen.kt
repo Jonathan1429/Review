@@ -30,9 +30,9 @@ import com.jonathanev.review.ui.theme.ReviewTheme
 
 @DevicePreviews
 @Composable
-fun PreviewMainScreen() {
+fun PreviewWithoutFoldersScreen() {
     ReviewTheme {
-        MainScreen(onNavCreateFilesProperties = {})
+        WithoutFoldersScreen(onNavCreateFilesProperties = {})
     }
 }
 
@@ -59,7 +59,7 @@ fun PreviewSinFolders(){
 }
 
 @Composable
-fun MainScreen(
+fun WithoutFoldersScreen(
     onNavCreateFilesProperties: (FolderAction) -> Unit
 ) {
     Scaffold(

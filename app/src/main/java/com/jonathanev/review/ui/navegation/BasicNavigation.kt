@@ -9,21 +9,20 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.jonathanev.review.presentation.event.MainUiEvent
 import com.jonathanev.review.presentation.model.FolderAction
-import com.jonathanev.review.presentation.model.GuideResultUi
-import com.jonathanev.review.presentation.state.CreatingUIState.Message
 import com.jonathanev.review.presentation.viewmodel.CreateFilesViewModel
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
 import com.jonathanev.review.presentation.viewmodel.NavigationViewModel
-import com.jonathanev.review.ui.model.PropertiesGuide
 import com.jonathanev.review.ui.screens.CreateFilesPropertiesRoute
 import com.jonathanev.review.ui.screens.FillingGuideScreen
-import com.jonathanev.review.ui.screens.MainScreen
+import com.jonathanev.review.ui.screens.ListFoldersScreen
+import com.jonathanev.review.ui.screens.WithoutFoldersScreen
 
 @Composable
 fun BasicNavigation() {
@@ -65,9 +64,12 @@ fun BasicNavigation() {
             val viewModel: MainActivityViewModel = viewModel()
             val context = LocalContext.current
 
+            val folders = viewModel.folders.collectAsStateWithLifecycle().value
+
             entry<AppRoutes.MainScreen> {
                 LaunchedEffect(Unit) {
                     viewModel.createFolders()
+                    viewModel.getAllFolders()
 
                     viewModel.uiEvent.collect { event ->
                         when (event) {
@@ -88,12 +90,22 @@ fun BasicNavigation() {
                         }
                     }
                 }
-
-                MainScreen(
-                    onNavCreateFilesProperties = { typeAction ->
-                        backStack.add(AppRoutes.CreateFilesPropertiesScreen(typeAction))
-                    }
-                )
+                
+                if (folders.isEmpty()){
+                    WithoutFoldersScreen(
+                        onNavCreateFilesProperties = { typeAction ->
+                            backStack.add(AppRoutes.CreateFilesPropertiesScreen(typeAction))
+                        }
+                    )   
+                } else {
+                    ListFoldersScreen(
+                        guias = folders,
+                        onCreateFolderClick = { typeAction ->
+                            backStack.add(AppRoutes.CreateFilesPropertiesScreen(typeAction))
+                        },
+                        onFolderClick = { noGuide ->  }
+                    )
+                }
             }
 
             entry<AppRoutes.CreateFilesPropertiesScreen> { typeAction ->

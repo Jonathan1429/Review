@@ -9,7 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.jonathanev.review.R
 import com.jonathanev.review.presentation.model.FolderAction
-import com.jonathanev.review.ui.screens.MainScreen
+import com.jonathanev.review.ui.screens.WithoutFoldersScreen
 import com.jonathanev.review.ui.theme.ReviewTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -25,7 +25,7 @@ class FragmentMain : Fragment(R.layout.fragment_compose_container) {
 
         composeView.setContent {
             ReviewTheme {
-                MainScreen(
+                WithoutFoldersScreen(
                     onNavCreateFilesProperties = {
                         findNavController().navigate(
                             R.id.action_to_create_graph,
