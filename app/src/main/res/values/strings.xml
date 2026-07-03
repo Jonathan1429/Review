@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Review</string>
 
+    <string name="lblListQuestions">Lista de Preguntas</string>
     <!-- Layout principal -->
     <string name="btnNuevaGuia">Nueva Guia</string>
     <string name="btnAbrirGuia">Abrir Guia</string>
