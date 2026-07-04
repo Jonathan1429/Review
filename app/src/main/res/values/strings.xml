@@ -84,4 +84,6 @@
     <string name="withoutPreviewQuestion">No hay texto a visualizar para la pregunta actual</string>
     <string name="add_text">Añadir texto</string>
     <string name="add_image">Añadir Imagen</string>
+
+    <string name="lblStudyGuide">Guias de Estudio</string>
 </resources>

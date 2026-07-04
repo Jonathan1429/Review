@@ -29,7 +29,6 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jonathanev.review.presentation.model.FolderAction
-import com.jonathanev.review.presentation.model.GuideResultUi
 import com.jonathanev.review.presentation.model.IconType
 import com.jonathanev.review.presentation.state.CreatingUIState
 import com.jonathanev.review.presentation.state.PropertiesFilesState
@@ -111,7 +110,7 @@ fun PreviewBoxItemFolder(
     @PreviewParameter(BoxItemFolderDataProvider::class) data: PropertiesItemFolder
 ) {
     ReviewTheme {
-        BoxItemFolder(data.folderColor, data.iconRes)
+        BoxItemFolder(data.iconRes)
     }
 }
 
@@ -371,8 +370,7 @@ fun CreateFilesPropertiesScreen(
                     Spacer(Modifier.size(12.dp))
                     Text("Previsualizacion:")
                     BoxItemFolder(
-                        state.color,
-                        state.icon,
+                        iconRes = state.icon,
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
                 }

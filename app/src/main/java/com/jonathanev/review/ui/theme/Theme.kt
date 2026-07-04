@@ -7,17 +7,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 val LightColors = lightColorScheme(
-    primary = LightPrimary,
+    primary = ColorBotones,
     background = LightBackground,
     surface = LightSurface,
+    onSurface = Black,
     onPrimary = LightOnPrimary
 )
 
 val DarkColors = darkColorScheme(
-    primary = DarkPrimary,
+    primary = ColorBotones,
     background = DarkBackground,
     surface = DarkSurface,
-    onPrimary = DarkOnPrimary
+    onSurface = White,
+    onPrimary = LightOnPrimary
 )
 
 val cardStepBackground: Color
@@ -37,9 +39,9 @@ val iconBackground: Color
 val cardListBackground: Color
     @Composable
     get() = if (isSystemInDarkTheme())
-        ContentsLight
-    else
         ContentsDark
+    else
+        ContentsLight
 
 
 val baseColor: Color

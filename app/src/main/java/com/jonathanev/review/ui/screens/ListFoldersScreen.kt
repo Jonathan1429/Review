@@ -36,16 +36,6 @@ fun PreviewListFolder(
     }
 }
 
-@DevicePreviews
-@Composable
-fun PreviewGuiaItem(
-    @PreviewParameter(ListFoldersDataProvider::class) data: List<FolderUiModel>
-){
-    ReviewTheme {
-        GuiaItem(data[0]) { }
-    }
-}
-
 @TraceRecomposition(tag = "Prueba")
 @Composable
 fun ListFoldersScreen(

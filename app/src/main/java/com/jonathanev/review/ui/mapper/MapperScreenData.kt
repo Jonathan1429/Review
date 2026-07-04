@@ -58,13 +58,3 @@ fun IconType.toDrawableRes(): Int = when (this) {
     IconType.ANGELLIST_BRANDS_SOLID_FULL -> R.drawable.ic_angellist_brands_solid_full
     IconType.BACTERIA_SOLID_FULL -> R.drawable.ic_bacteria_solid_full
 }
-
-fun ColorType.toColorRes(isDark: Boolean): Color {
-    return when (this) {
-        ColorType.Black -> Color.Black
-        ColorType.Gray -> Color.Gray
-        ColorType.White -> Color.White //R.color.white
-        is ColorType.RandomColor -> Color(this.color)
-        ColorType.Default -> if (isDark) Color.White else Color.Black
-    }
-}
