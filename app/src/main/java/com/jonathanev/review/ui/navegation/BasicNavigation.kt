@@ -163,7 +163,12 @@ fun BasicNavigation() {
                 )
             }
             entry<AppRoutes.FillingGuideScreen> { propertiesGuide ->
-                FillingGuideScreen()
+                val viewModel: CreateFilesViewModel = viewModel()
+
+                FillingGuideScreen(
+                    onAddQuestion = {},
+                    onSaveQuestion = {}
+                )
             }
 
             /*entry<AppRoutes.NotificationScreen> {

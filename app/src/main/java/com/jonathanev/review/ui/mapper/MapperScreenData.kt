@@ -7,6 +7,7 @@ import com.jonathanev.review.data.mapper.toColorType
 import com.jonathanev.review.presentation.model.ColorType
 import com.jonathanev.review.presentation.model.IconType
 import com.jonathanev.review.presentation.model.ScreenDataUi
+import com.jonathanev.review.ui.model.ContentType
 import com.jonathanev.review.ui.model.PropertiesGuide
 import com.jonathanev.review.ui.theme.White
 
@@ -57,4 +58,9 @@ fun IconType.toDrawableRes(): Int = when (this) {
     IconType.ANCHOR_SOLID_FULL -> R.drawable.ic_anchor_solid_full
     IconType.ANGELLIST_BRANDS_SOLID_FULL -> R.drawable.ic_angellist_brands_solid_full
     IconType.BACTERIA_SOLID_FULL -> R.drawable.ic_bacteria_solid_full
+}
+
+fun ContentType.toDrawable(): Int = when(this){
+    ContentType.TEXT -> R.drawable.ic_file
+    ContentType.IMAGE -> R.drawable.ic_image
 }

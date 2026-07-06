@@ -86,4 +86,9 @@
     <string name="add_image">Añadir Imagen</string>
 
     <string name="lblStudyGuide">Guias de Estudio</string>
+    <string name="lblImage">Imagen</string>
+    <string name="lblText">Texto</string>
+    <string name="lblOf">de</string>
+    <string name="lblDelete">Borrar</string>
+
 </resources>
