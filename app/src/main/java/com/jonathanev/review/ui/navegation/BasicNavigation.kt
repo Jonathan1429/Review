@@ -128,6 +128,11 @@ fun BasicNavigation() {
                             val oldName = typeAction.folderAction.fileName
                             val responseFillFields = viewModel.fillFields(oldName)
                             if (!responseFillFields){
+                                Toast.makeText(
+                                    context,
+                                    "Guia dañada, imposible renombrar",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                                 backStack.removeLastOrNull()
                             }
                         }
