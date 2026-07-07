@@ -29,7 +29,7 @@ fun PreviewCounterIconItem(
 }
 
 @Composable
-fun CounterIconItem(icon: Int, count: Int) {
+fun CounterIconItem(icon: Int, count: String) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -41,7 +41,7 @@ fun CounterIconItem(icon: Int, count: Int) {
             modifier = Modifier.size(16.dp)
         )
         Text(
-            text = count.toString(),
+            text = count,
             color = TextColorSecondary,
             fontSize = 13.sp
         )

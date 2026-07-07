@@ -1,28 +1,28 @@
 package com.jonathanev.review.ui.preview.providers
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import com.jonathanev.review.presentation.model.QuestionContentUi
+import com.jonathanev.review.presentation.model.QuestionItemUi
+import com.jonathanev.review.presentation.state.PreviewQuestionStateUi
 
-data class QuestionItem(
-    val id: Int,
-    val text: String,
-    val docsCount: Int,
-    val imgsCount: Int,
+data class QuestionItemProv(
+    val question: String,
+    val noTexts: String,
+    val noImages: String
 )
 
-class QuestionItemProvider(): PreviewParameterProvider<QuestionItem> {
-    override val values: Sequence<QuestionItem>
+class QuestionItemProvider() : PreviewParameterProvider<QuestionItemProv> {
+    override val values: Sequence<QuestionItemProv>
         get() = sequenceOf(
-            QuestionItem(
-                id = 1,
-                text = "¿Esta es la pregunta 1?",
-                docsCount = 2,
-                imgsCount = 1
+            QuestionItemProv(
+                question = "¿Como se crea un test unitario?",
+                noTexts = "2",
+                noImages = "3"
             ),
-            QuestionItem(
-                id = 2,
-                text = "¿Esta es la pregunta 2?",
-                docsCount = 9,
-                imgsCount = 4
+            QuestionItemProv(
+                question = "¿Que significa una variable mutable?",
+                noTexts = "2",
+                noImages = "4"
             )
         )
 }

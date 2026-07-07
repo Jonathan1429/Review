@@ -6,7 +6,7 @@ import com.jonathanev.review.R
 
 data class CounterItem(
     @param:DrawableRes val icon: Int,
-    val count: Int
+    val count: String
 )
 
 class CounterIconItemProvider(): PreviewParameterProvider<CounterItem> {
@@ -14,11 +14,11 @@ class CounterIconItemProvider(): PreviewParameterProvider<CounterItem> {
         get() = sequenceOf(
             CounterItem(
                 icon = R.drawable.ic_file,
-                count = 2
+                count = "2"
             ),
             CounterItem(
                 icon = R.drawable.ic_image,
-                count = 2
+                count = "2"
             )
         )
 }

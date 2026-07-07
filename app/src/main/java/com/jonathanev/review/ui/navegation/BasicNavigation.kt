@@ -19,12 +19,15 @@ import com.jonathanev.review.presentation.event.MainUiEvent
 import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.presentation.viewmodel.CreateFilesViewModel
 import com.jonathanev.review.presentation.viewmodel.FragmentListGuidesViewModel
+import com.jonathanev.review.presentation.viewmodel.FragmentRepasarViewModel
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
 import com.jonathanev.review.presentation.viewmodel.NavigationViewModel
 import com.jonathanev.review.ui.screens.CreateFilesPropertiesRoute
 import com.jonathanev.review.ui.screens.FillingGuideScreen
 import com.jonathanev.review.ui.screens.ListFoldersScreen
 import com.jonathanev.review.ui.screens.ListGuidesRoute
+import com.jonathanev.review.ui.screens.PreviewQuestionsRoute
+import com.jonathanev.review.ui.screens.PreviewQuestionsScreen
 import com.jonathanev.review.ui.screens.WithoutFoldersScreen
 
 @Composable
@@ -240,6 +243,16 @@ fun BasicNavigation() {
                 )
             }
 
+            entry<AppRoutes.PreviewQuestionsScreen> { value ->
+                val viewModel: FragmentRepasarViewModel = viewModel()
+                val navigationViewModel: NavigationViewModel = viewModel()
+
+                PreviewQuestionsRoute(
+                    viewModel = viewModel,
+                    navigationViewModel = navigationViewModel,
+                    nameGuide = value.nameGuide
+                )
+            }
             /*entry<AppRoutes.NotificationScreen> {
                 NotificationScreen(
                     navigateUp = {
