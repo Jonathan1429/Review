@@ -26,7 +26,10 @@ import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.QuestionItemUi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -43,8 +46,8 @@ class FragmentListGuidesViewModel @Inject constructor(
     private var cachedGuides: List<GuideDomainModel> = emptyList()
     private var selectedGuideDomain: GuideDomainModel? = null
 
-    private val _guides = MutableLiveData<List<GuideUiModel>>()
-    val guides: LiveData<List<GuideUiModel>> = _guides
+    private val _guides = MutableStateFlow<List<GuideUiModel>>(listOf())
+    val guides = _guides.asStateFlow()
 
     private val _eventsMessages = MutableSharedFlow<GuideActionEvent>()
     val eventsMessages = _eventsMessages.asSharedFlow()
@@ -61,7 +64,7 @@ class FragmentListGuidesViewModel @Inject constructor(
     fun getAllGuides(relativeGuidePath: RelativeGuidePath) {
         cachedGuides = loadGuidesUseCase.invoke(relativeGuidePath)
         val guidesUi = cachedGuides.map { guide -> guide.toUi() }
-        _guides.postValue(guidesUi)
+        _guides.value = guidesUi
     }
 
     fun getGuideSelected(position: Int): GuideResultUi {

@@ -8,7 +8,7 @@ sealed class FolderAction {
     data object CreatingFolder : FolderAction()
 
     @Serializable
-    data class RenamingFile(val fileName: String) : FolderAction()
+    data class RenamingFile(val fileName: String, val description: String) : FolderAction()
 
     @Serializable
     data object RenamingFolder : FolderAction()

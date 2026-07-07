@@ -72,10 +72,10 @@ class FragmentListFolders : Fragment(R.layout.fragment_compose_container) {
                     showToast(text = error)
                 }
 
-                ListFoldersScreen(
+                /*ListFoldersScreen(
                     guias = uiState.folders,
                     onFolderClick = { position ->
-                        showFolderOptions(position, mode)
+                        //showFolderOptions(position, mode)
                     },
                     onCreateFolderClick = {
                         if (mode is FolderAction.MovingFile) {
@@ -87,7 +87,7 @@ class FragmentListFolders : Fragment(R.layout.fragment_compose_container) {
                             )
                         }
                     }
-                )
+                )*/
             }
         }
 

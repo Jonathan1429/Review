@@ -8,15 +8,15 @@ import kotlinx.serialization.Serializable
 @Serializable
 sealed interface AppRoutes : NavKey {
     @Serializable
-    data object ListFoldersScreen: AppRoutes
+    data class ListGuidesScreen(val folderAction: FolderAction = FolderAction.None): AppRoutes
     @Serializable
-    data object MainScreen : AppRoutes
+    data class MainScreen(val folderAction: FolderAction = FolderAction.None) : AppRoutes
     @Serializable
     data class CreateFilesPropertiesScreen(val folderAction: FolderAction): AppRoutes
 
     @Serializable
     data class FillingGuideScreen(val propertiesGuide: PropertiesGuide): AppRoutes
 
-    /*@Serializable
-    data class PrevisualizacionScreen(val uuid: String): AppRoutes*/
+    @Serializable
+    data class PreviewQuestionsScreen(val nameGuide: String): AppRoutes
 }

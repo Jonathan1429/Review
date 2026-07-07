@@ -180,9 +180,9 @@ class FragmentListGuides : Fragment() {
             }
         )
 
-        viewModel.guides.observe(viewLifecycleOwner) { guides ->
+        /*viewModel.guides.observe(viewLifecycleOwner) { guides ->
             adaptListGuides.submitList(guides)
-        }
+        }*/
     }
 
     private fun initListeners(mode: FolderAction) {
@@ -277,10 +277,10 @@ class FragmentListGuides : Fragment() {
                                 .create().show()
 
                         2 -> {
-                            findNavController().navigate(
+                            /*findNavController().navigate(
                                 R.id.action_to_create_graph,
                                 bundleOf("mode" to FolderAction.RenamingFile(guideResult.guideUiModel.nameGuide))
-                            )
+                            )*/
                         }
 
                         3 -> {

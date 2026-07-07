@@ -42,6 +42,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.String
 
 @HiltViewModel
 class CreateFilesViewModel @Inject constructor(
@@ -148,6 +149,8 @@ class CreateFilesViewModel @Inject constructor(
 
         _uiStateComposable.update { currentState ->
             currentState.copy(
+                name = guideDomainModel.nameGuide,
+                description = guideDomainModel.description,
                 oldName = guideDomainModel.nameGuide,
                 oldDescription = guideDomainModel.description
             )

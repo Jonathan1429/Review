@@ -155,7 +155,7 @@ fun CreateFilesPropertiesRoute(
                 }
 
                 is CreatingUIState.RenameFile -> {
-                    val relativeGuidePath = viewModelNavigation.guidesPath.value
+                    val relativeGuidePath = viewModelNavigation.relativeGuidePath.value
 
                     viewModel.uploadCachedGuides(relativeGuidePath)
 

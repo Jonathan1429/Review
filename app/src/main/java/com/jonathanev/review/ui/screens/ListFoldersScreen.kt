@@ -3,22 +3,25 @@ package com.jonathanev.review.ui.screens
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
-import com.jonathanev.review.presentation.model.ColorType
+import com.jonathanev.review.R
 import com.jonathanev.review.presentation.model.FolderAction
-import com.jonathanev.review.presentation.model.FolderAttributesUi
 import com.jonathanev.review.presentation.model.FolderUiModel
-import com.jonathanev.review.presentation.model.IconType
 import com.jonathanev.review.ui.components.GuiaItem
 import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.ListFoldersDataProvider
@@ -32,19 +35,47 @@ fun PreviewListFolder(
     @PreviewParameter(ListFoldersDataProvider::class) data: List<FolderUiModel>
 ) {
     ReviewTheme {
-        ListFoldersScreen(data, onCreateFolderClick = {}, onFolderClick = {})
+        ListFoldersScreen(
+            data,
+            folderAction = FolderAction.None,
+            onCreateFolderClick = {},
+            onFolderClick = { _, _ ->}
+        )
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @TraceRecomposition(tag = "Prueba")
 @Composable
 fun ListFoldersScreen(
     guias: List<FolderUiModel>,
+    folderAction: FolderAction,
     onCreateFolderClick: (FolderAction) -> Unit,
-    onFolderClick: (Int) -> Unit
+    onFolderClick: (String, FolderAction) -> Unit
 ) {
     Scaffold(
-        //topBar = { TopAppBar(title = { Text("Carpetas") }) },
+        topBar = {
+            if (folderAction == FolderAction.MovingFile) {
+                CenterAlignedTopAppBar(
+                    title = {
+                        Text(stringResource(R.string.lblMoving))
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = { /* Acción Izquierda */ }) {
+                            Icon(painterResource(R.drawable.ic_cancel), contentDescription = "Cancelar")
+                        }
+                    }
+                    /*actions = {
+                        IconButton(onClick = { /* Acción Derecha */ }) {
+                            Icon(
+                                painterResource(R.drawable.ic_success),
+                                contentDescription = "Más opciones"
+                            )
+                        }
+                    }*/
+                )
+            }
+        },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { onCreateFolderClick(FolderAction.CreatingFolder) },
@@ -62,10 +93,12 @@ fun ListFoldersScreen(
             columns = GridCells.Fixed(2),
             modifier = Modifier.padding(padding)
         ) {
-            itemsIndexed(guias) { index, guia ->
+            items(guias) { guia ->
                 GuiaItem(
                     guia,
-                    onClick = { onFolderClick(index) }
+                    onClick = {
+                        onFolderClick(guia.folder.name, folderAction)
+                    }
                 )
             }
         }

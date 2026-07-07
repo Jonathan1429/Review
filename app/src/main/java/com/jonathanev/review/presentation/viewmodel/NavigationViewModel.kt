@@ -7,6 +7,7 @@ import com.jonathanev.review.domain.NextNavigationUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 @HiltViewModel
@@ -19,31 +20,31 @@ class NavigationViewModel @Inject constructor(
         private const val KEY_GUIDES_PATH = "guides_path"
     }
 
-    private val _guidesPath =
+    private val _relativeGuidePath =
         MutableStateFlow(
             savedStateHandle[KEY_GUIDES_PATH]
                 ?: ""
         )
-    val guidesPath: StateFlow<String> = _guidesPath
+    val relativeGuidePath = _relativeGuidePath.asStateFlow()
 
     fun setMainPath() {
-        _guidesPath.value = ""
+        _relativeGuidePath.value = ""
         savedStateHandle[KEY_GUIDES_PATH] = ""
     }
 
     fun next(folder: String) {
         val nextGuides =
-            nextNavigationUseCase.invoke(guidesPath.value, folder)
+            nextNavigationUseCase.invoke(relativeGuidePath.value, folder)
 
-        _guidesPath.value = nextGuides.value
+        _relativeGuidePath.value = nextGuides.value
 
         savedStateHandle[KEY_GUIDES_PATH] = nextGuides.value
     }
 
     fun back() {
         val backGuides =
-            backNavigationUseCase.invoke(guidesPath.value)
-        _guidesPath.value = backGuides.value
+            backNavigationUseCase.invoke(relativeGuidePath.value)
+        _relativeGuidePath.value = backGuides.value
 
         savedStateHandle[KEY_GUIDES_PATH] = backGuides.value
     }

@@ -14,19 +14,22 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
+import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.presentation.event.MainUiEvent
 import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.presentation.viewmodel.CreateFilesViewModel
+import com.jonathanev.review.presentation.viewmodel.FragmentListGuidesViewModel
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
 import com.jonathanev.review.presentation.viewmodel.NavigationViewModel
 import com.jonathanev.review.ui.screens.CreateFilesPropertiesRoute
 import com.jonathanev.review.ui.screens.FillingGuideScreen
 import com.jonathanev.review.ui.screens.ListFoldersScreen
+import com.jonathanev.review.ui.screens.ListGuidesRoute
 import com.jonathanev.review.ui.screens.WithoutFoldersScreen
 
 @Composable
 fun BasicNavigation() {
-    val backStack = rememberNavBackStack(AppRoutes.MainScreen)
+    val backStack = rememberNavBackStack(AppRoutes.MainScreen())
 
     NavDisplay(
         backStack = backStack,
@@ -62,11 +65,12 @@ fun BasicNavigation() {
         },
         entryProvider = entryProvider {
             val viewModel: MainActivityViewModel = viewModel()
+            val navigationViewModel: NavigationViewModel = viewModel()
             val context = LocalContext.current
 
             val folders = viewModel.folders.collectAsStateWithLifecycle().value
 
-            entry<AppRoutes.MainScreen> {
+            entry<AppRoutes.MainScreen> { action ->
                 LaunchedEffect(Unit) {
                     viewModel.createFolders()
                     viewModel.getAllFolders()
@@ -90,22 +94,82 @@ fun BasicNavigation() {
                         }
                     }
                 }
-                
-                if (folders.isEmpty()){
+
+                if (folders.isEmpty()) {
                     WithoutFoldersScreen(
                         onNavCreateFilesProperties = { typeAction ->
                             backStack.add(AppRoutes.CreateFilesPropertiesScreen(typeAction))
                         }
-                    )   
+                    )
                 } else {
                     ListFoldersScreen(
                         guias = folders,
                         onCreateFolderClick = { typeAction ->
                             backStack.add(AppRoutes.CreateFilesPropertiesScreen(typeAction))
                         },
-                        onFolderClick = { noGuide ->  }
+                        onFolderClick = { nameGuide, folderAction ->
+                            navigationViewModel.next(nameGuide)
+                            backStack.add(AppRoutes.ListGuidesScreen(folderAction))
+                        },
+                        folderAction = action.folderAction
                     )
                 }
+            }
+
+            entry<AppRoutes.ListGuidesScreen> { action ->
+                val viewModel: FragmentListGuidesViewModel = viewModel()
+                val navigationViewModel: NavigationViewModel = viewModel()
+                val relativeGuidePath =
+                    RelativeGuidePath(navigationViewModel.relativeGuidePath.collectAsStateWithLifecycle().value)
+                val guides = viewModel.guides.collectAsStateWithLifecycle().value
+
+                LaunchedEffect(Unit) {
+                    viewModel.getAllGuides(relativeGuidePath)
+                }
+
+                ListGuidesRoute(
+                    viewModel = viewModel,
+                    navigationViewModel = navigationViewModel,
+                    guides = guides,
+                    folderAction = action.folderAction,
+                    onAddGuideClick = {
+                        backStack.add(AppRoutes.CreateFilesPropertiesScreen(FolderAction.CreatingFile))
+                    },
+                    onOpenGuideClick = { nameGuide ->
+                        backStack.add(AppRoutes.PreviewQuestionsScreen(nameGuide))
+                    },
+                    onDeleteGuideClick = {
+                        backStack.removeLastOrNull()
+                    },
+                    onRenameGuideClick = { propertiesGuide ->
+                        backStack.add(
+                            AppRoutes.CreateFilesPropertiesScreen(
+                                FolderAction.RenamingFile(
+                                    fileName = propertiesGuide.name,
+                                    description = propertiesGuide.description
+                                )
+                            )
+                        )
+                    },
+                    onMoveGuideClick = { folderAction ->
+                        navigationViewModel.setMainPath()
+                        backStack.clear()
+                        backStack.add(AppRoutes.MainScreen(folderAction))
+                    },
+                    onMoveCancelGuideClick = {
+                        navigationViewModel.setMainPath()
+                        backStack.clear()
+                        backStack.add(AppRoutes.MainScreen(FolderAction.None))
+                    },
+                    onMoveSuccessGuideClick = {
+                        navigationViewModel.setMainPath()
+                        backStack.clear()
+                        backStack.add(AppRoutes.MainScreen(FolderAction.None))
+                    },
+                    onBackNav = {
+                        backStack.removeLastOrNull()
+                    }
+                )
             }
 
             entry<AppRoutes.CreateFilesPropertiesScreen> { typeAction ->
@@ -127,7 +191,7 @@ fun BasicNavigation() {
 
                             val oldName = typeAction.folderAction.fileName
                             val responseFillFields = viewModel.fillFields(oldName)
-                            if (!responseFillFields){
+                            if (!responseFillFields) {
                                 Toast.makeText(
                                     context,
                                     "Guia dañada, imposible renombrar",
