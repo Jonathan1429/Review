@@ -22,6 +22,7 @@ import com.jonathanev.review.presentation.viewmodel.FragmentListGuidesViewModel
 import com.jonathanev.review.presentation.viewmodel.FragmentRepasarViewModel
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
 import com.jonathanev.review.presentation.viewmodel.NavigationViewModel
+import com.jonathanev.review.ui.model.PropertiesGuide
 import com.jonathanev.review.ui.screens.CreateFilesPropertiesRoute
 import com.jonathanev.review.ui.screens.FillingGuideScreen
 import com.jonathanev.review.ui.screens.ListFoldersScreen
@@ -118,7 +119,6 @@ fun BasicNavigation() {
                     )
                 }
             }
-
             entry<AppRoutes.ListGuidesScreen> { action ->
                 val viewModel: FragmentListGuidesViewModel = viewModel()
                 val navigationViewModel: NavigationViewModel = viewModel()
@@ -174,7 +174,6 @@ fun BasicNavigation() {
                     }
                 )
             }
-
             entry<AppRoutes.CreateFilesPropertiesScreen> { typeAction ->
                 val viewModel: CreateFilesViewModel = viewModel()
                 val viewModelNavigation: NavigationViewModel = viewModel()
@@ -234,23 +233,33 @@ fun BasicNavigation() {
                     }
                 )
             }
-            entry<AppRoutes.FillingGuideScreen> { propertiesGuide ->
+            entry<AppRoutes.FillingGuideScreen> { properties ->
                 val viewModel: CreateFilesViewModel = viewModel()
-
                 FillingGuideScreen(
                     onAddQuestion = {},
                     onSaveQuestion = {}
                 )
             }
-
             entry<AppRoutes.PreviewQuestionsScreen> { value ->
                 val viewModel: FragmentRepasarViewModel = viewModel()
                 val navigationViewModel: NavigationViewModel = viewModel()
 
+                val propertiesGuide = viewModel.uiState.collectAsStateWithLifecycle().value
+
                 PreviewQuestionsRoute(
                     viewModel = viewModel,
                     navigationViewModel = navigationViewModel,
-                    nameGuide = value.nameGuide
+                    nameGuide = value.nameGuide,
+                    onEditingGuideClick = {
+                        backStack.add(
+                            AppRoutes.FillingGuideScreen(
+                                PropertiesGuide(
+                                    propertiesGuide.fileName,
+                                    propertiesGuide.description
+                                )
+                            )
+                        )
+                    }
                 )
             }
             /*entry<AppRoutes.NotificationScreen> {

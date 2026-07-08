@@ -10,6 +10,7 @@ data class GuideUiState(
     val contadorContenido: Int = -1,
     val qAType: QAType = QAType.QUESTION,
     val fileName: String = "",
+    val description: String = "",
     val isEditing: Boolean = false,
     val actualUri: String? = null,
     val isLastQuestion: Boolean? = false

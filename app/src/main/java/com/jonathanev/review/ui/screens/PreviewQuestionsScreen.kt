@@ -40,7 +40,7 @@ fun PreviewPreviewQuestionsScreen(
     @PreviewParameter(PreviewQuestionsProvider ::class) data: PreviewQuestionStateUi
 ) {
     ReviewTheme {
-        PreviewQuestionsScreen(data)
+        PreviewQuestionsScreen(data) {  }
     }
 }
 
@@ -48,7 +48,8 @@ fun PreviewPreviewQuestionsScreen(
 fun PreviewQuestionsRoute(
     viewModel: FragmentRepasarViewModel,
     navigationViewModel: NavigationViewModel,
-    nameGuide: String
+    nameGuide: String,
+    onEditingGuideClick: () -> Unit
 ) {
     val relativeGuidePath =
         navigationViewModel.relativeGuidePath.collectAsStateWithLifecycle().value
@@ -67,13 +68,15 @@ fun PreviewQuestionsRoute(
     }
 
     PreviewQuestionsScreen(
-        previewQuestions = previewQuestions
+        previewQuestions = previewQuestions,
+        onEditingGuideClick = onEditingGuideClick
     )
 }
 
 @Composable
 fun PreviewQuestionsScreen(
-    previewQuestions: PreviewQuestionStateUi
+    previewQuestions: PreviewQuestionStateUi,
+    onEditingGuideClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -101,7 +104,8 @@ fun PreviewQuestionsScreen(
                 QuestionCard(
                     question = question.question.text,
                     noTexts = previewQuestions.previewState[index].noTexts,
-                    noImages = previewQuestions.previewState[index].noImages
+                    noImages = previewQuestions.previewState[index].noImages,
+                    onEditingGuideClick = onEditingGuideClick
                 )
             }
         }

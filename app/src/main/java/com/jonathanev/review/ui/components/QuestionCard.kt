@@ -51,12 +51,17 @@ fun PreviewQuestionCard(
     @PreviewParameter(QuestionItemProvider::class) data: QuestionItemProv
 ) {
     ReviewTheme {
-        QuestionCard(data.question, data.noTexts, data.noImages)
+        QuestionCard(data.question, data.noTexts, data.noImages, {})
     }
 }
 
 @Composable
-fun QuestionCard(question: String, noTexts: String, noImages: String) {
+fun QuestionCard(
+    question: String,
+    noTexts: String,
+    noImages: String,
+    onEditingGuideClick: () -> Unit
+) {
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = cardStepBackground),
@@ -115,7 +120,7 @@ fun QuestionCard(question: String, noTexts: String, noImages: String) {
                     }*/
 
                     IconButton(
-                        onClick = { /* Acción editar */ },
+                        onClick = { onEditingGuideClick() },
                         modifier = Modifier
                             .size(40.dp)
                             .border(1.5.dp, CircleContentSVG, CircleShape),

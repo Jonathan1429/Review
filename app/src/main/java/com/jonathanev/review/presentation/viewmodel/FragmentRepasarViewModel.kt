@@ -105,6 +105,8 @@ class FragmentRepasarViewModel @Inject constructor(
                 initUiPreviewQuestions(result.list, relativeGuidePath)
                 _uiState.update { currentState ->
                     currentState.copy(
+                        fileName = guideDomainModel.nameGuide,
+                        description = guideDomainModel.description,
                         preguntas = questions.map { it.toUi() },
                         respuestas = answers.map { it.toUi() }
                     )
