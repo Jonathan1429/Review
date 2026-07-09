@@ -3,6 +3,7 @@ package com.jonathanev.review.ui.components
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.height
@@ -20,9 +21,14 @@ import com.jonathanev.review.ui.model.QAType
 import com.jonathanev.review.ui.theme.ComponentTheme
 
 @Composable
-fun RowScope.QATypeItem(qaTypeItem: QAType, typeSelected: QAType) {
+fun RowScope.QATypeItem(qaTypeItem: QAType, typeSelected: QAType, onTypeClicked: (QAType) -> Unit) {
     Box(
         modifier = Modifier
+            .clickable(
+                onClick = {
+                    onTypeClicked(qaTypeItem)
+                }
+            )
             .weight(1f)
             .height(56.dp)
             .then(

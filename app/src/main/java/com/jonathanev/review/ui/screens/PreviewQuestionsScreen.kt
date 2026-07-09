@@ -49,7 +49,7 @@ fun PreviewQuestionsRoute(
     viewModel: FragmentRepasarViewModel,
     navigationViewModel: NavigationViewModel,
     nameGuide: String,
-    onEditingGuideClick: () -> Unit
+    onEditingGuideClick: (Int) -> Unit
 ) {
     val relativeGuidePath =
         navigationViewModel.relativeGuidePath.collectAsStateWithLifecycle().value
@@ -69,14 +69,14 @@ fun PreviewQuestionsRoute(
 
     PreviewQuestionsScreen(
         previewQuestions = previewQuestions,
-        onEditingGuideClick = onEditingGuideClick
+        onEditingGuideClick = { position -> onEditingGuideClick(position) }
     )
 }
 
 @Composable
 fun PreviewQuestionsScreen(
     previewQuestions: PreviewQuestionStateUi,
-    onEditingGuideClick: () -> Unit
+    onEditingGuideClick: (Int) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -105,7 +105,7 @@ fun PreviewQuestionsScreen(
                     question = question.question.text,
                     noTexts = previewQuestions.previewState[index].noTexts,
                     noImages = previewQuestions.previewState[index].noImages,
-                    onEditingGuideClick = onEditingGuideClick
+                    onEditingGuideClick = { onEditingGuideClick(index) }
                 )
             }
         }

@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.os.BundleCompat
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -18,13 +17,10 @@ import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.jonathanev.review.R
 import com.jonathanev.review.domain.model.RelativeGuidePath
-import com.jonathanev.review.presentation.model.ActionGuide
 import com.jonathanev.review.presentation.model.FolderAction
-import com.jonathanev.review.presentation.model.GuideResultUi
 import com.jonathanev.review.presentation.model.ScreenDataUi
 import com.jonathanev.review.presentation.viewmodel.CreateFilesViewModel
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
-import com.jonathanev.review.ui.mapper.toNav
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

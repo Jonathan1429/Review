@@ -3,6 +3,7 @@ package com.jonathanev.review.ui.components
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -27,9 +28,12 @@ import com.jonathanev.review.ui.theme.ComponentTheme
 import com.jonathanev.review.ui.theme.TextColorSecondary
 
 @Composable
-fun FilterChipItem(itemContentType: ContentType, iconRes: Int, contentTypeSelected: ContentType) {
+fun FilterChipItem(itemContentType: ContentType, iconRes: Int, contentTypeSelected: ContentType, onFilterClicked: (ContentType) -> Unit) {
     Box(
         modifier = Modifier
+            .clickable(onClick = {
+                onFilterClicked(itemContentType)
+            })
             .height(40.dp)
             .then(
                 if (itemContentType == contentTypeSelected) {

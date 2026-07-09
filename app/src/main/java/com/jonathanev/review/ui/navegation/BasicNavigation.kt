@@ -16,19 +16,19 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.presentation.event.MainUiEvent
+import com.jonathanev.review.presentation.model.ActionGuide
 import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.presentation.viewmodel.CreateFilesViewModel
 import com.jonathanev.review.presentation.viewmodel.FragmentListGuidesViewModel
 import com.jonathanev.review.presentation.viewmodel.FragmentRepasarViewModel
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
 import com.jonathanev.review.presentation.viewmodel.NavigationViewModel
-import com.jonathanev.review.ui.model.PropertiesGuide
+import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.ui.screens.CreateFilesPropertiesRoute
-import com.jonathanev.review.ui.screens.FillingGuideScreen
+import com.jonathanev.review.ui.screens.FillingGuideRoute
 import com.jonathanev.review.ui.screens.ListFoldersScreen
 import com.jonathanev.review.ui.screens.ListGuidesRoute
 import com.jonathanev.review.ui.screens.PreviewQuestionsRoute
-import com.jonathanev.review.ui.screens.PreviewQuestionsScreen
 import com.jonathanev.review.ui.screens.WithoutFoldersScreen
 
 @Composable
@@ -229,15 +229,27 @@ fun BasicNavigation() {
                     mode = typeAction.folderAction,
                     onNavBack = { backStack.removeLastOrNull() },
                     onNavFillingGuide = { propertiesGuide ->
-                        backStack.add(AppRoutes.FillingGuideScreen(propertiesGuide))
+                        backStack.add(
+                            AppRoutes.FillingGuideScreen(
+                                ActionGuide.CREATE(
+                                    propertiesGuide.name,
+                                    propertiesGuide.description
+                                )
+                            )
+                        )
                     }
                 )
             }
-            entry<AppRoutes.FillingGuideScreen> { properties ->
-                val viewModel: CreateFilesViewModel = viewModel()
-                FillingGuideScreen(
-                    onAddQuestion = {},
-                    onSaveQuestion = {}
+            entry<AppRoutes.FillingGuideScreen> { action ->
+                val viewModel: SharedFragmentCreateFileViewModel = viewModel()
+                val viewModelNavigation: NavigationViewModel = viewModel()
+                val relativeGuidePath =
+                    viewModelNavigation.relativeGuidePath.collectAsStateWithLifecycle().value
+
+                FillingGuideRoute(
+                    viewModel = viewModel,
+                    action = action.actionGuide,
+                    relativeGuidePath = RelativeGuidePath(value = relativeGuidePath)
                 )
             }
             entry<AppRoutes.PreviewQuestionsScreen> { value ->
@@ -250,12 +262,13 @@ fun BasicNavigation() {
                     viewModel = viewModel,
                     navigationViewModel = navigationViewModel,
                     nameGuide = value.nameGuide,
-                    onEditingGuideClick = {
+                    onEditingGuideClick = { position ->
                         backStack.add(
                             AppRoutes.FillingGuideScreen(
-                                PropertiesGuide(
+                                ActionGuide.EDIT(
                                     propertiesGuide.fileName,
-                                    propertiesGuide.description
+                                    propertiesGuide.description,
+                                    position
                                 )
                             )
                         )

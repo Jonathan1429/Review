@@ -25,7 +25,6 @@ import com.jonathanev.review.R
 import com.jonathanev.review.databinding.FragmentCreateFileBinding
 import com.jonathanev.review.domain.model.QAType
 import com.jonathanev.review.domain.model.RelativeGuidePath
-import com.jonathanev.review.domain.model.SaveGuideMode
 import com.jonathanev.review.presentation.event.CreateGuideEvent
 import com.jonathanev.review.presentation.model.ActionGuide
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
@@ -198,9 +197,9 @@ class FragmentCreateFile : Fragment() {
 
         val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
         when (actionGuide) {
-            ActionGuide.CREATE -> Log.i("Crear", "Se está creando un archivo")
+            is ActionGuide.CREATE -> Log.i("Crear", "Se está creando un archivo")
             is ActionGuide.EDIT -> {
-                viewModel.getObtenerDatosXML(actionGuide.posGuide, actionGuide.nameGuide, relativeGuidePath)
+                viewModel.getObtenerDatosXML(actionGuide.noQuestion, actionGuide.nameGuide, relativeGuidePath)
             }
 
             ActionGuide.NONE -> {

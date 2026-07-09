@@ -3,18 +3,15 @@ package com.jonathanev.review.ui.mapper
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.jonathanev.review.R
-import com.jonathanev.review.data.mapper.toColorType
 import com.jonathanev.review.presentation.model.ColorType
 import com.jonathanev.review.presentation.model.IconType
-import com.jonathanev.review.presentation.model.ScreenDataUi
 import com.jonathanev.review.ui.model.ContentType
-import com.jonathanev.review.ui.model.PropertiesGuide
 import com.jonathanev.review.ui.theme.White
 
-fun ScreenDataUi.toNav(): PropertiesGuide = PropertiesGuide(
+/*fun ScreenDataUi.toNav(): PropertiesGuide = PropertiesGuide(
     name = name,
     description = description
-)
+)*/
 
 /*fun PropertiesGuide.toUi(): ScreenDataUi = ScreenDataUi(
     name = name,

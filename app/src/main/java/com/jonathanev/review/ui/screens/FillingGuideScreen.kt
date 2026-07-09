@@ -23,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -33,8 +34,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jonathanev.review.R
+import com.jonathanev.review.domain.model.RelativeGuidePath
+import com.jonathanev.review.presentation.model.ActionGuide
 import com.jonathanev.review.presentation.model.QuestionContentUi
+import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.ui.components.AssetCarouselViewer
 import com.jonathanev.review.ui.components.FilterChipItem
 import com.jonathanev.review.ui.components.NavigationPagerBar
@@ -50,15 +55,86 @@ import com.jonathanev.review.ui.theme.ReviewTheme
 fun PreviewFillingGuide() {
     ReviewTheme {
         FillingGuideScreen(
+            typeSelected = QAType.QUESTION,
+            typeForSelected = listOf(QAType.QUESTION, QAType.ANSWER),
+            mediaSelected = ContentType.TEXT,
+            mediaForSelected = listOf(ContentType.TEXT, ContentType.IMAGE),
+            actualQuestion = 1,
+            totalQuestions = 2,
+            listTypeMedia = listOf(QuestionContentUi.Text("Hola", listOf())),
+            onTypeClicked = {},
+            onFilterClicked = {},
             onAddQuestion = {},
             onSaveQuestion = {}
         )
     }
 }
 
+@Composable
+fun FillingGuideRoute(
+    viewModel: SharedFragmentCreateFileViewModel,
+    action: ActionGuide,
+    relativeGuidePath: RelativeGuidePath
+) {
+    var typeSelected by rememberSaveable { mutableStateOf(QAType.QUESTION) }
+    val typeForSelected = listOf(QAType.QUESTION, QAType.ANSWER)
+    var mediaSelected by rememberSaveable { mutableStateOf(ContentType.TEXT) }
+    val mediaForSelected = listOf(ContentType.TEXT, ContentType.IMAGE)
+
+    val totalQuestions = viewModel.uiState.collectAsStateWithLifecycle().value.preguntas.size
+    val actualQuestion = viewModel.uiState.collectAsStateWithLifecycle().value.contadorPregunta
+    val listTypeMedia = if (typeSelected == QAType.QUESTION) {
+        viewModel.textList.collectAsStateWithLifecycle().value
+    } else {
+        viewModel.imageList.collectAsStateWithLifecycle().value
+    }
+
+    LaunchedEffect(Unit) {
+        when (action) {
+            is ActionGuide.CREATE -> TODO()
+            is ActionGuide.EDIT -> {
+                viewModel.getObtenerDatosXML(
+                    noQuestion = action.noQuestion,
+                    nameGuide = action.nameGuide,
+                    relativeGuidePath = relativeGuidePath
+                )
+            }
+
+            ActionGuide.NONE -> TODO()
+        }
+    }
+
+    FillingGuideScreen(
+        typeSelected = typeSelected,
+        typeForSelected = typeForSelected,
+        mediaSelected = mediaSelected,
+        mediaForSelected = mediaForSelected,
+        actualQuestion = actualQuestion,
+        totalQuestions = totalQuestions,
+        listTypeMedia = listTypeMedia,
+        onTypeClicked = { typeClicked ->
+            typeSelected = typeClicked
+        },
+        onFilterClicked = { filterClicked ->
+            mediaSelected = filterClicked
+        },
+        onAddQuestion = { },
+        onSaveQuestion = { }
+    )
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FillingGuideScreen(
+    typeSelected: QAType,
+    typeForSelected: List<QAType>,
+    mediaSelected: ContentType,
+    mediaForSelected: List<ContentType>,
+    actualQuestion: Int,
+    totalQuestions: Int,
+    listTypeMedia: List<QuestionContentUi>,
+    onTypeClicked: (QAType) -> Unit,
+    onFilterClicked: (ContentType) -> Unit,
     onAddQuestion: () -> Unit,
     onSaveQuestion: () -> Unit
 ) {
@@ -68,10 +144,7 @@ fun FillingGuideScreen(
             FloatingActionButtons()
         }
     ) { padding ->
-        var typeSelected by rememberSaveable { mutableStateOf(QAType.QUESTION) }
-        val typeForSelected = listOf(QAType.QUESTION, QAType.ANSWER)
-        var mediaSelected by rememberSaveable { mutableStateOf(ContentType.TEXT) }
-        val mediaForSelected = listOf(ContentType.TEXT, ContentType.IMAGE)
+
 
         Column(
             modifier = Modifier
@@ -79,12 +152,16 @@ fun FillingGuideScreen(
                 .padding(padding)
                 .padding(horizontal = 16.dp)
         ) {
-            CustomTopBar(2, 2)
-            QAType(typeForSelected, typeSelected)
-            FilterChip(mediaForSelected, mediaSelected)
+            CustomTopBar(actualQuestion, totalQuestions)
+            QAType(typeForSelected, typeSelected, onTypeClicked = { typeClicked ->
+                onTypeClicked(typeClicked)
+            })
+            FilterChip(mediaForSelected, mediaSelected, onFilterClicked = { filterClicked ->
+                onFilterClicked(filterClicked)
+            })
 
             AssetCarouselViewer(
-                assets = listOf(QuestionContentUi.Text("", listOf()), QuestionContentUi.Text("a", listOf())),
+                assets = listTypeMedia,
                 mediaForSelected = mediaSelected,
                 onAddAssetClick = { },
                 onDeleteAssetClick = { }
@@ -101,7 +178,8 @@ fun FillingGuideScreen(
 @Composable
 private fun FilterChip(
     mediaForSelected: List<ContentType>,
-    mediaSelected: ContentType
+    mediaSelected: ContentType,
+    onFilterClicked: (ContentType) -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -113,7 +191,10 @@ private fun FilterChip(
             FilterChipItem(
                 itemContentType = item,
                 iconRes = item.toDrawable(),
-                contentTypeSelected = mediaSelected
+                contentTypeSelected = mediaSelected,
+                onFilterClicked = { filterClicked ->
+                    onFilterClicked(filterClicked)
+                }
             )
         }
     }
@@ -122,7 +203,8 @@ private fun FilterChip(
 @Composable
 private fun QAType(
     typeForSelected: List<QAType>,
-    typeSelected: QAType
+    typeSelected: QAType,
+    onTypeClicked: (QAType) -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -131,7 +213,12 @@ private fun QAType(
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         typeForSelected.forEach { item ->
-            QATypeItem(item, typeSelected)
+            QATypeItem(
+                item, typeSelected,
+                onTypeClicked = { typeClicked ->
+                    onTypeClicked(typeClicked)
+                }
+            )
         }
     }
 }
@@ -150,7 +237,7 @@ private fun CustomTopBar(
     ) {
         NavigationPagerBar(
             actualQuestion = actualQuestion,
-            totalQuestions = totalQuestions 
+            totalQuestions = totalQuestions
         )
         Spacer(modifier = Modifier.width(5.dp))
         Box(
