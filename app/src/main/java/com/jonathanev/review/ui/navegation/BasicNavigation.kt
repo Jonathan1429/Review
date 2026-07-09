@@ -18,6 +18,7 @@ import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.presentation.event.MainUiEvent
 import com.jonathanev.review.presentation.model.ActionGuide
 import com.jonathanev.review.presentation.model.FolderAction
+import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.presentation.viewmodel.CreateFilesViewModel
 import com.jonathanev.review.presentation.viewmodel.FragmentListGuidesViewModel
 import com.jonathanev.review.presentation.viewmodel.FragmentRepasarViewModel
@@ -25,6 +26,7 @@ import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
 import com.jonathanev.review.presentation.viewmodel.NavigationViewModel
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.ui.screens.CreateFilesPropertiesRoute
+import com.jonathanev.review.ui.screens.CreateImageScreen
 import com.jonathanev.review.ui.screens.FillingGuideRoute
 import com.jonathanev.review.ui.screens.ListFoldersScreen
 import com.jonathanev.review.ui.screens.ListGuidesRoute
@@ -249,9 +251,24 @@ fun BasicNavigation() {
                 FillingGuideRoute(
                     viewModel = viewModel,
                     action = action.actionGuide,
-                    relativeGuidePath = RelativeGuidePath(value = relativeGuidePath)
+                    relativeGuidePath = RelativeGuidePath(value = relativeGuidePath),
+                    onModifyAssetClick = { typeContent ->
+                        when(typeContent){
+                            is QuestionContentUi.Image -> {
+                                backStack.add(
+                                    AppRoutes.CreateImageScreen(QuestionContentUi.Image(typeContent.uri, typeContent.nameFile))
+                                )
+                            }
+                            QuestionContentUi.None -> TODO()
+                            is QuestionContentUi.Text -> TODO()
+                        }
+                    }
                 )
             }
+            entry<AppRoutes.CreateImageScreen> { imageContent ->
+                CreateImageScreen(imageContent.contentType)
+            }
+
             entry<AppRoutes.PreviewQuestionsScreen> { value ->
                 val viewModel: FragmentRepasarViewModel = viewModel()
                 val navigationViewModel: NavigationViewModel = viewModel()

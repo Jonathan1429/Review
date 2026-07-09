@@ -2,6 +2,7 @@ package com.jonathanev.review.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -54,7 +55,8 @@ fun PreviewMediaContentPager() {
         pagerState = pagerState,
         assets = listPreview,
         mediaForSelected = ContentType.TEXT,
-        resourceSelected = R.string.lblText
+        resourceSelected = R.string.lblText,
+        onModifyAssetClick = {}
     )
 }
 
@@ -63,7 +65,8 @@ fun MediaContentPager(
     pagerState: PagerState,
     assets: List<QuestionContentUi>,
     mediaForSelected: ContentType,
-    resourceSelected: Int
+    resourceSelected: Int,
+    onModifyAssetClick: (QuestionContentUi) -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -129,7 +132,17 @@ fun MediaContentPager(
                             painter = painterResource(R.drawable.ic_edit),
                             contentDescription = null,
                             tint = TextColorSecondary,
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier
+                                .size(16.dp)
+                                .clickable(onClick = {
+                                    when (val asset = assets[pagerState.currentPage]) {
+                                        is QuestionContentUi.Image -> {
+                                            onModifyAssetClick(QuestionContentUi.Image(asset.uri, asset.nameFile))
+                                        }
+                                        QuestionContentUi.None -> TODO()
+                                        is QuestionContentUi.Text -> TODO()
+                                    }
+                                })
                         )
                     }
 

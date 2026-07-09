@@ -57,7 +57,8 @@ fun PreviewAssetCarouselViewer() {
         assets = listOf(QuestionContentUi.Text("", listOf()), QuestionContentUi.Text("a", listOf())),
         mediaForSelected = ContentType.TEXT,
         onAddAssetClick = { },
-        onDeleteAssetClick = { }
+        onDeleteAssetClick = { },
+        onModifyAssetClick = {  }
     )
 }
 
@@ -67,7 +68,8 @@ fun AssetCarouselViewer(
     assets: List<QuestionContentUi>,
     mediaForSelected: ContentType,
     onAddAssetClick: () -> Unit,
-    onDeleteAssetClick: (Int) -> Unit
+    onDeleteAssetClick: (Int) -> Unit,
+    onModifyAssetClick: (QuestionContentUi) -> Unit
 ) {
     val pagerState = rememberPagerState(pageCount = { assets.size })
     val scope = rememberCoroutineScope()
@@ -81,7 +83,7 @@ fun AssetCarouselViewer(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        MediaContentPager(pagerState, assets, mediaForSelected, resourceSelected)
+        MediaContentPager(pagerState, assets, mediaForSelected, resourceSelected, onModifyAssetClick = { typeContent -> onModifyAssetClick(typeContent) })
         DeleteAsset(resourceSelected)
         Spacer(modifier = Modifier.height(24.dp))
         StepNavigationCarousel(lazyRowState, assets, pagerState, scope)

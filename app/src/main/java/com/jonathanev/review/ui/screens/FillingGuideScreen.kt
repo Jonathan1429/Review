@@ -64,6 +64,7 @@ fun PreviewFillingGuide() {
             listTypeMedia = listOf(QuestionContentUi.Text("Hola", listOf())),
             onTypeClicked = {},
             onFilterClicked = {},
+            onModifyAssetClick = {  },
             onAddQuestion = {},
             onSaveQuestion = {}
         )
@@ -74,7 +75,8 @@ fun PreviewFillingGuide() {
 fun FillingGuideRoute(
     viewModel: SharedFragmentCreateFileViewModel,
     action: ActionGuide,
-    relativeGuidePath: RelativeGuidePath
+    relativeGuidePath: RelativeGuidePath,
+    onModifyAssetClick: (QuestionContentUi) -> Unit
 ) {
     var typeSelected by rememberSaveable { mutableStateOf(QAType.QUESTION) }
     val typeForSelected = listOf(QAType.QUESTION, QAType.ANSWER)
@@ -118,6 +120,7 @@ fun FillingGuideRoute(
         onFilterClicked = { filterClicked ->
             mediaSelected = filterClicked
         },
+        onModifyAssetClick = { typeContent -> onModifyAssetClick(typeContent) },
         onAddQuestion = { },
         onSaveQuestion = { }
     )
@@ -135,6 +138,7 @@ fun FillingGuideScreen(
     listTypeMedia: List<QuestionContentUi>,
     onTypeClicked: (QAType) -> Unit,
     onFilterClicked: (ContentType) -> Unit,
+    onModifyAssetClick: (QuestionContentUi) -> Unit,
     onAddQuestion: () -> Unit,
     onSaveQuestion: () -> Unit
 ) {
@@ -164,13 +168,9 @@ fun FillingGuideScreen(
                 assets = listTypeMedia,
                 mediaForSelected = mediaSelected,
                 onAddAssetClick = { },
-                onDeleteAssetClick = { }
+                onDeleteAssetClick = { },
+                onModifyAssetClick = { typeContent -> onModifyAssetClick(typeContent) }
             )
-            /*item { MediaTextCard() }
-            /*item { MediaImageCard(imageRes = "") }
-            item { MediaImageCard(imageRes = "") }
-            item { MediaImageCard(imageRes = "") }*/
-        }*/
         }
     }
 }

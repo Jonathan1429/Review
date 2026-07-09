@@ -3,6 +3,7 @@ package com.jonathanev.review.ui.navegation
 import androidx.navigation3.runtime.NavKey
 import com.jonathanev.review.presentation.model.ActionGuide
 import com.jonathanev.review.presentation.model.FolderAction
+import com.jonathanev.review.presentation.model.QuestionContentUi
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -17,6 +18,7 @@ sealed interface AppRoutes : NavKey {
     @Serializable
     data class FillingGuideScreen(val actionGuide: ActionGuide): AppRoutes
 
+    data class CreateImageScreen(val contentType: QuestionContentUi.Image): AppRoutes
     @Serializable
     data class PreviewQuestionsScreen(val nameGuide: String): AppRoutes
 }

@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.ui.components.CustomBoxCreateImage
 import com.jonathanev.review.ui.components.OptionsCreateImage
 import com.jonathanev.review.ui.theme.ReviewTheme
@@ -25,13 +26,13 @@ import com.jonathanev.review.ui.theme.degradientColor
 @Composable
 fun PreviewCreateImageScreen() {
     ReviewTheme {
-        CreateImageScreen()
+        CreateImageScreen(QuestionContentUi.Image("", ""))
     }
 }
 
 @Composable
-fun CreateImageScreen() {
-    var uriImage by rememberSaveable { mutableStateOf("") }
+fun CreateImageScreen(contentType: QuestionContentUi.Image) {
+    var uriImage by rememberSaveable { mutableStateOf(contentType.uri) }
 
     Box(
         modifier = Modifier
