@@ -49,10 +49,10 @@ fun PreviewMediaContentPager() {
         QuestionContentUi.Text("Adios", emptyList())
     )
     val listEmpty = listOf<QuestionContentUi>()
-    val pagerState = rememberPagerState(pageCount = { 0 })
+    val pagerState = rememberPagerState(pageCount = { 2 })
     MediaContentPager(
         pagerState = pagerState,
-        assets = listEmpty,
+        assets = listPreview,
         mediaForSelected = ContentType.TEXT,
         resourceSelected = R.string.lblText
     )
@@ -68,98 +68,61 @@ fun MediaContentPager(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(1f) // Cuadrado perfecto como en tu captura
+            .aspectRatio(1f)
             .border(1.5.dp, BorderPasos, RoundedCornerShape(24.dp))
             .clip(RoundedCornerShape(24.dp))
             .background(cardStepBackground)
     ) {
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier.fillMaxSize()
-        ) { page ->
-            val currentAsset = assets[page]
-            /*Box(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(text = currentAsset.text ?: "Imagen ${page + 1}", color = Color.White)
-                }*/
-        }
-
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.TopCenter
-        ) {
+        if (assets.isEmpty()) {
             when (mediaForSelected) {
-                ContentType.IMAGE if assets.isEmpty() -> {
-                    EmptyStateView(
-                        icon = painterResource(R.drawable.ic_image),
-                        title = "No hay imagen que mostrar",
-                        subtitle = "Presiona el botón '+' de abajo para seleccionar un archivo multimedia (Imagen)."
-                    )
-                }
+                ContentType.IMAGE -> EmptyStateView(
+                    icon = painterResource(R.drawable.ic_image),
+                    title = "No hay imagen que mostrar",
+                    subtitle = "Presiona el botón '+' de abajo para seleccionar un archivo multimedia (Imagen)."
+                )
 
-                ContentType.TEXT if assets.isEmpty() -> {
-                    EmptyStateView(
-                        icon = painterResource(R.drawable.ic_empty_notes),
-                        title = "Sin contenido de texto",
-                        subtitle = "Presiona el botón '+' de abajo para escribir tu primer contenido tipo Texto."
-                    )
-                }
-
-                else -> {
-                    if (assets.size > 1) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 16.dp, start = 16.dp, end = 16.dp),
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            assets.forEachIndexed { index, _ ->
-                                Box(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .height(4.dp)
-                                        .clip(CircleShape)
-                                        .background(
-                                            if (index == pagerState.currentPage) MaterialTheme.colorScheme.primary
-                                            else MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                                        )
-                                )
-                            }
+                ContentType.TEXT -> EmptyStateView(
+                    icon = painterResource(R.drawable.ic_empty_notes),
+                    title = "Sin contenido de texto",
+                    subtitle = "Presiona el botón '+' de abajo para escribir tu primer contenido tipo Texto."
+                )
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                if (assets.size > 1) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        assets.forEachIndexed { index, _ ->
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(4.dp)
+                                    .clip(CircleShape)
+                                    .background(
+                                        if (index == pagerState.currentPage) MaterialTheme.colorScheme.primary
+                                        else MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                                    )
+                            )
                         }
                     }
+                }
 
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Box(
                         modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(top = if (assets.size > 1) 32.dp else 16.dp, end = 16.dp)
-                            .background(
-                                Color.Black.copy(alpha = 0.6f),
-                                RoundedCornerShape(12.dp)
-                            )
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                    ) {
-                        Text(
-                            text = "${stringResource(resourceSelected)} ${pagerState.currentPage + 1} ${
-                                stringResource(
-                                    R.string.lblOf
-                                )
-                            } ${assets.size}",
-                            color = Color.White,
-                            fontSize = 12.sp
-                        )
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.TopStart)
-                            .padding(top = if (assets.size > 1) 32.dp else 16.dp, start = 16.dp)
-                            .background(
-                                Color.Black.copy(alpha = 0.6f),
-                                RoundedCornerShape(12.dp)
-                            )
+                            .background(Color.Black.copy(alpha = 0.6f), RoundedCornerShape(12.dp))
                             .padding(horizontal = 12.dp, vertical = 6.dp)
                     ) {
                         Icon(
@@ -168,6 +131,51 @@ fun MediaContentPager(
                             tint = TextColorSecondary,
                             modifier = Modifier.size(16.dp)
                         )
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .background(Color.Black.copy(alpha = 0.6f), RoundedCornerShape(12.dp))
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                    ) {
+                        Text(
+                            text = "${stringResource(resourceSelected)} ${pagerState.currentPage + 1} ${
+                                stringResource(R.string.lblOf)
+                            } ${assets.size}",
+                            color = Color.White,
+                            fontSize = 12.sp
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                ) { page ->
+                    when (val currentAsset = assets[page]) {
+                        is QuestionContentUi.Image -> {
+                            CustomBoxCreateImage(currentAsset.nameFile)
+                        }
+
+                        is QuestionContentUi.Text -> {
+                            CustomBoxCreateText(
+                                textValue = currentAsset.text,
+                                hint = false,
+                                onTextValueChange = {}
+                            )
+                        }
+
+                        QuestionContentUi.None -> {
+                            EmptyStateView(
+                                icon = painterResource(R.drawable.ic_empty_notes),
+                                title = "Sin contenido",
+                                subtitle = "No se pudo cargar el contenido para mostrar"
+                            )
+                        }
                     }
                 }
             }

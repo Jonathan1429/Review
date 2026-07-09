@@ -62,6 +62,7 @@ fun CreateTextScreen(
                 OptionsCreateText(textValue)
                 CustomBoxCreateText(
                     textValue = textValue,
+                    hint = true,
                     onTextValueChange = { actualText -> textValue = actualText }
                 )
             }

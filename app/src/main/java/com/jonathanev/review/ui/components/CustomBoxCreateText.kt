@@ -19,8 +19,11 @@ import com.jonathanev.review.R
 @Composable
 fun CustomBoxCreateText(
     textValue: String,
+    hint: Boolean,
     onTextValueChange: (String) -> Unit
 ) {
+    val hint = if (hint) stringResource(R.string.lblCuestionario) else ""
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -28,7 +31,6 @@ fun CustomBoxCreateText(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 21.dp, vertical = 15.dp)
         ) {
             BasicTextField(
                 value = textValue,
@@ -42,7 +44,7 @@ fun CustomBoxCreateText(
                     Box(modifier = Modifier.fillMaxSize()) {
                         if (textValue.isEmpty()) {
                             Text(
-                                text = stringResource(id = R.string.lblCuestionario),
+                                text = hint,
                                 color = Color.Gray.copy(alpha = 0.6f),
                                 fontSize = 18.sp
                             )
