@@ -15,11 +15,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import com.jonathanev.review.R
 
 @Composable
-fun OptionsCreateText(textValue: String) {
+fun OptionsCreateText(textValue: AnnotatedString, onClearColorClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -27,7 +28,7 @@ fun OptionsCreateText(textValue: String) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
-            onClick = { },
+            onClick = onClearColorClick,
             modifier = Modifier
                 .padding(end = 10.dp)
                 .size(34.dp)

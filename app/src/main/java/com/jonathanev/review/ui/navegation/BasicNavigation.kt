@@ -27,6 +27,7 @@ import com.jonathanev.review.presentation.viewmodel.NavigationViewModel
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.ui.screens.CreateFilesPropertiesRoute
 import com.jonathanev.review.ui.screens.CreateImageRoute
+import com.jonathanev.review.ui.screens.CreateTextRoute
 import com.jonathanev.review.ui.screens.FillingGuideRoute
 import com.jonathanev.review.ui.screens.ListFoldersScreen
 import com.jonathanev.review.ui.screens.ListGuidesRoute
@@ -293,7 +294,7 @@ fun BasicNavigation() {
             }
 
             entry<AppRoutes.CreateTextScreen> { textContent ->
-
+                CreateTextRoute(textContent.contentType)
             }
 
             entry<AppRoutes.PreviewQuestionsScreen> { value ->
