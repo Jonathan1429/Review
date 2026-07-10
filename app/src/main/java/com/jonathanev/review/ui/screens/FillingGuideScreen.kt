@@ -148,8 +148,6 @@ fun FillingGuideScreen(
             FloatingActionButtons()
         }
     ) { padding ->
-
-
         Column(
             modifier = Modifier
                 .fillMaxSize()

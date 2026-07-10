@@ -266,7 +266,16 @@ fun BasicNavigation() {
                             }
 
                             QuestionContentUi.None -> TODO()
-                            is QuestionContentUi.Text -> TODO()
+                            is QuestionContentUi.Text -> {
+                                backStack.add(
+                                    AppRoutes.CreateTextScreen(
+                                        QuestionContentUi.Text(
+                                            typeContent.text,
+                                            typeContent.colorRanges
+                                        )
+                                    )
+                                )
+                            }
                         }
                     }
                 )
@@ -281,6 +290,10 @@ fun BasicNavigation() {
                         backStack.removeLastOrNull()
                     }
                 )
+            }
+
+            entry<AppRoutes.CreateTextScreen> { textContent ->
+
             }
 
             entry<AppRoutes.PreviewQuestionsScreen> { value ->
