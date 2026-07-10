@@ -1,5 +1,9 @@
 package com.jonathanev.review.ui.screens
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.jonathanev.review.presentation.model.QuestionContentUi
+import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.ui.components.CustomBoxCreateImage
 import com.jonathanev.review.ui.components.OptionsCreateImage
 import com.jonathanev.review.ui.theme.ReviewTheme
@@ -26,13 +31,46 @@ import com.jonathanev.review.ui.theme.degradientColor
 @Composable
 fun PreviewCreateImageScreen() {
     ReviewTheme {
-        CreateImageScreen(QuestionContentUi.Image("", ""))
+        CreateImageScreen(
+            uriImage = "",
+            selectedImage = { },
+            imageUploaded = {  }
+        )
     }
 }
 
 @Composable
-fun CreateImageScreen(contentType: QuestionContentUi.Image) {
+
+fun CreateImageRoute(
+    contentType: QuestionContentUi.Image,
+    viewModel: SharedFragmentCreateFileViewModel,
+    imageUploaded: () -> Unit
+) {
     var uriImage by rememberSaveable { mutableStateOf(contentType.uri) }
+    val resultLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            viewModel.setActualUri(uri.toString())
+        }
+    }
+
+    CreateImageScreen(
+        uriImage = uriImage,
+        selectedImage = { resultLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
+        imageUploaded = {
+            viewModel.addImageContent()
+            imageUploaded()
+        }
+    )
+}
+
+@Composable
+fun CreateImageScreen(
+    uriImage: String,
+    selectedImage: () -> Unit,
+    imageUploaded: () -> Unit
+) {
 
     Box(
         modifier = Modifier
@@ -56,7 +94,11 @@ fun CreateImageScreen(contentType: QuestionContentUi.Image) {
                     .fillMaxSize()
                     .padding(bottom = 16.dp)
             ) {
-                OptionsCreateImage(uriImage)
+                OptionsCreateImage(
+                    uriImage = uriImage,
+                    selectImage = selectedImage,
+                    imageUploaded = imageUploaded
+                )
                 CustomBoxCreateImage(uriImage)
             }
         }

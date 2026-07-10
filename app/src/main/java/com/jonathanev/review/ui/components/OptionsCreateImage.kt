@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import com.jonathanev.review.R
 
 @Composable
-fun OptionsCreateImage(uriImage: String) {
+fun OptionsCreateImage(uriImage: String, selectImage: () -> Unit, imageUploaded: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -24,7 +24,7 @@ fun OptionsCreateImage(uriImage: String) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(
-            onClick = { },
+            onClick = selectImage,
             modifier = Modifier
                 .padding(end = 10.dp)
                 .size(34.dp)
@@ -40,7 +40,7 @@ fun OptionsCreateImage(uriImage: String) {
 
         if (uriImage.isNotEmpty()) {
             IconButton(
-                onClick = {},
+                onClick = { imageUploaded },
                 modifier = Modifier.size(34.dp)
             ) {
                 Icon(
