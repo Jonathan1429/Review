@@ -294,7 +294,12 @@ fun BasicNavigation() {
             }
 
             entry<AppRoutes.CreateTextScreen> { textContent ->
-                CreateTextRoute(textContent.contentType)
+                val viewModel: SharedFragmentCreateFileViewModel = viewModel()
+
+                CreateTextRoute(
+                    viewModel = viewModel,
+                    contentType = textContent.contentType,
+                    onSaveText = { backStack.removeLastOrNull() })
             }
 
             entry<AppRoutes.PreviewQuestionsScreen> { value ->

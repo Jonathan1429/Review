@@ -1,7 +1,6 @@
 package com.jonathanev.review.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,13 +14,20 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import com.jonathanev.review.R
 
 @Composable
-fun OptionsCreateText(textValue: AnnotatedString, onClearColorClick: () -> Unit) {
+fun OptionsCreateText(
+    textValue: AnnotatedString,
+    selectedColor: Color,
+    onClearColorClick: () -> Unit,
+    onSelectColorClick: () -> Unit,
+    onSaveTextClick: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -42,7 +48,7 @@ fun OptionsCreateText(textValue: AnnotatedString, onClearColorClick: () -> Unit)
         }
 
         IconButton(
-            onClick = {},
+            onClick = onSelectColorClick,
             modifier = Modifier
                 .padding(end = 10.dp)
                 .size(34.dp)
@@ -58,7 +64,7 @@ fun OptionsCreateText(textValue: AnnotatedString, onClearColorClick: () -> Unit)
             modifier = Modifier
                 .size(20.dp)
                 .background(
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = selectedColor,
                     shape = CircleShape
                 )
         )
@@ -67,7 +73,7 @@ fun OptionsCreateText(textValue: AnnotatedString, onClearColorClick: () -> Unit)
 
         if (textValue.isNotEmpty()) {
             IconButton(
-                onClick = {},
+                onClick = onSaveTextClick,
                 modifier = Modifier.size(34.dp)
             ) {
                 Icon(
