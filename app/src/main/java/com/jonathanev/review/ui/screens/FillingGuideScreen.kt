@@ -1,6 +1,7 @@
 package com.jonathanev.review.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -45,11 +47,13 @@ import com.jonathanev.review.ui.components.AssetCarouselViewer
 import com.jonathanev.review.ui.components.FilterChipItem
 import com.jonathanev.review.ui.components.NavigationPagerBar
 import com.jonathanev.review.ui.components.QATypeItem
+import com.jonathanev.review.ui.components.ShowDeletePopUp
 import com.jonathanev.review.ui.mapper.toDrawable
 import com.jonathanev.review.ui.model.ContentType
 import com.jonathanev.review.ui.model.QAType
 import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.theme.ReviewTheme
+import kotlinx.coroutines.launch
 
 @DevicePreviews
 @Composable
@@ -67,7 +71,8 @@ fun PreviewFillingGuide() {
             onFilterClicked = {},
             onModifyAssetClick = { },
             onAddQuestion = {},
-            onSaveQuestion = {}
+            onSaveQuestion = {},
+            onDeleteQuestionClick = { }
         )
     }
 }
@@ -91,6 +96,7 @@ fun FillingGuideRoute(
     } else {
         viewModel.imageList.collectAsStateWithLifecycle().value
     }
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         when (action) {
@@ -115,6 +121,16 @@ fun FillingGuideRoute(
         actualQuestion = actualQuestion,
         totalQuestions = totalQuestions,
         listTypeMedia = listTypeMedia,
+        onDeleteQuestionClick = {
+            coroutineScope.launch {
+                val dontAsk = viewModel.getDontAskDeleteOnce()
+                if (dontAsk) {
+                    viewModel.deleteQuesAns()
+                } else {
+                    //ShowDeletePopUp()
+                }
+            }
+        },
         onTypeClicked = { typeClicked ->
             typeSelected = typeClicked
         },
@@ -158,6 +174,7 @@ fun FillingGuideScreen(
     actualQuestion: Int,
     totalQuestions: Int,
     listTypeMedia: List<QuestionContentUi>,
+    onDeleteQuestionClick: () -> Unit,
     onTypeClicked: (QAType) -> Unit,
     onFilterClicked: (ContentType) -> Unit,
     onModifyAssetClick: (QuestionContentUi) -> Unit,
@@ -179,7 +196,7 @@ fun FillingGuideScreen(
                 .padding(padding)
                 .padding(horizontal = 16.dp)
         ) {
-            CustomTopBar(actualQuestion, totalQuestions)
+            CustomTopBar(actualQuestion, totalQuestions, onDeleteQuestionClick = onDeleteQuestionClick)
             QAType(typeForSelected, typeSelected, onTypeClicked = { typeClicked ->
                 onTypeClicked(typeClicked)
             })
@@ -249,7 +266,8 @@ private fun QAType(
 @Composable
 private fun CustomTopBar(
     actualQuestion: Int,
-    totalQuestions: Int
+    totalQuestions: Int,
+    onDeleteQuestionClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -265,7 +283,8 @@ private fun CustomTopBar(
         Spacer(modifier = Modifier.width(5.dp))
         Box(
             modifier = Modifier
-                .padding(10.dp),
+                .padding(10.dp)
+                .clickable(onClick = onDeleteQuestionClick),
             contentAlignment = Alignment.Center
         ) {
             Icon(
