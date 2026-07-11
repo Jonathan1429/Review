@@ -320,24 +320,6 @@ fun BasicNavigation() {
                     }
                 )
             }
-            /*entry<AppRoutes.NotificationScreen> {
-                NotificationScreen(
-                    navigateUp = {
-                        backStack.removeLastOrNull()
-                    },
-                    onNavPrevisualizacion = { uuid ->
-                        backStack.add(AppRoutes.PrevisualizacionScreen(uuid))
-                    }
-                )
-            }
-            entry<AppRoutes.PrevisualizacionScreen> { key ->
-                PrevisualizacionScreen(
-                    uuidReporte = key.uuid,
-                    navigateUp = {
-                        backStack.removeLastOrNull()
-                    }
-                )
-            }*/
         }
     )
 }

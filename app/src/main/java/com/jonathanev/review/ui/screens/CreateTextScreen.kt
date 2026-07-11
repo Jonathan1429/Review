@@ -44,8 +44,7 @@ fun CreateTextRoute(contentType: QuestionContentUi.Text) {
 fun CreateTextScreen(
     modifier: Modifier = Modifier,
     contentType: QuestionContentUi.Text,
-    onSelectColorClick: () -> Unit = {},
-    onClearColorClick: () -> Unit = {}
+    onSelectColorClick: () -> Unit = {}
 ) {
     var textValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(annotatedString = contentType.toAnnotatedString()))
@@ -73,7 +72,9 @@ fun CreateTextScreen(
                     .fillMaxSize()
                     .padding(bottom = 16.dp)
             ) {
-                OptionsCreateText(textValue.annotatedString, onClearColorClick = onSelectColorClick)
+                OptionsCreateText(textValue.annotatedString, onClearColorClick = {
+                    textValue = TextFieldValue(text = textValue.text)
+                })
                 CustomBoxCreateText(
                     textValue = textValue,
                     hint = true,
