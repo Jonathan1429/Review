@@ -35,18 +35,32 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jonathanev.review.R
+import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.theme.ColorBotones
 import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.Teal200
 import com.jonathanev.review.ui.theme.TextGray
 import com.jonathanev.review.ui.theme.cardStepBackground
 
-@Preview
+@DevicePreviews
 @Composable
 fun PreviewShowDeletePopUp() {
     ReviewTheme {
         ShowDeletePopUp(
             isChecked = false,
+            onCheckedChange = { },
+            onConfirmClick = { },
+            onCancelClick = { }
+        )
+    }
+}
+
+@DevicePreviews
+@Composable
+fun PreviewShowDeletePopUpWithCheck() {
+    ReviewTheme {
+        ShowDeletePopUp(
+            isChecked = true,
             onCheckedChange = { },
             onConfirmClick = { },
             onCancelClick = { }
@@ -62,11 +76,6 @@ fun ShowDeletePopUp(
     onCancelClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    /*val bgPopup = Color(0xFF1C1D21)        // @color/background_pop_up
-    val textGray = Color(0xFF9E9E9E)       // @color/text_gray
-    val containerGray = Color(0xFF26282E)  // @drawable/rounded_content_gray_500
-    val accentGreen = Color(0xFF03D1BF)*/    // Botón principal
-
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -97,7 +106,7 @@ fun ShowDeletePopUp(
 
             Text(
                 text = stringResource(id = R.string.lblConfirmarAccion),
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
@@ -123,7 +132,6 @@ fun ShowDeletePopUp(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 4️⃣ CONTENEDOR CON SWITCH ("Recordar Elección")
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -138,7 +146,7 @@ fun ShowDeletePopUp(
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = stringResource(id = R.string.lblNoVolverPreguntar),
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.onSurface,
                             fontSize = 15.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -182,7 +190,6 @@ fun ShowDeletePopUp(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // 6️⃣ BOTÓN SECUNDARIO (CANCELAR - Outlined a mano)
             OutlinedButton(
                 onClick = onCancelClick,
                 modifier = Modifier
@@ -194,7 +201,7 @@ fun ShowDeletePopUp(
             ) {
                 Text(
                     text = stringResource(id = R.string.lblCancelar),
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 16.sp
                 )
             }
