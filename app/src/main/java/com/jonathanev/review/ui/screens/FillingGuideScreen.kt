@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jonathanev.review.R
 import com.jonathanev.review.domain.model.RelativeGuidePath
+import com.jonathanev.review.domain.model.SaveGuideMode
 import com.jonathanev.review.presentation.model.ActionGuide
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
@@ -64,7 +65,7 @@ fun PreviewFillingGuide() {
             listTypeMedia = listOf(QuestionContentUi.Text("Hola", listOf())),
             onTypeClicked = {},
             onFilterClicked = {},
-            onModifyAssetClick = {  },
+            onModifyAssetClick = { },
             onAddQuestion = {},
             onSaveQuestion = {}
         )
@@ -122,7 +123,28 @@ fun FillingGuideRoute(
         },
         onModifyAssetClick = { typeContent -> onModifyAssetClick(typeContent) },
         onAddQuestion = { },
-        onSaveQuestion = { }
+        onSaveQuestion = {
+            when (action) {
+                is ActionGuide.CREATE -> {
+                    viewModel.saveGuide(
+                        nameGuide = action.nameGuide,
+                        description = action.description,
+                        relativeGuidePath = relativeGuidePath,
+                        mode = SaveGuideMode.Create
+                    )
+                }
+
+                is ActionGuide.EDIT -> {
+                    viewModel.saveGuide(
+                        nameGuide = action.nameGuide,
+                        description = action.description,
+                        relativeGuidePath = relativeGuidePath,
+                        mode = SaveGuideMode.Update
+                    )
+                }
+                ActionGuide.NONE -> TODO()
+            }
+        }
     )
 }
 
@@ -145,7 +167,10 @@ fun FillingGuideScreen(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         floatingActionButton = {
-            FloatingActionButtons()
+            FloatingActionButtons(
+                onAddQuestion = {},
+                onSaveQuestion = onSaveQuestion
+            )
         }
     ) { padding ->
         Column(
@@ -254,13 +279,16 @@ private fun CustomTopBar(
 }
 
 @Composable
-private fun FloatingActionButtons() {
+private fun FloatingActionButtons(
+    onAddQuestion: () -> Unit,
+    onSaveQuestion: () -> Unit
+) {
     Column(
         horizontalAlignment = Alignment.End,
-        verticalArrangement = Arrangement.spacedBy(16.dp) // Espacio de separación entre ambos botones
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         FloatingActionButton(
-            onClick = { /* TODO: Lógica para añadir una pregunta más */ },
+            onClick = onAddQuestion,
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary,
             shape = CircleShape,
@@ -270,7 +298,7 @@ private fun FloatingActionButtons() {
         }
 
         ExtendedFloatingActionButton(
-            onClick = { /* TODO: Lógica para guardar la guía completa */ },
+            onClick = onSaveQuestion,
             containerColor = MaterialTheme.colorScheme.primary,
             shape = RoundedCornerShape(16.dp),
             icon = {
