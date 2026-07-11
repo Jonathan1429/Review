@@ -40,7 +40,7 @@ fun OptionsCreateImage(uriImage: String, selectImage: () -> Unit, imageUploaded:
 
         if (uriImage.isNotEmpty()) {
             IconButton(
-                onClick = { imageUploaded },
+                onClick = imageUploaded,
                 modifier = Modifier.size(34.dp)
             ) {
                 Icon(
