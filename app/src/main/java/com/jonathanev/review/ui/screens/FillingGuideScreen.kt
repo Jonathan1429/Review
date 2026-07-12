@@ -123,7 +123,8 @@ fun FillingGuideRoute(
     viewModel: SharedFragmentCreateFileViewModel,
     action: ActionGuide,
     relativeGuidePath: RelativeGuidePath,
-    onModifyAssetClick: (QuestionContentUi) -> Unit
+    onModifyAssetClick: (QuestionContentUi) -> Unit,
+    onActionGuideNone: () -> Unit
 ) {
     var typeSelected by rememberSaveable { mutableStateOf(QAType.QUESTION) }
     val typeForSelected = listOf(QAType.QUESTION, QAType.ANSWER)
@@ -144,7 +145,7 @@ fun FillingGuideRoute(
 
     LaunchedEffect(restartGuide) {
         when (action) {
-            is ActionGuide.CREATE -> TODO()
+            is ActionGuide.CREATE -> viewModel.initUIState()
             is ActionGuide.EDIT -> {
                 viewModel.getObtenerDatosXML(
                     noQuestion = action.noQuestion,
@@ -153,7 +154,7 @@ fun FillingGuideRoute(
                 )
             }
 
-            ActionGuide.NONE -> TODO()
+            ActionGuide.NONE -> onActionGuideNone()
         }
     }
 

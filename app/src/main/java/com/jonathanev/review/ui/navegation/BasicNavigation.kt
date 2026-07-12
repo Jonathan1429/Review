@@ -266,7 +266,13 @@ fun BasicNavigation() {
                                 )
                             }
 
-                            QuestionContentUi.None -> TODO()
+                            QuestionContentUi.None -> {
+                                Toast.makeText(
+                                    context,
+                                    "No se puede procesar la solicitud",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
                             is QuestionContentUi.Text -> {
                                 backStack.add(
                                     AppRoutes.CreateTextScreen(
@@ -278,6 +284,14 @@ fun BasicNavigation() {
                                 )
                             }
                         }
+                    },
+                    onActionGuideNone = {
+                        Toast.makeText(
+                            context,
+                            "No se puede procesar la solicitud",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        backStack.removeLastOrNull()
                     }
                 )
             }
