@@ -57,7 +57,8 @@ fun PreviewMediaContentPager() {
         assets = listPreview,
         mediaForSelected = ContentType.TEXT,
         resourceSelected = R.string.lblText,
-        onModifyAssetClick = {}
+        onModifyAssetClick = {},
+        onActionGuideNone = {}
     )
 }
 
@@ -67,7 +68,8 @@ fun MediaContentPager(
     assets: List<QuestionContentUi>,
     mediaForSelected: ContentType,
     resourceSelected: Int,
-    onModifyAssetClick: (QuestionContentUi) -> Unit
+    onModifyAssetClick: (QuestionContentUi) -> Unit,
+    onActionGuideNone: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -140,8 +142,10 @@ fun MediaContentPager(
                                         is QuestionContentUi.Image -> {
                                             onModifyAssetClick(QuestionContentUi.Image(asset.uri, asset.nameFile))
                                         }
-                                        QuestionContentUi.None -> TODO()
-                                        is QuestionContentUi.Text -> TODO()
+                                        QuestionContentUi.None -> onActionGuideNone()
+                                        is QuestionContentUi.Text -> {
+                                            onModifyAssetClick(QuestionContentUi.Text(asset.text, asset.colorRanges))
+                                        }
                                     }
                                 })
                         )

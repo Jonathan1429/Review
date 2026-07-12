@@ -84,6 +84,7 @@ fun PreviewFillingGuideWithShowDialog() {
             onAddQuestion = {},
             onDissmissDialogRepeatGuide = {},
             onConfirmDialogRepeatGuide = {},
+            onActionGuideNone = {},
             onSaveQuestion = {},
         )
     }
@@ -103,6 +104,7 @@ fun PreviewFillingGuideWithoutShowDialog() {
             listTypeMedia = listOf(QuestionContentUi.Text("Hola", listOf())),
             showDialogDeleteQuestion = false,
             showDialogRepeatGuide = false,
+            onActionGuideNone = {},
             onContinueDialogDeleteQuestionClick = {},
             onBackQuestionClick = {},
             onNextQuestionClick = {},
@@ -207,6 +209,7 @@ fun FillingGuideRoute(
             mediaSelected = filterClicked
         },
         onModifyAssetClick = { typeContent -> onModifyAssetClick(typeContent) },
+        onActionGuideNone = onActionGuideNone,
         onAddQuestion = { 
             viewModel.addNewQuestion()
         },
@@ -230,7 +233,7 @@ fun FillingGuideRoute(
                     )
                 }
 
-                ActionGuide.NONE -> TODO()
+                ActionGuide.NONE -> onActionGuideNone()
             }
         }
     )
@@ -257,6 +260,7 @@ fun FillingGuideScreen(
     onTypeClicked: (QAType) -> Unit,
     onFilterClicked: (ContentType) -> Unit,
     onModifyAssetClick: (QuestionContentUi) -> Unit,
+    onActionGuideNone: () -> Unit,
     onAddQuestion: () -> Unit,
     onSaveQuestion: () -> Unit
 ) {
@@ -294,7 +298,8 @@ fun FillingGuideScreen(
                 mediaForSelected = mediaSelected,
                 onAddAssetClick = { },
                 onDeleteAssetClick = { },
-                onModifyAssetClick = { typeContent -> onModifyAssetClick(typeContent) }
+                onModifyAssetClick = { typeContent -> onModifyAssetClick(typeContent) },
+                onActionGuideNone = onActionGuideNone
             )
         }
 

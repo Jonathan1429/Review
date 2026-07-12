@@ -54,11 +54,15 @@ import kotlinx.coroutines.launch
 @Composable
 fun PreviewAssetCarouselViewer() {
     AssetCarouselViewer(
-        assets = listOf(QuestionContentUi.Text("", listOf()), QuestionContentUi.Text("a", listOf())),
+        assets = listOf(
+            QuestionContentUi.Text("", listOf()),
+            QuestionContentUi.Text("a", listOf())
+        ),
         mediaForSelected = ContentType.TEXT,
         onAddAssetClick = { },
         onDeleteAssetClick = { },
-        onModifyAssetClick = {  }
+        onModifyAssetClick = { },
+        onActionGuideNone = { }
     )
 }
 
@@ -69,7 +73,8 @@ fun AssetCarouselViewer(
     mediaForSelected: ContentType,
     onAddAssetClick: () -> Unit,
     onDeleteAssetClick: (Int) -> Unit,
-    onModifyAssetClick: (QuestionContentUi) -> Unit
+    onModifyAssetClick: (QuestionContentUi) -> Unit,
+    onActionGuideNone: () -> Unit
 ) {
     val pagerState = rememberPagerState(pageCount = { assets.size })
     val scope = rememberCoroutineScope()
@@ -83,7 +88,13 @@ fun AssetCarouselViewer(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        MediaContentPager(pagerState, assets, mediaForSelected, resourceSelected, onModifyAssetClick = { typeContent -> onModifyAssetClick(typeContent) })
+        MediaContentPager(
+            pagerState = pagerState,
+            assets = assets,
+            mediaForSelected = mediaForSelected,
+            resourceSelected = resourceSelected,
+            onModifyAssetClick = { typeContent -> onModifyAssetClick(typeContent) },
+            onActionGuideNone = { onActionGuideNone() })
         DeleteAsset(resourceSelected)
         Spacer(modifier = Modifier.height(24.dp))
         StepNavigationCarousel(lazyRowState, assets, pagerState, scope)
