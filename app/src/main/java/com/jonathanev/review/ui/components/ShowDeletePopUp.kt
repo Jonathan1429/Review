@@ -81,7 +81,7 @@ fun ShowDeletePopUp(
                 .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            IconCircle()
+            WarningIconCircle()
             Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = stringResource(id = R.string.lblConfirmarAccion),
@@ -127,21 +127,5 @@ fun ShowDeletePopUp(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun IconCircle() {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .size(56.dp)
-            .background(color = ColorBotones, shape = CircleShape)
-    ) {
-        Icon(
-            painter = painterResource(R.drawable.ic_advertencia),
-            contentDescription = stringResource(R.string.iconAdvertencia),
-            tint = MaterialTheme.colorScheme.onPrimary
-        )
     }
 }

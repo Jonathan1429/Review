@@ -27,7 +27,8 @@ fun PreviewNavigationPagerBar() {
         Row() {
             NavigationPagerBar(
                 actualQuestion = 9,
-                totalQuestions = 15
+                totalQuestions = 15,
+                onNextQuestionClick = {}
             )
         }
     }
@@ -36,14 +37,18 @@ fun PreviewNavigationPagerBar() {
 @Composable
 fun RowScope.NavigationPagerBar(
     actualQuestion: Int,
-    totalQuestions: Int
+    totalQuestions: Int,
+    onNextQuestionClick: () -> Unit
 ) {
     Row(
         modifier = Modifier.weight(1f),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = { /* Anterior */ }) {
+        IconButton(
+            enabled = actualQuestion > 1,
+            onClick = { /* Anterior */}
+        ) {
             Icon(
                 Icons.Default.ArrowBack,
                 contentDescription = "Prev",
@@ -56,7 +61,10 @@ fun RowScope.NavigationPagerBar(
             fontSize = 18.sp,
             fontWeight = FontWeight.Medium
         )
-        IconButton(onClick = { /* Siguiente */ }) {
+        IconButton(
+            enabled =  totalQuestions > 1,
+            onClick = onNextQuestionClick
+        ) {
             Icon(
                 Icons.Default.ArrowForward,
                 contentDescription = "Next",
