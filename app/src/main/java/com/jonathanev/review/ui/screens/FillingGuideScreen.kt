@@ -75,6 +75,7 @@ fun PreviewFillingGuideWithShowDialog() {
             showDialogDeleteQuestion = true,
             showDialogRepeatGuide = false,
             onContinueDialogDeleteQuestionClick = {},
+            onBackQuestionClick = {},
             onNextQuestionClick = {},
             onDeleteQuestionClick = { },
             onTypeClicked = {},
@@ -103,6 +104,7 @@ fun PreviewFillingGuideWithoutShowDialog() {
             showDialogDeleteQuestion = false,
             showDialogRepeatGuide = false,
             onContinueDialogDeleteQuestionClick = {},
+            onBackQuestionClick = {},
             onNextQuestionClick = {},
             onDeleteQuestionClick = { },
             onTypeClicked = {},
@@ -177,8 +179,15 @@ fun FillingGuideRoute(
                 viewModel.saveDontAskDelete()
             }
         },
+        onBackQuestionClick = {
+            viewModel.previousQuestion()
+        },
         onNextQuestionClick = {
-            showDialogRepeatGuide = true
+            if (actualQuestion == totalQuestions){
+                showDialogRepeatGuide = true
+            } else {
+                viewModel.nextQuestion()
+            }
         },
         onDeleteQuestionClick = {
             coroutineScope.launch {
@@ -239,6 +248,7 @@ fun FillingGuideScreen(
     onDissmissDialogRepeatGuide: () -> Unit,
     onConfirmDialogRepeatGuide: () -> Unit,
     onContinueDialogDeleteQuestionClick: (Boolean) -> Unit,
+    onBackQuestionClick: () -> Unit,
     onNextQuestionClick: () -> Unit,
     onDeleteQuestionClick: () -> Unit,
     onTypeClicked: (QAType) -> Unit,
@@ -266,6 +276,7 @@ fun FillingGuideScreen(
                 actualQuestion,
                 totalQuestions,
                 onDeleteQuestionClick = onDeleteQuestionClick,
+                onBackQuestionClick = onBackQuestionClick,
                 onNextQuestionClick = onNextQuestionClick
             )
             QAType(typeForSelected, typeSelected, onTypeClicked = { typeClicked ->
@@ -370,6 +381,7 @@ private fun CustomTopBar(
     actualQuestion: Int,
     totalQuestions: Int,
     onDeleteQuestionClick: () -> Unit,
+    onBackQuestionClick: () -> Unit,
     onNextQuestionClick: () -> Unit
 ) {
     Row(
@@ -382,7 +394,8 @@ private fun CustomTopBar(
         NavigationPagerBar(
             actualQuestion = actualQuestion,
             totalQuestions = totalQuestions,
-            onNextQuestionClick = {}
+            onBackQuestionClick = onBackQuestionClick,
+            onNextQuestionClick = onNextQuestionClick
         )
         Spacer(modifier = Modifier.width(5.dp))
         Box(

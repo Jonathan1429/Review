@@ -28,7 +28,8 @@ fun PreviewNavigationPagerBar() {
             NavigationPagerBar(
                 actualQuestion = 9,
                 totalQuestions = 15,
-                onNextQuestionClick = {}
+                onNextQuestionClick = {},
+                onBackQuestionClick = {}
             )
         }
     }
@@ -38,6 +39,7 @@ fun PreviewNavigationPagerBar() {
 fun RowScope.NavigationPagerBar(
     actualQuestion: Int,
     totalQuestions: Int,
+    onBackQuestionClick: () -> Unit,
     onNextQuestionClick: () -> Unit
 ) {
     Row(
@@ -47,7 +49,7 @@ fun RowScope.NavigationPagerBar(
     ) {
         IconButton(
             enabled = actualQuestion > 1,
-            onClick = { /* Anterior */}
+            onClick = onBackQuestionClick
         ) {
             Icon(
                 Icons.Default.ArrowBack,
