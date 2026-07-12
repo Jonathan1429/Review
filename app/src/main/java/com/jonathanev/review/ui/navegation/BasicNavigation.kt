@@ -133,49 +133,57 @@ fun BasicNavigation() {
                     viewModel.getAllGuides(relativeGuidePath)
                 }
 
-                ListGuidesRoute(
-                    viewModel = viewModel,
-                    navigationViewModel = navigationViewModel,
-                    guides = guides,
-                    folderAction = action.folderAction,
-                    onAddGuideClick = {
-                        backStack.add(AppRoutes.CreateFilesPropertiesScreen(FolderAction.CreatingFile))
-                    },
-                    onOpenGuideClick = { nameGuide ->
-                        backStack.add(AppRoutes.PreviewQuestionsScreen(nameGuide))
-                    },
-                    onDeleteGuideClick = {
-                        backStack.removeLastOrNull()
-                    },
-                    onRenameGuideClick = { propertiesGuide ->
-                        backStack.add(
-                            AppRoutes.CreateFilesPropertiesScreen(
-                                FolderAction.RenamingFile(
-                                    fileName = propertiesGuide.name,
-                                    description = propertiesGuide.description
+                if (guides.isEmpty()) {
+                    WithoutFoldersScreen(
+                        onNavCreateFilesProperties = {
+                            backStack.add(AppRoutes.CreateFilesPropertiesScreen(FolderAction.CreatingFile))
+                        }
+                    )
+                } else {
+                    ListGuidesRoute(
+                        viewModel = viewModel,
+                        navigationViewModel = navigationViewModel,
+                        guides = guides,
+                        folderAction = action.folderAction,
+                        onAddGuideClick = {
+                            backStack.add(AppRoutes.CreateFilesPropertiesScreen(FolderAction.CreatingFile))
+                        },
+                        onOpenGuideClick = { nameGuide ->
+                            backStack.add(AppRoutes.PreviewQuestionsScreen(nameGuide))
+                        },
+                        onDeleteGuideClick = {
+                            backStack.removeLastOrNull()
+                        },
+                        onRenameGuideClick = { propertiesGuide ->
+                            backStack.add(
+                                AppRoutes.CreateFilesPropertiesScreen(
+                                    FolderAction.RenamingFile(
+                                        fileName = propertiesGuide.name,
+                                        description = propertiesGuide.description
+                                    )
                                 )
                             )
-                        )
-                    },
-                    onMoveGuideClick = { folderAction ->
-                        navigationViewModel.setMainPath()
-                        backStack.clear()
-                        backStack.add(AppRoutes.MainScreen(folderAction))
-                    },
-                    onMoveCancelGuideClick = {
-                        navigationViewModel.setMainPath()
-                        backStack.clear()
-                        backStack.add(AppRoutes.MainScreen(FolderAction.None))
-                    },
-                    onMoveSuccessGuideClick = {
-                        navigationViewModel.setMainPath()
-                        backStack.clear()
-                        backStack.add(AppRoutes.MainScreen(FolderAction.None))
-                    },
-                    onBackNav = {
-                        backStack.removeLastOrNull()
-                    }
-                )
+                        },
+                        onMoveGuideClick = { folderAction ->
+                            navigationViewModel.setMainPath()
+                            backStack.clear()
+                            backStack.add(AppRoutes.MainScreen(folderAction))
+                        },
+                        onMoveCancelGuideClick = {
+                            navigationViewModel.setMainPath()
+                            backStack.clear()
+                            backStack.add(AppRoutes.MainScreen(FolderAction.None))
+                        },
+                        onMoveSuccessGuideClick = {
+                            navigationViewModel.setMainPath()
+                            backStack.clear()
+                            backStack.add(AppRoutes.MainScreen(FolderAction.None))
+                        },
+                        onBackNav = {
+                            backStack.removeLastOrNull()
+                        }
+                    )
+                }
             }
             entry<AppRoutes.CreateFilesPropertiesScreen> { typeAction ->
                 val viewModel: CreateFilesViewModel = viewModel()
