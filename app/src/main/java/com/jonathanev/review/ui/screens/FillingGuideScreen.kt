@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -36,6 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jonathanev.review.R
 import com.jonathanev.review.domain.model.RelativeGuidePath
@@ -57,7 +59,7 @@ import kotlinx.coroutines.launch
 
 @DevicePreviews
 @Composable
-fun PreviewFillingGuide() {
+fun PreviewFillingGuideWithShowDialog() {
     ReviewTheme {
         FillingGuideScreen(
             typeSelected = QAType.QUESTION,
@@ -67,12 +69,38 @@ fun PreviewFillingGuide() {
             actualQuestion = 1,
             totalQuestions = 2,
             listTypeMedia = listOf(QuestionContentUi.Text("Hola", listOf())),
+            showDialogDeleteQuestion = true,
+            onDeleteQuestionClick = { },
             onTypeClicked = {},
             onFilterClicked = {},
             onModifyAssetClick = { },
             onAddQuestion = {},
+            onContinueDialogDeleteQuestionClick = {},
             onSaveQuestion = {},
-            onDeleteQuestionClick = { }
+        )
+    }
+}
+
+@DevicePreviews
+@Composable
+fun PreviewFillingGuideWithoutShowDialog() {
+    ReviewTheme {
+        FillingGuideScreen(
+            typeSelected = QAType.QUESTION,
+            typeForSelected = listOf(QAType.QUESTION, QAType.ANSWER),
+            mediaSelected = ContentType.TEXT,
+            mediaForSelected = listOf(ContentType.TEXT, ContentType.IMAGE),
+            actualQuestion = 1,
+            totalQuestions = 2,
+            listTypeMedia = listOf(QuestionContentUi.Text("Hola", listOf())),
+            showDialogDeleteQuestion = false,
+            onDeleteQuestionClick = { },
+            onTypeClicked = {},
+            onFilterClicked = {},
+            onModifyAssetClick = { },
+            onAddQuestion = {},
+            onContinueDialogDeleteQuestionClick = {},
+            onSaveQuestion = {},
         )
     }
 }
@@ -88,6 +116,7 @@ fun FillingGuideRoute(
     val typeForSelected = listOf(QAType.QUESTION, QAType.ANSWER)
     var mediaSelected by rememberSaveable { mutableStateOf(ContentType.TEXT) }
     val mediaForSelected = listOf(ContentType.TEXT, ContentType.IMAGE)
+    var showDialogDeleteQuestion by remember { mutableStateOf(false) }
 
     val totalQuestions = viewModel.uiState.collectAsStateWithLifecycle().value.preguntas.size
     val actualQuestion = viewModel.uiState.collectAsStateWithLifecycle().value.contadorPregunta
@@ -121,13 +150,18 @@ fun FillingGuideRoute(
         actualQuestion = actualQuestion,
         totalQuestions = totalQuestions,
         listTypeMedia = listTypeMedia,
+        showDialogDeleteQuestion = showDialogDeleteQuestion,
+        onContinueDialogDeleteQuestionClick = { isChecked ->
+            showDialogDeleteQuestion = false
+            if (isChecked) {
+                viewModel.saveDontAskDelete()
+            }
+        },
         onDeleteQuestionClick = {
             coroutineScope.launch {
-                val dontAsk = viewModel.getDontAskDeleteOnce()
-                if (dontAsk) {
+                showDialogDeleteQuestion = viewModel.getDontAskDeleteOnce()
+                if (showDialogDeleteQuestion) {
                     viewModel.deleteQuesAns()
-                } else {
-                    //ShowDeletePopUp()
                 }
             }
         },
@@ -158,6 +192,7 @@ fun FillingGuideRoute(
                         mode = SaveGuideMode.Update
                     )
                 }
+
                 ActionGuide.NONE -> TODO()
             }
         }
@@ -174,6 +209,8 @@ fun FillingGuideScreen(
     actualQuestion: Int,
     totalQuestions: Int,
     listTypeMedia: List<QuestionContentUi>,
+    showDialogDeleteQuestion: Boolean,
+    onContinueDialogDeleteQuestionClick: (Boolean) -> Unit,
     onDeleteQuestionClick: () -> Unit,
     onTypeClicked: (QAType) -> Unit,
     onFilterClicked: (ContentType) -> Unit,
@@ -196,7 +233,11 @@ fun FillingGuideScreen(
                 .padding(padding)
                 .padding(horizontal = 16.dp)
         ) {
-            CustomTopBar(actualQuestion, totalQuestions, onDeleteQuestionClick = onDeleteQuestionClick)
+            CustomTopBar(
+                actualQuestion,
+                totalQuestions,
+                onDeleteQuestionClick = onDeleteQuestionClick
+            )
             QAType(typeForSelected, typeSelected, onTypeClicked = { typeClicked ->
                 onTypeClicked(typeClicked)
             })
@@ -211,6 +252,20 @@ fun FillingGuideScreen(
                 onDeleteAssetClick = { },
                 onModifyAssetClick = { typeContent -> onModifyAssetClick(typeContent) }
             )
+        }
+
+        if (showDialogDeleteQuestion) {
+            Dialog(onDismissRequest = {}) {
+                Box(
+                    Modifier.fillMaxSize()) {
+                    ShowDeletePopUp(
+                        modifier = Modifier.align(Alignment.Center),
+                        onContinueClick = { isChecked ->
+                            onContinueDialogDeleteQuestionClick(isChecked)
+                        },
+                    )
+                }
+            }
         }
     }
 }
