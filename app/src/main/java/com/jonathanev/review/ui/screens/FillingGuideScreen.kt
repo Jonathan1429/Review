@@ -206,7 +206,9 @@ fun FillingGuideRoute(
             mediaSelected = filterClicked
         },
         onModifyAssetClick = { typeContent -> onModifyAssetClick(typeContent) },
-        onAddQuestion = { },
+        onAddQuestion = { 
+            viewModel.addNewQuestion()
+        },
         onSaveQuestion = {
             when (action) {
                 is ActionGuide.CREATE -> {
@@ -261,7 +263,7 @@ fun FillingGuideScreen(
         modifier = Modifier.fillMaxSize(),
         floatingActionButton = {
             FloatingActionButtons(
-                onAddQuestion = {},
+                onAddQuestion = onAddQuestion,
                 onSaveQuestion = onSaveQuestion
             )
         }

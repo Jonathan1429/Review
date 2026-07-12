@@ -366,7 +366,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             return
         }
 
-        var isLastQuestion = false
+        /*var isLastQuestion = false
         if (currentState.isLastQuestion == null) {
             isLastQuestion =
                 currentState.contadorPregunta + 1 == currentState.respuestas.size
@@ -382,6 +382,18 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 contadorPregunta = state.contadorPregunta + 1,
                 qAType = QAType.QUESTION, // Siempre volvemos a QUESTION al avanzar
                 actualUri = null,           // resetContentLists integrado
+                isEditing = false,
+                contadorContenido = -1,
+            )
+        }*/
+    }
+
+    fun addNewQuestion() {
+        _uiState.update { state ->
+            state.copy(
+                contadorPregunta = state.contadorPregunta + 1,
+                qAType = QAType.QUESTION,
+                actualUri = null,
                 isEditing = false,
                 contadorContenido = -1,
             )
