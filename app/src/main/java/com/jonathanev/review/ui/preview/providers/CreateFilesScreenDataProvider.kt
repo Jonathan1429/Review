@@ -2,6 +2,7 @@ package com.jonathanev.review.ui.preview.providers
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.jonathanev.review.presentation.model.ColorType
+import com.jonathanev.review.presentation.model.FileFormMode
 import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.presentation.model.IconType
 import com.jonathanev.review.presentation.state.PropertiesFilesState
@@ -9,7 +10,7 @@ import com.jonathanev.review.presentation.state.PropertiesFilesState
 data class PropertiesCreateFilesScreen(
     val listIcons: List<IconType>,
     val state: PropertiesFilesState,
-    val mode: FolderAction
+    val fileFormMode: FileFormMode
 )
 
 class CreateFilesScreenDataProvider : PreviewParameterProvider<PropertiesCreateFilesScreen> {
@@ -24,7 +25,6 @@ class CreateFilesScreenDataProvider : PreviewParameterProvider<PropertiesCreateF
                 state = PropertiesFilesState(
                     name = "",
                     description = "",
-                    mode = FolderAction.CreatingFolder,
                     icon = IconType.BACTERIA_SOLID_FULL,
                     color = ColorType.White,
                     selectedIndex = 1,
@@ -35,7 +35,7 @@ class CreateFilesScreenDataProvider : PreviewParameterProvider<PropertiesCreateF
                     ),
                     showOverwriteDialogFile = false
                 ),
-                mode = FolderAction.CreatingFolder
+                fileFormMode = FileFormMode.CreatingFolder
             )
         )
 }

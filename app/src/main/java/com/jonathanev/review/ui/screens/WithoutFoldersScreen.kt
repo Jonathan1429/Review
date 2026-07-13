@@ -60,13 +60,13 @@ fun PreviewSinFolders(){
 
 @Composable
 fun WithoutFoldersScreen(
-    onNavCreateFilesProperties: (FolderAction) -> Unit
+    onNavCreateFilesProperties: () -> Unit
 ) {
     Scaffold(
         //topBar = { TopAppBar(title = { Text("Carpetas") }) },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { onNavCreateFilesProperties(FolderAction.CreatingFolder) },
+                onClick = onNavCreateFilesProperties,
                 containerColor = ColorBotones
             ) {
                 Icon(

@@ -2,11 +2,12 @@ package com.jonathanev.review.domain
 
 import com.jonathanev.review.data.storage.StorageFolders
 import com.jonathanev.review.domain.result.ValidateCreateFileResult
+import com.jonathanev.review.presentation.model.FileFormMode
 import com.jonathanev.review.presentation.model.FolderAction
 import javax.inject.Inject
 
 class ValidateCreateFileUseCase @Inject constructor() {
-    operator fun invoke(name: String, description: String, mode: FolderAction): ValidateCreateFileResult {
+    operator fun invoke(name: String, description: String, mode: FileFormMode): ValidateCreateFileResult {
         val invalidChars = listOf("/", ".")
         val invalidNames = listOf(
             StorageFolders.DATASTORE,

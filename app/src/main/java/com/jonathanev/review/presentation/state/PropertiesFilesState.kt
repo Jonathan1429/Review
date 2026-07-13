@@ -1,6 +1,7 @@
 package com.jonathanev.review.presentation.state
 
 import com.jonathanev.review.presentation.model.ColorType
+import com.jonathanev.review.presentation.model.FileFormMode
 import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.presentation.model.IconType
 
@@ -9,7 +10,6 @@ data class PropertiesFilesState(
     val description: String = "",
     val oldName: String = "",
     val oldDescription: String = "",
-    val mode: FolderAction = FolderAction.None,
     val icon: IconType = IconType.ANCHOR_SOLID_FULL,
     val color: ColorType = ColorType.Black,
     val selectedIndex: Int = -1,

@@ -48,6 +48,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jonathanev.review.R
 import com.jonathanev.review.domain.model.RelativeGuidePath
+import com.jonathanev.review.presentation.model.FileInteractionMode
 import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.presentation.model.GuideResultUi
 import com.jonathanev.review.presentation.model.GuideUiModel
@@ -75,7 +76,7 @@ fun PreviewListGuidesScreen(
             onItemClick = { },
             onMoveCancelGuideClick = { },
             onMoveSuccessGuideClick = { },
-            folderAction = FolderAction.MovingFile
+            fileInteractionMode = FileInteractionMode.MovingItem
         )
     }
 }
@@ -85,12 +86,12 @@ fun ListGuidesRoute(
     viewModel: FragmentListGuidesViewModel,
     navigationViewModel: NavigationViewModel,
     guides: List<GuideUiModel>,
-    folderAction: FolderAction,
+    fileInteractionMode: FileInteractionMode,
     onAddGuideClick: () -> Unit,
     onOpenGuideClick: (String) -> Unit,
     onDeleteGuideClick: () -> Unit,
     onRenameGuideClick: (PropertiesGuide) -> Unit,
-    onMoveGuideClick: (FolderAction) -> Unit,
+    onMoveGuideClick: () -> Unit,
     onMoveCancelGuideClick: () -> Unit,
     onMoveSuccessGuideClick: () -> Unit,
     onBackNav: () -> Unit
@@ -124,7 +125,7 @@ fun ListGuidesRoute(
             viewModel.movingGuide(RelativeGuidePath(relativeGuidePath))
             onMoveSuccessGuideClick()
         },
-        folderAction = folderAction
+        fileInteractionMode = fileInteractionMode
     )
 
     currentDialog?.let { stateDialog ->
@@ -155,7 +156,7 @@ fun ListGuidesRoute(
                     onMoveGuideClick = {
                         viewModel.setContext(RelativeGuidePath(relativeGuidePath))
                         navigationViewModel.setMainPath()
-                        onMoveGuideClick(FolderAction.MovingFile)
+                        onMoveGuideClick()
                     }
                 )
             }
@@ -171,11 +172,11 @@ fun ListGuidesScreen(
     onItemClick: (Int) -> Unit,
     onMoveCancelGuideClick: () -> Unit,
     onMoveSuccessGuideClick: () -> Unit,
-    folderAction: FolderAction
+    fileInteractionMode: FileInteractionMode
 ) {
     Scaffold(
         topBar = {
-            if (folderAction == FolderAction.MovingFile) {
+            if (fileInteractionMode == FileInteractionMode.MovingItem) {
                 CenterAlignedTopAppBar(
                     title = {
                         Text(stringResource(R.string.lblMoving))

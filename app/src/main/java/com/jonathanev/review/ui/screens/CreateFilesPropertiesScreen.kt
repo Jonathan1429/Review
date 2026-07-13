@@ -28,7 +28,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.jonathanev.review.presentation.model.FolderAction
+import com.jonathanev.review.presentation.model.FileFormMode
 import com.jonathanev.review.presentation.model.IconType
 import com.jonathanev.review.presentation.state.CreatingUIState
 import com.jonathanev.review.presentation.state.PropertiesFilesState
@@ -62,16 +62,16 @@ fun PreviewCreateFilesPropertiesScreen(
 ) {
     ReviewTheme {
         CreateFilesPropertiesScreen(
-            PropertiesFilesState(icons = data.listIcons, selectedIndex = data.state.selectedIndex),
-            data.state.mode,
-            {},
-            {},
-            {},
-            {},
-            { _, _ -> },
-            {},
-            {},
-            {}
+            state = PropertiesFilesState(icons = data.listIcons, selectedIndex = data.state.selectedIndex),
+            fileFormMode = data.fileFormMode,
+            onClickApply = {},
+            onNameChange = {},
+            onDescriptionChange = {},
+            onConfirmDialog = {},
+            onChangeIcon = { _, _ -> },
+            onChangeColor = {},
+            onShowToast = {},
+            onDismissDialogs = {}
         )
     }
 }
@@ -138,7 +138,7 @@ fun PreviewLayeredSelectedIcon(
 fun CreateFilesPropertiesRoute(
     viewModel: CreateFilesViewModel,
     viewModelNavigation: NavigationViewModel,
-    mode: FolderAction,
+    fileFormMode: FileFormMode,
     onNavBack: () -> Unit,
     onNavFillingGuide: (PropertiesGuide) -> Unit
 ) {
@@ -173,14 +173,6 @@ fun CreateFilesPropertiesRoute(
                     onNavBack()
                 }
 
-                is CreatingUIState.RenameFolder -> {
-                    Toast.makeText(
-                        context,
-                        "No se encuentra implementada esta opción",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-
                 is CreatingUIState.Message -> {
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                 }
@@ -190,7 +182,7 @@ fun CreateFilesPropertiesRoute(
 
     CreateFilesPropertiesScreen(
         state = state,
-        mode = mode,
+        fileFormMode = fileFormMode,
         onClickApply = {
             focusManager.clearFocus()
             viewModel.dismissOverwriteDialog()
@@ -273,7 +265,7 @@ private fun onCreateFolderConfirmed(data: ScreenDataUi) {
 @Composable
 fun CreateFilesPropertiesScreen(
     state: PropertiesFilesState,
-    mode: FolderAction,
+    fileFormMode: FileFormMode,
     onClickApply: () -> Unit,
     onNameChange: (String) -> Unit,
     onDescriptionChange: (String) -> Unit,
@@ -344,8 +336,8 @@ fun CreateFilesPropertiesScreen(
                 .padding(padding)
                 .padding(8.dp)
         ) {
-            when (mode) {
-                FolderAction.CreatingFile, is FolderAction.RenamingFile -> {
+            when (fileFormMode) {
+                FileFormMode.CreatingFile, is FileFormMode.RenameFile -> {
                     CustomTextField(state.name, "Nombra tu archivo") { onNameChange(it) }
                     Spacer(Modifier.size(12.dp))
                     CustomTextField(
@@ -358,7 +350,7 @@ fun CreateFilesPropertiesScreen(
                     }
                 }
 
-                FolderAction.CreatingFolder, FolderAction.RenamingFolder -> {
+                FileFormMode.CreatingFolder -> {
                     CustomTextField(state.name, "Nombra tu carpeta") { onNameChange(it) }
                     Spacer(Modifier.size(12.dp))
                     IconsForSelect(state.icons, state.selectedIndex) { position, icon ->

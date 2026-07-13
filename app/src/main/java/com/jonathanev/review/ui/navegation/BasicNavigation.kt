@@ -16,8 +16,10 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.presentation.event.MainUiEvent
-import com.jonathanev.review.presentation.model.ActionGuide
-import com.jonathanev.review.presentation.model.FolderAction
+import com.jonathanev.review.presentation.model.FileFormMode
+import com.jonathanev.review.presentation.model.FileInteractionMode
+import com.jonathanev.review.presentation.model.GuideMode
+import com.jonathanev.review.presentation.model.GuideUiModel
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.presentation.viewmodel.CreateFilesViewModel
 import com.jonathanev.review.presentation.viewmodel.FragmentListGuidesViewModel
@@ -32,6 +34,7 @@ import com.jonathanev.review.ui.screens.FillingGuideRoute
 import com.jonathanev.review.ui.screens.ListFoldersScreen
 import com.jonathanev.review.ui.screens.ListGuidesRoute
 import com.jonathanev.review.ui.screens.PreviewQuestionsRoute
+import com.jonathanev.review.ui.screens.WithoutFilesScreen
 import com.jonathanev.review.ui.screens.WithoutFoldersScreen
 
 @Composable
@@ -77,7 +80,7 @@ fun BasicNavigation() {
 
             val folders = viewModel.folders.collectAsStateWithLifecycle().value
 
-            entry<AppRoutes.MainScreen> { action ->
+            entry<AppRoutes.MainScreen> { mode ->
                 LaunchedEffect(Unit) {
                     viewModel.createFolders()
                     viewModel.getAllFolders()
@@ -104,21 +107,21 @@ fun BasicNavigation() {
 
                 if (folders.isEmpty()) {
                     WithoutFoldersScreen(
-                        onNavCreateFilesProperties = { typeAction ->
-                            backStack.add(AppRoutes.CreateFilesPropertiesScreen(typeAction))
+                        onNavCreateFilesProperties = {
+                            backStack.add(AppRoutes.CreateFilesPropertiesScreen(FileFormMode.CreatingFolder))
                         }
                     )
                 } else {
                     ListFoldersScreen(
                         guias = folders,
-                        onCreateFolderClick = { typeAction ->
-                            backStack.add(AppRoutes.CreateFilesPropertiesScreen(typeAction))
+                        onCreateFolderClick = {
+                            backStack.add(AppRoutes.CreateFilesPropertiesScreen(FileFormMode.CreatingFolder))
                         },
                         onFolderClick = { nameGuide, folderAction ->
                             navigationViewModel.next(nameGuide)
                             backStack.add(AppRoutes.ListGuidesScreen(folderAction))
                         },
-                        folderAction = action.folderAction
+                        fileInteractionMode = mode.fileInteractionMode
                     )
                 }
             }
@@ -134,9 +137,9 @@ fun BasicNavigation() {
                 }
 
                 if (guides.isEmpty()) {
-                    WithoutFoldersScreen(
-                        onNavCreateFilesProperties = {
-                            backStack.add(AppRoutes.CreateFilesPropertiesScreen(FolderAction.CreatingFile))
+                    WithoutFilesScreen(
+                        onAddGuideClick = {
+                            backStack.add(AppRoutes.CreateFilesPropertiesScreen(FileFormMode.CreatingFile))
                         }
                     )
                 } else {
@@ -144,9 +147,9 @@ fun BasicNavigation() {
                         viewModel = viewModel,
                         navigationViewModel = navigationViewModel,
                         guides = guides,
-                        folderAction = action.folderAction,
+                        fileInteractionMode = action.fileInteractionMode,
                         onAddGuideClick = {
-                            backStack.add(AppRoutes.CreateFilesPropertiesScreen(FolderAction.CreatingFile))
+                            backStack.add(AppRoutes.CreateFilesPropertiesScreen(FileFormMode.CreatingFile))
                         },
                         onOpenGuideClick = { nameGuide ->
                             backStack.add(AppRoutes.PreviewQuestionsScreen(nameGuide))
@@ -157,27 +160,29 @@ fun BasicNavigation() {
                         onRenameGuideClick = { propertiesGuide ->
                             backStack.add(
                                 AppRoutes.CreateFilesPropertiesScreen(
-                                    FolderAction.RenamingFile(
-                                        fileName = propertiesGuide.name,
-                                        description = propertiesGuide.description
+                                    FileFormMode.RenameFile(
+                                        GuideUiModel(
+                                            nameGuide = propertiesGuide.name,
+                                            description = propertiesGuide.description
+                                        )
                                     )
                                 )
                             )
                         },
-                        onMoveGuideClick = { folderAction ->
+                        onMoveGuideClick = {
                             navigationViewModel.setMainPath()
                             backStack.clear()
-                            backStack.add(AppRoutes.MainScreen(folderAction))
+                            backStack.add(AppRoutes.MainScreen(FileInteractionMode.MovingItem))
                         },
                         onMoveCancelGuideClick = {
                             navigationViewModel.setMainPath()
                             backStack.clear()
-                            backStack.add(AppRoutes.MainScreen(FolderAction.None))
+                            backStack.add(AppRoutes.MainScreen(FileInteractionMode.Default))
                         },
                         onMoveSuccessGuideClick = {
                             navigationViewModel.setMainPath()
                             backStack.clear()
-                            backStack.add(AppRoutes.MainScreen(FolderAction.None))
+                            backStack.add(AppRoutes.MainScreen(FileInteractionMode.Default))
                         },
                         onBackNav = {
                             backStack.removeLastOrNull()
@@ -185,24 +190,17 @@ fun BasicNavigation() {
                     )
                 }
             }
-            entry<AppRoutes.CreateFilesPropertiesScreen> { typeAction ->
+            entry<AppRoutes.CreateFilesPropertiesScreen> { mode ->
                 val viewModel: CreateFilesViewModel = viewModel()
                 val viewModelNavigation: NavigationViewModel = viewModel()
 
                 LaunchedEffect(Unit) {
-                    when (typeAction.folderAction) {
-                        FolderAction.CreatingFile -> {
-                            viewModel.initWithMode(typeAction.folderAction)
-                        }
+                    when (mode.fileFormMode) {
+                        FileFormMode.CreatingFile -> viewModel.initWithMode(mode.fileFormMode)
+                        is FileFormMode.RenameFile -> {
+                            viewModel.initWithMode(mode.fileFormMode)
 
-                        FolderAction.CreatingFolder -> {
-                            viewModel.initWithMode(typeAction.folderAction)
-                        }
-
-                        is FolderAction.RenamingFile -> {
-                            viewModel.initWithMode(typeAction.folderAction)
-
-                            val oldName = typeAction.folderAction.fileName
+                            val oldName = mode.fileFormMode.guideUiModel.nameGuide
                             val responseFillFields = viewModel.fillFields(oldName)
                             if (!responseFillFields) {
                                 Toast.makeText(
@@ -214,38 +212,19 @@ fun BasicNavigation() {
                             }
                         }
 
-                        FolderAction.RenamingFolder -> {
-                            Toast.makeText(
-                                context,
-                                "No se encuentra disponible el renombrar un folder",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            backStack.removeLastOrNull()
-                        }
-
-                        FolderAction.MovingFile, FolderAction.None -> {
-                            Toast.makeText(
-                                context,
-                                "No se puede procesar la solicitud",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                            backStack.removeLastOrNull()
-                        }
+                        FileFormMode.CreatingFolder -> viewModel.initWithMode(mode.fileFormMode)
                     }
                 }
 
                 CreateFilesPropertiesRoute(
                     viewModel = viewModel,
                     viewModelNavigation = viewModelNavigation,
-                    mode = typeAction.folderAction,
+                    fileFormMode = mode.fileFormMode,
                     onNavBack = { backStack.removeLastOrNull() },
                     onNavFillingGuide = { propertiesGuide ->
                         backStack.add(
                             AppRoutes.FillingGuideScreen(
-                                ActionGuide.CREATE(
-                                    propertiesGuide.name,
-                                    propertiesGuide.description
-                                )
+                                GuideMode.Create(propertiesGuide.name, propertiesGuide.description)
                             )
                         )
                     }
@@ -259,7 +238,7 @@ fun BasicNavigation() {
 
                 FillingGuideRoute(
                     viewModel = viewModel,
-                    action = action.actionGuide,
+                    guideMode = action.guideMode,
                     relativeGuidePath = RelativeGuidePath(value = relativeGuidePath),
                     onModifyAssetClick = { typeContent ->
                         when (typeContent) {
@@ -281,6 +260,7 @@ fun BasicNavigation() {
                                     Toast.LENGTH_SHORT
                                 ).show()
                             }
+
                             is QuestionContentUi.Text -> {
                                 backStack.add(
                                     AppRoutes.CreateTextScreen(
@@ -337,7 +317,7 @@ fun BasicNavigation() {
                     onEditingGuideClick = { position ->
                         backStack.add(
                             AppRoutes.FillingGuideScreen(
-                                ActionGuide.EDIT(
+                                GuideMode.Edit(
                                     propertiesGuide.fileName,
                                     propertiesGuide.description,
                                     position

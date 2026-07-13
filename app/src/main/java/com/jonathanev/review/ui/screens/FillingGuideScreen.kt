@@ -44,7 +44,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jonathanev.review.R
 import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.model.SaveGuideMode
-import com.jonathanev.review.presentation.model.ActionGuide
+import com.jonathanev.review.presentation.model.GuideMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.ui.components.AssetCarouselViewer
@@ -85,7 +85,7 @@ fun PreviewFillingGuideWithShowDialog() {
             onDissmissDialogRepeatGuide = {},
             onConfirmDialogRepeatGuide = {},
             onActionGuideNone = {},
-            onSaveQuestion = {},
+            onCloseGuide = {},
             onDeleteItemClick = {_, _ -> },
         )
     }
@@ -116,7 +116,7 @@ fun PreviewFillingGuideWithoutShowDialog() {
             onAddQuestion = {},
             onDissmissDialogRepeatGuide = {},
             onConfirmDialogRepeatGuide = {},
-            onSaveQuestion = {},
+            onCloseGuide = {},
             onDeleteItemClick = {_, _ -> },
         )
     }
@@ -125,7 +125,7 @@ fun PreviewFillingGuideWithoutShowDialog() {
 @Composable
 fun FillingGuideRoute(
     viewModel: SharedFragmentCreateFileViewModel,
-    action: ActionGuide,
+    guideMode: GuideMode,
     relativeGuidePath: RelativeGuidePath,
     onModifyAssetClick: (QuestionContentUi) -> Unit,
     onActionGuideNone: () -> Unit
@@ -148,17 +148,18 @@ fun FillingGuideRoute(
     var restartGuide by rememberSaveable { mutableIntStateOf(0) }
 
     LaunchedEffect(restartGuide) {
-        when (action) {
-            is ActionGuide.CREATE -> viewModel.initUIState()
-            is ActionGuide.EDIT -> {
+        when (guideMode) {
+            is GuideMode.Create -> {
+                viewModel.initUIState()
+            }
+            is GuideMode.Edit -> {
                 viewModel.getObtenerDatosXML(
-                    noQuestion = action.noQuestion,
-                    nameGuide = action.nameGuide,
+                    noQuestion = guideMode.noQuestion,
+                    nameGuide = guideMode.nameGuide,
                     relativeGuidePath = relativeGuidePath
                 )
             }
-
-            ActionGuide.NONE -> onActionGuideNone()
+            GuideMode.Review -> TODO()
         }
     }
 
@@ -227,12 +228,13 @@ fun FillingGuideRoute(
         onAddQuestion = {
             viewModel.addNewQuestion()
         },
-        onSaveQuestion = {
-            when (action) {
+        onCloseGuide = {
+            when(guideMode){
+            /*when (guideMode) {
                 is ActionGuide.CREATE -> {
                     viewModel.saveGuide(
-                        nameGuide = action.nameGuide,
-                        description = action.description,
+                        nameGuide = guideMode.nameGuide,
+                        description = guideMode.description,
                         relativeGuidePath = relativeGuidePath,
                         mode = SaveGuideMode.Create
                     )
@@ -240,14 +242,31 @@ fun FillingGuideRoute(
 
                 is ActionGuide.EDIT -> {
                     viewModel.saveGuide(
-                        nameGuide = action.nameGuide,
-                        description = action.description,
+                        nameGuide = guideMode.nameGuide,
+                        description = guideMode.description,
                         relativeGuidePath = relativeGuidePath,
                         mode = SaveGuideMode.Update
                     )
                 }
 
-                ActionGuide.NONE -> onActionGuideNone()
+                ActionGuide.NONE -> onActionGuideNone()*/
+                is GuideMode.Create -> {
+                    viewModel.saveGuide(
+                        nameGuide = guideMode.nameGuide,
+                        description = guideMode.description,
+                        relativeGuidePath = relativeGuidePath,
+                        mode = SaveGuideMode.Create
+                    )
+                }
+                is GuideMode.Edit ->{
+                    viewModel.saveGuide(
+                        nameGuide = guideMode.nameGuide,
+                        description = guideMode.description,
+                        relativeGuidePath = relativeGuidePath,
+                        mode = SaveGuideMode.Update
+                    )
+                }
+                GuideMode.Review -> TODO()
             }
         }
     )
@@ -277,14 +296,14 @@ fun FillingGuideScreen(
     onDeleteItemClick: (typeContent: QuestionContentUi, positionItem: Int) -> Unit,
     onActionGuideNone: () -> Unit,
     onAddQuestion: () -> Unit,
-    onSaveQuestion: () -> Unit
+    onCloseGuide: () -> Unit
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         floatingActionButton = {
             FloatingActionButtons(
                 onAddQuestion = onAddQuestion,
-                onSaveQuestion = onSaveQuestion
+                onCloseGuide = onCloseGuide
             )
         }
     ) { padding ->
@@ -445,7 +464,7 @@ private fun CustomTopBar(
 @Composable
 private fun FloatingActionButtons(
     onAddQuestion: () -> Unit,
-    onSaveQuestion: () -> Unit
+    onCloseGuide: () -> Unit
 ) {
     Column(
         horizontalAlignment = Alignment.End,
@@ -462,7 +481,7 @@ private fun FloatingActionButtons(
         }
 
         ExtendedFloatingActionButton(
-            onClick = onSaveQuestion,
+            onClick = onCloseGuide,
             containerColor = MaterialTheme.colorScheme.primary,
             shape = RoundedCornerShape(16.dp),
             icon = {

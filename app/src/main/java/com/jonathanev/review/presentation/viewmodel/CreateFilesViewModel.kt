@@ -20,10 +20,8 @@ import com.jonathanev.review.domain.result.ExistGuideV1Result
 import com.jonathanev.review.domain.result.RenamedGuideResult
 import com.jonathanev.review.domain.result.ValidateCreateFileResult
 import com.jonathanev.review.presentation.mapper.toDomain
-import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.ColorType
-import com.jonathanev.review.presentation.model.FolderAction
-import com.jonathanev.review.presentation.model.GuideResultUi
+import com.jonathanev.review.presentation.model.FileFormMode
 import com.jonathanev.review.presentation.model.IconType
 import com.jonathanev.review.presentation.model.QuestionItemUi
 import com.jonathanev.review.presentation.model.ScreenDataUi
@@ -32,7 +30,6 @@ import com.jonathanev.review.presentation.state.CreatingUIState.CreateFile
 import com.jonathanev.review.presentation.state.CreatingUIState.CreateFolder
 import com.jonathanev.review.presentation.state.CreatingUIState.Message
 import com.jonathanev.review.presentation.state.CreatingUIState.RenameFile
-import com.jonathanev.review.presentation.state.CreatingUIState.RenameFolder
 import com.jonathanev.review.presentation.state.PropertiesFilesState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -42,7 +39,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.String
 
 @HiltViewModel
 class CreateFilesViewModel @Inject constructor(
@@ -63,6 +59,7 @@ class CreateFilesViewModel @Inject constructor(
     private val _eventUI = MutableSharedFlow<CreatingUIState>()
     val eventUI = _eventUI.asSharedFlow()
 
+    private var currentMode: FileFormMode? = null
     /*private val _eventsMessages = MutableSharedFlow<RenameGuideEvent>()
     val eventsMessages = _eventsMessages.asSharedFlow()*/
 
@@ -75,25 +72,17 @@ class CreateFilesViewModel @Inject constructor(
     private var _respuestas = mutableListOf<QuestionItemUi>()
     val respuestas: List<QuestionItemUi> get() = _respuestas
 
-    fun loadIconsFor(action: FolderAction) {
-        val icons = when (action) {
-            FolderAction.CreatingFile -> listOf(IconType.LIGHTBULB)
-            FolderAction.CreatingFolder -> listOf(
+    fun loadIconsFor(mode: FileFormMode) {
+        val icons = when (mode) {
+            FileFormMode.CreatingFile, is FileFormMode.RenameFile -> {
+                listOf(IconType.LIGHTBULB)
+            }
+
+            FileFormMode.CreatingFolder -> listOf(
                 IconType.ANCHOR_SOLID_FULL,
                 IconType.ANGELLIST_BRANDS_SOLID_FULL,
                 IconType.BACTERIA_SOLID_FULL
             )
-
-            is FolderAction.RenamingFile -> listOf(IconType.LIGHTBULB)
-
-            FolderAction.RenamingFolder -> listOf(
-                IconType.ANCHOR_SOLID_FULL,
-                IconType.ANGELLIST_BRANDS_SOLID_FULL,
-                IconType.BACTERIA_SOLID_FULL
-            )
-
-            FolderAction.None -> emptyList()
-            is FolderAction.MovingFile -> emptyList()
         }
 
         _uiStateComposable.update { currentState ->
@@ -104,6 +93,10 @@ class CreateFilesViewModel @Inject constructor(
                 color = ColorType.Gray
             )
         }
+    }
+
+    fun initForm(mode: FileFormMode) {
+        this.currentMode = mode
     }
 
     fun changeIconSelected(position: Int, icon: IconType) {
@@ -189,7 +182,10 @@ class CreateFilesViewModel @Inject constructor(
 
                     val xmlGuideV1 = GuideDomainModel(GuideVersion.V1, fileName, description)
 
-                    when (existXMLGuideV1UseCase.invoke(xmlGuideV1, RelativeGuidePath(relativeGuidePath))) {
+                    when (existXMLGuideV1UseCase.invoke(
+                        xmlGuideV1,
+                        RelativeGuidePath(relativeGuidePath)
+                    )) {
                         ExistGuideV1Result.Error ->
                             Log.d("RenameGuide", "Error al validar la guia V1")
 
@@ -242,7 +238,7 @@ class CreateFilesViewModel @Inject constructor(
     private fun emitEvent(state: CreatingUIState) {
         viewModelScope.launch {
             when (state) {
-                CreateFile, RenameFile, CreateFolder, RenameFolder->
+                CreateFile, RenameFile, CreateFolder ->
                     _eventUI.emit(state)
 
                 // RenameFolder and Message
@@ -252,27 +248,21 @@ class CreateFilesViewModel @Inject constructor(
         }
     }
 
-    fun fileExist(mode: FolderAction, name: String): Boolean {
+    fun fileExist(mode: FileFormMode, name: String): Boolean {
         return when (mode) {
-            FolderAction.CreatingFile -> isExistFileUseCase.invoke(
+            FileFormMode.CreatingFile -> isExistFileUseCase.invoke(
                 cachedGuides = cachedGuides,
                 name = name,
                 oldName = ""
             )
 
-            is FolderAction.RenamingFile -> {
-                isExistFileUseCase.invoke(
-                    cachedGuides = cachedGuides,
-                    name = name,
-                    oldName = mode.fileName
-                )
-            }
+            is FileFormMode.RenameFile -> isExistFileUseCase.invoke(
+                cachedGuides = cachedGuides,
+                name = name,
+                oldName = mode.guideUiModel.nameGuide
+            )
 
-            FolderAction.CreatingFolder -> isExistFolderUseCase.invoke(name)
-            else -> {
-                emitEvent(Message("Error inesperado"))
-                true
-            }
+            FileFormMode.CreatingFolder -> isExistFolderUseCase.invoke(name)
         }
     }
 
@@ -289,39 +279,37 @@ class CreateFilesViewModel @Inject constructor(
 
     fun dataUniqueScreen(): Boolean {
         val state = uiStateComposable.value
-        val isExistFile = fileExist(state.mode, state.name)
+        val mode = currentMode
+        if (mode == null) {
+            emitEvent(Message("No fue posible procesar los datos"))
+            return false
+        }
 
-        when (state.mode) {
-            FolderAction.CreatingFolder, is FolderAction.RenamingFile -> {
-                if (isExistFile) {
-                    _uiStateComposable.update { currentState ->
-                        currentState.copy(
-                            showOverwriteDialogFile = true
-                        )
-                    }
+        val existFile = fileExist(mode, state.name)
+        if (!existFile) {
+            return true
+        }
 
-                    return false
+        when (mode) {
+            FileFormMode.CreatingFile, is FileFormMode.RenameFile -> {
+                _uiStateComposable.update { currentState ->
+                    currentState.copy(
+                        showOverwriteDialogFile = true
+                    )
                 }
+
+                return false
             }
 
-            FolderAction.CreatingFolder -> {
-                if (isExistFile) {
-                    _uiStateComposable.update { currentState ->
-                        currentState.copy(
-                            showOverwriteDialogFolder = true
-                        )
-                    }
-                    return false
+            FileFormMode.CreatingFolder -> {
+                _uiStateComposable.update { currentState ->
+                    currentState.copy(
+                        showOverwriteDialogFolder = true
+                    )
                 }
-            }
-
-            else -> {
-                emitEvent(Message("No fue posible procesar los datos"))
                 return false
             }
         }
-
-        return true
     }
 
     // Función para cuando el usuario pulsa "Confirmar" o "Cancelar"
@@ -336,18 +324,9 @@ class CreateFilesViewModel @Inject constructor(
         }
     }*/
 
-    fun initWithMode(mode: FolderAction) {
-        // Solo inicializamos si el modo es diferente al actual
-        // para evitar reinicios innecesarios
-        if (uiStateComposable.value.mode != mode) {
-            _uiStateComposable.update { currentState ->
-                currentState.copy(
-                    mode = mode
-                )
-            }
-
-            loadIconsFor(mode)
-        }
+    fun initWithMode(mode: FileFormMode) {
+        loadIconsFor(mode)
+        initForm(mode)
     }
 
     fun onNameChange(newName: String) {
@@ -371,12 +350,9 @@ class CreateFilesViewModel @Inject constructor(
         viewModelScope.launch {
             val dataUniqueScreen = dataUniqueScreen()
 
-            // Si no existe el archivo (canContinue = true), guardamos directamente
             if (dataUniqueScreen) {
                 proceedWithSave()
             }
-            // Si existe (canContinue = false), prepareScreenData ya abrió el diálogo
-            // y este hilo se detiene aquí.
         }
     }
 
@@ -387,7 +363,6 @@ class CreateFilesViewModel @Inject constructor(
     }
 
     fun saveData() {
-        val state = uiStateComposable.value
         /*val icon = state.icons[state.selectedIndex]
 
         val data = ScreenDataUi(
@@ -397,24 +372,25 @@ class CreateFilesViewModel @Inject constructor(
             color = state.color
         )*/
 
-        when (state.mode) {
-            FolderAction.CreatingFolder -> emitEvent(CreateFolder) //onCreateFolderConfirmed(data)
-            is FolderAction.RenamingFile -> emitEvent(RenameFile)//renameFile(state.mode.fileName)
-            FolderAction.RenamingFolder ->
-                emitEvent(Message("Aun no se aplica la funcion renombrar folder"))
-
-            FolderAction.CreatingFile -> emitEvent(CreateFile) //OnCreateGuideConfirmed(data)
-            FolderAction.MovingFile -> emitEvent(Message("No se pudo crear el archivo"))
-            FolderAction.None -> emitEvent(Message("No se pudo crear el archivo"))
+        when (currentMode) {
+            FileFormMode.CreatingFile -> emitEvent(CreateFile)
+            FileFormMode.CreatingFolder -> emitEvent(CreateFolder)
+            is FileFormMode.RenameFile -> emitEvent(RenameFile)
+            null -> emitEvent(Message("No se pudo crear el archivo"))
         }
     }
 
     fun validateData(): Boolean {
         val state = uiStateComposable.value
+        val mode = currentMode
 
-        // Validate Folder y File
+        if (mode == null){
+            emitEvent(Message("No se pudo crear el archivo"))
+            return false
+        }
+
         return when (val response =
-            validateCreateFileUseCase.invoke(state.name, state.description, state.mode)) {
+            validateCreateFileUseCase.invoke(state.name, state.description, mode)) {
             is ValidateCreateFileResult.Error -> {
                 emitEvent(Message(response.message))
                 false

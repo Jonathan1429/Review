@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 sealed class FolderAction {
+
     @Serializable
     data object CreatingFolder : FolderAction()
 

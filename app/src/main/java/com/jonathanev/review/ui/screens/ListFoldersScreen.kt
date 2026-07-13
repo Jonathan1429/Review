@@ -20,6 +20,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.jonathanev.review.R
+import com.jonathanev.review.presentation.model.FileInteractionMode
 import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.presentation.model.FolderUiModel
 import com.jonathanev.review.ui.components.GuiaItem
@@ -37,7 +38,7 @@ fun PreviewListFolder(
     ReviewTheme {
         ListFoldersScreen(
             data,
-            folderAction = FolderAction.None,
+            fileInteractionMode = FileInteractionMode.Default,
             onCreateFolderClick = {},
             onFolderClick = { _, _ ->}
         )
@@ -49,13 +50,13 @@ fun PreviewListFolder(
 @Composable
 fun ListFoldersScreen(
     guias: List<FolderUiModel>,
-    folderAction: FolderAction,
-    onCreateFolderClick: (FolderAction) -> Unit,
-    onFolderClick: (String, FolderAction) -> Unit
+    fileInteractionMode: FileInteractionMode,
+    onCreateFolderClick: () -> Unit,
+    onFolderClick: (String, FileInteractionMode) -> Unit
 ) {
     Scaffold(
         topBar = {
-            if (folderAction == FolderAction.MovingFile) {
+            if (fileInteractionMode == FileInteractionMode.MovingItem) {
                 CenterAlignedTopAppBar(
                     title = {
                         Text(stringResource(R.string.lblMoving))
@@ -78,7 +79,7 @@ fun ListFoldersScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { onCreateFolderClick(FolderAction.CreatingFolder) },
+                onClick = onCreateFolderClick,
                 containerColor = ColorBotones
             ) {
                 Icon(
@@ -97,7 +98,7 @@ fun ListFoldersScreen(
                 GuiaItem(
                     guia,
                     onClick = {
-                        onFolderClick(guia.folder.name, folderAction)
+                        onFolderClick(guia.folder.name, fileInteractionMode)
                     }
                 )
             }
