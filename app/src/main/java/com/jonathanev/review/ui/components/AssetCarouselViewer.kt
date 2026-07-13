@@ -60,7 +60,7 @@ fun PreviewAssetCarouselViewer() {
         ),
         mediaForSelected = ContentType.TEXT,
         onAddAssetClick = { },
-        onDeleteAssetClick = { },
+        onDeleteItemClick = { _, _ -> },
         onModifyAssetClick = { },
         onActionGuideNone = { }
     )
@@ -72,7 +72,7 @@ fun AssetCarouselViewer(
     assets: List<QuestionContentUi>,
     mediaForSelected: ContentType,
     onAddAssetClick: () -> Unit,
-    onDeleteAssetClick: (Int) -> Unit,
+    onDeleteItemClick: (typeContent: QuestionContentUi, positionItem: Int ) -> Unit,
     onModifyAssetClick: (QuestionContentUi) -> Unit,
     onActionGuideNone: () -> Unit
 ) {
@@ -95,19 +95,26 @@ fun AssetCarouselViewer(
             resourceSelected = resourceSelected,
             onModifyAssetClick = { typeContent -> onModifyAssetClick(typeContent) },
             onActionGuideNone = { onActionGuideNone() })
-        DeleteAsset(resourceSelected)
+        DeleteAsset(resourceSelected, onDeleteItemClick = {
+            val asset = assets[pagerState.currentPage]
+            onDeleteItemClick(
+                asset,
+                pagerState.currentPage
+            )
+        })
         Spacer(modifier = Modifier.height(24.dp))
         StepNavigationCarousel(lazyRowState, assets, pagerState, scope)
     }
 }
 
 @Composable
-private fun DeleteAsset(resourceSelected: Int) {
+private fun DeleteAsset(resourceSelected: Int, onDeleteItemClick: () -> Unit) {
     Box(Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
-                .padding(end = 8.dp),
+                .padding(end = 8.dp)
+                .clickable(onClick = {}),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {

@@ -86,6 +86,7 @@ fun PreviewFillingGuideWithShowDialog() {
             onConfirmDialogRepeatGuide = {},
             onActionGuideNone = {},
             onSaveQuestion = {},
+            onDeleteItemClick = {_, _ -> },
         )
     }
 }
@@ -116,6 +117,7 @@ fun PreviewFillingGuideWithoutShowDialog() {
             onDissmissDialogRepeatGuide = {},
             onConfirmDialogRepeatGuide = {},
             onSaveQuestion = {},
+            onDeleteItemClick = {_, _ -> },
         )
     }
 }
@@ -186,7 +188,7 @@ fun FillingGuideRoute(
             viewModel.previousQuestion()
         },
         onNextQuestionClick = {
-            if (actualQuestion == totalQuestions){
+            if (actualQuestion == totalQuestions) {
                 showDialogRepeatGuide = true
             } else {
                 viewModel.nextQuestion()
@@ -202,6 +204,18 @@ fun FillingGuideRoute(
                 }
             }
         },
+        onDeleteItemClick = { typeContent, positionItem ->
+            when (typeContent) {
+                is QuestionContentUi.Image -> {
+                    viewModel.deleteImage(positionItem)
+                }
+
+                QuestionContentUi.None -> onActionGuideNone()
+                is QuestionContentUi.Text -> {
+                    viewModel.deleteText(positionItem)
+                }
+            }
+        },
         onTypeClicked = { typeClicked ->
             typeSelected = typeClicked
         },
@@ -210,7 +224,7 @@ fun FillingGuideRoute(
         },
         onModifyAssetClick = { typeContent -> onModifyAssetClick(typeContent) },
         onActionGuideNone = onActionGuideNone,
-        onAddQuestion = { 
+        onAddQuestion = {
             viewModel.addNewQuestion()
         },
         onSaveQuestion = {
@@ -260,6 +274,7 @@ fun FillingGuideScreen(
     onTypeClicked: (QAType) -> Unit,
     onFilterClicked: (ContentType) -> Unit,
     onModifyAssetClick: (QuestionContentUi) -> Unit,
+    onDeleteItemClick: (typeContent: QuestionContentUi, positionItem: Int) -> Unit,
     onActionGuideNone: () -> Unit,
     onAddQuestion: () -> Unit,
     onSaveQuestion: () -> Unit
@@ -297,9 +312,14 @@ fun FillingGuideScreen(
                 assets = listTypeMedia,
                 mediaForSelected = mediaSelected,
                 onAddAssetClick = { },
-                onDeleteAssetClick = { },
+                onDeleteItemClick = { typeContent, positionItem ->
+                    onDeleteItemClick(
+                        typeContent,
+                        positionItem
+                    )
+                },
                 onModifyAssetClick = { typeContent -> onModifyAssetClick(typeContent) },
-                onActionGuideNone = onActionGuideNone
+                onActionGuideNone = onActionGuideNone,
             )
         }
 
