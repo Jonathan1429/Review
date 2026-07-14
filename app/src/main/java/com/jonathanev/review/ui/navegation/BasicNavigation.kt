@@ -195,28 +195,6 @@ fun BasicNavigation() {
                 val viewModel: CreateFilesViewModel = viewModel()
                 val viewModelNavigation: NavigationViewModel = viewModel()
 
-                LaunchedEffect(Unit) {
-                    when (mode.fileFormMode) {
-                        FileFormMode.CreatingFile -> viewModel.initWithMode(mode.fileFormMode)
-                        is FileFormMode.RenameFile -> {
-                            viewModel.initWithMode(mode.fileFormMode)
-
-                            val oldName = mode.fileFormMode.guideUiModel.nameGuide
-                            val responseFillFields = viewModel.fillFields(oldName)
-                            if (!responseFillFields) {
-                                Toast.makeText(
-                                    context,
-                                    "Guia dañada, imposible renombrar",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                backStack.removeLastOrNull()
-                            }
-                        }
-
-                        FileFormMode.CreatingFolder -> viewModel.initWithMode(mode.fileFormMode)
-                    }
-                }
-
                 CreateFilesPropertiesRoute(
                     viewModel = viewModel,
                     viewModelNavigation = viewModelNavigation,

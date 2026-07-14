@@ -25,10 +25,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.flowWithLifecycle
 import com.jonathanev.review.presentation.model.FileFormMode
+import com.jonathanev.review.presentation.model.GuideUiModel
 import com.jonathanev.review.presentation.model.IconType
 import com.jonathanev.review.presentation.state.CreatingUIState
 import com.jonathanev.review.presentation.state.PropertiesFilesState
@@ -47,12 +52,12 @@ import com.jonathanev.review.ui.theme.ReviewTheme
 
 @DevicePreviews
 @Composable
-fun PreviewCreateFilesPropertiesScreen(
+fun PreviewCreatingFile(
     @PreviewParameter(CreateFilesScreenDataProvider::class) data: PropertiesCreateFilesScreen
 ) {
     ReviewTheme {
         CreateFilesPropertiesScreen(
-            state = PropertiesFilesState(icons = data.listIcons, selectedIndex = data.state.selectedIndex),
+            state = data.state,
             fileFormMode = data.fileFormMode,
             onClickApply = {},
             onNameChange = {},
@@ -78,38 +83,63 @@ fun CreateFilesPropertiesRoute(
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val isDarkTheme = isSystemInDarkTheme()
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
 
-    LaunchedEffect(Unit) {
-        viewModel.eventUI.collect { event ->
-            when (event) {
-                is CreatingUIState.CreateFile -> {
-                    onNavFillingGuide(PropertiesGuide(state.name, state.description))
-                }
+    LaunchedEffect(fileFormMode) {
+        when (fileFormMode) {
+            FileFormMode.CreatingFile -> viewModel.initWithMode(fileFormMode)
+            is FileFormMode.RenameFile -> {
+                viewModel.initWithMode(fileFormMode)
 
-                is CreatingUIState.RenameFile -> {
-                    val relativeGuidePath = viewModelNavigation.relativeGuidePath.value
-
-                    viewModel.uploadCachedGuides(relativeGuidePath)
-
-                    viewModel.renameFile(
-                        oldName = state.oldName,
-                        fileName = state.name,
-                        description = state.description,
-                        relativeGuidePath = relativeGuidePath
-                    )
+                val oldName = fileFormMode.guideUiModel.nameGuide
+                val responseFillFields = viewModel.fillFields(oldName)
+                if (!responseFillFields) {
+                    Toast.makeText(
+                        context,
+                        "Guia dañada, imposible renombrar",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     onNavBack()
-                }
-
-                is CreatingUIState.CreateFolder -> {
-                    viewModel.saveMetadata(isDarkTheme)
-                    onNavBack()
-                }
-
-                is CreatingUIState.Message -> {
-                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                 }
             }
+
+            FileFormMode.CreatingFolder -> viewModel.initWithMode(fileFormMode)
         }
+    }
+
+    LaunchedEffect(viewModel.eventUI, lifecycle) {
+        viewModel.eventUI
+            .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
+            .collect { event ->
+                when (event) {
+                    is CreatingUIState.CreateFile -> {
+                        onNavFillingGuide(PropertiesGuide(state.name, state.description))
+                    }
+
+                    is CreatingUIState.RenameFile -> {
+                        val relativeGuidePath = viewModelNavigation.relativeGuidePath.value
+
+                        viewModel.uploadCachedGuides(relativeGuidePath)
+
+                        viewModel.renameFile(
+                            oldName = state.oldName,
+                            fileName = state.name,
+                            description = state.description,
+                            relativeGuidePath = relativeGuidePath
+                        )
+                        onNavBack()
+                    }
+
+                    is CreatingUIState.CreateFolder -> {
+                        viewModel.saveMetadata(isDarkTheme)
+                        onNavBack()
+                    }
+
+                    is CreatingUIState.Message -> {
+                        Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
     }
 
     CreateFilesPropertiesScreen(
@@ -119,8 +149,6 @@ fun CreateFilesPropertiesRoute(
             focusManager.clearFocus()
             viewModel.dismissOverwriteDialog()
             viewModel.processSaveRequest()
-            /*viewModel.prepareScreenData() // Ver si existe carpeta o archivo
-            viewModel.validateData() // Ver que pasen validaciones*/
         },
         onNameChange = { viewModel.onNameChange(it) },
         onDescriptionChange = { viewModel.onDescriptionChange(it) },

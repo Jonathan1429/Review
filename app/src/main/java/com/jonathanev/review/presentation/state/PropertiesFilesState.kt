@@ -16,4 +16,17 @@ data class PropertiesFilesState(
     val icons: List<IconType> = emptyList(),
     val showOverwriteDialogFile: Boolean = false,
     val showOverwriteDialogFolder: Boolean = false
-)
+) {
+    companion object {
+        // 1. Define las listas de íconos como constantes de prueba independientes
+        val FileIconsMock = listOf(
+            IconType.LIGHTBULB
+        )
+
+        val FolderIconsMock = listOf(
+            IconType.BACTERIA_SOLID_FULL,
+            IconType.ANCHOR_SOLID_FULL,
+            IconType.ANGELLIST_BRANDS_SOLID_FULL
+        )
+    }
+}

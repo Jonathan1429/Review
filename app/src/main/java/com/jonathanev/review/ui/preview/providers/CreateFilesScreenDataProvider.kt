@@ -3,12 +3,13 @@ package com.jonathanev.review.ui.preview.providers
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.jonathanev.review.presentation.model.ColorType
 import com.jonathanev.review.presentation.model.FileFormMode
-import com.jonathanev.review.presentation.model.FolderAction
+import com.jonathanev.review.presentation.model.GuideUiModel
 import com.jonathanev.review.presentation.model.IconType
 import com.jonathanev.review.presentation.state.PropertiesFilesState
+import com.jonathanev.review.presentation.state.PropertiesFilesState.Companion.FileIconsMock
+import com.jonathanev.review.presentation.state.PropertiesFilesState.Companion.FolderIconsMock
 
 data class PropertiesCreateFilesScreen(
-    val listIcons: List<IconType>,
     val state: PropertiesFilesState,
     val fileFormMode: FileFormMode
 )
@@ -17,22 +18,42 @@ class CreateFilesScreenDataProvider : PreviewParameterProvider<PropertiesCreateF
     override val values: Sequence<PropertiesCreateFilesScreen>
         get() = sequenceOf(
             PropertiesCreateFilesScreen(
-                listIcons = listOf(
-                    IconType.ANCHOR_SOLID_FULL,
-                    IconType.ANGELLIST_BRANDS_SOLID_FULL,
-                    IconType.BACTERIA_SOLID_FULL
-                ),
                 state = PropertiesFilesState(
                     name = "",
                     description = "",
-                    icon = IconType.BACTERIA_SOLID_FULL,
+                    icon = FileIconsMock[0],
+                    color = ColorType.White,
+                    selectedIndex = 0,
+                    icons = FileIconsMock,
+                    showOverwriteDialogFile = false
+                ),
+                fileFormMode = FileFormMode.CreatingFile
+            ),
+            PropertiesCreateFilesScreen(
+                state = PropertiesFilesState(
+                    name = "",
+                    description = "",
+                    icon = FileIconsMock[0],
+                    color = ColorType.White,
+                    selectedIndex = 0,
+                    icons = FileIconsMock,
+                    showOverwriteDialogFile = false
+                ),
+                fileFormMode = FileFormMode.RenameFile(
+                    GuideUiModel(
+                        nameGuide = "Test",
+                        description = "Testing Unitarios"
+                    )
+                )
+            ),
+            PropertiesCreateFilesScreen(
+                state = PropertiesFilesState(
+                    name = "",
+                    description = "",
+                    icon = FolderIconsMock[1],
                     color = ColorType.White,
                     selectedIndex = 1,
-                    icons = listOf(
-                        IconType.ANCHOR_SOLID_FULL,
-                        IconType.ANGELLIST_BRANDS_SOLID_FULL,
-                        IconType.BACTERIA_SOLID_FULL
-                    ),
+                    icons = FolderIconsMock,
                     showOverwriteDialogFile = false
                 ),
                 fileFormMode = FileFormMode.CreatingFolder
