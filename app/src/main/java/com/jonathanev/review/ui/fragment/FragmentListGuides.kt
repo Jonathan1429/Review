@@ -20,11 +20,11 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jonathanev.review.R
 import com.jonathanev.review.databinding.FragmentListGuidesBinding
-import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.presentation.event.GuideActionEvent
 import com.jonathanev.review.presentation.event.UIMovingEvent
 import com.jonathanev.review.presentation.model.GuideResultUi
 import com.jonathanev.review.presentation.model.FolderAction
+import com.jonathanev.review.presentation.model.RelativeGuidePath
 import com.jonathanev.review.presentation.viewmodel.FragmentListGuidesViewModel
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
 import com.jonathanev.review.presentation.viewmodel.MainToolbarViewModel
@@ -68,7 +68,8 @@ class FragmentListGuides : Fragment() {
                     when (event) {
                         UIMovingEvent.ExistFile -> {
                             alertDialog { confirmed ->
-                                val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
+                                val relativeGuidePath =
+                                    RelativeGuidePath(navStateViewModel.guidesPath.value)
                                 viewModel.onContinueProcess(confirmed, relativeGuidePath)
 
                                 if (!confirmed) {

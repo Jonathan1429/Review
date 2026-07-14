@@ -1,7 +1,5 @@
 package com.jonathanev.review.presentation.viewmodel
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.domain.DeleteGuideUseCase
@@ -13,23 +11,23 @@ import com.jonathanev.review.domain.MoveGuideUseCase
 import com.jonathanev.review.domain.SetContextMoveUseCase
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
-import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.result.DeleteGuideResult
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.GuideResultDomain
 import com.jonathanev.review.domain.result.MoveGuideResponse
 import com.jonathanev.review.presentation.event.GuideActionEvent
 import com.jonathanev.review.presentation.event.UIMovingEvent
+import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.presentation.model.GuideResultUi
 import com.jonathanev.review.presentation.model.GuideUiModel
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.QuestionItemUi
+import com.jonathanev.review.presentation.model.RelativeGuidePath
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -62,7 +60,9 @@ class FragmentListGuidesViewModel @Inject constructor(
     val respuestas: List<QuestionItemUi> get() = _respuestas
 
     fun getAllGuides(relativeGuidePath: RelativeGuidePath) {
-        cachedGuides = loadGuidesUseCase.invoke(relativeGuidePath)
+        val relGuidePathDomain = relativeGuidePath.toDomain()
+
+        cachedGuides = loadGuidesUseCase.invoke(relGuidePathDomain)
         val guidesUi = cachedGuides.map { guide -> guide.toUi() }
         _guides.value = guidesUi
     }
@@ -78,13 +78,14 @@ class FragmentListGuidesViewModel @Inject constructor(
     }
 
     fun deleteGuide(nameGuide: String, relativeGuidePath: RelativeGuidePath) {
+        val relGuidePathDomain = relativeGuidePath.toDomain()
         val guideDomainModel = cachedGuides.find { it.nameGuide == nameGuide }
         if (guideDomainModel == null) {
             emitMessage(GuideActionEvent.ShowMessage("No se ha encontrado la guia"))
             return
         }
 
-        val response = deleteGuideUseCase.invoke(guideDomainModel, relativeGuidePath)
+        val response = deleteGuideUseCase.invoke(guideDomainModel, relGuidePathDomain)
         when (response) {
             DeleteGuideResult.DeleteSuccess -> {
                 emitMessage(GuideActionEvent.Success("Guia borrada exitosamente"))
@@ -128,8 +129,8 @@ class FragmentListGuidesViewModel @Inject constructor(
             is GuideContext.Moving -> {
                 when (val guideData = getGuideXmlDataUseCase.invoke(context)) {
                     is GetGuideResult.Success -> {
-
-                        val response = moveGuideUseCase.invoke(guideData, context, relativeGuidePath)
+                        val relGuidePathDomain = relativeGuidePath.toDomain()
+                        val response = moveGuideUseCase.invoke(guideData, context, relGuidePathDomain)
                         when (response) {
                             MoveGuideResponse.ErrorMovingGuide ->
                                 eventMovingFile("Error al intentar mover la guia")
@@ -172,7 +173,8 @@ class FragmentListGuidesViewModel @Inject constructor(
     }
 
     fun setContext(relativeGuidePath: RelativeGuidePath) {
+        val relGuidePathDomain = relativeGuidePath.toDomain()
         val guide = selectedGuideDomain ?: return
-        setContextMoveUseCase.invoke(guide, relativeGuidePath)
+        setContextMoveUseCase.invoke(guide, relGuidePathDomain)
     }
 }

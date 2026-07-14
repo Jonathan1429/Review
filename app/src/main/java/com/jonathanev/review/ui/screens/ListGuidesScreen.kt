@@ -29,6 +29,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -44,10 +45,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jonathanev.review.R
-import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.presentation.model.FileInteractionMode
 import com.jonathanev.review.presentation.model.GuideResultUi
 import com.jonathanev.review.presentation.model.GuideUiModel
+import com.jonathanev.review.presentation.model.RelativeGuidePath
 import com.jonathanev.review.presentation.state.DialogState
 import com.jonathanev.review.presentation.viewmodel.FragmentListGuidesViewModel
 import com.jonathanev.review.presentation.viewmodel.NavigationViewModel
@@ -95,7 +96,11 @@ fun ListGuidesRoute(
     val context = LocalContext.current
     var currentDialog by rememberSaveable { mutableStateOf<DialogState?>(null) }
     val relativeGuidePath =
-        navigationViewModel.relativeGuidePath.collectAsStateWithLifecycle().value
+        RelativeGuidePath(navigationViewModel.relativeGuidePath.collectAsStateWithLifecycle().value)
+
+    LaunchedEffect(relativeGuidePath) {
+        viewModel.getAllGuides(relativeGuidePath)
+    }
 
     ListGuidesScreen(
         guides = guides,
@@ -118,7 +123,7 @@ fun ListGuidesRoute(
         },
         onMoveCancelGuideClick = onMoveCancelGuideClick,
         onMoveSuccessGuideClick = {
-            viewModel.movingGuide(RelativeGuidePath(relativeGuidePath))
+            viewModel.movingGuide(relativeGuidePath)
             onMoveSuccessGuideClick()
         },
         fileInteractionMode = fileInteractionMode
@@ -150,7 +155,7 @@ fun ListGuidesRoute(
                         )
                     },
                     onMoveGuideClick = {
-                        viewModel.setContext(RelativeGuidePath(relativeGuidePath))
+                        viewModel.setContext(relativeGuidePath)
                         navigationViewModel.setMainPath()
                         onMoveGuideClick()
                     }
@@ -262,7 +267,7 @@ private fun dialogConfirmDelete(
     currentDialog: DialogState?,
     viewModel: FragmentListGuidesViewModel,
     stateDialog: DialogState.ConfirmDelete,
-    relativeGuidePath: String,
+    relativeGuidePath: RelativeGuidePath,
     onDeleteGuideClick: () -> Unit
 ): DialogState? {
     var currentDialog1 = currentDialog
@@ -284,7 +289,7 @@ private fun dialogConfirmDelete(
             TextButton(onClick = {
                 viewModel.deleteGuide(
                     nameGuide = stateDialog.guide.guideUiModel.nameGuide,
-                    relativeGuidePath = RelativeGuidePath(relativeGuidePath)
+                    relativeGuidePath = relativeGuidePath
                 )
                 onDeleteGuideClick()
                 currentDialog1 = null

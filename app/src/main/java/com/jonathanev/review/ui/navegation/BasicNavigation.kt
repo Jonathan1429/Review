@@ -129,13 +129,7 @@ fun BasicNavigation() {
             entry<AppRoutes.ListGuidesScreen> { action ->
                 val viewModel: FragmentListGuidesViewModel = viewModel()
                 val navigationViewModel: NavigationViewModel = viewModel()
-                val relativeGuidePath =
-                    RelativeGuidePath(navigationViewModel.relativeGuidePath.collectAsStateWithLifecycle().value)
                 val guides = viewModel.guides.collectAsStateWithLifecycle().value
-
-                LaunchedEffect(Unit) {
-                    viewModel.getAllGuides(relativeGuidePath)
-                }
 
                 if (guides.isEmpty()) {
                     WithoutFilesScreen(

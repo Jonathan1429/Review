@@ -8,6 +8,8 @@ import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.domain.model.QuestionItemDomain
 import com.jonathanev.review.presentation.model.QuestionItemUi
+import com.jonathanev.review.presentation.model.RelativeGuidePath as RelativeGuidePathUI
+import com.jonathanev.review.domain.model.RelativeGuidePath as RelativeGuidePathDomain
 
 fun PreviewQuestionDomain.toUi(): PreviewQuestionUi {
     return PreviewQuestionUi(
@@ -72,4 +74,8 @@ fun ColorRangeDomain.toUi(): ColorRangeUi {
 
 fun ColorRangeUi.toDomain(): ColorRangeDomain {
     return ColorRangeDomain(start = start, end = end, color = color)
+}
+
+fun RelativeGuidePathUI.toDomain(): RelativeGuidePathDomain {
+    return RelativeGuidePathDomain(this.value)
 }
