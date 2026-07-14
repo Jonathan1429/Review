@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.jonathanev.review.presentation.model.GuideMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.ui.components.CustomBoxCreateImage
@@ -32,6 +33,7 @@ import com.jonathanev.review.ui.theme.degradientColor
 fun PreviewCreateImageScreen() {
     ReviewTheme {
         CreateImageScreen(
+            guideMode = GuideMode.Edit("", "", 0),
             uriImage = "",
             selectedImage = { },
             imageUploaded = {  }
@@ -42,6 +44,7 @@ fun PreviewCreateImageScreen() {
 @Composable
 
 fun CreateImageRoute(
+    guideMode: GuideMode,
     contentType: QuestionContentUi.Image,
     viewModel: SharedFragmentCreateFileViewModel,
     imageUploaded: () -> Unit
@@ -56,6 +59,7 @@ fun CreateImageRoute(
     }
 
     CreateImageScreen(
+        guideMode = guideMode,
         uriImage = uriImage,
         selectedImage = { resultLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
         imageUploaded = {
@@ -67,6 +71,7 @@ fun CreateImageRoute(
 
 @Composable
 fun CreateImageScreen(
+    guideMode: GuideMode,
     uriImage: String,
     selectedImage: () -> Unit,
     imageUploaded: () -> Unit
@@ -94,11 +99,13 @@ fun CreateImageScreen(
                     .fillMaxSize()
                     .padding(bottom = 16.dp)
             ) {
-                OptionsCreateImage(
-                    uriImage = uriImage,
-                    selectImage = selectedImage,
-                    imageUploaded = imageUploaded
-                )
+                if (guideMode !is GuideMode.Review) {
+                    OptionsCreateImage(
+                        uriImage = uriImage,
+                        selectImage = selectedImage,
+                        imageUploaded = imageUploaded
+                    )
+                }
                 CustomBoxCreateImage(uriImage)
             }
         }

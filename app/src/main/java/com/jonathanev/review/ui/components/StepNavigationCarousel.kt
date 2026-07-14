@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.jonathanev.review.presentation.model.GuideMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.ui.theme.BorderPasos
 import com.jonathanev.review.ui.theme.BorderSelected
@@ -42,25 +43,28 @@ fun StepNavigationCarousel(
     lazyRowState: LazyListState,
     assets: List<QuestionContentUi>,
     pagerState: PagerState,
-    scope: CoroutineScope
+    scope: CoroutineScope,
+    guideMode: GuideMode
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
-            modifier = Modifier
-                .size(50.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.primary)
-                .clickable { /* Guardar todo */ },
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                Icons.Default.Add,
-                contentDescription = "Siguiente",
-                tint = MaterialTheme.colorScheme.onPrimary
-            )
+        if (guideMode !is GuideMode.Review) {
+            Box(
+                modifier = Modifier
+                    .size(50.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.primary)
+                    .clickable { /* Guardar todo */ },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = "Agregar item",
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
+            }
         }
 
         Spacer(modifier = Modifier.width(8.dp))

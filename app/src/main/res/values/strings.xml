@@ -94,4 +94,5 @@
     <string name="iconAdvertencia">Advertencia</string>
     <string name="lblTitleRepeatGuide">¿Reiniciar guia?</string>
     <string name="lblDescriptionRepeatGuide">¿Quieres comenzar nuevamente la guia en la pregunta 1?</string>
+    <string name="lblCloseGuide">Cerrar guia</string>
 </resources>

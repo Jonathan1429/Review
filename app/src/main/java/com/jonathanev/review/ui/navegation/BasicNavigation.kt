@@ -240,7 +240,7 @@ fun BasicNavigation() {
                     viewModel = viewModel,
                     guideMode = action.guideMode,
                     relativeGuidePath = RelativeGuidePath(value = relativeGuidePath),
-                    onModifyAssetClick = { typeContent ->
+                    onAssetClick = { typeContent ->
                         when (typeContent) {
                             is QuestionContentUi.Image -> {
                                 backStack.add(
@@ -248,7 +248,8 @@ fun BasicNavigation() {
                                         QuestionContentUi.Image(
                                             typeContent.uri,
                                             typeContent.nameFile
-                                        )
+                                        ),
+                                        action.guideMode
                                     )
                                 )
                             }
@@ -267,7 +268,8 @@ fun BasicNavigation() {
                                         QuestionContentUi.Text(
                                             typeContent.text,
                                             typeContent.colorRanges
-                                        )
+                                        ),
+                                        action.guideMode
                                     )
                                 )
                             }
@@ -280,6 +282,10 @@ fun BasicNavigation() {
                             Toast.LENGTH_SHORT
                         ).show()
                         backStack.removeLastOrNull()
+                    },
+                    onCloseGuide = {
+                        backStack.clear()
+                        backStack.add(AppRoutes.MainScreen(FileInteractionMode.Default))
                     }
                 )
             }
@@ -287,6 +293,7 @@ fun BasicNavigation() {
                 val viewModel: SharedFragmentCreateFileViewModel = viewModel()
 
                 CreateImageRoute(
+                    guideMode = imageContent.guideMode,
                     contentType = imageContent.contentType,
                     viewModel = viewModel,
                     imageUploaded = {
@@ -299,6 +306,7 @@ fun BasicNavigation() {
                 val viewModel: SharedFragmentCreateFileViewModel = viewModel()
 
                 CreateTextRoute(
+                    guideMode = textContent.guideMode,
                     viewModel = viewModel,
                     contentType = textContent.contentType,
                     onSaveText = { backStack.removeLastOrNull() })
@@ -321,6 +329,16 @@ fun BasicNavigation() {
                                     propertiesGuide.fileName,
                                     propertiesGuide.description,
                                     position
+                                )
+                            )
+                        )
+                    },
+                    onPlayGuideClick = {
+                        backStack.add(
+                            AppRoutes.FillingGuideScreen(
+                                GuideMode.Review(
+                                    nameGuide = propertiesGuide.fileName,
+                                    posQuestion = 0
                                 )
                             )
                         )

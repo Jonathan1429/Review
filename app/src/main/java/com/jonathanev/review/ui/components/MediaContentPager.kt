@@ -37,6 +37,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jonathanev.review.R
+import com.jonathanev.review.presentation.model.GuideMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.ui.model.ContentType
 import com.jonathanev.review.ui.theme.BorderPasos
@@ -57,7 +58,8 @@ fun PreviewMediaContentPager() {
         assets = listPreview,
         mediaForSelected = ContentType.TEXT,
         resourceSelected = R.string.lblText,
-        onModifyAssetClick = {},
+        guideMode = GuideMode.Edit("", "", 0),
+        onAssetClick = {},
         onActionGuideNone = {}
     )
 }
@@ -68,7 +70,8 @@ fun MediaContentPager(
     assets: List<QuestionContentUi>,
     mediaForSelected: ContentType,
     resourceSelected: Int,
-    onModifyAssetClick: (QuestionContentUi) -> Unit,
+    guideMode: GuideMode,
+    onAssetClick: (QuestionContentUi) -> Unit,
     onActionGuideNone: () -> Unit
 ) {
     Box(
@@ -121,32 +124,48 @@ fun MediaContentPager(
                     }
                 }
 
-                Row(
+                val painter =
+                    if (guideMode !is GuideMode.Review)
+                        R.drawable.ic_edit
+                    else
+                        R.drawable.ic_eye
+                Box(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
                         modifier = Modifier
-                            .background(Color.Black.copy(alpha = 0.6f), RoundedCornerShape(12.dp))
+                            .background(
+                                Color.Black.copy(alpha = 0.6f),
+                                RoundedCornerShape(12.dp)
+                            )
                             .padding(horizontal = 12.dp, vertical = 6.dp)
+                            .align(Alignment.TopStart)
                     ) {
                         Icon(
-                            painter = painterResource(R.drawable.ic_edit),
+                            painter = painterResource(painter),
                             contentDescription = null,
                             tint = TextColorSecondary,
                             modifier = Modifier
                                 .size(16.dp)
                                 .clickable(onClick = {
-                                    when (val asset = assets[pagerState.currentPage]) {
+                                    val typeContent = when (val asset = assets[pagerState.currentPage]) {
                                         is QuestionContentUi.Image -> {
-                                            onModifyAssetClick(QuestionContentUi.Image(asset.uri, asset.nameFile))
+                                                QuestionContentUi.Image(
+                                                    asset.uri,
+                                                    asset.nameFile
+                                                )
                                         }
-                                        QuestionContentUi.None -> onActionGuideNone()
+
+                                        QuestionContentUi.None -> QuestionContentUi.None
                                         is QuestionContentUi.Text -> {
-                                            onModifyAssetClick(QuestionContentUi.Text(asset.text, asset.colorRanges))
+                                                QuestionContentUi.Text(
+                                                    asset.text,
+                                                    asset.colorRanges
+                                                )
                                         }
                                     }
+
+                                    onAssetClick(typeContent)
                                 })
                         )
                     }
@@ -155,6 +174,7 @@ fun MediaContentPager(
                         modifier = Modifier
                             .background(Color.Black.copy(alpha = 0.6f), RoundedCornerShape(12.dp))
                             .padding(horizontal = 12.dp, vertical = 6.dp)
+                            .align(Alignment.TopEnd)
                     ) {
                         Text(
                             text = "${stringResource(resourceSelected)} ${pagerState.currentPage + 1} ${

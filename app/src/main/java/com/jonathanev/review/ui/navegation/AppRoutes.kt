@@ -21,9 +21,9 @@ sealed interface AppRoutes : NavKey {
     @Serializable
     data class FillingGuideScreen(val guideMode: GuideMode): AppRoutes
 
-    data class CreateImageScreen(val contentType: QuestionContentUi.Image): AppRoutes
+    data class CreateImageScreen(val contentType: QuestionContentUi.Image, val guideMode: GuideMode): AppRoutes
 
-    data class CreateTextScreen(val contentType: QuestionContentUi.Text): AppRoutes
+    data class CreateTextScreen(val contentType: QuestionContentUi.Text, val guideMode: GuideMode): AppRoutes
     @Serializable
     data class PreviewQuestionsScreen(val nameGuide: String): AppRoutes
 }

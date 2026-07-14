@@ -1,17 +1,14 @@
 package com.jonathanev.review.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -49,8 +46,8 @@ import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.ui.components.AssetCarouselViewer
 import com.jonathanev.review.ui.components.CustomAlertDialog
+import com.jonathanev.review.ui.components.CustomTopBar
 import com.jonathanev.review.ui.components.FilterChipItem
-import com.jonathanev.review.ui.components.NavigationPagerBar
 import com.jonathanev.review.ui.components.QATypeItem
 import com.jonathanev.review.ui.components.ShowDeletePopUp
 import com.jonathanev.review.ui.mapper.toDrawable
@@ -72,22 +69,22 @@ fun PreviewFillingGuideWithShowDialog() {
             actualQuestion = 1,
             totalQuestions = 2,
             listTypeMedia = listOf(QuestionContentUi.Text("Hola", listOf())),
+            guideMode = GuideMode.Edit("", "", 0),
             showDialogDeleteQuestion = true,
             showDialogRepeatGuide = false,
+            onDissmissDialogRepeatGuide = {},
+            onConfirmDialogRepeatGuide = {},
             onContinueDialogDeleteQuestionClick = {},
             onBackQuestionClick = {},
             onNextQuestionClick = {},
             onDeleteQuestionClick = { },
             onTypeClicked = {},
             onFilterClicked = {},
-            onModifyAssetClick = { },
-            onAddQuestion = {},
-            onDissmissDialogRepeatGuide = {},
-            onConfirmDialogRepeatGuide = {},
+            onAssetClick = {},
+            onDeleteItemClick = { _, _ -> },
             onActionGuideNone = {},
-            onCloseGuide = {},
-            onDeleteItemClick = {_, _ -> },
-        )
+            onAddQuestion = {},
+        ) {}
     }
 }
 
@@ -103,22 +100,22 @@ fun PreviewFillingGuideWithoutShowDialog() {
             actualQuestion = 1,
             totalQuestions = 2,
             listTypeMedia = listOf(QuestionContentUi.Text("Hola", listOf())),
+            guideMode = GuideMode.Edit("", "", 0),
             showDialogDeleteQuestion = false,
             showDialogRepeatGuide = false,
-            onActionGuideNone = {},
+            onDissmissDialogRepeatGuide = {},
+            onConfirmDialogRepeatGuide = {},
             onContinueDialogDeleteQuestionClick = {},
             onBackQuestionClick = {},
             onNextQuestionClick = {},
             onDeleteQuestionClick = { },
             onTypeClicked = {},
             onFilterClicked = {},
-            onModifyAssetClick = { },
+            onAssetClick = {},
+            onDeleteItemClick = { _, _ -> },
+            onActionGuideNone = {},
             onAddQuestion = {},
-            onDissmissDialogRepeatGuide = {},
-            onConfirmDialogRepeatGuide = {},
-            onCloseGuide = {},
-            onDeleteItemClick = {_, _ -> },
-        )
+        ) {}
     }
 }
 
@@ -127,8 +124,9 @@ fun FillingGuideRoute(
     viewModel: SharedFragmentCreateFileViewModel,
     guideMode: GuideMode,
     relativeGuidePath: RelativeGuidePath,
-    onModifyAssetClick: (QuestionContentUi) -> Unit,
-    onActionGuideNone: () -> Unit
+    onAssetClick: (QuestionContentUi) -> Unit,
+    onActionGuideNone: () -> Unit,
+    onCloseGuide: () -> Unit
 ) {
     var typeSelected by rememberSaveable { mutableStateOf(QAType.QUESTION) }
     val typeForSelected = listOf(QAType.QUESTION, QAType.ANSWER)
@@ -152,14 +150,22 @@ fun FillingGuideRoute(
             is GuideMode.Create -> {
                 viewModel.initUIState()
             }
+
             is GuideMode.Edit -> {
                 viewModel.getObtenerDatosXML(
-                    noQuestion = guideMode.noQuestion,
+                    posQuestion = guideMode.posQuestion,
                     nameGuide = guideMode.nameGuide,
                     relativeGuidePath = relativeGuidePath
                 )
             }
-            GuideMode.Review -> TODO()
+
+            is GuideMode.Review -> {
+                viewModel.getObtenerDatosXML(
+                    posQuestion = guideMode.posQuestion,
+                    nameGuide = guideMode.nameGuide,
+                    relativeGuidePath = relativeGuidePath
+                )
+            }
         }
     }
 
@@ -171,6 +177,7 @@ fun FillingGuideRoute(
         actualQuestion = actualQuestion,
         totalQuestions = totalQuestions,
         listTypeMedia = listTypeMedia,
+        guideMode = guideMode,
         showDialogDeleteQuestion = showDialogDeleteQuestion,
         showDialogRepeatGuide = showDialogRepeatGuide,
         onDissmissDialogRepeatGuide = { showDialogRepeatGuide = false },
@@ -223,33 +230,13 @@ fun FillingGuideRoute(
         onFilterClicked = { filterClicked ->
             mediaSelected = filterClicked
         },
-        onModifyAssetClick = { typeContent -> onModifyAssetClick(typeContent) },
+        onAssetClick = { typeContent -> onAssetClick(typeContent) },
         onActionGuideNone = onActionGuideNone,
         onAddQuestion = {
             viewModel.addNewQuestion()
         },
         onCloseGuide = {
-            when(guideMode){
-            /*when (guideMode) {
-                is ActionGuide.CREATE -> {
-                    viewModel.saveGuide(
-                        nameGuide = guideMode.nameGuide,
-                        description = guideMode.description,
-                        relativeGuidePath = relativeGuidePath,
-                        mode = SaveGuideMode.Create
-                    )
-                }
-
-                is ActionGuide.EDIT -> {
-                    viewModel.saveGuide(
-                        nameGuide = guideMode.nameGuide,
-                        description = guideMode.description,
-                        relativeGuidePath = relativeGuidePath,
-                        mode = SaveGuideMode.Update
-                    )
-                }
-
-                ActionGuide.NONE -> onActionGuideNone()*/
+            when (guideMode) {
                 is GuideMode.Create -> {
                     viewModel.saveGuide(
                         nameGuide = guideMode.nameGuide,
@@ -257,16 +244,22 @@ fun FillingGuideRoute(
                         relativeGuidePath = relativeGuidePath,
                         mode = SaveGuideMode.Create
                     )
+                    onCloseGuide()
                 }
-                is GuideMode.Edit ->{
+
+                is GuideMode.Edit -> {
                     viewModel.saveGuide(
                         nameGuide = guideMode.nameGuide,
                         description = guideMode.description,
                         relativeGuidePath = relativeGuidePath,
                         mode = SaveGuideMode.Update
                     )
+                    onCloseGuide()
                 }
-                GuideMode.Review -> TODO()
+
+                is GuideMode.Review -> {
+                    onCloseGuide()
+                }
             }
         }
     )
@@ -282,6 +275,7 @@ fun FillingGuideScreen(
     actualQuestion: Int,
     totalQuestions: Int,
     listTypeMedia: List<QuestionContentUi>,
+    guideMode: GuideMode,
     showDialogDeleteQuestion: Boolean,
     showDialogRepeatGuide: Boolean,
     onDissmissDialogRepeatGuide: () -> Unit,
@@ -292,7 +286,7 @@ fun FillingGuideScreen(
     onDeleteQuestionClick: () -> Unit,
     onTypeClicked: (QAType) -> Unit,
     onFilterClicked: (ContentType) -> Unit,
-    onModifyAssetClick: (QuestionContentUi) -> Unit,
+    onAssetClick: (QuestionContentUi) -> Unit,
     onDeleteItemClick: (typeContent: QuestionContentUi, positionItem: Int) -> Unit,
     onActionGuideNone: () -> Unit,
     onAddQuestion: () -> Unit,
@@ -302,6 +296,7 @@ fun FillingGuideScreen(
         modifier = Modifier.fillMaxSize(),
         floatingActionButton = {
             FloatingActionButtons(
+                guideMode = guideMode,
                 onAddQuestion = onAddQuestion,
                 onCloseGuide = onCloseGuide
             )
@@ -314,8 +309,9 @@ fun FillingGuideScreen(
                 .padding(horizontal = 16.dp)
         ) {
             CustomTopBar(
-                actualQuestion,
-                totalQuestions,
+                actualQuestion = actualQuestion,
+                totalQuestions = totalQuestions,
+                guideMode = guideMode,
                 onDeleteQuestionClick = onDeleteQuestionClick,
                 onBackQuestionClick = onBackQuestionClick,
                 onNextQuestionClick = onNextQuestionClick
@@ -330,6 +326,7 @@ fun FillingGuideScreen(
             AssetCarouselViewer(
                 assets = listTypeMedia,
                 mediaForSelected = mediaSelected,
+                guideMode = guideMode,
                 onAddAssetClick = { },
                 onDeleteItemClick = { typeContent, positionItem ->
                     onDeleteItemClick(
@@ -337,7 +334,7 @@ fun FillingGuideScreen(
                         positionItem
                     )
                 },
-                onModifyAssetClick = { typeContent -> onModifyAssetClick(typeContent) },
+                onAssetClick = { typeContent -> onAssetClick(typeContent) },
                 onActionGuideNone = onActionGuideNone,
             )
         }
@@ -424,45 +421,8 @@ private fun QAType(
 }
 
 @Composable
-private fun CustomTopBar(
-    actualQuestion: Int,
-    totalQuestions: Int,
-    onDeleteQuestionClick: () -> Unit,
-    onBackQuestionClick: () -> Unit,
-    onNextQuestionClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Start
-    ) {
-        NavigationPagerBar(
-            actualQuestion = actualQuestion,
-            totalQuestions = totalQuestions,
-            onBackQuestionClick = onBackQuestionClick,
-            onNextQuestionClick = onNextQuestionClick
-        )
-        Spacer(modifier = Modifier.width(5.dp))
-        Box(
-            modifier = Modifier
-                .padding(10.dp)
-                .clickable(onClick = onDeleteQuestionClick),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                modifier = Modifier.size(16.dp),
-                painter = painterResource(R.drawable.ic_trash),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurface
-            )
-        }
-    }
-}
-
-@Composable
 private fun FloatingActionButtons(
+    guideMode: GuideMode,
     onAddQuestion: () -> Unit,
     onCloseGuide: () -> Unit
 ) {
@@ -470,30 +430,42 @@ private fun FloatingActionButtons(
         horizontalAlignment = Alignment.End,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        FloatingActionButton(
-            onClick = onAddQuestion,
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary,
-            shape = CircleShape,
-            modifier = Modifier.size(56.dp)
-        ) {
-            NewQuestionIcon(modifier = Modifier.padding(8.dp))
+        if (guideMode !is GuideMode.Review) {
+            FloatingActionButton(
+                onClick = onAddQuestion,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                shape = CircleShape,
+                modifier = Modifier.size(56.dp)
+            ) {
+                NewQuestionIcon(modifier = Modifier.padding(8.dp))
+            }
         }
 
+        val painter =
+            if (guideMode !is GuideMode.Review)
+                android.R.drawable.ic_menu_save
+            else
+                R.drawable.ic_success
+        val text =
+            if (guideMode !is GuideMode.Review)
+                stringResource(R.string.btnGuardarGuia)
+            else
+                stringResource(R.string.lblCloseGuide)
         ExtendedFloatingActionButton(
             onClick = onCloseGuide,
             containerColor = MaterialTheme.colorScheme.primary,
             shape = RoundedCornerShape(16.dp),
             icon = {
                 Icon(
-                    painter = painterResource(id = android.R.drawable.ic_menu_save),
+                    painter = painterResource(painter),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onPrimary
                 )
             },
             text = {
                 Text(
-                    "Guardar Guía",
+                    text = text,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onPrimary
                 )

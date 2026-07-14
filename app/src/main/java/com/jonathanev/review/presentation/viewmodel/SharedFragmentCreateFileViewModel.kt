@@ -443,7 +443,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         if (noQuestion == -1) totalAnswers else noQuestion
 
     fun getObtenerDatosXML(
-        noQuestion: Int,
+        posQuestion: Int,
         nameGuide: String,
         relativeGuidePath: RelativeGuidePath
     ) {
@@ -455,7 +455,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         }
 
         val result = loadGuideXml(guide, relativeGuidePath)
-        handleGuideResult(result, noQuestion)
+        handleGuideResult(result, posQuestion)
     }
 
     private fun isDataValid(): Boolean {

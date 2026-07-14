@@ -25,6 +25,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.jonathanev.review.presentation.model.ColorRangeUi
+import com.jonathanev.review.presentation.model.GuideMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.presentation.model.SpanPalabraModel
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
@@ -39,6 +40,7 @@ import com.jonathanev.review.ui.theme.degradientColor
 fun PreviewCreateTextScreen() {
     ReviewTheme {
         CreateTextScreen(
+            guideMode = GuideMode.Review("", 0),
             contentType = QuestionContentUi.Text("", emptyList()),
             onSaveText = { _, _ -> }
         )
@@ -47,19 +49,25 @@ fun PreviewCreateTextScreen() {
 
 @Composable
 fun CreateTextRoute(
+    guideMode: GuideMode,
     viewModel: SharedFragmentCreateFileViewModel,
     contentType: QuestionContentUi.Text,
     onSaveText: () -> Unit
 ) {
-    CreateTextScreen(contentType = contentType, onSaveText = { text, colors ->
-        viewModel.addTextContent(textWithLabels = text, listSpans = colors)
-        onSaveText()
-    })
+    CreateTextScreen(
+        guideMode = guideMode,
+        contentType = contentType,
+        onSaveText = { text, colors ->
+            viewModel.addTextContent(textWithLabels = text, listSpans = colors)
+            onSaveText()
+        }
+    )
 }
 
 @Composable
 fun CreateTextScreen(
     modifier: Modifier = Modifier,
+    guideMode: GuideMode,
     contentType: QuestionContentUi.Text,
     onSaveText: (String, List<ColorRangeUi>) -> Unit,
 ) {
@@ -92,23 +100,25 @@ fun CreateTextScreen(
                     .fillMaxSize()
                     .padding(bottom = 16.dp)
             ) {
-                OptionsCreateText(
-                    textValue = textValue.annotatedString,
-                    selectedColor = selectedColor,
-                    onClearColorClick = {
-                        textValue = TextFieldValue(text = textValue.text)
-                    },
-                    onSelectColorClick = { showDialog = true },
-                    onSaveTextClick = {
-                        saveCurrentQuestion(
-                            textFieldValue = textValue,
-                            onSaveContent = { text, colors -> onSaveText(text, colors) }
-                        )
-                    }
-                )
+                if (guideMode !is GuideMode.Review) {
+                    OptionsCreateText(
+                        textValue = textValue.annotatedString,
+                        selectedColor = selectedColor,
+                        onClearColorClick = {
+                            textValue = TextFieldValue(text = textValue.text)
+                        },
+                        onSelectColorClick = { showDialog = true },
+                        onSaveTextClick = {
+                            saveCurrentQuestion(
+                                textFieldValue = textValue,
+                                onSaveContent = { text, colors -> onSaveText(text, colors) }
+                            )
+                        }
+                    )
+                }
                 CustomBoxCreateText(
                     textValue = textValue,
-                    hint = true,
+                    hint = textValue.text.isNotEmpty(),
                     onTextValueChange = { actualText ->
                         val oldText = textValue.text
                         val newText = actualText.text

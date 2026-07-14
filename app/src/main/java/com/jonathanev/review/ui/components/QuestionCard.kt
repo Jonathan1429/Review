@@ -51,7 +51,7 @@ fun PreviewQuestionCard(
     @PreviewParameter(QuestionItemProvider::class) data: QuestionItemProv
 ) {
     ReviewTheme {
-        QuestionCard(data.question, data.noTexts, data.noImages, {})
+        QuestionCard(data.question, data.noTexts, data.noImages, {}, {})
     }
 }
 
@@ -60,7 +60,8 @@ fun QuestionCard(
     question: String,
     noTexts: String,
     noImages: String,
-    onEditingGuideClick: () -> Unit
+    onEditingGuideClick: () -> Unit,
+    onPlayGuideClick: () -> Unit
 ) {
     Card(
         shape = RoundedCornerShape(16.dp),
@@ -138,7 +139,7 @@ fun QuestionCard(
                     }
 
                     IconButton(
-                        onClick = { /* Acción reproducir */ },
+                        onClick = onPlayGuideClick,
                         colors = IconButtonDefaults.iconButtonColors(containerColor = CircleContentSVG),
                         modifier = Modifier.size(40.dp)
                     ) {
