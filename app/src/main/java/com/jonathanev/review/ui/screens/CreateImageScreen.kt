@@ -25,15 +25,45 @@ import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.ui.components.CustomBoxCreateImage
 import com.jonathanev.review.ui.components.OptionsCreateImage
+import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.theme.ReviewTheme
+import com.jonathanev.review.ui.theme.cardListBackground
+import com.jonathanev.review.ui.theme.cardStepBackground
 import com.jonathanev.review.ui.theme.degradientColor
+import com.jonathanev.review.ui.theme.iconBackground
 
-@Preview
+@DevicePreviews
 @Composable
-fun PreviewCreateImageScreen() {
+fun PreviewCreateImageEdit() {
     ReviewTheme {
         CreateImageScreen(
             guideMode = GuideMode.Edit("", "", 0),
+            uriImage = "",
+            selectedImage = { },
+            imageUploaded = {  }
+        )
+    }
+}
+
+@DevicePreviews
+@Composable
+fun PreviewCreateImageCreate() {
+    ReviewTheme {
+        CreateImageScreen(
+            guideMode = GuideMode.Create("", ""),
+            uriImage = "",
+            selectedImage = { },
+            imageUploaded = {  }
+        )
+    }
+}
+
+@DevicePreviews
+@Composable
+fun PreviewCreateImageReview() {
+    ReviewTheme {
+        CreateImageScreen(
+            guideMode = GuideMode.Review("", 0),
             uriImage = "",
             selectedImage = { },
             imageUploaded = {  }
@@ -88,7 +118,7 @@ fun CreateImageScreen(
                 .padding(16.dp),
             shape = RoundedCornerShape(42.dp),
             colors = CardDefaults.elevatedCardColors(
-                containerColor = degradientColor
+                containerColor = cardStepBackground
             ),
             elevation = CardDefaults.elevatedCardElevation(
                 defaultElevation = 8.dp
