@@ -37,21 +37,11 @@ import com.jonathanev.review.presentation.viewmodel.NavigationViewModel
 import com.jonathanev.review.ui.components.BoxItemFolder
 import com.jonathanev.review.ui.components.CustomTextField
 import com.jonathanev.review.ui.components.IconsForSelect
-import com.jonathanev.review.ui.components.LayeredSelectedIcon
 import com.jonathanev.review.ui.components.SelectedPickerColor
 import com.jonathanev.review.ui.model.PropertiesGuide
 import com.jonathanev.review.ui.preview.DevicePreviews
-import com.jonathanev.review.ui.preview.providers.BoxItemFolderDataProvider
 import com.jonathanev.review.ui.preview.providers.CreateFilesScreenDataProvider
-import com.jonathanev.review.ui.preview.providers.CustomTextFieldDataProvider
-import com.jonathanev.review.ui.preview.providers.IconSelected
-import com.jonathanev.review.ui.preview.providers.IconsFolderDataProvider
-import com.jonathanev.review.ui.preview.providers.IconsGuideDataProvider
-import com.jonathanev.review.ui.preview.providers.LayeredSelectedIconDataProvider
 import com.jonathanev.review.ui.preview.providers.PropertiesCreateFilesScreen
-import com.jonathanev.review.ui.preview.providers.PropertiesFolderSelected
-import com.jonathanev.review.ui.preview.providers.PropertiesItemFolder
-import com.jonathanev.review.ui.preview.providers.PropertiesTF
 import com.jonathanev.review.ui.theme.ColorBotones
 import com.jonathanev.review.ui.theme.ReviewTheme
 

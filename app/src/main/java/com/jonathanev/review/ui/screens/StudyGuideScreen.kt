@@ -4,9 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -47,10 +45,9 @@ import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileView
 import com.jonathanev.review.ui.components.AssetCarouselViewer
 import com.jonathanev.review.ui.components.CustomAlertDialog
 import com.jonathanev.review.ui.components.CustomTopBar
-import com.jonathanev.review.ui.components.FilterChipItem
-import com.jonathanev.review.ui.components.QATypeItem
+import com.jonathanev.review.ui.components.FilterTypeItem
+import com.jonathanev.review.ui.components.QASelectType
 import com.jonathanev.review.ui.components.ShowDeletePopUp
-import com.jonathanev.review.ui.mapper.toDrawable
 import com.jonathanev.review.ui.model.ContentType
 import com.jonathanev.review.ui.model.QAType
 import com.jonathanev.review.ui.preview.DevicePreviews
@@ -317,10 +314,10 @@ fun FillingGuideScreen(
                 onBackQuestionClick = onBackQuestionClick,
                 onNextQuestionClick = onNextQuestionClick
             )
-            QAType(typeForSelected, typeSelected, onTypeClicked = { typeClicked ->
+            QASelectType(typeForSelected, typeSelected, onTypeClicked = { typeClicked ->
                 onTypeClicked(typeClicked)
             })
-            FilterChip(mediaForSelected, mediaSelected, onFilterClicked = { filterClicked ->
+            FilterTypeItem(mediaForSelected, mediaSelected, onFilterClicked = { filterClicked ->
                 onFilterClicked(filterClicked)
             })
 
@@ -368,54 +365,6 @@ fun FillingGuideScreen(
                 }
             }
 
-        }
-    }
-}
-
-@Composable
-private fun FilterChip(
-    mediaForSelected: List<ContentType>,
-    mediaSelected: ContentType,
-    onFilterClicked: (ContentType) -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 24.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        mediaForSelected.forEach { item ->
-            FilterChipItem(
-                itemContentType = item,
-                iconRes = item.toDrawable(),
-                contentTypeSelected = mediaSelected,
-                onFilterClicked = { filterClicked ->
-                    onFilterClicked(filterClicked)
-                }
-            )
-        }
-    }
-}
-
-@Composable
-private fun QAType(
-    typeForSelected: List<QAType>,
-    typeSelected: QAType,
-    onTypeClicked: (QAType) -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 24.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        typeForSelected.forEach { item ->
-            QATypeItem(
-                item, typeSelected,
-                onTypeClicked = { typeClicked ->
-                    onTypeClicked(typeClicked)
-                }
-            )
         }
     }
 }
