@@ -44,7 +44,6 @@ fun PreviewAssetCarouselViewer() {
         onAddAssetClick = { },
         onAssetClick = {},
         onDeleteItemClick = { _, _ -> },
-        onActionGuideNone = { }
     )
 }
 
@@ -57,7 +56,6 @@ fun AssetCarouselViewer(
     onAddAssetClick: () -> Unit,
     onAssetClick: (QuestionContentUi) -> Unit,
     onDeleteItemClick: (typeContent: QuestionContentUi, positionItem: Int ) -> Unit,
-    onActionGuideNone: () -> Unit
 ) {
     val pagerState = rememberPagerState(pageCount = { assets.size })
     val scope = rememberCoroutineScope()
@@ -77,8 +75,8 @@ fun AssetCarouselViewer(
             mediaForSelected = mediaForSelected,
             resourceSelected = resourceSelected,
             guideMode = guideMode,
-            onAssetClick = { typeContent -> onAssetClick(typeContent) },
-            onActionGuideNone = { onActionGuideNone() })
+            onAssetClick = { typeContent -> onAssetClick(typeContent) }
+        )
         if (guideMode !is GuideMode.Review) {
             DeleteAsset(resourceSelected, onDeleteItemClick = {
                 val asset = assets[pagerState.currentPage]
@@ -106,7 +104,7 @@ private fun DeleteAsset(resourceSelected: Int, onDeleteItemClick: () -> Unit) {
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .padding(end = 8.dp)
-                .clickable(onClick = {}),
+                .clickable(onClick = onDeleteItemClick),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {

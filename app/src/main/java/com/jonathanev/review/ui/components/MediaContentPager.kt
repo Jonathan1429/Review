@@ -59,8 +59,7 @@ fun PreviewMediaContentPager() {
         mediaForSelected = ContentType.TEXT,
         resourceSelected = R.string.lblText,
         guideMode = GuideMode.Edit("", "", 0),
-        onAssetClick = {},
-        onActionGuideNone = {}
+        onAssetClick = {}
     )
 }
 
@@ -72,7 +71,6 @@ fun MediaContentPager(
     resourceSelected: Int,
     guideMode: GuideMode,
     onAssetClick: (QuestionContentUi) -> Unit,
-    onActionGuideNone: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -144,7 +142,7 @@ fun MediaContentPager(
                         Icon(
                             painter = painterResource(painter),
                             contentDescription = null,
-                            tint = TextColorSecondary,
+                            tint = Color.White,
                             modifier = Modifier
                                 .size(16.dp)
                                 .clickable(onClick = {

@@ -334,8 +334,7 @@ fun FillingGuideScreen(
                         positionItem
                     )
                 },
-                onAssetClick = { typeContent -> onAssetClick(typeContent) },
-                onActionGuideNone = onActionGuideNone,
+                onAssetClick = { typeContent -> onAssetClick(typeContent) }
             )
         }
 
