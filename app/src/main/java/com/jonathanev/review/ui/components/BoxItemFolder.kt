@@ -12,11 +12,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.jonathanev.review.presentation.model.IconType
 import com.jonathanev.review.ui.mapper.toInt
+import com.jonathanev.review.ui.preview.DevicePreviews
+import com.jonathanev.review.ui.preview.providers.BoxItemFolderDataProvider
+import com.jonathanev.review.ui.preview.providers.PropertiesItemFolder
 import com.jonathanev.review.ui.theme.Black
+import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.White
+
+@DevicePreviews
+@Composable
+fun PreviewBoxItemFolder(
+    @PreviewParameter(BoxItemFolderDataProvider::class) data: PropertiesItemFolder
+) {
+    ReviewTheme {
+        BoxItemFolder(data.iconRes)
+    }
+}
 
 @Composable
 fun BoxItemFolder(

@@ -76,64 +76,6 @@ fun PreviewCreateFilesPropertiesScreen(
     }
 }
 
-@DevicePreviews
-@Composable
-fun PreviewIconsFile(
-    @PreviewParameter(IconsGuideDataProvider::class) data: List<IconType>
-) {
-    ReviewTheme {
-        IconsForSelect(data, 0) { _, _ -> }
-    }
-}
-
-@DevicePreviews
-@Composable
-fun PreviewIconsFolder(
-    @PreviewParameter(IconsFolderDataProvider::class) data: PropertiesFolderSelected
-) {
-    ReviewTheme {
-        IconsForSelect(data.listIcons, data.posSelected) { _, _ -> }
-    }
-}
-
-@DevicePreviews
-@Composable
-fun PreviewSelectedPickerColor() {
-    ReviewTheme {
-        SelectedPickerColor { }
-    }
-}
-
-@DevicePreviews
-@Composable
-fun PreviewBoxItemFolder(
-    @PreviewParameter(BoxItemFolderDataProvider::class) data: PropertiesItemFolder
-) {
-    ReviewTheme {
-        BoxItemFolder(data.iconRes)
-    }
-}
-
-@DevicePreviews
-@Composable
-fun PreviewCustomTextField(
-    @PreviewParameter(CustomTextFieldDataProvider::class) data: PropertiesTF
-) {
-    ReviewTheme {
-        CustomTextField(data.name, data.label) { }
-    }
-}
-
-@DevicePreviews
-@Composable
-fun PreviewLayeredSelectedIcon(
-    @PreviewParameter(LayeredSelectedIconDataProvider::class) data: IconSelected
-) {
-    ReviewTheme {
-        LayeredSelectedIcon(data.icon, data.isSelected) { }
-    }
-}
-
 @Composable
 fun CreateFilesPropertiesRoute(
     viewModel: CreateFilesViewModel,
@@ -202,65 +144,7 @@ fun CreateFilesPropertiesRoute(
         onShowToast = { message -> Toast.makeText(context, message, Toast.LENGTH_SHORT).show() },
         onDismissDialogs = { viewModel.dismissOverwriteDialog() }
     )
-
-    /*LaunchedEffect(Unit) {
-        viewModel.events.collectLatest { event ->
-            when (event) {
-                CreateFilesEvent.CreatingFolder -> {
-                    val data = ScreenDataUi(state.name, state.description, state.icon, state.color)
-                    viewModel.saveMetadata(data)
-                }
-
-                is CreateFilesEvent.ShowMessage ->
-                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
-
-                CreateFilesEvent.CreateFile -> TODO()
-                CreateFilesEvent.RenamingFile -> TODO()
-            }
-        }
-        viewModel.messages.collectLatest { event ->
-            when (event) {
-                is CreatingFileUiState.ContinuedProcess ->{
-                    val data = ScreenDataUi(state.name, state.description, state.icon, state.color)
-                    viewModel.saveMetadata(data)
-                }
-
-                is CreatingFileUiState.Message ->
-                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
-            }
-        }
-    }*/
 }
-
-/*@Composable
-private fun OnCreateGuideConfirmed(data: ScreenDataUi) {
-    val isDark = isSystemInDarkTheme()
-
-    findNavController().navigate(
-        R.id.action_to_create_file,
-        bundleOf(
-            //"mode" to mode,
-            "screenData" to data.toNav(isDark),
-            "actionGuide" to ActionGuide.CREATE
-        )
-    )
-}
-
-private fun onCreateFolderConfirmed(data: ScreenDataUi) {
-    Toast.makeText(
-        requireContext(),
-        "Carpeta creada exitosamente",
-        Toast.LENGTH_SHORT
-    ).show()
-
-    findNavController().navigate(
-        R.id.fragmentsContent,
-        null,
-        NavOptions.Builder()
-            .setPopUpTo(R.id.content_graph, true) // Limpia el historial
-            .build()
-    )
-}*/
 
 @Composable
 fun CreateFilesPropertiesScreen(
@@ -365,10 +249,6 @@ fun CreateFilesPropertiesScreen(
                         iconRes = state.icon,
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
-                }
-
-                else -> {
-                    Text("No se puede procesar esa informacion")
                 }
             }
         }

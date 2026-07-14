@@ -7,8 +7,34 @@ import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.jonathanev.review.presentation.model.IconType
+import com.jonathanev.review.ui.preview.DevicePreviews
+import com.jonathanev.review.ui.preview.providers.IconsFolderDataProvider
+import com.jonathanev.review.ui.preview.providers.IconsGuideDataProvider
+import com.jonathanev.review.ui.preview.providers.PropertiesFolderSelected
+import com.jonathanev.review.ui.theme.ReviewTheme
+
+@DevicePreviews
+@Composable
+fun PreviewIconsFile(
+    @PreviewParameter(IconsGuideDataProvider::class) data: List<IconType>
+) {
+    ReviewTheme {
+        IconsForSelect(data, 0) { _, _ -> }
+    }
+}
+
+@DevicePreviews
+@Composable
+fun PreviewIconsFolder(
+    @PreviewParameter(IconsFolderDataProvider::class) data: PropertiesFolderSelected
+) {
+    ReviewTheme {
+        IconsForSelect(data.listIcons, data.posSelected) { _, _ -> }
+    }
+}
 
 @Composable
 fun IconsForSelect(

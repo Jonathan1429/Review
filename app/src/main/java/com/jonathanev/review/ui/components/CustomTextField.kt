@@ -9,6 +9,21 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import com.jonathanev.review.ui.preview.DevicePreviews
+import com.jonathanev.review.ui.preview.providers.CustomTextFieldDataProvider
+import com.jonathanev.review.ui.preview.providers.PropertiesTF
+import com.jonathanev.review.ui.theme.ReviewTheme
+
+@DevicePreviews
+@Composable
+fun PreviewCustomTextField(
+    @PreviewParameter(CustomTextFieldDataProvider::class) data: PropertiesTF
+) {
+    ReviewTheme {
+        CustomTextField(data.name, data.label) { }
+    }
+}
 
 @Composable
 fun CustomTextField(name: String, label: String, onValueChange: (String) -> Unit) {
