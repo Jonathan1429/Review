@@ -27,6 +27,7 @@ import com.jonathanev.review.presentation.viewmodel.FragmentRepasarViewModel
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
 import com.jonathanev.review.presentation.viewmodel.NavigationViewModel
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
+import com.jonathanev.review.ui.model.ContentType
 import com.jonathanev.review.ui.screens.CreateFilesPropertiesRoute
 import com.jonathanev.review.ui.screens.CreateImageRoute
 import com.jonathanev.review.ui.screens.CreateTextRoute
@@ -274,6 +275,30 @@ fun BasicNavigation() {
                                 )
                             }
                         }
+                    },
+                    onAddAssetClick = { mediaSelected ->
+                        when (mediaSelected) {
+                            ContentType.TEXT ->
+                                AppRoutes.CreateTextScreen(
+                                    contentType = QuestionContentUi.Text(
+                                        text = "",
+                                        colorRanges = emptyList()
+                                    ),
+                                    guideMode = action.guideMode
+                                )
+
+                            ContentType.IMAGE -> {
+                                AppRoutes.CreateImageScreen(
+                                    contentType = QuestionContentUi.Image(
+                                        uri = "",
+                                        nameFile = ""
+                                    ),
+                                    guideMode = action.guideMode
+                                )
+                            }
+                        }
+
+
                     },
                     onActionGuideNone = {
                         Toast.makeText(

@@ -44,7 +44,8 @@ fun StepNavigationCarousel(
     assets: List<QuestionContentUi>,
     pagerState: PagerState,
     scope: CoroutineScope,
-    guideMode: GuideMode
+    guideMode: GuideMode,
+    onAddAssetClick: () -> Unit
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -56,7 +57,7 @@ fun StepNavigationCarousel(
                     .size(50.dp)
                     .clip(RoundedCornerShape(16.dp))
                     .background(MaterialTheme.colorScheme.primary)
-                    .clickable { /* Guardar todo */ },
+                    .clickable(onClick = onAddAssetClick),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(

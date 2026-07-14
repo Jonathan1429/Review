@@ -81,8 +81,8 @@ fun PreviewFillingGuideWithShowDialog() {
             onTypeClicked = {},
             onFilterClicked = {},
             onAssetClick = {},
+            onAddAssetClick = {},
             onDeleteItemClick = { _, _ -> },
-            onActionGuideNone = {},
             onAddQuestion = {},
         ) {}
     }
@@ -112,8 +112,8 @@ fun PreviewFillingGuideWithoutShowDialog() {
             onTypeClicked = {},
             onFilterClicked = {},
             onAssetClick = {},
+            onAddAssetClick = {},
             onDeleteItemClick = { _, _ -> },
-            onActionGuideNone = {},
             onAddQuestion = {},
         ) {}
     }
@@ -125,6 +125,7 @@ fun FillingGuideRoute(
     guideMode: GuideMode,
     relativeGuidePath: RelativeGuidePath,
     onAssetClick: (QuestionContentUi) -> Unit,
+    onAddAssetClick: (ContentType) -> Unit,
     onActionGuideNone: () -> Unit,
     onCloseGuide: () -> Unit
 ) {
@@ -231,7 +232,7 @@ fun FillingGuideRoute(
             mediaSelected = filterClicked
         },
         onAssetClick = { typeContent -> onAssetClick(typeContent) },
-        onActionGuideNone = onActionGuideNone,
+        onAddAssetClick = { onAddAssetClick(mediaSelected) },
         onAddQuestion = {
             viewModel.addNewQuestion()
         },
@@ -288,7 +289,7 @@ fun FillingGuideScreen(
     onFilterClicked: (ContentType) -> Unit,
     onAssetClick: (QuestionContentUi) -> Unit,
     onDeleteItemClick: (typeContent: QuestionContentUi, positionItem: Int) -> Unit,
-    onActionGuideNone: () -> Unit,
+    onAddAssetClick: () -> Unit,
     onAddQuestion: () -> Unit,
     onCloseGuide: () -> Unit
 ) {
@@ -327,7 +328,7 @@ fun FillingGuideScreen(
                 assets = listTypeMedia,
                 mediaForSelected = mediaSelected,
                 guideMode = guideMode,
-                onAddAssetClick = { },
+                onAddAssetClick = onAddAssetClick,
                 onDeleteItemClick = { typeContent, positionItem ->
                     onDeleteItemClick(
                         typeContent,

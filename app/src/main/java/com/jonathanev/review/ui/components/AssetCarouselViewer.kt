@@ -92,7 +92,8 @@ fun AssetCarouselViewer(
             assets = assets,
             pagerState = pagerState,
             scope = scope,
-            guideMode = guideMode
+            guideMode = guideMode,
+            onAddAssetClick = onAddAssetClick
         )
     }
 }
