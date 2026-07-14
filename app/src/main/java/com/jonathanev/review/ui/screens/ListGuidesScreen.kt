@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -34,7 +33,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -45,17 +43,15 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.jonathanev.review.R
 import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.presentation.model.FileInteractionMode
-import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.presentation.model.GuideResultUi
 import com.jonathanev.review.presentation.model.GuideUiModel
+import com.jonathanev.review.presentation.state.DialogState
 import com.jonathanev.review.presentation.viewmodel.FragmentListGuidesViewModel
 import com.jonathanev.review.presentation.viewmodel.NavigationViewModel
 import com.jonathanev.review.ui.components.ItemGuide
-import com.jonathanev.review.presentation.state.DialogState
 import com.jonathanev.review.ui.model.PropertiesGuide
 import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.StudyGuidesProvider

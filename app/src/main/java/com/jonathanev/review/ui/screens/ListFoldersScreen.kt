@@ -21,7 +21,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.jonathanev.review.R
 import com.jonathanev.review.presentation.model.FileInteractionMode
-import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.presentation.model.FolderUiModel
 import com.jonathanev.review.ui.components.GuiaItem
 import com.jonathanev.review.ui.preview.DevicePreviews

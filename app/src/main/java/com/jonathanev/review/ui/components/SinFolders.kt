@@ -22,12 +22,21 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jonathanev.review.R
+import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.theme.CircleContentSVG
 import com.jonathanev.review.ui.theme.Inter
+import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.TextGray
 import com.jonathanev.review.ui.theme.cardStepBackground
 
-@Preview(showBackground = true)
+@DevicePreviews
+@Composable
+fun PreviewSinFolders(){
+    ReviewTheme {
+        SinFolders()
+    }
+}
+
 @Composable
 fun SinFolders() {
     Column(

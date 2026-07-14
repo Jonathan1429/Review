@@ -16,15 +16,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.jonathanev.review.R
-import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.ui.components.BasePasos
 import com.jonathanev.review.ui.components.SinFolders
 import com.jonathanev.review.ui.preview.DevicePreviews
-import com.jonathanev.review.ui.preview.providers.PasoPreviewData
-import com.jonathanev.review.ui.preview.providers.PasosDataProvider
 import com.jonathanev.review.ui.theme.ColorBotones
 import com.jonathanev.review.ui.theme.ReviewTheme
 
@@ -33,28 +29,6 @@ import com.jonathanev.review.ui.theme.ReviewTheme
 fun PreviewWithoutFoldersScreen() {
     ReviewTheme {
         WithoutFoldersScreen(onNavCreateFilesProperties = {})
-    }
-}
-
-@DevicePreviews
-@Composable
-fun PreviewBasePasos(
-    @PreviewParameter(PasosDataProvider::class) data: PasoPreviewData
-) {
-    ReviewTheme {
-        BasePasos(
-            image = data.image,
-            title = data.title,
-            description = data.description
-        )
-    }
-}
-
-@DevicePreviews
-@Composable
-fun PreviewSinFolders(){
-    ReviewTheme {
-        SinFolders()
     }
 }
 
