@@ -63,17 +63,36 @@ import com.jonathanev.review.ui.theme.cardStepBackground
 
 @DevicePreviews
 @Composable
-fun PreviewListGuidesScreen(
+fun PreviewMovingGuide(
     @PreviewParameter(StudyGuidesProvider::class) data: List<GuideUiModel>
 ) {
     ReviewTheme {
         ListGuidesScreen(
             guides = data,
+            fileInteractionMode = FileInteractionMode.MovingItem,
             onAddGuideClick = { },
             onItemClick = { },
             onMoveCancelGuideClick = { },
             onMoveSuccessGuideClick = { },
-            fileInteractionMode = FileInteractionMode.MovingItem
+            onErrorProcess = {}
+        )
+    }
+}
+
+@DevicePreviews
+@Composable
+fun PreviewListGuides(
+    @PreviewParameter(StudyGuidesProvider::class) data: List<GuideUiModel>
+) {
+    ReviewTheme {
+        ListGuidesScreen(
+            guides = data,
+            fileInteractionMode = FileInteractionMode.Default,
+            onAddGuideClick = { },
+            onItemClick = { },
+            onMoveCancelGuideClick = { },
+            onMoveSuccessGuideClick = { },
+            onErrorProcess = {}
         )
     }
 }
@@ -105,6 +124,7 @@ fun ListGuidesRoute(
     ListGuidesScreen(
         guides = guides,
         onAddGuideClick = onAddGuideClick,
+        fileInteractionMode = fileInteractionMode,
         onItemClick = { posGuide ->
             when (val result = viewModel.getGuideSelected(posGuide)) {
                 GuideResultUi.Error -> {
@@ -126,7 +146,13 @@ fun ListGuidesRoute(
             viewModel.movingGuide(relativeGuidePath)
             onMoveSuccessGuideClick()
         },
-        fileInteractionMode = fileInteractionMode
+        onErrorProcess = {
+            Toast.makeText(
+                /* context = */ context,
+                /* text = */ "Debes mover la guia antes de hacer otra accion",
+                /* duration = */ Toast.LENGTH_SHORT
+            ).show()
+        }
     )
 
     currentDialog?.let { stateDialog ->
@@ -169,11 +195,12 @@ fun ListGuidesRoute(
 @Composable
 fun ListGuidesScreen(
     guides: List<GuideUiModel>,
+    fileInteractionMode: FileInteractionMode,
     onAddGuideClick: () -> Unit,
     onItemClick: (Int) -> Unit,
     onMoveCancelGuideClick: () -> Unit,
     onMoveSuccessGuideClick: () -> Unit,
-    fileInteractionMode: FileInteractionMode
+    onErrorProcess: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -245,7 +272,13 @@ fun ListGuidesScreen(
                     itemsIndexed(guides) { index, guide ->
                         ItemGuide(
                             guide = guide,
-                            onClick = { onItemClick(index) }
+                            onClick = {
+                                if (fileInteractionMode == FileInteractionMode.MovingItem){
+                                    onErrorProcess()
+                                } else {
+                                    onItemClick(index)
+                                }
+                            }
                         )
 
                         if (index < guides.lastIndex) {
