@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -34,44 +35,62 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jonathanev.review.R
 import com.jonathanev.review.presentation.model.GuideMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.ui.model.ContentType
+import com.jonathanev.review.ui.preview.DevicePreviews
+import com.jonathanev.review.ui.preview.providers.DataMediaContentPagerProvider
+import com.jonathanev.review.ui.preview.providers.MediaContentPagerProvider
 import com.jonathanev.review.ui.theme.BorderPasos
+import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.TextColorSecondary
 import com.jonathanev.review.ui.theme.cardStepBackground
 
-@Preview(showBackground = true)
+/*@DevicePreviews
 @Composable
-fun PreviewMediaContentPager() {
-    val listPreview = listOf(
-        QuestionContentUi.Text("Hola", emptyList()),
-        QuestionContentUi.Text("Adios", emptyList())
-    )
-    val listEmpty = listOf<QuestionContentUi>()
-    val pagerState = rememberPagerState(pageCount = { 2 })
-    MediaContentPager(
-        pagerState = pagerState,
-        assets = listPreview,
-        mediaForSelected = ContentType.TEXT,
-        resourceSelected = R.string.lblText,
-        guideMode = GuideMode.Edit("", "", 0),
-        onAssetClick = {}
-    )
-}
+fun PreviewMediaContentPager(
+    @PreviewParameter(MediaContentPagerProvider::class) data: DataMediaContentPagerProvider
+) {
+    val pagerState = rememberPagerState(pageCount = { data.sizeList })
+    ReviewTheme {
+        Column() {
+            Surface(
+                color = MaterialTheme.colorScheme.tertiaryContainer,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "PREVIEW: $data - ${data::class.simpleName}",
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    color = MaterialTheme.colorScheme.onTertiaryContainer
+                )
+            }
+            MediaContentPager(
+                pagerState = pagerState,
+                assets = data.listType,
+                mediaForSelected = data.mediaForSelected,
+                guideMode = data.guideMode,
+                onAssetClick = {}
+            )
+        }
+    }
+}*/
 
 @Composable
 fun MediaContentPager(
     pagerState: PagerState,
     assets: List<QuestionContentUi>,
     mediaForSelected: ContentType,
-    resourceSelected: Int,
     guideMode: GuideMode,
     onAssetClick: (QuestionContentUi) -> Unit,
 ) {
+    val resourceSelected =
+        if (mediaForSelected == ContentType.TEXT) R.string.lblText else R.string.lblImage
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -245,7 +264,6 @@ private fun EmptyStateView(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Título principal
         Text(
             text = title,
             color = MaterialTheme.colorScheme.onSurface,
@@ -254,7 +272,6 @@ private fun EmptyStateView(
             textAlign = TextAlign.Center
         )
 
-        // Subtítulo opcional para dar más contexto
         if (subtitle != null) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(

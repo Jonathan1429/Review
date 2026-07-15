@@ -24,28 +24,34 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jonathanev.review.R
 import com.jonathanev.review.presentation.model.GuideMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.ui.model.ContentType
+import com.jonathanev.review.ui.preview.DevicePreviews
+import com.jonathanev.review.ui.preview.providers.DataMediaContentPagerProvider
+import com.jonathanev.review.ui.preview.providers.MediaContentPagerProvider
+import com.jonathanev.review.ui.theme.ReviewTheme
 
-@Preview(showBackground = true)
+/*@DevicePreviews
 @Composable
-fun PreviewAssetCarouselViewer() {
-    AssetCarouselViewer(
-        assets = listOf(
-            QuestionContentUi.Text("", listOf()),
-            QuestionContentUi.Text("a", listOf())
-        ),
-        mediaForSelected = ContentType.TEXT,
-        guideMode = GuideMode.Review("", 0),
-        onAddAssetClick = { },
-        onAssetClick = {},
-        onDeleteItemClick = { _, _ -> },
-    )
-}
+fun PreviewAssetCarouselViewer(
+    @PreviewParameter(MediaContentPagerProvider::class) data: DataMediaContentPagerProvider
+) {
+    ReviewTheme {
+        AssetCarouselViewer(
+            assets = data.listType,
+            mediaForSelected = data.mediaForSelected,
+            guideMode = data.guideMode,
+            onAddAssetClick = { },
+            onAssetClick = {},
+            onDeleteItemClick = { _, _ -> },
+        )
+    }
+}*/
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -59,8 +65,6 @@ fun AssetCarouselViewer(
 ) {
     val pagerState = rememberPagerState(pageCount = { assets.size })
     val scope = rememberCoroutineScope()
-    val resourceSelected =
-        if (mediaForSelected == ContentType.TEXT) R.string.lblText else R.string.lblImage
     val lazyRowState = rememberLazyListState()
 
     Column(
@@ -73,12 +77,11 @@ fun AssetCarouselViewer(
             pagerState = pagerState,
             assets = assets,
             mediaForSelected = mediaForSelected,
-            resourceSelected = resourceSelected,
             guideMode = guideMode,
             onAssetClick = { typeContent -> onAssetClick(typeContent) }
         )
         if (guideMode !is GuideMode.Review) {
-            DeleteAsset(resourceSelected, onDeleteItemClick = {
+            DeleteAsset(mediaForSelected = mediaForSelected, onDeleteItemClick = {
                 val asset = assets[pagerState.currentPage]
                 onDeleteItemClick(
                     asset,
@@ -99,7 +102,10 @@ fun AssetCarouselViewer(
 }
 
 @Composable
-private fun DeleteAsset(resourceSelected: Int, onDeleteItemClick: () -> Unit) {
+private fun DeleteAsset(mediaForSelected: ContentType, onDeleteItemClick: () -> Unit) {
+    val resourceSelected =
+        if (mediaForSelected == ContentType.TEXT) R.string.lblText else R.string.lblImage
+
     Box(Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier

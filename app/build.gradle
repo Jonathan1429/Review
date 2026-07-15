@@ -22,6 +22,8 @@ plugins {
 
     // @Parcelize
     id 'kotlin-parcelize'
+
+    id("io.github.takahirom.roborazzi")
 }
 
 def keystoreProperties = new Properties()
@@ -99,6 +101,12 @@ android {
         viewBinding true
         buildConfig true
     }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
 }
 
 dependencies {
@@ -135,6 +143,15 @@ dependencies {
     // Librería de rueda de colores
     implementation 'com.github.skydoves:colorpickerview:2.2.4'
     implementation 'com.github.skydoves:colorpicker-compose:1.1.2'
+
+    // Dependencias de Roborazzi
+    testImplementation("io.github.takahirom.roborazzi:roborazzi:1.44.0")
+    testImplementation("io.github.takahirom.roborazzi:roborazzi-compose:1.44.0")
+
+    // Dependencias para robolectric y compose test
+    testImplementation("org.robolectric:robolectric:4.14.1")
+    testImplementation("androidx.compose.ui:ui-test-junit4")
+    debugImplementation 'androidx.compose.ui:ui-test-manifest'
 
     //Bundle Compat
     implementation 'androidx.core:core-ktx:1.12.0'

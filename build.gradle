@@ -11,4 +11,6 @@ plugins {
     id 'com.github.skydoves.compose.stability.analyzer' version '0.6.5+' apply false
 
     id 'com.google.devtools.ksp' version '2.2.21-2.0.5' apply false
+
+    id("io.github.takahirom.roborazzi") version "1.44.0" apply false
 }

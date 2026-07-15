@@ -5,38 +5,88 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jonathanev.review.presentation.model.GuideMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
+import com.jonathanev.review.ui.preview.DevicePreviews
+import com.jonathanev.review.ui.preview.providers.StepNavigationCarouselProviders
 import com.jonathanev.review.ui.theme.BorderPasos
 import com.jonathanev.review.ui.theme.BorderSelected
+import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.cardStepBackground
 import com.jonathanev.review.ui.theme.degradientColor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+
+/*@DevicePreviews
+@Composable
+fun PreviewCarousel(
+    @PreviewParameter(StepNavigationCarouselProviders::class) data: GuideMode
+) {
+    ReviewTheme {
+        Column {
+            Surface(
+                color = MaterialTheme.colorScheme.tertiaryContainer,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "PREVIEW: $data - ${data::class.simpleName}",
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    color = MaterialTheme.colorScheme.onTertiaryContainer
+                )
+            }
+
+            val assets = listOf(
+                QuestionContentUi.Text("Hola", listOf()),
+                QuestionContentUi.Text("b", listOf()),
+                QuestionContentUi.Text("a", listOf())
+            )
+            val scope = rememberCoroutineScope()
+            val pagerState = rememberPagerState(pageCount = { assets.size })
+            val lazyRowState = rememberLazyListState()
+
+            StepNavigationCarousel(
+                lazyRowState = lazyRowState,
+                assets = assets,
+                pagerState = pagerState,
+                scope = scope,
+                guideMode = data,
+                onAddAssetClick = {}
+            )
+        }
+    }
+}*/
 
 @Composable
 fun StepNavigationCarousel(
@@ -112,7 +162,8 @@ fun StepNavigationCarousel(
                     Text(
                         text = "${index + 1}",
                         color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = 12.sp
+                        //color = Color.Red,
+                        fontSize = 15.sp
                     )
                 }
             }
