@@ -31,12 +31,27 @@ import com.skydoves.compose.stability.runtime.TraceRecomposition
 
 @DevicePreviews
 @Composable
+fun PreviewMovingItem(
+    @PreviewParameter(ListFoldersDataProvider::class) data: List<FolderUiModel>
+) {
+    ReviewTheme {
+        ListFoldersScreen(
+            guias = data,
+            fileInteractionMode = FileInteractionMode.MovingItem,
+            onCreateFolderClick = {},
+            onFolderClick = { _, _ ->}
+        )
+    }
+}
+
+@DevicePreviews
+@Composable
 fun PreviewListFolder(
     @PreviewParameter(ListFoldersDataProvider::class) data: List<FolderUiModel>
 ) {
     ReviewTheme {
         ListFoldersScreen(
-            data,
+            guias = data,
             fileInteractionMode = FileInteractionMode.Default,
             onCreateFolderClick = {},
             onFolderClick = { _, _ ->}
