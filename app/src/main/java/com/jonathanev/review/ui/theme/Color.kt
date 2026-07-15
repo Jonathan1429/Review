@@ -32,7 +32,7 @@ val Red = Color(0xFFFF0000)
 val BackgroundPreguntar = Color(0x65000000)
 val BackgroundApp = Color(0xFF111922)
 val ContentsDark = Color(0xFF18222C)
-val ContentsLight = Color(0x1D18222C)
+val ContentsLight = Color(0xFFC6CED2)
 
 val ContentInContent = Color(0xFF283849)
 val CircleContentSVG = Color(0xFF049689)

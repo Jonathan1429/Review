@@ -37,6 +37,12 @@ val iconBackground: Color
     else
         ContentsLight
 
+val dialogBackground: Color
+    @Composable
+    get() = if (isSystemInDarkTheme())
+        ContentInContent
+    else
+        ContentsLight
 val cardListBackground: Color
     @Composable
     get() = if (isSystemInDarkTheme())

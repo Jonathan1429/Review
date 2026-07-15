@@ -56,7 +56,7 @@ import kotlinx.coroutines.launch
 
 @DevicePreviews
 @Composable
-fun PreviewFillingGuideWithShowDialog() {
+fun PreviewDialogDeleteQuestion() {
     ReviewTheme {
         FillingGuideScreen(
             typeSelected = QAType.QUESTION,
@@ -69,6 +69,37 @@ fun PreviewFillingGuideWithShowDialog() {
             guideMode = GuideMode.Edit("", "", 0),
             showDialogDeleteQuestion = true,
             showDialogRepeatGuide = false,
+            onDissmissDialogRepeatGuide = {},
+            onConfirmDialogRepeatGuide = {},
+            onContinueDialogDeleteQuestionClick = {},
+            onBackQuestionClick = {},
+            onNextQuestionClick = {},
+            onDeleteQuestionClick = { },
+            onTypeClicked = {},
+            onFilterClicked = {},
+            onAssetClick = {},
+            onAddAssetClick = {},
+            onDeleteItemClick = { _, _ -> },
+            onAddQuestion = {},
+        ) {}
+    }
+}
+
+@DevicePreviews
+@Composable
+fun PreviewDialogRepeatGuide() {
+    ReviewTheme {
+        FillingGuideScreen(
+            typeSelected = QAType.QUESTION,
+            typeForSelected = listOf(QAType.QUESTION, QAType.ANSWER),
+            mediaSelected = ContentType.TEXT,
+            mediaForSelected = listOf(ContentType.TEXT, ContentType.IMAGE),
+            actualQuestion = 1,
+            totalQuestions = 2,
+            listTypeMedia = listOf(QuestionContentUi.Text("Hola", listOf())),
+            guideMode = GuideMode.Edit("", "", 0),
+            showDialogDeleteQuestion = false,
+            showDialogRepeatGuide = true,
             onDissmissDialogRepeatGuide = {},
             onConfirmDialogRepeatGuide = {},
             onContinueDialogDeleteQuestionClick = {},
@@ -357,6 +388,7 @@ fun FillingGuideScreen(
                     Modifier.fillMaxSize()
                 ) {
                     CustomAlertDialog(
+                        modifier = Modifier.align(Alignment.Center),
                         onDismissRequest = onDissmissDialogRepeatGuide,
                         onConfirm = onConfirmDialogRepeatGuide,
                         title = stringResource(R.string.lblTitleRepeatGuide),

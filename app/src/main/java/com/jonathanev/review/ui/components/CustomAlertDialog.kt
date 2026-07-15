@@ -24,7 +24,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jonathanev.review.R
 import com.jonathanev.review.ui.theme.ReviewTheme
+import com.jonathanev.review.ui.theme.cardListBackground
 import com.jonathanev.review.ui.theme.cardStepBackground
+import com.jonathanev.review.ui.theme.dialogBackground
+import com.jonathanev.review.ui.theme.iconBackground
 
 @Preview(showBackground = true)
 @Composable
@@ -34,19 +37,22 @@ fun PreviewCustomAlertDialog() {
             onDismissRequest = {},
             onConfirm = {},
             title = stringResource(R.string.lblTitleRepeatGuide),
-            message = stringResource(R.string.lblDescriptionRepeatGuide)
+            message = stringResource(R.string.lblDescriptionRepeatGuide),
+            modifier = Modifier
         )
     }
 }
 
 @Composable
 fun CustomAlertDialog(
-    onDismissRequest: () -> Unit,
-    onConfirm: () -> Unit,
+    modifier: Modifier = Modifier,
     title: String,
-    message: String
+    message: String,
+    onDismissRequest: () -> Unit,
+    onConfirm: () -> Unit
 ) {
     CustomAlertDialogContent(
+        modifier = modifier,
         onDismissRequest = onDismissRequest,
         onConfirm = onConfirm,
         title = title,
@@ -59,13 +65,14 @@ fun CustomAlertDialogContent(
     onDismissRequest: () -> Unit,
     onConfirm: () -> Unit,
     title: String,
-    message: String
+    message: String,
+    modifier: Modifier
 ) {
     Surface(
         shape = RoundedCornerShape(28.dp),
-        color = cardStepBackground,
+        color = dialogBackground,
         tonalElevation = 6.dp,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(16.dp)
     ) {
