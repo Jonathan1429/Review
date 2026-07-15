@@ -306,7 +306,9 @@ fun BasicNavigation() {
                     guideMode = textContent.guideMode,
                     viewModel = viewModel,
                     contentType = textContent.contentType,
-                    onSaveText = { backStack.removeLastOrNull() })
+                    onSaveText = { backStack.removeLastOrNull() },
+                    onBackNav = { backStack.removeLastOrNull() }
+                )
             }
 
             entry<AppRoutes.PreviewQuestionsScreen> { value ->

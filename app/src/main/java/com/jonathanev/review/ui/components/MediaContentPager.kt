@@ -194,7 +194,7 @@ fun MediaContentPager(
                 ) { page ->
                     when (val currentAsset = assets[page]) {
                         is QuestionContentUi.Image -> {
-                            CustomBoxCreateImage(currentAsset.nameFile)
+                            CustomBoxCreateImage(uriImage = currentAsset.nameFile)
                         }
 
                         is QuestionContentUi.Text -> {

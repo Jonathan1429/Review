@@ -106,7 +106,6 @@ fun CreateImageScreen(
     selectedImage: () -> Unit,
     imageUploaded: () -> Unit
 ) {
-
     Box(
         modifier = Modifier
             .fillMaxSize(),
@@ -136,7 +135,16 @@ fun CreateImageScreen(
                         imageUploaded = imageUploaded
                     )
                 }
-                CustomBoxCreateImage(uriImage)
+                CustomBoxCreateImage(
+                    modifier = Modifier.then(
+                        if (guideMode !is GuideMode.Review) {
+                            Modifier
+                        } else {
+                            Modifier.padding(20.dp)
+                        }
+                    ),
+                    uriImage
+                )
             }
         }
     }

@@ -8,11 +8,12 @@ import me.saket.telephoto.zoomable.coil.ZoomableAsyncImage
 
 @Composable
 fun CustomBoxCreateImage(
+    modifier: Modifier = Modifier,
     uriImage: String
 ) {
     ZoomableAsyncImage(
         model = uriImage.toUri(),
         contentDescription = "Vista previa de la imagen",
-        modifier = Modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize()
     )
 }

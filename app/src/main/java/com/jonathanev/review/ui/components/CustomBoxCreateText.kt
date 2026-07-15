@@ -31,6 +31,7 @@ fun PreviewCustomBoxCreateText() {
 }
 @Composable
 fun CustomBoxCreateText(
+    modifier: Modifier = Modifier,
     textValue: TextFieldValue,
     hint: Boolean,
     onTextValueChange: (TextFieldValue) -> Unit
@@ -38,7 +39,7 @@ fun CustomBoxCreateText(
     val hint = if (hint) stringResource(R.string.lblCuestionario) else ""
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
     ) {
         Box(

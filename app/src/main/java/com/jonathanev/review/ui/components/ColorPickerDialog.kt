@@ -11,17 +11,44 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
+import androidx.core.content.ContextCompat
+import com.jonathanev.review.R
+import com.jonathanev.review.ui.theme.ReviewTheme
 import com.skydoves.colorpickerview.ColorPickerView
 import com.skydoves.colorpickerview.listeners.ColorEnvelopeListener
+import androidx.core.graphics.toColorInt
+import com.github.skydoves.colorpicker.compose.ColorPickerController
+import com.github.skydoves.colorpicker.compose.HsvColorPicker
+import com.github.skydoves.colorpicker.compose.rememberColorPickerController
+import com.jonathanev.review.ui.preview.DevicePreviews
+
+@DevicePreviews
+@Composable
+fun PreviewColorPickerDialog(){
+    ReviewTheme {
+        val controller = rememberColorPickerController()
+
+        ColorPickerDialogContent(
+            controller = controller,
+            colorInitial = MaterialTheme.colorScheme.onSurface,
+            selectedColor = MaterialTheme.colorScheme.onSurface,
+            onDismissRequest = {},
+            onColorSelected = {},
+            onDefaultClick = {}
+        )
+    }
+}
 
 @Composable
 fun ColorPickerDialog(
@@ -31,56 +58,69 @@ fun ColorPickerDialog(
     onColorSelected: (Color) -> Unit,
     onDefaultClick: () -> Unit
 ) {
+    val controller = rememberColorPickerController()
+
     Dialog(onDismissRequest = onDismissRequest) {
-        Card(
-            modifier = Modifier.size(350.dp),
-            shape = MaterialTheme.shapes.medium
+        ColorPickerDialogContent(
+            controller,
+            colorInitial,
+            onColorSelected,
+            selectedColor,
+            onDismissRequest,
+            onDefaultClick
+        )
+    }
+}
+
+@Composable
+private fun ColorPickerDialogContent(
+    controller: ColorPickerController,
+    colorInitial: Color,
+    onColorSelected: (Color) -> Unit,
+    selectedColor: Color,
+    onDismissRequest: () -> Unit,
+    onDefaultClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier.size(320.dp, 350.dp),
+        shape = MaterialTheme.shapes.medium
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(15.dp)
+            HsvColorPicker(
+                modifier = Modifier.size(200.dp),
+                controller = controller,
+                initialColor = colorInitial,
+                onColorChanged = { colorEnvelope ->
+                    onColorSelected(colorEnvelope.color)
+                }
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.SpaceBetween
-                ) {
-                    AndroidView(
-                        factory = { context ->
-                            ColorPickerView(context).apply {
-                                setInitialColor(colorInitial.toArgb())
-                                setColorListener(ColorEnvelopeListener { envelope, _ ->
-                                    val parsedColor = Color(android.graphics.Color.parseColor(envelope.hexCode))
-                                    onColorSelected(parsedColor)
-                                })
-                            }
-                        },
-                        modifier = Modifier.size(160.dp)
-                    )
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Button(
-                            onClick = {
-                                onColorSelected(selectedColor)
-                                onDismissRequest()
-                            }
-                        ) {
-                            Text("Continuar")
-                        }
-
-                        Button(
-                            onClick = {
-                                onDefaultClick()
-                                onDismissRequest()
-                            }
-                        ) {
-                            Text("Default")
-                        }
+                Button(
+                    onClick = {
+                        onColorSelected(selectedColor)
+                        onDismissRequest()
                     }
+                ) {
+                    Text("Continuar")
+                }
+
+                OutlinedButton(
+                    onClick = {
+                        onDefaultClick()
+                        onDismissRequest()
+                    }
+                ) {
+                    Text("Default")
                 }
             }
         }
