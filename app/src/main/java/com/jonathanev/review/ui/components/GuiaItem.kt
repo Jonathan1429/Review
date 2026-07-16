@@ -36,7 +36,7 @@ import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.White
 import com.jonathanev.review.ui.theme.cardStepBackground
 
-@DevicePreviews
+//@DevicePreviews
 @Composable
 fun PreviewGuiaItem(
     @PreviewParameter(ListFoldersDataProvider::class) data: List<FolderUiModel>

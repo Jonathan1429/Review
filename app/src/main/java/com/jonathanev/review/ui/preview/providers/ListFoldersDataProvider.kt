@@ -42,6 +42,5 @@ class ListFoldersDataProvider : PreviewParameterProvider<List<FolderUiModel>> {
                 numGuides = 6
             )
         )
-        // Puedes agregar "," y poner mas listas aquí
     )
 }
