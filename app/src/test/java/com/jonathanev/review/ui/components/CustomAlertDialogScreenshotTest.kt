@@ -8,11 +8,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.dp
-import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import com.github.takahirom.roborazzi.captureRoboImage
+import com.jonathanev.review.R
 import com.jonathanev.review.ui.theme.ReviewTheme
 import org.junit.Rule
 import org.junit.Test
@@ -28,7 +29,7 @@ import org.robolectric.annotation.GraphicsMode
     sdk = [34],
     instrumentedPackages = ["androidx.loader.content"]
 )
-class ColorPickerDialogScreenshotTest(
+class CustomAlertDialogScreenshotTest(
     private val variantName: String,
     private val themeQualifier: String
 ) {
@@ -62,13 +63,11 @@ class ColorPickerDialogScreenshotTest(
     }
 
     @Test
-    fun captureColorPickerDialogVariant() {
+    fun captureCustomAlertDialogVariant() {
         RuntimeEnvironment.setQualifiers(themeQualifier)
 
         composeTestRule.setContent {
             ReviewTheme {
-                val controller = rememberColorPickerController()
-
                 Column {
                     Surface(
                         color = MaterialTheme.colorScheme.tertiaryContainer,
@@ -82,20 +81,19 @@ class ColorPickerDialogScreenshotTest(
                         )
                     }
 
-                    ColorPickerDialogContent(
-                        controller = controller,
-                        colorInitial = MaterialTheme.colorScheme.onSurface,
-                        selectedColor = MaterialTheme.colorScheme.onSurface,
+                    CustomAlertDialogContent(
                         onDismissRequest = {},
-                        onColorSelected = {},
-                        onDefaultClick = {}
+                        onConfirm = {},
+                        title = stringResource(R.string.lblTitleRepeatGuide),
+                        message = stringResource(R.string.lblDescriptionRepeatGuide),
+                        modifier = Modifier
                     )
                 }
             }
         }
 
         composeTestRule.onRoot().captureRoboImage(
-            filePath = "build/outputs/roborazzi/picker_dialog_viewer/${variantName}.png"
+            filePath = "build/outputs/roborazzi/custom_alert_dialog_viewer/${variantName}.png"
         )
     }
 }
