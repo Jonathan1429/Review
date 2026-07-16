@@ -15,7 +15,7 @@ import com.jonathanev.review.ui.preview.providers.CustomTextFieldDataProvider
 import com.jonathanev.review.ui.preview.providers.PropertiesTF
 import com.jonathanev.review.ui.theme.ReviewTheme
 
-@DevicePreviews
+//@DevicePreviews
 @Composable
 fun PreviewCustomTextField(
     @PreviewParameter(CustomTextFieldDataProvider::class) data: PropertiesTF
