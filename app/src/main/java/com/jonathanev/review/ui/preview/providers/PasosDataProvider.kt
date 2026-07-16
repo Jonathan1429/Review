@@ -3,6 +3,7 @@ package com.jonathanev.review.ui.preview.providers
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.jonathanev.review.R
 
+
 data class PasoPreviewData(
     val image: Int,
     val title: Int,
@@ -10,7 +11,7 @@ data class PasoPreviewData(
 )
 
 class PasosDataProvider : PreviewParameterProvider<PasoPreviewData> {
-    override val values: Sequence<PasoPreviewData> = sequenceOf(
+    private val dataList = listOf(
         PasoPreviewData(
             image = R.drawable.ic_plus_circle_outline,
             title = R.string.lblTitleStepOne,
@@ -27,4 +28,16 @@ class PasosDataProvider : PreviewParameterProvider<PasoPreviewData> {
             description = R.string.lblDescStepThree
         )
     )
+
+    override val values: Sequence<PasoPreviewData> = dataList.asSequence()
+
+    // Sobrescribimos el nombre que Android Studio mostrará en el panel
+    override fun getDisplayName(index: Int): String? {
+        return when (index) {
+            0 -> "Paso 1: Crear"
+            1 -> "Paso 2: Personalizar"
+            2 -> "Paso 3: Organizar"
+            else -> super.getDisplayName(index)
+        }
+    }
 }

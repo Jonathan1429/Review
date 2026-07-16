@@ -32,7 +32,7 @@ import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.TextGray
 import com.jonathanev.review.ui.theme.cardStepBackground
 
-@DevicePreviews
+//@DevicePreviews
 @Composable
 fun PreviewBasePasos(
     @PreviewParameter(PasosDataProvider::class) data: PasoPreviewData
