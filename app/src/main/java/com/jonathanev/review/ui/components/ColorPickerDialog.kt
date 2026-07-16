@@ -33,7 +33,7 @@ import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import com.jonathanev.review.ui.preview.DevicePreviews
 
-@DevicePreviews
+//@DevicePreviews
 @Composable
 fun PreviewColorPickerDialog(){
     ReviewTheme {

@@ -18,7 +18,7 @@ import com.jonathanev.review.ui.preview.providers.CounterItem
 import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.TextColorSecondary
 
-@DevicePreviews
+//@DevicePreviews
 @Composable
 fun PreviewCounterIconItem(
     @PreviewParameter(CounterIconItemProvider ::class) data: CounterItem

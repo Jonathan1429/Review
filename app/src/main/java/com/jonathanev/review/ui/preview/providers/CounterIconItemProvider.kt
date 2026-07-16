@@ -14,11 +14,19 @@ class CounterIconItemProvider(): PreviewParameterProvider<CounterItem> {
         get() = sequenceOf(
             CounterItem(
                 icon = R.drawable.ic_file,
-                count = "2"
+                count = "3"
             ),
             CounterItem(
                 icon = R.drawable.ic_image,
                 count = "2"
             )
         )
+
+    override fun getDisplayName(index: Int): String? {
+        return when(index){
+            0 -> "ic_file"
+            1 -> "ic_image"
+            else -> super.getDisplayName(index)
+        }
+    }
 }
