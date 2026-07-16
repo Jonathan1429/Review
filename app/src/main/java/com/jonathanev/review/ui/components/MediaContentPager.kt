@@ -50,7 +50,7 @@ import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.TextColorSecondary
 import com.jonathanev.review.ui.theme.cardStepBackground
 
-/*@DevicePreviews
+/*@Preview
 @Composable
 fun PreviewMediaContentPager(
     @PreviewParameter(MediaContentPagerProvider::class) data: DataMediaContentPagerProvider

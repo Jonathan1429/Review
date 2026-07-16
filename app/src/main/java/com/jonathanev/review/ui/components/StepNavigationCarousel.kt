@@ -33,12 +33,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jonathanev.review.presentation.model.GuideMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.ui.preview.DevicePreviews
+import com.jonathanev.review.ui.preview.providers.StepNavigationCarouselProv
 import com.jonathanev.review.ui.preview.providers.StepNavigationCarouselProviders
 import com.jonathanev.review.ui.theme.BorderPasos
 import com.jonathanev.review.ui.theme.BorderSelected
@@ -48,10 +50,10 @@ import com.jonathanev.review.ui.theme.degradientColor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-/*@DevicePreviews
+/*@Preview
 @Composable
 fun PreviewCarousel(
-    @PreviewParameter(StepNavigationCarouselProviders::class) data: GuideMode
+    @PreviewParameter(StepNavigationCarouselProviders::class) data: StepNavigationCarouselProv
 ) {
     ReviewTheme {
         Column {
@@ -67,21 +69,16 @@ fun PreviewCarousel(
                 )
             }
 
-            val assets = listOf(
-                QuestionContentUi.Text("Hola", listOf()),
-                QuestionContentUi.Text("b", listOf()),
-                QuestionContentUi.Text("a", listOf())
-            )
             val scope = rememberCoroutineScope()
-            val pagerState = rememberPagerState(pageCount = { assets.size })
+            val pagerState = rememberPagerState(pageCount = { data.listQuestionContent.size })
             val lazyRowState = rememberLazyListState()
 
             StepNavigationCarousel(
                 lazyRowState = lazyRowState,
-                assets = assets,
+                assets = data.listQuestionContent,
                 pagerState = pagerState,
                 scope = scope,
-                guideMode = data,
+                guideMode = data.mode,
                 onAddAssetClick = {}
             )
         }

@@ -1,10 +1,19 @@
 package com.jonathanev.review.ui.components
 
 import androidx.activity.ComponentActivity
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.unit.dp
 import com.github.takahirom.roborazzi.captureRoboImage
+import com.jonathanev.review.ui.components.MediaContentPagerScreenshotTest.Companion.data
 import com.jonathanev.review.ui.preview.providers.DataMediaContentPagerProvider
 import com.jonathanev.review.ui.preview.providers.MediaContentPagerProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
@@ -95,7 +104,7 @@ class MediaContentPagerScreenshotTest(
                 // MODO CLARO
                 testCases.add(
                     arrayOf(
-                        "variant_${index}_${dataState.guideMode}_light", // -> Asignado a 'variantName'
+                        "variant_${index}_${dataState}_light",            // -> Asignado a 'variantName'
                         "notnight",                                       // -> Asignado a 'themeQualifier'
                         dataState                                         // -> Asignado a 'dataState'
                     )
@@ -104,7 +113,7 @@ class MediaContentPagerScreenshotTest(
                 // MODO OSCURO
                 testCases.add(
                     arrayOf(
-                        "variant_${index}_${dataState.guideMode}_dark",  // -> Asignado a 'variantName'
+                        "variant_${index}_${dataState}_dark",             // -> Asignado a 'variantName'
                         "night",                                          // -> Asignado a 'themeQualifier'
                         dataState                                         // -> Asignado a 'dataState'
                     )
@@ -127,21 +136,34 @@ class MediaContentPagerScreenshotTest(
         // Tu Theme en Compose (`ReviewTheme`) detectará este cambio mediante `isSystemInDarkTheme()`.
         RuntimeEnvironment.setQualifiers(themeQualifier)
 
-        // Prevenimos que el Pager explote asegurando un mínimo de 1 elemento.
-        val pageCount = dataState.sizeList.coerceAtLeast(1)
+        // Hay que aprender eso del coerceAtLeast...
+        //val pageCount = dataState.sizeList.coerceAtLeast(1)
 
         // PASO 2: Montamos la jerarquía de UI de Compose en la Activity de pruebas.
         composeTestRule.setContent {
             ReviewTheme {
-                val pagerState = rememberPagerState(pageCount = { pageCount })
+                val pagerState = rememberPagerState(pageCount = { dataState.listType.size })
 
-                MediaContentPager(
-                    pagerState = pagerState,
-                    assets = dataState.listType,
-                    mediaForSelected = dataState.mediaForSelected,
-                    guideMode = dataState.guideMode,
-                    onAssetClick = {}
-                )
+                Column() {
+                    Surface(
+                        color = MaterialTheme.colorScheme.tertiaryContainer,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "PREVIEW: $dataState - ${dataState::class.simpleName}",
+                            style = MaterialTheme.typography.labelMedium,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            color = MaterialTheme.colorScheme.onTertiaryContainer
+                        )
+                    }
+                    MediaContentPager(
+                        pagerState = pagerState,
+                        assets = dataState.listType,
+                        mediaForSelected = dataState.mediaForSelected,
+                        guideMode = dataState.guideMode,
+                        onAssetClick = {}
+                    )
+                }
             }
         }
 
@@ -149,7 +171,7 @@ class MediaContentPagerScreenshotTest(
         // - onRoot(): Captura todo el contenido visible en la pantalla.
         // - captureRoboImage(): Mide, renderiza el mapa de bits (Bitmap) y lo guarda en disco.
         composeTestRule.onRoot().captureRoboImage(
-            filePath = "build/outputs/roborazzi/media_pager_${variantName}.png"
+            filePath = "build/outputs/roborazzi/media_pager/${variantName}.png"
         )
     }
 }
