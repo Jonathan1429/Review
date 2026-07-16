@@ -73,7 +73,7 @@ fun ColorPickerDialog(
 }
 
 @Composable
-private fun ColorPickerDialogContent(
+fun ColorPickerDialogContent(
     controller: ColorPickerController,
     colorInitial: Color,
     onColorSelected: (Color) -> Unit,

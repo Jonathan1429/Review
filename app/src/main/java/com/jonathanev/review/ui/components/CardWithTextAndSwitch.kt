@@ -27,7 +27,7 @@ import com.jonathanev.review.ui.theme.Teal200
 import com.jonathanev.review.ui.theme.TextGray
 import com.jonathanev.review.ui.theme.cardStepBackground
 
-@DevicePreviews
+//@DevicePreviews
 @Composable
 fun PreviewCardWithTextAndSwitch() {
     CardWithTextAndSwitch(
