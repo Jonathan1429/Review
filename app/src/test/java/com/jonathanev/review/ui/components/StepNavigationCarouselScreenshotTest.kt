@@ -15,7 +15,6 @@ import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.dp
 import com.github.takahirom.roborazzi.captureRoboImage
-import com.jonathanev.review.ui.preview.providers.MediaContentPagerProvider
 import com.jonathanev.review.ui.preview.providers.StepNavigationCarouselProv
 import com.jonathanev.review.ui.preview.providers.StepNavigationCarouselProviders
 import com.jonathanev.review.ui.theme.ReviewTheme

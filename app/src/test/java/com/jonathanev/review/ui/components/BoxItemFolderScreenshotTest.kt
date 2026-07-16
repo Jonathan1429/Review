@@ -12,8 +12,8 @@ import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.dp
 import com.github.takahirom.roborazzi.captureRoboImage
-import com.jonathanev.review.ui.preview.providers.DataMediaContentPagerProvider
-import com.jonathanev.review.ui.preview.providers.MediaContentPagerProvider
+import com.jonathanev.review.ui.preview.providers.BoxItemFolderDataProvider
+import com.jonathanev.review.ui.preview.providers.PropertiesItemFolder
 import com.jonathanev.review.ui.theme.ReviewTheme
 import org.junit.Rule
 import org.junit.Test
@@ -29,10 +29,10 @@ import org.robolectric.annotation.GraphicsMode
     sdk = [34],
     instrumentedPackages = ["androidx.loader.content"]
 )
-class AssetCarouselViewerScreenshotTest(
+class BoxItemFolderScreenshotTest(
     private val variantName: String,
     private val themeQualifier: String,
-    private val dataState: DataMediaContentPagerProvider
+    private val dataState: PropertiesItemFolder
 ) {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
@@ -41,14 +41,14 @@ class AssetCarouselViewerScreenshotTest(
         @JvmStatic
         @ParameterizedRobolectricTestRunner.Parameters(name = "{0}")
         fun data(): Collection<Array<Any>> {
-            val provider = MediaContentPagerProvider()
+            val provider = BoxItemFolderDataProvider()
             val testCases = mutableListOf<Array<Any>>()
 
             provider.values.forEach { dataState ->
                 // MODO CLARO
                 testCases.add(
                     arrayOf(
-                        "${dataState}_light",
+                        "${dataState.iconRes.name}_light",
                         "notnight",
                         dataState
                     )
@@ -57,7 +57,7 @@ class AssetCarouselViewerScreenshotTest(
                 // MODO OSCURO
                 testCases.add(
                     arrayOf(
-                        "${dataState}_dark",
+                        "${dataState.iconRes.name}_dark",
                         "night",
                         dataState
                     )
@@ -69,7 +69,7 @@ class AssetCarouselViewerScreenshotTest(
     }
 
     @Test
-    fun captureAssetCarouselViewerVariant() {
+    fun captureBoxItemFolderVariant() {
         RuntimeEnvironment.setQualifiers(themeQualifier)
 
         composeTestRule.setContent {
@@ -80,27 +80,20 @@ class AssetCarouselViewerScreenshotTest(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
-                            text = "PREVIEW: $dataState - ${dataState::class.simpleName}",
+                            text = "PREVIEW: ${dataState.iconRes.name} - ${dataState::class.simpleName}",
                             style = MaterialTheme.typography.labelMedium,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                             color = MaterialTheme.colorScheme.onTertiaryContainer
                         )
                     }
 
-                    AssetCarouselViewer(
-                        assets = dataState.listType,
-                        mediaForSelected = dataState.mediaForSelected,
-                        guideMode = dataState.guideMode,
-                        onAddAssetClick = { },
-                        onAssetClick = {},
-                        onDeleteItemClick = { _, _ -> },
-                    )
+                    BoxItemFolder(dataState.iconRes)
                 }
             }
         }
 
         composeTestRule.onRoot().captureRoboImage(
-            filePath = "build/outputs/roborazzi/asset_carousel_viewer/${variantName}.png"
+            filePath = "build/outputs/roborazzi/box_item_folder_viewer/${variantName}.png"
         )
     }
 }
