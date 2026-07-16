@@ -19,8 +19,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jonathanev.review.R
 import com.jonathanev.review.presentation.model.GuideMode
+import com.jonathanev.review.ui.preview.DevicePreviews
 
-@Preview(showBackground = true)
+//@DevicePreviews
 @Composable
 fun PreviewCustomBoxCreateText() {
     CustomBoxCreateText(
