@@ -50,7 +50,7 @@ import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.TextColorSecondary
 import com.jonathanev.review.ui.theme.cardStepBackground
 
-/*@Preview
+//@DevicePreviews
 @Composable
 fun PreviewMediaContentPager(
     @PreviewParameter(MediaContentPagerProvider::class) data: DataMediaContentPagerProvider
@@ -69,6 +69,7 @@ fun PreviewMediaContentPager(
                     color = MaterialTheme.colorScheme.onTertiaryContainer
                 )
             }
+
             MediaContentPager(
                 pagerState = pagerState,
                 assets = data.listType,
@@ -78,7 +79,7 @@ fun PreviewMediaContentPager(
             )
         }
     }
-}*/
+}
 
 @Composable
 fun MediaContentPager(

@@ -50,7 +50,7 @@ import com.jonathanev.review.ui.theme.degradientColor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-/*@Preview
+//@DevicePreviews
 @Composable
 fun PreviewCarousel(
     @PreviewParameter(StepNavigationCarouselProviders::class) data: StepNavigationCarouselProv
@@ -83,7 +83,7 @@ fun PreviewCarousel(
             )
         }
     }
-}*/
+}
 
 @Composable
 fun StepNavigationCarousel(

@@ -1,6 +1,7 @@
 package com.jonathanev.review.ui.components
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,11 +16,13 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -36,22 +39,36 @@ import com.jonathanev.review.ui.preview.providers.DataMediaContentPagerProvider
 import com.jonathanev.review.ui.preview.providers.MediaContentPagerProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
 
-/*@DevicePreviews
+//@DevicePreviews
 @Composable
 fun PreviewAssetCarouselViewer(
     @PreviewParameter(MediaContentPagerProvider::class) data: DataMediaContentPagerProvider
 ) {
     ReviewTheme {
-        AssetCarouselViewer(
-            assets = data.listType,
-            mediaForSelected = data.mediaForSelected,
-            guideMode = data.guideMode,
-            onAddAssetClick = { },
-            onAssetClick = {},
-            onDeleteItemClick = { _, _ -> },
-        )
+        Column {
+            Surface(
+                color = MaterialTheme.colorScheme.tertiaryContainer,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "PREVIEW: $data - ${data::class.simpleName}",
+                    style = MaterialTheme.typography.labelMedium,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    color = MaterialTheme.colorScheme.onTertiaryContainer
+                )
+            }
+
+            AssetCarouselViewer(
+                assets = data.listType,
+                mediaForSelected = data.mediaForSelected,
+                guideMode = data.guideMode,
+                onAddAssetClick = { },
+                onAssetClick = {},
+                onDeleteItemClick = { _, _ -> },
+            )
+        }
     }
-}*/
+}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -61,7 +78,7 @@ fun AssetCarouselViewer(
     guideMode: GuideMode,
     onAddAssetClick: () -> Unit,
     onAssetClick: (QuestionContentUi) -> Unit,
-    onDeleteItemClick: (typeContent: QuestionContentUi, positionItem: Int ) -> Unit,
+    onDeleteItemClick: (typeContent: QuestionContentUi, positionItem: Int) -> Unit,
 ) {
     val pagerState = rememberPagerState(pageCount = { assets.size })
     val scope = rememberCoroutineScope()

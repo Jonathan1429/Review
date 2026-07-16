@@ -15,9 +15,8 @@ import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.dp
 import com.github.takahirom.roborazzi.captureRoboImage
+import com.jonathanev.review.ui.preview.providers.DataMediaContentPagerProvider
 import com.jonathanev.review.ui.preview.providers.MediaContentPagerProvider
-import com.jonathanev.review.ui.preview.providers.StepNavigationCarouselProv
-import com.jonathanev.review.ui.preview.providers.StepNavigationCarouselProviders
 import com.jonathanev.review.ui.theme.ReviewTheme
 import org.junit.Rule
 import org.junit.Test
@@ -33,10 +32,10 @@ import org.robolectric.annotation.GraphicsMode
     sdk = [34],
     instrumentedPackages = ["androidx.loader.content"]
 )
-class StepNavigationCarouselScreenshotTest(
+class AssetCarouselViewerScreenshotTest(
     private val variantName: String,
     private val themeQualifier: String,
-    private val dataState: StepNavigationCarouselProv
+    private val dataState: DataMediaContentPagerProvider
 ) {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
@@ -45,7 +44,7 @@ class StepNavigationCarouselScreenshotTest(
         @JvmStatic
         @ParameterizedRobolectricTestRunner.Parameters(name = "{0}")
         fun data(): Collection<Array<Any>> {
-            val provider = StepNavigationCarouselProviders()
+            val provider = MediaContentPagerProvider()
             val testCases = mutableListOf<Array<Any>>()
 
             provider.values.forEach { dataState ->
@@ -73,9 +72,8 @@ class StepNavigationCarouselScreenshotTest(
     }
 
     @Test
-    fun captureStepNavigationCarouselVariant() {
+    fun captureAssetCarouselViewerVariant() {
         RuntimeEnvironment.setQualifiers(themeQualifier)
-        //val pageCount = dataState.listQuestionContent.size.coerceAtLeast(1)
 
         composeTestRule.setContent {
             ReviewTheme {
@@ -92,24 +90,20 @@ class StepNavigationCarouselScreenshotTest(
                         )
                     }
 
-                    val scope = rememberCoroutineScope()
-                    val pagerState = rememberPagerState(pageCount = { dataState.listQuestionContent.size })
-                    val lazyRowState = rememberLazyListState()
-
-                    StepNavigationCarousel(
-                        lazyRowState = lazyRowState,
-                        assets = dataState.listQuestionContent,
-                        pagerState = pagerState,
-                        scope = scope,
-                        guideMode = dataState.mode,
-                        onAddAssetClick = {}
+                    AssetCarouselViewer(
+                        assets = dataState.listType,
+                        mediaForSelected = dataState.mediaForSelected,
+                        guideMode = dataState.guideMode,
+                        onAddAssetClick = { },
+                        onAssetClick = {},
+                        onDeleteItemClick = { _, _ -> },
                     )
                 }
             }
         }
 
         composeTestRule.onRoot().captureRoboImage(
-            filePath = "build/outputs/roborazzi/step_navigation/${variantName}.png"
+            filePath = "build/outputs/roborazzi/asset_carousel_viewer/${variantName}.png"
         )
     }
 }
