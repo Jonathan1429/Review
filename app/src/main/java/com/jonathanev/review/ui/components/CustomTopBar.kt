@@ -15,20 +15,25 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.jonathanev.review.R
 import com.jonathanev.review.presentation.model.GuideMode
+import com.jonathanev.review.ui.preview.DevicePreviews
+import com.jonathanev.review.ui.preview.providers.CustomTopBarProv
+import com.jonathanev.review.ui.preview.providers.CustomTopBarProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
 
-@Preview
+//@DevicePreviews
 @Composable
-fun PreviewCustomTopBar() {
+fun PreviewCustomTopBar(
+    @PreviewParameter(CustomTopBarProvider::class) data: CustomTopBarProv
+) {
     ReviewTheme {
         CustomTopBar(
-            actualQuestion = 1,
-            totalQuestions = 2,
-            guideMode = GuideMode.Review("", 0),
+            actualQuestion = data.actualQuestion,
+            totalQuestions = data.totalQuestion,
+            guideMode = data.guideMode,
             onDeleteQuestionClick = {},
             onBackQuestionClick = {},
             onNextQuestionClick = {}
