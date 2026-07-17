@@ -11,7 +11,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.dp
+import com.github.takahirom.roborazzi.ExperimentalRoborazziApi
+import com.github.takahirom.roborazzi.RoborazziOptions
 import com.github.takahirom.roborazzi.captureRoboImage
+import com.github.takahirom.roborazzi.roborazziSystemPropertyOutputDirectory
 import com.jonathanev.review.ui.preview.providers.FilterChipItemProv
 import com.jonathanev.review.ui.preview.providers.FilterChipItemProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
@@ -68,9 +71,19 @@ class FilterChipItemScreenshotTest(
         }
     }
 
+    @OptIn(ExperimentalRoborazziApi::class)
     @Test
     fun captureFilterChipItemVariant() {
         RuntimeEnvironment.setQualifiers(themeQualifier)
+
+        val basePath = "build/outputs/roborazzi/success/FilterChipItemScreenshotTest"
+        val failurePath = "build/outputs/roborazzi/failures/FilterChipItemScreenshotTest"
+
+        val roborazziOptions = RoborazziOptions(
+            compareOptions = RoborazziOptions.CompareOptions(
+                outputDirectoryPath = failurePath
+            )
+        )
 
         composeTestRule.setContent {
             ReviewTheme {
@@ -100,7 +113,8 @@ class FilterChipItemScreenshotTest(
         }
 
         composeTestRule.onRoot().captureRoboImage(
-            filePath = "build/outputs/roborazzi/filter_chip_item_viewer/${variantName}.png"
+            filePath = "$basePath/${variantName}.png",
+            roborazziOptions = roborazziOptions
         )
     }
 }
