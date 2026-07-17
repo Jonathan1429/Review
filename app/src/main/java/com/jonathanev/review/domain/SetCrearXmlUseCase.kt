@@ -7,7 +7,7 @@ import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.model.SaveGuideMode
 import com.jonathanev.review.domain.repository.DirectoryManager
 import com.jonathanev.review.domain.repository.GuiaRepository
-import com.jonathanev.review.domain.result.GetSaveGuideResult
+import com.jonathanev.review.domain.result.GuideResource
 import com.jonathanev.review.domain.result.UpdateGuideResult
 import javax.inject.Inject
 
@@ -64,8 +64,8 @@ class SetCrearXmlUseCase @Inject constructor(
             relativeGuidePath = relativeGuidePath
         )
 
-        if (resultGuide is GetSaveGuideResult.Failure) {
-            return UpdateGuideResult.SaveFailed(resultGuide.error)
+        if (resultGuide is GuideResource.Error) {
+            return UpdateGuideResult.SaveFailed(resultGuide.exception)
         }
 
         val imagesUpdated = updateImagesUseCase.invoke(

@@ -1,6 +1,5 @@
 package com.jonathanev.review.domain.service
 
-import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuidePath
 import com.jonathanev.review.domain.model.GuideVersion
@@ -106,6 +105,21 @@ class FilePathResolverService @Inject constructor(
             )
 
         return GuidePath(path)
+    }
+
+    override fun getPathGuidesV1(
+        guideDomainModel: GuideDomainModel,
+        kind: PathKind,
+        relativeGuidePath: RelativeGuidePath
+    ): String {
+        val root = when (kind) {
+            PathKind.GUIAS -> navigationPathRepository.getRootGuides()
+            PathKind.IMAGENES -> navigationPathRepository.getRootImages()
+        }
+
+        val relativeGuidePath = "${root.value}/${relativeGuidePath.value}"
+        val file = FileNamingRules.buildXmlFileName(guideDomainModel.nameGuide)
+        return filePathsProvider.buildGuide(relativeGuidePath, file)
     }
 
     override fun getPathGuidesV2(

@@ -8,8 +8,8 @@ import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.model.SaveGuideMode
 import com.jonathanev.review.domain.repository.DirectoryManager
 import com.jonathanev.review.domain.repository.GuiaRepository
-import com.jonathanev.review.domain.result.GetSaveGuideResult
-import com.jonathanev.review.domain.result.SaveGuideError
+import com.jonathanev.review.domain.result.GuideResource
+import com.jonathanev.review.domain.result.SaveGuideErrors
 import com.jonathanev.review.domain.result.UpdateGuideResult
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -142,7 +142,7 @@ class SetCrearXmlUseCaseTest {
         every { directoryManager.createPathGuide(relativeGuidePath, nameGuide) } returns true
         every {
             guiaRepository.saveGuide(guideDomainModel, preguntas, respuestas, relativeGuidePath)
-        } returns GetSaveGuideResult.Failure(SaveGuideError.ErrorSave)
+        } returns GuideResource.Error(SaveGuideErrors.InsufficientStorageOrDiskError)
 
         setCrearXmlUseCase.invoke(
             nameGuide = nameGuide,
@@ -182,7 +182,7 @@ class SetCrearXmlUseCaseTest {
         every { directoryManager.createPathGuide(relativeGuidePath, nameGuide) } returns true
         every {
             guiaRepository.saveGuide(guideDomainModel, preguntas, respuestas, relativeGuidePath)
-        } returns GetSaveGuideResult.SaveGuide
+        } returns GuideResource.Success(guideDomainModel)
         every {
             updateImagesUseCase.invoke(
                 GuideDomainModel(GuideVersion.V2, nameGuide, description),
@@ -241,7 +241,7 @@ class SetCrearXmlUseCaseTest {
         every { directoryManager.createPathGuide(relativeGuidePath, nameGuide) } returns true
         every {
             guiaRepository.saveGuide(guideDomainModel, preguntas, respuestas, relativeGuidePath)
-        } returns GetSaveGuideResult.SaveGuide
+        } returns GuideResource.Success(guideDomainModel)
         every {
             updateImagesUseCase.invoke(
                 GuideDomainModel(GuideVersion.V2, nameGuide, description),

@@ -1,6 +1,5 @@
 package com.jonathanev.review.domain.repository
 
-import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuidePath
 import com.jonathanev.review.domain.model.PathKind
@@ -26,6 +25,12 @@ interface FilePathResolver {
     //fun renamePathGuidesV2(guideContext: GuideContext.Rename): String
 
     fun getPathGuidesV2(
+        guideDomainModel: GuideDomainModel,
+        kind: PathKind,
+        relativeGuidePath: RelativeGuidePath
+    ): String
+
+    fun getPathGuidesV1(
         guideDomainModel: GuideDomainModel,
         kind: PathKind,
         relativeGuidePath: RelativeGuidePath
