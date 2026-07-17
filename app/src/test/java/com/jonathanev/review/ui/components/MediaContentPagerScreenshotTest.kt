@@ -17,6 +17,7 @@ import com.jonathanev.review.ui.components.MediaContentPagerScreenshotTest.Compa
 import com.jonathanev.review.ui.preview.providers.DataMediaContentPagerProvider
 import com.jonathanev.review.ui.preview.providers.MediaContentPagerProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
+import com.jonathanev.review.utils.captureTestOutput
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -129,7 +130,7 @@ class MediaContentPagerScreenshotTest(
     // =========================================================================================
 
     @Test
-    fun captureMediaContentPagerVariant() {
+    fun captureVariant() {
         // PASO 1: Inyectamos el calificador del sistema a Robolectric en tiempo de ejecución.
         // "notnight" -> Fuerza la UI a Modo Claro.
         // "night"    -> Fuerza la UI a Modo Oscuro.
@@ -172,8 +173,9 @@ class MediaContentPagerScreenshotTest(
         // PASO 3: Tomamos la captura del árbol de vistas.
         // - onRoot(): Captura todo el contenido visible en la pantalla.
         // - captureRoboImage(): Mide, renderiza el mapa de bits (Bitmap) y lo guarda en disco.
-        composeTestRule.onRoot().captureRoboImage(
-            filePath = "build/outputs/roborazzi/media_pager/${variantName}.png"
+        composeTestRule.onRoot().captureTestOutput(
+            testClassName = this::class.java.simpleName,
+            variantName = variantName
         )
     }
 }

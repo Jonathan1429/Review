@@ -18,6 +18,7 @@ import com.github.takahirom.roborazzi.captureRoboImage
 import com.jonathanev.review.ui.preview.providers.StepNavigationCarouselProv
 import com.jonathanev.review.ui.preview.providers.StepNavigationCarouselProviders
 import com.jonathanev.review.ui.theme.ReviewTheme
+import com.jonathanev.review.utils.captureTestOutput
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -72,7 +73,7 @@ class StepNavigationCarouselScreenshotTest(
     }
 
     @Test
-    fun captureStepNavigationCarouselVariant() {
+    fun captureVariant() {
         RuntimeEnvironment.setQualifiers(themeQualifier)
         //val pageCount = dataState.listQuestionContent.size.coerceAtLeast(1)
 
@@ -109,8 +110,9 @@ class StepNavigationCarouselScreenshotTest(
             }
         }
 
-        composeTestRule.onRoot().captureRoboImage(
-            filePath = "build/outputs/roborazzi/step_navigation/${variantName}.png"
+        composeTestRule.onRoot().captureTestOutput(
+            testClassName = this::class.java.simpleName,
+            variantName = variantName
         )
     }
 }

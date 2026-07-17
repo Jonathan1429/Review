@@ -15,6 +15,7 @@ import com.github.takahirom.roborazzi.captureRoboImage
 import com.jonathanev.review.ui.preview.providers.CustomTextFieldDataProvider
 import com.jonathanev.review.ui.preview.providers.PropertiesTF
 import com.jonathanev.review.ui.theme.ReviewTheme
+import com.jonathanev.review.utils.captureTestOutput
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -69,7 +70,7 @@ class CustomTextFieldScreenshotTest(
     }
 
     @Test
-    fun captureCustomTextFieldVariant() {
+    fun captureVariant() {
         RuntimeEnvironment.setQualifiers(themeQualifier)
 
         composeTestRule.setContent {
@@ -98,8 +99,9 @@ class CustomTextFieldScreenshotTest(
             }
         }
 
-        composeTestRule.onRoot().captureRoboImage(
-            filePath = "build/outputs/roborazzi/custom_text_field_viewer/${variantName}.png"
+        composeTestRule.onRoot().captureTestOutput(
+            testClassName = this::class.java.simpleName,
+            variantName = variantName
         )
     }
 }

@@ -14,6 +14,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.github.takahirom.roborazzi.captureRoboImage
 import com.jonathanev.review.ui.theme.ReviewTheme
+import com.jonathanev.review.utils.captureTestOutput
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -71,7 +72,7 @@ class CustomBoxCreateTextScreenshotTest(
     }
 
     @Test
-    fun captureCustomBoxCreateTextVariant() {
+    fun captureVariant() {
         RuntimeEnvironment.setQualifiers(themeQualifier)
 
         composeTestRule.setContent {
@@ -100,8 +101,9 @@ class CustomBoxCreateTextScreenshotTest(
             }
         }
 
-        composeTestRule.onRoot().captureRoboImage(
-            filePath = "build/outputs/roborazzi/custom_box_create_text_viewer/${variantName}.png"
+        composeTestRule.onRoot().captureTestOutput(
+            testClassName = this::class.java.simpleName,
+            variantName = variantName
         )
     }
 }

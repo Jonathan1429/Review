@@ -15,6 +15,7 @@ import com.github.takahirom.roborazzi.captureRoboImage
 import com.jonathanev.review.ui.preview.providers.CustomTopBarProv
 import com.jonathanev.review.ui.preview.providers.CustomTopBarProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
+import com.jonathanev.review.utils.captureTestOutput
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -71,7 +72,7 @@ class CustomTopBarScreenshotTest(
     }
 
     @Test
-    fun captureCustomTopBarVariant() {
+    fun captureVariant() {
         RuntimeEnvironment.setQualifiers(themeQualifier)
 
         composeTestRule.setContent {
@@ -103,8 +104,9 @@ class CustomTopBarScreenshotTest(
             }
         }
 
-        composeTestRule.onRoot().captureRoboImage(
-            filePath = "build/outputs/roborazzi/custom_top_bar_viewer/${variantName}.png"
+        composeTestRule.onRoot().captureTestOutput(
+            testClassName = this::class.java.simpleName,
+            variantName = variantName
         )
     }
 }

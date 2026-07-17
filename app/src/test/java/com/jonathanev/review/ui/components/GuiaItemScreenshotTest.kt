@@ -15,6 +15,7 @@ import com.github.takahirom.roborazzi.captureRoboImage
 import com.jonathanev.review.presentation.model.FolderUiModel
 import com.jonathanev.review.ui.preview.providers.ListFoldersDataProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
+import com.jonathanev.review.utils.captureTestOutput
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -68,7 +69,7 @@ class GuiaItemScreenshotTest(
     }
 
     @Test
-    fun captureFilterChipItemVariant() {
+    fun captureVariant() {
         RuntimeEnvironment.setQualifiers(themeQualifier)
 
         composeTestRule.setContent {
@@ -93,8 +94,9 @@ class GuiaItemScreenshotTest(
             }
         }
 
-        composeTestRule.onRoot().captureRoboImage(
-            filePath = "build/outputs/roborazzi/guia≠_item_viewer/${variantName}.png"
+        composeTestRule.onRoot().captureTestOutput(
+            testClassName = this::class.java.simpleName,
+            variantName = variantName
         )
     }
 }
