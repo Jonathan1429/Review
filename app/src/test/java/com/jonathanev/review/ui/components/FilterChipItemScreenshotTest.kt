@@ -18,6 +18,7 @@ import com.github.takahirom.roborazzi.roborazziSystemPropertyOutputDirectory
 import com.jonathanev.review.ui.preview.providers.FilterChipItemProv
 import com.jonathanev.review.ui.preview.providers.FilterChipItemProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
+import com.jonathanev.review.utils.captureTestOutput
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -73,17 +74,8 @@ class FilterChipItemScreenshotTest(
 
     @OptIn(ExperimentalRoborazziApi::class)
     @Test
-    fun captureFilterChipItemVariant() {
+    fun captureVariant() {
         RuntimeEnvironment.setQualifiers(themeQualifier)
-
-        val basePath = "build/outputs/roborazzi/success/FilterChipItemScreenshotTest"
-        val failurePath = "build/outputs/roborazzi/failures/FilterChipItemScreenshotTest"
-
-        val roborazziOptions = RoborazziOptions(
-            compareOptions = RoborazziOptions.CompareOptions(
-                outputDirectoryPath = failurePath
-            )
-        )
 
         composeTestRule.setContent {
             ReviewTheme {
@@ -112,9 +104,9 @@ class FilterChipItemScreenshotTest(
             }
         }
 
-        composeTestRule.onRoot().captureRoboImage(
-            filePath = "$basePath/${variantName}.png",
-            roborazziOptions = roborazziOptions
+        composeTestRule.onRoot().captureTestOutput(
+            testClassName = this::class.java.simpleName,
+            variantName = variantName
         )
     }
 }
