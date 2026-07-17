@@ -3,7 +3,6 @@ package com.jonathanev.review.ui.components
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -11,17 +10,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jonathanev.review.R
-import com.jonathanev.review.presentation.model.GuideMode
 import com.jonathanev.review.ui.preview.DevicePreviews
 
-//@DevicePreviews
+@DevicePreviews
 @Composable
 fun PreviewCustomBoxCreateText() {
     CustomBoxCreateText(
@@ -30,6 +25,7 @@ fun PreviewCustomBoxCreateText() {
         onTextValueChange = {}
     )
 }
+
 @Composable
 fun CustomBoxCreateText(
     modifier: Modifier = Modifier,

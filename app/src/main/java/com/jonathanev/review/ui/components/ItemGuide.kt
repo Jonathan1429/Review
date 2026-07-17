@@ -30,7 +30,6 @@ import com.jonathanev.review.ui.theme.ColorBotones
 import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.TextGray
 import com.jonathanev.review.ui.theme.cardListBackground
-import com.jonathanev.review.ui.theme.cardStepBackground
 
 @DevicePreviews
 @Composable

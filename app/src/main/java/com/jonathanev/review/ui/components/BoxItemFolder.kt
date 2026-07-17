@@ -23,7 +23,7 @@ import com.jonathanev.review.ui.theme.Black
 import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.White
 
-//@DevicePreviews
+@DevicePreviews
 @Composable
 fun PreviewBoxItemFolder(
     @PreviewParameter(BoxItemFolderDataProvider::class) data: PropertiesItemFolder

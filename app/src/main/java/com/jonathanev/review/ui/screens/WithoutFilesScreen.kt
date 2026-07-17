@@ -51,7 +51,7 @@ fun WithoutFilesScreen(
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             floatingActionButton = {
-                 ExtendedFloatingActionButton(
+                ExtendedFloatingActionButton(
                     onClick = onAddGuideClick,
                     containerColor = MaterialTheme.colorScheme.primary,
                     shape = RoundedCornerShape(16.dp),

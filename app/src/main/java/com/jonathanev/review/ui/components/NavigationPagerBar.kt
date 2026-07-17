@@ -64,7 +64,7 @@ fun RowScope.NavigationPagerBar(
             fontWeight = FontWeight.Medium
         )
         IconButton(
-            enabled =  totalQuestions > 1,
+            enabled = totalQuestions > 1,
             onClick = onNextQuestionClick
         ) {
             Icon(

@@ -19,18 +19,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jonathanev.review.R
 import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.theme.ReviewTheme
-import com.jonathanev.review.ui.theme.cardListBackground
-import com.jonathanev.review.ui.theme.cardStepBackground
 import com.jonathanev.review.ui.theme.dialogBackground
-import com.jonathanev.review.ui.theme.iconBackground
 
-//@DevicePreviews
+@DevicePreviews
 @Composable
 fun PreviewCustomAlertDialog() {
     ReviewTheme {

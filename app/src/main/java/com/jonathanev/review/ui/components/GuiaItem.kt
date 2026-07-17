@@ -36,11 +36,11 @@ import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.White
 import com.jonathanev.review.ui.theme.cardStepBackground
 
-//@DevicePreviews
+@DevicePreviews
 @Composable
 fun PreviewGuiaItem(
     @PreviewParameter(ListFoldersDataProvider::class) data: List<FolderUiModel>
-){
+) {
     ReviewTheme {
         GuiaItem(data[0]) { }
     }
@@ -53,7 +53,7 @@ fun GuiaItem(
 ) {
     //val color50 = ColorUtils.setAlphaComponent(guia.folder.color.toColorRes(), 50)
     val isDark = isSystemInDarkTheme()
-    val backgroundColor = if(isDark) White else Black
+    val backgroundColor = if (isDark) White else Black
     val colorTwentyPercent = backgroundColor.copy(alpha = 0.2f)
 
     Card(

@@ -210,12 +210,15 @@ fun ListGuidesScreen(
                         Text(stringResource(R.string.lblMoving))
                     },
                     navigationIcon = {
-                        IconButton(onClick = onMoveCancelGuideClick ) {
-                            Icon(painterResource(R.drawable.ic_cancel), contentDescription = "Cancelar")
+                        IconButton(onClick = onMoveCancelGuideClick) {
+                            Icon(
+                                painterResource(R.drawable.ic_cancel),
+                                contentDescription = "Cancelar"
+                            )
                         }
                     },
                     actions = {
-                        IconButton(onClick = onMoveSuccessGuideClick ) {
+                        IconButton(onClick = onMoveSuccessGuideClick) {
                             Icon(
                                 painterResource(R.drawable.ic_success),
                                 contentDescription = "Aceptar"
@@ -273,7 +276,7 @@ fun ListGuidesScreen(
                         ItemGuide(
                             guide = guide,
                             onClick = {
-                                if (fileInteractionMode == FileInteractionMode.MovingItem){
+                                if (fileInteractionMode == FileInteractionMode.MovingItem) {
                                     onErrorProcess()
                                 } else {
                                     onItemClick(index)

@@ -18,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jonathanev.review.R
@@ -27,7 +26,7 @@ import com.jonathanev.review.ui.theme.Teal200
 import com.jonathanev.review.ui.theme.TextGray
 import com.jonathanev.review.ui.theme.cardStepBackground
 
-//@DevicePreviews
+@DevicePreviews
 @Composable
 fun PreviewCardWithTextAndSwitch() {
     CardWithTextAndSwitch(

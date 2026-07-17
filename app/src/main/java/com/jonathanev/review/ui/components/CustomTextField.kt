@@ -1,12 +1,10 @@
 package com.jonathanev.review.ui.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -15,7 +13,7 @@ import com.jonathanev.review.ui.preview.providers.CustomTextFieldDataProvider
 import com.jonathanev.review.ui.preview.providers.PropertiesTF
 import com.jonathanev.review.ui.theme.ReviewTheme
 
-//@DevicePreviews
+@DevicePreviews
 @Composable
 fun PreviewCustomTextField(
     @PreviewParameter(CustomTextFieldDataProvider::class) data: PropertiesTF

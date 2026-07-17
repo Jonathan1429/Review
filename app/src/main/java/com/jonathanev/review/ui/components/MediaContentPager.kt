@@ -34,7 +34,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -47,10 +46,9 @@ import com.jonathanev.review.ui.preview.providers.DataMediaContentPagerProvider
 import com.jonathanev.review.ui.preview.providers.MediaContentPagerProvider
 import com.jonathanev.review.ui.theme.BorderPasos
 import com.jonathanev.review.ui.theme.ReviewTheme
-import com.jonathanev.review.ui.theme.TextColorSecondary
 import com.jonathanev.review.ui.theme.cardStepBackground
 
-//@DevicePreviews
+@DevicePreviews
 @Composable
 fun PreviewMediaContentPager(
     @PreviewParameter(MediaContentPagerProvider::class) data: DataMediaContentPagerProvider
@@ -166,22 +164,23 @@ fun MediaContentPager(
                             modifier = Modifier
                                 .size(16.dp)
                                 .clickable(onClick = {
-                                    val typeContent = when (val asset = assets[pagerState.currentPage]) {
-                                        is QuestionContentUi.Image -> {
+                                    val typeContent =
+                                        when (val asset = assets[pagerState.currentPage]) {
+                                            is QuestionContentUi.Image -> {
                                                 QuestionContentUi.Image(
                                                     asset.uri,
                                                     asset.nameFile
                                                 )
-                                        }
+                                            }
 
-                                        QuestionContentUi.None -> QuestionContentUi.None
-                                        is QuestionContentUi.Text -> {
+                                            QuestionContentUi.None -> QuestionContentUi.None
+                                            is QuestionContentUi.Text -> {
                                                 QuestionContentUi.Text(
                                                     asset.text,
                                                     asset.colorRanges
                                                 )
+                                            }
                                         }
-                                    }
 
                                     onAssetClick(typeContent)
                                 })

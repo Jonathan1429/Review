@@ -20,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -49,7 +48,12 @@ fun PreviewFilterChipItem(
 }
 
 @Composable
-fun FilterChipItem(itemContentType: ContentType, iconRes: Int, contentTypeSelected: ContentType, onFilterClicked: (ContentType) -> Unit) {
+fun FilterChipItem(
+    itemContentType: ContentType,
+    iconRes: Int,
+    contentTypeSelected: ContentType,
+    onFilterClicked: (ContentType) -> Unit
+) {
     Box(
         modifier = Modifier
             .clickable(onClick = {

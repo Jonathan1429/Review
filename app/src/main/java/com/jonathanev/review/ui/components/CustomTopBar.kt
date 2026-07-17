@@ -24,7 +24,7 @@ import com.jonathanev.review.ui.preview.providers.CustomTopBarProv
 import com.jonathanev.review.ui.preview.providers.CustomTopBarProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
 
-//@DevicePreviews
+@DevicePreviews
 @Composable
 fun PreviewCustomTopBar(
     @PreviewParameter(CustomTopBarProvider::class) data: CustomTopBarProv

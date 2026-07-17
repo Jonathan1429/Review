@@ -37,7 +37,7 @@ import com.jonathanev.review.ui.theme.cardStepBackground
 @Composable
 fun PreviewPreviewQuestionsScreen(
     //@PreviewParameter(PreviewQuestionsProvider::class) data: PreviewQuestionsProv
-    @PreviewParameter(PreviewQuestionsProvider ::class) data: PreviewQuestionStateUi
+    @PreviewParameter(PreviewQuestionsProvider::class) data: PreviewQuestionStateUi
 ) {
     ReviewTheme {
         PreviewQuestionsScreen(

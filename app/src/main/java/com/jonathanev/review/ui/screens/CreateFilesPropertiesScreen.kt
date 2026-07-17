@@ -25,7 +25,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -33,7 +32,6 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.flowWithLifecycle
 import com.jonathanev.review.presentation.model.FileFormMode
-import com.jonathanev.review.presentation.model.GuideUiModel
 import com.jonathanev.review.presentation.model.IconType
 import com.jonathanev.review.presentation.state.CreatingUIState
 import com.jonathanev.review.presentation.state.PropertiesFilesState

@@ -33,7 +33,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,7 +49,7 @@ import com.jonathanev.review.ui.theme.degradientColor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-//@DevicePreviews
+@DevicePreviews
 @Composable
 fun PreviewCarousel(
     @PreviewParameter(StepNavigationCarouselProviders::class) data: StepNavigationCarouselProv

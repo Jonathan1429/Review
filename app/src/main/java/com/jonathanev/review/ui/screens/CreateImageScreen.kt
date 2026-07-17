@@ -18,7 +18,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.jonathanev.review.presentation.model.GuideMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
@@ -27,10 +26,7 @@ import com.jonathanev.review.ui.components.CustomBoxCreateImage
 import com.jonathanev.review.ui.components.OptionsCreateImage
 import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.theme.ReviewTheme
-import com.jonathanev.review.ui.theme.cardListBackground
 import com.jonathanev.review.ui.theme.cardStepBackground
-import com.jonathanev.review.ui.theme.degradientColor
-import com.jonathanev.review.ui.theme.iconBackground
 
 @DevicePreviews
 @Composable
@@ -40,7 +36,7 @@ fun PreviewCreateImageEdit() {
             guideMode = GuideMode.Edit("", "", 0),
             uriImage = "",
             selectedImage = { },
-            imageUploaded = {  }
+            imageUploaded = { }
         )
     }
 }
@@ -53,7 +49,7 @@ fun PreviewCreateImageCreate() {
             guideMode = GuideMode.Create("", ""),
             uriImage = "",
             selectedImage = { },
-            imageUploaded = {  }
+            imageUploaded = { }
         )
     }
 }
@@ -66,7 +62,7 @@ fun PreviewCreateImageReview() {
             guideMode = GuideMode.Review("", 0),
             uriImage = "",
             selectedImage = { },
-            imageUploaded = {  }
+            imageUploaded = { }
         )
     }
 }

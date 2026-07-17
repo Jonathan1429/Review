@@ -39,7 +39,7 @@ fun PreviewMovingItem(
             guias = data,
             fileInteractionMode = FileInteractionMode.MovingItem,
             onCreateFolderClick = {},
-            onFolderClick = { _, _ ->}
+            onFolderClick = { _, _ -> }
         )
     }
 }
@@ -54,7 +54,7 @@ fun PreviewListFolder(
             guias = data,
             fileInteractionMode = FileInteractionMode.Default,
             onCreateFolderClick = {},
-            onFolderClick = { _, _ ->}
+            onFolderClick = { _, _ -> }
         )
     }
 }
@@ -77,7 +77,10 @@ fun ListFoldersScreen(
                     },
                     navigationIcon = {
                         IconButton(onClick = { /* Acción Izquierda */ }) {
-                            Icon(painterResource(R.drawable.ic_cancel), contentDescription = "Cancelar")
+                            Icon(
+                                painterResource(R.drawable.ic_cancel),
+                                contentDescription = "Cancelar"
+                            )
                         }
                     }
                     /*actions = {
