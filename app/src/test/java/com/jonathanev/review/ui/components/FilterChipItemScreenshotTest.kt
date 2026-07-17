@@ -74,25 +74,27 @@ class FilterChipItemScreenshotTest(
 
         composeTestRule.setContent {
             ReviewTheme {
-                Column {
-                    Surface(
-                        color = MaterialTheme.colorScheme.tertiaryContainer,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "PREVIEW: $data - ${data::class.simpleName}",
-                            style = MaterialTheme.typography.labelMedium,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            color = MaterialTheme.colorScheme.onTertiaryContainer
+                Surface(color = MaterialTheme.colorScheme.background) {
+                    Column {
+                        Surface(
+                            color = MaterialTheme.colorScheme.tertiaryContainer,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = "PREVIEW: $data - ${data::class.simpleName}",
+                                style = MaterialTheme.typography.labelMedium,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                color = MaterialTheme.colorScheme.onTertiaryContainer
+                            )
+                        }
+
+                        FilterChipItem(
+                            itemContentType = data.itemContentType,
+                            iconRes = data.iconRes,
+                            contentTypeSelected = data.contentTypeSelected,
+                            onFilterClicked = {}
                         )
                     }
-
-                    FilterChipItem(
-                        itemContentType = data.itemContentType,
-                        iconRes = data.iconRes,
-                        contentTypeSelected = data.contentTypeSelected,
-                        onFilterClicked = {}
-                    )
                 }
             }
         }

@@ -67,29 +67,31 @@ class ColorPickerDialogScreenshotTest(
 
         composeTestRule.setContent {
             ReviewTheme {
-                val controller = rememberColorPickerController()
+                Surface(color = MaterialTheme.colorScheme.background) {
+                    val controller = rememberColorPickerController()
 
-                Column {
-                    Surface(
-                        color = MaterialTheme.colorScheme.tertiaryContainer,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "PREVIEW: $variantName",
-                            style = MaterialTheme.typography.labelMedium,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            color = MaterialTheme.colorScheme.onTertiaryContainer
+                    Column {
+                        Surface(
+                            color = MaterialTheme.colorScheme.tertiaryContainer,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = "PREVIEW: $variantName",
+                                style = MaterialTheme.typography.labelMedium,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                color = MaterialTheme.colorScheme.onTertiaryContainer
+                            )
+                        }
+
+                        ColorPickerDialogContent(
+                            controller = controller,
+                            colorInitial = MaterialTheme.colorScheme.onSurface,
+                            selectedColor = MaterialTheme.colorScheme.onSurface,
+                            onDismissRequest = {},
+                            onColorSelected = {},
+                            onDefaultClick = {}
                         )
                     }
-
-                    ColorPickerDialogContent(
-                        controller = controller,
-                        colorInitial = MaterialTheme.colorScheme.onSurface,
-                        selectedColor = MaterialTheme.colorScheme.onSurface,
-                        onDismissRequest = {},
-                        onColorSelected = {},
-                        onDefaultClick = {}
-                    )
                 }
             }
         }

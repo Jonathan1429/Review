@@ -142,27 +142,29 @@ class MediaContentPagerScreenshotTest(
         // PASO 2: Montamos la jerarquía de UI de Compose en la Activity de pruebas.
         composeTestRule.setContent {
             ReviewTheme {
-                val pagerState = rememberPagerState(pageCount = { dataState.listType.size })
+                Surface(color = MaterialTheme.colorScheme.background) {
+                    val pagerState = rememberPagerState(pageCount = { dataState.listType.size })
 
-                Column() {
-                    Surface(
-                        color = MaterialTheme.colorScheme.tertiaryContainer,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "PREVIEW: $dataState - ${dataState::class.simpleName}",
-                            style = MaterialTheme.typography.labelMedium,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            color = MaterialTheme.colorScheme.onTertiaryContainer
+                    Column() {
+                        Surface(
+                            color = MaterialTheme.colorScheme.tertiaryContainer,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = "PREVIEW: $dataState - ${dataState::class.simpleName}",
+                                style = MaterialTheme.typography.labelMedium,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                color = MaterialTheme.colorScheme.onTertiaryContainer
+                            )
+                        }
+                        MediaContentPager(
+                            pagerState = pagerState,
+                            assets = dataState.listType,
+                            mediaForSelected = dataState.mediaForSelected,
+                            guideMode = dataState.guideMode,
+                            onAssetClick = {}
                         )
                     }
-                    MediaContentPager(
-                        pagerState = pagerState,
-                        assets = dataState.listType,
-                        mediaForSelected = dataState.mediaForSelected,
-                        guideMode = dataState.guideMode,
-                        onAssetClick = {}
-                    )
                 }
             }
         }

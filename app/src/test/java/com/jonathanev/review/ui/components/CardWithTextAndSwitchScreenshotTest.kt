@@ -71,23 +71,25 @@ class CardWithTextAndSwitchScreenshotTest(
 
         composeTestRule.setContent {
             ReviewTheme {
-                Column {
-                    Surface(
-                        color = MaterialTheme.colorScheme.tertiaryContainer,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "PREVIEW: Checked: $isChecked",
-                            style = MaterialTheme.typography.labelMedium,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            color = MaterialTheme.colorScheme.onTertiaryContainer
+                Surface(color = MaterialTheme.colorScheme.background) {
+                    Column {
+                        Surface(
+                            color = MaterialTheme.colorScheme.tertiaryContainer,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = "PREVIEW: Checked: $isChecked",
+                                style = MaterialTheme.typography.labelMedium,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                color = MaterialTheme.colorScheme.onTertiaryContainer
+                            )
+                        }
+
+                        CardWithTextAndSwitch(
+                            isChecked = isChecked,
+                            onCheckedChange = {}
                         )
                     }
-
-                    CardWithTextAndSwitch(
-                        isChecked = isChecked,
-                        onCheckedChange = {}
-                    )
                 }
             }
         }

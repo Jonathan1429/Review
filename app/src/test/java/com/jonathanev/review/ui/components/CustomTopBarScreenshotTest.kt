@@ -76,27 +76,29 @@ class CustomTopBarScreenshotTest(
 
         composeTestRule.setContent {
             ReviewTheme {
-                Column {
-                    Surface(
-                        color = MaterialTheme.colorScheme.tertiaryContainer,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "PREVIEW: $variantName - ${dataState::class.simpleName}",
-                            style = MaterialTheme.typography.labelMedium,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            color = MaterialTheme.colorScheme.onTertiaryContainer
+                Surface(color = MaterialTheme.colorScheme.background) {
+                    Column {
+                        Surface(
+                            color = MaterialTheme.colorScheme.tertiaryContainer,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = "PREVIEW: $variantName - ${dataState::class.simpleName}",
+                                style = MaterialTheme.typography.labelMedium,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                color = MaterialTheme.colorScheme.onTertiaryContainer
+                            )
+                        }
+
+                        CustomTopBar(
+                            actualQuestion = dataState.actualQuestion,
+                            totalQuestions = dataState.totalQuestion,
+                            guideMode = dataState.guideMode,
+                            onDeleteQuestionClick = {},
+                            onBackQuestionClick = {},
+                            onNextQuestionClick = {}
                         )
                     }
-
-                    CustomTopBar(
-                        actualQuestion = dataState.actualQuestion,
-                        totalQuestions = dataState.totalQuestion,
-                        guideMode = dataState.guideMode,
-                        onDeleteQuestionClick = {},
-                        onBackQuestionClick = {},
-                        onNextQuestionClick = {}
-                    )
                 }
             }
         }

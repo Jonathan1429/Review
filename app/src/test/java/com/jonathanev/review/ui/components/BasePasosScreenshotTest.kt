@@ -81,26 +81,28 @@ class BasePasosScreenshotTest(
 
         composeTestRule.setContent {
             ReviewTheme {
-                val textoVisible = stringResource(id = dataState.title)
+                Surface(color = MaterialTheme.colorScheme.background) {
+                    val textoVisible = stringResource(id = dataState.title)
 
-                Column {
-                    Surface(
-                        color = MaterialTheme.colorScheme.tertiaryContainer,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "PREVIEW: $textoVisible - ${dataState::class.simpleName}",
-                            style = MaterialTheme.typography.labelMedium,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            color = MaterialTheme.colorScheme.onTertiaryContainer
+                    Column {
+                        Surface(
+                            color = MaterialTheme.colorScheme.tertiaryContainer,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = "PREVIEW: $textoVisible - ${dataState::class.simpleName}",
+                                style = MaterialTheme.typography.labelMedium,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                color = MaterialTheme.colorScheme.onTertiaryContainer
+                            )
+                        }
+
+                        BasePasos(
+                            image = dataState.image,
+                            title = dataState.title,
+                            description = dataState.description
                         )
                     }
-
-                    BasePasos(
-                        image = dataState.image,
-                        title = dataState.title,
-                        description = dataState.description
-                    )
                 }
             }
         }
