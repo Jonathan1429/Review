@@ -10,7 +10,8 @@ fun SemanticsNodeInteraction.captureTestOutput(
     testClassName: String,
     variantName: String
 ) {
-    val baseDirectory = "build/outputs/roborazzi/success/$testClassName"
+    //val baseDirectory = "build/outputs/roborazzi/success/$testClassName"
+    val baseDirectory = "src/test/resources/screenshots/$testClassName"
     val failureDirectory = "build/outputs/roborazzi/failures/$testClassName"
 
     val roborazziOptions = RoborazziOptions(

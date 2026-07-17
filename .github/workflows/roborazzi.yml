@@ -1,0 +1,38 @@
+name: Roborazzi Automated Flow
+
+on:
+  push:
+    branches:
+      - 'feature/ui-*'
+
+  pull_request:
+    branches: [ dev, main ]
+
+jobs:
+  roborazzi-task:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del proyecto
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configurar Java y Gradle
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v3
+
+      - name: Grabar capturas automáticamente
+        if: ${{ github.event_name == 'push' }}
+        run: |
+          ./gradlew recordRoborazziDebug
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add app/src/test/resources/screenshots/*
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: auto-update screenshots [skip ci]" && git push)
+
+      - name: Verificar capturas existentes
+        if: ${{ github.event_name == 'pull_request' }}
+        run: ./gradlew verifyRoborazziDebug
