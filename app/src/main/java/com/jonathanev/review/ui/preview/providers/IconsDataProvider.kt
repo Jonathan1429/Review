@@ -8,8 +8,12 @@ data class PropertiesFolderSelected(
     val posSelected: Int
 )
 
-class IconsFolderDataProvider : PreviewParameterProvider<PropertiesFolderSelected> {
+class IconsDataProvider : PreviewParameterProvider<PropertiesFolderSelected> {
     override val values: Sequence<PropertiesFolderSelected> = sequenceOf(
+        PropertiesFolderSelected(
+            listIcons = listOf(IconType.LIGHTBULB),
+            posSelected = 0
+        ),
         PropertiesFolderSelected(
             listIcons = listOf(
                 IconType.ANCHOR_SOLID_FULL,
@@ -35,4 +39,14 @@ class IconsFolderDataProvider : PreviewParameterProvider<PropertiesFolderSelecte
             posSelected = 2
         )
     )
+
+    override fun getDisplayName(index: Int): String? {
+        return when(index) {
+            0 -> "Icons file - pos $index"
+            1 -> "Icons folder - pos $index"
+            2 -> "Icons folder - pos $index"
+            3 -> "Icons folder - pos $index"
+            else -> super.getDisplayName(index)
+        }
+    }
 }
