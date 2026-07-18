@@ -17,9 +17,32 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.jonathanev.review.R
 import com.jonathanev.review.presentation.model.GuideMode
+import com.jonathanev.review.ui.preview.DevicePreviews
+import com.jonathanev.review.ui.preview.providers.OptionsCreateTextProv
+import com.jonathanev.review.ui.preview.providers.OptionsCreateTextProvider
+import com.jonathanev.review.ui.theme.ReviewTheme
+
+@DevicePreviews
+@Composable
+fun PreviewOptionsCreateText(
+    @PreviewParameter(OptionsCreateTextProvider::class) data: OptionsCreateTextProv
+) {
+    ReviewTheme {
+        OptionsCreateText(
+            textValue = data.text,
+            selectedColor = data.color,
+            guideMode = data.guideMode,
+            onClearColorClick = {},
+            onSelectColorClick = {},
+            onSaveTextClick = {},
+            onBackNav = {}
+        )
+    }
+}
 
 @Composable
 fun OptionsCreateText(
