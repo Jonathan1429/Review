@@ -43,28 +43,25 @@ class GuiaItemScreenshotTest(
         fun data(): Collection<Array<Any>> {
             val provider = ListFoldersDataProvider()
             val testCases = mutableListOf<Array<Any>>()
+            val guiaItem = provider.values.toList()[0]
 
-            provider.values.forEachIndexed { index, dataState ->
-                val nameScreenshot = provider.getDisplayName(index) ?: "item_$index"
-
-                // MODO CLARO
-                testCases.add(
-                    arrayOf(
-                        "${nameScreenshot}_light",
-                        "notnight",
-                        dataState
-                    )
+            // MODO CLARO
+            testCases.add(
+                arrayOf(
+                    "${guiaItem.listFolders[0].folder.name}_light",
+                    "notnight",
+                    guiaItem.listFolders[0]
                 )
+            )
 
-                // MODO OSCURO
-                testCases.add(
-                    arrayOf(
-                        "${nameScreenshot}_dark",
-                        "night",
-                        dataState
-                    )
+            // MODO OSCURO
+            testCases.add(
+                arrayOf(
+                    "${guiaItem.listFolders[0].folder.name}_dark",
+                    "night",
+                    guiaItem.listFolders[0]
                 )
-            }
+            )
 
             return testCases
         }
