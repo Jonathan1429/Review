@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -51,86 +52,28 @@ import com.jonathanev.review.ui.components.ShowDeletePopUp
 import com.jonathanev.review.ui.model.ContentType
 import com.jonathanev.review.ui.model.QAType
 import com.jonathanev.review.ui.preview.DevicePreviews
+import com.jonathanev.review.ui.preview.providers.StudyGuideScreenProv
+import com.jonathanev.review.ui.preview.providers.StudyGuideScreenProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
 import kotlinx.coroutines.launch
 
 @DevicePreviews
 @Composable
-fun PreviewDialogDeleteQuestion() {
+fun PreviewStudyGuideScreen(
+    @PreviewParameter(StudyGuideScreenProvider::class) data: StudyGuideScreenProv
+) {
     ReviewTheme {
         FillingGuideScreen(
-            typeSelected = QAType.QUESTION,
-            typeForSelected = listOf(QAType.QUESTION, QAType.ANSWER),
-            mediaSelected = ContentType.TEXT,
-            mediaForSelected = listOf(ContentType.TEXT, ContentType.IMAGE),
-            actualQuestion = 1,
-            totalQuestions = 2,
-            listTypeMedia = listOf(QuestionContentUi.Text("Hola", listOf())),
-            guideMode = GuideMode.Edit("", "", 0),
-            showDialogDeleteQuestion = true,
-            showDialogRepeatGuide = false,
-            onDissmissDialogRepeatGuide = {},
-            onConfirmDialogRepeatGuide = {},
-            onContinueDialogDeleteQuestionClick = {},
-            onBackQuestionClick = {},
-            onNextQuestionClick = {},
-            onDeleteQuestionClick = { },
-            onTypeClicked = {},
-            onFilterClicked = {},
-            onAssetClick = {},
-            onAddAssetClick = {},
-            onDeleteItemClick = { _, _ -> },
-            onAddQuestion = {},
-        ) {}
-    }
-}
-
-@DevicePreviews
-@Composable
-fun PreviewDialogRepeatGuide() {
-    ReviewTheme {
-        FillingGuideScreen(
-            typeSelected = QAType.QUESTION,
-            typeForSelected = listOf(QAType.QUESTION, QAType.ANSWER),
-            mediaSelected = ContentType.TEXT,
-            mediaForSelected = listOf(ContentType.TEXT, ContentType.IMAGE),
-            actualQuestion = 1,
-            totalQuestions = 2,
-            listTypeMedia = listOf(QuestionContentUi.Text("Hola", listOf())),
-            guideMode = GuideMode.Edit("", "", 0),
-            showDialogDeleteQuestion = false,
-            showDialogRepeatGuide = true,
-            onDissmissDialogRepeatGuide = {},
-            onConfirmDialogRepeatGuide = {},
-            onContinueDialogDeleteQuestionClick = {},
-            onBackQuestionClick = {},
-            onNextQuestionClick = {},
-            onDeleteQuestionClick = { },
-            onTypeClicked = {},
-            onFilterClicked = {},
-            onAssetClick = {},
-            onAddAssetClick = {},
-            onDeleteItemClick = { _, _ -> },
-            onAddQuestion = {},
-        ) {}
-    }
-}
-
-@DevicePreviews
-@Composable
-fun PreviewFillingGuideWithoutShowDialog() {
-    ReviewTheme {
-        FillingGuideScreen(
-            typeSelected = QAType.QUESTION,
-            typeForSelected = listOf(QAType.QUESTION, QAType.ANSWER),
-            mediaSelected = ContentType.TEXT,
-            mediaForSelected = listOf(ContentType.TEXT, ContentType.IMAGE),
-            actualQuestion = 1,
-            totalQuestions = 2,
-            listTypeMedia = listOf(QuestionContentUi.Text("Hola", listOf())),
-            guideMode = GuideMode.Edit("", "", 0),
-            showDialogDeleteQuestion = false,
-            showDialogRepeatGuide = false,
+            typeSelected = data.typeSelected,
+            typeForSelected = data.typeForSelected,
+            mediaSelected = data.mediaSelected,
+            mediaForSelected = data.mediaForSelected,
+            actualQuestion = data.actualQuestion,
+            totalQuestions = data.totalQuestions,
+            listTypeMedia = data.listTypeMedia,
+            guideMode = data.guideMode,
+            showDialogDeleteQuestion = data.showDialogDeleteQuestion,
+            showDialogRepeatGuide = data.showDialogRepeatGuide,
             onDissmissDialogRepeatGuide = {},
             onConfirmDialogRepeatGuide = {},
             onContinueDialogDeleteQuestionClick = {},
