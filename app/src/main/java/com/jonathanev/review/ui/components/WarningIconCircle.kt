@@ -13,7 +13,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.jonathanev.review.R
+import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.theme.ColorBotones
+
+@DevicePreviews
+@Composable
+fun PreviewWarningIconCircle() {
+    WarningIconCircle()
+}
 
 @Composable
 fun WarningIconCircle() {
