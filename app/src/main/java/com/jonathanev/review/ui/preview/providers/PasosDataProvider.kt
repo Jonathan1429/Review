@@ -34,9 +34,9 @@ class PasosDataProvider : PreviewParameterProvider<PasoPreviewData> {
     // Sobrescribimos el nombre que Android Studio mostrará en el panel
     override fun getDisplayName(index: Int): String? {
         return when (index) {
-            0 -> "Paso 1: Crear"
-            1 -> "Paso 2: Personalizar"
-            2 -> "Paso 3: Organizar"
+            0 -> "Paso1_Crear"
+            1 -> "Paso2_Personalizar"
+            2 -> "Paso3_Organizar"
             else -> super.getDisplayName(index)
         }
     }

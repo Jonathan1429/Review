@@ -7,7 +7,7 @@ data class PropertiesTF(
     val label: String
 ){
     override fun toString(): String {
-        return "Label: $label"
+        return "Label_$label"
     }
 }
 
@@ -30,8 +30,8 @@ class CustomTextFieldDataProvider: PreviewParameterProvider<PropertiesTF> {
 
     override fun getDisplayName(index: Int): String? {
         return when(index){
-            0 -> "Nombrar carpeta"
-            1 -> "Nombrar archivo"
+            0 -> "Nombrar_carpeta"
+            1 -> "Nombrar_archivo"
             2 -> "Descripcion"
             else -> super.getDisplayName(index)
         }

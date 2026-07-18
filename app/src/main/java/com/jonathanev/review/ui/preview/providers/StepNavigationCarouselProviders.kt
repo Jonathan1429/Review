@@ -9,7 +9,7 @@ data class StepNavigationCarouselProv(
     val listQuestionContent: List<QuestionContentUi>
 ) {
     override fun toString(): String {
-        return "Size: ${listQuestionContent.size} - Mode: $mode"
+        return "Size_${listQuestionContent.size}_Mode_$mode"
     }
 }
 

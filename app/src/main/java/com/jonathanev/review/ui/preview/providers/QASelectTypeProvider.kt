@@ -23,8 +23,8 @@ class QASelectTypeProvider : PreviewParameterProvider<QASelectTypeProv> {
 
     override fun getDisplayName(index: Int): String? {
         return when(index) {
-            0 -> "Selected: Question"
-            1 -> "Selected: Answer"
+            0 -> "Selected_Question"
+            1 -> "Selected_Answer"
             else -> super.getDisplayName(index)
         }
     }

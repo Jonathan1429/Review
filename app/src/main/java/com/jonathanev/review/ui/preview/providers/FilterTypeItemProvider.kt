@@ -8,7 +8,7 @@ data class FilterTypeItemProv(
     val mediaSelected: ContentType
 ) {
     override fun toString(): String {
-        return "Selected: $mediaSelected"
+        return "Selected_$mediaSelected"
     }
 }
 
@@ -27,8 +27,8 @@ class FilterTypeItemProvider: PreviewParameterProvider<FilterTypeItemProv>{
 
     override fun getDisplayName(index: Int): String? {
         return when(index) {
-            0 -> "Selected: Text"
-            1 -> "Selected: Image"
+            0 -> "Selected_Text"
+            1 -> "Selected_Image"
             else -> super.getDisplayName(index)
         }
     }
