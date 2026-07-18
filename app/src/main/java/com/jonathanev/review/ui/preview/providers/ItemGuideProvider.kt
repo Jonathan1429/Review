@@ -12,8 +12,8 @@ class ItemGuideProvider() : PreviewParameterProvider<GuideUiModel> {
 
     override fun getDisplayName(index: Int): String? {
         return when(index)  {
-            0 -> "Guia: Kotlin"
-            1 -> "Guia: Test"
+            0 -> "Guia_Kotlin"
+            1 -> "Guia_Test"
             else -> super.getDisplayName(index)
         }
     }

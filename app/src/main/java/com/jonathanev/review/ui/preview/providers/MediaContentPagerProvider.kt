@@ -12,7 +12,7 @@ data class DataMediaContentPagerProvider(
     val guideMode: GuideMode
 ) {
     override fun toString(): String {
-        return "Size: $sizeList - Type: $mediaForSelected - Mode: $guideMode"
+        return "Size_${sizeList}_Type_${mediaForSelected}_Mode_$guideMode"
     }
 }
 

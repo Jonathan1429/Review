@@ -31,10 +31,10 @@ class QATypeItemProvider: PreviewParameterProvider<QATypeItemProv> {
 
     override fun getDisplayName(index: Int): String? {
         return when(index) {
-            0 -> "Question selected"
-            1 -> "Question no selected"
-            2 -> "Answer selected"
-            3 -> "Answer no selected"
+            0 -> "Question_selected"
+            1 -> "Question_no_selected"
+            2 -> "Answer_selected"
+            3 -> "Answer_no_selected"
             else -> super.getDisplayName(index)
         }
     }

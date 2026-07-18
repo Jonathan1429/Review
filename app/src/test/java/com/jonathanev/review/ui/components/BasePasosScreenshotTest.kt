@@ -12,7 +12,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.dp
-import com.github.takahirom.roborazzi.captureRoboImage
 import com.jonathanev.review.ui.preview.providers.PasoPreviewData
 import com.jonathanev.review.ui.preview.providers.PasosDataProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
@@ -46,17 +45,14 @@ class BasePasosScreenshotTest(
             val provider = PasosDataProvider()
             val testCases = mutableListOf<Array<Any>>()
 
+
             provider.values.forEachIndexed { index, dataState ->
-                val titles = listOf(
-                    "Paso 1: Crear",
-                    "Paso 2: Personalizar",
-                    "Paso 3: Organizar"
-                )
+                val screenshotName = provider.getDisplayName(index) ?: "item_$index"
 
                 // MODO CLARO
                 testCases.add(
                     arrayOf(
-                        "${titles[index]}_light",
+                        "${screenshotName}_light",
                         "notnight",
                         dataState
                     )
@@ -65,7 +61,7 @@ class BasePasosScreenshotTest(
                 // MODO OSCURO
                 testCases.add(
                     arrayOf(
-                        "${titles[index]}_dark",
+                        "${screenshotName}_dark",
                         "night",
                         dataState
                     )

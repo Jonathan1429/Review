@@ -10,7 +10,7 @@ data class FilterChipItemProv(
     val contentTypeSelected: ContentType
 ) {
     override fun toString(): String {
-        return "Item: ${itemContentType.name} - Selected: ${contentTypeSelected.name}"
+        return "Item_${itemContentType.name}_Selected_${contentTypeSelected.name}"
     }
 }
 
@@ -41,10 +41,10 @@ class FilterChipItemProvider: PreviewParameterProvider<FilterChipItemProv> {
 
     override fun getDisplayName(index: Int): String? {
         return when(index) {
-            0 -> "Text - Selected: Text"
-            1 -> "Text - Selected: Image"
-            2 -> "Image - Selected: Image"
-            3 -> "Image - Selected: Text"
+            0 -> "Text_Selected_Text"
+            1 -> "Text_Selected_Image"
+            2 -> "Image_Selected_Image"
+            3 -> "Image_Selected_Text"
             else -> super.getDisplayName(index)
         }
     }

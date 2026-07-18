@@ -42,10 +42,10 @@ class IconsDataProvider : PreviewParameterProvider<PropertiesFolderSelected> {
 
     override fun getDisplayName(index: Int): String? {
         return when(index) {
-            0 -> "Icons file - pos $index"
-            1 -> "Icons folder - pos $index"
-            2 -> "Icons folder - pos $index"
-            3 -> "Icons folder - pos $index"
+            0 -> "Icons_file_pos_$index"
+            1 -> "Icons_folder_pos_$index"
+            2 -> "Icons_folder_pos_$index"
+            3 -> "Icons_folder_pos_$index"
             else -> super.getDisplayName(index)
         }
     }
