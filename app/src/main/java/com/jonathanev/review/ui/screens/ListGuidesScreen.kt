@@ -55,6 +55,7 @@ import com.jonathanev.review.presentation.viewmodel.NavigationViewModel
 import com.jonathanev.review.ui.components.ItemGuide
 import com.jonathanev.review.ui.model.PropertiesGuide
 import com.jonathanev.review.ui.preview.DevicePreviews
+import com.jonathanev.review.ui.preview.providers.StudyGuidesProv
 import com.jonathanev.review.ui.preview.providers.StudyGuidesProvider
 import com.jonathanev.review.ui.theme.BorderPasos
 import com.jonathanev.review.ui.theme.ColorBotones
@@ -64,30 +65,12 @@ import com.jonathanev.review.ui.theme.cardStepBackground
 @DevicePreviews
 @Composable
 fun PreviewMovingGuide(
-    @PreviewParameter(StudyGuidesProvider::class) data: List<GuideUiModel>
+    @PreviewParameter(StudyGuidesProvider::class) data: StudyGuidesProv
 ) {
     ReviewTheme {
         ListGuidesScreen(
-            guides = data,
-            fileInteractionMode = FileInteractionMode.MovingItem,
-            onAddGuideClick = { },
-            onItemClick = { },
-            onMoveCancelGuideClick = { },
-            onMoveSuccessGuideClick = { },
-            onErrorProcess = {}
-        )
-    }
-}
-
-@DevicePreviews
-@Composable
-fun PreviewListGuides(
-    @PreviewParameter(StudyGuidesProvider::class) data: List<GuideUiModel>
-) {
-    ReviewTheme {
-        ListGuidesScreen(
-            guides = data,
-            fileInteractionMode = FileInteractionMode.Default,
+            guides = data.listStudyGuides,
+            fileInteractionMode = data.fileInteractionMode,
             onAddGuideClick = { },
             onItemClick = { },
             onMoveCancelGuideClick = { },

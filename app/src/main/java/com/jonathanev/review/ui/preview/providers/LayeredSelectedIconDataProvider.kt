@@ -44,4 +44,18 @@ class LayeredSelectedIconDataProvider: PreviewParameterProvider<IconSelected>{
                 isSelected = true
             )
         )
+
+    override fun getDisplayName(index: Int): String? {
+        return when(index) {
+            0 -> "Anchor - no seleccionado"
+            1 -> "Anchor - seleccionado"
+            2 -> "Bacteria - no seleccionada"
+            3 -> "Bacteria - seleccionada"
+            4 -> "Angellist - no seleccionado"
+            5 -> "Angelist - seleccionado"
+            6 -> "Lightbulb - no seleccionado"
+            7 -> "Lightbulb - seleccionado"
+            else -> super.getDisplayName(index)
+        }
+    }
 }

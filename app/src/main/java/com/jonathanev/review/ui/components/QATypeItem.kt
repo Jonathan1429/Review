@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,11 +15,32 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jonathanev.review.R
 import com.jonathanev.review.ui.model.QAType
+import com.jonathanev.review.ui.preview.DevicePreviews
+import com.jonathanev.review.ui.preview.providers.QATypeItemProv
+import com.jonathanev.review.ui.preview.providers.QATypeItemProvider
 import com.jonathanev.review.ui.theme.ComponentTheme
+import com.jonathanev.review.ui.theme.ReviewTheme
+
+@DevicePreviews
+@Composable
+fun PreviewQATypeItem(
+    @PreviewParameter(QATypeItemProvider::class) data: QATypeItemProv
+) {
+    ReviewTheme {
+        Row {
+            QATypeItem(
+                qaTypeItem = data.qaTypeItem,
+                typeSelected = data.typeSelected,
+                onTypeClicked = {}
+            )
+        }
+    }
+}
 
 @Composable
 fun RowScope.QATypeItem(qaTypeItem: QAType, typeSelected: QAType, onTypeClicked: (QAType) -> Unit) {

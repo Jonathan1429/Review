@@ -24,6 +24,7 @@ import com.jonathanev.review.presentation.model.FileInteractionMode
 import com.jonathanev.review.presentation.model.FolderUiModel
 import com.jonathanev.review.ui.components.GuiaItem
 import com.jonathanev.review.ui.preview.DevicePreviews
+import com.jonathanev.review.ui.preview.providers.ListFoldersDataProv
 import com.jonathanev.review.ui.preview.providers.ListFoldersDataProvider
 import com.jonathanev.review.ui.theme.ColorBotones
 import com.jonathanev.review.ui.theme.ReviewTheme
@@ -31,28 +32,13 @@ import com.skydoves.compose.stability.runtime.TraceRecomposition
 
 @DevicePreviews
 @Composable
-fun PreviewMovingItem(
-    @PreviewParameter(ListFoldersDataProvider::class) data: List<FolderUiModel>
+fun PreviewFoldersScreen(
+    @PreviewParameter(ListFoldersDataProvider::class) data: ListFoldersDataProv
 ) {
     ReviewTheme {
         ListFoldersScreen(
-            guias = data,
-            fileInteractionMode = FileInteractionMode.MovingItem,
-            onCreateFolderClick = {},
-            onFolderClick = { _, _ -> }
-        )
-    }
-}
-
-@DevicePreviews
-@Composable
-fun PreviewListFolder(
-    @PreviewParameter(ListFoldersDataProvider::class) data: List<FolderUiModel>
-) {
-    ReviewTheme {
-        ListFoldersScreen(
-            guias = data,
-            fileInteractionMode = FileInteractionMode.Default,
+            guias = data.listFolders,
+            fileInteractionMode = data.fildeInteractionMode,
             onCreateFolderClick = {},
             onFolderClick = { _, _ -> }
         )

@@ -43,16 +43,6 @@ fun PreviewShowDeletePopUp() {
     }
 }
 
-@DevicePreviews
-@Composable
-fun PreviewShowDeletePopUpWithCheck() {
-    ReviewTheme {
-        ShowDeletePopUp(
-            onContinueClick = { },
-        )
-    }
-}
-
 @Composable
 fun ShowDeletePopUp(
     onContinueClick: (Boolean) -> Unit,

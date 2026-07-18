@@ -11,7 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.dp
-import com.github.takahirom.roborazzi.captureRoboImage
 import com.jonathanev.review.presentation.model.FolderUiModel
 import com.jonathanev.review.ui.preview.providers.ListFoldersDataProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
@@ -44,23 +43,23 @@ class GuiaItemScreenshotTest(
         fun data(): Collection<Array<Any>> {
             val provider = ListFoldersDataProvider()
             val testCases = mutableListOf<Array<Any>>()
-            val guideMode = provider.values.flatten().toList()
+            val guiaItem = provider.values.toList()[0]
 
             // MODO CLARO
             testCases.add(
                 arrayOf(
-                    "${guideMode[0].folder.name}_light",
+                    "${guiaItem.listFolders[0].folder.name}_light",
                     "notnight",
-                    guideMode[0]
+                    guiaItem.listFolders[0]
                 )
             )
 
             // MODO OSCURO
             testCases.add(
                 arrayOf(
-                    "${guideMode[0].folder.name}_dark",
+                    "${guiaItem.listFolders[0].folder.name}_dark",
                     "night",
-                    guideMode[0]
+                    guiaItem.listFolders[0]
                 )
             )
 
@@ -71,6 +70,7 @@ class GuiaItemScreenshotTest(
     @Test
     fun captureVariant() {
         RuntimeEnvironment.setQualifiers(themeQualifier)
+        //val pageCount = dataState.listQuestionContent.size.coerceAtLeast(1)
 
         composeTestRule.setContent {
             ReviewTheme {
