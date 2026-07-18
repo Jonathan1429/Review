@@ -20,6 +20,7 @@ import org.robolectric.ParameterizedRobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
+import kotlin.intArrayOf
 
 @RunWith(ParameterizedRobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -27,7 +28,7 @@ import org.robolectric.annotation.GraphicsMode
     sdk = [34],
     instrumentedPackages = ["androidx.loader.content"]
 )
-class ShowDeletePopUpScreenshotTest(
+class SinFoldersScreenshotTest(
     private val variantName: String,
     private val themeQualifier: String
 ) {
@@ -81,9 +82,7 @@ class ShowDeletePopUpScreenshotTest(
                             )
                         }
 
-                        ShowDeletePopUp(
-                            onContinueClick = {}
-                        )
+                        SinFolders()
                     }
                 }
             }
