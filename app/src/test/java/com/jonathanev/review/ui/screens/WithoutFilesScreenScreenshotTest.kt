@@ -1,4 +1,4 @@
-package com.jonathanev.review.ui.components
+package com.jonathanev.review.ui.screens
 
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Column
@@ -11,8 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.dp
-import com.jonathanev.review.presentation.model.FolderUiModel
-import com.jonathanev.review.ui.preview.providers.ListFoldersDataProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.utils.captureTestOutput
 import org.junit.Rule
@@ -29,10 +27,9 @@ import org.robolectric.annotation.GraphicsMode
     sdk = [34],
     instrumentedPackages = ["androidx.loader.content"]
 )
-class GuiaItemScreenshotTest(
+class WithoutFilesScreenScreenshotTest(
     private val variantName: String,
-    private val themeQualifier: String,
-    private val data: FolderUiModel
+    private val themeQualifier: String
 ) {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
@@ -41,30 +38,23 @@ class GuiaItemScreenshotTest(
         @JvmStatic
         @ParameterizedRobolectricTestRunner.Parameters(name = "{0}")
         fun data(): Collection<Array<Any>> {
-            val provider = ListFoldersDataProvider()
             val testCases = mutableListOf<Array<Any>>()
 
-            provider.values.forEachIndexed { index, dataState ->
-                val nameScreenshot = provider.getDisplayName(index) ?: "item_$index"
-
-                // MODO CLARO
-                testCases.add(
-                    arrayOf(
-                        "${nameScreenshot}_light",
-                        "notnight",
-                        dataState
-                    )
+            // MODO CLARO
+            testCases.add(
+                arrayOf(
+                    "light",
+                    "notnight"
                 )
+            )
 
-                // MODO OSCURO
-                testCases.add(
-                    arrayOf(
-                        "${nameScreenshot}_dark",
-                        "night",
-                        dataState
-                    )
+            // MODO OSCURO
+            testCases.add(
+                arrayOf(
+                    "dark",
+                    "night"
                 )
-            }
+            )
 
             return testCases
         }
@@ -84,14 +74,16 @@ class GuiaItemScreenshotTest(
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(
-                                text = "PREVIEW: ${data.folder.name} - ${data::class.simpleName}",
+                                text = "PREVIEW: $variantName",
                                 style = MaterialTheme.typography.labelMedium,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                                 color = MaterialTheme.colorScheme.onTertiaryContainer
                             )
                         }
 
-                        GuiaItem(data) {}
+                        WithoutFilesScreen(
+                            onAddGuideClick = {}
+                        )
                     }
                 }
             }
