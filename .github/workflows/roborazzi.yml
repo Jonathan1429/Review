@@ -3,7 +3,7 @@ name: Roborazzi Automated Flow
 on:
   push:
     branches:
-      - 'feature/ui-*'
+      - '*/ui-*'
 
   pull_request:
     branches: [ dev, main ]
