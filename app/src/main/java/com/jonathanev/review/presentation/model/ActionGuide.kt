@@ -1,14 +1,16 @@
 package com.jonathanev.review.presentation.model
 
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
-@Parcelize
-sealed class ActionGuide: Parcelable {
-    @Parcelize
-    data object NONE: ActionGuide()
-    @Parcelize
-    data object CREATE: ActionGuide()
-    @Parcelize
-    data class EDIT(val nameGuide: String, val posGuide: Int): ActionGuide()
+@Serializable
+sealed class ActionGuide {
+    @Serializable
+    data object NONE : ActionGuide()
+
+    @Serializable
+    data class CREATE(val nameGuide: String, val description: String) : ActionGuide()
+
+    @Serializable
+    data class EDIT(val nameGuide: String, val description: String, val noQuestion: Int) :
+        ActionGuide()
 }

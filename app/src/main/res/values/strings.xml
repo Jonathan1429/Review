@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Review</string>
 
+    <string name="lblListQuestions">Lista de Preguntas</string>
     <!-- Layout principal -->
     <string name="btnNuevaGuia">Nueva Guia</string>
     <string name="btnAbrirGuia">Abrir Guia</string>
@@ -55,7 +56,7 @@
     <string name="lblConfirmarAccionDes">Esta acción es irreversible, borrarás por completo pregunta y respuesta. ¿Seguro deseas continuar?</string>
 
     <string name="lblWithoutFolders">Sin folders aún</string>
-    <string name="lblWithoutFoldersDes">Vamos a ayudarte a ser organizado! Aqui aprender a crear tu primer folder.</string>
+    <string name="lblWithoutFoldersDes">Vamos a ayudarte a ser organizado!\nAqui aprenderás a crear tu primer folder.</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="lblNameYourFolder">Nombra tu carpeta</string>
     <string name="lblNameYourFile">Nombra tu guia</string>
@@ -63,7 +64,7 @@
     <string name="lblPickColor">Selecciona el color de la carpeta</string>
 
     <string name="lblTitleStepOne">Paso 1: Crear</string>
-    <string name="lblDescStepOne">Presiona el botón crear carpeta para crear guias dentro de la misma.</string>
+    <string name="lblDescStepOne">Presiona el botón + para crear una carpeta.</string>
     <string name="lblTitleStepTwo">Paso 2: Personalizar</string>
     <string name="lblDescStepTwo">Ingresa el nombre de la carpeta, seleccionar un icono y un color para identificar mas fácilmente.</string>
     <string name="lblTitleStepThree">Paso 3: Organizar</string>
@@ -83,4 +84,15 @@
     <string name="withoutPreviewQuestion">No hay texto a visualizar para la pregunta actual</string>
     <string name="add_text">Añadir texto</string>
     <string name="add_image">Añadir Imagen</string>
+
+    <string name="lblStudyGuide">Guias de Estudio</string>
+    <string name="lblImage">Imagen</string>
+    <string name="lblText">Texto</string>
+    <string name="lblOf">de</string>
+    <string name="lblDelete">Borrar</string>
+    <string name="lblMoving">Moviendo</string>
+    <string name="iconAdvertencia">Advertencia</string>
+    <string name="lblTitleRepeatGuide">¿Reiniciar guia?</string>
+    <string name="lblDescriptionRepeatGuide">¿Quieres comenzar nuevamente la guia en la pregunta 1?</string>
+    <string name="lblCloseGuide">Cerrar guia</string>
 </resources>

@@ -1,0 +1,124 @@
+package com.jonathanev.review.ui.screens
+
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import com.jonathanev.review.R
+import com.jonathanev.review.presentation.model.FileInteractionMode
+import com.jonathanev.review.presentation.model.FolderUiModel
+import com.jonathanev.review.ui.components.GuiaItem
+import com.jonathanev.review.ui.preview.DevicePreviews
+import com.jonathanev.review.ui.preview.providers.ListFoldersDataProvider
+import com.jonathanev.review.ui.theme.ColorBotones
+import com.jonathanev.review.ui.theme.ReviewTheme
+import com.skydoves.compose.stability.runtime.TraceRecomposition
+
+@DevicePreviews
+@Composable
+fun PreviewMovingItem(
+    @PreviewParameter(ListFoldersDataProvider::class) data: List<FolderUiModel>
+) {
+    ReviewTheme {
+        ListFoldersScreen(
+            guias = data,
+            fileInteractionMode = FileInteractionMode.MovingItem,
+            onCreateFolderClick = {},
+            onFolderClick = { _, _ -> }
+        )
+    }
+}
+
+@DevicePreviews
+@Composable
+fun PreviewListFolder(
+    @PreviewParameter(ListFoldersDataProvider::class) data: List<FolderUiModel>
+) {
+    ReviewTheme {
+        ListFoldersScreen(
+            guias = data,
+            fileInteractionMode = FileInteractionMode.Default,
+            onCreateFolderClick = {},
+            onFolderClick = { _, _ -> }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@TraceRecomposition(tag = "Prueba")
+@Composable
+fun ListFoldersScreen(
+    guias: List<FolderUiModel>,
+    fileInteractionMode: FileInteractionMode,
+    onCreateFolderClick: () -> Unit,
+    onFolderClick: (String, FileInteractionMode) -> Unit
+) {
+    Scaffold(
+        topBar = {
+            if (fileInteractionMode == FileInteractionMode.MovingItem) {
+                CenterAlignedTopAppBar(
+                    title = {
+                        Text(stringResource(R.string.lblMoving))
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = { /* Acción Izquierda */ }) {
+                            Icon(
+                                painterResource(R.drawable.ic_cancel),
+                                contentDescription = "Cancelar"
+                            )
+                        }
+                    }
+                    /*actions = {
+                        IconButton(onClick = { /* Acción Derecha */ }) {
+                            Icon(
+                                painterResource(R.drawable.ic_success),
+                                contentDescription = "Más opciones"
+                            )
+                        }
+                    }*/
+                )
+            }
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onCreateFolderClick,
+                containerColor = ColorBotones
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Boton crear carpeta",
+                    tint = Color.White
+                )
+            }
+        }
+    ) { padding ->
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            modifier = Modifier.padding(padding)
+        ) {
+            items(guias) { guia ->
+                GuiaItem(
+                    guia,
+                    onClick = {
+                        onFolderClick(guia.folder.name, fileInteractionMode)
+                    }
+                )
+            }
+        }
+    }
+}

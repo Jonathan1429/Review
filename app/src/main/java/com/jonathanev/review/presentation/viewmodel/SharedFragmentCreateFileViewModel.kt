@@ -366,7 +366,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             return
         }
 
-        var isLastQuestion = false
+        /*var isLastQuestion = false
         if (currentState.isLastQuestion == null) {
             isLastQuestion =
                 currentState.contadorPregunta + 1 == currentState.respuestas.size
@@ -385,6 +385,18 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 isEditing = false,
                 contadorContenido = -1,
             )
+        }*/
+    }
+
+    fun addNewQuestion() {
+        _uiState.update { state ->
+            state.copy(
+                contadorPregunta = state.contadorPregunta + 1,
+                qAType = QAType.QUESTION,
+                actualUri = null,
+                isEditing = false,
+                contadorContenido = -1,
+            )
         }
     }
 
@@ -399,10 +411,10 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
     private fun handleGuideResult(
         result: GetGuideResult,
-        positionContent: Int
+        noQuestion: Int
     ) {
         when (result) {
-            is GetGuideResult.Success -> updateUiWithContent(result, positionContent)
+            is GetGuideResult.Success -> updateUiWithContent(result, noQuestion)
             GetGuideResult.InvalidFormat -> showMessage("La guia está dañada")
             GetGuideResult.NotFound -> showMessage("No se ha encontrado la guia")
             GetGuideResult.UnknownError -> showMessage("Error desconocido")
@@ -412,26 +424,26 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
     private fun updateUiWithContent(
         result: GetGuideResult.Success,
-        positionContent: Int
+        noQuestion: Int
     ) {
         val (questions, answers) = guideQuestionExtractor.map(result)
 
         _uiState.update { state ->
             state.copy(
-                contadorPregunta = calculatePosition(positionContent, answers.size),
+                contadorPregunta = calculatePosition(noQuestion, answers.size),
                 qAType = QAType.QUESTION,
                 preguntas = questions.map { it.toUi() },
                 respuestas = answers.map { it.toUi() },
-                isLastQuestion = if (positionContent == -1) false else null
+                isLastQuestion = if (noQuestion == -1) false else null
             )
         }
     }
 
-    private fun calculatePosition(position: Int, totalAnswers: Int): Int =
-        if (position == -1) totalAnswers else position
+    private fun calculatePosition(noQuestion: Int, totalAnswers: Int): Int =
+        if (noQuestion == -1) totalAnswers else noQuestion
 
     fun getObtenerDatosXML(
-        positionContent: Int,
+        posQuestion: Int,
         nameGuide: String,
         relativeGuidePath: RelativeGuidePath
     ) {
@@ -443,7 +455,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         }
 
         val result = loadGuideXml(guide, relativeGuidePath)
-        handleGuideResult(result, positionContent)
+        handleGuideResult(result, posQuestion)
     }
 
     private fun isDataValid(): Boolean {
@@ -584,4 +596,20 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             )
         }
     }
+
+    /*fun restartGuide() {
+        _uiState.update { state ->
+            state.copy(contadorPregunta = 0)
+        }
+
+        _uiState.update { state ->
+            state.copy(
+                contadorPregunta = calculatePosition(noQuestion, answers.size),
+                qAType = QAType.QUESTION,
+                preguntas = questions.map { it.toUi() },
+                respuestas = answers.map { it.toUi() },
+                isLastQuestion = if (noQuestion == -1) false else null
+            )
+        }
+    }*/
 }

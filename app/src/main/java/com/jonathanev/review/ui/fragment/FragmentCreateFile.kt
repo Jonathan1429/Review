@@ -25,7 +25,6 @@ import com.jonathanev.review.R
 import com.jonathanev.review.databinding.FragmentCreateFileBinding
 import com.jonathanev.review.domain.model.QAType
 import com.jonathanev.review.domain.model.RelativeGuidePath
-import com.jonathanev.review.domain.model.SaveGuideMode
 import com.jonathanev.review.presentation.event.CreateGuideEvent
 import com.jonathanev.review.presentation.model.ActionGuide
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
@@ -33,7 +32,7 @@ import com.jonathanev.review.presentation.viewmodel.MainToolbarViewModel
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.ui.adapter.ListCreateImagesAdapter
 import com.jonathanev.review.ui.adapter.ListCreateTextsAdapter
-import com.jonathanev.review.ui.model.ScreenDataNav
+//import com.jonathanev.review.ui.model.ScreenDataNav
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -47,7 +46,7 @@ class FragmentCreateFile : Fragment() {
 
     private lateinit var adaptListCreateTexts: ListCreateTextsAdapter
     private lateinit var adaptListCreateImages: ListCreateImagesAdapter
-    private lateinit var screenDataNav: ScreenDataNav
+    //private lateinit var screenDataNav: ScreenDataNav
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -67,9 +66,9 @@ class FragmentCreateFile : Fragment() {
             requireArguments(), "actionGuide", ActionGuide::class.java
         ) ?: ActionGuide.NONE
 
-        screenDataNav = BundleCompat.getParcelable(
+        /*screenDataNav = BundleCompat.getParcelable(
             requireArguments(), "screenData", ScreenDataNav::class.java
-        ) ?: ScreenDataNav("", "", R.drawable.ic_anchor_solid_full, R.color.black)
+        ) ?: ScreenDataNav("", "", R.drawable.ic_anchor_solid_full, R.color.black)*/
 
         val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -198,9 +197,9 @@ class FragmentCreateFile : Fragment() {
 
         val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
         when (actionGuide) {
-            ActionGuide.CREATE -> Log.i("Crear", "Se está creando un archivo")
+            is ActionGuide.CREATE -> Log.i("Crear", "Se está creando un archivo")
             is ActionGuide.EDIT -> {
-                viewModel.getObtenerDatosXML(actionGuide.posGuide, actionGuide.nameGuide, relativeGuidePath)
+                viewModel.getObtenerDatosXML(actionGuide.noQuestion, actionGuide.nameGuide, relativeGuidePath)
             }
 
             ActionGuide.NONE -> {
@@ -287,7 +286,7 @@ class FragmentCreateFile : Fragment() {
         binding.btnSaveGuide.setOnClickListener {
             val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
 
-            when (actionGuide) {
+            /*when (actionGuide) {
                 ActionGuide.CREATE -> viewModel.saveGuide(
                     nameGuide = screenDataNav.name,
                     description = screenDataNav.description,
@@ -305,7 +304,7 @@ class FragmentCreateFile : Fragment() {
                 }
 
                 ActionGuide.NONE -> Log.e("Error:", "NO se pudo guardar la guia")
-            }
+            }*/
         }
     }
 

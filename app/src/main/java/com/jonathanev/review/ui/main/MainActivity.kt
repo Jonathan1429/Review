@@ -4,13 +4,22 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -18,128 +27,140 @@ import com.jonathanev.review.databinding.ActivityMainBinding
 import com.jonathanev.review.presentation.event.MainUiEvent
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
 import com.jonathanev.review.presentation.viewmodel.MainToolbarViewModel
+import com.jonathanev.review.ui.navegation.BasicNavigation
+import com.jonathanev.review.ui.theme.ReviewTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity() {
+class MainActivity : ComponentActivity() {
     /*companion object {
         private const val REQUEST_PERMISSION_CODE = 123
     }*/
 
-    private lateinit var binding: ActivityMainBinding
+    /*private lateinit var binding: ActivityMainBinding
     private val viewModel: MainActivityViewModel by viewModels()
-    private val viewModelToolbar: MainToolbarViewModel by viewModels()
+    private val viewModelToolbar: MainToolbarViewModel by viewModels()*/
 
     @RequiresApi(api = Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        enableEdgeToEdge()
+        setContent {
+            ReviewTheme {
+                BasicNavigation()
+            }
+        }
+    }
+    //WindowCompat.setDecorFitsSystemWindows(window, false)
 
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+    /*binding = ActivityMainBinding.inflate(layoutInflater)
+setContentView(binding.root)
 
-        // Ejemplo: verificamos si ya tiene permiso
-        val hasPermission = ContextCompat.checkSelfPermission(
-            applicationContext,
-            Manifest.permission.READ_EXTERNAL_STORAGE
-        ) == PackageManager.PERMISSION_GRANTED
+//AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
 
-        //viewModel.checkIfNeedsPermission(hasPermission)
+// Ejemplo: verificamos si ya tiene permiso
+val hasPermission = ContextCompat.checkSelfPermission(
+    applicationContext,
+    Manifest.permission.READ_EXTERNAL_STORAGE
+) == PackageManager.PERMISSION_GRANTED
 
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModelToolbar.uiState.collect { uiState ->
-                    binding.barraSuperiorBack.imgvBack.visibility =
-                        if (uiState.showBack) View.VISIBLE else View.GONE
-                    binding.barraSuperiorBack.imgvSave.visibility =
-                        if (uiState.showSave) View.VISIBLE else View.GONE
-                    binding.barraSuperiorBack.btnSuccess.visibility =
-                        if (uiState.showSuccess) View.VISIBLE else View.GONE
-                    binding.barraSuperiorBack.btnCancel.visibility =
-                        if (uiState.showCancel) View.VISIBLE else View.GONE
+//viewModel.checkIfNeedsPermission(hasPermission)
+
+lifecycleScope.launch {
+    repeatOnLifecycle(Lifecycle.State.STARTED) {
+        viewModelToolbar.uiState.collect { uiState ->
+            binding.barraSuperiorBack.imgvBack.visibility =
+                if (uiState.showBack) View.VISIBLE else View.GONE
+            binding.barraSuperiorBack.imgvSave.visibility =
+                if (uiState.showSave) View.VISIBLE else View.GONE
+            binding.barraSuperiorBack.btnSuccess.visibility =
+                if (uiState.showSuccess) View.VISIBLE else View.GONE
+            binding.barraSuperiorBack.btnCancel.visibility =
+                if (uiState.showCancel) View.VISIBLE else View.GONE
+        }
+    }
+}
+
+lifecycleScope.launch {
+    repeatOnLifecycle(Lifecycle.State.STARTED) {
+        viewModel.uiEvent.collect { event ->
+            when (event) {
+                MainUiEvent.ShowCreateFoldersError -> {
+                    alertWithoutFolders()
                 }
             }
         }
-
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiEvent.collect { event ->
-                    when (event) {
-                        MainUiEvent.ShowCreateFoldersError -> {
-                            alertWithoutFolders()
-                        }
-                    }
-                }
-            }
-        }
-
-        initUI()
-        observers()
-        initListeners()
     }
+}
 
-    private fun initListeners() {
-        binding.barraSuperiorBack.imgvSave.setOnClickListener {
-            viewModelToolbar.btnSaveText()
-        }
+initUI()
+observers()
+initListeners()
+}
 
-        binding.barraSuperiorBack.imgvBack.setOnClickListener {
-            viewModelToolbar.btnBefore()
-        }
+private fun initListeners() {
+binding.barraSuperiorBack.imgvSave.setOnClickListener {
+    viewModelToolbar.btnSaveText()
+}
 
-        binding.barraSuperiorBack.btnCancel.setOnClickListener {
-            viewModelToolbar.btnCancel()
-        }
+binding.barraSuperiorBack.imgvBack.setOnClickListener {
+    viewModelToolbar.btnBefore()
+}
 
-        binding.barraSuperiorBack.btnSuccess.setOnClickListener {
-            viewModelToolbar.btnSuccess()
-        }
-    }
+binding.barraSuperiorBack.btnCancel.setOnClickListener {
+    viewModelToolbar.btnCancel()
+}
 
-    private fun observers() {
-        // Revisar permisos, sino hay se solicitan
-        /*viewModel.shouldRequestPermission.observe(this) { withoutPermission ->
-            if (withoutPermission) requestReadPermission()
-        }*/
+binding.barraSuperiorBack.btnSuccess.setOnClickListener {
+    viewModelToolbar.btnSuccess()
+}
+}
 
-        viewModelToolbar.title.observe(this) { title ->
-            binding.barraSuperiorBack.tvTituloToolbar.text = title
-        }
-    }
+private fun observers() {
+// Revisar permisos, sino hay se solicitan
+/*viewModel.shouldRequestPermission.observe(this) { withoutPermission ->
+    if (withoutPermission) requestReadPermission()
+}*/
 
-    private fun initUI() {
-        viewModelToolbar.init()
-        viewModel.createFolders()
-    }
+viewModelToolbar.title.observe(this) { title ->
+    binding.barraSuperiorBack.tvTituloToolbar.text = title
+}
+}
 
-    private fun alertWithoutFolders() {
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("Error")
-        builder.setMessage("No se pudieron crear los ficheros correctamente")
+private fun initUI() {
+viewModelToolbar.init()
+viewModel.createFolders()
+}
 
-        // Agregar un botón para cerrar el diálogo
-        builder.setPositiveButton("Reintentar") { dialog, _ ->
-            initUI()
-            dialog.dismiss() // Cerrar el diálogo
-        }
+private fun alertWithoutFolders() {
+val builder = AlertDialog.Builder(this)
+builder.setTitle("Error")
+builder.setMessage("No se pudieron crear los ficheros correctamente")
 
-        builder.setNegativeButton("Cancelar") { dialog, _ ->
-            dialog.dismiss()
-        }
+// Agregar un botón para cerrar el diálogo
+builder.setPositiveButton("Reintentar") { dialog, _ ->
+    initUI()
+    dialog.dismiss() // Cerrar el diálogo
+}
 
-        // Evitar que el diálogo se cierre al tocar fuera de él o presionar el botón de atrás
-        builder.setCancelable(false)
+builder.setNegativeButton("Cancelar") { dialog, _ ->
+    dialog.dismiss()
+}
 
-        val dialog: AlertDialog = builder.create()
-        dialog.show()
-    }
+// Evitar que el diálogo se cierre al tocar fuera de él o presionar el botón de atrás
+builder.setCancelable(false)
+
+val dialog: AlertDialog = builder.create()
+dialog.show()
+}*/
 
     /*private fun requestReadPermission() {
-        ActivityCompat.requestPermissions(
-            this,
-            arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-            REQUEST_PERMISSION_CODE
-        )
-    }*/
+ActivityCompat.requestPermissions(
+    this,
+    arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+    REQUEST_PERMISSION_CODE
+)
+}*/
+
 }

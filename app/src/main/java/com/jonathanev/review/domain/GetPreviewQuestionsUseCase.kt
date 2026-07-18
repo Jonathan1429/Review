@@ -1,5 +1,7 @@
 package com.jonathanev.review.domain
 
+import androidx.compose.ui.res.stringResource
+import androidx.core.R
 import com.jonathanev.review.domain.model.PreviewQuestionDomain
 import com.jonathanev.review.domain.model.QAItemDomain
 import com.jonathanev.review.domain.model.QuestionContentDomain
@@ -18,6 +20,7 @@ class GetPreviewQuestionsUseCase @Inject constructor(
         domainItems.forEach { domainItem ->
             var primerTextoPregunta: QuestionContentDomain.Text? = null
             var totalImgsPregunta = 0
+            var totalTextsPregunta = 0
 
             domainItem.question.content.forEach { item ->
                 when (val result =
@@ -27,6 +30,8 @@ class GetPreviewQuestionsUseCase @Inject constructor(
                     }
 
                     is QuestionContentDomain.Text -> {
+                        totalTextsPregunta++
+
                         if (primerTextoPregunta == null) {
                             primerTextoPregunta = QuestionContentDomain.Text(
                                 result.text,
@@ -38,10 +43,14 @@ class GetPreviewQuestionsUseCase @Inject constructor(
             }
 
             var totalImgsRespuesta = 0
+            var totalTextsRespuesta = 0
 
             domainItem.answer.content.forEach { item ->
                 if (item is QuestionContentDomain.Image) {
                     totalImgsRespuesta++
+                }
+                if (item is QuestionContentDomain.Text) {
+                    totalTextsRespuesta++
                 }
             }
 
@@ -51,6 +60,7 @@ class GetPreviewQuestionsUseCase @Inject constructor(
                         "No se encuentra texto a cargar",
                         emptyList()
                     ),
+                    noTexts = totalTextsPregunta + totalTextsRespuesta,
                     noImages = totalImgsPregunta + totalImgsRespuesta
                 )
             )

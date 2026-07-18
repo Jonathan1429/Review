@@ -15,7 +15,7 @@ fun String.toIconType(): IconType {
 
 fun Int.toColorType(): ColorType {
     return when (this) {
-        0 -> ColorType.White
+        0 -> ColorType.Default
         else -> ColorType.RandomColor(this)
     }
 }

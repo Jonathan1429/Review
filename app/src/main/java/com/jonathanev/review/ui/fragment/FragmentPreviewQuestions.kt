@@ -91,10 +91,10 @@ class FragmentPreviewQuestions : Fragment() {
                 Toast.LENGTH_SHORT
             ).show()
 
-            findNavController().navigate(
+            /*findNavController().navigate(
                 R.id.action_to_create_graph,
                 bundleOf("actionGuide" to ActionGuide.EDIT(folderId, -1))
-            )
+            )*/
         }
     }
 
@@ -113,10 +113,10 @@ class FragmentPreviewQuestions : Fragment() {
     }
 
     private fun goEdit(position: Int, folderId: String) {
-        findNavController().navigate(
+        /*findNavController().navigate(
             R.id.action_to_create_graph,
             bundleOf("actionGuide" to ActionGuide.EDIT(folderId, position))
-        )
+        )*/
     }
 
     private fun goReview(position: Int) {

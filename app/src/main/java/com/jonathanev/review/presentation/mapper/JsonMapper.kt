@@ -5,12 +5,12 @@ import com.jonathanev.review.domain.model.FolderScreenInfoDomain
 import com.jonathanev.review.presentation.model.ScreenDataUi
 import com.jonathanev.review.ui.mapper.toInt
 
-fun ScreenDataUi.toDomain(): FolderScreenInfoDomain {
+fun ScreenDataUi.toDomain(isDark: Boolean): FolderScreenInfoDomain {
     return FolderScreenInfoDomain(
         name = this.name,
         description = this.description,
         imgFolder = this.imgFolder.toIconKeys(),
-        color = this.color.toInt(),
+        color = this.color.toInt(isDark),
         version = this.version
     )
 }
