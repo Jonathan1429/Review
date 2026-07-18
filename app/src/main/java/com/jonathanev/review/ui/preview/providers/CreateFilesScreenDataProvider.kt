@@ -31,13 +31,13 @@ class CreateFilesScreenDataProvider : PreviewParameterProvider<PropertiesCreateF
             ),
             PropertiesCreateFilesScreen(
                 state = PropertiesFilesState(
-                    name = "",
+                    name = "Testing",
                     description = "",
                     icon = FileIconsMock[0],
                     color = ColorType.White,
                     selectedIndex = 0,
                     icons = FileIconsMock,
-                    showOverwriteDialogFile = false
+                    showOverwriteDialogFile = true
                 ),
                 fileFormMode = FileFormMode.RenameFile(
                     GuideUiModel(
