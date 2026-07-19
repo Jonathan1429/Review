@@ -215,25 +215,12 @@ fun CreateFilesPropertiesScreen(
                 Text("Aplicar")
             }
         }
-        //topBar = { TopAppBar(title = { Text("Carpetas") }) },
-        /*floatingActionButton = {
-            FloatingActionButton(
-                onClick = { onCreateFolderClick() },
-                containerColor = ColorBotones
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Boton crear carpeta",
-                    tint = Color.White
-                )
-            }
-        }*/
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.Transparent)
-                //.padding(padding)
+                .padding(padding)
                 .padding(8.dp)
         ) {
             when (fileFormMode) {

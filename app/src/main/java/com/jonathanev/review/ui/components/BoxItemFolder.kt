@@ -16,14 +16,14 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.jonathanev.review.presentation.model.IconType
 import com.jonathanev.review.ui.mapper.toInt
-import com.jonathanev.review.ui.preview.DevicePreviews
+import com.jonathanev.review.ui.preview.ComponentsPreviews
 import com.jonathanev.review.ui.preview.providers.BoxItemFolderDataProvider
 import com.jonathanev.review.ui.preview.providers.PropertiesItemFolder
 import com.jonathanev.review.ui.theme.Black
 import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.White
 
-@DevicePreviews
+@ComponentsPreviews
 @Composable
 fun PreviewBoxItemFolder(
     @PreviewParameter(BoxItemFolderDataProvider::class) data: PropertiesItemFolder

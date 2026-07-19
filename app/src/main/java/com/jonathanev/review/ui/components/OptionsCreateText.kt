@@ -21,12 +21,12 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.jonathanev.review.R
 import com.jonathanev.review.presentation.model.GuideMode
-import com.jonathanev.review.ui.preview.DevicePreviews
+import com.jonathanev.review.ui.preview.ComponentsPreviews
 import com.jonathanev.review.ui.preview.providers.OptionsCreateTextProv
 import com.jonathanev.review.ui.preview.providers.OptionsCreateTextProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
 
-@DevicePreviews
+@ComponentsPreviews
 @Composable
 fun PreviewOptionsCreateText(
     @PreviewParameter(OptionsCreateTextProvider::class) data: OptionsCreateTextProv

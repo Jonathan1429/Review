@@ -20,13 +20,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jonathanev.review.R
 import com.jonathanev.review.ui.model.QAType
-import com.jonathanev.review.ui.preview.DevicePreviews
+import com.jonathanev.review.ui.preview.ComponentsPreviews
 import com.jonathanev.review.ui.preview.providers.QATypeItemProv
 import com.jonathanev.review.ui.preview.providers.QATypeItemProvider
 import com.jonathanev.review.ui.theme.ComponentTheme
 import com.jonathanev.review.ui.theme.ReviewTheme
 
-@DevicePreviews
+@ComponentsPreviews
 @Composable
 fun PreviewQATypeItem(
     @PreviewParameter(QATypeItemProvider::class) data: QATypeItemProv

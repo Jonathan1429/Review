@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -47,6 +48,7 @@ fun WithoutFilesScreen(
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+        contentWindowInsets = androidx.compose.foundation.layout.WindowInsets.safeDrawing,
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = onAddGuideClick,
@@ -73,7 +75,7 @@ fun WithoutFilesScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(20.dp)
+                    .padding(horizontal = 20.dp)
                     .padding(padding)
                     .align(Alignment.Center),
                 horizontalAlignment = Alignment.CenterHorizontally,

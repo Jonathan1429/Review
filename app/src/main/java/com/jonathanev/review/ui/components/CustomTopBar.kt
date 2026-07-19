@@ -19,12 +19,12 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.jonathanev.review.R
 import com.jonathanev.review.presentation.model.GuideMode
-import com.jonathanev.review.ui.preview.DevicePreviews
+import com.jonathanev.review.ui.preview.ComponentsPreviews
 import com.jonathanev.review.ui.preview.providers.CustomTopBarProv
 import com.jonathanev.review.ui.preview.providers.CustomTopBarProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
 
-@DevicePreviews
+@ComponentsPreviews
 @Composable
 fun PreviewCustomTopBar(
     @PreviewParameter(CustomTopBarProvider::class) data: CustomTopBarProv

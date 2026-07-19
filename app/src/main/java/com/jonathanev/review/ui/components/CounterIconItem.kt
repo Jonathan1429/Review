@@ -12,13 +12,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.jonathanev.review.ui.preview.DevicePreviews
+import com.jonathanev.review.ui.preview.ComponentsPreviews
 import com.jonathanev.review.ui.preview.providers.CounterIconItemProvider
 import com.jonathanev.review.ui.preview.providers.CounterItem
 import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.TextColorSecondary
 
-@DevicePreviews
+@ComponentsPreviews
 @Composable
 fun PreviewCounterIconItem(
     @PreviewParameter(CounterIconItemProvider::class) data: CounterItem

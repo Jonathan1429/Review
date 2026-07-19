@@ -25,14 +25,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jonathanev.review.R
 import com.jonathanev.review.ui.model.ContentType
-import com.jonathanev.review.ui.preview.DevicePreviews
+import com.jonathanev.review.ui.preview.ComponentsPreviews
 import com.jonathanev.review.ui.preview.providers.FilterChipItemProv
 import com.jonathanev.review.ui.preview.providers.FilterChipItemProvider
 import com.jonathanev.review.ui.theme.ComponentTheme
 import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.TextColorSecondary
 
-@DevicePreviews
+@ComponentsPreviews
 @Composable
 fun PreviewFilterChipItem(
     @PreviewParameter(FilterChipItemProvider::class) data: FilterChipItemProv

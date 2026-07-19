@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jonathanev.review.presentation.model.FolderUiModel
 import com.jonathanev.review.ui.mapper.toDrawableRes
-import com.jonathanev.review.ui.preview.DevicePreviews
+import com.jonathanev.review.ui.preview.ComponentsPreviews
 import com.jonathanev.review.ui.preview.providers.ListFoldersDataProv
 import com.jonathanev.review.ui.preview.providers.ListFoldersDataProvider
 import com.jonathanev.review.ui.theme.Black
@@ -37,7 +37,7 @@ import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.White
 import com.jonathanev.review.ui.theme.cardStepBackground
 
-@DevicePreviews
+@ComponentsPreviews
 @Composable
 fun PreviewGuiaItem(
     @PreviewParameter(ListFoldersDataProvider::class) data: ListFoldersDataProv

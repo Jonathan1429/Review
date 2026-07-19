@@ -1,15 +1,13 @@
 package com.jonathanev.review.ui.screens
 
 import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -24,7 +22,6 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -39,11 +36,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jonathanev.review.R
 import com.jonathanev.review.presentation.model.FileInteractionMode
@@ -55,14 +49,14 @@ import com.jonathanev.review.presentation.viewmodel.FragmentListGuidesViewModel
 import com.jonathanev.review.presentation.viewmodel.NavigationViewModel
 import com.jonathanev.review.ui.components.ItemGuide
 import com.jonathanev.review.ui.model.PropertiesGuide
+import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.StudyGuidesProv
 import com.jonathanev.review.ui.preview.providers.StudyGuidesProvider
 import com.jonathanev.review.ui.theme.BorderPasos
 import com.jonathanev.review.ui.theme.ColorBotones
 import com.jonathanev.review.ui.theme.ReviewTheme
-import com.jonathanev.review.ui.theme.cardStepBackground
 
-@Preview
+@DevicePreviews
 @Composable
 fun PreviewMovingGuide(
     @PreviewParameter(StudyGuidesProvider::class) data: StudyGuidesProv
@@ -189,7 +183,7 @@ fun ListGuidesScreen(
         contentWindowInsets = if (fileInteractionMode == FileInteractionMode.MovingItem) {
             androidx.compose.material3.ScaffoldDefaults.contentWindowInsets
         } else {
-            androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0)
+            androidx.compose.foundation.layout.WindowInsets.safeDrawing
         },
         topBar = {
             if (fileInteractionMode == FileInteractionMode.MovingItem) {
@@ -197,7 +191,6 @@ fun ListGuidesScreen(
                     title = {
                         Text(stringResource(R.string.lblMoving))
                     },
-                    windowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
                     navigationIcon = {
                         IconButton(onClick = onMoveCancelGuideClick) {
                             Icon(
@@ -240,24 +233,11 @@ fun ListGuidesScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .background(cardStepBackground)
+                .padding(vertical = 16.dp, horizontal = 16.dp)
         ) {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 20.dp)
+                modifier = Modifier.fillMaxSize()
             ) {
-                Spacer(modifier = Modifier.height(32.dp))
-
-                Text(
-                    text = stringResource(R.string.lblStudyGuide),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = 26.sp,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
                 LazyColumn(
                     modifier = Modifier.fillMaxWidth(),
                 ) {

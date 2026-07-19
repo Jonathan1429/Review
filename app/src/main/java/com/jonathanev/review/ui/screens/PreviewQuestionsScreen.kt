@@ -87,15 +87,6 @@ fun PreviewQuestionsScreen(
     onCreateQuestionClick: () -> Unit
 ) {
     Scaffold(
-        /*topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(stringResource(R.string.lblListQuestions))
-                },
-                //windowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
-
-            )
-        },*/
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onCreateQuestionClick,
