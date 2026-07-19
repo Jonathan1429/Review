@@ -93,7 +93,8 @@ class PreviewQuestionsScreenshotTest(
                         PreviewQuestionsScreen(
                             data,
                             onEditingGuideClick = { },
-                            onPlayGuideClick = {}
+                            onPlayGuideClick = {},
+                            onCreateQuestionClick = {}
                         )
                     }
                 }
