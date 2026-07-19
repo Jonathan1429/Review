@@ -22,7 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.jonathanev.review.ui.preview.DevicePreviews
+import com.jonathanev.review.ui.preview.ComponentsPreviews
 import com.jonathanev.review.ui.preview.providers.PasoPreviewData
 import com.jonathanev.review.ui.preview.providers.PasosDataProvider
 import com.jonathanev.review.ui.theme.BorderPasos
@@ -32,7 +32,7 @@ import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.TextGray
 import com.jonathanev.review.ui.theme.cardStepBackground
 
-@DevicePreviews
+@ComponentsPreviews
 @Composable
 fun PreviewBasePasos(
     @PreviewParameter(PasosDataProvider::class) data: PasoPreviewData

@@ -14,9 +14,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.sp
 import com.jonathanev.review.R
-import com.jonathanev.review.ui.preview.DevicePreviews
+import com.jonathanev.review.ui.preview.ComponentsPreviews
 
-@DevicePreviews
+@ComponentsPreviews
 @Composable
 fun PreviewCustomBoxCreateText() {
     CustomBoxCreateText(

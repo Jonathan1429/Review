@@ -10,11 +10,11 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.jonathanev.review.ui.mapper.toDrawable
 import com.jonathanev.review.ui.model.ContentType
-import com.jonathanev.review.ui.preview.DevicePreviews
+import com.jonathanev.review.ui.preview.ComponentsPreviews
 import com.jonathanev.review.ui.preview.providers.FilterTypeItemProv
 import com.jonathanev.review.ui.preview.providers.FilterTypeItemProvider
 
-@DevicePreviews
+@ComponentsPreviews
 @Composable
 fun PreviewFilterTypeItem(
     @PreviewParameter(FilterTypeItemProvider::class) data: FilterTypeItemProv

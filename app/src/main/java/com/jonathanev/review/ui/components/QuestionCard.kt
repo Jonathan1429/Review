@@ -31,7 +31,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jonathanev.review.R
-import com.jonathanev.review.ui.preview.DevicePreviews
+import com.jonathanev.review.ui.preview.ComponentsPreviews
 import com.jonathanev.review.ui.preview.providers.QuestionItemProv
 import com.jonathanev.review.ui.preview.providers.QuestionItemProvider
 import com.jonathanev.review.ui.theme.CircleContentSVG
@@ -39,7 +39,7 @@ import com.jonathanev.review.ui.theme.IconsCustom
 import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.cardStepBackground
 
-@DevicePreviews
+@ComponentsPreviews
 @Composable
 fun PreviewQuestionCard(
     @PreviewParameter(QuestionItemProvider::class) data: QuestionItemProv

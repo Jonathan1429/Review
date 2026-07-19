@@ -17,10 +17,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.jonathanev.review.R
-import com.jonathanev.review.ui.preview.DevicePreviews
+import com.jonathanev.review.ui.preview.ComponentsPreviews
 import com.jonathanev.review.ui.theme.ReviewTheme
 
-@DevicePreviews
+@ComponentsPreviews
 @Composable
 fun PreviewNavigationPagerBar() {
     ReviewTheme {

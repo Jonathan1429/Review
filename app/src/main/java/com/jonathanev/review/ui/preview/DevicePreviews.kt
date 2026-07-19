@@ -21,3 +21,15 @@ import androidx.compose.ui.tooling.preview.Preview
 )
 //@Preview(name = "Idioma Español", locale = "es")
 annotation class DevicePreviews
+
+@Preview(
+    name = "Light Mode",
+    group = "UI Devices",
+    showBackground = true
+)
+@Preview(
+    name = "Dark Mode",
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    showBackground = true
+)
+annotation class ComponentsPreviews

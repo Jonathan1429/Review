@@ -10,12 +10,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.jonathanev.review.presentation.model.IconType
-import com.jonathanev.review.ui.preview.DevicePreviews
+import com.jonathanev.review.ui.preview.ComponentsPreviews
 import com.jonathanev.review.ui.preview.providers.IconsDataProvider
 import com.jonathanev.review.ui.preview.providers.PropertiesFolderSelected
 import com.jonathanev.review.ui.theme.ReviewTheme
 
-@DevicePreviews
+@ComponentsPreviews
 @Composable
 fun PreviewIconsForSelected(
     @PreviewParameter(IconsDataProvider::class) data: PropertiesFolderSelected

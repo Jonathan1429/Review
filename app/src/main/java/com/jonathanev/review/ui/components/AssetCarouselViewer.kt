@@ -31,12 +31,12 @@ import com.jonathanev.review.R
 import com.jonathanev.review.presentation.model.GuideMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.ui.model.ContentType
-import com.jonathanev.review.ui.preview.DevicePreviews
+import com.jonathanev.review.ui.preview.ComponentsPreviews
 import com.jonathanev.review.ui.preview.providers.DataMediaContentPagerProvider
 import com.jonathanev.review.ui.preview.providers.MediaContentPagerProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
 
-@DevicePreviews
+@ComponentsPreviews
 @Composable
 fun PreviewAssetCarouselViewer(
     @PreviewParameter(MediaContentPagerProvider::class) data: DataMediaContentPagerProvider

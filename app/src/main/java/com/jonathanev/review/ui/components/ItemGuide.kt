@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jonathanev.review.R
 import com.jonathanev.review.presentation.model.GuideUiModel
-import com.jonathanev.review.ui.preview.DevicePreviews
+import com.jonathanev.review.ui.preview.ComponentsPreviews
 import com.jonathanev.review.ui.preview.providers.ItemGuideProvider
 import com.jonathanev.review.ui.theme.ColorBotones
 import com.jonathanev.review.ui.theme.ReviewTheme
@@ -35,7 +35,7 @@ import com.jonathanev.review.ui.theme.TextGray
 import com.jonathanev.review.ui.theme.cardListBackground
 import com.jonathanev.review.ui.theme.cardStepBackground
 
-@DevicePreviews
+@ComponentsPreviews
 @Composable
 fun PreviewItemGuid3(
     @PreviewParameter(ItemGuideProvider::class) data: GuideUiModel

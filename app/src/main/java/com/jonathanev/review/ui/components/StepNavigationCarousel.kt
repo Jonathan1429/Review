@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jonathanev.review.presentation.model.GuideMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
-import com.jonathanev.review.ui.preview.DevicePreviews
+import com.jonathanev.review.ui.preview.ComponentsPreviews
 import com.jonathanev.review.ui.preview.providers.StepNavigationCarouselProv
 import com.jonathanev.review.ui.preview.providers.StepNavigationCarouselProviders
 import com.jonathanev.review.ui.theme.BorderPasos
@@ -49,7 +49,7 @@ import com.jonathanev.review.ui.theme.degradientColor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-@DevicePreviews
+@ComponentsPreviews
 @Composable
 fun PreviewCarousel(
     @PreviewParameter(StepNavigationCarouselProviders::class) data: StepNavigationCarouselProv

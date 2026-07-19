@@ -17,13 +17,13 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.jonathanev.review.R
 import com.jonathanev.review.presentation.model.IconType
-import com.jonathanev.review.ui.preview.DevicePreviews
+import com.jonathanev.review.ui.preview.ComponentsPreviews
 import com.jonathanev.review.ui.preview.providers.IconSelected
 import com.jonathanev.review.ui.preview.providers.LayeredSelectedIconDataProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.iconBackground
 
-@DevicePreviews
+@ComponentsPreviews
 @Composable
 fun PreviewLayeredSelectedIcon(
     @PreviewParameter(LayeredSelectedIconDataProvider::class) data: IconSelected
