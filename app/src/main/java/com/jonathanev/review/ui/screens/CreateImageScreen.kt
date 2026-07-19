@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -102,45 +103,50 @@ fun CreateImageScreen(
     selectedImage: () -> Unit,
     imageUploaded: () -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        ElevatedCard(
+    Scaffold(
+        modifier = Modifier.fillMaxSize()
+    ) { padding ->
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
-            shape = RoundedCornerShape(42.dp),
-            colors = CardDefaults.elevatedCardColors(
-                containerColor = cardStepBackground
-            ),
-            elevation = CardDefaults.elevatedCardElevation(
-                defaultElevation = 8.dp
-            )
+                .padding(padding),
+            contentAlignment = Alignment.Center
         ) {
-            Column(
+            ElevatedCard(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(bottom = 16.dp)
+                    .padding(16.dp),
+                shape = RoundedCornerShape(42.dp),
+                colors = CardDefaults.elevatedCardColors(
+                    containerColor = cardStepBackground
+                ),
+                elevation = CardDefaults.elevatedCardElevation(
+                    defaultElevation = 8.dp
+                )
             ) {
-                if (guideMode !is GuideMode.Review) {
-                    OptionsCreateImage(
-                        uriImage = uriImage,
-                        selectImage = selectedImage,
-                        imageUploaded = imageUploaded
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = 16.dp)
+                ) {
+                    if (guideMode !is GuideMode.Review) {
+                        OptionsCreateImage(
+                            uriImage = uriImage,
+                            selectImage = selectedImage,
+                            imageUploaded = imageUploaded
+                        )
+                    }
+                    CustomBoxCreateImage(
+                        modifier = Modifier.then(
+                            if (guideMode !is GuideMode.Review) {
+                                Modifier
+                            } else {
+                                Modifier.padding(20.dp)
+                            }
+                        ),
+                        uriImage
                     )
                 }
-                CustomBoxCreateImage(
-                    modifier = Modifier.then(
-                        if (guideMode !is GuideMode.Review) {
-                            Modifier
-                        } else {
-                            Modifier.padding(20.dp)
-                        }
-                    ),
-                    uriImage
-                )
             }
         }
     }

@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -277,94 +278,99 @@ fun CreateTextScreen(
     onColorSelected: (Color) -> Unit,
     onBackNav: () -> Unit
 ) {
-    Box(
-        modifier = modifier
-            .fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        ElevatedCard(
-            modifier = Modifier
+    Scaffold(
+        modifier = Modifier.fillMaxSize()
+    ) { padding ->
+        Box(
+            modifier = modifier
                 .fillMaxSize()
-                .padding(16.dp),
-            shape = RoundedCornerShape(42.dp),
-            colors = CardDefaults.elevatedCardColors(
-                containerColor = degradientColor
-            ),
-            elevation = CardDefaults.elevatedCardElevation(
-                defaultElevation = 8.dp
-            )
+                .padding(padding),
+            contentAlignment = Alignment.Center
         ) {
-            Column(
+            ElevatedCard(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(bottom = 16.dp)
+                    .padding(16.dp),
+                shape = RoundedCornerShape(42.dp),
+                colors = CardDefaults.elevatedCardColors(
+                    containerColor = degradientColor
+                ),
+                elevation = CardDefaults.elevatedCardElevation(
+                    defaultElevation = 8.dp
+                )
             ) {
-                OptionsCreateText(
-                    guideMode = guideMode,
-                    textValue = textValue.annotatedString,
-                    selectedColor = selectedColor,
-                    onClearColorClick = onClearColorClick,
-                    onSelectColorClick = onSelectColorClick,
-                    onSaveTextClick = {
-                        saveCurrentQuestion(
-                            textFieldValue = textValue,
-                            onSaveContent = { text, colors -> onSaveText(text, colors) }
-                        )
-                    },
-                    onBackNav = onBackNav
-                )
-                CustomBoxCreateText(
-                    modifier = Modifier.then(
-                        if (guideMode !is GuideMode.Review) {
-                            Modifier
-                        } else {
-                            Modifier.padding(20.dp)
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = 16.dp)
+                ) {
+                    OptionsCreateText(
+                        guideMode = guideMode,
+                        textValue = textValue.annotatedString,
+                        selectedColor = selectedColor,
+                        onClearColorClick = onClearColorClick,
+                        onSelectColorClick = onSelectColorClick,
+                        onSaveTextClick = {
+                            saveCurrentQuestion(
+                                textFieldValue = textValue,
+                                onSaveContent = { text, colors -> onSaveText(text, colors) }
+                            )
+                        },
+                        onBackNav = onBackNav
+                    )
+                    CustomBoxCreateText(
+                        modifier = Modifier.then(
+                            if (guideMode !is GuideMode.Review) {
+                                Modifier
+                            } else {
+                                Modifier.padding(20.dp)
+                            }
+                        ),
+                        textValue = textValue,
+                        hint = textValue.text.isNotEmpty(),
+                        onTextValueChange = { actualText ->
+                            val oldText = textValue.text
+                            val newText = actualText.text
+                            val isSingleCharacterAdded = (newText.length - oldText.length) == 1
+                            val cursorPosition = actualText.selection.start
+                            val addedChar =
+                                if (cursorPosition > 0 && cursorPosition <= newText.length) {
+                                    newText[cursorPosition - 1]
+                                } else {
+                                    null
+                                }
+
+                            val response =
+                                if (isSingleCharacterAdded && addedChar != '\n' && selectedColor != colorInitial) {
+                                    val newAnnotatedString = applyColorToCharacter(
+                                        currentAnnotatedString = actualText.annotatedString,
+                                        cursorPosition = cursorPosition,
+                                        color = selectedColor
+                                    )
+
+                                    actualText.copy(annotatedString = newAnnotatedString)
+                                } else {
+                                    actualText
+                                }
+
+                            onChangeTextValue(response)
                         }
-                    ),
-                    textValue = textValue,
-                    hint = textValue.text.isNotEmpty(),
-                    onTextValueChange = { actualText ->
-                        val oldText = textValue.text
-                        val newText = actualText.text
-                        val isSingleCharacterAdded = (newText.length - oldText.length) == 1
-                        val cursorPosition = actualText.selection.start
-                        val addedChar =
-                            if (cursorPosition > 0 && cursorPosition <= newText.length) {
-                                newText[cursorPosition - 1]
-                            } else {
-                                null
-                            }
+                    )
+                }
 
-                        val response =
-                            if (isSingleCharacterAdded && addedChar != '\n' && selectedColor != colorInitial) {
-                                val newAnnotatedString = applyColorToCharacter(
-                                    currentAnnotatedString = actualText.annotatedString,
-                                    cursorPosition = cursorPosition,
-                                    color = selectedColor
-                                )
-
-                                actualText.copy(annotatedString = newAnnotatedString)
-                            } else {
-                                actualText
-                            }
-
-                        onChangeTextValue(response)
-                    }
-                )
-            }
-
-            if (showDialog) {
-                ColorPickerDialog(
-                    colorInitial = colorInitial,
-                    selectedColor = selectedColor,
-                    onDismissRequest = onDissmissDialog,
-                    onColorSelected = { colorActual ->
-                        onColorSelected(colorActual)
-                    },
-                    onDefaultClick = {
-                        onColorSelected(colorInitial)
-                    }
-                )
+                if (showDialog) {
+                    ColorPickerDialog(
+                        colorInitial = colorInitial,
+                        selectedColor = selectedColor,
+                        onDismissRequest = onDissmissDialog,
+                        onColorSelected = { colorActual ->
+                            onColorSelected(colorActual)
+                        },
+                        onDefaultClick = {
+                            onColorSelected(colorInitial)
+                        }
+                    )
+                }
             }
         }
     }

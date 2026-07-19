@@ -1,6 +1,8 @@
 package com.jonathanev.review.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -55,10 +57,11 @@ fun ListFoldersScreen(
     onFolderClick: (String, FileInteractionMode) -> Unit
 ) {
     Scaffold(
+        modifier = Modifier.background(Color.Red),
         contentWindowInsets = if (fileInteractionMode == FileInteractionMode.MovingItem) {
             androidx.compose.material3.ScaffoldDefaults.contentWindowInsets
         } else {
-            androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0)
+            androidx.compose.foundation.layout.WindowInsets.safeDrawing
         },
         topBar = {
             if (fileInteractionMode == FileInteractionMode.MovingItem) {
@@ -66,7 +69,6 @@ fun ListFoldersScreen(
                     title = {
                         Text(stringResource(R.string.lblMoving))
                     },
-                    windowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
                     navigationIcon = {
                         IconButton(onClick = { /* Acción Izquierda */ }) {
                             Icon(
