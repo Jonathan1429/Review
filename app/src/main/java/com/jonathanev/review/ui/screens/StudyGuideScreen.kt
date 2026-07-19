@@ -1,5 +1,7 @@
 package com.jonathanev.review.ui.screens
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -41,6 +44,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jonathanev.review.R
 import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.model.SaveGuideMode
+import com.jonathanev.review.presentation.event.CreateGuideEvent
 import com.jonathanev.review.presentation.model.GuideMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
@@ -101,6 +105,7 @@ fun FillingGuideRoute(
     onActionGuideNone: () -> Unit,
     onCloseGuide: () -> Unit
 ) {
+    val context = LocalContext.current
     var typeSelected by rememberSaveable { mutableStateOf(QAType.QUESTION) }
     val typeForSelected = listOf(QAType.QUESTION, QAType.ANSWER)
     var mediaSelected by rememberSaveable { mutableStateOf(ContentType.TEXT) }
@@ -138,6 +143,29 @@ fun FillingGuideRoute(
                     nameGuide = guideMode.nameGuide,
                     relativeGuidePath = relativeGuidePath
                 )
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.createGuideEvent.collect { event ->
+            when (event) {
+                CreateGuideEvent.WithoutText ->
+                    showToast("Debes tener al menos un texto", context)
+
+                CreateGuideEvent.WithoutTextQA ->
+                    showToast("Debes tener al menos un texto en pregunta/respuesta", context)
+
+                is CreateGuideEvent.ErrorGuideCreated -> {
+                    showToast(event.text, context)
+                    onCloseGuide()
+                }
+
+                is CreateGuideEvent.SuccessGuideCreated -> {
+                    viewModel.initUIState()
+                    showToast(event.text, context)
+                    onCloseGuide()
+                }
             }
         }
     }
@@ -206,7 +234,7 @@ fun FillingGuideRoute(
         onAssetClick = { typeContent -> onAssetClick(typeContent) },
         onAddAssetClick = { onAddAssetClick(mediaSelected) },
         onAddQuestion = {
-            viewModel.addNewQuestion()
+            viewModel.nextQuestion()
         },
         onCloseGuide = {
             when (guideMode) {
@@ -426,4 +454,8 @@ private fun NewQuestionIcon(modifier: Modifier = Modifier) {
                 .padding(1.dp)
         )
     }
+}
+
+private fun showToast(text: String, context: Context) {
+    Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
 }
