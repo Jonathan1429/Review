@@ -35,7 +35,6 @@ import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.degradientColor
 
-// Con Texto
 @DevicePreviews
 @Composable
 fun PreviewReviewWithTexto() {

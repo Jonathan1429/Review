@@ -233,7 +233,7 @@ fun CreateFilesPropertiesScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.Transparent)
-                .padding(padding)
+                //.padding(padding)
                 .padding(8.dp)
         ) {
             when (fileFormMode) {

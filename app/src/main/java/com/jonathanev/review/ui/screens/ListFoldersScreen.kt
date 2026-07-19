@@ -55,12 +55,18 @@ fun ListFoldersScreen(
     onFolderClick: (String, FileInteractionMode) -> Unit
 ) {
     Scaffold(
+        contentWindowInsets = if (fileInteractionMode == FileInteractionMode.MovingItem) {
+            androidx.compose.material3.ScaffoldDefaults.contentWindowInsets
+        } else {
+            androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0)
+        },
         topBar = {
             if (fileInteractionMode == FileInteractionMode.MovingItem) {
                 CenterAlignedTopAppBar(
                     title = {
                         Text(stringResource(R.string.lblMoving))
                     },
+                    windowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
                     navigationIcon = {
                         IconButton(onClick = { /* Acción Izquierda */ }) {
                             Icon(
@@ -69,14 +75,6 @@ fun ListFoldersScreen(
                             )
                         }
                     }
-                    /*actions = {
-                        IconButton(onClick = { /* Acción Derecha */ }) {
-                            Icon(
-                                painterResource(R.drawable.ic_success),
-                                contentDescription = "Más opciones"
-                            )
-                        }
-                    }*/
                 )
             }
         },
