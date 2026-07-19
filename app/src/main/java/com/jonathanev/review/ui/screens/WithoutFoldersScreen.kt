@@ -37,7 +37,6 @@ fun WithoutFoldersScreen(
     onNavCreateFilesProperties: () -> Unit
 ) {
     Scaffold(
-        //topBar = { TopAppBar(title = { Text("Carpetas") }) },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onNavCreateFilesProperties,

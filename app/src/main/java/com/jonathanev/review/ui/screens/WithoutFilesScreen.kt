@@ -45,33 +45,31 @@ fun WithoutFilesScreenPreview() {
 fun WithoutFilesScreen(
     onAddGuideClick: () -> Unit
 ) {
-    Box(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            floatingActionButton = {
-                ExtendedFloatingActionButton(
-                    onClick = onAddGuideClick,
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    shape = RoundedCornerShape(16.dp),
-                    icon = {
-                        Icon(
-                            painter = painterResource(R.drawable.plus),
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimary
-                        )
-                    },
-                    text = {
-                        Text(
-                            stringResource(R.string.btnAddGuide),
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimary
-                        )
-                    }
-                )
-            }
-        ) { padding ->
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                onClick = onAddGuideClick,
+                containerColor = MaterialTheme.colorScheme.primary,
+                shape = RoundedCornerShape(16.dp),
+                icon = {
+                    Icon(
+                        painter = painterResource(R.drawable.plus),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
+                },
+                text = {
+                    Text(
+                        stringResource(R.string.btnAddGuide),
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+            )
+        }
+    ) { padding ->
+        Box {
             Column(
                 modifier = Modifier
                     .fillMaxSize()

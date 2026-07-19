@@ -40,6 +40,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -54,7 +55,6 @@ import com.jonathanev.review.presentation.viewmodel.FragmentListGuidesViewModel
 import com.jonathanev.review.presentation.viewmodel.NavigationViewModel
 import com.jonathanev.review.ui.components.ItemGuide
 import com.jonathanev.review.ui.model.PropertiesGuide
-import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.StudyGuidesProv
 import com.jonathanev.review.ui.preview.providers.StudyGuidesProvider
 import com.jonathanev.review.ui.theme.BorderPasos
@@ -62,7 +62,7 @@ import com.jonathanev.review.ui.theme.ColorBotones
 import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.cardStepBackground
 
-@DevicePreviews
+@Preview
 @Composable
 fun PreviewMovingGuide(
     @PreviewParameter(StudyGuidesProvider::class) data: StudyGuidesProv
@@ -186,12 +186,18 @@ fun ListGuidesScreen(
     onErrorProcess: () -> Unit
 ) {
     Scaffold(
+        contentWindowInsets = if (fileInteractionMode == FileInteractionMode.MovingItem) {
+            androidx.compose.material3.ScaffoldDefaults.contentWindowInsets
+        } else {
+            androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0)
+        },
         topBar = {
             if (fileInteractionMode == FileInteractionMode.MovingItem) {
                 CenterAlignedTopAppBar(
                     title = {
                         Text(stringResource(R.string.lblMoving))
                     },
+                    windowInsets = androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0),
                     navigationIcon = {
                         IconButton(onClick = onMoveCancelGuideClick) {
                             Icon(
