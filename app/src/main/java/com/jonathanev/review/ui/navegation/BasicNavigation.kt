@@ -14,13 +14,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
-import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.presentation.event.MainUiEvent
 import com.jonathanev.review.presentation.model.FileFormMode
 import com.jonathanev.review.presentation.model.FileInteractionMode
 import com.jonathanev.review.presentation.model.GuideMode
 import com.jonathanev.review.presentation.model.GuideUiModel
 import com.jonathanev.review.presentation.model.QuestionContentUi
+import com.jonathanev.review.presentation.model.RelativeGuidePath
 import com.jonathanev.review.presentation.viewmodel.CreateFilesViewModel
 import com.jonathanev.review.presentation.viewmodel.FragmentListGuidesViewModel
 import com.jonathanev.review.presentation.viewmodel.FragmentRepasarViewModel
@@ -75,13 +75,14 @@ fun BasicNavigation() {
             )
         },
         entryProvider = entryProvider {
-            val viewModel: MainActivityViewModel = viewModel()
-            val navigationViewModel: NavigationViewModel = viewModel()
-            val context = LocalContext.current
-
-            val folders = viewModel.folders.collectAsStateWithLifecycle().value
+            val viewModelSharedCreateFile: SharedFragmentCreateFileViewModel = viewModel()
 
             entry<AppRoutes.MainScreen> { mode ->
+                val viewModel: MainActivityViewModel = viewModel()
+                val navigationViewModel: NavigationViewModel = viewModel()
+                val context = LocalContext.current
+
+                val folders = viewModel.folders.collectAsStateWithLifecycle().value
                 LaunchedEffect(Unit) {
                     viewModel.createFolders()
                     viewModel.getAllFolders()
@@ -204,13 +205,13 @@ fun BasicNavigation() {
                 )
             }
             entry<AppRoutes.FillingGuideScreen> { action ->
-                val viewModel: SharedFragmentCreateFileViewModel = viewModel()
+                val context = LocalContext.current
                 val viewModelNavigation: NavigationViewModel = viewModel()
                 val relativeGuidePath =
                     viewModelNavigation.relativeGuidePath.collectAsStateWithLifecycle().value
 
                 FillingGuideRoute(
-                    viewModel = viewModel,
+                    viewModel = viewModelSharedCreateFile,
                     guideMode = action.guideMode,
                     relativeGuidePath = RelativeGuidePath(value = relativeGuidePath),
                     onAssetClick = { typeContent ->
@@ -290,12 +291,10 @@ fun BasicNavigation() {
                 )
             }
             entry<AppRoutes.CreateImageScreen> { imageContent ->
-                val viewModel: SharedFragmentCreateFileViewModel = viewModel()
-
                 CreateImageRoute(
                     guideMode = imageContent.guideMode,
                     contentType = imageContent.contentType,
-                    viewModel = viewModel,
+                    viewModel = viewModelSharedCreateFile,
                     imageUploaded = {
                         backStack.removeLastOrNull()
                     }
@@ -303,11 +302,9 @@ fun BasicNavigation() {
             }
 
             entry<AppRoutes.CreateTextScreen> { textContent ->
-                val viewModel: SharedFragmentCreateFileViewModel = viewModel()
-
                 CreateTextRoute(
                     guideMode = textContent.guideMode,
-                    viewModel = viewModel,
+                    viewModel = viewModelSharedCreateFile,
                     contentType = textContent.contentType,
                     onSaveText = { backStack.removeLastOrNull() },
                     onBackNav = { backStack.removeLastOrNull() }

@@ -197,7 +197,7 @@ class FragmentCreateFile : Fragment() {
         when (actionGuide) {
             is ActionGuide.CREATE -> Log.i("Crear", "Se está creando un archivo")
             is ActionGuide.EDIT -> {
-                viewModel.getObtenerDatosXML(actionGuide.noQuestion, actionGuide.nameGuide, relativeGuidePath)
+                //viewModel.getObtenerDatosXML(actionGuide.noQuestion, actionGuide.nameGuide, relativeGuidePath)
             }
 
             ActionGuide.NONE -> {

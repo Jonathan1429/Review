@@ -303,7 +303,7 @@ fun CreateTextScreen(
                     onClearColorClick = onClearColorClick,
                     onSelectColorClick = onSelectColorClick,
                     onSaveTextClick = {
-                        val a = saveCurrentQuestion(
+                        saveCurrentQuestion(
                             textFieldValue = textValue,
                             onSaveContent = { text, colors -> onSaveText(text, colors) }
                         )

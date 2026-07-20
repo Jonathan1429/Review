@@ -1,5 +1,6 @@
 package com.jonathanev.review.presentation.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.domain.GetGuideXmlDataUseCase
@@ -12,8 +13,6 @@ import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.QAType
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
-import com.jonathanev.review.domain.model.RelativeGuidePath
-import com.jonathanev.review.domain.model.SaveGuideMode
 import com.jonathanev.review.domain.repository.UserPreferencesRepository
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.SaveGuideErrors
@@ -24,7 +23,10 @@ import com.jonathanev.review.presentation.event.CreateGuideEvent.SuccessGuideCre
 import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.ColorRangeUi
+import com.jonathanev.review.presentation.model.GuideMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
+import com.jonathanev.review.presentation.model.RelativeGuidePath
+import com.jonathanev.review.presentation.model.SaveGuideMode
 import com.jonathanev.review.presentation.state.GuideUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -49,6 +51,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     private val guideQuestionExtractor: GuideQuestionExtractor,
     private val setCrearXmlUseCase: SetCrearXmlUseCase
 ) : ViewModel() {
+    private var isInitialized = false
     private val _uiState = MutableStateFlow(GuideUiState())
     val uiState = _uiState.asStateFlow()
 
@@ -75,10 +78,16 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         .map { state ->
             val currentSource =
                 if (state.qAType == QAType.QUESTION) state.preguntas else state.respuestas
-            currentSource.getOrNull(state.contadorPregunta)
-                ?.content
-                ?.filterIsInstance<QuestionContentUi.Text>()
-                ?: emptyList()
+            val itemActual = currentSource.getOrNull(state.contadorPregunta)
+            val contenidosText =
+                itemActual?.content?.filterIsInstance<QuestionContentUi.Text>() ?: emptyList()
+
+            Log.d(
+                "TRACK_DATA",
+                "5. textList MAP -> qAType: ${state.qAType}, contadorPregunta: ${state.contadorPregunta}, preguntasSize: ${state.preguntas.size}, itemActualIsNull: ${itemActual == null}, resultTextsSize: ${contenidosText.size}"
+            )
+
+            contenidosText
         }
         .stateIn(
             scope = viewModelScope,
@@ -90,14 +99,43 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     /*init {
         viewModelScope.launch {
             _uiState.collect { state ->
-                val fotos = state.preguntas.getOrNull(state.contadorPregunta)?.content?.filterIsInstance<QuestionContent.Image>()?.size ?: 0
-                Log.d("DEBUG_INTERNO", "EL ESTADO MAESTRO CAMBIÓ: Preguntas size = ${state.preguntas.size}, Fotos en pregunta actual = $fotos")
+                val fotos = state.preguntas.getOrNull(state.contadorPregunta)?.content?.filterIsInstance<QuestionContentUi.Text>()?.size ?: 0
+
+                // Imprimimos la pila de llamadas para saber QUIÉN hizo el .update o .value
+                val stackTrace = Exception("REVISION_ESTADO").stackTraceToString()
+
+                Log.d("DEBUG_INTERNO", "EL ESTADO MAESTRO CAMBIÓ: Preguntas size = ${state.preguntas.size}, Fotos = $fotos\nOrigen:\n$stackTrace")
             }
         }
     }*/
 
     fun initUIState() {
+        Log.d("DEBUG_NAV", "🚨 ALERTA: initUIState FUE LLAMADO DESDE ALGUN LUGAR!")
         _uiState.value = GuideUiState()
+    }
+
+    fun loadInitialData(guideMode: GuideMode, relativeGuidePath: RelativeGuidePath) {
+        if (isInitialized) return
+        isInitialized = true
+
+        when (guideMode) {
+            is GuideMode.Create -> initUIState()
+            is GuideMode.Edit -> {
+                getObtenerDatosXML(
+                    posQuestion = guideMode.posQuestion,
+                    nameGuide = guideMode.nameGuide,
+                    relativeGuidePath = relativeGuidePath
+                )
+            }
+
+            is GuideMode.Review -> {
+                getObtenerDatosXML(
+                    posQuestion = guideMode.posQuestion,
+                    nameGuide = guideMode.nameGuide,
+                    relativeGuidePath = relativeGuidePath
+                )
+            }
+        }
     }
 
     fun setEditingMode(value: Boolean, position: Int) {
@@ -110,6 +148,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     }
 
     fun addTextContent(textWithLabels: String, listSpans: List<ColorRangeUi>) {
+        Log.d("DEBUG_TEXT", "addTextContent ejecutado. isEditing=${_uiState.value.isEditing}")
         val listSpansDomain = listSpans.map { it.toDomain() }
         val newContent = QuestionContentDomain.Text(textWithLabels, listSpansDomain)
 
@@ -129,9 +168,16 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 listQuestionItemDomain.map { it.toUi() }
             }
 
+            val newIndex = if (sourceListUi.lastIndex < state.contadorPregunta) {
+                sourceListUi.size
+            } else {
+                state.contadorPregunta
+            }
+
             state.copy(
                 preguntas = if (isQuestion) updatedList else state.preguntas,
                 respuestas = if (!isQuestion) updatedList else state.respuestas,
+                contadorContenido = 1,
                 isEditing = false,
                 actualUri = null
             )
@@ -408,7 +454,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         guide: GuideDomainModel,
         relativeGuidePath: RelativeGuidePath
     ): GetGuideResult =
-        getGuideXmlDataUseCase.invoke(GuideContext.Editing(guide, relativeGuidePath))
+        getGuideXmlDataUseCase.invoke(GuideContext.Editing(guide, relativeGuidePath.toDomain()))
 
     private fun handleGuideResult(
         result: GetGuideResult,
@@ -448,6 +494,10 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         nameGuide: String,
         relativeGuidePath: RelativeGuidePath
     ) {
+        Log.d(
+            "DEBUG_RESET",
+            "🚨 ALERTA: getObtenerDatosXML ejecutado desde:\n" + Log.getStackTraceString(Throwable())
+        )
         if (uiState.value.respuestas.isNotEmpty()) return
 
         val guide = findGuide(nameGuide) ?: run {
@@ -506,8 +556,8 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 description = description,
                 preguntas = uiState.value.preguntas.map { it.toDomain() },
                 respuestas = uiState.value.respuestas.map { it.toDomain() },
-                relativeGuidePath = relativeGuidePath,
-                mode = mode
+                relativeGuidePath = relativeGuidePath.toDomain(),
+                mode = mode.toDomain()
             )
 
             when (response) {

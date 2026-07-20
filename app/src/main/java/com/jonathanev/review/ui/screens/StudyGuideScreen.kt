@@ -1,6 +1,7 @@
 package com.jonathanev.review.ui.screens
 
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -42,11 +43,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jonathanev.review.R
-import com.jonathanev.review.domain.model.RelativeGuidePath
-import com.jonathanev.review.domain.model.SaveGuideMode
 import com.jonathanev.review.presentation.event.CreateGuideEvent
 import com.jonathanev.review.presentation.model.GuideMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
+import com.jonathanev.review.presentation.model.RelativeGuidePath
+import com.jonathanev.review.presentation.model.SaveGuideMode
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.ui.components.AssetCarouselViewer
 import com.jonathanev.review.ui.components.CustomAlertDialog
@@ -113,8 +114,10 @@ fun FillingGuideRoute(
     var showDialogDeleteQuestion by remember { mutableStateOf(false) }
     var showDialogRepeatGuide by remember { mutableStateOf(false) }
 
-    val totalQuestions = viewModel.uiState.collectAsStateWithLifecycle().value.preguntas.size
-    val actualQuestion = viewModel.uiState.collectAsStateWithLifecycle().value.contadorPregunta + 1
+    val uiState = viewModel.uiState.collectAsStateWithLifecycle()
+
+    val totalQuestions = uiState.value.preguntas.size
+    val actualQuestion = uiState.value.contadorPregunta + 1
     val listTypeMedia = if (typeSelected == QAType.QUESTION) {
         viewModel.textList.collectAsStateWithLifecycle().value
     } else {
@@ -123,28 +126,16 @@ fun FillingGuideRoute(
     val coroutineScope = rememberCoroutineScope()
     var restartGuide by rememberSaveable { mutableIntStateOf(0) }
 
-    LaunchedEffect(restartGuide) {
-        when (guideMode) {
-            is GuideMode.Create -> {
-                viewModel.initUIState()
-            }
+    Log.d(
+        "DEBUG_NAV",
+        "FillingGuide - Preguntas: ${uiState.value.preguntas.size} | Respuestas: ${uiState.value.respuestas.size}"
+    )
 
-            is GuideMode.Edit -> {
-                viewModel.getObtenerDatosXML(
-                    posQuestion = guideMode.posQuestion,
-                    nameGuide = guideMode.nameGuide,
-                    relativeGuidePath = relativeGuidePath
-                )
-            }
-
-            is GuideMode.Review -> {
-                viewModel.getObtenerDatosXML(
-                    posQuestion = guideMode.posQuestion,
-                    nameGuide = guideMode.nameGuide,
-                    relativeGuidePath = relativeGuidePath
-                )
-            }
-        }
+    LaunchedEffect(Unit) {
+        viewModel.loadInitialData(
+            guideMode = guideMode,
+            relativeGuidePath = relativeGuidePath
+        )
     }
 
     LaunchedEffect(Unit) {
