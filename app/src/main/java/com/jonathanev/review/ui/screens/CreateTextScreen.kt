@@ -1,6 +1,5 @@
 package com.jonathanev.review.ui.screens
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -15,7 +14,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -264,7 +262,6 @@ fun CreateTextRoute(
 
 @Composable
 fun CreateTextScreen(
-    modifier: Modifier = Modifier,
     guideMode: GuideMode,
     onSaveText: (String, List<ColorRangeUi>) -> Unit,
     colorInitial: Color,
@@ -281,96 +278,84 @@ fun CreateTextScreen(
     Scaffold(
         modifier = Modifier.fillMaxSize()
     ) { padding ->
-        Box(
-            modifier = modifier
+        ElevatedCard(
+            modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
-            contentAlignment = Alignment.Center
+                .padding(padding)
+                .padding(16.dp),
+            shape = RoundedCornerShape(42.dp),
+            colors = CardDefaults.elevatedCardColors(
+                containerColor = degradientColor
+            ),
+            elevation = CardDefaults.elevatedCardElevation(
+                defaultElevation = 8.dp
+            )
         ) {
-            ElevatedCard(
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp),
-                shape = RoundedCornerShape(42.dp),
-                colors = CardDefaults.elevatedCardColors(
-                    containerColor = degradientColor
-                ),
-                elevation = CardDefaults.elevatedCardElevation(
-                    defaultElevation = 8.dp
-                )
+                    .padding(bottom = 16.dp)
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(bottom = 16.dp)
-                ) {
-                    OptionsCreateText(
-                        guideMode = guideMode,
-                        textValue = textValue.annotatedString,
-                        selectedColor = selectedColor,
-                        onClearColorClick = onClearColorClick,
-                        onSelectColorClick = onSelectColorClick,
-                        onSaveTextClick = {
-                            saveCurrentQuestion(
-                                textFieldValue = textValue,
-                                onSaveContent = { text, colors -> onSaveText(text, colors) }
-                            )
-                        },
-                        onBackNav = onBackNav
-                    )
-                    CustomBoxCreateText(
-                        modifier = Modifier.then(
-                            if (guideMode !is GuideMode.Review) {
-                                Modifier
+                OptionsCreateText(
+                    guideMode = guideMode,
+                    textValue = textValue.annotatedString,
+                    selectedColor = selectedColor,
+                    onClearColorClick = onClearColorClick,
+                    onSelectColorClick = onSelectColorClick,
+                    onSaveTextClick = {
+                        val a = saveCurrentQuestion(
+                            textFieldValue = textValue,
+                            onSaveContent = { text, colors -> onSaveText(text, colors) }
+                        )
+                    },
+                    onBackNav = onBackNav
+                )
+                CustomBoxCreateText(
+                    modifier = Modifier.padding(20.dp),
+                    textValue = textValue,
+                    hint = textValue.text.isNotEmpty(),
+                    onTextValueChange = { actualText ->
+                        val oldText = textValue.text
+                        val newText = actualText.text
+                        val isSingleCharacterAdded = (newText.length - oldText.length) == 1
+                        val cursorPosition = actualText.selection.start
+                        val addedChar =
+                            if (cursorPosition > 0 && cursorPosition <= newText.length) {
+                                newText[cursorPosition - 1]
                             } else {
-                                Modifier.padding(20.dp)
+                                null
                             }
-                        ),
-                        textValue = textValue,
-                        hint = textValue.text.isNotEmpty(),
-                        onTextValueChange = { actualText ->
-                            val oldText = textValue.text
-                            val newText = actualText.text
-                            val isSingleCharacterAdded = (newText.length - oldText.length) == 1
-                            val cursorPosition = actualText.selection.start
-                            val addedChar =
-                                if (cursorPosition > 0 && cursorPosition <= newText.length) {
-                                    newText[cursorPosition - 1]
-                                } else {
-                                    null
-                                }
 
-                            val response =
-                                if (isSingleCharacterAdded && addedChar != '\n' && selectedColor != colorInitial) {
-                                    val newAnnotatedString = applyColorToCharacter(
-                                        currentAnnotatedString = actualText.annotatedString,
-                                        cursorPosition = cursorPosition,
-                                        color = selectedColor
-                                    )
+                        val response =
+                            if (isSingleCharacterAdded && addedChar != '\n' && selectedColor != colorInitial) {
+                                val newAnnotatedString = applyColorToCharacter(
+                                    currentAnnotatedString = actualText.annotatedString,
+                                    cursorPosition = cursorPosition,
+                                    color = selectedColor
+                                )
 
-                                    actualText.copy(annotatedString = newAnnotatedString)
-                                } else {
-                                    actualText
-                                }
+                                actualText.copy(annotatedString = newAnnotatedString)
+                            } else {
+                                actualText
+                            }
 
-                            onChangeTextValue(response)
-                        }
-                    )
-                }
+                        onChangeTextValue(response)
+                    }
+                )
+            }
 
-                if (showDialog) {
-                    ColorPickerDialog(
-                        colorInitial = colorInitial,
-                        selectedColor = selectedColor,
-                        onDismissRequest = onDissmissDialog,
-                        onColorSelected = { colorActual ->
-                            onColorSelected(colorActual)
-                        },
-                        onDefaultClick = {
-                            onColorSelected(colorInitial)
-                        }
-                    )
-                }
+            if (showDialog) {
+                ColorPickerDialog(
+                    colorInitial = colorInitial,
+                    selectedColor = selectedColor,
+                    onDismissRequest = onDissmissDialog,
+                    onColorSelected = { colorActual ->
+                        onColorSelected(colorActual)
+                    },
+                    onDefaultClick = {
+                        onColorSelected(colorInitial)
+                    }
+                )
             }
         }
     }
