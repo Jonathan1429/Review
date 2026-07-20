@@ -1,5 +1,6 @@
 package com.jonathanev.review.ui.components
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -29,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -41,14 +44,14 @@ import com.jonathanev.review.R
 import com.jonathanev.review.presentation.model.GuideMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.ui.model.ContentType
-import com.jonathanev.review.ui.preview.ComponentsPreviews
+import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.DataMediaContentPagerProvider
 import com.jonathanev.review.ui.preview.providers.MediaContentPagerProvider
 import com.jonathanev.review.ui.theme.BorderPasos
 import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.cardStepBackground
 
-@ComponentsPreviews
+@DevicePreviews
 @Composable
 fun PreviewMediaContentPager(
     @PreviewParameter(MediaContentPagerProvider::class) data: DataMediaContentPagerProvider
@@ -89,13 +92,21 @@ fun MediaContentPager(
 ) {
     val resourceSelected =
         if (mediaForSelected == ContentType.TEXT) R.string.lblText else R.string.lblImage
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(1f)
-            .border(1.5.dp, BorderPasos, RoundedCornerShape(24.dp))
+            .then(
+                if (isLandscape) {
+                    Modifier.fillMaxHeight(0.8f)
+                } else {
+                    Modifier.aspectRatio(1f)
+                }
+            )
             .clip(RoundedCornerShape(24.dp))
+            .border(1.5.dp, BorderPasos, RoundedCornerShape(24.dp))
             .background(cardStepBackground)
     ) {
         if (assets.isEmpty()) {

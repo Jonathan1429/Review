@@ -94,7 +94,10 @@ fun AssetCarouselViewer(
             guideMode = guideMode,
             onAssetClick = { typeContent -> onAssetClick(typeContent) }
         )
-        if (guideMode !is GuideMode.Review) {
+        val currentAsset = assets.getOrNull(pagerState.currentPage)
+            .takeUnless { guideMode is GuideMode.Review }
+
+        if (currentAsset != null) {
             DeleteAsset(mediaForSelected = mediaForSelected, onDeleteItemClick = {
                 val asset = assets[pagerState.currentPage]
                 onDeleteItemClick(

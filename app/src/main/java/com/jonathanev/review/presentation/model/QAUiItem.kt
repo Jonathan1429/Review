@@ -1,25 +1,26 @@
 package com.jonathanev.review.presentation.model
 
-import android.os.Parcelable
-import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 
-@Parcelize
-sealed class QuestionContentUi : Parcelable {
-    @Parcelize
+@Serializable
+sealed class QuestionContentUi {
+    @Serializable
     data object None : QuestionContentUi()
-    @Parcelize
+
+    @Serializable
     data class Text(val text: String, val colorRanges: List<ColorRangeUi>) : QuestionContentUi()
-    @Parcelize
+
+    @Serializable
     data class Image(val uri: String, val nameFile: String) : QuestionContentUi()
 }
 
-@Parcelize
-data class ColorRangeUi(val start: Int, val end: Int, val color: Int) : Parcelable
+@Serializable
+data class ColorRangeUi(val start: Int, val end: Int, val color: Int)
 
-@Parcelize
+@Serializable
 data class QuestionItemUi(
     val content: List<QuestionContentUi>
-) : Parcelable
+)
 
 /*@Parcelize
 data class QAUiItem(

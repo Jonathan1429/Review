@@ -251,21 +251,24 @@ fun BasicNavigation() {
                     onAddAssetClick = { mediaSelected ->
                         when (mediaSelected) {
                             ContentType.TEXT ->
-                                AppRoutes.CreateTextScreen(
-                                    contentType = QuestionContentUi.Text(
-                                        text = "",
-                                        colorRanges = emptyList()
-                                    ),
-                                    guideMode = action.guideMode
+                                backStack.add(
+                                    AppRoutes.CreateTextScreen(
+                                        contentType = QuestionContentUi.Text(
+                                            text = "",
+                                            colorRanges = emptyList()
+                                        ),
+                                        guideMode = action.guideMode
+                                    )
                                 )
-
                             ContentType.IMAGE -> {
-                                AppRoutes.CreateImageScreen(
-                                    contentType = QuestionContentUi.Image(
-                                        uri = "",
-                                        nameFile = ""
-                                    ),
-                                    guideMode = action.guideMode
+                                backStack.add(
+                                    AppRoutes.CreateImageScreen(
+                                        contentType = QuestionContentUi.Image(
+                                            uri = "",
+                                            nameFile = ""
+                                        ),
+                                        guideMode = action.guideMode
+                                    )
                                 )
                             }
                         }

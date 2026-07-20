@@ -19,7 +19,7 @@ import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.SaveGuideErrors
 import com.jonathanev.review.domain.result.UpdateGuideResult
 import com.jonathanev.review.presentation.event.CreateGuideEvent
-import com.jonathanev.review.presentation.event.CreateGuideEvent.ShowMessage
+import com.jonathanev.review.presentation.event.CreateGuideEvent.ErrorGuideCreated
 import com.jonathanev.review.presentation.event.CreateGuideEvent.SuccessGuideCreated
 import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.presentation.mapper.toUi
@@ -293,10 +293,10 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         val currentState = uiState.value
 
         // 1. Validaciones de Negocio
-        if (currentState.contadorPregunta == 0) {
+        /*if (currentState.contadorPregunta == 0) {
             sendNotification(CreateGuideEvent.NotQuestionBefore)
             return
-        }
+        }*/
 
         if (textList.value.isEmpty()) {
             sendNotification(CreateGuideEvent.WithoutText)
@@ -340,7 +340,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
     private fun showMessage(text: String) {
         viewModelScope.launch {
-            _createGuideEvent.emit(CreateGuideEvent.ShowMessage(text))
+            _createGuideEvent.emit(CreateGuideEvent.ErrorGuideCreated(text))
         }
     }
 
@@ -366,6 +366,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             return
         }
 
+        addNewQuestionTopBar()
         /*var isLastQuestion = false
         if (currentState.isLastQuestion == null) {
             isLastQuestion =
@@ -388,7 +389,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         }*/
     }
 
-    fun addNewQuestion() {
+    private fun addNewQuestionTopBar() {
         _uiState.update { state ->
             state.copy(
                 contadorPregunta = state.contadorPregunta + 1,
@@ -511,10 +512,10 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
             when (response) {
                 UpdateGuideResult.ErrorPath ->
-                    sendNotification(ShowMessage("Error en la ruta inicial"))
+                    sendNotification(ErrorGuideCreated("Error en la ruta inicial"))
 
                 UpdateGuideResult.ErrorUpdateGuide ->
-                    sendNotification(ShowMessage("Error al cargar datos de la guia"))
+                    sendNotification(ErrorGuideCreated("Error al cargar datos de la guia"))
 
                 UpdateGuideResult.ImagesFailed ->
                     sendNotification(SuccessGuideCreated("Guia guardada con imagenes corruptas"))
@@ -522,11 +523,11 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 is UpdateGuideResult.SaveFailed -> {
                     when (response.cause) {
                         SaveGuideErrors.CommitChangesFailed ->
-                            sendNotification(ShowMessage("Error al guardar la guia"))
+                            sendNotification(ErrorGuideCreated("Error al guardar la guia"))
                         SaveGuideErrors.InsufficientStorageOrDiskError ->
-                            sendNotification(ShowMessage("Error de entrada/salida al guardar la guía"))
+                            sendNotification(ErrorGuideCreated("Error de entrada/salida al guardar la guía"))
                         SaveGuideErrors.StoragePermissionDenied ->
-                            sendNotification(ShowMessage("Permisos insuficientes para guardar la guía"))
+                            sendNotification(ErrorGuideCreated("Permisos insuficientes para guardar la guía"))
                     }
                 }
 

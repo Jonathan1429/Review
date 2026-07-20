@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
@@ -88,7 +87,7 @@ class FragmentCreateFile : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.createGuideEvent.collect { createGuideEvent ->
                     when (createGuideEvent) {
-                        CreateGuideEvent.AddMoreQuestions -> {
+                        /*CreateGuideEvent.AddMoreQuestions -> {
                             AlertDialog.Builder(requireContext())
                                 .setTitle("¡Atención!")
                                 .setMessage("Ya no hay mas preguntas, ¿quieres agregar mas?")
@@ -105,13 +104,12 @@ class FragmentCreateFile : Fragment() {
                                 }.setOnCancelListener {
 
                                 }.create().show()
-                        }
+                        }*/
 
-                        CreateGuideEvent.ErrorGuideCreated -> showToast("No se pudo crear la guia")
-                        CreateGuideEvent.NotQuestionBefore -> showToast("Ya no hay preguntas anteriores")
+                        //CreateGuideEvent.NotQuestionBefore -> showToast("Ya no hay preguntas anteriores")
                         CreateGuideEvent.WithoutText -> showToast("Debes tener al menos un texto")
                         CreateGuideEvent.WithoutTextQA -> showToast("Debes tener al menos un texto en pregunta/respuesta")
-                        is CreateGuideEvent.ShowMessage -> {
+                        is CreateGuideEvent.ErrorGuideCreated -> {
                             showToast(createGuideEvent.text)
                             navStateViewModel.setMainPath()
 

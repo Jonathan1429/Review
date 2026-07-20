@@ -1,17 +1,17 @@
-name: Android CI
-
+name: Android Testing CI
 on:
   push:
-    branches: ["develop"]
+    branches: [ "**" ]
   pull_request:
-    branches: ["develop", "master"]
+    branches: [ "develop", "master" ]
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v3
+
       - name: set up JDK 17
         uses: actions/setup-java@v3
         with:
@@ -34,6 +34,13 @@ jobs:
           keyAlias=${{ secrets.KEY_ALIAS }}
           keyPassword=${{ secrets.KEY_PASSWORD }}
           EOF
+
+      - name: Unit Test
+        run: ./gradlew testDebugUnitTest
+
+      - name: Android Test Report
+        uses: asadmansr/android-test-report-action@v1.2.0
+        if: ${{ always() }}
 
       - name: Build app
         run: ./gradlew assemble
