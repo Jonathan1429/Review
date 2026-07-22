@@ -362,59 +362,11 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     }
 
     fun nextQuestion() {
-        val currentState = uiState.value
-
-        if (textList.value.isEmpty()) {
-            sendNotification(CreateGuideEvent.WithoutText)
-            return
-        }
-
-        val listToCheckUi = if (currentState.qAType == QATypeUI.QUESTION)
-            currentState.respuestas
-        else
-            currentState.preguntas
-        val listCheckToDomain = listToCheckUi.map { it.toDomain() }
-
-        val hasCounterpart = listCheckToDomain.getOrNull(currentState.contadorPregunta)?.content
-            ?.any { it is QuestionContentDomain.Text } ?: false
-
-        if (!hasCounterpart) {
-            sendNotification(CreateGuideEvent.WithoutTextQA)
-            return
-        }
-
-        addNewQuestionTopBar()
-        /*var isLastQuestion = false
-        if (currentState.isLastQuestion == null) {
-            isLastQuestion =
-                currentState.contadorPregunta + 1 == currentState.respuestas.size
-        }
-
-        if (isLastQuestion) {
-            sendNotification(CreateGuideEvent.AddMoreQuestions)
-            return
-        }
-
-        _uiState.update { state ->
-            state.copy(
-                contadorPregunta = state.contadorPregunta + 1,
-                qAType = QAType.QUESTION, // Siempre volvemos a QUESTION al avanzar
-                actualUri = null,           // resetContentLists integrado
-                isEditing = false,
-                contadorContenido = -1,
-            )
-        }*/
-    }
-
-    private fun addNewQuestionTopBar() {
         _uiState.update { state ->
             state.copy(
                 contadorPregunta = state.contadorPregunta + 1,
                 qAType = QATypeUI.QUESTION,
-                actualUri = null,
-                isEditing = false,
                 contadorContenido = 0
-                //contadorContenido = -1,
             )
         }
     }
