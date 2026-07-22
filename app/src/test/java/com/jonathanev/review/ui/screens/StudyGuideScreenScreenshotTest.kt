@@ -101,6 +101,7 @@ class StudyGuideScreenScreenshotTest(
                             guideMode = data.guideMode,
                             showDialogDeleteQuestion = data.showDialogDeleteQuestion,
                             showDialogRepeatGuide = data.showDialogRepeatGuide,
+                            currentPosContent = 0,
                             onDissmissDialogRepeatGuide = {},
                             onConfirmDialogRepeatGuide = {},
                             onContinueDialogDeleteQuestionClick = {},
@@ -109,11 +110,13 @@ class StudyGuideScreenScreenshotTest(
                             onDeleteQuestionClick = { },
                             onTypeClicked = {},
                             onFilterClicked = {},
-                            onAssetClick = {},
-                            onAddAssetClick = {},
+                            onOpenAssetClick = {},
                             onDeleteItemClick = { _, _ -> },
+                            onAddAssetClick = {},
                             onAddQuestion = {},
-                        ) {}
+                            onCloseGuide = {},
+                            onCurrentPosContent = {},
+                        )
                     }
                 }
             }

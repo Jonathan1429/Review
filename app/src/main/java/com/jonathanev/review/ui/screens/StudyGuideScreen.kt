@@ -78,6 +78,7 @@ fun PreviewStudyGuideScreen(
             totalQuestions = data.totalQuestions,
             listTypeMedia = data.listTypeMedia,
             guideMode = data.guideMode,
+            currentPosContent = 0,
             showDialogDeleteQuestion = data.showDialogDeleteQuestion,
             showDialogRepeatGuide = data.showDialogRepeatGuide,
             onDissmissDialogRepeatGuide = {},
@@ -88,11 +89,13 @@ fun PreviewStudyGuideScreen(
             onDeleteQuestionClick = { },
             onTypeClicked = {},
             onFilterClicked = {},
-            onAssetClick = {},
-            onAddAssetClick = {},
+            onOpenAssetClick = {},
             onDeleteItemClick = { _, _ -> },
+            onAddAssetClick = {},
             onAddQuestion = {},
-        ) {}
+            onCloseGuide = {},
+            onCurrentPosContent = {},
+        )
     }
 }
 
@@ -101,7 +104,7 @@ fun FillingGuideRoute(
     viewModel: SharedFragmentCreateFileViewModel,
     guideMode: GuideMode,
     relativeGuidePath: RelativeGuidePath,
-    onAssetClick: (QuestionContentUi) -> Unit,
+    onOpenAssetClick: (QuestionContentUi) -> Unit,
     onAddAssetClick: (ContentType) -> Unit,
     onActionGuideNone: () -> Unit,
     onCloseGuide: () -> Unit
@@ -115,6 +118,7 @@ fun FillingGuideRoute(
     var showDialogRepeatGuide by remember { mutableStateOf(false) }
 
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
+    val currentPosContent = uiState.value.contadorContenido
 
     val totalQuestions = uiState.value.preguntas.size
     val actualQuestion = uiState.value.contadorPregunta + 1
@@ -170,6 +174,7 @@ fun FillingGuideRoute(
         totalQuestions = totalQuestions,
         listTypeMedia = listTypeMedia,
         guideMode = guideMode,
+        currentPosContent = currentPosContent,
         showDialogDeleteQuestion = showDialogDeleteQuestion,
         showDialogRepeatGuide = showDialogRepeatGuide,
         onDissmissDialogRepeatGuide = { showDialogRepeatGuide = false },
@@ -222,7 +227,7 @@ fun FillingGuideRoute(
         onFilterClicked = { filterClicked ->
             mediaSelected = filterClicked
         },
-        onAssetClick = { typeContent -> onAssetClick(typeContent) },
+        onOpenAssetClick = { typeContent -> onOpenAssetClick(typeContent) },
         onAddAssetClick = { onAddAssetClick(mediaSelected) },
         onAddQuestion = {
             viewModel.nextQuestion()
@@ -253,6 +258,9 @@ fun FillingGuideRoute(
                     onCloseGuide()
                 }
             }
+        },
+        onCurrentPosContent = { position ->
+            viewModel.updatePosContent(position)
         }
     )
 }
@@ -278,11 +286,13 @@ fun FillingGuideScreen(
     onDeleteQuestionClick: () -> Unit,
     onTypeClicked: (QAType) -> Unit,
     onFilterClicked: (ContentType) -> Unit,
-    onAssetClick: (QuestionContentUi) -> Unit,
+    onOpenAssetClick: (QuestionContentUi) -> Unit,
     onDeleteItemClick: (typeContent: QuestionContentUi, positionItem: Int) -> Unit,
     onAddAssetClick: () -> Unit,
     onAddQuestion: () -> Unit,
-    onCloseGuide: () -> Unit
+    onCloseGuide: () -> Unit,
+    onCurrentPosContent: (Int) -> Unit,
+    currentPosContent: Int
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -320,6 +330,7 @@ fun FillingGuideScreen(
                 assets = listTypeMedia,
                 mediaForSelected = mediaSelected,
                 guideMode = guideMode,
+                currentPosContent = currentPosContent,
                 onAddAssetClick = onAddAssetClick,
                 onDeleteItemClick = { typeContent, positionItem ->
                     onDeleteItemClick(
@@ -327,7 +338,8 @@ fun FillingGuideScreen(
                         positionItem
                     )
                 },
-                onAssetClick = { typeContent -> onAssetClick(typeContent) }
+                onOpenAssetClick = { typeContent -> onOpenAssetClick(typeContent) },
+                onCurrentPosContent = { position -> onCurrentPosContent(position) }
             )
         }
 

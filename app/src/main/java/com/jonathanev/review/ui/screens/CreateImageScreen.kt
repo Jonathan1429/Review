@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.jonathanev.review.presentation.model.GuideMode
+import com.jonathanev.review.presentation.model.QuestionContentMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.ui.components.CustomBoxCreateImage
@@ -74,7 +75,8 @@ fun CreateImageRoute(
     guideMode: GuideMode,
     contentType: QuestionContentUi.Image,
     viewModel: SharedFragmentCreateFileViewModel,
-    imageUploaded: () -> Unit
+    imageUploaded: () -> Unit,
+    questionContentMode: QuestionContentMode
 ) {
     var uriImage by rememberSaveable { mutableStateOf(contentType.uri) }
     val resultLauncher = rememberLauncherForActivityResult(
@@ -90,7 +92,7 @@ fun CreateImageRoute(
         uriImage = uriImage,
         selectedImage = { resultLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
         imageUploaded = {
-            viewModel.addImageContent()
+            viewModel.addImageContent(questionContentMode)
             imageUploaded()
         }
     )

@@ -92,9 +92,11 @@ class AssetCarouselViewerScreenshotTest(
                             assets = dataState.listType,
                             mediaForSelected = dataState.mediaForSelected,
                             guideMode = dataState.guideMode,
+                            currentPosContent = 0,
                             onAddAssetClick = { },
-                            onAssetClick = {},
+                            onOpenAssetClick = {},
                             onDeleteItemClick = { _, _ -> },
+                            onCurrentPosContent = {},
                         )
                     }
                 }

@@ -12,7 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.dp
-import com.github.takahirom.roborazzi.captureRoboImage
 import com.jonathanev.review.ui.components.MediaContentPagerScreenshotTest.Companion.data
 import com.jonathanev.review.ui.preview.providers.DataMediaContentPagerProvider
 import com.jonathanev.review.ui.preview.providers.MediaContentPagerProvider
@@ -163,7 +162,8 @@ class MediaContentPagerScreenshotTest(
                             assets = dataState.listType,
                             mediaForSelected = dataState.mediaForSelected,
                             guideMode = dataState.guideMode,
-                            onAssetClick = {}
+                            onOpenAssetClick = {},
+                            onCurrentPosContent = {}
                         )
                     }
                 }

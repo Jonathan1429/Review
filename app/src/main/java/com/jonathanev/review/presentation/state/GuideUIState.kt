@@ -7,7 +7,7 @@ data class GuideUiState(
     val preguntas: List<QuestionItemUi> = emptyList(),
     val respuestas: List<QuestionItemUi> = emptyList(),
     val contadorPregunta: Int = 0,
-    val contadorContenido: Int = -1,
+    val contadorContenido: Int = 0,
     val qAType: QAType = QAType.QUESTION,
     val fileName: String = "",
     val description: String = "",

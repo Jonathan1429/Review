@@ -6,22 +6,22 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.davemorrissey.labs.subscaleview.ImageSource
-import com.jonathanev.review.presentation.viewmodel.MainToolbarViewModel
-import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.databinding.FragmentCreateImagesBinding
 import com.jonathanev.review.presentation.model.QuestionContentUi
+import com.jonathanev.review.presentation.viewmodel.MainToolbarViewModel
+import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -120,6 +120,6 @@ class FragmentCreateImages : Fragment() {
 
     private fun processImage() {
         // Editing
-        sharedViewModel.addImageContent()
+        //sharedViewModel.addImageContent(questionContentMode)
     }
 }

@@ -24,6 +24,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.jonathanev.review.presentation.model.ColorRangeUi
 import com.jonathanev.review.presentation.model.GuideMode
+import com.jonathanev.review.presentation.model.QuestionContentMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.presentation.model.SpanPalabraModel
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
@@ -223,7 +224,8 @@ fun CreateTextRoute(
     viewModel: SharedFragmentCreateFileViewModel,
     contentType: QuestionContentUi.Text,
     onSaveText: () -> Unit,
-    onBackNav: () -> Unit
+    onBackNav: () -> Unit,
+    questionContentMode: QuestionContentMode
 ) {
     val colorInitial = MaterialTheme.colorScheme.onSurface
     var selectedColor by remember { mutableStateOf(colorInitial) }
@@ -239,7 +241,7 @@ fun CreateTextRoute(
         textValue = textValue,
         showDialog = showDialog,
         onSaveText = { text, colors ->
-            viewModel.addTextContent(textWithLabels = text, listSpans = colors)
+            viewModel.addTextContent(textWithLabels = text, listSpans = colors, questionContentMode)
             onSaveText()
         },
         onClearColorClick = {

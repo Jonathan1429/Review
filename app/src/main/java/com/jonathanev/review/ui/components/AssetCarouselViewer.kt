@@ -59,9 +59,11 @@ fun PreviewAssetCarouselViewer(
                 assets = data.listType,
                 mediaForSelected = data.mediaForSelected,
                 guideMode = data.guideMode,
+                currentPosContent = 0,
                 onAddAssetClick = { },
-                onAssetClick = {},
+                onOpenAssetClick = {},
                 onDeleteItemClick = { _, _ -> },
+                onCurrentPosContent = {},
             )
         }
     }
@@ -73,11 +75,14 @@ fun AssetCarouselViewer(
     assets: List<QuestionContentUi>,
     mediaForSelected: ContentType,
     guideMode: GuideMode,
+    currentPosContent: Int,
     onAddAssetClick: () -> Unit,
-    onAssetClick: (QuestionContentUi) -> Unit,
+    onOpenAssetClick: (QuestionContentUi) -> Unit,
     onDeleteItemClick: (typeContent: QuestionContentUi, positionItem: Int) -> Unit,
+    onCurrentPosContent: (Int) -> Unit,
 ) {
-    val pagerState = rememberPagerState(pageCount = { assets.size })
+    val pagerState =
+        rememberPagerState(initialPage = currentPosContent, pageCount = { assets.size })
     val scope = rememberCoroutineScope()
     val lazyRowState = rememberLazyListState()
 
@@ -92,7 +97,8 @@ fun AssetCarouselViewer(
             assets = assets,
             mediaForSelected = mediaForSelected,
             guideMode = guideMode,
-            onAssetClick = { typeContent -> onAssetClick(typeContent) }
+            onOpenAssetClick = { typeContent -> onOpenAssetClick(typeContent) },
+            onCurrentPosContent = { position -> onCurrentPosContent(position) }
         )
         val currentAsset = assets.getOrNull(pagerState.currentPage)
             .takeUnless { guideMode is GuideMode.Review }

@@ -1,6 +1,5 @@
 package com.jonathanev.review.presentation.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.domain.GetGuideXmlDataUseCase
@@ -24,7 +23,9 @@ import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.ColorRangeUi
 import com.jonathanev.review.presentation.model.GuideMode
+import com.jonathanev.review.presentation.model.QuestionContentMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
+import com.jonathanev.review.presentation.model.QuestionItemUi
 import com.jonathanev.review.presentation.model.RelativeGuidePath
 import com.jonathanev.review.presentation.model.SaveGuideMode
 import com.jonathanev.review.presentation.state.GuideUiState
@@ -82,11 +83,6 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             val contenidosText =
                 itemActual?.content?.filterIsInstance<QuestionContentUi.Text>() ?: emptyList()
 
-            Log.d(
-                "TRACK_DATA",
-                "5. textList MAP -> qAType: ${state.qAType}, contadorPregunta: ${state.contadorPregunta}, preguntasSize: ${state.preguntas.size}, itemActualIsNull: ${itemActual == null}, resultTextsSize: ${contenidosText.size}"
-            )
-
             contenidosText
         }
         .stateIn(
@@ -110,7 +106,6 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     }*/
 
     fun initUIState() {
-        Log.d("DEBUG_NAV", "🚨 ALERTA: initUIState FUE LLAMADO DESDE ALGUN LUGAR!")
         _uiState.value = GuideUiState()
     }
 
@@ -147,76 +142,100 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         }
     }
 
-    fun addTextContent(textWithLabels: String, listSpans: List<ColorRangeUi>) {
-        Log.d("DEBUG_TEXT", "addTextContent ejecutado. isEditing=${_uiState.value.isEditing}")
+    fun updatePosContent(currentPos: Int) {
+        _uiState.update { state ->
+            state.copy(
+                contadorContenido = currentPos
+            )
+        }
+    }
+
+    fun addTextContent(
+        textWithLabels: String,
+        listSpans: List<ColorRangeUi>,
+        questionContentMode: QuestionContentMode
+    ) {
         val listSpansDomain = listSpans.map { it.toDomain() }
         val newContent = QuestionContentDomain.Text(textWithLabels, listSpansDomain)
+        val currentPosContent =
+            if (questionContentMode == QuestionContentMode.CREATING) {
+                uiState.value.contadorContenido + 1
+            } else {
+                uiState.value.contadorContenido
+            }
 
         _uiState.update { state ->
             val isQuestion = state.qAType == QAType.QUESTION
             val sourceListUi = if (isQuestion) state.preguntas else state.respuestas
 
-            // 1. Calculamos la nueva lista de preguntas/respuestas
-            val updatedList = if (sourceListUi.lastIndex < state.contadorPregunta) {
-                sourceListUi + QuestionItemDomain(content = listOf(newContent)).toUi()
-            } else {
-                val sourceListDomain = sourceListUi.map { it.toDomain() }
-                val listQuestionItemDomain = setContentUseCase.invoke(
-                    newContent, sourceListDomain, state.contadorPregunta,
-                    state.contadorContenido, state.isEditing, QuestionContentDomain.Text::class.java
-                )
-                listQuestionItemDomain.map { it.toUi() }
-            }
+            val currentQuestionUi = sourceListUi.getOrNull(state.contadorPregunta)
 
-            val newIndex = if (sourceListUi.lastIndex < state.contadorPregunta) {
-                sourceListUi.size
-            } else {
-                state.contadorPregunta
+            // Agregar una pregunta + contenido
+            val updatedList: List<QuestionItemUi> = if (currentQuestionUi == null) {
+                sourceListUi + QuestionItemDomain(content = listOf(newContent)).toUi()
+            } else { // Agregar o editar contenido
+                val sourceListDomain = sourceListUi.map { it.toDomain() }
+
+                val updatedDomainList = setContentUseCase.invoke(
+                    newContent = newContent,
+                    sourceList = sourceListDomain,
+                    contadorPregunta = state.contadorPregunta,
+                    contadorContenido = currentPosContent,
+                    isEditingMode = questionContentMode == QuestionContentMode.EDITING,
+                    filterType = QuestionContentDomain.Text::class.java
+                )
+
+                updatedDomainList.map { it.toUi() }
             }
 
             state.copy(
                 preguntas = if (isQuestion) updatedList else state.preguntas,
                 respuestas = if (!isQuestion) updatedList else state.respuestas,
-                contadorContenido = 1,
-                isEditing = false,
-                actualUri = null
+                contadorContenido = currentPosContent
             )
         }
     }
 
-    fun addImageContent() {
-        _uiState.update { currentState ->
-            val uriAAgregar = currentState.actualUri ?: return@update currentState
-
-            val isQuestion = currentState.qAType == QAType.QUESTION
-            val sourceListUi = if (isQuestion) currentState.preguntas else currentState.respuestas
-
-            val newImage = QuestionContentDomain.Image(uri = uriAAgregar, nameFile = "")
-
-            // Usamos tu UseCase para actualizar la lista maestra
-            val updatedList = if (sourceListUi.lastIndex < currentState.contadorPregunta) {
-                sourceListUi + QuestionItemDomain(content = listOf(newImage)).toUi()
+    fun addImageContent(questionContentMode: QuestionContentMode) {
+        val currentPosContent =
+            if (questionContentMode == QuestionContentMode.CREATING) {
+                uiState.value.contadorContenido + 1
             } else {
-                val sourceListDomain = sourceListUi.map { it.toDomain() }
-
-                val listQuestionItemDomain = setContentUseCase.invoke(
-                    newContent = newImage,
-                    sourceList = sourceListDomain,
-                    contadorPregunta = currentState.contadorPregunta,
-                    contadorContenido = currentState.contadorContenido,
-                    isEditingMode = currentState.isEditing,
-                    filterType = QuestionContentDomain.Image::class.java
-                )
-                listQuestionItemDomain.map { it.toUi() }
+                uiState.value.contadorContenido
             }
 
-            // Solo retornamos las listas maestras y reseteamos flags
-            currentState.copy(
-                preguntas = if (isQuestion) updatedList else currentState.preguntas,
-                respuestas = if (!isQuestion) updatedList else currentState.respuestas,
-                isEditing = false,
+        _uiState.update { state ->
+            val uriAAgregar = state.actualUri ?: return@update state
+
+            val isQuestion = state.qAType == QAType.QUESTION
+            val sourceListUi = if (isQuestion) state.preguntas else state.respuestas
+            val currentQuestionUi = sourceListUi.getOrNull(state.contadorPregunta)
+
+            val newContent = QuestionContentDomain.Image(uri = uriAAgregar, nameFile = "")
+
+            // Agregar una pregunta + contenido
+            val updatedList: List<QuestionItemUi> = if (currentQuestionUi == null) {
+                sourceListUi + QuestionItemDomain(content = listOf(newContent)).toUi()
+            } else { // Agregar o editar contenido
+                val sourceListDomain = sourceListUi.map { it.toDomain() }
+
+                val updatedDomainList = setContentUseCase.invoke(
+                    newContent = newContent,
+                    sourceList = sourceListDomain,
+                    contadorPregunta = state.contadorPregunta,
+                    contadorContenido = currentPosContent,
+                    isEditingMode = questionContentMode == QuestionContentMode.EDITING,
+                    filterType = QuestionContentDomain.Text::class.java
+                )
+
+                updatedDomainList.map { it.toUi() }
+            }
+
+            state.copy(
+                preguntas = if (isQuestion) updatedList else state.preguntas,
+                respuestas = if (!isQuestion) updatedList else state.respuestas,
                 actualUri = null,
-                contadorContenido = -1
+                contadorContenido = currentPosContent
             )
         }
     }
@@ -247,7 +266,8 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 respuestas = if (!isQuestion) updatedListToUi else currentState.respuestas,
                 actualUri = null,         // resetContentLists integrado
                 isEditing = false,
-                contadorContenido = -1
+                contadorContenido = 0
+                //contadorContenido = -1
             )
         }
     }
@@ -274,7 +294,8 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 respuestas = if (!isQuestion) updatedListToUi else currentState.respuestas,
                 actualUri = null, // resetContentLists integrado
                 isEditing = false,
-                contadorContenido = -1
+                contadorContenido = 0
+                //contadorContenido = -1
             )
         }
     }
@@ -330,7 +351,8 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 qAType = newType,
                 actualUri = null,           // resetContentLists integrado
                 isEditing = false,          // Aseguramos que no quede en modo edición al cambiar
-                contadorContenido = -1
+                contadorContenido = 0
+                //contadorContenido = -1
             )
         }
     }
@@ -373,7 +395,8 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 qAType = QAType.QUESTION, // Por estándar, volver a mostrar la Pregunta
                 actualUri = null,           // Limpieza de datos temporales
                 isEditing = false,
-                contadorContenido = -1
+                contadorContenido = 0
+                //contadorContenido = -1
             )
         }
     }
@@ -442,7 +465,8 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 qAType = QAType.QUESTION,
                 actualUri = null,
                 isEditing = false,
-                contadorContenido = -1,
+                contadorContenido = 0
+                //contadorContenido = -1,
             )
         }
     }
@@ -494,10 +518,6 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         nameGuide: String,
         relativeGuidePath: RelativeGuidePath
     ) {
-        Log.d(
-            "DEBUG_RESET",
-            "🚨 ALERTA: getObtenerDatosXML ejecutado desde:\n" + Log.getStackTraceString(Throwable())
-        )
         if (uiState.value.respuestas.isNotEmpty()) return
 
         val guide = findGuide(nameGuide) ?: run {
@@ -574,8 +594,10 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                     when (response.cause) {
                         SaveGuideErrors.CommitChangesFailed ->
                             sendNotification(ErrorGuideCreated("Error al guardar la guia"))
+
                         SaveGuideErrors.InsufficientStorageOrDiskError ->
                             sendNotification(ErrorGuideCreated("Error de entrada/salida al guardar la guía"))
+
                         SaveGuideErrors.StoragePermissionDenied ->
                             sendNotification(ErrorGuideCreated("Permisos insuficientes para guardar la guía"))
                     }

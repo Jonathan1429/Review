@@ -19,6 +19,7 @@ import com.jonathanev.review.presentation.model.FileFormMode
 import com.jonathanev.review.presentation.model.FileInteractionMode
 import com.jonathanev.review.presentation.model.GuideMode
 import com.jonathanev.review.presentation.model.GuideUiModel
+import com.jonathanev.review.presentation.model.QuestionContentMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.presentation.model.RelativeGuidePath
 import com.jonathanev.review.presentation.viewmodel.CreateFilesViewModel
@@ -214,16 +215,17 @@ fun BasicNavigation() {
                     viewModel = viewModelSharedCreateFile,
                     guideMode = action.guideMode,
                     relativeGuidePath = RelativeGuidePath(value = relativeGuidePath),
-                    onAssetClick = { typeContent ->
+                    onOpenAssetClick = { typeContent ->
                         when (typeContent) {
                             is QuestionContentUi.Image -> {
                                 backStack.add(
                                     AppRoutes.CreateImageScreen(
-                                        QuestionContentUi.Image(
-                                            typeContent.uri,
-                                            typeContent.nameFile
+                                        questionContentMode = QuestionContentMode.EDITING,
+                                        contentType = QuestionContentUi.Image(
+                                            uri = typeContent.uri,
+                                            nameFile = typeContent.nameFile
                                         ),
-                                        action.guideMode
+                                        guideMode = action.guideMode
                                     )
                                 )
                             }
@@ -239,11 +241,12 @@ fun BasicNavigation() {
                             is QuestionContentUi.Text -> {
                                 backStack.add(
                                     AppRoutes.CreateTextScreen(
-                                        QuestionContentUi.Text(
+                                        questionContentMode = QuestionContentMode.EDITING,
+                                        contentType = QuestionContentUi.Text(
                                             typeContent.text,
                                             typeContent.colorRanges
                                         ),
-                                        action.guideMode
+                                        guideMode = action.guideMode
                                     )
                                 )
                             }
@@ -254,6 +257,7 @@ fun BasicNavigation() {
                             ContentType.TEXT ->
                                 backStack.add(
                                     AppRoutes.CreateTextScreen(
+                                        questionContentMode = QuestionContentMode.CREATING,
                                         contentType = QuestionContentUi.Text(
                                             text = "",
                                             colorRanges = emptyList()
@@ -261,9 +265,11 @@ fun BasicNavigation() {
                                         guideMode = action.guideMode
                                     )
                                 )
+
                             ContentType.IMAGE -> {
                                 backStack.add(
                                     AppRoutes.CreateImageScreen(
+                                        questionContentMode = QuestionContentMode.CREATING,
                                         contentType = QuestionContentUi.Image(
                                             uri = "",
                                             nameFile = ""
@@ -273,8 +279,6 @@ fun BasicNavigation() {
                                 )
                             }
                         }
-
-
                     },
                     onActionGuideNone = {
                         Toast.makeText(
@@ -290,27 +294,27 @@ fun BasicNavigation() {
                     }
                 )
             }
-            entry<AppRoutes.CreateImageScreen> { imageContent ->
+            entry<AppRoutes.CreateImageScreen> { values ->
                 CreateImageRoute(
-                    guideMode = imageContent.guideMode,
-                    contentType = imageContent.contentType,
+                    questionContentMode = values.questionContentMode,
+                    guideMode = values.guideMode,
+                    contentType = values.contentType,
                     viewModel = viewModelSharedCreateFile,
                     imageUploaded = {
                         backStack.removeLastOrNull()
                     }
                 )
             }
-
-            entry<AppRoutes.CreateTextScreen> { textContent ->
+            entry<AppRoutes.CreateTextScreen> { values ->
                 CreateTextRoute(
-                    guideMode = textContent.guideMode,
+                    questionContentMode = values.questionContentMode,
+                    guideMode = values.guideMode,
                     viewModel = viewModelSharedCreateFile,
-                    contentType = textContent.contentType,
+                    contentType = values.contentType,
                     onSaveText = { backStack.removeLastOrNull() },
                     onBackNav = { backStack.removeLastOrNull() }
                 )
             }
-
             entry<AppRoutes.PreviewQuestionsScreen> { value ->
                 val viewModel: FragmentRepasarViewModel = viewModel()
                 val navigationViewModel: NavigationViewModel = viewModel()

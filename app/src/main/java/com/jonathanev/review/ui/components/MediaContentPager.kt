@@ -26,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -76,7 +77,8 @@ fun PreviewMediaContentPager(
                 assets = data.listType,
                 mediaForSelected = data.mediaForSelected,
                 guideMode = data.guideMode,
-                onAssetClick = {}
+                onOpenAssetClick = {},
+                onCurrentPosContent = {}
             )
         }
     }
@@ -88,12 +90,18 @@ fun MediaContentPager(
     assets: List<QuestionContentUi>,
     mediaForSelected: ContentType,
     guideMode: GuideMode,
-    onAssetClick: (QuestionContentUi) -> Unit,
+    onOpenAssetClick: (QuestionContentUi) -> Unit,
+    onCurrentPosContent: (Int) -> Unit
 ) {
     val resourceSelected =
         if (mediaForSelected == ContentType.TEXT) R.string.lblText else R.string.lblImage
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+    LaunchedEffect(pagerState.currentPage) {
+        val position = pagerState.currentPage
+        onCurrentPosContent(position)
+    }
 
     Box(
         modifier = Modifier
@@ -193,7 +201,7 @@ fun MediaContentPager(
                                             }
                                         }
 
-                                    onAssetClick(typeContent)
+                                    onOpenAssetClick(typeContent)
                                 })
                         )
                     }

@@ -192,7 +192,7 @@ class FragmentRepasarViewModel @Inject constructor(
         _uiState.update { uiState ->
             uiState.copy(
                 contadorPregunta = 0,
-                contadorContenido = -1,
+                //contadorContenido = -1,
                 qAType = QAType.QUESTION
             )
         }
