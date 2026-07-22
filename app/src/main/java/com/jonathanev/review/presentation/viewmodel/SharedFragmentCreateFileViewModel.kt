@@ -338,45 +338,13 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     }
 
     fun previousQuestion() {
-        val currentState = uiState.value
-
-        // 1. Validaciones de Negocio
-        /*if (currentState.contadorPregunta == 0) {
-            sendNotification(CreateGuideEvent.NotQuestionBefore)
-            return
-        }*/
-
-        if (textList.value.isEmpty()) {
-            sendNotification(CreateGuideEvent.WithoutText)
-            return
-        }
-
-        // Validar contraparte (si estoy en pregunta, validar que la respuesta tenga texto)
-        val listToCheckUi = if (currentState.qAType == QATypeUI.QUESTION)
-            currentState.respuestas
-        else
-            currentState.preguntas
-
-        val listCheckToDomain = listToCheckUi.map { it.toDomain() }
-        val hasCounterpartText = listCheckToDomain.getOrNull(currentState.contadorPregunta)?.content
-            ?.any { it is QuestionContentDomain.Text } ?: false
-
-        if (!hasCounterpartText) {
-            sendNotification(CreateGuideEvent.WithoutTextQA)
-            return
-        }
-
-        // 2. Transición al estado anterior
         _uiState.update { state ->
             val nuevoContador = state.contadorPregunta - 1
 
             state.copy(
                 contadorPregunta = nuevoContador,
-                qAType = QATypeUI.QUESTION, // Por estándar, volver a mostrar la Pregunta
-                actualUri = null,           // Limpieza de datos temporales
-                isEditing = false,
+                qAType = QATypeUI.QUESTION,
                 contadorContenido = 0
-                //contadorContenido = -1
             )
         }
     }
