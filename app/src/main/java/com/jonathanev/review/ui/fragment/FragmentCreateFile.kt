@@ -24,7 +24,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.jonathanev.review.R
 import com.jonathanev.review.databinding.FragmentCreateFileBinding
 import com.jonathanev.review.domain.model.RelativeGuidePath
-import com.jonathanev.review.presentation.event.CreateGuideEvent
 import com.jonathanev.review.presentation.model.ActionGuide
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
 import com.jonathanev.review.presentation.viewmodel.MainToolbarViewModel
@@ -85,7 +84,7 @@ class FragmentCreateFile : Fragment() {
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.createGuideEvent.collect { createGuideEvent ->
-                    when (createGuideEvent) {
+                    /*when (createGuideEvent) {
                         /*CreateGuideEvent.AddMoreQuestions -> {
                             AlertDialog.Builder(requireContext())
                                 .setTitle("¡Atención!")
@@ -133,7 +132,7 @@ class FragmentCreateFile : Fragment() {
                                     .build()
                             )
                         }
-                    }
+                    }*/
                 }
             }
         }

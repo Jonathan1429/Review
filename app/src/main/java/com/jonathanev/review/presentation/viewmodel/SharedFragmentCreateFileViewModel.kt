@@ -482,22 +482,29 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         val preguntasDomain = stateUi.preguntas.map { it.toDomain() }
         val respuestasDomain = stateUi.respuestas.map { it.toDomain() }
 
+        val listWithMoreQuestions =
+            if (preguntasDomain.size > respuestasDomain.size)
+                preguntasDomain
+            else
+                respuestasDomain
+
         val questionHasContent = preguntasDomain.isEmpty()
         if (questionHasContent) {
             showMessage("Debes tener minimo algo para guardar")
             return false
         }
 
-        // Validar consistencia en la posición actual
-        val currentQuestionHasText =
-            preguntasDomain.getOrNull(stateUi.contadorPregunta)?.hasText() ?: false
-        val currentAnswerHasText =
-            respuestasDomain.getOrNull(stateUi.contadorPregunta)?.hasText() ?: false
+        listWithMoreQuestions.forEachIndexed { index, _ ->
+            // Validar consistencia en la posición actual
+            val currentQuestionHasText =
+                preguntasDomain.getOrNull(index)?.hasText() ?: false
+            val currentAnswerHasText =
+                respuestasDomain.getOrNull(index)?.hasText() ?: false
 
-        if (!currentQuestionHasText || !currentAnswerHasText) {
-            // Usamos el mensaje genérico que ya tenías definido
-            sendNotification(CreateGuideEvent.WithoutTextQA)
-            return false
+            if (!currentQuestionHasText || !currentAnswerHasText) {
+                sendNotification(CreateGuideEvent.WithoutTextInPos(index + 1))
+                return false
+            }
         }
 
         return true

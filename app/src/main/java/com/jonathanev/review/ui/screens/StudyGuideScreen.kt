@@ -151,6 +151,13 @@ fun FillingGuideRoute(
                 CreateGuideEvent.WithoutTextQA ->
                     showToast("Debes tener al menos un texto en pregunta/respuesta", context)
 
+                is CreateGuideEvent.WithoutTextInPos -> {
+                    showToast(
+                        "Revisa la pregunta ${event.position} - Debes tener al menos un texto en pregunta/respuesta",
+                        context
+                    )
+                }
+
                 is CreateGuideEvent.ErrorGuideCreated -> {
                     showToast(event.text, context)
                     onCloseGuide()
