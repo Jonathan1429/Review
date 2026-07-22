@@ -248,7 +248,6 @@ fun FillingGuideRoute(
                         relativeGuidePath = relativeGuidePath,
                         mode = SaveGuideMode.Create
                     )
-                    onCloseGuide()
                 }
 
                 is GuideMode.Edit -> {
@@ -258,7 +257,6 @@ fun FillingGuideRoute(
                         relativeGuidePath = relativeGuidePath,
                         mode = SaveGuideMode.Update
                     )
-                    onCloseGuide()
                 }
 
                 is GuideMode.Review -> {
