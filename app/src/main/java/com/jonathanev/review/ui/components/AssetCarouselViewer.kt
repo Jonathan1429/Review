@@ -18,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -85,6 +86,12 @@ fun AssetCarouselViewer(
         rememberPagerState(initialPage = currentPosContent, pageCount = { assets.size })
     val scope = rememberCoroutineScope()
     val lazyRowState = rememberLazyListState()
+
+    LaunchedEffect(currentPosContent) {
+        if (assets.isNotEmpty() && pagerState.currentPage != currentPosContent) {
+            pagerState.scrollToPage(currentPosContent)
+        }
+    }
 
     Column(
         modifier = Modifier
