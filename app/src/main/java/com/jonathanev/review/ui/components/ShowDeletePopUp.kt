@@ -1,18 +1,19 @@
 package com.jonathanev.review.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -21,7 +22,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -29,7 +29,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jonathanev.review.R
 import com.jonathanev.review.ui.preview.ComponentsPreviews
-import com.jonathanev.review.ui.theme.ColorBotones
 import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.TextGray
 
@@ -39,6 +38,7 @@ fun PreviewShowDeletePopUp() {
     ReviewTheme {
         ShowDeletePopUp(
             onContinueClick = { },
+            onDismissRequest = {}
         )
     }
 }
@@ -46,6 +46,7 @@ fun PreviewShowDeletePopUp() {
 @Composable
 fun ShowDeletePopUp(
     onContinueClick: (Boolean) -> Unit,
+    onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var isChecked by remember { mutableStateOf(false) }
@@ -92,7 +93,27 @@ fun ShowDeletePopUp(
             )
             Spacer(modifier = Modifier.height(20.dp))
 
-            Button(
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                OutlinedButton(
+                    onClick = onDismissRequest,
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(text = stringResource(R.string.lblCancelar))
+                }
+
+                Button(
+                    onClick = { onContinueClick(isChecked) },
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(text = stringResource(R.string.btnContinuar))
+                }
+            }
+            /*Button(
                 onClick = { onContinueClick(isChecked) },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -106,7 +127,7 @@ fun ShowDeletePopUp(
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
-            }
+            }*/
         }
     }
 }

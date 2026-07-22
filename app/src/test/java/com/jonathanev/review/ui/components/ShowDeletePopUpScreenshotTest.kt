@@ -82,7 +82,8 @@ class ShowDeletePopUpScreenshotTest(
                         }
 
                         ShowDeletePopUp(
-                            onContinueClick = {}
+                            onContinueClick = {},
+                            onDismissRequest = {}
                         )
                     }
                 }

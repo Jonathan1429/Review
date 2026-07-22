@@ -116,6 +116,7 @@ class StudyGuideScreenScreenshotTest(
                             onAddQuestion = {},
                             onCloseGuide = {},
                             onCurrentPosContent = {},
+                            onDismissRequest = {}
                         )
                     }
                 }

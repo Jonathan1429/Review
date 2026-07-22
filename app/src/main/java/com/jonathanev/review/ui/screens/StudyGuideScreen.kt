@@ -95,6 +95,7 @@ fun PreviewStudyGuideScreen(
             onAddQuestion = {},
             onCloseGuide = {},
             onCurrentPosContent = {},
+            onDismissRequest = {}
         )
     }
 }
@@ -266,7 +267,8 @@ fun FillingGuideRoute(
         },
         onCurrentPosContent = { position ->
             viewModel.updatePosContent(position)
-        }
+        },
+        onDismissRequest = { showDialogRepeatGuide = false }
     )
 }
 
@@ -282,6 +284,7 @@ fun FillingGuideScreen(
     listTypeMedia: List<QuestionContentUi>,
     guideMode: GuideMode,
     showDialogDeleteQuestion: Boolean,
+    currentPosContent: Int,
     showDialogRepeatGuide: Boolean,
     onDissmissDialogRepeatGuide: () -> Unit,
     onConfirmDialogRepeatGuide: () -> Unit,
@@ -297,7 +300,7 @@ fun FillingGuideScreen(
     onAddQuestion: () -> Unit,
     onCloseGuide: () -> Unit,
     onCurrentPosContent: (Int) -> Unit,
-    currentPosContent: Int
+    onDismissRequest: () -> Unit
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -364,6 +367,7 @@ fun FillingGuideScreen(
                         onContinueClick = { isChecked ->
                             onContinueDialogDeleteQuestionClick(isChecked)
                         },
+                        onDismissRequest = { onDismissRequest() }
                     )
                 }
             }
