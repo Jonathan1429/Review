@@ -155,16 +155,13 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         listSpans: List<ColorRangeUi>,
         questionContentMode: QuestionContentMode
     ) {
-        val listSpansDomain = listSpans.map { it.toDomain() }
-        val newContent = QuestionContentDomain.Text(textWithLabels, listSpansDomain)
-        val currentPosContent =
-            if (questionContentMode == QuestionContentMode.CREATING) {
-                uiState.value.contadorContenido + 1
-            } else {
-                uiState.value.contadorContenido
-            }
+        val newContent = QuestionContentUi.Text(textWithLabels, listSpans)
 
         _uiState.update { state ->
+            val currentPosContent = when (questionContentMode) {
+                QuestionContentMode.CREATING -> state.contadorContenido + 1
+                QuestionContentMode.EDITING -> state.contadorContenido
+            }
             val isQuestion = state.qAType == QATypeUI.QUESTION
             val sourceListUi = if (isQuestion) state.preguntas else state.respuestas
 
@@ -172,12 +169,12 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
             // Agregar una pregunta + contenido
             val updatedList: List<QuestionItemUi> = if (currentQuestionUi == null) {
-                sourceListUi + QuestionItemDomain(content = listOf(newContent)).toUi()
+                sourceListUi + QuestionItemUi(content = listOf(newContent))
             } else { // Agregar o editar contenido
                 val sourceListDomain = sourceListUi.map { it.toDomain() }
 
                 val updatedDomainList = setContentUseCase.invoke(
-                    newContent = newContent,
+                    newContent = newContent.toDomain(),
                     sourceList = sourceListDomain,
                     contadorPregunta = state.contadorPregunta,
                     contadorContenido = currentPosContent,
@@ -197,14 +194,13 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     }
 
     fun addImageContent(questionContentMode: QuestionContentMode) {
-        val currentPosContent =
-            if (questionContentMode == QuestionContentMode.CREATING) {
-                uiState.value.contadorContenido + 1
-            } else {
-                uiState.value.contadorContenido
-            }
-
         _uiState.update { state ->
+            val currentPosContent =
+                if (questionContentMode == QuestionContentMode.CREATING) {
+                    uiState.value.contadorContenido + 1
+                } else {
+                    uiState.value.contadorContenido
+                }
             val uriAAgregar = state.actualUri ?: return@update state
 
             val isQuestion = state.qAType == QATypeUI.QUESTION
@@ -367,6 +363,37 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 contadorPregunta = state.contadorPregunta + 1,
                 qAType = QATypeUI.QUESTION,
                 contadorContenido = 0
+            )
+        }
+    }
+
+    fun addNextQuestion() {
+        _uiState.update { state ->
+            state.copy(
+                contadorPregunta = state.contadorPregunta + 1
+            )
+        }
+
+        addContentEmpty()
+    }
+
+    private fun addContentEmpty() {
+        _uiState.update { state ->
+            val pos = state.contadorPregunta
+
+            val updatedPreguntas = state.preguntas.toMutableList().apply {
+                val index = pos.coerceIn(0, size)
+                add(index, QuestionItemDomain(content = emptyList()).toUi())
+            }
+
+            val updatedRespuestas = state.respuestas.toMutableList().apply {
+                val index = pos.coerceIn(0, size)
+                add(index, QuestionItemDomain(content = emptyList()).toUi())
+            }
+
+            state.copy(
+                preguntas = updatedPreguntas,
+                respuestas = updatedRespuestas
             )
         }
     }

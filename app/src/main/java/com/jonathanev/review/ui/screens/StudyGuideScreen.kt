@@ -149,7 +149,7 @@ fun FillingGuideRoute(
                     showToast("Debes tener al menos un texto", context)
 
                 CreateGuideEvent.WithoutTextQA ->
-                    showToast("Debes tener al menos un texto en pregunta/respuesta", context)
+                    showToast("Debes tener al menos un texto en pregunta y respuesta", context)
 
                 is CreateGuideEvent.WithoutTextInPos -> {
                     showToast(
@@ -237,7 +237,7 @@ fun FillingGuideRoute(
         onOpenAssetClick = { typeContent -> onOpenAssetClick(typeContent) },
         onAddAssetClick = { onAddAssetClick(mediaSelected) },
         onAddQuestion = {
-            viewModel.nextQuestion()
+            viewModel.addNextQuestion()
         },
         onCloseGuide = {
             when (guideMode) {
