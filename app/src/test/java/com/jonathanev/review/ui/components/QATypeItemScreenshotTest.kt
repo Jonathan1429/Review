@@ -95,8 +95,8 @@ class QATypeItemScreenshotTest(
                         Row {
                             QATypeItem(
                                 qaTypeItem = data.qaTypeItem,
-                                typeSelected = data.typeSelected,
-                                onTypeClicked = {}
+                                cardType = data.typeSelected,
+                                onCardTypeClicked = {}
                             )
                         }
                     }

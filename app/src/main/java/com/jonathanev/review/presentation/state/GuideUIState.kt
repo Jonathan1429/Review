@@ -1,7 +1,7 @@
 package com.jonathanev.review.presentation.state
 
-import com.jonathanev.review.domain.model.QAType
 import com.jonathanev.review.presentation.model.QuestionItemUi
+import com.jonathanev.review.ui.model.QAType
 
 data class GuideUiState(
     val preguntas: List<QuestionItemUi> = emptyList(),

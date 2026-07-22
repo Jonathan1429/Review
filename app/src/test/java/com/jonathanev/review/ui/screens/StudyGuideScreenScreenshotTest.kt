@@ -91,7 +91,7 @@ class StudyGuideScreenScreenshotTest(
                         }
 
                         FillingGuideScreen(
-                            typeSelected = data.typeSelected,
+                            cardType = data.typeSelected,
                             typeForSelected = data.typeForSelected,
                             mediaSelected = data.mediaSelected,
                             mediaForSelected = data.mediaForSelected,
@@ -108,8 +108,8 @@ class StudyGuideScreenScreenshotTest(
                             onBackQuestionClick = {},
                             onNextQuestionClick = {},
                             onDeleteQuestionClick = { },
-                            onTypeClicked = {},
-                            onFilterClicked = {},
+                            onCardTypeClicked = {},
+                            onFilterTypeClicked = {},
                             onOpenAssetClick = {},
                             onDeleteItemClick = { _, _ -> },
                             onAddAssetClick = {},

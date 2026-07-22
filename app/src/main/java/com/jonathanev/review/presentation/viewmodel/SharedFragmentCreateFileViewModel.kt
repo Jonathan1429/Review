@@ -9,7 +9,6 @@ import com.jonathanev.review.domain.SetCrearXmlUseCase
 import com.jonathanev.review.domain.mapper.GuideQuestionExtractor
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
-import com.jonathanev.review.domain.model.QAType
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
 import com.jonathanev.review.domain.repository.UserPreferencesRepository
@@ -42,6 +41,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.jonathanev.review.ui.model.QAType as QATypeUI
 
 @HiltViewModel
 class SharedFragmentCreateFileViewModel @Inject constructor(
@@ -62,7 +62,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     val imageList: StateFlow<List<QuestionContentUi.Image>> = _uiState
         .map { state ->
             val currentSource =
-                if (state.qAType == QAType.QUESTION) state.preguntas else state.respuestas
+                if (state.qAType == QATypeUI.QUESTION) state.preguntas else state.respuestas
             currentSource.getOrNull(state.contadorPregunta)
                 ?.content
                 ?.filterIsInstance<QuestionContentUi.Image>()
@@ -78,7 +78,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     val textList: StateFlow<List<QuestionContentUi.Text>> = _uiState
         .map { state ->
             val currentSource =
-                if (state.qAType == QAType.QUESTION) state.preguntas else state.respuestas
+                if (state.qAType == QATypeUI.QUESTION) state.preguntas else state.respuestas
             val itemActual = currentSource.getOrNull(state.contadorPregunta)
             val contenidosText =
                 itemActual?.content?.filterIsInstance<QuestionContentUi.Text>() ?: emptyList()
@@ -165,7 +165,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             }
 
         _uiState.update { state ->
-            val isQuestion = state.qAType == QAType.QUESTION
+            val isQuestion = state.qAType == QATypeUI.QUESTION
             val sourceListUi = if (isQuestion) state.preguntas else state.respuestas
 
             val currentQuestionUi = sourceListUi.getOrNull(state.contadorPregunta)
@@ -207,7 +207,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         _uiState.update { state ->
             val uriAAgregar = state.actualUri ?: return@update state
 
-            val isQuestion = state.qAType == QAType.QUESTION
+            val isQuestion = state.qAType == QATypeUI.QUESTION
             val sourceListUi = if (isQuestion) state.preguntas else state.respuestas
             val currentQuestionUi = sourceListUi.getOrNull(state.contadorPregunta)
 
@@ -248,7 +248,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
     fun deleteImage(position: Int) {
         _uiState.update { currentState ->
-            val isQuestion = currentState.qAType == QAType.QUESTION
+            val isQuestion = currentState.qAType == QATypeUI.QUESTION
             val sourceListUi = if (isQuestion) currentState.preguntas else currentState.respuestas
 
             // 1. Calculamos la lista actualizada usando la lógica funcional de borrado
@@ -274,7 +274,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
     fun deleteText(position: Int) {
         _uiState.update { currentState ->
-            val isQuestion = currentState.qAType == QAType.QUESTION
+            val isQuestion = currentState.qAType == QATypeUI.QUESTION
             val sourceListUi = if (isQuestion) currentState.preguntas else currentState.respuestas
 
             // 1. Obtenemos la lista actualizada usando la función de borrado funcional
@@ -331,29 +331,9 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     }
 
 
-    fun rollPregResp() {
-        // 1. Validación de Negocio
-        if (textList.value.isEmpty()) {
-            sendNotification(CreateGuideEvent.WithoutText)
-            return
-        }
-
-        // 2. Intercambio Atómico de Contenido
+    fun onCardTypeChanged(cardTypeClicked: QATypeUI) {
         _uiState.update { state ->
-            // Determinamos el nuevo tipo (Si era QUESTION ahora es ANSWER y viceversa)
-            val newType = if (state.qAType == QAType.QUESTION) {
-                QAType.ANSWER
-            } else {
-                QAType.QUESTION
-            }
-
-            state.copy(
-                qAType = newType,
-                actualUri = null,           // resetContentLists integrado
-                isEditing = false,          // Aseguramos que no quede en modo edición al cambiar
-                contadorContenido = 0
-                //contadorContenido = -1
-            )
+            state.copy(qAType = cardTypeClicked)
         }
     }
 
@@ -372,7 +352,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         }
 
         // Validar contraparte (si estoy en pregunta, validar que la respuesta tenga texto)
-        val listToCheckUi = if (currentState.qAType == QAType.QUESTION)
+        val listToCheckUi = if (currentState.qAType == QATypeUI.QUESTION)
             currentState.respuestas
         else
             currentState.preguntas
@@ -392,7 +372,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
             state.copy(
                 contadorPregunta = nuevoContador,
-                qAType = QAType.QUESTION, // Por estándar, volver a mostrar la Pregunta
+                qAType = QATypeUI.QUESTION, // Por estándar, volver a mostrar la Pregunta
                 actualUri = null,           // Limpieza de datos temporales
                 isEditing = false,
                 contadorContenido = 0
@@ -421,7 +401,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             return
         }
 
-        val listToCheckUi = if (currentState.qAType == QAType.QUESTION)
+        val listToCheckUi = if (currentState.qAType == QATypeUI.QUESTION)
             currentState.respuestas
         else
             currentState.preguntas
@@ -462,7 +442,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         _uiState.update { state ->
             state.copy(
                 contadorPregunta = state.contadorPregunta + 1,
-                qAType = QAType.QUESTION,
+                qAType = QATypeUI.QUESTION,
                 actualUri = null,
                 isEditing = false,
                 contadorContenido = 0
@@ -502,7 +482,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         _uiState.update { state ->
             state.copy(
                 contadorPregunta = calculatePosition(noQuestion, answers.size),
-                qAType = QAType.QUESTION,
+                qAType = QATypeUI.QUESTION,
                 preguntas = questions.map { it.toUi() },
                 respuestas = answers.map { it.toUi() },
                 isLastQuestion = if (noQuestion == -1) false else null
@@ -663,7 +643,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     fun updateLastQuestion() {
         _uiState.update { state ->
             state.copy(
-                qAType = QAType.QUESTION,
+                qAType = QATypeUI.QUESTION,
                 isLastQuestion = false,
                 contadorPregunta = state.contadorPregunta + 1
             )

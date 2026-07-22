@@ -12,9 +12,6 @@ import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.dp
 import com.github.takahirom.roborazzi.ExperimentalRoborazziApi
-import com.github.takahirom.roborazzi.RoborazziOptions
-import com.github.takahirom.roborazzi.captureRoboImage
-import com.github.takahirom.roborazzi.roborazziSystemPropertyOutputDirectory
 import com.jonathanev.review.ui.preview.providers.FilterChipItemProv
 import com.jonathanev.review.ui.preview.providers.FilterChipItemProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
@@ -97,7 +94,7 @@ class FilterChipItemScreenshotTest(
                             itemContentType = data.itemContentType,
                             iconRes = data.iconRes,
                             contentTypeSelected = data.contentTypeSelected,
-                            onFilterClicked = {}
+                            onFilterTypeClicked = {}
                         )
                     }
                 }

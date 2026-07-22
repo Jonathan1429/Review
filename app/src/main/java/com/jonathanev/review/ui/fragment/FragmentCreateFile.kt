@@ -1,5 +1,6 @@
 package com.jonathanev.review.ui.fragment
 
+//import com.jonathanev.review.ui.model.ScreenDataNav
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -22,7 +23,6 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.jonathanev.review.R
 import com.jonathanev.review.databinding.FragmentCreateFileBinding
-import com.jonathanev.review.domain.model.QAType
 import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.presentation.event.CreateGuideEvent
 import com.jonathanev.review.presentation.model.ActionGuide
@@ -31,7 +31,6 @@ import com.jonathanev.review.presentation.viewmodel.MainToolbarViewModel
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.ui.adapter.ListCreateImagesAdapter
 import com.jonathanev.review.ui.adapter.ListCreateTextsAdapter
-//import com.jonathanev.review.ui.model.ScreenDataNav
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -142,11 +141,11 @@ class FragmentCreateFile : Fragment() {
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { uiState ->
-                    binding.lblPregResp.text =
+                    /*binding.lblPregResp.text =
                         if (uiState.qAType == QAType.QUESTION)
                             getString(R.string.etPregunta)
                         else
-                            getString(R.string.etRespuesta)
+                            getString(R.string.etRespuesta)*/
                 }
             }
         }
@@ -259,7 +258,7 @@ class FragmentCreateFile : Fragment() {
         }
 
         binding.btnPregResp.setOnClickListener {
-            viewModel.rollPregResp()
+            //viewModel.onCardTypeChanged(typeClicked)
         }
 
         binding.btnPrevious.setOnClickListener {

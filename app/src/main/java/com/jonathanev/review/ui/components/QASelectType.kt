@@ -22,8 +22,8 @@ fun PreviewQASelectType(
     ReviewTheme {
         QASelectType(
             typeForSelected = data.typesForSelect,
-            typeSelected = data.typeSelected,
-            onTypeClicked = {}
+            cardType = data.typeSelected,
+            onCardTypeClicked = {}
         )
     }
 }
@@ -31,8 +31,8 @@ fun PreviewQASelectType(
 @Composable
 fun QASelectType(
     typeForSelected: List<QAType>,
-    typeSelected: QAType,
-    onTypeClicked: (QAType) -> Unit
+    cardType: QAType,
+    onCardTypeClicked: (QAType) -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -42,9 +42,10 @@ fun QASelectType(
     ) {
         typeForSelected.forEach { item ->
             QATypeItem(
-                item, typeSelected,
-                onTypeClicked = { typeClicked ->
-                    onTypeClicked(typeClicked)
+                qaTypeItem = item,
+                cardType = cardType,
+                onCardTypeClicked = { cardTypeClicked ->
+                    onCardTypeClicked(cardTypeClicked)
                 }
             )
         }

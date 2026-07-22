@@ -9,7 +9,6 @@ import com.jonathanev.review.domain.mapper.GuideQuestionExtractor
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.QAItemDomain
-import com.jonathanev.review.domain.model.QAType
 import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.presentation.event.GuidePreviewEvent
@@ -18,6 +17,7 @@ import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.presentation.state.GuideUiState
 import com.jonathanev.review.presentation.state.PreviewQuestionStateUi
+import com.jonathanev.review.ui.model.QAType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow

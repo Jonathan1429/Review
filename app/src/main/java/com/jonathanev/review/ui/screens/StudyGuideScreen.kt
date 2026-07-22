@@ -70,7 +70,7 @@ fun PreviewStudyGuideScreen(
 ) {
     ReviewTheme {
         FillingGuideScreen(
-            typeSelected = data.typeSelected,
+            cardType = data.typeSelected,
             typeForSelected = data.typeForSelected,
             mediaSelected = data.mediaSelected,
             mediaForSelected = data.mediaForSelected,
@@ -87,8 +87,8 @@ fun PreviewStudyGuideScreen(
             onBackQuestionClick = {},
             onNextQuestionClick = {},
             onDeleteQuestionClick = { },
-            onTypeClicked = {},
-            onFilterClicked = {},
+            onCardTypeClicked = {},
+            onFilterTypeClicked = {},
             onOpenAssetClick = {},
             onDeleteItemClick = { _, _ -> },
             onAddAssetClick = {},
@@ -110,7 +110,6 @@ fun FillingGuideRoute(
     onCloseGuide: () -> Unit
 ) {
     val context = LocalContext.current
-    var typeSelected by rememberSaveable { mutableStateOf(QAType.QUESTION) }
     val typeForSelected = listOf(QAType.QUESTION, QAType.ANSWER)
     var mediaSelected by rememberSaveable { mutableStateOf(ContentType.TEXT) }
     val mediaForSelected = listOf(ContentType.TEXT, ContentType.IMAGE)
@@ -118,11 +117,12 @@ fun FillingGuideRoute(
     var showDialogRepeatGuide by remember { mutableStateOf(false) }
 
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
+    val cardType = uiState.value.qAType
     val currentPosContent = uiState.value.contadorContenido
 
     val totalQuestions = uiState.value.preguntas.size
     val actualQuestion = uiState.value.contadorPregunta + 1
-    val listTypeMedia = if (typeSelected == QAType.QUESTION) {
+    val listTypeMedia = if (mediaSelected == ContentType.TEXT) {
         viewModel.textList.collectAsStateWithLifecycle().value
     } else {
         viewModel.imageList.collectAsStateWithLifecycle().value
@@ -166,7 +166,7 @@ fun FillingGuideRoute(
     }
 
     FillingGuideScreen(
-        typeSelected = typeSelected,
+        cardType = cardType,
         typeForSelected = typeForSelected,
         mediaSelected = mediaSelected,
         mediaForSelected = mediaForSelected,
@@ -221,11 +221,11 @@ fun FillingGuideRoute(
                 }
             }
         },
-        onTypeClicked = { typeClicked ->
-            typeSelected = typeClicked
+        onCardTypeClicked = { cardTypeClicked ->
+            viewModel.onCardTypeChanged(cardTypeClicked)
         },
-        onFilterClicked = { filterClicked ->
-            mediaSelected = filterClicked
+        onFilterTypeClicked = { filterTypeClicked ->
+            mediaSelected = filterTypeClicked
         },
         onOpenAssetClick = { typeContent -> onOpenAssetClick(typeContent) },
         onAddAssetClick = { onAddAssetClick(mediaSelected) },
@@ -268,7 +268,7 @@ fun FillingGuideRoute(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FillingGuideScreen(
-    typeSelected: QAType,
+    cardType: QAType,
     typeForSelected: List<QAType>,
     mediaSelected: ContentType,
     mediaForSelected: List<ContentType>,
@@ -284,8 +284,8 @@ fun FillingGuideScreen(
     onBackQuestionClick: () -> Unit,
     onNextQuestionClick: () -> Unit,
     onDeleteQuestionClick: () -> Unit,
-    onTypeClicked: (QAType) -> Unit,
-    onFilterClicked: (ContentType) -> Unit,
+    onCardTypeClicked: (QAType) -> Unit,
+    onFilterTypeClicked: (ContentType) -> Unit,
     onOpenAssetClick: (QuestionContentUi) -> Unit,
     onDeleteItemClick: (typeContent: QuestionContentUi, positionItem: Int) -> Unit,
     onAddAssetClick: () -> Unit,
@@ -319,12 +319,18 @@ fun FillingGuideScreen(
                 onBackQuestionClick = onBackQuestionClick,
                 onNextQuestionClick = onNextQuestionClick
             )
-            QASelectType(typeForSelected, typeSelected, onTypeClicked = { typeClicked ->
-                onTypeClicked(typeClicked)
-            })
-            FilterTypeItem(mediaForSelected, mediaSelected, onFilterClicked = { filterClicked ->
-                onFilterClicked(filterClicked)
-            })
+            QASelectType(
+                typeForSelected = typeForSelected,
+                cardType = cardType,
+                onCardTypeClicked = { cardTypeClicked ->
+                    onCardTypeClicked(cardTypeClicked)
+                })
+            FilterTypeItem(
+                mediaForSelected = mediaForSelected,
+                mediaSelected = mediaSelected,
+                onFilterTypeClicked = { filterTypeClicked ->
+                    onFilterTypeClicked(filterTypeClicked)
+                })
 
             AssetCarouselViewer(
                 assets = listTypeMedia,

@@ -93,8 +93,8 @@ class QASelectTypeTest(
 
                         QASelectType(
                             typeForSelected = data.typesForSelect,
-                            typeSelected = data.typeSelected,
-                            onTypeClicked = {}
+                            cardType = data.typeSelected,
+                            onCardTypeClicked = {}
                         )
                     }
                 }

@@ -17,14 +17,12 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.jonathanev.review.domain.model.QAType
-import com.jonathanev.review.ui.adapter.ListItemPintarImagenesAdapter
-import com.jonathanev.review.ui.adapter.ListItemPintarTextosAdapter
 import com.jonathanev.review.R
-import com.jonathanev.review.presentation.viewmodel.FragmentRepasarViewModel
 import com.jonathanev.review.databinding.FragmentRepasarBinding
 import com.jonathanev.review.presentation.event.GuideReviewEvent
-import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
+import com.jonathanev.review.presentation.viewmodel.FragmentRepasarViewModel
+import com.jonathanev.review.ui.adapter.ListItemPintarImagenesAdapter
+import com.jonathanev.review.ui.adapter.ListItemPintarTextosAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -80,11 +78,11 @@ class FragmentRepasar : Fragment() {
                 // Texto pregunta/respuesta
                 launch {
                     viewModel.uiState.collect { uiState ->
-                        binding.lblPregResp.text =
+                        /*binding.lblPregResp.text =
                             if (uiState.qAType == QAType.QUESTION)
                                 getString(R.string.etPregunta)
                             else
-                                getString(R.string.etRespuesta)
+                                getString(R.string.etRespuesta)*/
                     }
                 }
 

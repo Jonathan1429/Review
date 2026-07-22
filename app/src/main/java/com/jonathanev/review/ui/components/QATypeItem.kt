@@ -35,26 +35,26 @@ fun PreviewQATypeItem(
         Row {
             QATypeItem(
                 qaTypeItem = data.qaTypeItem,
-                typeSelected = data.typeSelected,
-                onTypeClicked = {}
+                cardType = data.typeSelected,
+                onCardTypeClicked = {}
             )
         }
     }
 }
 
 @Composable
-fun RowScope.QATypeItem(qaTypeItem: QAType, typeSelected: QAType, onTypeClicked: (QAType) -> Unit) {
+fun RowScope.QATypeItem(qaTypeItem: QAType, cardType: QAType, onCardTypeClicked: (QAType) -> Unit) {
     Box(
         modifier = Modifier
             .clickable(
                 onClick = {
-                    onTypeClicked(qaTypeItem)
+                    onCardTypeClicked(qaTypeItem)
                 }
             )
             .weight(1f)
             .height(56.dp)
             .then(
-                if (qaTypeItem == typeSelected) {
+                if (qaTypeItem == cardType) {
                     Modifier
                         .border(
                             border = BorderStroke(2.dp, ComponentTheme.getSelectedBorderBrush()),
