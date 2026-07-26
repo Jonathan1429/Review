@@ -16,7 +16,7 @@ class MoveGuideUseCase @Inject constructor(
     private val guiaRepository: GuiaRepository,
     private val directoryManager: DirectoryManager
 ) {
-    operator fun invoke(
+    suspend operator fun invoke(
         guideData: GetGuideResult.Success,
         contextMoving: GuideContext.Moving,
         relativeGuidePath: RelativeGuidePath

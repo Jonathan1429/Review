@@ -23,7 +23,6 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.jonathanev.review.R
 import com.jonathanev.review.databinding.FragmentCreateFileBinding
-import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.presentation.model.ActionGuide
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
 import com.jonathanev.review.presentation.viewmodel.MainToolbarViewModel
@@ -191,7 +190,7 @@ class FragmentCreateFile : Fragment() {
         binding.recyclerImagenes.setHasFixedSize(true)
         binding.recyclerImagenes.adapter = adaptListCreateImages
 
-        val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
+        //val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
         when (actionGuide) {
             is ActionGuide.CREATE -> Log.i("Crear", "Se está creando un archivo")
             is ActionGuide.EDIT -> {
@@ -280,7 +279,7 @@ class FragmentCreateFile : Fragment() {
         }
 
         binding.btnSaveGuide.setOnClickListener {
-            val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
+            //val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
 
             /*when (actionGuide) {
                 ActionGuide.CREATE -> viewModel.saveGuide(

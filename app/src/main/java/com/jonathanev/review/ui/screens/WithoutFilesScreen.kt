@@ -11,8 +11,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -29,6 +32,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jonathanev.review.R
+import com.jonathanev.review.presentation.model.FileInteractionMode
+import com.jonathanev.review.presentation.viewmodel.FragmentWithoutFilesViewModel
 import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.theme.ReviewTheme
 
@@ -37,18 +42,68 @@ import com.jonathanev.review.ui.theme.ReviewTheme
 fun WithoutFilesScreenPreview() {
     ReviewTheme {
         WithoutFilesScreen(
-            onAddGuideClick = {}
+            fileInteractionMode = FileInteractionMode.MovingItem,
+            onAddGuideClick = {},
+            onMoveCancelGuideClick = {},
+            onMoveSuccessGuideClick = {},
         )
     }
 }
 
 @Composable
+fun WithoutFilesRoute(
+    fileInteractionMode: FileInteractionMode,
+    onAddGuideClick: () -> Unit,
+    viewModel: FragmentWithoutFilesViewModel
+) {
+    WithoutFilesScreen(
+        fileInteractionMode = fileInteractionMode,
+        onAddGuideClick = onAddGuideClick,
+        onMoveCancelGuideClick = {
+            viewModel.initRelativeGuide()
+        },
+        onMoveSuccessGuideClick = {
+            viewModel.initRelativeGuide()
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
 fun WithoutFilesScreen(
-    onAddGuideClick: () -> Unit
+    fileInteractionMode: FileInteractionMode,
+    onAddGuideClick: () -> Unit,
+    onMoveCancelGuideClick: () -> Unit,
+    onMoveSuccessGuideClick: () -> Unit,
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         contentWindowInsets = androidx.compose.foundation.layout.WindowInsets.safeDrawing,
+        topBar = {
+            if (fileInteractionMode == FileInteractionMode.MovingItem) {
+                CenterAlignedTopAppBar(
+                    title = {
+                        Text(stringResource(R.string.lblMoving))
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onMoveCancelGuideClick) {
+                            Icon(
+                                painterResource(R.drawable.ic_cancel),
+                                contentDescription = "Cancelar"
+                            )
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = onMoveSuccessGuideClick) {
+                            Icon(
+                                painterResource(R.drawable.ic_success),
+                                contentDescription = "Aceptar"
+                            )
+                        }
+                    }
+                )
+            }
+        },
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = onAddGuideClick,

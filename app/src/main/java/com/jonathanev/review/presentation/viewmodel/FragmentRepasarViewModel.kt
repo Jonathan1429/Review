@@ -9,7 +9,6 @@ import com.jonathanev.review.domain.mapper.GuideQuestionExtractor
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.QAItemDomain
-import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.presentation.event.GuidePreviewEvent
 import com.jonathanev.review.presentation.event.GuideReviewEvent
@@ -87,37 +86,42 @@ class FragmentRepasarViewModel @Inject constructor(
         _uiState.value = GuideUiState()
     }
 
-    fun getObtenerDatosXML(folderId: String, relativeGuidePath: RelativeGuidePath) {
-        val guideDomainModel = cachedGuides.find { it.nameGuide == folderId }
-        if (guideDomainModel == null) {
-            emitMessage("No se ha encontrado la guia")
-            return
-        }
-        //Revisar como se obtienen los datos aqui, porque no se visualiza la imagen
-        when (val result = getGuideXmlDataUseCase.invoke(
-            context = GuideContext.Browsing(
-                guide = guideDomainModel,
-                relativeGuidePath = relativeGuidePath
-            )
-        )) {
-            is GetGuideResult.Success -> {
-                val (questions, answers) = guideQuestionExtractor.map(result)
-                initUiPreviewQuestions(result.list, relativeGuidePath)
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        fileName = guideDomainModel.nameGuide,
-                        description = guideDomainModel.description,
-                        preguntas = questions.map { it.toUi() },
-                        respuestas = answers.map { it.toUi() }
-                    )
-                }
+    fun getObtenerDatosXML(folderId: String) {
+        viewModelScope.launch {
+            // 1. Búsqueda de la guía en caché
+            val guideDomainModel = cachedGuides.find { it.nameGuide == folderId }
+            if (guideDomainModel == null) {
+                emitMessage("No se ha encontrado la guía")
+                return@launch
             }
 
-            GetGuideResult.InvalidFormat -> emitMessage("La guia está dañada")
+            // 2. Obtención de datos XML
+            val context = GuideContext.Browsing(guide = guideDomainModel)
+            val result = getGuideXmlDataUseCase(context = context)
 
-            GetGuideResult.NotFound -> emitMessage("No se ha encontrado la guia")
+            // 3. Manejo de errores early return
+            if (result !is GetGuideResult.Success) {
+                val errorMessage = when (result) {
+                    GetGuideResult.InvalidFormat -> "La guía está dañada"
+                    GetGuideResult.NotFound -> "No se ha encontrado la guía"
+                    else -> "Error desconocido"
+                }
+                emitMessage(errorMessage)
+                return@launch
+            }
 
-            GetGuideResult.UnknownError -> emitMessage("Error desconocido")
+            val (questions, answers) = guideQuestionExtractor.map(result)
+
+            initUiPreviewQuestions(result.list)
+
+            _uiState.update { currentState ->
+                currentState.copy(
+                    fileName = guideDomainModel.nameGuide,
+                    description = guideDomainModel.description,
+                    preguntas = questions.map { it.toUi() },
+                    respuestas = answers.map { it.toUi() }
+                )
+            }
         }
     }
 
@@ -127,16 +131,15 @@ class FragmentRepasarViewModel @Inject constructor(
         }
     }
 
-    private fun initUiPreviewQuestions(
-        domainItems: List<QAItemDomain>,
-        relativeGuidePath: RelativeGuidePath,
-    ) {
-        val response = getPreviewQuestionsUseCase.invoke(domainItems, relativeGuidePath)
-        val responseToUi = response.map { it.toUi() }
+    private fun initUiPreviewQuestions(domainItems: List<QAItemDomain>) {
+        viewModelScope.launch {
+            val response = getPreviewQuestionsUseCase.invoke(domainItems)
+            val responseToUi = response.map { it.toUi() }
 
-        _uiStatePreview.value = PreviewQuestionStateUi(
-            previewState = responseToUi
-        )
+            _uiStatePreview.value = PreviewQuestionStateUi(
+                previewState = responseToUi
+            )
+        }
     }
 
     fun swapTypeContent() {

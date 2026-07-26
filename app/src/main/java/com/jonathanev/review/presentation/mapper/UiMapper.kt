@@ -88,3 +88,7 @@ fun SaveGuideModeUI.toDomain(): SaveGuideModeDomain {
         SaveGuideModeUI.Update -> SaveGuideModeDomain.Update
     }
 }
+
+fun RelativeGuidePathDomain.toUI(): RelativeGuidePathUI {
+    return RelativeGuidePathUI(this.value)
+}

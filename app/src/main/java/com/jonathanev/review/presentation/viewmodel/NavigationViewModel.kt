@@ -5,9 +5,6 @@ import androidx.lifecycle.ViewModel
 import com.jonathanev.review.domain.BackNavigationUseCase
 import com.jonathanev.review.domain.NextNavigationUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 @HiltViewModel
@@ -16,7 +13,7 @@ class NavigationViewModel @Inject constructor(
     private val nextNavigationUseCase: NextNavigationUseCase,
     private val backNavigationUseCase: BackNavigationUseCase
 ) : ViewModel() {
-    companion object {
+    /*companion object {
         private const val KEY_GUIDES_PATH = "guides_path"
     }
 
@@ -47,5 +44,5 @@ class NavigationViewModel @Inject constructor(
         _relativeGuidePath.value = backGuides.value
 
         savedStateHandle[KEY_GUIDES_PATH] = backGuides.value
-    }
+    }*/
 }

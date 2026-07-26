@@ -16,7 +16,6 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.jonathanev.review.R
-import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.presentation.model.ScreenDataUi
 import com.jonathanev.review.presentation.viewmodel.CreateFilesViewModel
@@ -196,13 +195,13 @@ class FragmentCreatingFiles : Fragment(R.layout.fragment_compose_container) {
             GridLayoutManager(requireContext(), 6)*/
 
         //viewModel.loadIconsFor(mode)
-        val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
+        //val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
 
         when (mode) {
             FolderAction.CreatingFolder -> showToast("Sección implementada")//showFolderUI()
             is FolderAction.RenamingFile -> {
                 //showFileUI()
-                viewModel.uploadCachedGuides(relativeGuidePath.value)
+                //viewModel.uploadCachedGuides(relativeGuidePath.value)
 
                 /*when (val result = viewModel.fillFields(mode.fileName)) {
                     is GuideResultUi.Error -> showToast("No se ha encontrado la guia a cargar")
@@ -217,7 +216,7 @@ class FragmentCreatingFiles : Fragment(R.layout.fragment_compose_container) {
             FolderAction.CreatingFile -> {
                 showToast("Sección aún no implementada3")
                 //showFileUI()
-                viewModel.uploadCachedGuides(relativeGuidePath.value)
+                //viewModel.uploadCachedGuides(relativeGuidePath.value)
             }
 
             FolderAction.None -> Log.e("Error", "No se pudieron cargar datos iniciales")
@@ -327,7 +326,7 @@ class FragmentCreatingFiles : Fragment(R.layout.fragment_compose_container) {
         val description =
             binding.fragmentCreate.fragmentComponentsFile.etDescription.text.toString().trim()*/
 
-        val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
+        //val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
         //viewModel.renameFile(oldName, fileName, description, relativeGuidePath)
     }
 

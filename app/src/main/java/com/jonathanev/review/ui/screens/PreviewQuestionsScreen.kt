@@ -20,10 +20,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.presentation.state.PreviewQuestionStateUi
 import com.jonathanev.review.presentation.viewmodel.FragmentRepasarViewModel
-import com.jonathanev.review.presentation.viewmodel.NavigationViewModel
 import com.jonathanev.review.ui.components.QuestionCard
 import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.PreviewQuestionsProvider
@@ -49,25 +47,15 @@ fun PreviewPreviewQuestionsScreen(
 @Composable
 fun PreviewQuestionsRoute(
     viewModel: FragmentRepasarViewModel,
-    navigationViewModel: NavigationViewModel,
     nameGuide: String,
     onEditingGuideClick: (Int) -> Unit,
     onPlayGuideClick: () -> Unit
 ) {
-    val relativeGuidePath =
-        navigationViewModel.relativeGuidePath.collectAsStateWithLifecycle().value
-    //val state = viewModel.uiState.collectAsStateWithLifecycle().value
     val previewQuestions = viewModel.uiStatePreview.collectAsStateWithLifecycle().value
-
-    /*val noImages = viewModel.imageList.collectAsStateWithLifecycle().value.size
-    val noTexts = viewModel.textList.collectAsStateWithLifecycle().value.size*/
 
     LaunchedEffect(Unit) {
         viewModel.uploadCachedGuides()
-        viewModel.getObtenerDatosXML(
-            folderId = nameGuide,
-            relativeGuidePath = RelativeGuidePath(relativeGuidePath)
-        )
+        viewModel.getObtenerDatosXML(folderId = nameGuide)
     }
 
     PreviewQuestionsScreen(

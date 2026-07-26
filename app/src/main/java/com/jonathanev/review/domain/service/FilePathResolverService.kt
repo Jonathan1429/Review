@@ -8,17 +8,17 @@ import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.provider.FilePathsProvider
 import com.jonathanev.review.domain.repository.FilePathResolver
 import com.jonathanev.review.domain.repository.NavigationPathRepository
+import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 class FilePathResolverService @Inject constructor(
     private val navigationPathRepository: NavigationPathRepository,
     private val filePathsProvider: FilePathsProvider
 ): FilePathResolver {
-    override fun mapToFilePathSpecificGuide(
+    override suspend fun mapToFilePathSpecificGuide(
         guideDomainModel: GuideDomainModel,
-        relativeGuidePath: RelativeGuidePath,
         kind: PathKind
-    ) = getFilePathSpecificGuide(guideDomainModel, relativeGuidePath, kind)
+    ) = getFilePathSpecificGuide(guideDomainModel, kind)
 
     fun mapToFolderPathSpecificGuide(
         guideDomainModel: GuideDomainModel,
@@ -58,11 +58,12 @@ class FilePathResolverService @Inject constructor(
         return GuidePath(path)
     }
 
-    private fun getFilePathSpecificGuide(
+    private suspend fun getFilePathSpecificGuide(
         guideDomainModel: GuideDomainModel,
-        relativePath: RelativeGuidePath,
         kind: PathKind
     ): GuidePath {
+        val relativePath = navigationPathRepository.relativePath.first()
+
         val root = when (kind) {
             PathKind.GUIAS -> navigationPathRepository.getRootGuides()
             PathKind.IMAGENES -> navigationPathRepository.getRootImages()

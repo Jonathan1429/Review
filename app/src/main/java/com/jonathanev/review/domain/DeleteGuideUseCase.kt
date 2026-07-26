@@ -3,27 +3,26 @@ package com.jonathanev.review.domain
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.QuestionContentDomain
-import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.repository.GuiaRepository
 import com.jonathanev.review.domain.repository.ImagesRepository
+import com.jonathanev.review.domain.repository.NavigationPathRepository
 import com.jonathanev.review.domain.result.DeleteGuideResult
 import com.jonathanev.review.domain.result.GetGuideResult
+import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 class DeleteGuideUseCase @Inject constructor(
     private val guiaRepository: GuiaRepository,
-    private val imagesRepository: ImagesRepository
+    private val imagesRepository: ImagesRepository,
+    private val navigationPathRepository: NavigationPathRepository
 ) {
-    operator fun invoke(
-        guideDomainModel: GuideDomainModel,
-        relativeGuidePath: RelativeGuidePath
+    suspend operator fun invoke(
+        guideDomainModel: GuideDomainModel
     ): DeleteGuideResult {
+        val relativeGuidePath = navigationPathRepository.relativePath.first()
 
         return when (val result =
-            guiaRepository.getXMLGuide(
-                guideDomainModel,
-                relativeGuidePath
-            )) {
+            guiaRepository.getXMLGuide(guideDomainModel)) {
             is GetGuideResult.Success -> {
                 val tempQuestions =
                     result.list.map { it.question }.toList()
@@ -47,7 +46,7 @@ class DeleteGuideUseCase @Inject constructor(
                     return DeleteGuideResult.ErrorImage
                 }
 
-                return DeleteGuideResult.DeleteSuccess
+                DeleteGuideResult.DeleteSuccess
             }
 
             else -> DeleteGuideResult.Error

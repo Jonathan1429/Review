@@ -5,20 +5,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.BundleCompat
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.NavOptions
-import androidx.navigation.fragment.findNavController
 import com.jonathanev.review.R
 import com.jonathanev.review.databinding.FragmentReviewEntryBinding
-import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.presentation.viewmodel.FragReviewEntryViewModel
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlin.getValue
 
 @AndroidEntryPoint
 class FragmentReviewEntry : Fragment() {
@@ -48,13 +44,13 @@ class FragmentReviewEntry : Fragment() {
     }
 
     private fun initUI(mode: FolderAction) {
-        val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
-        val noGuides = viewModel.getGuides(relativeGuidePath)
+        //val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
+        //val noGuides = viewModel.getGuides(relativeGuidePath)
         val navOptions = NavOptions.Builder()
             .setPopUpTo(R.id.fragmentReviewEntry, true)
             .build()
 
-        if (noGuides > 0) {
+        /*if (noGuides > 0) {
             findNavController().navigate(
                 resId = R.id.action_fragmentReviewEntry_to_fragmentListGuides2,
                 args = bundleOf("mode" to mode),
@@ -89,6 +85,6 @@ class FragmentReviewEntry : Fragment() {
                 bundleOf("mode" to mode),
                 navOptions
             )
-        }
+        }*/
     }
 }

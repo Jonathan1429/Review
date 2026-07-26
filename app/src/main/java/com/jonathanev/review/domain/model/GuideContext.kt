@@ -6,15 +6,9 @@ sealed class GuideContext {
         val relativeGuidePath: RelativeGuidePath
     ) : GuideContext()
 
-    data class Browsing(
-        val guide: GuideDomainModel,
-        val relativeGuidePath: RelativeGuidePath
-    ): GuideContext()
+    data class Browsing(val guide: GuideDomainModel) : GuideContext()
 
-    data class Editing(
-        val guide: GuideDomainModel,
-        val relativeGuidePath: RelativeGuidePath
-    ) : GuideContext()
+    data class Editing(val guide: GuideDomainModel) : GuideContext()
 
     data class Moving(
         val guide: GuideDomainModel,

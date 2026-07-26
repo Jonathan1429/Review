@@ -6,9 +6,8 @@ import com.jonathanev.review.domain.model.PathKind
 import com.jonathanev.review.domain.model.RelativeGuidePath
 
 interface FilePathResolver {
-    fun mapToFilePathSpecificGuide(
+    suspend fun mapToFilePathSpecificGuide(
         guideDomainModel: GuideDomainModel,
-        relativeGuidePath: RelativeGuidePath,
         kind: PathKind
     ): GuidePath
 

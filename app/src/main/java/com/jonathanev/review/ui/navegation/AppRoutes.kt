@@ -3,6 +3,7 @@ package com.jonathanev.review.ui.navegation
 import androidx.navigation3.runtime.NavKey
 import com.jonathanev.review.presentation.model.FileFormMode
 import com.jonathanev.review.presentation.model.FileInteractionMode
+import com.jonathanev.review.presentation.model.FolderUiModel
 import com.jonathanev.review.presentation.model.GuideMode
 import com.jonathanev.review.presentation.model.QuestionContentMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
@@ -11,9 +12,27 @@ import kotlinx.serialization.Serializable
 @Serializable
 sealed interface AppRoutes : NavKey {
     @Serializable
-    data class ListGuidesScreen(val fileInteractionMode: FileInteractionMode = FileInteractionMode.Default): AppRoutes
+    data object WithoutFoldersScreen : AppRoutes
+
     @Serializable
-    data class MainScreen(val fileInteractionMode: FileInteractionMode = FileInteractionMode.Default) : AppRoutes
+    data class WithoutGuidesScreen(val fileInteractionMode: FileInteractionMode = FileInteractionMode.Default) :
+        AppRoutes
+
+    @Serializable
+    data class ListFoldersScreen(
+        val fileInteractionMode: FileInteractionMode = FileInteractionMode.Default,
+        val listFolders: List<FolderUiModel>
+    ) : AppRoutes
+
+    @Serializable
+    data class ListGuidesScreen(val fileInteractionMode: FileInteractionMode = FileInteractionMode.Default) :
+        AppRoutes
+    @Serializable
+    data class EntryGuidesScreen(val fileInteractionMode: FileInteractionMode = FileInteractionMode.Default) :
+        AppRoutes
+
+    @Serializable
+    data object MainScreen : AppRoutes
     @Serializable
     data class CreateFilesPropertiesScreen(val fileFormMode: FileFormMode): AppRoutes
 

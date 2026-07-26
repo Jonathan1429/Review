@@ -17,14 +17,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
-import com.jonathanev.review.presentation.model.FolderAction
-import com.jonathanev.review.presentation.event.UIMovingEvent
 import com.jonathanev.review.R
-import com.jonathanev.review.presentation.viewmodel.FragmentWithoutFilesViewModel
-import com.jonathanev.review.presentation.viewmodel.MainToolbarViewModel
 import com.jonathanev.review.databinding.FragmentWithoutFilesBinding
-import com.jonathanev.review.domain.model.RelativeGuidePath
+import com.jonathanev.review.presentation.event.UIMovingEvent
+import com.jonathanev.review.presentation.model.FolderAction
+import com.jonathanev.review.presentation.viewmodel.FragmentWithoutFilesViewModel
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
+import com.jonathanev.review.presentation.viewmodel.MainToolbarViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -98,8 +97,8 @@ class FragmentWithoutFiles : Fragment() {
 
                 launch {
                     viewModelToolbar.onSuccess.collect {
-                        val relativePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
-                        viewModel.movingGuide(relativePath)
+                        /*val relativePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
+                        viewModel.movingGuide(relativePath)*/
                         viewModelToolbar.initButtons()
                         navStateViewModel.setMainPath()
 

@@ -1,15 +1,12 @@
 package com.jonathanev.review.presentation.viewmodel
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jonathanev.review.domain.BackNavigationUseCase
 import com.jonathanev.review.domain.GetFoldersWithNumGuidesUseCase
 import com.jonathanev.review.domain.InitializeGuideStorageUseCase
-import com.jonathanev.review.domain.model.GuidePath
-import com.jonathanev.review.domain.model.RelativeGuidePath
-import com.jonathanev.review.domain.repository.NavigationPathRepository
+import com.jonathanev.review.domain.NextNavigationUseCase
+import com.jonathanev.review.domain.ResetNavigationUseCase
 import com.jonathanev.review.presentation.event.MainUiEvent
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.FolderUiModel
@@ -25,9 +22,10 @@ import javax.inject.Inject
 @HiltViewModel
 class MainActivityViewModel @Inject constructor(
     private val initializeGuideStorageUseCase: InitializeGuideStorageUseCase,
-    private val savedStateHandle: SavedStateHandle,
-    private val navigationPathRepository: NavigationPathRepository,
-    private val getFoldersWithNumGuidesUseCase: GetFoldersWithNumGuidesUseCase
+    private val getFoldersWithNumGuidesUseCase: GetFoldersWithNumGuidesUseCase,
+    private val resetNavigationUseCase: ResetNavigationUseCase,
+    private val nextNavigationUseCase: NextNavigationUseCase,
+    private val backNavigationUseCase: BackNavigationUseCase
 ) : ViewModel() {
     /*private val _shouldRequestPermission = MutableLiveData<Boolean>()
     val shouldRequestPermission: LiveData<Boolean> get() = _shouldRequestPermission*/
@@ -42,12 +40,6 @@ class MainActivityViewModel @Inject constructor(
         private const val KEY_GUIDES_PATH = "guides_path"
     }
 
-    private val _guidesPath =
-        MutableStateFlow(
-            savedStateHandle[KEY_GUIDES_PATH]
-                ?: ""
-        )
-    val guidesPath: StateFlow<String> = _guidesPath
     fun createFolders() {
         val isSuccess = initializeGuideStorageUseCase.invoke()
         if (!isSuccess){
@@ -68,25 +60,21 @@ class MainActivityViewModel @Inject constructor(
     }
 
     fun setMainPath() {
-        _guidesPath.value = ""
-        savedStateHandle[KEY_GUIDES_PATH] = ""
+        viewModelScope.launch {
+            resetNavigationUseCase.invoke()
+        }
     }
 
     fun next(folder: String) {
-        val nextGuides =
-            navigationPathRepository.next(RelativeGuidePath(guidesPath.value), folder)
-
-        _guidesPath.value = nextGuides.value
-
-        savedStateHandle[KEY_GUIDES_PATH] = nextGuides.value
+        viewModelScope.launch {
+            nextNavigationUseCase.invoke(folder)
+        }
     }
 
     fun back() {
-        val backGuides =
-            navigationPathRepository.back(RelativeGuidePath(guidesPath.value))
-        _guidesPath.value = backGuides.value
-
-        savedStateHandle[KEY_GUIDES_PATH] = backGuides.value
+        viewModelScope.launch {
+            backNavigationUseCase.invoke()
+        }
     }
     /*fun checkIfNeedsPermission(hasPermission: Boolean) {
         if (!hasPermission) {

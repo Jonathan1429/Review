@@ -36,7 +36,6 @@ import com.jonathanev.review.presentation.model.IconType
 import com.jonathanev.review.presentation.state.CreatingUIState
 import com.jonathanev.review.presentation.state.PropertiesFilesState
 import com.jonathanev.review.presentation.viewmodel.CreateFilesViewModel
-import com.jonathanev.review.presentation.viewmodel.NavigationViewModel
 import com.jonathanev.review.ui.components.BoxItemFolder
 import com.jonathanev.review.ui.components.CustomTextField
 import com.jonathanev.review.ui.components.IconsForSelect
@@ -72,7 +71,6 @@ fun PreviewCreatingFile(
 @Composable
 fun CreateFilesPropertiesRoute(
     viewModel: CreateFilesViewModel,
-    viewModelNavigation: NavigationViewModel,
     fileFormMode: FileFormMode,
     onNavBack: () -> Unit,
     onNavFillingGuide: (PropertiesGuide) -> Unit
@@ -90,15 +88,7 @@ fun CreateFilesPropertiesRoute(
                 viewModel.initWithMode(fileFormMode)
 
                 val oldName = fileFormMode.guideUiModel.nameGuide
-                val responseFillFields = viewModel.fillFields(oldName)
-                if (!responseFillFields) {
-                    Toast.makeText(
-                        context,
-                        "Guia dañada, imposible renombrar",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    onNavBack()
-                }
+                viewModel.fillFields(oldName, fileFormMode.guideUiModel.description)
             }
 
             FileFormMode.CreatingFolder -> viewModel.initWithMode(fileFormMode)
@@ -115,15 +105,12 @@ fun CreateFilesPropertiesRoute(
                     }
 
                     is CreatingUIState.RenameFile -> {
-                        val relativeGuidePath = viewModelNavigation.relativeGuidePath.value
-
-                        viewModel.uploadCachedGuides(relativeGuidePath)
+                        //viewModel.uploadCachedGuides()
 
                         viewModel.renameFile(
                             oldName = state.oldName,
-                            fileName = state.name,
-                            description = state.description,
-                            relativeGuidePath = relativeGuidePath
+                            newFileName = state.name,
+                            newDescription = state.description
                         )
                         onNavBack()
                     }

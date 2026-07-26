@@ -25,7 +25,6 @@ import com.jonathanev.review.presentation.model.GuideMode
 import com.jonathanev.review.presentation.model.QuestionContentMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.presentation.model.QuestionItemUi
-import com.jonathanev.review.presentation.model.RelativeGuidePath
 import com.jonathanev.review.presentation.model.SaveGuideMode
 import com.jonathanev.review.presentation.state.GuideUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -109,7 +108,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         _uiState.value = GuideUiState()
     }
 
-    fun loadInitialData(guideMode: GuideMode, relativeGuidePath: RelativeGuidePath) {
+    fun loadInitialData(guideMode: GuideMode) {
         if (isInitialized) return
         isInitialized = true
 
@@ -118,16 +117,14 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             is GuideMode.Edit -> {
                 getObtenerDatosXML(
                     posQuestion = guideMode.posQuestion,
-                    nameGuide = guideMode.nameGuide,
-                    relativeGuidePath = relativeGuidePath
+                    nameGuide = guideMode.nameGuide
                 )
             }
 
             is GuideMode.Review -> {
                 getObtenerDatosXML(
                     posQuestion = guideMode.posQuestion,
-                    nameGuide = guideMode.nameGuide,
-                    relativeGuidePath = relativeGuidePath
+                    nameGuide = guideMode.nameGuide
                 )
             }
         }
@@ -401,11 +398,10 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     private fun findGuide(nameGuide: String): GuideDomainModel? =
         getSaveGuidesUseCase.invoke().find { it.nameGuide == nameGuide }
 
-    private fun loadGuideXml(
+    private suspend fun loadGuideXml(
         guide: GuideDomainModel,
-        relativeGuidePath: RelativeGuidePath
     ): GetGuideResult =
-        getGuideXmlDataUseCase.invoke(GuideContext.Editing(guide, relativeGuidePath.toDomain()))
+        getGuideXmlDataUseCase.invoke(GuideContext.Editing(guide))
 
     private fun handleGuideResult(
         result: GetGuideResult,
@@ -443,17 +439,18 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     fun getObtenerDatosXML(
         posQuestion: Int,
         nameGuide: String,
-        relativeGuidePath: RelativeGuidePath
     ) {
-        if (uiState.value.respuestas.isNotEmpty()) return
+        viewModelScope.launch {
+            if (uiState.value.respuestas.isNotEmpty()) return@launch
 
-        val guide = findGuide(nameGuide) ?: run {
-            showMessage("No se ha encontrado la guia a renombrar")
-            return
+            val guide = findGuide(nameGuide) ?: run {
+                showMessage("No se ha encontrado la guia a renombrar")
+                return@launch
+            }
+
+            val result = loadGuideXml(guide)
+            handleGuideResult(result, posQuestion)
         }
-
-        val result = loadGuideXml(guide, relativeGuidePath)
-        handleGuideResult(result, posQuestion)
     }
 
     private fun isDataValid(): Boolean {
@@ -497,7 +494,6 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     fun saveGuide(
         nameGuide: String,
         description: String,
-        relativeGuidePath: RelativeGuidePath,
         mode: SaveGuideMode
     ) {
         if (!isDataValid()) {
@@ -510,7 +506,6 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 description = description,
                 preguntas = uiState.value.preguntas.map { it.toDomain() },
                 respuestas = uiState.value.respuestas.map { it.toDomain() },
-                relativeGuidePath = relativeGuidePath.toDomain(),
                 mode = mode.toDomain()
             )
 

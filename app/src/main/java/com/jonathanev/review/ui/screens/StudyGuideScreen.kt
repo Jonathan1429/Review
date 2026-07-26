@@ -46,7 +46,6 @@ import com.jonathanev.review.R
 import com.jonathanev.review.presentation.event.CreateGuideEvent
 import com.jonathanev.review.presentation.model.GuideMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
-import com.jonathanev.review.presentation.model.RelativeGuidePath
 import com.jonathanev.review.presentation.model.SaveGuideMode
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.ui.components.AssetCarouselViewer
@@ -104,7 +103,6 @@ fun PreviewStudyGuideScreen(
 fun FillingGuideRoute(
     viewModel: SharedFragmentCreateFileViewModel,
     guideMode: GuideMode,
-    relativeGuidePath: RelativeGuidePath,
     onOpenAssetClick: (QuestionContentUi) -> Unit,
     onAddAssetClick: (ContentType) -> Unit,
     onActionGuideNone: () -> Unit,
@@ -137,10 +135,7 @@ fun FillingGuideRoute(
     )
 
     LaunchedEffect(Unit) {
-        viewModel.loadInitialData(
-            guideMode = guideMode,
-            relativeGuidePath = relativeGuidePath
-        )
+        viewModel.loadInitialData(guideMode = guideMode)
     }
 
     LaunchedEffect(Unit) {
@@ -246,7 +241,6 @@ fun FillingGuideRoute(
                     viewModel.saveGuide(
                         nameGuide = guideMode.nameGuide,
                         description = guideMode.description,
-                        relativeGuidePath = relativeGuidePath,
                         mode = SaveGuideMode.Create
                     )
                 }
@@ -255,7 +249,6 @@ fun FillingGuideRoute(
                     viewModel.saveGuide(
                         nameGuide = guideMode.nameGuide,
                         description = guideMode.description,
-                        relativeGuidePath = relativeGuidePath,
                         mode = SaveGuideMode.Update
                     )
                 }

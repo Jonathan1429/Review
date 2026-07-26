@@ -29,7 +29,7 @@ import org.robolectric.annotation.GraphicsMode
     sdk = [34],
     instrumentedPackages = ["androidx.loader.content"]
 )
-class ListGuidesScreenScreenshotTest(
+class EntryGuidesScreenScreenshotTest(
     private val variantName: String,
     private val themeQualifier: String,
     private val data: StudyGuidesProv

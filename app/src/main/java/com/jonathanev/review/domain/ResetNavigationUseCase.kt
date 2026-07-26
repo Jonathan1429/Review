@@ -3,10 +3,10 @@ package com.jonathanev.review.domain
 import com.jonathanev.review.domain.repository.NavigationPathRepository
 import javax.inject.Inject
 
-class NextNavigationUseCase @Inject constructor(
+class ResetNavigationUseCase @Inject constructor(
     private val navigationPathRepository: NavigationPathRepository
 ) {
-    suspend operator fun invoke(folder: String) {
-        return navigationPathRepository.next(folder)
+    suspend operator fun invoke() {
+        navigationPathRepository.reset()
     }
 }

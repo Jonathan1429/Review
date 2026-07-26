@@ -7,14 +7,15 @@ import com.jonathanev.review.domain.model.GuideRenameContext
 import com.jonathanev.review.domain.model.OptionalAttrGuide
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
-import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.model.RequiredAttrGuide
 import com.jonathanev.review.domain.repository.DirectoryManager
 import com.jonathanev.review.domain.repository.GuiaRepository
 import com.jonathanev.review.domain.repository.ImagesRepository
+import com.jonathanev.review.domain.repository.NavigationPathRepository
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.GuideResource
 import com.jonathanev.review.domain.result.RenamedGuideResult
+import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 class RenameGuideUseCase @Inject constructor(
@@ -22,14 +23,16 @@ class RenameGuideUseCase @Inject constructor(
     private val guideQuestionExtractor: GuideQuestionExtractor,
     private val imagesRepository: ImagesRepository,
     private val directoryManager: DirectoryManager,
+    private val navigationPathRepository: NavigationPathRepository
 ) {
-    operator fun invoke(
+    suspend operator fun invoke(
         guide: GuideDomainModel,
-        relativeGuidePath: RelativeGuidePath,
         newName: String,
-        description: String
+        newDescription: String
     ): RenamedGuideResult {
-        return when (val result = guiaRepository.getXMLGuide(guide, relativeGuidePath)) {
+        val relativeGuidePath = navigationPathRepository.relativePath.first()
+
+        return when (val result = guiaRepository.getXMLGuide(guide)) {
             is GetGuideResult.Success -> {
                 val (questions, answers) = guideQuestionExtractor.map(result)
 
@@ -45,7 +48,7 @@ class RenameGuideUseCase @Inject constructor(
                         guide = guide,
                         relativeGuidePath = relativeGuidePath,
                         name = RequiredAttrGuide(newName),
-                        description = OptionalAttrGuide(description)
+                        description = OptionalAttrGuide(newDescription)
                     )
                 )
 
@@ -67,7 +70,7 @@ class RenameGuideUseCase @Inject constructor(
                 }
 
 
-                return RenamedGuideResult.Success
+                RenamedGuideResult.Success
             }
 
             GetGuideResult.NotFound -> RenamedGuideResult.NotFound

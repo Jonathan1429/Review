@@ -196,6 +196,8 @@ dependencies {
 
     // UnitTesting
     testImplementation 'junit:junit:4.13.2'
+    // Para tests unitarios en la JVM (JUnit 4/5)
+    testImplementation("org.jetbrains.kotlin:kotlin-test")
 
     // Mockk
     testImplementation("io.mockk:mockk:1.13.12")

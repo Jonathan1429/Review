@@ -17,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -26,7 +27,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -45,8 +45,8 @@ import com.jonathanev.review.presentation.model.GuideResultUi
 import com.jonathanev.review.presentation.model.GuideUiModel
 import com.jonathanev.review.presentation.model.RelativeGuidePath
 import com.jonathanev.review.presentation.state.DialogState
+import com.jonathanev.review.presentation.state.GuidesUiState
 import com.jonathanev.review.presentation.viewmodel.FragmentListGuidesViewModel
-import com.jonathanev.review.presentation.viewmodel.NavigationViewModel
 import com.jonathanev.review.ui.components.ItemGuide
 import com.jonathanev.review.ui.model.PropertiesGuide
 import com.jonathanev.review.ui.preview.DevicePreviews
@@ -77,92 +77,104 @@ fun PreviewMovingGuide(
 @Composable
 fun ListGuidesRoute(
     viewModel: FragmentListGuidesViewModel,
-    navigationViewModel: NavigationViewModel,
-    guides: List<GuideUiModel>,
     fileInteractionMode: FileInteractionMode,
     onAddGuideClick: () -> Unit,
     onOpenGuideClick: (String) -> Unit,
     onDeleteGuideClick: () -> Unit,
     onRenameGuideClick: (PropertiesGuide) -> Unit,
     onMoveGuideClick: () -> Unit,
-    onMoveCancelGuideClick: () -> Unit,
-    onMoveSuccessGuideClick: () -> Unit,
-    onBackNav: () -> Unit
+    onBackNav: () -> Unit,
+    onNavigateWithoutFilesScreen: () -> Unit,
 ) {
     val context = LocalContext.current
     var currentDialog by rememberSaveable { mutableStateOf<DialogState?>(null) }
-    val relativeGuidePath =
-        RelativeGuidePath(navigationViewModel.relativeGuidePath.collectAsStateWithLifecycle().value)
 
-    LaunchedEffect(relativeGuidePath) {
-        viewModel.getAllGuides(relativeGuidePath)
+    var currentInteractionMode by rememberSaveable(fileInteractionMode) {
+        mutableStateOf(fileInteractionMode)
     }
 
-    ListGuidesScreen(
-        guides = guides,
-        onAddGuideClick = onAddGuideClick,
-        fileInteractionMode = fileInteractionMode,
-        onItemClick = { posGuide ->
-            when (val result = viewModel.getGuideSelected(posGuide)) {
-                GuideResultUi.Error -> {
-                    onBackNav()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val relativeGuidePath by viewModel.relativePath.collectAsStateWithLifecycle()
+
+    when (val state = uiState) {
+        is GuidesUiState.Loading -> {
+            CircularProgressIndicator()
+        }
+
+        is GuidesUiState.Empty -> {
+            onNavigateWithoutFilesScreen()
+        }
+
+        is GuidesUiState.Success -> {
+            ListGuidesScreen(
+                guides = state.guides,
+                onAddGuideClick = onAddGuideClick,
+                fileInteractionMode = currentInteractionMode,
+                onItemClick = { posGuide ->
+                    when (val result = viewModel.getGuideSelected(posGuide)) {
+                        GuideResultUi.Error -> {
+                            onBackNav()
+                            Toast.makeText(
+                                /* context = */ context,
+                                /* text = */
+                                "No se pudo encontrar la guia en la posición $posGuide",
+                                /* duration = */
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+
+                        is GuideResultUi.Success -> {
+                            currentDialog = DialogState.OptionsMenu(result)
+                        }
+                    }
+                },
+                onMoveCancelGuideClick = {
+                    currentInteractionMode = FileInteractionMode.Default
+                },
+                onMoveSuccessGuideClick = {
+                    viewModel.movingGuide(relativeGuidePath)
+                },
+                onErrorProcess = {
                     Toast.makeText(
                         /* context = */ context,
-                        /* text = */ "No se pudo encontrar la guia en la posición $posGuide",
+                        /* text = */ "Debes mover la guia antes de hacer otra accion",
                         /* duration = */ Toast.LENGTH_SHORT
                     ).show()
                 }
+            )
 
-                is GuideResultUi.Success -> {
-                    currentDialog = DialogState.OptionsMenu(result)
-                }
-            }
-        },
-        onMoveCancelGuideClick = onMoveCancelGuideClick,
-        onMoveSuccessGuideClick = {
-            viewModel.movingGuide(relativeGuidePath)
-            onMoveSuccessGuideClick()
-        },
-        onErrorProcess = {
-            Toast.makeText(
-                /* context = */ context,
-                /* text = */ "Debes mover la guia antes de hacer otra accion",
-                /* duration = */ Toast.LENGTH_SHORT
-            ).show()
-        }
-    )
-
-    currentDialog?.let { stateDialog ->
-        currentDialog = when (stateDialog) {
-            is DialogState.ConfirmDelete -> {
-                dialogConfirmDelete(
-                    currentDialog,
-                    viewModel,
-                    stateDialog,
-                    relativeGuidePath,
-                    onDeleteGuideClick
-                )
-            }
-
-            is DialogState.OptionsMenu -> {
-                dialogOptionsMenu(
-                    currDialog = currentDialog,
-                    stateDialog = stateDialog,
-                    onOpenGuideClick = onOpenGuideClick,
-                    onRenameGuideClick = { guideUiModel ->
-                        onRenameGuideClick(
-                            PropertiesGuide(
-                                name = guideUiModel.nameGuide,
-                                description = guideUiModel.description
-                            )
+            currentDialog?.let { stateDialog ->
+                currentDialog = when (stateDialog) {
+                    is DialogState.ConfirmDelete -> {
+                        dialogConfirmDelete(
+                            currentDialog,
+                            viewModel,
+                            stateDialog,
+                            relativeGuidePath,
+                            onDeleteGuideClick
                         )
-                    },
-                    onMoveGuideClick = {
-                        viewModel.setContext(relativeGuidePath)
-                        navigationViewModel.setMainPath()
-                        onMoveGuideClick()
                     }
-                )
+
+                    is DialogState.OptionsMenu -> {
+                        dialogOptionsMenu(
+                            currDialog = currentDialog,
+                            stateDialog = stateDialog,
+                            onOpenGuideClick = onOpenGuideClick,
+                            onRenameGuideClick = { guideUiModel ->
+                                onRenameGuideClick(
+                                    PropertiesGuide(
+                                        name = guideUiModel.nameGuide,
+                                        description = guideUiModel.description
+                                    )
+                                )
+                            },
+                            onMoveGuideClick = {
+                                viewModel.setContext(relativeGuidePath)
+                                onMoveGuideClick()
+                            }
+                        )
+                    }
+                }
             }
         }
     }
@@ -292,10 +304,7 @@ private fun dialogConfirmDelete(
         text = { Text(text = "¿Estás seguro que deseas eliminar la guia?") },
         confirmButton = {
             TextButton(onClick = {
-                viewModel.deleteGuide(
-                    nameGuide = stateDialog.guide.guideUiModel.nameGuide,
-                    relativeGuidePath = relativeGuidePath
-                )
+                viewModel.deleteGuide(nameGuide = stateDialog.guide.guideUiModel.nameGuide)
                 onDeleteGuideClick()
                 currentDialog1 = null
             }) {

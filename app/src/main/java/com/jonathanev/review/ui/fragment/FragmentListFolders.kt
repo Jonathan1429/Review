@@ -26,10 +26,9 @@ import com.jonathanev.review.presentation.event.FolderActionEvent
 import com.jonathanev.review.presentation.event.UIMovingEvent
 import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.presentation.model.FolderResultUi
-import com.jonathanev.review.presentation.viewmodel.FoldersListViewModel
+import com.jonathanev.review.presentation.viewmodel.ListFoldersViewModel
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
 import com.jonathanev.review.presentation.viewmodel.MainToolbarViewModel
-import com.jonathanev.review.ui.screens.ListFoldersScreen
 import com.jonathanev.review.ui.theme.ReviewTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -38,7 +37,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class FragmentListFolders : Fragment(R.layout.fragment_compose_container) {
 
-    private val viewModel by viewModels<FoldersListViewModel>()
+    private val viewModel by viewModels<ListFoldersViewModel>()
     private val viewModelToolbar: MainToolbarViewModel by activityViewModels()
     private val navStateViewModel: MainActivityViewModel by activityViewModels()
 

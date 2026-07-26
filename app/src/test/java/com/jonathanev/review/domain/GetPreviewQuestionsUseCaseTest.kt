@@ -4,9 +4,12 @@ import com.jonathanev.review.domain.model.QAItemDomain
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
 import com.jonathanev.review.domain.model.RelativeGuidePath
+import com.jonathanev.review.domain.repository.NavigationPathRepository
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import io.mockk.mockk
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -15,17 +18,18 @@ import org.junit.Test
 class GetPreviewQuestionsUseCaseTest {
     @MockK
     lateinit var setPintarTextosUseCase: SetPintarTextosUseCase
-
+    private var navigationPathRepository = mockk<NavigationPathRepository>()
     private lateinit var useCase: GetPreviewQuestionsUseCase
 
     @Before
     fun setup() {
         MockKAnnotations.init(this)
-        useCase = GetPreviewQuestionsUseCase(setPintarTextosUseCase)
+        useCase = GetPreviewQuestionsUseCase(setPintarTextosUseCase, navigationPathRepository)
     }
 
     @Test
-    fun `should take first text from question and count images from question and answer`() {
+    fun `should take first text from question and count images from question and answer`() =
+        runTest {
 
         // -------- Given --------
 
@@ -65,7 +69,7 @@ class GetPreviewQuestionsUseCaseTest {
 
         // -------- When --------
 
-        val result = useCase.invoke(listOf(qaItem1, qaItem2), relativePath)
+            val result = useCase.invoke(listOf(qaItem1, qaItem2))
 
         // -------- Then --------
 

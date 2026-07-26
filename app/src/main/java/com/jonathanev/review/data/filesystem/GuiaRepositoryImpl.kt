@@ -34,6 +34,8 @@ import com.jonathanev.review.domain.result.GuideResource
 import com.jonathanev.review.domain.result.ReadGuideError
 import com.jonathanev.review.domain.result.SaveGuideErrors
 import com.jonathanev.review.domain.result.UpdateGuideError
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.NodeList
@@ -81,12 +83,26 @@ class GuiaRepositoryImpl @Inject constructor(
         return (listFiles + listFromFolders)
     }
 
-    override fun getNumGuides(relativeGuidePath: RelativeGuidePath): Int {
-        val result = listGuides(relativeGuidePath).size
-        return result
+    override fun hasGuides(relativeGuidePath: RelativeGuidePath): Flow<Boolean> {
+        val path = File(filePathResolver.mapToFolderPath(relativeGuidePath, PathKind.GUIAS).value)
+        val allItems = path.listFiles() ?: return flowOf(false)
+
+        val hasDirectFile = allItems.any { file ->
+            file.isFile && file.extension == Extensions.XML_EXTENSION
+        }
+        if (hasDirectFile) return flowOf(true)
+
+        for (folder in allItems.filter { it.isDirectory }) {
+            val hasFolderFile = folder.listFiles().orEmpty().any { file ->
+                file.isFile && file.extension == Extensions.XML_EXTENSION
+            }
+            if (hasFolderFile) return flowOf(true)
+        }
+
+        return flowOf(false)
     }
 
-    override fun getGuides(relativeGuidePath: RelativeGuidePath): List<GuideDomainModel> {
+    override fun getGuides(relativeGuidePath: RelativeGuidePath): Flow<List<GuideDomainModel>> {
         val result = listGuides(relativeGuidePath)
         val resultGuides = result.sortedBy { it.name }.mapNotNull { file ->
             when (val guideDomainModel: GuideResource<GuideDomainModel, ReadGuideError> =
@@ -96,17 +112,16 @@ class GuiaRepositoryImpl @Inject constructor(
             }
         }
         _guidesRecovery = resultGuides
-        return resultGuides
+        return flowOf(resultGuides)
     }
 
-    override fun renameGuide(
+    override suspend fun renameGuide(
         preguntas: List<QuestionItemDomain>,
         respuestas: List<QuestionItemDomain>,
         guideContext: GuideContext.Rename
     ): GuideResource<GuideDomainModel, UpdateGuideError> {
         val path = filePathResolver.mapToFilePathSpecificGuide(
             guideDomainModel = guideContext.guide,
-            relativeGuidePath = guideContext.relativeGuidePath,
             kind = PathKind.GUIAS
         )
 
@@ -182,7 +197,7 @@ class GuiaRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun saveGuide(
+    override suspend fun saveGuide(
         guideDomainModel: GuideDomainModel,
         preguntas: List<QuestionItemDomain>,
         respuestas: List<QuestionItemDomain>,
@@ -190,7 +205,6 @@ class GuiaRepositoryImpl @Inject constructor(
     ): GuideResource<GuideDomainModel, SaveGuideErrors> {
         val currentPath = filePathResolver.mapToFilePathSpecificGuide(
             guideDomainModel = guideDomainModel,
-            relativeGuidePath = relativeGuidePath,
             kind = PathKind.GUIAS
         )
 
@@ -271,7 +285,7 @@ class GuiaRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun deleteGuide(
+    override suspend fun deleteGuide(
         deleteGuide: GuideContext.DeleteGuide
     ): Boolean {
         val pathGuide =
@@ -286,7 +300,7 @@ class GuiaRepositoryImpl @Inject constructor(
                 )
             } else {
                 filePathResolver.mapToFilePathSpecificGuide(
-                    deleteGuide.guide, deleteGuide.relativeGuidePath,
+                    deleteGuide.guide,
                     PathKind.GUIAS
                 )
             }
@@ -502,14 +516,12 @@ class GuiaRepositoryImpl @Inject constructor(
         return GetGuideResult.Success(guideDomainModel, listaQA.map { it.toDomain() })
     }
 
-    override fun getXMLGuide(
-        guideDomainModel: GuideDomainModel,
-        relativeGuidePath: RelativeGuidePath
+    override suspend fun getXMLGuide(
+        guideDomainModel: GuideDomainModel
     ): GetGuideResult {
         val version = guideDomainModel.version
         val path = filePathResolver.mapToFilePathSpecificGuide(
             guideDomainModel,
-            relativeGuidePath,
             PathKind.GUIAS
         )
         return if (version == GuideVersion.V1)
@@ -541,20 +553,38 @@ class GuiaRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun moveGuide(guideContext: GuideContext.Moving): Boolean {
+    override suspend fun moveGuide(guideContext: GuideContext.Moving): Boolean {
         val newGuidePath = filePathResolver.mapToFilePathSpecificGuide(
             guideDomainModel = guideContext.guide,
-            relativeGuidePath = guideContext.relativeGuidePath,
             kind = PathKind.GUIAS
         )
 
         val oldGuidePath = filePathResolver.mapToFilePathSpecificGuide(
             guideDomainModel = guideContext.guide,
-            relativeGuidePath = guideContext.oldRelativeGuidePath,
             kind = PathKind.GUIAS
         )
 
         return File(oldGuidePath.value).renameTo(File(newGuidePath.value))
+    }
+
+    override fun getVersionGuide(
+        nameFile: String,
+        relativeGuidePath: RelativeGuidePath
+    ): GuideResource<GuideDomainModel, ReadGuideError> {
+        val targetFile = listGuides(relativeGuidePath).find { file ->
+            file.name == nameFile || file.nameWithoutExtension == nameFile
+        } ?: return GuideResource.Error(ReadGuideError.FileNotFound)
+
+        // 2. Leemos sus atributos directamente
+        return getAttributesGuide(targetFile)
+    }
+
+    override fun existGuide(nameFile: String, relativeGuidePath: RelativeGuidePath): Boolean {
+        // 2. Verificamos la existencia física (V1 o V2)
+        return listGuides(relativeGuidePath).any { file ->
+            file.name.equals(nameFile, ignoreCase = true) ||
+                    file.nameWithoutExtension.equals(nameFile, ignoreCase = true)
+        }
     }
 
     private fun getAttributesGuide(file: File): GuideResource<GuideDomainModel, ReadGuideError> {
