@@ -31,7 +31,7 @@ plugins {
     id("io.github.takahirom.roborazzi") version "1.44.0" apply false
 
     // Kover
-    id "org.jetbrains.kotlinx.kover" version "0.7.6" apply false
+    id "org.jetbrains.kotlinx.kover" version "0.9.9" apply false
 }
 
 //apply plugin: 'org.jetbrains.kotlinx.kover'

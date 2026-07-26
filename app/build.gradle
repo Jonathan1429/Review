@@ -156,12 +156,16 @@ dependencies {
     implementation 'com.github.skydoves:colorpicker-compose:1.1.2'
 
     // Dependencias de Roborazzi
-    testImplementation("io.github.takahirom.roborazzi:roborazzi:1.44.0")
-    testImplementation("io.github.takahirom.roborazzi:roborazzi-compose:1.44.0")
+    androidTestImplementation("io.github.takahirom.roborazzi:roborazzi:1.44.0")
+    androidTestImplementation("io.github.takahirom.roborazzi:roborazzi-compose:1.44.0")
+    /*testImplementation("io.github.takahirom.roborazzi:roborazzi:1.44.0")
+    testImplementation("io.github.takahirom.roborazzi:roborazzi-compose:1.44.0")*/
 
     // Dependencias para robolectric y compose test
-    testImplementation("org.robolectric:robolectric:4.14.1")
-    testImplementation("androidx.compose.ui:ui-test-junit4")
+    //testImplementation("org.robolectric:robolectric:4.14.1")
+    androidTestImplementation("org.robolectric:robolectric:4.14.1")
+    //testImplementation("androidx.compose.ui:ui-test-junit4")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
 
     //Bundle Compat
@@ -217,24 +221,15 @@ dependencies {
 }
 
 kover {
-    htmlReport {
-        title = "Reporte de Cobertura con Kover"
-        reportDir = file("${buildDir}/reports/kover/html")
-
+    reports {
         filters {
             excludes {
-                classes([
-                        "**.*Generated*",
+                classes(
                         "*_Factory",
-                        "*_Factory\$*",
-                        "*_Factory*",
-                        "**.*_Factory",
-                        "**.*_Factory\$*"
-                ])
-                packages([
-                        "com.jonathanev.review.UI.View.*",
-                        "com.jonathanev.review.UI.View.**"
-                ])
+                        "*Factory",
+                        "*_Impl",
+                        "*Module*"
+                )
             }
         }
     }
