@@ -9,6 +9,7 @@ import com.jonathanev.review.domain.SetCrearXmlUseCase
 import com.jonathanev.review.domain.mapper.GuideQuestionExtractor
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
+import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
 import com.jonathanev.review.domain.repository.UserPreferencesRepository
@@ -502,11 +503,10 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
         viewModelScope.launch {
             val response = setCrearXmlUseCase.invoke(
-                nameGuide = nameGuide,
-                description = description,
+                guideDomainModel = GuideDomainModel(GuideVersion.V2, nameGuide, description),
                 preguntas = uiState.value.preguntas.map { it.toDomain() },
                 respuestas = uiState.value.respuestas.map { it.toDomain() },
-                mode = mode.toDomain()
+                saveGuideMode = mode.toDomain()
             )
 
             when (response) {

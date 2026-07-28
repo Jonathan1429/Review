@@ -2,6 +2,7 @@ package com.jonathanev.review.domain.repository
 
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuidePath
+import com.jonathanev.review.domain.model.HasOriginPath
 import com.jonathanev.review.domain.model.PathKind
 import com.jonathanev.review.domain.model.RelativeGuidePath
 
@@ -11,13 +12,22 @@ interface FilePathResolver {
         kind: PathKind
     ): GuidePath
 
-    fun mapToJoinRelativePath(
-        relativeGuidePath: RelativeGuidePath,
+    fun mapToOldFolderPathSpecificGuide(
+        guideDomainModel: GuideDomainModel,
+        originContext: HasOriginPath,
+        kind: PathKind
+    ): GuidePath
+
+    suspend fun mapToFolderPathSpecificGuide(
+        guideDomainModel: GuideDomainModel,
+        kind: PathKind
+    ): GuidePath
+
+    suspend fun mapToJoinRelativePath(
         nameFolder: String
     ): RelativeGuidePath
 
-    fun mapToFolderPath(
-        relativeGuidePath: RelativeGuidePath,
+    suspend fun mapToFolderPath(
         kind: PathKind
     ): GuidePath
 

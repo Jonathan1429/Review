@@ -15,7 +15,6 @@ import com.jonathanev.review.domain.repository.NavigationPathRepository
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.GuideResource
 import com.jonathanev.review.domain.result.RenamedGuideResult
-import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 class RenameGuideUseCase @Inject constructor(
@@ -26,17 +25,14 @@ class RenameGuideUseCase @Inject constructor(
     private val navigationPathRepository: NavigationPathRepository
 ) {
     suspend operator fun invoke(
-        guide: GuideDomainModel,
-        newName: String,
-        newDescription: String
+        oldGuide: GuideDomainModel,
+        newGuide: GuideDomainModel
     ): RenamedGuideResult {
-        val relativeGuidePath = navigationPathRepository.relativePath.first()
-
-        return when (val result = guiaRepository.getXMLGuide(guide)) {
+        return when (val result = guiaRepository.getXMLGuide(oldGuide)) {
             is GetGuideResult.Success -> {
                 val (questions, answers) = guideQuestionExtractor.map(result)
 
-                val isPathExist = directoryManager.createPathGuide(relativeGuidePath, newName)
+                val isPathExist = directoryManager.createPathGuide(newGuide)
                 if (!isPathExist) {
                     return RenamedGuideResult.GuidePathError
                 }
@@ -45,10 +41,9 @@ class RenameGuideUseCase @Inject constructor(
                     preguntas = questions,
                     respuestas = answers,
                     guideContext = GuideContext.Rename(
-                        guide = guide,
-                        relativeGuidePath = relativeGuidePath,
-                        name = RequiredAttrGuide(newName),
-                        description = OptionalAttrGuide(newDescription)
+                        guide = oldGuide,
+                        name = RequiredAttrGuide(newGuide.nameGuide),
+                        description = OptionalAttrGuide(newGuide.description)
                     )
                 )
 
@@ -59,9 +54,8 @@ class RenameGuideUseCase @Inject constructor(
                 val images = extractImages(questions, answers)
 
                 val isSuccess = imagesRepository.moveImages(
-                    images,
-                    GuideRenameContext(result.guideDomainModel, newName),
-                    relativeGuidePath
+                    images = images,
+                    guideRenameContext = GuideRenameContext(result.guideDomainModel, newGuide)
                 )
 
                 //navigationPathRepository.reset()

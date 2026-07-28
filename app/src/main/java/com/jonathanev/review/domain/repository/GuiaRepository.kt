@@ -3,7 +3,6 @@ package com.jonathanev.review.domain.repository
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.QuestionItemDomain
-import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.result.ExistGuideV1Result
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.GuideResource
@@ -14,20 +13,18 @@ import kotlinx.coroutines.flow.Flow
 
 interface GuiaRepository {
     val guidesRecovery: List<GuideDomainModel>
-    fun getGuides(relativeGuidePath: RelativeGuidePath): Flow<List<GuideDomainModel>>
-    fun hasGuides(relativeGuidePath: RelativeGuidePath): Flow<Boolean>
+    fun getGuides(): Flow<List<GuideDomainModel>>
+    suspend fun hasGuides(): Boolean
     suspend fun getXMLGuide(guideDomainModel: GuideDomainModel): GetGuideResult
 
-    fun existXMLGuideV1(
-        guideDomainModel: GuideDomainModel,
-        relativeGuidePath: RelativeGuidePath
+    suspend fun existXMLGuideV1(
+        guideDomainModel: GuideDomainModel
     ): ExistGuideV1Result
 
     suspend fun saveGuide(
         guideDomainModel: GuideDomainModel,
         preguntas: List<QuestionItemDomain>,
-        respuestas: List<QuestionItemDomain>,
-        relativeGuidePath: RelativeGuidePath
+        respuestas: List<QuestionItemDomain>
     ): GuideResource<GuideDomainModel, SaveGuideErrors>
 
     suspend fun renameGuide(
@@ -42,10 +39,9 @@ interface GuiaRepository {
 
     suspend fun moveGuide(guideContext: GuideContext.Moving): Boolean
 
-    fun getVersionGuide(
+    suspend fun getVersionGuide(
         nameFile: String,
-        relativeGuidePath: RelativeGuidePath
     ): GuideResource<GuideDomainModel, ReadGuideError>
 
-    fun existGuide(nameFile: String, relativeGuidePath: RelativeGuidePath): Boolean
+    suspend fun existGuide(nameFile: String): Boolean
 }

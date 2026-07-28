@@ -3,7 +3,7 @@ package com.jonathanev.review.domain
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuideVersion
-import com.jonathanev.review.domain.model.ImageSource
+import com.jonathanev.review.domain.model.ImageContext
 import com.jonathanev.review.domain.model.QAItemDomain
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
@@ -155,7 +155,7 @@ class MoveGuideUseCaseTest {
             directoryManager.moveImages(
                 images = any(),
                 guideDomainModel = localContext.guide,
-                imageSource = ImageSource.MovingGuide(
+                imageContext = ImageContext.MovingImage(
                     localContext.oldRelativeGuidePath,
                     localContext.relativeGuidePath
                 )
@@ -175,7 +175,7 @@ class MoveGuideUseCaseTest {
             directoryManager.moveImages(
                 images = any(),
                 guideDomainModel = localContext.guide,
-                imageSource = ImageSource.MovingGuide(
+                imageContext = ImageContext.MovingImage(
                     localContext.oldRelativeGuidePath,
                     localContext.relativeGuidePath
                 )
@@ -205,7 +205,7 @@ class MoveGuideUseCaseTest {
             directoryManager.moveImages(
                 images = any(),
                 guideDomainModel = context.guide,
-                imageSource = ImageSource.MovingGuide(
+                imageContext = ImageContext.MovingImage(
                     context.oldRelativeGuidePath,
                     context.relativeGuidePath
                 )
@@ -233,7 +233,7 @@ class MoveGuideUseCaseTest {
             directoryManager.moveImages(
                 images = any(),
                 guideDomainModel = context.guide,
-                imageSource = ImageSource.MovingGuide(
+                imageContext = ImageContext.MovingImage(
                     context.oldRelativeGuidePath,
                     context.relativeGuidePath
                 )

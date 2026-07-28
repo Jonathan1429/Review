@@ -2,20 +2,13 @@ package com.jonathanev.review.domain
 
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.repository.GuiaRepository
-import com.jonathanev.review.domain.repository.NavigationPathRepository
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flatMapLatest
 import javax.inject.Inject
 
 class LoadGuidesUseCase @Inject constructor(
-    private val guiaRepository: GuiaRepository,
-    private val navigationPathRepository: NavigationPathRepository
+    private val guiaRepository: GuiaRepository
 ) {
-    @OptIn(ExperimentalCoroutinesApi::class)
     operator fun invoke(): Flow<List<GuideDomainModel>> {
-        return navigationPathRepository.relativePath.flatMapLatest { relativePath ->
-            guiaRepository.getGuides(relativePath)
-        }
+        return guiaRepository.getGuides()
     }
 }

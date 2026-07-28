@@ -6,7 +6,6 @@ import com.jonathanev.review.domain.DeleteGuideUseCase
 import com.jonathanev.review.domain.GetGuideMoveUseCase
 import com.jonathanev.review.domain.GetGuidePosicionUseCase
 import com.jonathanev.review.domain.GetGuideXmlDataUseCase
-import com.jonathanev.review.domain.GetNavigationUseCase
 import com.jonathanev.review.domain.LoadGuidesUseCase
 import com.jonathanev.review.domain.MoveGuideUseCase
 import com.jonathanev.review.domain.ResetNavigationUseCase
@@ -19,12 +18,9 @@ import com.jonathanev.review.domain.result.GuideResultDomain
 import com.jonathanev.review.domain.result.MoveGuideResponse
 import com.jonathanev.review.presentation.event.GuideActionEvent
 import com.jonathanev.review.presentation.event.UIMovingEvent
-import com.jonathanev.review.presentation.mapper.toDomain
-import com.jonathanev.review.presentation.mapper.toUI
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.GuideResultUi
 import com.jonathanev.review.presentation.model.GuideUiModel
-import com.jonathanev.review.presentation.model.RelativeGuidePath
 import com.jonathanev.review.presentation.state.GuidesUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -47,7 +43,6 @@ class FragmentListGuidesViewModel @Inject constructor(
     private val getGuideMoveUseCase: GetGuideMoveUseCase,
     private val getGuideXmlDataUseCase: GetGuideXmlDataUseCase,
     private val moveGuideUseCase: MoveGuideUseCase,
-    private val getNavigationUseCase: GetNavigationUseCase,
     private val resetNavigationUseCase: ResetNavigationUseCase
 ) : ViewModel() {
     private var cachedGuides: List<GuideDomainModel> = emptyList()
@@ -62,15 +57,6 @@ class FragmentListGuidesViewModel @Inject constructor(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = GuidesUiState.Loading
-        )
-
-    val relativePath: StateFlow<RelativeGuidePath> = getNavigationUseCase.invoke()
-        .map { relativeGuidePath ->
-            relativeGuidePath.toUI()
-        }.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = RelativeGuidePath("")
         )
 
     private val _guides = MutableStateFlow<List<GuideUiModel>>(listOf())
@@ -121,7 +107,7 @@ class FragmentListGuidesViewModel @Inject constructor(
         }
     }
 
-    fun movingGuide(relativeGuidePath: RelativeGuidePath) {
+    fun movingGuide() {
         when (val context = getGuideMoveUseCase.invoke()) {
             is GuideContext.Moving -> {
                 val guideDomainModel = cachedGuides.find { it.nameGuide == context.guide.nameGuide }
@@ -133,14 +119,14 @@ class FragmentListGuidesViewModel @Inject constructor(
                     return
                 }
 
-                onContinueProcess(true, relativeGuidePath)
+                onContinueProcess(true)
             }
 
             else -> eventMovingFile("Error inesperado")
         }
     }
 
-    fun onContinueProcess(confirmed: Boolean, relativeGuidePath: RelativeGuidePath) {
+    fun onContinueProcess(confirmed: Boolean) {
         viewModelScope.launch {
             if (!confirmed) return@launch
 
@@ -148,9 +134,8 @@ class FragmentListGuidesViewModel @Inject constructor(
                 is GuideContext.Moving -> {
                     when (val guideData = getGuideXmlDataUseCase.invoke(context)) {
                         is GetGuideResult.Success -> {
-                            val relGuidePathDomain = relativeGuidePath.toDomain()
                             val response =
-                                moveGuideUseCase.invoke(guideData, context, relGuidePathDomain)
+                                moveGuideUseCase.invoke(guideData, context)
                             when (response) {
                                 MoveGuideResponse.ErrorMovingGuide ->
                                     eventMovingFile("Error al intentar mover la guia")
@@ -193,15 +178,10 @@ class FragmentListGuidesViewModel @Inject constructor(
         eventMovingFile("Se ha cancelado la acción")
     }
 
-    fun setContext(relativeGuidePath: RelativeGuidePath) {
-        val relGuidePathDomain = relativeGuidePath.toDomain()
-        val guide = selectedGuideDomain ?: return
-        setContextMoveUseCase.invoke(guide, relGuidePathDomain)
-        initRelativeGuide()
-    }
-
-    fun initRelativeGuide() {
+    fun setContext() {
         viewModelScope.launch {
+            val guide = selectedGuideDomain ?: return@launch
+            setContextMoveUseCase.invoke(guide)
             resetNavigationUseCase.invoke()
         }
     }

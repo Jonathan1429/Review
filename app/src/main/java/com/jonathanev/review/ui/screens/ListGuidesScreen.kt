@@ -43,7 +43,6 @@ import com.jonathanev.review.R
 import com.jonathanev.review.presentation.model.FileInteractionMode
 import com.jonathanev.review.presentation.model.GuideResultUi
 import com.jonathanev.review.presentation.model.GuideUiModel
-import com.jonathanev.review.presentation.model.RelativeGuidePath
 import com.jonathanev.review.presentation.state.DialogState
 import com.jonathanev.review.presentation.state.GuidesUiState
 import com.jonathanev.review.presentation.viewmodel.FragmentListGuidesViewModel
@@ -94,7 +93,6 @@ fun ListGuidesRoute(
     }
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val relativeGuidePath by viewModel.relativePath.collectAsStateWithLifecycle()
 
     when (val state = uiState) {
         is GuidesUiState.Loading -> {
@@ -132,7 +130,7 @@ fun ListGuidesRoute(
                     currentInteractionMode = FileInteractionMode.Default
                 },
                 onMoveSuccessGuideClick = {
-                    viewModel.movingGuide(relativeGuidePath)
+                    viewModel.movingGuide()
                 },
                 onErrorProcess = {
                     Toast.makeText(
@@ -150,7 +148,6 @@ fun ListGuidesRoute(
                             currentDialog,
                             viewModel,
                             stateDialog,
-                            relativeGuidePath,
                             onDeleteGuideClick
                         )
                     }
@@ -169,7 +166,7 @@ fun ListGuidesRoute(
                                 )
                             },
                             onMoveGuideClick = {
-                                viewModel.setContext(relativeGuidePath)
+                                viewModel.setContext()
                                 onMoveGuideClick()
                             }
                         )
@@ -284,7 +281,6 @@ private fun dialogConfirmDelete(
     currentDialog: DialogState?,
     viewModel: FragmentListGuidesViewModel,
     stateDialog: DialogState.ConfirmDelete,
-    relativeGuidePath: RelativeGuidePath,
     onDeleteGuideClick: () -> Unit
 ): DialogState? {
     var currentDialog1 = currentDialog

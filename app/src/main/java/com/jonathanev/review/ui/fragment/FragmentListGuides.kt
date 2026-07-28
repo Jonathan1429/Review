@@ -169,7 +169,7 @@ class FragmentListGuides : Fragment() {
             viewLifecycleOwner,
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
-                    navStateViewModel.back()
+                    //navStateViewModel.back()
 
                     findNavController().popBackStack(
                         R.id.fragmentListFolders,

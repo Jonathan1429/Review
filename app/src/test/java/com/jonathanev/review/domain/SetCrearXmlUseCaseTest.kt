@@ -95,7 +95,7 @@ class SetCrearXmlUseCaseTest {
             description = description,
             preguntas = preguntas,
             respuestas = respuestas,
-            mode = SaveGuideMode.Update
+            saveGuideMode = SaveGuideMode.Update
         )
 
         coVerify { setDecodePathImageUseCase.invoke(preguntas, respuestas) }
@@ -122,7 +122,7 @@ class SetCrearXmlUseCaseTest {
             description = description,
             preguntas = preguntas,
             respuestas = respuestas,
-            mode = SaveGuideMode.Update
+            saveGuideMode = SaveGuideMode.Update
         )
 
         coVerify { setDecodePathImageUseCase.invoke(preguntas, respuestas) }
@@ -155,7 +155,7 @@ class SetCrearXmlUseCaseTest {
             description = description,
             preguntas = preguntas,
             respuestas = respuestas,
-            mode = SaveGuideMode.Update
+            saveGuideMode = SaveGuideMode.Update
         )
 
         coVerify { setDecodePathImageUseCase.invoke(preguntas, respuestas) }
@@ -203,7 +203,7 @@ class SetCrearXmlUseCaseTest {
             description = description,
             preguntas = preguntas,
             respuestas = respuestas,
-            mode = SaveGuideMode.Create
+            saveGuideMode = SaveGuideMode.Create
         )
 
         coVerify { setDecodePathImageUseCase.invoke(preguntas, respuestas) }
@@ -261,7 +261,7 @@ class SetCrearXmlUseCaseTest {
             description = description,
             preguntas = preguntas,
             respuestas = respuestas,
-            mode = SaveGuideMode.Update
+            saveGuideMode = SaveGuideMode.Update
         )
 
         coVerify { setDecodePathImageUseCase.invoke(preguntas, respuestas) }

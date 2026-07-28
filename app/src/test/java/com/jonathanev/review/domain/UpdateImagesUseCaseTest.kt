@@ -2,7 +2,7 @@ package com.jonathanev.review.domain
 
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuideVersion
-import com.jonathanev.review.domain.model.ImageSource
+import com.jonathanev.review.domain.model.ImageContext
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
 import com.jonathanev.review.domain.model.RelativeGuidePath
@@ -76,7 +76,7 @@ class UpdateImagesUseCaseTest {
         } returns true
         every {
             directoryManager.moveImages(
-                guideDomain, ImageSource.Save(relativeGuidePath), listOf(image)
+                guideDomain, ImageContext.Save(relativeGuidePath), listOf(image)
             )
         } returns false
 
@@ -102,7 +102,7 @@ class UpdateImagesUseCaseTest {
         verify {
             directoryManager.moveImages(
                 guideDomain,
-                ImageSource.Save(relativeGuidePath),
+                ImageContext.Save(relativeGuidePath),
                 listOf(image)
             )
         }
@@ -187,7 +187,7 @@ class UpdateImagesUseCaseTest {
         } returns true
         every {
             directoryManager.moveImages(
-                guideDomain, ImageSource.Save(relativeGuidePath), images
+                guideDomain, ImageContext.Save(relativeGuidePath), images
             )
         } returns true
         every {

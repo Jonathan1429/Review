@@ -3,17 +3,12 @@ package com.jonathanev.review.domain
 import com.jonathanev.review.domain.model.PreviewQuestionDomain
 import com.jonathanev.review.domain.model.QAItemDomain
 import com.jonathanev.review.domain.model.QuestionContentDomain
-import com.jonathanev.review.domain.repository.NavigationPathRepository
-import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 class GetPreviewQuestionsUseCase @Inject constructor(
-    private val setPintarTextosUseCase: SetPintarTextosUseCase,
-    private val navigationPathRepository: NavigationPathRepository
+    private val setPintarTextosUseCase: SetPintarTextosUseCase
 ) {
     suspend operator fun invoke(domainItems: List<QAItemDomain>): List<PreviewQuestionDomain> {
-        val relativeGuidePath = navigationPathRepository.relativePath.first()
-
         val previewQuestionDomain = mutableListOf<PreviewQuestionDomain>()
 
         domainItems.forEach { domainItem ->
@@ -23,7 +18,7 @@ class GetPreviewQuestionsUseCase @Inject constructor(
 
             domainItem.question.content.forEach { item ->
                 when (val result =
-                    setPintarTextosUseCase.invoke(item, relativeGuidePath.value)) {
+                    setPintarTextosUseCase.invoke(item)) {
                     is QuestionContentDomain.Image -> {
                         totalImgsPregunta++
                     }

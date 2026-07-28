@@ -6,6 +6,7 @@ import com.jonathanev.review.domain.DeleteFolderUseCase
 import com.jonathanev.review.domain.GetFolderPosicionUseCase
 import com.jonathanev.review.domain.GetFoldersWithNumGuidesUseCase
 import com.jonathanev.review.domain.NextNavigationUseCase
+import com.jonathanev.review.domain.ResetNavigationUseCase
 import com.jonathanev.review.domain.model.FolderDomainModel
 import com.jonathanev.review.presentation.event.FolderActionEvent
 import com.jonathanev.review.presentation.event.UIMovingEvent
@@ -25,7 +26,8 @@ class ListFoldersViewModel @Inject constructor(
     private val getFolderPosicionUseCase: GetFolderPosicionUseCase,
     private val getFoldersWithNumGuidesUseCase: GetFoldersWithNumGuidesUseCase,
     private val deleteFolderUseCase: DeleteFolderUseCase,
-    private val nextNavigationUseCase: NextNavigationUseCase
+    private val nextNavigationUseCase: NextNavigationUseCase,
+    private val resetNavigationUseCase: ResetNavigationUseCase
 ) : ViewModel() {
     private var _foldersUiState = MutableStateFlow(FoldersUiState())
     val foldersUiState = _foldersUiState.asStateFlow()
@@ -71,9 +73,10 @@ class ListFoldersViewModel @Inject constructor(
         return folderResultDomain.toUi()
     }
 
-    fun deleteFiles(nameFolder: String) {
+    fun deleteFolderAndContent(nameFolder: String) {
         viewModelScope.launch {
-            val message = deleteFolderUseCase.invoke(nameFolder)
+            nextNavigationUseCase.invoke(nameFolder)
+            val message = deleteFolderUseCase.invoke()
             _eventsMessages.emit(
                 if (message) {
                     FolderActionEvent.DeleteFolderSuccess
@@ -81,6 +84,7 @@ class ListFoldersViewModel @Inject constructor(
                     FolderActionEvent.ShowMessage("No se pudo borrar la carpeta correctamente")
                 }
             )
+            resetNavigationUseCase.invoke()
         }
     }
 

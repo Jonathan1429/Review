@@ -1,40 +1,34 @@
 package com.jonathanev.review.domain
 
-import com.jonathanev.review.data.repository.NavigationPathRepositoryImpl
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.QAItemDomain
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
-import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.repository.GuiaRepository
 import com.jonathanev.review.domain.repository.ImagesRepository
 import com.jonathanev.review.domain.result.DeleteGuideResult
 import com.jonathanev.review.domain.result.GetGuideResult
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
+import org.junit.Test
 import kotlin.test.Ignore
 
 class DeleteGuideUseCaseTest {
     private val guiaRepository = mockk<GuiaRepository>()
     private val imagesRepository = mockk<ImagesRepository>()
-    private val navigationPathRepository = mockk<NavigationPathRepositoryImpl>()
     private lateinit var deleteGuideUseCase: DeleteGuideUseCase
     private lateinit var guideDomainModel: GuideDomainModel
-    private var relativeGuidePath = RelativeGuidePath("init")
     private lateinit var qaItemDomain: QAItemDomain
 
     @Before
     fun setUp() {
         guideDomainModel = GuideDomainModel(GuideVersion.V2, "Guia a eliminar", "")
-        relativeGuidePath = RelativeGuidePath("Kotlin")
         qaItemDomain = QAItemDomain(
             question = QuestionItemDomain(
                 listOf(
@@ -49,10 +43,11 @@ class DeleteGuideUseCaseTest {
         )
 
         deleteGuideUseCase =
-            DeleteGuideUseCase(guiaRepository, imagesRepository, navigationPathRepository)
+            DeleteGuideUseCase(guiaRepository, imagesRepository)
     }
 
-    @Ignore("Por el momento no")
+    @Ignore("a")
+    @Test
     fun if_the_xml_is_not_read_correctly_it_returns_an_error() = runTest {
         coEvery {
             guiaRepository.getXMLGuide(guideDomainModel)
@@ -71,10 +66,7 @@ class DeleteGuideUseCaseTest {
 
         coEvery {
             guiaRepository.deleteGuide(
-                GuideContext.DeleteGuide(
-                    guideDomainModel,
-                    relativeGuidePath
-                )
+                GuideContext.DeleteGuide(guideDomainModel)
             )
         } returns false
 
@@ -95,18 +87,14 @@ class DeleteGuideUseCaseTest {
 
         coEvery {
             guiaRepository.deleteGuide(
-                GuideContext.DeleteGuide(
-                    guideDomainModel,
-                    relativeGuidePath
-                )
+                GuideContext.DeleteGuide(guideDomainModel)
             )
         } returns true
 
-        every {
+        coEvery {
             imagesRepository.deleteImages(
-                guideDomainModel,
-                emptyList(),
-                relativeGuidePath
+                guide = guideDomainModel,
+                images = emptyList()
             )
         } returns false
 
@@ -117,14 +105,11 @@ class DeleteGuideUseCaseTest {
         }
         coVerify {
             guiaRepository.deleteGuide(
-                GuideContext.DeleteGuide(
-                    guideDomainModel,
-                    relativeGuidePath
-                )
+                GuideContext.DeleteGuide(guideDomainModel)
             )
         }
 
-        verify { imagesRepository.deleteImages(guideDomainModel, emptyList(), relativeGuidePath) }
+        coVerify { imagesRepository.deleteImages(guideDomainModel, emptyList()) }
         assertEquals(DeleteGuideResult.ErrorImage, response)
     }
 
@@ -136,18 +121,14 @@ class DeleteGuideUseCaseTest {
 
         coEvery {
             guiaRepository.deleteGuide(
-                GuideContext.DeleteGuide(
-                    guideDomainModel,
-                    relativeGuidePath
-                )
+                GuideContext.DeleteGuide(guideDomainModel)
             )
         } returns true
 
-        every {
+        coEvery {
             imagesRepository.deleteImages(
-                guideDomainModel,
-                emptyList(),
-                relativeGuidePath
+                guide = guideDomainModel,
+                images = emptyList()
             )
         } returns true
 
@@ -158,13 +139,10 @@ class DeleteGuideUseCaseTest {
         }
         coVerify {
             guiaRepository.deleteGuide(
-                GuideContext.DeleteGuide(
-                    guideDomainModel,
-                    relativeGuidePath
-                )
+                GuideContext.DeleteGuide(guideDomainModel)
             )
         }
-        verify { imagesRepository.deleteImages(guideDomainModel, emptyList(), relativeGuidePath) }
+        coVerify { imagesRepository.deleteImages(guide = guideDomainModel, images = emptyList()) }
         assertEquals(DeleteGuideResult.DeleteSuccess, response)
     }
 }

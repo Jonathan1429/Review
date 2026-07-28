@@ -3,48 +3,62 @@ package com.jonathanev.review.domain.service
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuidePath
 import com.jonathanev.review.domain.model.GuideVersion
+import com.jonathanev.review.domain.model.HasOriginPath
 import com.jonathanev.review.domain.model.PathKind
 import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.provider.FilePathsProvider
 import com.jonathanev.review.domain.repository.FilePathResolver
 import com.jonathanev.review.domain.repository.NavigationPathRepository
-import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 class FilePathResolverService @Inject constructor(
     private val navigationPathRepository: NavigationPathRepository,
     private val filePathsProvider: FilePathsProvider
-): FilePathResolver {
+) : FilePathResolver {
     override suspend fun mapToFilePathSpecificGuide(
         guideDomainModel: GuideDomainModel,
         kind: PathKind
     ) = getFilePathSpecificGuide(guideDomainModel, kind)
 
-    fun mapToFolderPathSpecificGuide(
+    override fun mapToOldFolderPathSpecificGuide(
         guideDomainModel: GuideDomainModel,
-        relativeGuidePath: RelativeGuidePath,
-        kind: PathKind
-    ) = getFolderPathSpecificGuide(guideDomainModel,relativeGuidePath, kind)
-
-    override fun mapToJoinRelativePath(
-        relativeGuidePath: RelativeGuidePath,
-        nameFolder: String
-    ) = getRelativePath(relativeGuidePath, nameFolder)
-
-    private fun getRelativePath(
-        relativeGuidePath: RelativeGuidePath,
-        nameFolder: String
-    ) = RelativeGuidePath("${relativeGuidePath.value}/$nameFolder")
-
-    override fun mapToFolderPath(
-        relativeGuidePath: RelativeGuidePath,
-        kind: PathKind
-    ) = getFolderPath(relativeGuidePath, kind)
-
-    private fun getFolderPath(
-        relativeGuidePath: RelativeGuidePath,
+        originContext: HasOriginPath,
         kind: PathKind
     ): GuidePath {
+        return getOldFolderPathSpecificGuide(
+            guideDomainModel,
+            originContext.oldRelativeGuidePath,
+            kind
+        )
+    }
+
+    override suspend fun mapToFolderPathSpecificGuide(
+        guideDomainModel: GuideDomainModel,
+        kind: PathKind
+    ) = getFolderPathSpecificGuide(guideDomainModel, kind)
+
+    override suspend fun mapToJoinRelativePath(
+        nameFolder: String
+    ) = getRelativePath(nameFolder)
+
+    private suspend fun getRelativePath(
+        nameFolder: String
+    ): RelativeGuidePath {
+        val relativeGuidePath =
+            navigationPathRepository.getRelativePath() // ESTE NO SE DEBERÍA USAR
+
+        return RelativeGuidePath("${relativeGuidePath.value}/$nameFolder")
+    }
+
+    override suspend fun mapToFolderPath(
+        kind: PathKind
+    ) = getFolderPath(kind)
+
+    private suspend fun getFolderPath(
+        kind: PathKind
+    ): GuidePath {
+        val relativePath = navigationPathRepository.getRelativePath()
+
         val root = when (kind) {
             PathKind.GUIAS -> navigationPathRepository.getRootGuides()
             PathKind.IMAGENES -> navigationPathRepository.getRootImages()
@@ -52,7 +66,7 @@ class FilePathResolverService @Inject constructor(
 
         val path = filePathsProvider.buildFolder(
             base = root.value,
-            folder = relativeGuidePath.value
+            folder = relativePath.value
         )
 
         return GuidePath(path)
@@ -62,14 +76,15 @@ class FilePathResolverService @Inject constructor(
         guideDomainModel: GuideDomainModel,
         kind: PathKind
     ): GuidePath {
-        val relativePath = navigationPathRepository.relativePath.first()
+        val relativePath = navigationPathRepository.getRelativePath()
 
         val root = when (kind) {
             PathKind.GUIAS -> navigationPathRepository.getRootGuides()
             PathKind.IMAGENES -> navigationPathRepository.getRootImages()
         }
 
-        val pathRelative = if (relativePath.value.isBlank()) root.value else "${root.value}/${relativePath.value}"
+        val pathRelative =
+            if (relativePath.value.isBlank()) root.value else "${root.value}/${relativePath.value}"
         val path = if (guideDomainModel.version == GuideVersion.V1) {
             val file = FileNamingRules.buildXmlFileName(guideDomainModel.nameGuide)
             filePathsProvider.buildGuide(
@@ -88,11 +103,12 @@ class FilePathResolverService @Inject constructor(
         return GuidePath(path)
     }
 
-    private fun getFolderPathSpecificGuide(
+    private suspend fun getFolderPathSpecificGuide(
         guideDomainModel: GuideDomainModel,
-        relativePath: RelativeGuidePath,
         kind: PathKind
     ): GuidePath {
+        val relativePath = navigationPathRepository.getRelativePath()
+
         val root = when (kind) {
             PathKind.GUIAS -> navigationPathRepository.getRootGuides()
             PathKind.IMAGENES -> navigationPathRepository.getRootImages()
@@ -101,9 +117,36 @@ class FilePathResolverService @Inject constructor(
         val pathRelative = if (guideDomainModel.version == GuideVersion.V2)
             "${relativePath.value}/${guideDomainModel.nameGuide}" else relativePath.value
         val path = filePathsProvider.buildFolder(
-                base = root.value,
-                folder = pathRelative
-            )
+            base = root.value,
+            folder = pathRelative
+        )
+
+        return GuidePath(path)
+    }
+
+    private fun getOldFolderPathSpecificGuide(
+        guideDomainModel: GuideDomainModel,
+        relativeGuidePath: RelativeGuidePath,
+        kind: PathKind
+    ): GuidePath {
+        val root = when (kind) {
+            PathKind.GUIAS -> navigationPathRepository.getRootGuides()
+            PathKind.IMAGENES -> navigationPathRepository.getRootImages()
+        }
+
+        // Folder donde se guarda la guia
+        var path = if (relativeGuidePath.value.isBlank()) {
+            root.value
+        } else {
+            filePathsProvider.buildFolder(root.value, relativeGuidePath.value)
+        }
+
+        // Las guias V2 se guardan en su propio folder
+        path = if (guideDomainModel.version == GuideVersion.V2) {
+            filePathsProvider.buildFolder(path, guideDomainModel.nameGuide)
+        } else {
+            path
+        }
 
         return GuidePath(path)
     }

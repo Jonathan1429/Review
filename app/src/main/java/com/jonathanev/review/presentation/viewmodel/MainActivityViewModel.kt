@@ -2,7 +2,6 @@ package com.jonathanev.review.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jonathanev.review.domain.BackNavigationUseCase
 import com.jonathanev.review.domain.GetFoldersWithNumGuidesUseCase
 import com.jonathanev.review.domain.InitializeGuideStorageUseCase
 import com.jonathanev.review.domain.NextNavigationUseCase
@@ -24,8 +23,7 @@ class MainActivityViewModel @Inject constructor(
     private val initializeGuideStorageUseCase: InitializeGuideStorageUseCase,
     private val getFoldersWithNumGuidesUseCase: GetFoldersWithNumGuidesUseCase,
     private val resetNavigationUseCase: ResetNavigationUseCase,
-    private val nextNavigationUseCase: NextNavigationUseCase,
-    private val backNavigationUseCase: BackNavigationUseCase
+    private val nextNavigationUseCase: NextNavigationUseCase
 ) : ViewModel() {
     /*private val _shouldRequestPermission = MutableLiveData<Boolean>()
     val shouldRequestPermission: LiveData<Boolean> get() = _shouldRequestPermission*/
@@ -71,11 +69,6 @@ class MainActivityViewModel @Inject constructor(
         }
     }
 
-    fun back() {
-        viewModelScope.launch {
-            backNavigationUseCase.invoke()
-        }
-    }
     /*fun checkIfNeedsPermission(hasPermission: Boolean) {
         if (!hasPermission) {
             _shouldRequestPermission.value = true

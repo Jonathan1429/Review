@@ -23,7 +23,6 @@ import com.jonathanev.review.domain.model.PathKind
 import com.jonathanev.review.domain.model.QAType
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
-import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.repository.FileOutputStreamFactory
 import com.jonathanev.review.domain.repository.FilePathResolver
 import com.jonathanev.review.domain.repository.GuiaRepository
@@ -34,8 +33,12 @@ import com.jonathanev.review.domain.result.GuideResource
 import com.jonathanev.review.domain.result.ReadGuideError
 import com.jonathanev.review.domain.result.SaveGuideErrors
 import com.jonathanev.review.domain.result.UpdateGuideError
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.NodeList
@@ -61,16 +64,19 @@ class GuiaRepositoryImpl @Inject constructor(
     private var _guidesRecovery = emptyList<GuideDomainModel>()
     override val guidesRecovery: List<GuideDomainModel>
         get() = _guidesRecovery
+    private val refreshTrigger = MutableSharedFlow<Unit>(replay = 1).apply {
+        tryEmit(Unit)
+    }
 
-    private fun listGuides(relativeGuidePath: RelativeGuidePath): List<File> {
-        val path = File(filePathResolver.mapToFolderPath(relativeGuidePath, PathKind.GUIAS).value)
+    private suspend fun listGuides(): List<File> {
+        val guidePath = filePathResolver.mapToFolderPath(PathKind.GUIAS)
+
+        val path = File(guidePath.value)
         val allItems = path.listFiles().orEmpty()
 
         val listFiles = allItems
             .filter { file -> file.isFile }
-            .filter { file ->
-                file.extension == Extensions.XML_EXTENSION
-            }
+            .filter { file -> file.extension == Extensions.XML_EXTENSION }
 
         val listFromFolders = allItems
             .filter { it.isDirectory }
@@ -80,39 +86,38 @@ class GuiaRepositoryImpl @Inject constructor(
                     .filter { file -> file.extension == Extensions.XML_EXTENSION }
             }
 
-        return (listFiles + listFromFolders)
+        return listFiles + listFromFolders
     }
 
-    override fun hasGuides(relativeGuidePath: RelativeGuidePath): Flow<Boolean> {
-        val path = File(filePathResolver.mapToFolderPath(relativeGuidePath, PathKind.GUIAS).value)
-        val allItems = path.listFiles() ?: return flowOf(false)
+    override suspend fun hasGuides(): Boolean = withContext(Dispatchers.IO) {
+        val path = File(filePathResolver.mapToFolderPath(PathKind.GUIAS).value)
+        val allItems = path.listFiles() ?: return@withContext false
 
         val hasDirectFile = allItems.any { file ->
             file.isFile && file.extension == Extensions.XML_EXTENSION
         }
-        if (hasDirectFile) return flowOf(true)
+        if (hasDirectFile) return@withContext true
 
         for (folder in allItems.filter { it.isDirectory }) {
             val hasFolderFile = folder.listFiles().orEmpty().any { file ->
                 file.isFile && file.extension == Extensions.XML_EXTENSION
             }
-            if (hasFolderFile) return flowOf(true)
+            if (hasFolderFile) return@withContext true
         }
 
-        return flowOf(false)
+        false
     }
 
-    override fun getGuides(relativeGuidePath: RelativeGuidePath): Flow<List<GuideDomainModel>> {
-        val result = listGuides(relativeGuidePath)
-        val resultGuides = result.sortedBy { it.name }.mapNotNull { file ->
-            when (val guideDomainModel: GuideResource<GuideDomainModel, ReadGuideError> =
-                getAttributesGuide(file)) {
-                is GuideResource.Error -> null
-                is GuideResource.Success -> guideDomainModel.data
-            }
-        }
-        _guidesRecovery = resultGuides
-        return flowOf(resultGuides)
+    override fun getGuides(): Flow<List<GuideDomainModel>> {
+        return refreshTrigger.map {
+            val result = listGuides()
+            result.sortedBy { it.name }.mapNotNull { file ->
+                when (val guideResource = getAttributesGuide(file)) {
+                    is GuideResource.Error -> null
+                    is GuideResource.Success -> guideResource.data
+                }
+            }.also { _guidesRecovery = it }
+        }.flowOn(Dispatchers.IO)
     }
 
     override suspend fun renameGuide(
@@ -162,18 +167,17 @@ class GuiaRepositoryImpl @Inject constructor(
                 guideContext.name.value,
                 guideContext.description.value
             )
-            val newPath = filePathResolver.getPathGuidesV2(
-                guideDomainModel = newGuideDomain,
-                kind = PathKind.GUIAS,
-                relativeGuidePath = guideContext.relativeGuidePath
-            )
+            val newPath =
+                filePathResolver.mapToFilePathSpecificGuide(newGuideDomain, PathKind.GUIAS).value
 
             try {
-                Files.move(
-                    /* source = */ tempFile.toPath(),
-                    /* target = */ Paths.get(newPath),
-                    /* ...options = */ StandardCopyOption.REPLACE_EXISTING
-                )
+                withContext(Dispatchers.IO) {
+                    Files.move(
+                        /* source = */ tempFile.toPath(),
+                        /* target = */ Paths.get(newPath),
+                        /* ...options = */ StandardCopyOption.REPLACE_EXISTING
+                    )
+                }
             } catch (_: IOException) {
                 tempFile.delete()
                 return GuideResource.Error(UpdateGuideError.WriteError)
@@ -187,6 +191,7 @@ class GuiaRepositoryImpl @Inject constructor(
                 }
             }
 
+            refreshTrigger.emit(Unit)
             GuideResource.Success(newGuideDomain)
         } catch (_: FileNotFoundException) {
             tempFile.delete()
@@ -200,8 +205,7 @@ class GuiaRepositoryImpl @Inject constructor(
     override suspend fun saveGuide(
         guideDomainModel: GuideDomainModel,
         preguntas: List<QuestionItemDomain>,
-        respuestas: List<QuestionItemDomain>,
-        relativeGuidePath: RelativeGuidePath,
+        respuestas: List<QuestionItemDomain>
     ): GuideResource<GuideDomainModel, SaveGuideErrors> {
         val currentPath = filePathResolver.mapToFilePathSpecificGuide(
             guideDomainModel = guideDomainModel,
@@ -245,19 +249,18 @@ class GuiaRepositoryImpl @Inject constructor(
                 serializer.endDocument()
             }
 
-            val newPath = filePathResolver.getPathGuidesV2(
-                guideDomainModel,
-                PathKind.GUIAS,
-                relativeGuidePath
-            )
+            val newPath =
+                filePathResolver.mapToFilePathSpecificGuide(guideDomainModel, PathKind.GUIAS).value
 
             try {
-                Files.move(
-                    tempFile.toPath(),
-                    File(newPath).toPath(),
-                    StandardCopyOption.REPLACE_EXISTING,
-                    StandardCopyOption.ATOMIC_MOVE
-                )
+                withContext(Dispatchers.IO) {
+                    Files.move(
+                        tempFile.toPath(),
+                        File(newPath).toPath(),
+                        StandardCopyOption.REPLACE_EXISTING,
+                        StandardCopyOption.ATOMIC_MOVE
+                    )
+                }
 
                 if (finalFile.path != File(newPath).path) {
                     try {
@@ -265,6 +268,8 @@ class GuiaRepositoryImpl @Inject constructor(
                     } catch (_: Exception) {
                     }
                 }
+
+                //refreshTrigger.emit(Unit)
                 GuideResource.Success(
                     GuideDomainModel(
                         GuideVersion.V2,
@@ -290,14 +295,7 @@ class GuiaRepositoryImpl @Inject constructor(
     ): Boolean {
         val pathGuide =
             if (deleteGuide.guide.version == GuideVersion.V2) {
-                val relativeGuidePath = filePathResolver.mapToJoinRelativePath(
-                    deleteGuide.relativeGuidePath,
-                    deleteGuide.guide.nameGuide
-                )
-                filePathResolver.mapToFolderPath(
-                    relativeGuidePath,
-                    PathKind.GUIAS
-                )
+                filePathResolver.mapToFolderPath(PathKind.GUIAS)
             } else {
                 filePathResolver.mapToFilePathSpecificGuide(
                     deleteGuide.guide,
@@ -309,6 +307,7 @@ class GuiaRepositoryImpl @Inject constructor(
 
         if (!pathGuideFile.exists()) return false
 
+        refreshTrigger.emit(Unit)
         return pathGuideFile.deleteRecursively()
     }
 
@@ -530,16 +529,14 @@ class GuiaRepositoryImpl @Inject constructor(
             obtenerDatosXMLV2(guideDomainModel, path)
     }
 
-    override fun existXMLGuideV1(
-        guideDomainModel: GuideDomainModel,
-        relativeGuidePath: RelativeGuidePath
+    override suspend fun existXMLGuideV1(
+        guideDomainModel: GuideDomainModel
     ): ExistGuideV1Result {
         val pathComplete = File(
-            filePathResolver.getPathGuidesV1(
+            filePathResolver.mapToFilePathSpecificGuide(
                 guideDomainModel,
-                PathKind.GUIAS,
-                relativeGuidePath
-            )
+                PathKind.GUIAS
+            ).value
         )
 
         return when (val guideDomainModel: GuideResource<GuideDomainModel, ReadGuideError> =
@@ -567,11 +564,10 @@ class GuiaRepositoryImpl @Inject constructor(
         return File(oldGuidePath.value).renameTo(File(newGuidePath.value))
     }
 
-    override fun getVersionGuide(
+    override suspend fun getVersionGuide(
         nameFile: String,
-        relativeGuidePath: RelativeGuidePath
     ): GuideResource<GuideDomainModel, ReadGuideError> {
-        val targetFile = listGuides(relativeGuidePath).find { file ->
+        val targetFile = listGuides().find { file ->
             file.name == nameFile || file.nameWithoutExtension == nameFile
         } ?: return GuideResource.Error(ReadGuideError.FileNotFound)
 
@@ -579,9 +575,11 @@ class GuiaRepositoryImpl @Inject constructor(
         return getAttributesGuide(targetFile)
     }
 
-    override fun existGuide(nameFile: String, relativeGuidePath: RelativeGuidePath): Boolean {
+    override suspend fun existGuide(
+        nameFile: String
+    ): Boolean {
         // 2. Verificamos la existencia física (V1 o V2)
-        return listGuides(relativeGuidePath).any { file ->
+        return listGuides().any { file ->
             file.name.equals(nameFile, ignoreCase = true) ||
                     file.nameWithoutExtension.equals(nameFile, ignoreCase = true)
         }

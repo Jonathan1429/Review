@@ -50,7 +50,7 @@ class FragmentWithoutFilesViewModel @Inject constructor(
                 is GuideContext.Moving -> {
                     when (val guideData = getGuideXmlDataUseCase.invoke(context)) {
                         is GetGuideResult.Success -> {
-                            val response = moveGuideUseCase.invoke(guideData, context, relativePath)
+                            val response = moveGuideUseCase.invoke(guideData, context)
                             when (response) {
                                 MoveGuideResponse.ErrorMovingGuide ->
                                     eventMovingFile("Error al intentar mover la guia")

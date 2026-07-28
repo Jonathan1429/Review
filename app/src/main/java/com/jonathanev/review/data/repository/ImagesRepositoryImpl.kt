@@ -10,11 +10,10 @@ import com.jonathanev.review.domain.model.GuideRenameContext
 import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.PathKind
 import com.jonathanev.review.domain.model.QuestionContentDomain
-import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.provider.FilePathsProvider
+import com.jonathanev.review.domain.repository.FilePathResolver
 import com.jonathanev.review.domain.repository.ImagesRepository
 import com.jonathanev.review.domain.service.FileNamingRules
-import com.jonathanev.review.domain.service.FilePathResolverService
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import javax.inject.Inject
@@ -22,17 +21,15 @@ import javax.inject.Inject
 class ImagesRepositoryImpl @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val filePathsProvider: FilePathsProvider,
-    private val filePathResolverService: FilePathResolverService
+    private val filePathResolver: FilePathResolver
 ) : ImagesRepository {
-    override fun save(
+    override suspend fun save(
         image: QuestionContentDomain.Image,
-        guide: GuideDomainModel,
-        relativeGuidePath: RelativeGuidePath
+        guide: GuideDomainModel
     ) {
-        val relativeGuidePath =
-            filePathResolverService.mapToJoinRelativePath(relativeGuidePath, guide.nameGuide)
         val currentPath =
-            filePathResolverService.mapToFolderPath(relativeGuidePath, PathKind.IMAGENES).value
+            filePathResolver.mapToFolderPathSpecificGuide(guide, PathKind.IMAGENES).value
+
         val uri = image.uri.toUri()
         val fileName = image.nameFile
         val outputFile = File(currentPath, fileName)
@@ -67,17 +64,14 @@ class ImagesRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun deleteImages(
+    override suspend fun deleteImages(
         guide: GuideDomainModel,
         images: List<QuestionContentDomain.Image>,
-        relativeGuidePath: RelativeGuidePath
     ): Boolean {
 
         if (guide.version == GuideVersion.V1) {
-            val basePathImages = filePathResolverService.mapToFolderPath(
-                relativeGuidePath,
-                PathKind.IMAGENES
-            ).value
+            val basePathImages =
+                filePathResolver.mapToFolderPathSpecificGuide(guide, PathKind.IMAGENES).value
 
             images.forEach { image ->
                 val noImage = File(image.uri.substringAfterLast("/")).nameWithoutExtension
@@ -91,45 +85,32 @@ class ImagesRepositoryImpl @Inject constructor(
 
             return true
         } else {
-            val relativeGuidePath =
-                filePathResolverService.mapToJoinRelativePath(relativeGuidePath, guide.nameGuide)
-            val basePathImages = File(
-                filePathResolverService.mapToFolderPath(
-                    relativeGuidePath,
-                    PathKind.IMAGENES
-                ).value
-            )
+            val basePathImages =
+                File(filePathResolver.mapToFolderPathSpecificGuide(guide, PathKind.IMAGENES).value)
 
             return basePathImages.deleteRecursively()
         }
     }
 
-    override fun moveImages(
+    override suspend fun moveImages(
         images: List<QuestionContentDomain.Image>,
-        guideRenameContext: GuideRenameContext,
-        relativeGuidePath: RelativeGuidePath
+        guideRenameContext: GuideRenameContext
     ): Boolean {
-        val oldRelativeGuidePath = filePathResolverService.mapToJoinRelativePath(
-            relativeGuidePath,
-            guideRenameContext.oldGuide.nameGuide
-        )
-        val oldFolderImages = File(
-            filePathResolverService.mapToFolderPath(
-                oldRelativeGuidePath,
-                PathKind.IMAGENES
-            ).value
-        )
+        val oldFolderImages =
+            File(
+                filePathResolver.mapToFolderPathSpecificGuide(
+                    guideDomainModel = guideRenameContext.oldGuide,
+                    kind = PathKind.IMAGENES
+                ).value
+            )
 
-        val relativeGuidePath = filePathResolverService.mapToJoinRelativePath(
-            relativeGuidePath,
-            guideRenameContext.newName
-        )
-        val newPathImages = File(
-            filePathResolverService.mapToFolderPath(
-                relativeGuidePath,
-                PathKind.IMAGENES
-            ).value
-        )
+        val newPathImages =
+            File(
+                filePathResolver.mapToFolderPathSpecificGuide(
+                    guideDomainModel = guideRenameContext.newGuide,
+                    kind = PathKind.IMAGENES
+                ).value
+            )
 
         // Renamed folder
         if (guideRenameContext.oldGuide.version == GuideVersion.V2) {

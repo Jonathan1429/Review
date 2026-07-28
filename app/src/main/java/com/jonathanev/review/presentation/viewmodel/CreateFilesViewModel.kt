@@ -159,9 +159,8 @@ class CreateFilesViewModel @Inject constructor(
             val guideDomain = (guideResource as GuideResource.Success).data
 
             when (renameGuideUseCase.invoke(
-                guide = guideDomain,
-                newName = newFileName,
-                newDescription = newDescription
+                oldGuide = guideDomain,
+                newGuide = GuideDomainModel(GuideVersion.V2, newFileName, newDescription)
             )) {
                 RenamedGuideResult.ImageError ->
                     emitEvent(Message("No se pasaron correctamente todas las imagenes"))

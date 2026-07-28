@@ -193,7 +193,7 @@ class FragmentListFolders : Fragment(R.layout.fragment_compose_container) {
                                     "¿Estás seguro que deseas eliminar la carpeta y su contenido?"
                                 )
                                 .setPositiveButton("Si") { _, _ ->
-                                    viewModel.deleteFiles(folderResult.folderUi.folder.name)
+                                    viewModel.deleteFolderAndContent(folderResult.folderUi.folder.name)
                                 }
                                 .setNegativeButton("Cancelar") { _, _ -> dialog.dismiss() }
                                 .create().show()

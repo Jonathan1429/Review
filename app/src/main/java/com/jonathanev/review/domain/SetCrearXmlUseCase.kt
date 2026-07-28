@@ -22,13 +22,11 @@ class SetCrearXmlUseCase @Inject constructor(
     private val guiaRepository: GuiaRepository
 ) {
     suspend operator fun invoke(
-        nameGuide: String,
-        description: String,
+        guideDomainModel: GuideDomainModel,
         preguntas: List<QuestionItemDomain>,
         respuestas: List<QuestionItemDomain>,
-        mode: SaveGuideMode
+        saveGuideMode: SaveGuideMode
     ): UpdateGuideResult {
-        val relativeGuidePath = navigationPathRepository.relativePath.first()
         val (preguntasProcesadas, respuestasProcesadas) = setDecodePathImageUseCase.invoke(
             preguntas,
             respuestas
@@ -37,15 +35,15 @@ class SetCrearXmlUseCase @Inject constructor(
         val guidesList = loadGuidesUseCase().first()
 
         val version = guidesList
-            .find { it.nameGuide == nameGuide }
+            .find { it.nameGuide == guideDomainModel.nameGuide }
             ?.version
 
-        if (mode == SaveGuideMode.Update && version == null) {
+        if (saveGuideMode == SaveGuideMode.Update && version == null) {
             return UpdateGuideResult.ErrorUpdateGuide
         }
 
-        if (mode == SaveGuideMode.Update){
-            val guide = guidesList.find { it.nameGuide == nameGuide }
+        if (saveGuideMode == SaveGuideMode.Update) {
+            val guide = guidesList.find { it.nameGuide == guideDomainModel.nameGuide }
 
             if (guide == null) {
                 return UpdateGuideResult.ErrorUpdateGuide
@@ -55,16 +53,19 @@ class SetCrearXmlUseCase @Inject constructor(
         val (dataWithTagsQ, dataWithTagsA) =
             setLabelsUseCase.invoke(preguntasProcesadas, respuestasProcesadas)
 
-        val path = directoryManager.createPathGuide(relativeGuidePath, nameGuide)
+        val path = directoryManager.createPathGuide(guideDomainModel)
         if (!path) {
             return UpdateGuideResult.ErrorPath
         }
 
         val resultGuide = guiaRepository.saveGuide(
-            guideDomainModel = GuideDomainModel(version ?: GuideVersion.V2, nameGuide, description),
+            guideDomainModel = GuideDomainModel(
+                GuideVersion.V2,
+                guideDomainModel.nameGuide,
+                guideDomainModel.description
+            ),
             preguntas = dataWithTagsQ,
-            respuestas = dataWithTagsA,
-            relativeGuidePath = relativeGuidePath
+            respuestas = dataWithTagsA
         )
 
         if (resultGuide is GuideResource.Error) {
@@ -72,11 +73,14 @@ class SetCrearXmlUseCase @Inject constructor(
         }
 
         val imagesUpdated = updateImagesUseCase.invoke(
-            guideDomain =  GuideDomainModel(version ?: GuideVersion.V2, nameGuide, description),
+            guideDomain = GuideDomainModel(
+                version ?: GuideVersion.V2,
+                guideDomainModel.nameGuide,
+                guideDomainModel.description
+            ),
             preguntasProcesadas = preguntasProcesadas,
             respuestasProcesadas = respuestasProcesadas,
-            isNewFile = mode != SaveGuideMode.Update,
-            relativeGuidePath = relativeGuidePath
+            saveGuideMode = SaveGuideMode.Update
         )
         return if (imagesUpdated) {
             UpdateGuideResult.Success

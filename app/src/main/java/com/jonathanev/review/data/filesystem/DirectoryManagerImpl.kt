@@ -4,29 +4,30 @@ import com.jonathanev.review.domain.constants.Extensions
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuideVersion
-import com.jonathanev.review.domain.model.ImageSource
+import com.jonathanev.review.domain.model.ImageContext
 import com.jonathanev.review.domain.model.PathKind
 import com.jonathanev.review.domain.model.QuestionContentDomain
-import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.provider.FilePathsProvider
 import com.jonathanev.review.domain.repository.DirectoryManager
-import com.jonathanev.review.domain.service.FilePathResolverService
+import com.jonathanev.review.domain.repository.FilePathResolver
 import java.io.File
 import javax.inject.Inject
 
 class DirectoryManagerImpl @Inject constructor(
-    private val filePathResolverService: FilePathResolverService,
+    private val filePathResolver: FilePathResolver,
     private val filePathsProvider: FilePathsProvider,
 ) : DirectoryManager {
-    override fun createPathImages(
+    override suspend fun createPathImages(
         guideDomainModel: GuideDomainModel,
-        isNewFile: Boolean,
-        relativePath: RelativeGuidePath
+        isNewFile: Boolean
     ): Boolean {
-        val relativePath =
-            filePathResolverService.mapToJoinRelativePath(relativePath, guideDomainModel.nameGuide)
         val currentPath =
-            File(filePathResolverService.mapToFolderPath(relativePath, PathKind.IMAGENES).value)
+            File(
+                filePathResolver.mapToFolderPathSpecificGuide(
+                    guideDomainModel = guideDomainModel,
+                    kind = PathKind.IMAGENES
+                ).value
+            )
 
         when {
             isNewFile -> {
@@ -49,42 +50,35 @@ class DirectoryManagerImpl @Inject constructor(
         return File(path).exists()
     }
 
-    override fun moveImages(
+    override suspend fun moveImages(
         guideDomainModel: GuideDomainModel,
-        imageSource: ImageSource,
+        imageContext: ImageContext,
         images: List<QuestionContentDomain.Image>
     ): Boolean {
-        val (oldImagesPath, newImagesPath) = when (imageSource) {
-            is ImageSource.MovingGuide -> {
-                val old = filePathResolverService.mapToFolderPathSpecificGuide(
+        val (oldImagesPath, newImagesPath) = when (imageContext) {
+            is ImageContext.MovingImage -> {
+                val old = filePathResolver.mapToOldFolderPathSpecificGuide(
                     guideDomainModel = guideDomainModel,
-                    relativeGuidePath = imageSource.oldRelativeGuidePath,
+                    originContext = imageContext,
                     kind = PathKind.IMAGENES
                 )
-                val new = filePathResolverService.mapToFolderPathSpecificGuide(
+                val new = filePathResolver.mapToFolderPathSpecificGuide(
                     guideDomainModel = guideDomainModel,
-                    relativeGuidePath = imageSource.relativeGuidePath,
                     kind = PathKind.IMAGENES
                 )
                 Pair(old, new)
             }
 
-            is ImageSource.Save -> {
-                val old = filePathResolverService.mapToFolderPathSpecificGuide(
-                    guideDomainModel = guideDomainModel,
-                    relativeGuidePath = imageSource.relativeGuidePath,
-                    kind = PathKind.IMAGENES
-                )
-                val new = filePathResolverService.mapToFolderPathSpecificGuide(
+            is ImageContext.Save -> {
+                val new = filePathResolver.mapToFolderPathSpecificGuide(
                     guideDomainModel = GuideDomainModel(
                         version = GuideVersion.V2,
                         nameGuide = guideDomainModel.nameGuide,
                         description = guideDomainModel.description
                     ),
-                    relativeGuidePath = imageSource.relativeGuidePath,
                     kind = PathKind.IMAGENES
                 )
-                Pair(old, new)
+                Pair(new, new)
             }
         }
 
@@ -103,15 +97,17 @@ class DirectoryManagerImpl @Inject constructor(
         return isSuccess
     }
 
-    override fun deleteLeftoverImagesInDevice(
-        nameGuide: String,
-        listImages: List<QuestionContentDomain.Image>,
-        relativeGuidePath: RelativeGuidePath
+    override suspend fun deleteLeftoverImagesInDevice(
+        guideDomainModel: GuideDomainModel,
+        listImages: List<QuestionContentDomain.Image>
     ) {
-        val relativePath =
-            filePathResolverService.mapToJoinRelativePath(relativeGuidePath, nameGuide)
         val currentPath =
-            File(filePathResolverService.mapToFolderPath(relativePath, PathKind.IMAGENES).value)
+            File(
+                filePathResolver.mapToFolderPathSpecificGuide(
+                    guideDomainModel,
+                    PathKind.IMAGENES
+                ).value
+            )
         // Borrar imagenes que ya no estén en el XML pero si en el dispositivo
         val currentDeviceNames =
             currentPath.listFiles()?.map { it.name }?.toSet() ?: emptySet()
@@ -125,10 +121,9 @@ class DirectoryManagerImpl @Inject constructor(
         }
     }
 
-    override fun createPathGuide(relativeGuidePath: RelativeGuidePath, nameGuide: String): Boolean {
-        val pathRelative =
-            filePathResolverService.mapToJoinRelativePath(relativeGuidePath, nameGuide)
-        val currentPath = filePathResolverService.mapToFolderPath(pathRelative, PathKind.GUIAS)
+    override suspend fun createPathGuide(guideDomainModel: GuideDomainModel): Boolean {
+        val currentPath =
+            filePathResolver.mapToFolderPathSpecificGuide(guideDomainModel, PathKind.GUIAS)
 
         File(currentPath.value).mkdir()
         return File(currentPath.value).exists()
@@ -150,22 +145,20 @@ class DirectoryManagerImpl @Inject constructor(
     }
 
     override fun deleteFolderEmpty(context: GuideContext.Moving) {
-        val relativePath = filePathResolverService.mapToJoinRelativePath(
-            context.oldRelativeGuidePath,
-            context.guide.nameGuide
-        )
-
         val pathGuides =
             File(
-                filePathResolverService.mapToFolderPath(
-                    relativeGuidePath = relativePath,
+                filePathResolver.mapToOldFolderPathSpecificGuide(
+                    guideDomainModel = context.guide,
+                    originContext = context,
                     kind = PathKind.GUIAS
                 ).value
             )
+
         val pathImages =
             File(
-                filePathResolverService.mapToFolderPath(
-                    relativeGuidePath = relativePath,
+                filePathResolver.mapToOldFolderPathSpecificGuide(
+                    guideDomainModel = context.guide,
+                    originContext = context,
                     kind = PathKind.IMAGENES
                 ).value
             )
@@ -175,14 +168,12 @@ class DirectoryManagerImpl @Inject constructor(
         }
     }
 
-    override fun getImagesInDevice(
-        guideDomain: GuideDomainModel,
-        relativeGuidePath: RelativeGuidePath
+    override suspend fun getImagesInDevice(
+        guideDomain: GuideDomainModel
     ): Set<String> {
         val currentPath =
-            filePathResolverService.mapToFolderPathSpecificGuide(
+            filePathResolver.mapToFolderPathSpecificGuide(
                 guideDomain,
-                relativeGuidePath,
                 PathKind.IMAGENES
             )
 
