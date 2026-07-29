@@ -8,7 +8,7 @@ import javax.inject.Inject
 class GetPreviewQuestionsUseCase @Inject constructor(
     private val setPintarTextosUseCase: SetPintarTextosUseCase
 ) {
-    suspend operator fun invoke(domainItems: List<QAItemDomain>): List<PreviewQuestionDomain> {
+    operator fun invoke(domainItems: List<QAItemDomain>): List<PreviewQuestionDomain> {
         val previewQuestionDomain = mutableListOf<PreviewQuestionDomain>()
 
         domainItems.forEach { domainItem ->

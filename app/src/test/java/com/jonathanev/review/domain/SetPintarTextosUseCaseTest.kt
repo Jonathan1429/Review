@@ -2,7 +2,6 @@ package com.jonathanev.review.domain
 
 import com.jonathanev.review.domain.model.ColorRangeDomain
 import com.jonathanev.review.domain.model.QuestionContentDomain
-import com.jonathanev.review.domain.repository.NavigationPathRepository
 import com.jonathanev.review.domain.service.ColorRangeParser
 import io.mockk.every
 import io.mockk.mockk
@@ -13,15 +12,13 @@ import org.junit.Test
 
 class SetPintarTextosUseCaseTest {
     private val colorRangeParser = mockk<ColorRangeParser>(relaxed = true)
-    private val navigationPathRepository = mockk<NavigationPathRepository>()
-    private val setPintarTextosUseCase =
-        SetPintarTextosUseCase(colorRangeParser, navigationPathRepository)
+    private val setPintarTextosUseCase = SetPintarTextosUseCase(colorRangeParser)
     private val ruta: String = "fake/path"
 
     @Test
     fun to_processing_an_image() = runTest {
         val result =
-            setPintarTextosUseCase.invoke(QuestionContentDomain.Image("uri", "1.png"))
+            setPintarTextosUseCase.invoke(QuestionContentDomain.Image(ruta, "1.png"))
 
         assertEquals(QuestionContentDomain.Image(ruta, "1.png"), result)
     }
