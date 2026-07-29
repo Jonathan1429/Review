@@ -13,7 +13,7 @@ import io.mockk.impl.annotations.MockK
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
-import org.junit.Ignore
+import org.junit.Test
 
 class GetGuideXmlDataUseCaseTest {
     @MockK
@@ -31,7 +31,7 @@ class GetGuideXmlDataUseCaseTest {
         getGuideXmlDataUseCase = GetGuideXmlDataUseCase(guiaRepository)
     }
 
-    @Ignore("Por el momento no")
+    @Test
     fun error_guide_not_found() = runTest {
         val context = GuideContext.DeleteGuide(guideDomainModel)
 
@@ -40,7 +40,7 @@ class GetGuideXmlDataUseCaseTest {
         assertEquals(GetGuideResult.NotFound, response)
     }
 
-    @Ignore("No")
+    @Test
     fun search_for_a_guide_correctly_with_context_browsing() = runTest {
         val context = GuideContext.Browsing(guideDomainModel)
 
@@ -57,7 +57,7 @@ class GetGuideXmlDataUseCaseTest {
         assertEquals(GetGuideResult.Success(guideDomainModel, emptyList()), response)
     }
 
-    @Ignore("No")
+    @Test
     fun search_for_a_guide_correctly_with_context_editing() = runTest {
         val context = GuideContext.Editing(guideDomainModel)
 
@@ -74,7 +74,7 @@ class GetGuideXmlDataUseCaseTest {
         assertEquals(GetGuideResult.Success(guideDomainModel, emptyList()), response)
     }
 
-    @Ignore("No")
+    @Test
     fun search_for_a_guide_correctly_with_context_moving() = runTest {
         val context = GuideContext.Moving(guideDomainModel, relativeGuidePath)
 
