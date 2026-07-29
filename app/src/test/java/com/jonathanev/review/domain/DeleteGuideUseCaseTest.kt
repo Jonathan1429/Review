@@ -17,7 +17,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import kotlin.test.Ignore
 
 class DeleteGuideUseCaseTest {
     private val guiaRepository = mockk<GuiaRepository>()
@@ -46,7 +45,6 @@ class DeleteGuideUseCaseTest {
             DeleteGuideUseCase(guiaRepository, imagesRepository)
     }
 
-    @Ignore("a")
     @Test
     fun if_the_xml_is_not_read_correctly_it_returns_an_error() = runTest {
         coEvery {
@@ -58,7 +56,7 @@ class DeleteGuideUseCaseTest {
         assertEquals(DeleteGuideResult.Error, response)
     }
 
-    @Ignore("Por el momento no")
+    @Test
     fun error_deleting_the_guide() = runTest {
         coEvery {
             guiaRepository.getXMLGuide(guideDomainModel)
@@ -79,7 +77,7 @@ class DeleteGuideUseCaseTest {
         assertEquals(DeleteGuideResult.ErrorGuide, response)
     }
 
-    @Ignore("Por el momento no")
+    @Test
     fun error_deleting_the_images() = runTest {
         coEvery {
             guiaRepository.getXMLGuide(guideDomainModel)
@@ -113,7 +111,7 @@ class DeleteGuideUseCaseTest {
         assertEquals(DeleteGuideResult.ErrorImage, response)
     }
 
-    @Ignore("Por el momento no")
+    @Test
     fun success_deliting_the_guide() = runTest {
         coEvery {
             guiaRepository.getXMLGuide(guideDomainModel)
