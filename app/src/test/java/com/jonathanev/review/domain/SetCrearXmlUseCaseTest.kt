@@ -8,7 +8,6 @@ import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.model.SaveGuideMode
 import com.jonathanev.review.domain.repository.DirectoryManager
 import com.jonathanev.review.domain.repository.GuiaRepository
-import com.jonathanev.review.domain.repository.NavigationPathRepository
 import com.jonathanev.review.domain.result.GuideResource
 import com.jonathanev.review.domain.result.SaveGuideErrors
 import com.jonathanev.review.domain.result.UpdateGuideResult
@@ -22,13 +21,12 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
-import org.junit.Ignore
+import org.junit.Test
 
 class SetCrearXmlUseCaseTest {
     private val setDecodePathImageUseCase = mockk<SetDecodePathImageUseCase>()
     private val loadGuidesUseCase = mockk<LoadGuidesUseCase>()
     private val setLabelsUseCase = mockk<SetLabelsUseCase>()
-    private val navigationPathRepository = mockk<NavigationPathRepository>()
     private val updateImagesUseCase = mockk<UpdateImagesUseCase>()
     private val directoryManager = mockk<DirectoryManager>()
     private val guiaRepository = mockk<GuiaRepository>()
@@ -70,7 +68,6 @@ class SetCrearXmlUseCaseTest {
         )
 
         setCrearXmlUseCase = SetCrearXmlUseCase(
-            navigationPathRepository,
             setDecodePathImageUseCase,
             loadGuidesUseCase,
             setLabelsUseCase,
@@ -80,7 +77,7 @@ class SetCrearXmlUseCaseTest {
         )
     }
 
-    @Ignore("No")
+    @Test
     fun error_update_guide() = runTest {
         val localGuides =
             flowOf(listOf(GuideDomainModel(GuideVersion.V2, "Prueba", "Sin descripcion")))
@@ -102,7 +99,7 @@ class SetCrearXmlUseCaseTest {
         assertEquals(UpdateGuideResult.ErrorUpdateGuide, response)
     }
 
-    @Ignore("No")
+    @Test
     fun error_create_path_guide() = runTest {
         coEvery {
             setDecodePathImageUseCase.invoke(preguntas, respuestas)
@@ -131,7 +128,7 @@ class SetCrearXmlUseCaseTest {
         assertEquals(UpdateGuideResult.ErrorPath, response)
     }
 
-    @Ignore("No")
+    @Test
     fun failure_create_guide() = runTest {
         coEvery {
             setDecodePathImageUseCase.invoke(preguntas, respuestas)
@@ -168,7 +165,7 @@ class SetCrearXmlUseCaseTest {
         }
     }
 
-    @Ignore("No")
+    @Test
     fun failure_saved_images() = runTest {
         coEvery {
             setDecodePathImageUseCase.invoke(preguntas, respuestas)
@@ -186,10 +183,10 @@ class SetCrearXmlUseCaseTest {
         } returns GuideResource.Success(guideDomainModel)
         coEvery {
             updateImagesUseCase.invoke(
-                GuideDomainModel(GuideVersion.V2, nameGuide, description),
-                preguntas,
-                respuestas,
-                SaveGuideMode.Create
+                guideDomain = guideDomainModel,
+                preguntasProcesadas = preguntas,
+                respuestasProcesadas = respuestas,
+                saveGuideMode = SaveGuideMode.Create
             )
         } returns false
 
@@ -213,16 +210,16 @@ class SetCrearXmlUseCaseTest {
         }
         coVerify {
             updateImagesUseCase.invoke(
-                guideDomainModel,
-                preguntas,
-                respuestas,
-                SaveGuideMode.Create
+                guideDomain = guideDomainModel,
+                preguntasProcesadas = preguntas,
+                respuestasProcesadas = respuestas,
+                saveGuideMode = SaveGuideMode.Create
             )
         }
         assertEquals(UpdateGuideResult.ImagesFailed, response)
     }
 
-    @Ignore("No")
+    @Test
     fun successful_process() = runTest {
         coEvery {
             setDecodePathImageUseCase.invoke(preguntas, respuestas)
@@ -240,10 +237,10 @@ class SetCrearXmlUseCaseTest {
         } returns GuideResource.Success(guideDomainModel)
         coEvery {
             updateImagesUseCase.invoke(
-                GuideDomainModel(GuideVersion.V2, nameGuide, description),
-                preguntas,
-                respuestas,
-                SaveGuideMode.Create
+                guideDomain = guideDomainModel,
+                preguntasProcesadas = preguntas,
+                respuestasProcesadas = respuestas,
+                saveGuideMode = SaveGuideMode.Create
             )
         } returns true
 
@@ -251,11 +248,10 @@ class SetCrearXmlUseCaseTest {
             guideDomainModel = guideDomainModel,
             preguntas = preguntas,
             respuestas = respuestas,
-            saveGuideMode = SaveGuideMode.Update
+            saveGuideMode = SaveGuideMode.Create
         )
 
         coVerify { setDecodePathImageUseCase.invoke(preguntas, respuestas) }
-        //verify { loadGuidesUseCase.invoke() }
         verify { setLabelsUseCase.invoke(preguntas, respuestas) }
         coVerify { directoryManager.createPathGuide(guideDomainModel) }
         coVerify {
@@ -270,7 +266,7 @@ class SetCrearXmlUseCaseTest {
                 guideDomain = guideDomainModel,
                 preguntasProcesadas = preguntas,
                 respuestasProcesadas = respuestas,
-                saveGuideMode = SaveGuideMode.Update,
+                saveGuideMode = SaveGuideMode.Create,
             )
         }
         assertEquals(UpdateGuideResult.Success, response)

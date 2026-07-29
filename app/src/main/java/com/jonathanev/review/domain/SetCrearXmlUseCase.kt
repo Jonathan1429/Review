@@ -6,14 +6,12 @@ import com.jonathanev.review.domain.model.QuestionItemDomain
 import com.jonathanev.review.domain.model.SaveGuideMode
 import com.jonathanev.review.domain.repository.DirectoryManager
 import com.jonathanev.review.domain.repository.GuiaRepository
-import com.jonathanev.review.domain.repository.NavigationPathRepository
 import com.jonathanev.review.domain.result.GuideResource
 import com.jonathanev.review.domain.result.UpdateGuideResult
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 class SetCrearXmlUseCase @Inject constructor(
-    private val navigationPathRepository: NavigationPathRepository,
     private val setDecodePathImageUseCase: SetDecodePathImageUseCase,
     private val loadGuidesUseCase: LoadGuidesUseCase,
     private val setLabelsUseCase: SetLabelsUseCase,
@@ -80,7 +78,7 @@ class SetCrearXmlUseCase @Inject constructor(
             ),
             preguntasProcesadas = preguntasProcesadas,
             respuestasProcesadas = respuestasProcesadas,
-            saveGuideMode = SaveGuideMode.Update
+            saveGuideMode = saveGuideMode
         )
         return if (imagesUpdated) {
             UpdateGuideResult.Success
