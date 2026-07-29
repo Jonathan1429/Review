@@ -27,7 +27,7 @@ import io.mockk.verify
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
-import org.junit.Ignore
+import org.junit.Test
 
 class RenameGuideTest {
     private val guiaRepository = mockk<GuiaRepository>()
@@ -95,7 +95,7 @@ class RenameGuideTest {
         newName = "Nuevo archivo"
     }
 
-    @Ignore("No")
+    @Test
     fun unknownerror_in_get_xml_guide() = runTest {
         coEvery {
             guiaRepository.getXMLGuide(context.guide)
@@ -106,7 +106,7 @@ class RenameGuideTest {
         coVerify { guiaRepository.getXMLGuide(context.guide) }
     }
 
-    @Ignore("No")
+    @Test
     fun invalid_format_in_get_xml_guide() = runTest {
         coEvery {
             guiaRepository.getXMLGuide(context.guide)
@@ -117,7 +117,7 @@ class RenameGuideTest {
         coVerify { guiaRepository.getXMLGuide(context.guide) }
     }
 
-    @Ignore("No")
+    @Test
     fun not_found_in_get_xml_guide() = runTest {
         coEvery {
             guiaRepository.getXMLGuide(context.guide)
@@ -128,7 +128,7 @@ class RenameGuideTest {
         coVerify { guiaRepository.getXMLGuide(context.guide) }
     }
 
-    @Ignore("No")
+    @Test
     fun guide_path_error_moving_guide() = runTest {
         val success = GetGuideResult.Success(guideDomainModel = guideDomain, list = result)
         coEvery {
@@ -155,7 +155,7 @@ class RenameGuideTest {
         assertEquals(RenamedGuideResult.GuidePathError, response)
     }
 
-    @Ignore("No")
+    @Test
     fun renamed_error_moving_guide() = runTest {
         val success = GetGuideResult.Success(guideDomainModel = guideDomain, list = result)
         coEvery {
@@ -176,8 +176,8 @@ class RenameGuideTest {
                 respuestas = listOf(answerItemDomain),
                 guideContext = GuideContext.Rename(
                     guide = guideDomain,
-                    name = RequiredAttrGuide(newName),
-                    description = OptionalAttrGuide("")
+                    name = RequiredAttrGuide(newGuideDomain.nameGuide),
+                    description = OptionalAttrGuide(newGuideDomain.description)
                 )
             )
         } returns GuideResource.Error(UpdateGuideError.UnknownError)
@@ -197,8 +197,8 @@ class RenameGuideTest {
                 respuestas = listOf(answerItemDomain),
                 guideContext = GuideContext.Rename(
                     guide = guideDomain,
-                    name = RequiredAttrGuide(newName),
-                    description = OptionalAttrGuide("")
+                    name = RequiredAttrGuide(newGuideDomain.nameGuide),
+                    description = OptionalAttrGuide(newGuideDomain.description)
                 )
             )
         }
@@ -206,7 +206,7 @@ class RenameGuideTest {
         assertEquals(RenamedGuideResult.RenamedError, response)
     }
 
-    @Ignore("No")
+    @Test
     fun image_error_moving_guide() = runTest {
         val success = GetGuideResult.Success(guideDomainModel = guideDomain, list = result)
         coEvery {
@@ -227,8 +227,8 @@ class RenameGuideTest {
                 respuestas = listOf(answerItemDomain),
                 guideContext = GuideContext.Rename(
                     guide = guideDomain,
-                    name = RequiredAttrGuide(newName),
-                    description = OptionalAttrGuide("")
+                    name = RequiredAttrGuide(newGuideDomain.nameGuide),
+                    description = OptionalAttrGuide(newGuideDomain.description)
                 )
             )
         } returns GuideResource.Success(guideDomain)
@@ -255,8 +255,8 @@ class RenameGuideTest {
                 respuestas = listOf(answerItemDomain),
                 guideContext = GuideContext.Rename(
                     guide = guideDomain,
-                    name = RequiredAttrGuide(newName),
-                    description = OptionalAttrGuide("")
+                    name = RequiredAttrGuide(newGuideDomain.nameGuide),
+                    description = OptionalAttrGuide(newGuideDomain.description)
                 )
             )
         }
@@ -271,7 +271,7 @@ class RenameGuideTest {
         assertEquals(RenamedGuideResult.ImageError, response)
     }
 
-    @Ignore("No")
+    @Test
     fun success_moving_guide() = runTest {
         val success = GetGuideResult.Success(guideDomainModel = guideDomain, list = result)
         coEvery {
@@ -292,8 +292,8 @@ class RenameGuideTest {
                 respuestas = listOf(answerItemDomain),
                 guideContext = GuideContext.Rename(
                     guide = guideDomain,
-                    name = RequiredAttrGuide(newName),
-                    description = OptionalAttrGuide("")
+                    name = RequiredAttrGuide(newGuideDomain.nameGuide),
+                    description = OptionalAttrGuide(newGuideDomain.description)
                 )
             )
         } returns GuideResource.Success(guideDomain)
@@ -320,8 +320,8 @@ class RenameGuideTest {
                 respuestas = listOf(answerItemDomain),
                 guideContext = GuideContext.Rename(
                     guide = guideDomain,
-                    name = RequiredAttrGuide(newName),
-                    description = OptionalAttrGuide("")
+                    name = RequiredAttrGuide(newGuideDomain.nameGuide),
+                    description = OptionalAttrGuide(newGuideDomain.description)
                 )
             )
         }
