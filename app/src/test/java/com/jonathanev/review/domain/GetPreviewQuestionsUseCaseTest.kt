@@ -4,11 +4,9 @@ import com.jonathanev.review.domain.model.QAItemDomain
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
 import com.jonathanev.review.domain.model.RelativeGuidePath
-import com.jonathanev.review.domain.repository.NavigationPathRepository
 import io.mockk.MockKAnnotations
-import io.mockk.every
+import io.mockk.coEvery
 import io.mockk.impl.annotations.MockK
-import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -18,13 +16,12 @@ import kotlin.test.Ignore
 class GetPreviewQuestionsUseCaseTest {
     @MockK
     lateinit var setPintarTextosUseCase: SetPintarTextosUseCase
-    private var navigationPathRepository = mockk<NavigationPathRepository>()
     private lateinit var useCase: GetPreviewQuestionsUseCase
 
     @Before
     fun setup() {
         MockKAnnotations.init(this)
-        useCase = GetPreviewQuestionsUseCase(setPintarTextosUseCase, navigationPathRepository)
+        useCase = GetPreviewQuestionsUseCase(setPintarTextosUseCase)
     }
 
     @Ignore("No")
@@ -39,20 +36,20 @@ class GetPreviewQuestionsUseCaseTest {
         val answerItem2 = QuestionContentDomain.Text("Segundo texto", emptyList())
 
         // Configuramos qué devuelve el use case para cada item
-        every {
-            setPintarTextosUseCase.invoke(questionItem1, any())
+            coEvery {
+                setPintarTextosUseCase.invoke(questionItem1)
         } returns questionItem1
 
-        every {
-            setPintarTextosUseCase.invoke(questionItem2, any())
+            coEvery {
+                setPintarTextosUseCase.invoke(questionItem2)
         } returns questionItem2
 
-        every {
-            setPintarTextosUseCase.invoke(answerItem1, any())
+            coEvery {
+                setPintarTextosUseCase.invoke(answerItem1)
         } returns answerItem1
 
-        every {
-            setPintarTextosUseCase.invoke(answerItem2, any())
+            coEvery {
+                setPintarTextosUseCase.invoke(answerItem2)
         } returns answerItem2
 
         val qaItem1 = QAItemDomain(

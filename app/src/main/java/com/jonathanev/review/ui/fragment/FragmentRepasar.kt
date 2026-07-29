@@ -7,9 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.appcompat.app.AlertDialog
 import androidx.core.animation.doOnEnd
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -17,10 +15,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.jonathanev.review.R
 import com.jonathanev.review.databinding.FragmentRepasarBinding
-import com.jonathanev.review.presentation.event.GuideReviewEvent
-import com.jonathanev.review.presentation.viewmodel.FragmentRepasarViewModel
+import com.jonathanev.review.presentation.viewmodel.PreviewViewModel
 import com.jonathanev.review.ui.adapter.ListItemPintarImagenesAdapter
 import com.jonathanev.review.ui.adapter.ListItemPintarTextosAdapter
 import dagger.hilt.android.AndroidEntryPoint
@@ -30,7 +26,7 @@ import kotlinx.coroutines.launch
 class FragmentRepasar : Fragment() {
     private var _binding: FragmentRepasarBinding? = null
     private val binding get() = _binding!!
-    private val viewModel: FragmentRepasarViewModel by activityViewModels()
+    private val viewModel: PreviewViewModel by activityViewModels()
     private lateinit var adaptListPintarTextos: ListItemPintarTextosAdapter
     private lateinit var adaptListPintarImagenes: ListItemPintarImagenesAdapter
 
@@ -50,7 +46,7 @@ class FragmentRepasar : Fragment() {
 
         val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                viewModel.initUiState()
+                //viewModel.initUiState()
                 findNavController().popBackStack()
             }
         }
@@ -62,7 +58,7 @@ class FragmentRepasar : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 // Observamos imageList directamente
-                launch {
+                /*launch {
                     viewModel.imageList.collect { list ->
                         adaptListPintarImagenes.submitList(list)
                     }
@@ -73,21 +69,21 @@ class FragmentRepasar : Fragment() {
                     viewModel.textList.collect { list ->
                         adaptListPintarTextos.submitList(list)
                     }
-                }
+                }*/
 
                 // Texto pregunta/respuesta
                 launch {
-                    viewModel.uiState.collect { uiState ->
+                    /*viewModel.uiState.collect { uiState ->
                         /*binding.lblPregResp.text =
                             if (uiState.qAType == QAType.QUESTION)
                                 getString(R.string.etPregunta)
                             else
                                 getString(R.string.etRespuesta)*/
-                    }
+                    }*/
                 }
 
                 launch {
-                    viewModel.eventsMessages.collect { event ->
+                    /*viewModel.eventsMessages.collect { event ->
                         when (event) {
                             GuideReviewEvent.NotQuestionBefore ->
                                 showToast("Ya no tienes preguntas anteriores")
@@ -99,7 +95,7 @@ class FragmentRepasar : Fragment() {
                                     .setPositiveButton(
                                         "Si"
                                     ) { _, _ ->
-                                        viewModel.restartReview()
+                                        //viewModel.restartReview()
                                         showToast("Guia reiniciada")
                                     }
                                     .setNegativeButton(
@@ -113,7 +109,7 @@ class FragmentRepasar : Fragment() {
 
                             is GuideReviewEvent.ShowMessage -> showToast(event.text)
                         }
-                    }
+                    }*/
                 }
             }
         }
@@ -126,7 +122,7 @@ class FragmentRepasar : Fragment() {
     }
 
     private fun initListeners() {
-        binding.btnPregResp.setOnClickListener {
+        /*binding.btnPregResp.setOnClickListener {
             viewModel.swapTypeContent()
         }
 
@@ -136,7 +132,7 @@ class FragmentRepasar : Fragment() {
 
         binding.btnPrevious.setOnClickListener {
             viewModel.beforeQuestion()
-        }
+        }*/
     }
 
     private fun initUI() {
@@ -158,17 +154,17 @@ class FragmentRepasar : Fragment() {
     }
 
     private fun goVisorTexto(position: Int) {
-        findNavController().navigate(
+        /*findNavController().navigate(
             R.id.action_fragmentRepasar_to_fragmentVisorTexto,
             bundleOf("questionText" to viewModel.textList.value[position])
-        )
+        )*/
     }
 
     private fun goVisorImagen(position: Int) {
-        findNavController().navigate(
+        /*findNavController().navigate(
             R.id.action_fragmentRepasar_to_fragmentVisorImagen,
             bundleOf("questionImage" to viewModel.imageList.value[position])
-        )
+        )*/
     }
 
     private fun girarCardView() {

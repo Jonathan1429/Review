@@ -2,12 +2,13 @@ package com.jonathanev.review.ui.preview.providers
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.jonathanev.review.presentation.model.GuideUiModel
+import com.jonathanev.review.presentation.model.GuideVersion
 
 class ItemGuideProvider() : PreviewParameterProvider<GuideUiModel> {
     override val values: Sequence<GuideUiModel>
         get() = sequenceOf(
-            GuideUiModel("Kotlin", "Sintaxis basica de Kotlin"),
-            GuideUiModel("Test", "Test unitarios")
+            GuideUiModel(GuideVersion.V2, "Kotlin", "Sintaxis basica de Kotlin"),
+            GuideUiModel(GuideVersion.V2, "Test", "Test unitarios")
         )
 
     override fun getDisplayName(index: Int): String? {

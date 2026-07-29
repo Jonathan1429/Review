@@ -15,16 +15,15 @@ import androidx.navigation3.ui.NavDisplay
 import com.jonathanev.review.presentation.model.FileFormMode
 import com.jonathanev.review.presentation.model.FileInteractionMode
 import com.jonathanev.review.presentation.model.GuideMode
-import com.jonathanev.review.presentation.model.GuideUiModel
 import com.jonathanev.review.presentation.model.QuestionContentMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.presentation.viewmodel.CreateFilesViewModel
 import com.jonathanev.review.presentation.viewmodel.FragReviewEntryViewModel
 import com.jonathanev.review.presentation.viewmodel.FragmentListGuidesViewModel
-import com.jonathanev.review.presentation.viewmodel.FragmentRepasarViewModel
 import com.jonathanev.review.presentation.viewmodel.FragmentWithoutFilesViewModel
 import com.jonathanev.review.presentation.viewmodel.ListFoldersViewModel
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
+import com.jonathanev.review.presentation.viewmodel.PreviewViewModel
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.ui.model.ContentType
 import com.jonathanev.review.ui.screens.CreateFilesPropertiesRoute
@@ -148,20 +147,17 @@ fun BasicNavigation() {
                     onAddGuideClick = {
                         backStack.add(AppRoutes.CreateFilesPropertiesScreen(FileFormMode.CreatingFile))
                     },
-                    onOpenGuideClick = { nameGuide ->
-                        backStack.add(AppRoutes.PreviewQuestionsScreen(nameGuide))
+                    onOpenGuideClick = {
+                        backStack.add(AppRoutes.PreviewQuestionsScreen)
                     },
                     onDeleteGuideClick = {
                         backStack.removeLastOrNull()
                     },
-                    onRenameGuideClick = { propertiesGuide ->
+                    onRenameGuideClick = { guideUIModel ->
                         backStack.add(
                             AppRoutes.CreateFilesPropertiesScreen(
                                 FileFormMode.RenameFile(
-                                    GuideUiModel(
-                                        nameGuide = propertiesGuide.name,
-                                        description = propertiesGuide.description
-                                    )
+                                    guideUIModel
                                 )
                             )
                         )
@@ -300,31 +296,30 @@ fun BasicNavigation() {
                     onBackNav = { backStack.removeLastOrNull() }
                 )
             }
-            entry<AppRoutes.PreviewQuestionsScreen> { value ->
-                val viewModel: FragmentRepasarViewModel = viewModel()
+            entry<AppRoutes.PreviewQuestionsScreen> {
+                val viewModel: PreviewViewModel = viewModel()
 
                 val propertiesGuide = viewModel.uiState.collectAsStateWithLifecycle().value
 
                 PreviewQuestionsRoute(
                     viewModel = viewModel,
-                    nameGuide = value.nameGuide,
-                    onEditingGuideClick = { position ->
+                    onEditingGuideClick = { nameGuide: String, descriptionGuide: String, posQuestionEdit: Int ->
                         backStack.add(
                             AppRoutes.FillingGuideScreen(
                                 GuideMode.Edit(
-                                    propertiesGuide.fileName,
-                                    propertiesGuide.description,
-                                    position
+                                    nameGuide,
+                                    descriptionGuide,
+                                    posQuestionEdit
                                 )
                             )
                         )
                     },
-                    onPlayGuideClick = {
+                    onPlayGuideClick = { nameGuide: String, posQuestionPlay: Int ->
                         backStack.add(
                             AppRoutes.FillingGuideScreen(
                                 GuideMode.Review(
-                                    nameGuide = propertiesGuide.fileName,
-                                    posQuestion = 0
+                                    nameGuide = nameGuide,
+                                    posQuestion = posQuestionPlay
                                 )
                             )
                         )

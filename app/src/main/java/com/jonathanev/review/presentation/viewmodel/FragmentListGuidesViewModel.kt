@@ -9,6 +9,7 @@ import com.jonathanev.review.domain.GetGuideXmlDataUseCase
 import com.jonathanev.review.domain.LoadGuidesUseCase
 import com.jonathanev.review.domain.MoveGuideUseCase
 import com.jonathanev.review.domain.ResetNavigationUseCase
+import com.jonathanev.review.domain.SetActiveGuideUseCase
 import com.jonathanev.review.domain.SetContextMoveUseCase
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
@@ -18,6 +19,7 @@ import com.jonathanev.review.domain.result.GuideResultDomain
 import com.jonathanev.review.domain.result.MoveGuideResponse
 import com.jonathanev.review.presentation.event.GuideActionEvent
 import com.jonathanev.review.presentation.event.UIMovingEvent
+import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.GuideResultUi
 import com.jonathanev.review.presentation.model.GuideUiModel
@@ -43,7 +45,8 @@ class FragmentListGuidesViewModel @Inject constructor(
     private val getGuideMoveUseCase: GetGuideMoveUseCase,
     private val getGuideXmlDataUseCase: GetGuideXmlDataUseCase,
     private val moveGuideUseCase: MoveGuideUseCase,
-    private val resetNavigationUseCase: ResetNavigationUseCase
+    private val resetNavigationUseCase: ResetNavigationUseCase,
+    private val setActiveGuideUseCase: SetActiveGuideUseCase
 ) : ViewModel() {
     private var cachedGuides: List<GuideDomainModel> = emptyList()
     private var selectedGuideDomain: GuideDomainModel? = null
@@ -183,6 +186,12 @@ class FragmentListGuidesViewModel @Inject constructor(
             val guide = selectedGuideDomain ?: return@launch
             setContextMoveUseCase.invoke(guide)
             resetNavigationUseCase.invoke()
+        }
+    }
+
+    fun setActiveGuide(guideUIModel: GuideUiModel) {
+        viewModelScope.launch {
+            setActiveGuideUseCase.invoke(guideUIModel.toDomain())
         }
     }
 }

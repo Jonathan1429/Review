@@ -52,5 +52,5 @@ sealed interface AppRoutes : NavKey {
         val guideMode: GuideMode
     ) : AppRoutes
     @Serializable
-    data class PreviewQuestionsScreen(val nameGuide: String): AppRoutes
+    data object PreviewQuestionsScreen : AppRoutes
 }

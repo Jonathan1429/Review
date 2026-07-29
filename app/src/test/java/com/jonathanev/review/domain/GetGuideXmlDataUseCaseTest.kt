@@ -5,13 +5,11 @@ import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.repository.GuiaRepository
-import com.jonathanev.review.domain.repository.NavigationPathRepository
 import com.jonathanev.review.domain.result.GetGuideResult
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.impl.annotations.MockK
-import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -20,7 +18,6 @@ import org.junit.Ignore
 class GetGuideXmlDataUseCaseTest {
     @MockK
     lateinit var guiaRepository: GuiaRepository
-    private var navigationPathRepository = mockk<NavigationPathRepository>()
     private lateinit var getGuideXmlDataUseCase: GetGuideXmlDataUseCase
     private lateinit var guideDomainModel: GuideDomainModel
     private var relativeGuidePath = RelativeGuidePath("init")
@@ -31,12 +28,12 @@ class GetGuideXmlDataUseCaseTest {
         guideDomainModel = GuideDomainModel(GuideVersion.V2, "Guia de prueba", "")
         relativeGuidePath = RelativeGuidePath("path/fake")
 
-        getGuideXmlDataUseCase = GetGuideXmlDataUseCase(guiaRepository, navigationPathRepository)
+        getGuideXmlDataUseCase = GetGuideXmlDataUseCase(guiaRepository)
     }
 
     @Ignore("Por el momento no")
     fun error_guide_not_found() = runTest {
-        val context = GuideContext.DeleteGuide(guideDomainModel, relativeGuidePath)
+        val context = GuideContext.DeleteGuide(guideDomainModel)
 
         val response = getGuideXmlDataUseCase.invoke(context)
 
@@ -79,7 +76,7 @@ class GetGuideXmlDataUseCaseTest {
 
     @Ignore("No")
     fun search_for_a_guide_correctly_with_context_moving() = runTest {
-        val context = GuideContext.Moving(guideDomainModel, relativeGuidePath, relativeGuidePath)
+        val context = GuideContext.Moving(guideDomainModel, relativeGuidePath)
 
         coEvery {
             guiaRepository.getXMLGuide(guideDomainModel)

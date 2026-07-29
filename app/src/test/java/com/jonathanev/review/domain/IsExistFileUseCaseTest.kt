@@ -3,7 +3,6 @@ package com.jonathanev.review.domain
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.repository.GuiaRepository
-import com.jonathanev.review.domain.repository.NavigationPathRepository
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertFalse
@@ -15,8 +14,6 @@ class IsExistFileUseCaseTest {
     private lateinit var cachedGuides: List<GuideDomainModel>
     private lateinit var isExistFileUseCase: IsExistFileUseCase
     private var guiaRepository = mockk<GuiaRepository>()
-    private val navigationPathRepository = mockk<NavigationPathRepository>()
-
     @Before
     fun setUp() {
         cachedGuides = listOf(
@@ -24,7 +21,7 @@ class IsExistFileUseCaseTest {
             GuideDomainModel(GuideVersion.V2, "Kotlin", "")
         )
 
-        isExistFileUseCase = IsExistFileUseCase(guiaRepository, navigationPathRepository)
+        isExistFileUseCase = IsExistFileUseCase(guiaRepository)
     }
 
     @Ignore("No")

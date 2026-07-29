@@ -36,6 +36,7 @@ class RenameGuideTest {
     private val directoryManager = mockk<DirectoryManager>()
     private val navigationPathRepository = mockk<NavigationPathRepository>()
     private lateinit var guideDomain: GuideDomainModel
+    private lateinit var newGuideDomain: GuideDomainModel
     private var oldRelativeGuidePath: RelativeGuidePath = RelativeGuidePath("init")
     private lateinit var context: GuideContext.Editing
     private lateinit var result: List<QAItemDomain>
@@ -50,6 +51,11 @@ class RenameGuideTest {
             GuideVersion.V1,
             "Prueba",
             "Descripcion"
+        )
+        newGuideDomain = GuideDomainModel(
+            GuideVersion.V2,
+            "Kotlin",
+            "Descripcion Kotlin"
         )
         oldRelativeGuidePath = RelativeGuidePath("fake/path/oldGuide")
         renameGuideUseCase = RenameGuideUseCase(
@@ -95,7 +101,7 @@ class RenameGuideTest {
             guiaRepository.getXMLGuide(context.guide)
         } returns GetGuideResult.UnknownError
 
-        renameGuideUseCase.invoke(guideDomain, newName, "")
+        renameGuideUseCase.invoke(guideDomain, newGuideDomain)
 
         coVerify { guiaRepository.getXMLGuide(context.guide) }
     }
@@ -106,7 +112,7 @@ class RenameGuideTest {
             guiaRepository.getXMLGuide(context.guide)
         } returns GetGuideResult.InvalidFormat
 
-        renameGuideUseCase.invoke(guideDomain, newName, "Prueba")
+        renameGuideUseCase.invoke(guideDomain, newGuideDomain)
 
         coVerify { guiaRepository.getXMLGuide(context.guide) }
     }
@@ -117,7 +123,7 @@ class RenameGuideTest {
             guiaRepository.getXMLGuide(context.guide)
         } returns GetGuideResult.NotFound
 
-        renameGuideUseCase.invoke(guideDomain, newName, "")
+        renameGuideUseCase.invoke(guideDomain, newGuideDomain)
 
         coVerify { guiaRepository.getXMLGuide(context.guide) }
     }
@@ -133,18 +139,18 @@ class RenameGuideTest {
             guideQuestionExtractor.map(success)
         } returns Pair(listOf(questionItemDomain), listOf(answerItemDomain))
 
-        every {
-            directoryManager.createPathGuide(oldRelativeGuidePath, newName)
+        coEvery {
+            directoryManager.createPathGuide(newGuideDomain)
         } returns false
 
         val response =
-            renameGuideUseCase.invoke(guideDomain, newName, "")
+            renameGuideUseCase.invoke(guideDomain, newGuideDomain)
 
         coVerify { guiaRepository.getXMLGuide(context.guide) }
 
         verify { guideQuestionExtractor.map(success) }
 
-        verify { directoryManager.createPathGuide(oldRelativeGuidePath, newName) }
+        coVerify { directoryManager.createPathGuide(newGuideDomain) }
 
         assertEquals(RenamedGuideResult.GuidePathError, response)
     }
@@ -160,8 +166,8 @@ class RenameGuideTest {
             guideQuestionExtractor.map(success)
         } returns Pair(listOf(questionItemDomain), listOf(answerItemDomain))
 
-        every {
-            directoryManager.createPathGuide(oldRelativeGuidePath, newName)
+        coEvery {
+            directoryManager.createPathGuide(newGuideDomain)
         } returns true
 
         coEvery {
@@ -170,7 +176,6 @@ class RenameGuideTest {
                 respuestas = listOf(answerItemDomain),
                 guideContext = GuideContext.Rename(
                     guide = guideDomain,
-                    relativeGuidePath = oldRelativeGuidePath,
                     name = RequiredAttrGuide(newName),
                     description = OptionalAttrGuide("")
                 )
@@ -178,13 +183,13 @@ class RenameGuideTest {
         } returns GuideResource.Error(UpdateGuideError.UnknownError)
 
         val response =
-            renameGuideUseCase.invoke(guideDomain, newName, "")
+            renameGuideUseCase.invoke(guideDomain, newGuideDomain)
 
         coVerify { guiaRepository.getXMLGuide(context.guide) }
 
         verify { guideQuestionExtractor.map(success) }
 
-        verify { directoryManager.createPathGuide(oldRelativeGuidePath, newName) }
+        coVerify { directoryManager.createPathGuide(newGuideDomain) }
 
         coVerify {
             guiaRepository.renameGuide(
@@ -192,7 +197,6 @@ class RenameGuideTest {
                 respuestas = listOf(answerItemDomain),
                 guideContext = GuideContext.Rename(
                     guide = guideDomain,
-                    relativeGuidePath = oldRelativeGuidePath,
                     name = RequiredAttrGuide(newName),
                     description = OptionalAttrGuide("")
                 )
@@ -213,8 +217,8 @@ class RenameGuideTest {
             guideQuestionExtractor.map(success)
         } returns Pair(listOf(questionItemDomain), listOf(answerItemDomain))
 
-        every {
-            directoryManager.createPathGuide(oldRelativeGuidePath, newName)
+        coEvery {
+            directoryManager.createPathGuide(newGuideDomain)
         } returns true
 
         coEvery {
@@ -223,29 +227,27 @@ class RenameGuideTest {
                 respuestas = listOf(answerItemDomain),
                 guideContext = GuideContext.Rename(
                     guide = guideDomain,
-                    relativeGuidePath = oldRelativeGuidePath,
                     name = RequiredAttrGuide(newName),
                     description = OptionalAttrGuide("")
                 )
             )
         } returns GuideResource.Success(guideDomain)
 
-        every {
+        coEvery {
             imagesRepository.moveImages(
                 images = any(),
-                guideRenameContext = GuideRenameContext(guideDomain, newName),
-                relativeGuidePath = oldRelativeGuidePath
+                guideRenameContext = GuideRenameContext(guideDomain, newGuideDomain),
             )
         } returns false
 
         val response =
-            renameGuideUseCase.invoke(guideDomain, newName, "")
+            renameGuideUseCase.invoke(guideDomain, newGuideDomain)
 
         coVerify { guiaRepository.getXMLGuide(context.guide) }
 
         verify { guideQuestionExtractor.map(success) }
 
-        verify { directoryManager.createPathGuide(oldRelativeGuidePath, newName) }
+        coVerify { directoryManager.createPathGuide(newGuideDomain) }
 
         coVerify {
             guiaRepository.renameGuide(
@@ -253,18 +255,16 @@ class RenameGuideTest {
                 respuestas = listOf(answerItemDomain),
                 guideContext = GuideContext.Rename(
                     guide = guideDomain,
-                    relativeGuidePath = oldRelativeGuidePath,
                     name = RequiredAttrGuide(newName),
                     description = OptionalAttrGuide("")
                 )
             )
         }
 
-        verify {
+        coVerify {
             imagesRepository.moveImages(
                 images = any(),
-                guideRenameContext = GuideRenameContext(guideDomain, newName),
-                relativeGuidePath = oldRelativeGuidePath
+                guideRenameContext = GuideRenameContext(guideDomain, newGuideDomain),
             )
         }
 
@@ -282,8 +282,8 @@ class RenameGuideTest {
             guideQuestionExtractor.map(success)
         } returns Pair(listOf(questionItemDomain), listOf(answerItemDomain))
 
-        every {
-            directoryManager.createPathGuide(oldRelativeGuidePath, newName)
+        coEvery {
+            directoryManager.createPathGuide(newGuideDomain)
         } returns true
 
         coEvery {
@@ -292,29 +292,27 @@ class RenameGuideTest {
                 respuestas = listOf(answerItemDomain),
                 guideContext = GuideContext.Rename(
                     guide = guideDomain,
-                    relativeGuidePath = oldRelativeGuidePath,
                     name = RequiredAttrGuide(newName),
                     description = OptionalAttrGuide("")
                 )
             )
         } returns GuideResource.Success(guideDomain)
 
-        every {
+        coEvery {
             imagesRepository.moveImages(
                 images = any(),
-                guideRenameContext = GuideRenameContext(guideDomain, newName),
-                relativeGuidePath = oldRelativeGuidePath
+                guideRenameContext = GuideRenameContext(guideDomain, newGuideDomain),
             )
         } returns true
 
         val response =
-            renameGuideUseCase.invoke(guideDomain, newName, "")
+            renameGuideUseCase.invoke(guideDomain, newGuideDomain)
 
         coVerify { guiaRepository.getXMLGuide(context.guide) }
 
         verify { guideQuestionExtractor.map(success) }
 
-        verify { directoryManager.createPathGuide(oldRelativeGuidePath, newName) }
+        coVerify { directoryManager.createPathGuide(newGuideDomain) }
 
         coVerify {
             guiaRepository.renameGuide(
@@ -322,18 +320,16 @@ class RenameGuideTest {
                 respuestas = listOf(answerItemDomain),
                 guideContext = GuideContext.Rename(
                     guide = guideDomain,
-                    relativeGuidePath = oldRelativeGuidePath,
                     name = RequiredAttrGuide(newName),
                     description = OptionalAttrGuide("")
                 )
             )
         }
 
-        verify {
+        coVerify {
             imagesRepository.moveImages(
                 images = any(),
-                guideRenameContext = GuideRenameContext(guideDomain, newName),
-                relativeGuidePath = oldRelativeGuidePath
+                guideRenameContext = GuideRenameContext(guideDomain, newGuideDomain),
             )
         }
 

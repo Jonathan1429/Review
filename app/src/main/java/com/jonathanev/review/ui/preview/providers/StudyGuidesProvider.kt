@@ -3,6 +3,7 @@ package com.jonathanev.review.ui.preview.providers
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.jonathanev.review.presentation.model.FileInteractionMode
 import com.jonathanev.review.presentation.model.GuideUiModel
+import com.jonathanev.review.presentation.model.GuideVersion
 
 data class StudyGuidesProv(
     val listStudyGuides: List<GuideUiModel>,
@@ -11,8 +12,8 @@ data class StudyGuidesProv(
 
 class StudyGuidesProvider() : PreviewParameterProvider<StudyGuidesProv> {
     val list = listOf(
-        GuideUiModel("Kotlin", "Sintaxis basica de Kotlin"),
-        GuideUiModel("Test", "Test unitarios")
+        GuideUiModel(GuideVersion.V2, "Kotlin", "Sintaxis basica de Kotlin"),
+        GuideUiModel(GuideVersion.V2, "Test", "Test unitarios")
     )
 
     override val values: Sequence<StudyGuidesProv>

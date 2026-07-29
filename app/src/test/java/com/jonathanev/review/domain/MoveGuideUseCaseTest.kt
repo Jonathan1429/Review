@@ -58,7 +58,6 @@ class MoveGuideUseCaseTest {
         guideResult = GetGuideResult.Success(guideDomain, list)
         context = GuideContext.Moving(
             guideDomain,
-            relativeGuidePath,
             relativeGuidePath
         )
 
@@ -70,20 +69,18 @@ class MoveGuideUseCaseTest {
 
     @Test
     fun return_error_path_guide() = runTest {
-        every {
+        coEvery {
             directoryManager.createPathGuide(
-                relativeGuidePath,
-                context.guide.nameGuide
+                context.guide
             )
         } returns false
 
         val response = moveGuideUseCase.invoke(
             guideData = guideResult,
-            contextMoving = context,
-            relativeGuidePath = relativeGuidePath
+            contextMoving = context
         )
 
-        verify { directoryManager.createPathGuide(relativeGuidePath, context.guide.nameGuide) }
+        coVerify { directoryManager.createPathGuide(context.guide) }
         assertEquals(MoveGuideResponse.ErrorPathGuide, response)
     }
 
@@ -91,7 +88,6 @@ class MoveGuideUseCaseTest {
     fun return_error_moving_guide() = runTest {
         val localContext = GuideContext.Moving(
             GuideDomainModel(GuideVersion.V1, "Archivo", ""),
-            RelativeGuidePath("path/old/guide"),
             RelativeGuidePath("path/old/guide")
         )
 
@@ -99,8 +95,7 @@ class MoveGuideUseCaseTest {
 
         val response = moveGuideUseCase.invoke(
             guideData = guideResult,
-            contextMoving = localContext,
-            relativeGuidePath = relativeGuidePath
+            contextMoving = localContext
         )
 
         coVerify { guiaRepository.moveGuide(localContext) }
@@ -109,34 +104,30 @@ class MoveGuideUseCaseTest {
 
     @Test
     fun return_error_path_images() = runTest {
-        every {
+        coEvery {
             directoryManager.createPathGuide(
-                relativeGuidePath,
-                context.guide.nameGuide
+                context.guide
             )
         } returns true
         coEvery { guiaRepository.moveGuide(context) } returns true
-        every {
+        coEvery {
             directoryManager.createPathImages(
                 guideDomainModel = context.guide,
-                isNewFile = true,
-                relativePath = relativeGuidePath
+                isNewFile = true
             )
         } returns false
 
         val response = moveGuideUseCase.invoke(
             guideData = guideResult,
-            contextMoving = context,
-            relativeGuidePath = relativeGuidePath
+            contextMoving = context
         )
 
-        verify { directoryManager.createPathGuide(relativeGuidePath, context.guide.nameGuide) }
+        coVerify { directoryManager.createPathGuide(context.guide) }
         coVerify { guiaRepository.moveGuide(context) }
-        verify {
+        coVerify {
             directoryManager.createPathImages(
                 guideResult.guideDomainModel,
-                true,
-                relativeGuidePath
+                true
             )
         }
         assertEquals(MoveGuideResponse.ErrorPathImages, response)
@@ -146,18 +137,16 @@ class MoveGuideUseCaseTest {
     fun return_error_moving_images() = runTest {
         val localContext = GuideContext.Moving(
             GuideDomainModel(GuideVersion.V1, "Archivo", ""),
-            RelativeGuidePath("path/old/guide"),
             RelativeGuidePath("path/old/guide")
         )
 
         coEvery { guiaRepository.moveGuide(localContext) } returns true
-        every {
+        coEvery {
             directoryManager.moveImages(
                 images = any(),
                 guideDomainModel = localContext.guide,
                 imageContext = ImageContext.MovingImage(
-                    localContext.oldRelativeGuidePath,
-                    localContext.relativeGuidePath
+                    localContext.oldRelativeGuidePath
                 )
             )
         } returns false
@@ -166,18 +155,16 @@ class MoveGuideUseCaseTest {
 
         val response = moveGuideUseCase.invoke(
             guideData = guideResult,
-            contextMoving = localContext,
-            relativeGuidePath = relativeGuidePath
+            contextMoving = localContext
         )
 
         coVerify { guiaRepository.moveGuide(localContext) }
-        verify {
+        coVerify {
             directoryManager.moveImages(
                 images = any(),
                 guideDomainModel = localContext.guide,
                 imageContext = ImageContext.MovingImage(
-                    localContext.oldRelativeGuidePath,
-                    localContext.relativeGuidePath
+                    localContext.oldRelativeGuidePath
                 )
             )
         }
@@ -187,27 +174,24 @@ class MoveGuideUseCaseTest {
 
     @Test
     fun move_guide_successful() = runTest {
-        every {
+        coEvery {
             directoryManager.createPathGuide(
-                relativeGuidePath,
-                context.guide.nameGuide
+                context.guide
             )
         } returns true
         coEvery { guiaRepository.moveGuide(context) } returns true
-        every {
+        coEvery {
             directoryManager.createPathImages(
                 guideDomainModel = context.guide,
-                isNewFile = true,
-                relativePath = relativeGuidePath
+                isNewFile = true
             )
         } returns true
-        every {
+        coEvery {
             directoryManager.moveImages(
                 images = any(),
                 guideDomainModel = context.guide,
                 imageContext = ImageContext.MovingImage(
-                    context.oldRelativeGuidePath,
-                    context.relativeGuidePath
+                    context.oldRelativeGuidePath
                 )
             )
         } returns true
@@ -216,26 +200,23 @@ class MoveGuideUseCaseTest {
 
         val response = moveGuideUseCase.invoke(
             guideData = guideResult,
-            contextMoving = context,
-            relativeGuidePath = relativeGuidePath
+            contextMoving = context
         )
 
-        verify { directoryManager.createPathGuide(relativeGuidePath, context.guide.nameGuide) }
+        coVerify { directoryManager.createPathGuide(context.guide) }
         coVerify { guiaRepository.moveGuide(context) }
-        verify {
+        coVerify {
             directoryManager.createPathImages(
                 guideDomainModel = guideResult.guideDomainModel,
-                isNewFile = true,
-                relativePath = relativeGuidePath
+                isNewFile = true
             )
         }
-        verify {
+        coVerify {
             directoryManager.moveImages(
                 images = any(),
                 guideDomainModel = context.guide,
                 imageContext = ImageContext.MovingImage(
-                    context.oldRelativeGuidePath,
-                    context.relativeGuidePath
+                    context.oldRelativeGuidePath
                 )
             )
         }

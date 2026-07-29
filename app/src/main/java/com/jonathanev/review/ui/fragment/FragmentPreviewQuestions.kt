@@ -13,9 +13,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jonathanev.review.R
 import com.jonathanev.review.databinding.FragmentPreviewQuestionsBinding
-import com.jonathanev.review.presentation.event.GuidePreviewEvent
-import com.jonathanev.review.presentation.viewmodel.FragmentRepasarViewModel
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
+import com.jonathanev.review.presentation.viewmodel.PreviewViewModel
 import com.jonathanev.review.ui.adapter.ListPreviewQuestionsAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -25,7 +24,7 @@ class FragmentPreviewQuestions : Fragment() {
     private var _binding: FragmentPreviewQuestionsBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: FragmentRepasarViewModel by activityViewModels()
+    private val viewModel: PreviewViewModel by activityViewModels()
     private val navStateViewModel: MainActivityViewModel by activityViewModels()
     private lateinit var adaptListPreviewQuestion: ListPreviewQuestionsAdapter
 
@@ -45,14 +44,14 @@ class FragmentPreviewQuestions : Fragment() {
         ) ?: ""
 
         lifecycleScope.launch {
-            viewModel.eventsPreviewMessages.collect { event ->
+            /*viewModel.eventsPreviewMessages.collect { event ->
                 when (event) {
                     is GuidePreviewEvent.ShowMessage -> {
                         findNavController().popBackStack()
                         showToast(event.text)
                     }
                 }
-            }
+            }*/
         }
 
         initUI(folderId)
@@ -74,9 +73,9 @@ class FragmentPreviewQuestions : Fragment() {
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
 
         lifecycleScope.launch {
-            viewModel.uiStatePreview.collect { uiStatePreview ->
+            /*viewModel.uiStatePreview.collect { uiStatePreview ->
                 adaptListPreviewQuestion.submitList(uiStatePreview.previewState)
-            }
+            }*/
         }
     }
 
@@ -104,8 +103,8 @@ class FragmentPreviewQuestions : Fragment() {
         binding.reciclerPreviewQuestions.setHasFixedSize(true)
         binding.reciclerPreviewQuestions.adapter = adaptListPreviewQuestion
 
-        viewModel.uploadCachedGuides()
-        viewModel.getObtenerDatosXML(folderId)
+        //viewModel.uploadCachedGuides()
+        //viewModel.getObtenerDatosXML(folderId)
     }
 
     private fun goEdit(position: Int, folderId: String) {
@@ -116,7 +115,7 @@ class FragmentPreviewQuestions : Fragment() {
     }
 
     private fun goReview(position: Int) {
-        viewModel.showQuestionClicked(position)
+        //viewModel.showQuestionClicked(position)
 
         findNavController().navigate(
             R.id.action_fragmentPreviewQuestions_to_fragmentRepasar,

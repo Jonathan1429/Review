@@ -47,7 +47,6 @@ import com.jonathanev.review.presentation.state.DialogState
 import com.jonathanev.review.presentation.state.GuidesUiState
 import com.jonathanev.review.presentation.viewmodel.FragmentListGuidesViewModel
 import com.jonathanev.review.ui.components.ItemGuide
-import com.jonathanev.review.ui.model.PropertiesGuide
 import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.StudyGuidesProv
 import com.jonathanev.review.ui.preview.providers.StudyGuidesProvider
@@ -78,9 +77,9 @@ fun ListGuidesRoute(
     viewModel: FragmentListGuidesViewModel,
     fileInteractionMode: FileInteractionMode,
     onAddGuideClick: () -> Unit,
-    onOpenGuideClick: (String) -> Unit,
+    onOpenGuideClick: () -> Unit,
     onDeleteGuideClick: () -> Unit,
-    onRenameGuideClick: (PropertiesGuide) -> Unit,
+    onRenameGuideClick: (GuideUiModel) -> Unit,
     onMoveGuideClick: () -> Unit,
     onBackNav: () -> Unit,
     onNavigateWithoutFilesScreen: () -> Unit,
@@ -156,14 +155,12 @@ fun ListGuidesRoute(
                         dialogOptionsMenu(
                             currDialog = currentDialog,
                             stateDialog = stateDialog,
-                            onOpenGuideClick = onOpenGuideClick,
+                            onOpenGuideClick = { guideUIModel ->
+                                viewModel.setActiveGuide(guideUIModel)
+                                onOpenGuideClick()
+                            },
                             onRenameGuideClick = { guideUiModel ->
-                                onRenameGuideClick(
-                                    PropertiesGuide(
-                                        name = guideUiModel.nameGuide,
-                                        description = guideUiModel.description
-                                    )
-                                )
+                                onRenameGuideClick(guideUiModel)
                             },
                             onMoveGuideClick = {
                                 viewModel.setContext()
@@ -300,7 +297,7 @@ private fun dialogConfirmDelete(
         text = { Text(text = "¿Estás seguro que deseas eliminar la guia?") },
         confirmButton = {
             TextButton(onClick = {
-                viewModel.deleteGuide(nameGuide = stateDialog.guide.guideUiModel.nameGuide)
+                viewModel.deleteGuide(nameGuide = stateDialog.item.guideUiModel.nameGuide)
                 onDeleteGuideClick()
                 currentDialog1 = null
             }) {
@@ -322,7 +319,7 @@ private fun dialogConfirmDelete(
 private fun dialogOptionsMenu(
     currDialog: DialogState?,
     stateDialog: DialogState.OptionsMenu,
-    onOpenGuideClick: (String) -> Unit,
+    onOpenGuideClick: (GuideUiModel) -> Unit,
     onRenameGuideClick: (GuideUiModel) -> Unit,
     onMoveGuideClick: () -> Unit
 ): DialogState? {
@@ -353,16 +350,16 @@ private fun dialogOptionsMenu(
                                 when (opcion) {
                                     "Abrir" -> {
                                         currentDialog = null
-                                        onOpenGuideClick(stateDialog.guide.guideUiModel.nameGuide)
+                                        onOpenGuideClick(stateDialog.item.guideUiModel)
                                     }
 
                                     "Eliminar" -> {
                                         currentDialog =
-                                            DialogState.ConfirmDelete(stateDialog.guide)
+                                            DialogState.ConfirmDelete(stateDialog.item)
                                     }
 
                                     "Cambiar nombre" -> {
-                                        onRenameGuideClick(stateDialog.guide.guideUiModel)
+                                        onRenameGuideClick(stateDialog.item.guideUiModel)
                                     }
 
                                     "Mover" -> {

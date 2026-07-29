@@ -4,7 +4,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.jonathanev.review.presentation.model.ColorType
 import com.jonathanev.review.presentation.model.FileFormMode
 import com.jonathanev.review.presentation.model.GuideUiModel
-import com.jonathanev.review.presentation.model.IconType
+import com.jonathanev.review.presentation.model.GuideVersion
 import com.jonathanev.review.presentation.state.PropertiesFilesState
 import com.jonathanev.review.presentation.state.PropertiesFilesState.Companion.FileIconsMock
 import com.jonathanev.review.presentation.state.PropertiesFilesState.Companion.FolderIconsMock
@@ -41,6 +41,7 @@ class CreateFilesScreenDataProvider : PreviewParameterProvider<PropertiesCreateF
                 ),
                 fileFormMode = FileFormMode.RenameFile(
                     GuideUiModel(
+                        version = GuideVersion.V2,
                         nameGuide = "Test",
                         description = "Testing Unitarios"
                     )
