@@ -1,8 +1,6 @@
 package com.jonathanev.review.presentation.state
 
 import com.jonathanev.review.presentation.model.ColorType
-import com.jonathanev.review.presentation.model.FileFormMode
-import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.presentation.model.IconType
 
 data class PropertiesFilesState(
@@ -11,7 +9,7 @@ data class PropertiesFilesState(
     val oldName: String = "",
     val oldDescription: String = "",
     val icon: IconType = IconType.ANCHOR_SOLID_FULL,
-    val color: ColorType = ColorType.Black,
+    val color: ColorType = ColorType.Default,
     val selectedIndex: Int = -1,
     val icons: List<IconType> = emptyList(),
     val showOverwriteDialogFile: Boolean = false,

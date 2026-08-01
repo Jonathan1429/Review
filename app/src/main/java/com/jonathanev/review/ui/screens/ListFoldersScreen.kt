@@ -1,6 +1,5 @@
 package com.jonathanev.review.ui.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
@@ -35,7 +34,7 @@ import com.jonathanev.review.ui.components.GuiaItem
 import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.ListFoldersDataProv
 import com.jonathanev.review.ui.preview.providers.ListFoldersDataProvider
-import com.jonathanev.review.ui.theme.ColorBotones
+import com.jonathanev.review.ui.theme.HardColorButton
 import com.jonathanev.review.ui.theme.ReviewTheme
 import com.skydoves.compose.stability.runtime.TraceRecomposition
 
@@ -92,7 +91,6 @@ fun ListFoldersScreen(
     onMoveCancelGuideClick: () -> Unit
 ) {
     Scaffold(
-        modifier = Modifier.background(Color.Red),
         contentWindowInsets = if (fileInteractionMode == FileInteractionMode.MovingItem) {
             ScaffoldDefaults.contentWindowInsets
         } else {
@@ -118,7 +116,7 @@ fun ListFoldersScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onCreateFolderClick,
-                containerColor = ColorBotones
+                containerColor = HardColorButton
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,

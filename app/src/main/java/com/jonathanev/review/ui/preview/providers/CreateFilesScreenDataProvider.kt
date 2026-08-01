@@ -13,7 +13,6 @@ data class PropertiesCreateFilesScreen(
     val state: PropertiesFilesState,
     val fileFormMode: FileFormMode
 )
-
 class CreateFilesScreenDataProvider : PreviewParameterProvider<PropertiesCreateFilesScreen> {
     override val values: Sequence<PropertiesCreateFilesScreen>
         get() = sequenceOf(
@@ -22,7 +21,7 @@ class CreateFilesScreenDataProvider : PreviewParameterProvider<PropertiesCreateF
                     name = "",
                     description = "",
                     icon = FileIconsMock[0],
-                    color = ColorType.White,
+                    color = ColorType.Default,
                     selectedIndex = 0,
                     icons = FileIconsMock,
                     showOverwriteDialogFile = false
@@ -34,7 +33,7 @@ class CreateFilesScreenDataProvider : PreviewParameterProvider<PropertiesCreateF
                     name = "Testing",
                     description = "",
                     icon = FileIconsMock[0],
-                    color = ColorType.White,
+                    color = ColorType.Default,
                     selectedIndex = 0,
                     icons = FileIconsMock,
                     showOverwriteDialogFile = true
@@ -52,7 +51,7 @@ class CreateFilesScreenDataProvider : PreviewParameterProvider<PropertiesCreateF
                     name = "",
                     description = "",
                     icon = FolderIconsMock[1],
-                    color = ColorType.White,
+                    color = ColorType.Default,
                     selectedIndex = 1,
                     icons = FolderIconsMock,
                     showOverwriteDialogFile = false

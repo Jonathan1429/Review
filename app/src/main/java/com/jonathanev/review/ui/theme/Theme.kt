@@ -6,9 +6,11 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import android.graphics.Color as AndroidColor
 
 val LightColors = lightColorScheme(
-    primary = ColorBotones,
+    primary = HardColorButton,
     background = LightBackground,
     surface = LightSurface,
     onSurface = Black,
@@ -16,7 +18,7 @@ val LightColors = lightColorScheme(
 )
 
 val DarkColors = darkColorScheme(
-    primary = ColorBotones,
+    primary = HardColorButton,
     background = DarkBackground,
     surface = DarkSurface,
     onSurface = White,
@@ -33,9 +35,9 @@ val cardStepBackground: Color
 val iconBackground: Color
     @Composable
     get() = if (isSystemInDarkTheme())
-        ContentInContent
+        CardBackgroundColor
     else
-        ContentsLight
+        CardBackgroundColor.lighten(0.9f)
 
 val dialogBackground: Color
     @Composable
@@ -66,6 +68,62 @@ val degradientColor: Color
         White
     }
 
+@Composable
+fun getButtonBackgroundBrush(): Brush {
+    return Brush.linearGradient(
+        colors = listOf(LightColorButton, HardColorButton)
+    )
+}
+
+@Composable
+fun getCardContainerColor(): Color {
+    return if (isSystemInDarkTheme()) {
+        ContainerCard
+    } else {
+        ContainerCard.lighten(0.8f)
+    }
+}
+
+@Composable
+fun getColorSubtitle(): Color {
+    return if (isSystemInDarkTheme()) {
+        ColorDarkSubtitle
+    } else {
+        ColorLightSubtitle
+    }
+}
+
+@Composable
+fun getColorTitleCard(): Color {
+    return if (isSystemInDarkTheme()) {
+        ColorTitleCard
+    } else {
+        ColorTitleCard.darken(0.6f)
+    }
+}
+
+fun Color.darken(factor: Float = 0.3f): Color {
+    val hsv = FloatArray(3)
+    AndroidColor.colorToHSV(this.toArgb(), hsv)
+
+    hsv[2] = (hsv[2] * (1f - factor)).coerceIn(0f, 1f)
+
+    return Color(AndroidColor.HSVToColor(hsv))
+}
+
+fun Color.lighten(factor: Float = 0.3f): Color {
+    val hsv = FloatArray(3)
+    AndroidColor.colorToHSV(this.toArgb(), hsv)
+
+    val validFactor = factor.coerceIn(0f, 1f)
+
+    hsv[2] = (hsv[2] + (1f - hsv[2]) * validFactor).coerceIn(0f, 1f)
+
+    hsv[1] = (hsv[1] * (1f - validFactor)).coerceIn(0f, 1f)
+
+    return Color(AndroidColor.HSVToColor(hsv))
+}
+
 object ComponentTheme {
     // Tu color primario base
     val PrimaryTeal = Color(0xFF019486)
@@ -93,7 +151,6 @@ object ComponentTheme {
         return if (isSystemInDarkTheme()) {
             Brush.linearGradient(listOf(ContentsDark, Color(0xFF1E293B)))
         } else {
-            // Modo Claro Seleccionado: Degradado sutil entre tonos de tu marca
             Brush.linearGradient(listOf(TealBgLightNormal, Color(0xFFE6F4F1)))
         }
     }

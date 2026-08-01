@@ -10,7 +10,7 @@ val LightOnPrimary = Color(0xFFFFFFFF)
 
 // Dark
 val DarkPrimary = Color(0xFFFFFFFF)
-val DarkBackground = Color(0xFF0B1326)
+val DarkBackground = Color(0xFF0B1326).copy(alpha = 0.95f)
 val DarkSurface = Color(0xFF222A3D)
 val DarkOnPrimary = Color(0xFF212121)
 
@@ -52,3 +52,9 @@ val CardBackgroundColor = Color(0xFF1B243B)
 val TextColorPrimary = Color(0xFFE2E8F0)
 val TextColorSecondary = Color(0xFF718096)
 val CyanAccent = Color(0xFF00E5FF)
+val ColorLightSubtitle = Color(0xFF5B5B65)
+val ColorDarkSubtitle = Color(0xFFC4C5D9)
+val ColorTitleCard = Color(0xFFB8C3FF)
+val ContainerCard = Color(0xFF171F33)
+val HardColorButton = Color(0xFF2E5BFF)
+val LightColorButton = Color(0xFFB8C3FF)
