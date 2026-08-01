@@ -32,7 +32,7 @@ import org.robolectric.annotation.GraphicsMode
 class BoxItemFolderScreenshotTest(
     private val variantName: String,
     private val themeQualifier: String,
-    private val dataState: PropertiesItemFolder
+    private val data: PropertiesItemFolder
 ) {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
@@ -81,14 +81,14 @@ class BoxItemFolderScreenshotTest(
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(
-                                text = "PREVIEW: ${dataState.iconRes.name} - ${dataState::class.simpleName}",
+                                text = "PREVIEW: ${data.iconRes.name} - ${data::class.simpleName}",
                                 style = MaterialTheme.typography.labelMedium,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                                 color = MaterialTheme.colorScheme.onTertiaryContainer
                             )
                         }
 
-                        BoxItemFolder(dataState.iconRes)
+                        BoxItemFolder(data.iconRes, data.iconcolor)
                     }
                 }
             }
