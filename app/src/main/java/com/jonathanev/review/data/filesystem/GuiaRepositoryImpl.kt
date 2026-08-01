@@ -64,7 +64,7 @@ class GuiaRepositoryImpl @Inject constructor(
     private var _guidesRecovery = emptyList<GuideDomainModel>()
     override val guidesRecovery: List<GuideDomainModel>
         get() = _guidesRecovery
-    private val refreshTrigger = MutableSharedFlow<Unit>(replay = 1).apply {
+    private val refreshGuides = MutableSharedFlow<Unit>(replay = 1).apply {
         tryEmit(Unit)
     }
 
@@ -109,7 +109,7 @@ class GuiaRepositoryImpl @Inject constructor(
     }
 
     override fun getGuides(): Flow<List<GuideDomainModel>> {
-        return refreshTrigger.map {
+        return refreshGuides.map {
             val result = listGuides()
             result.sortedBy { it.name }.mapNotNull { file ->
                 when (val guideResource = getAttributesGuide(file)) {
@@ -191,7 +191,7 @@ class GuiaRepositoryImpl @Inject constructor(
                 }
             }
 
-            refreshTrigger.emit(Unit)
+            refreshGuides.emit(Unit)
             GuideResource.Success(newGuideDomain)
         } catch (_: FileNotFoundException) {
             tempFile.delete()
@@ -250,7 +250,14 @@ class GuiaRepositoryImpl @Inject constructor(
             }
 
             val newPath =
-                filePathResolver.mapToFilePathSpecificGuide(guideDomainModel, PathKind.GUIAS).value
+                filePathResolver.mapToFilePathSpecificGuide(
+                    guideDomainModel = GuideDomainModel(
+                        version = GuideVersion.V2,
+                        nameGuide = guideDomainModel.nameGuide,
+                        description = guideDomainModel.description
+                    ),
+                    kind = PathKind.GUIAS
+                ).value
 
             try {
                 withContext(Dispatchers.IO) {
@@ -307,7 +314,7 @@ class GuiaRepositoryImpl @Inject constructor(
 
         if (!pathGuideFile.exists()) return false
 
-        refreshTrigger.emit(Unit)
+        refreshGuides.emit(Unit)
         return pathGuideFile.deleteRecursively()
     }
 
@@ -550,18 +557,39 @@ class GuiaRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun moveGuide(guideContext: GuideContext.Moving): Boolean {
+    override suspend fun moveGuide(
+        guideContext: GuideContext.Moving
+    ): Boolean {
         val newGuidePath = filePathResolver.mapToFilePathSpecificGuide(
             guideDomainModel = guideContext.guide,
             kind = PathKind.GUIAS
         )
 
-        val oldGuidePath = filePathResolver.mapToFilePathSpecificGuide(
+        val oldGuidePath = filePathResolver.mapToOldFolderPathSpecificGuide(
             guideDomainModel = guideContext.guide,
-            kind = PathKind.GUIAS
+            kind = PathKind.GUIAS,
+            originContext = guideContext
         )
 
-        return File(oldGuidePath.value).renameTo(File(newGuidePath.value))
+        return withContext(Dispatchers.IO) {
+            try {
+                val source = Paths.get(oldGuidePath.value)
+                val target = Paths.get(newGuidePath.value)
+
+                target.parent?.let { Files.createDirectories(it) }
+
+                Files.move(
+                    source,
+                    target,
+                    StandardCopyOption.REPLACE_EXISTING
+                )
+
+                refreshGuides.emit(Unit)
+                true
+            } catch (_: Exception) {
+                false
+            }
+        }
     }
 
     override suspend fun getVersionGuide(

@@ -7,7 +7,6 @@ import com.jonathanev.review.domain.GetGuideXmlDataUseCase
 import com.jonathanev.review.domain.MoveGuideUseCase
 import com.jonathanev.review.domain.ResetNavigationUseCase
 import com.jonathanev.review.domain.model.GuideContext
-import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.MoveGuideResponse
 import com.jonathanev.review.presentation.event.UIMovingEvent
@@ -44,7 +43,7 @@ class FragmentWithoutFilesViewModel @Inject constructor(
         eventMovingFile("Se ha cancelado la acción")
     }
 
-    fun movingGuide(relativePath: RelativeGuidePath) {
+    fun movingGuide() {
         viewModelScope.launch {
             when (val context = getGuideMoveUseCase.invoke()) {
                 is GuideContext.Moving -> {

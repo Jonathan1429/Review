@@ -57,11 +57,7 @@ class SetCrearXmlUseCase @Inject constructor(
         }
 
         val resultGuide = guiaRepository.saveGuide(
-            guideDomainModel = GuideDomainModel(
-                GuideVersion.V2,
-                guideDomainModel.nameGuide,
-                guideDomainModel.description
-            ),
+            guideDomainModel = guideDomainModel,
             preguntas = dataWithTagsQ,
             respuestas = dataWithTagsA
         )
