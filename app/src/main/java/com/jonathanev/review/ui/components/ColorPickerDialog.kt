@@ -111,7 +111,10 @@ fun ColorPickerDialogContent(
                         onDismissRequest()
                     }
                 ) {
-                    Text("Default")
+                    Text(
+                        text = "Default",
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
                 }
             }
         }

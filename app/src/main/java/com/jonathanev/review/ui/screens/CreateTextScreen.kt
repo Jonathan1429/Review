@@ -21,6 +21,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.jonathanev.review.presentation.model.ColorRangeUi
 import com.jonathanev.review.presentation.model.GuideMode
@@ -32,181 +33,23 @@ import com.jonathanev.review.ui.components.ColorPickerDialog
 import com.jonathanev.review.ui.components.CustomBoxCreateText
 import com.jonathanev.review.ui.components.OptionsCreateText
 import com.jonathanev.review.ui.preview.DevicePreviews
+import com.jonathanev.review.ui.preview.providers.CreateTextScreenProv
+import com.jonathanev.review.ui.preview.providers.CreateTextScreenProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.degradientColor
 
 @DevicePreviews
 @Composable
-fun PreviewReviewWithTexto() {
+fun PreviewTextScreen(
+    @PreviewParameter(CreateTextScreenProvider::class) data: CreateTextScreenProv
+) {
     ReviewTheme {
         CreateTextScreen(
-            guideMode = GuideMode.Review("", 0),
+            guideMode = data.guideMode,
             colorInitial = MaterialTheme.colorScheme.onSurface,
             selectedColor = MaterialTheme.colorScheme.onSurface,
-            textValue = TextFieldValue(
-                annotatedString = QuestionContentUi.Text(
-                    "Texto de prueba",
-                    emptyList()
-                ).toAnnotatedString()
-            ),
-            showDialog = false,
-            onClearColorClick = {},
-            onSelectColorClick = {},
-            onChangeTextValue = {},
-            onDissmissDialog = {},
-            onColorSelected = {},
-            onSaveText = { _, _ -> },
-            onBackNav = {}
-        )
-    }
-}
-
-@DevicePreviews
-@Composable
-fun PreviewCreateWithTexto() {
-    ReviewTheme {
-        CreateTextScreen(
-            guideMode = GuideMode.Create("", ""),
-            colorInitial = MaterialTheme.colorScheme.onSurface,
-            selectedColor = MaterialTheme.colorScheme.onSurface,
-            textValue = TextFieldValue(
-                annotatedString = QuestionContentUi.Text(
-                    "Texto de prueba",
-                    emptyList()
-                ).toAnnotatedString()
-            ),
-            showDialog = false,
-            onClearColorClick = {},
-            onSelectColorClick = {},
-            onChangeTextValue = {},
-            onDissmissDialog = {},
-            onColorSelected = {},
-            onSaveText = { _, _ -> },
-            onBackNav = {}
-        )
-    }
-}
-
-@DevicePreviews
-@Composable
-fun PreviewEditWithTexto() {
-    ReviewTheme {
-        CreateTextScreen(
-            guideMode = GuideMode.Edit("", "", 0),
-            colorInitial = MaterialTheme.colorScheme.onSurface,
-            selectedColor = MaterialTheme.colorScheme.onSurface,
-            textValue = TextFieldValue(
-                annotatedString = QuestionContentUi.Text(
-                    "Texto de prueba",
-                    emptyList()
-                ).toAnnotatedString()
-            ),
-            showDialog = false,
-            onClearColorClick = {},
-            onSelectColorClick = {},
-            onChangeTextValue = {},
-            onDissmissDialog = {},
-            onColorSelected = {},
-            onSaveText = { _, _ -> },
-            onBackNav = {}
-        )
-    }
-}
-
-// Sin texto
-@DevicePreviews
-@Composable
-fun PreviewReview() {
-    ReviewTheme {
-        CreateTextScreen(
-            guideMode = GuideMode.Review("", 0),
-            colorInitial = MaterialTheme.colorScheme.onSurface,
-            selectedColor = MaterialTheme.colorScheme.onSurface,
-            textValue = TextFieldValue(
-                annotatedString = QuestionContentUi.Text(
-                    "",
-                    emptyList()
-                ).toAnnotatedString()
-            ),
-            showDialog = false,
-            onClearColorClick = {},
-            onSelectColorClick = {},
-            onChangeTextValue = {},
-            onDissmissDialog = {},
-            onColorSelected = {},
-            onSaveText = { _, _ -> },
-            onBackNav = {}
-        )
-    }
-}
-
-@DevicePreviews
-@Composable
-fun PreviewCreate() {
-    ReviewTheme {
-        CreateTextScreen(
-            guideMode = GuideMode.Create("", ""),
-            colorInitial = MaterialTheme.colorScheme.onSurface,
-            selectedColor = MaterialTheme.colorScheme.onSurface,
-            textValue = TextFieldValue(
-                annotatedString = QuestionContentUi.Text(
-                    "",
-                    emptyList()
-                ).toAnnotatedString()
-            ),
-            showDialog = false,
-            onClearColorClick = {},
-            onSelectColorClick = {},
-            onChangeTextValue = {},
-            onDissmissDialog = {},
-            onColorSelected = {},
-            onSaveText = { _, _ -> },
-            onBackNav = {}
-        )
-    }
-}
-
-@DevicePreviews
-@Composable
-fun PreviewEdit() {
-    ReviewTheme {
-        CreateTextScreen(
-            guideMode = GuideMode.Edit("", "", 0),
-            colorInitial = MaterialTheme.colorScheme.onSurface,
-            selectedColor = MaterialTheme.colorScheme.onSurface,
-            textValue = TextFieldValue(
-                annotatedString = QuestionContentUi.Text(
-                    "",
-                    emptyList()
-                ).toAnnotatedString()
-            ),
-            showDialog = false,
-            onClearColorClick = {},
-            onSelectColorClick = {},
-            onChangeTextValue = {},
-            onDissmissDialog = {},
-            onColorSelected = {},
-            onSaveText = { _, _ -> },
-            onBackNav = {}
-        )
-    }
-}
-
-@DevicePreviews
-@Composable
-fun PreviewShowDialog() {
-    ReviewTheme {
-        CreateTextScreen(
-            guideMode = GuideMode.Edit("", "", 0),
-            colorInitial = MaterialTheme.colorScheme.onSurface,
-            selectedColor = MaterialTheme.colorScheme.onSurface,
-            textValue = TextFieldValue(
-                annotatedString = QuestionContentUi.Text(
-                    "Texto de prueba",
-                    emptyList()
-                ).toAnnotatedString()
-            ),
-            showDialog = true,
+            textValue = data.textValue,
+            showDialog = data.showDialog,
             onClearColorClick = {},
             onSelectColorClick = {},
             onChangeTextValue = {},
@@ -382,7 +225,7 @@ private fun applyColorToCharacter(
     }
 }
 
-private fun QuestionContentUi.Text.toAnnotatedString(): AnnotatedString {
+fun QuestionContentUi.Text.toAnnotatedString(): AnnotatedString {
     return buildAnnotatedString {
         append(this@toAnnotatedString.text)
 

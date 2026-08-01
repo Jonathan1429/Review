@@ -95,34 +95,29 @@ fun OptionsCreateText(
                         shape = CircleShape
                     )
             )
+        }
 
-            Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.weight(1f))
 
-            if (textValue.isNotEmpty()) {
-                IconButton(
-                    onClick = onSaveTextClick,
-                    modifier = Modifier.size(34.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_success),
-                        contentDescription = "Confirmar",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+        IconButton(
+            onClick = {
+                if (guideMode is GuideMode.Review) {
+                    onBackNav()
+                } else {
+                    if (textValue.isNotEmpty()) {
+                        onSaveTextClick()
+                    } else {
+                        onBackNav()
+                    }
                 }
-            }
-        } else {
-            Spacer(modifier = Modifier.weight(1f))
-
-            IconButton(
-                onClick = onBackNav,
-                modifier = Modifier.size(34.dp)
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_success),
-                    contentDescription = "Confirmar",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+            },
+            modifier = Modifier.size(34.dp)
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_success),
+                contentDescription = "Confirmar",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
