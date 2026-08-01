@@ -1,6 +1,5 @@
 package com.jonathanev.review.ui.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,7 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -31,9 +29,8 @@ import com.jonathanev.review.ui.preview.ComponentsPreviews
 import com.jonathanev.review.ui.preview.providers.ItemGuideProvider
 import com.jonathanev.review.ui.theme.ColorBotones
 import com.jonathanev.review.ui.theme.ReviewTheme
-import com.jonathanev.review.ui.theme.TextGray
-import com.jonathanev.review.ui.theme.cardListBackground
-import com.jonathanev.review.ui.theme.cardStepBackground
+import com.jonathanev.review.ui.theme.getCardContainerColor
+import com.jonathanev.review.ui.theme.getColorSubtitle
 
 @ComponentsPreviews
 @Composable
@@ -52,7 +49,7 @@ fun ItemGuide(
 ) {
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = Color.Transparent
+            containerColor = getCardContainerColor()
         ),
         modifier = Modifier
             .fillMaxWidth()
@@ -62,7 +59,6 @@ fun ItemGuide(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(cardListBackground)
                 .clip(ShapeDefaults.ExtraLarge)
                 .clickable(onClick = onClick)
                 .padding(vertical = 14.dp, horizontal = 8.dp),
@@ -78,9 +74,7 @@ fun ItemGuide(
             )
 
             Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .background(cardStepBackground)
+                modifier = Modifier.weight(1f)
             ) {
                 Text(
                     text = guide.nameGuide,
@@ -91,7 +85,7 @@ fun ItemGuide(
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = guide.description,
-                    color = TextGray,
+                    color = getColorSubtitle(),
                     fontSize = 13.sp,
                     lineHeight = 18.sp
                 )

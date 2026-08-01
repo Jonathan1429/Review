@@ -23,6 +23,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -50,8 +51,7 @@ import com.jonathanev.review.ui.components.ItemGuide
 import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.StudyGuidesProv
 import com.jonathanev.review.ui.preview.providers.StudyGuidesProvider
-import com.jonathanev.review.ui.theme.BorderPasos
-import com.jonathanev.review.ui.theme.ColorBotones
+import com.jonathanev.review.ui.theme.HardColorButton
 import com.jonathanev.review.ui.theme.ReviewTheme
 
 @DevicePreviews
@@ -219,7 +219,7 @@ fun ListGuidesScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onAddGuideClick,
-                containerColor = ColorBotones,
+                containerColor = HardColorButton,
                 contentColor = Color.White,
                 shape = CircleShape,
                 modifier = Modifier
@@ -261,7 +261,7 @@ fun ListGuidesScreen(
 
                         if (index < guides.lastIndex) {
                             HorizontalDivider(
-                                color = BorderPasos,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
                                 thickness = 1.dp,
                                 modifier = Modifier.padding(vertical = 4.dp)
                             )

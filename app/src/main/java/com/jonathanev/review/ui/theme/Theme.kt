@@ -12,7 +12,7 @@ import android.graphics.Color as AndroidColor
 val LightColors = lightColorScheme(
     primary = HardColorButton,
     background = LightBackground,
-    surface = LightSurface,
+    surface = LightBackground,
     onSurface = Black,
     onPrimary = LightOnPrimary
 )
@@ -20,7 +20,7 @@ val LightColors = lightColorScheme(
 val DarkColors = darkColorScheme(
     primary = HardColorButton,
     background = DarkBackground,
-    surface = DarkSurface,
+    surface = DarkBackground,
     onSurface = White,
     onPrimary = LightOnPrimary
 )
