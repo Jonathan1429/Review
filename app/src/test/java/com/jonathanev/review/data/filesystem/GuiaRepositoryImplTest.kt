@@ -145,9 +145,10 @@ class GuiaRepositoryImplTest {
         File(folderTest, "Imagen1.${Extensions.PNG_EXTENSION}").createNewFile()
         File(folderTest, "Imagen2.${Extensions.PNG_EXTENSION}").createNewFile()
 
-        val resultado = repository.hasGuides()
-
-        assertTrue(resultado)
+        repository.hasGuides().test {
+            assertTrue(awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
@@ -168,9 +169,10 @@ class GuiaRepositoryImplTest {
         File(folderTest, "Imagen1.${Extensions.PNG_EXTENSION}").createNewFile()
         File(folderTest, "Imagen2.${Extensions.PNG_EXTENSION}").createNewFile()
 
-        val resultado = repository.hasGuides()
-
-        assertFalse(resultado)
+        repository.hasGuides().test {
+            assertFalse(awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
@@ -182,9 +184,10 @@ class GuiaRepositoryImplTest {
             filePathResolver.mapToFolderPath(PathKind.GUIAS)
         } returns GuidePath(pathNonExistent)
 
-        val resultado = repository.hasGuides()
-
-        assertFalse(resultado)
+        repository.hasGuides().test {
+            assertFalse(awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
@@ -202,9 +205,10 @@ class GuiaRepositoryImplTest {
         File(pathKotlin, "Imagen1.${Extensions.PNG_EXTENSION}").createNewFile()
         File(pathKotlin, "Imagen2.${Extensions.PNG_EXTENSION}").createNewFile()
 
-        val resultado = repository.hasGuides()
-
-        assertTrue(resultado)
+        repository.hasGuides().test {
+            assertTrue(awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     // getGuides
