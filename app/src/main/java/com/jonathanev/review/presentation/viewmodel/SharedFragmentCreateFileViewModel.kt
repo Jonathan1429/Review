@@ -1,5 +1,6 @@
 package com.jonathanev.review.presentation.viewmodel
 
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.domain.GetGuideXmlDataUseCase
@@ -28,6 +29,7 @@ import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.presentation.model.QuestionItemUi
 import com.jonathanev.review.presentation.model.SaveGuideMode
 import com.jonathanev.review.presentation.state.GuideUiState
+import com.jonathanev.review.ui.screens.toAnnotatedString
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -105,6 +107,23 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         }
     }*/
 
+    private val _draftTextValue = MutableStateFlow<TextFieldValue?>(null)
+    val draftTextValue: StateFlow<TextFieldValue?> = _draftTextValue.asStateFlow()
+
+    fun initTextDraft(initialContent: QuestionContentUi.Text) {
+        if (_draftTextValue.value == null) {
+            _draftTextValue.value =
+                TextFieldValue(annotatedString = initialContent.toAnnotatedString())
+        }
+    }
+
+    fun onDraftTextChange(newValue: TextFieldValue) {
+        _draftTextValue.value = newValue
+    }
+
+    fun clearTextDraft() {
+        _draftTextValue.value = null
+    }
     fun initUIState() {
         _uiState.value = GuideUiState()
     }
@@ -189,6 +208,8 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 contadorContenido = currentPosContent
             )
         }
+
+        clearTextDraft()
     }
 
     fun addImageContent(questionContentMode: QuestionContentMode) {

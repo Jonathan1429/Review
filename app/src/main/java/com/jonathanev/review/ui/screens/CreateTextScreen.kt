@@ -9,10 +9,10 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,6 +23,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jonathanev.review.presentation.model.ColorRangeUi
 import com.jonathanev.review.presentation.model.GuideMode
 import com.jonathanev.review.presentation.model.QuestionContentMode
@@ -70,12 +71,16 @@ fun CreateTextRoute(
     onBackNav: () -> Unit,
     questionContentMode: QuestionContentMode
 ) {
+    LaunchedEffect(Unit) {
+        viewModel.initTextDraft(contentType)
+    }
+
     val colorInitial = MaterialTheme.colorScheme.onSurface
     var selectedColor by remember { mutableStateOf(colorInitial) }
-    var textValue by rememberSaveable(stateSaver = TextFieldValue.Saver) {
-        mutableStateOf(TextFieldValue(annotatedString = contentType.toAnnotatedString()))
-    }
     var showDialog by remember { mutableStateOf(false) }
+    val textValueState by viewModel.draftTextValue.collectAsStateWithLifecycle()
+    val textValue =
+        textValueState ?: TextFieldValue(annotatedString = contentType.toAnnotatedString())
 
     CreateTextScreen(
         guideMode = guideMode,
@@ -88,11 +93,11 @@ fun CreateTextRoute(
             onSaveText()
         },
         onClearColorClick = {
-            textValue = TextFieldValue(text = textValue.text)
+            viewModel.onDraftTextChange(newValue = TextFieldValue(textValue.text))
         },
         onSelectColorClick = { showDialog = true },
         onChangeTextValue = { textFieldValue ->
-            textValue = textFieldValue
+            viewModel.onDraftTextChange(newValue = textFieldValue)
         },
         onDissmissDialog = {
             showDialog = false
