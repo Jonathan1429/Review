@@ -27,7 +27,6 @@ import com.jonathanev.review.R
 import com.jonathanev.review.presentation.model.GuideUiModel
 import com.jonathanev.review.ui.preview.ComponentsPreviews
 import com.jonathanev.review.ui.preview.providers.ItemGuideProvider
-import com.jonathanev.review.ui.theme.ColorBotones
 import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.getCardContainerColor
 import com.jonathanev.review.ui.theme.getColorSubtitle
@@ -67,7 +66,7 @@ fun ItemGuide(
             Icon(
                 painter = painterResource(id = R.drawable.ic_lightbulb_solid_full),
                 contentDescription = null,
-                tint = ColorBotones,
+                tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier
                     .size(32.dp)
                     .padding(end = 12.dp)
