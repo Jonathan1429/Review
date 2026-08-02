@@ -35,7 +35,7 @@ import com.jonathanev.review.ui.theme.Black
 import com.jonathanev.review.ui.theme.Inter
 import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.White
-import com.jonathanev.review.ui.theme.cardStepBackground
+import com.jonathanev.review.ui.theme.getCardContainerColor
 
 @ComponentsPreviews
 @Composable
@@ -58,9 +58,7 @@ fun GuiaItem(
     val colorTwentyPercent = backgroundColor.copy(alpha = 0.2f)
 
     Card(
-        colors = CardDefaults.cardColors(
-            containerColor = Color.Transparent
-        ),
+        colors = CardDefaults.cardColors(containerColor = getCardContainerColor()),
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
@@ -71,7 +69,6 @@ fun GuiaItem(
             modifier = Modifier
                 .clip(RectangleShape)
                 .fillMaxWidth()
-                .background(cardStepBackground)
                 .padding(horizontal = 6.dp, vertical = 8.dp)
         ) {
             Image(
