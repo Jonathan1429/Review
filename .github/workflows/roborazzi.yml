@@ -17,17 +17,12 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Configurar Java y Gradle
+      - name: Configurar Java y Gradle Cache
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
-
-      - name: Configurar Gradle Cache
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          cache-read-only: ${{ github.event_name == 'pull_request' }}
-          build-scan-publish: false
+          cache: 'gradle'
 
       - name: Grabar capturas automáticamente
         if: ${{ github.event_name == 'push' }}
