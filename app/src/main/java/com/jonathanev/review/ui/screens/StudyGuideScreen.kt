@@ -110,7 +110,7 @@ fun FillingGuideRoute(
 ) {
     val context = LocalContext.current
     val typeForSelected = listOf(QAType.QUESTION, QAType.ANSWER)
-    var mediaSelected by rememberSaveable { mutableStateOf(ContentType.TEXT) }
+    var mediaSelected by remember { mutableStateOf(ContentType.TEXT) }
     val mediaForSelected = listOf(ContentType.TEXT, ContentType.IMAGE)
     var showDialogDeleteQuestion by remember { mutableStateOf(false) }
     var showDialogRepeatGuide by remember { mutableStateOf(false) }
