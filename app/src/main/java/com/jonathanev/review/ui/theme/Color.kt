@@ -10,7 +10,7 @@ val LightOnPrimary = Color(0xFFFFFFFF)
 
 // Dark
 val DarkPrimary = Color(0xFFFFFFFF)
-val DarkBackground = Color(0xFF0B1326).copy(alpha = 0.95f)
+val DarkBackground = Color(0xFF0B1326).lighten(0.1f)
 val DarkSurface = Color(0xFF222A3D)
 val DarkOnPrimary = Color(0xFF212121)
 
