@@ -8,7 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.dp
 import com.jonathanev.review.ui.preview.providers.CustomTextFieldDataProvider
@@ -44,11 +44,13 @@ class CustomTextFieldScreenshotTest(
             val provider = CustomTextFieldDataProvider()
             val testCases = mutableListOf<Array<Any>>()
 
-            provider.values.forEach { dataState ->
+            provider.values.forEachIndexed { index, dataState ->
+                val nameScreenshot = provider.getDisplayName(index) ?: "item_$index"
+
                 // MODO CLARO
                 testCases.add(
                     arrayOf(
-                        "${dataState}_light",
+                        "${nameScreenshot}_light",
                         "notnight",
                         dataState
                     )
@@ -57,7 +59,7 @@ class CustomTextFieldScreenshotTest(
                 // MODO OSCURO
                 testCases.add(
                     arrayOf(
-                        "${dataState}_dark",
+                        "${nameScreenshot}_dark",
                         "night",
                         dataState
                     )
