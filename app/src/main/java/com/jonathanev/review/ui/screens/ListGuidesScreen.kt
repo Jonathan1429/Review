@@ -30,7 +30,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -85,9 +85,9 @@ fun ListGuidesRoute(
     onNavigateWithoutFilesScreen: () -> Unit,
 ) {
     val context = LocalContext.current
-    var currentDialog by rememberSaveable { mutableStateOf<DialogState?>(null) }
+    var currentDialog by remember { mutableStateOf<DialogState?>(null) }
 
-    var currentInteractionMode by rememberSaveable(fileInteractionMode) {
+    var currentInteractionMode by remember(fileInteractionMode) {
         mutableStateOf(fileInteractionMode)
     }
 
