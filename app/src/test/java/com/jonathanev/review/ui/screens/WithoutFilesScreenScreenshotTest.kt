@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.dp
+import com.github.takahirom.roborazzi.RobolectricDeviceQualifiers
 import com.jonathanev.review.presentation.model.FileInteractionMode
 import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.utils.captureTestOutput
@@ -26,7 +27,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(
     sdk = [34],
-    instrumentedPackages = ["androidx.loader.content"]
+    instrumentedPackages = ["androidx.loader.content"],
+    qualifiers = RobolectricDeviceQualifiers.Pixel5
 )
 class WithoutFilesScreenScreenshotTest(
     private val variantName: String,
@@ -45,7 +47,7 @@ class WithoutFilesScreenScreenshotTest(
             testCases.add(
                 arrayOf(
                     "light",
-                    "notnight"
+                    "+notnight"
                 )
             )
 
@@ -53,7 +55,7 @@ class WithoutFilesScreenScreenshotTest(
             testCases.add(
                 arrayOf(
                     "dark",
-                    "night"
+                    "+night"
                 )
             )
 
