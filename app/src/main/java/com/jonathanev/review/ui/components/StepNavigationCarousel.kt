@@ -41,10 +41,11 @@ import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.ui.preview.ComponentsPreviews
 import com.jonathanev.review.ui.preview.providers.StepNavigationCarouselProv
 import com.jonathanev.review.ui.preview.providers.StepNavigationCarouselProviders
-import com.jonathanev.review.ui.theme.BorderPasos
-import com.jonathanev.review.ui.theme.BorderSelected
+import com.jonathanev.review.ui.theme.BorderGray
+import com.jonathanev.review.ui.theme.HardColorButton
 import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.cardStepBackground
+import com.jonathanev.review.ui.theme.lighten
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -144,7 +145,7 @@ fun StepNavigationCarousel(
                         .size(50.dp)
                         .border(
                             width = if (isSelected) 2.dp else 1.dp,
-                            color = if (isSelected) BorderSelected else BorderPasos,
+                            color = if (isSelected) HardColorButton.lighten(0.2f) else BorderGray,
                             shape = RoundedCornerShape(12.dp)
                         )
                         .clip(RoundedCornerShape(12.dp))

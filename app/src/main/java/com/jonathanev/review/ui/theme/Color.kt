@@ -44,7 +44,7 @@ val IconsCustom = Color(0xFF06DECB)
 val BackgroundPopUp = Color(0xFF223040)
 val IconWarning = Color(0xFF0FBD0F)
 val BackgroundWarning = Color(0xFF124312)
-val BorderPasos = Color(0xFF9AA0A5)
+val BorderGray = Color(0xFF9AA0A5)
 val ColorBotones = Color(0xFF019486)
 
 val BackgroundColor = Color(0xFF0D1527)

@@ -48,7 +48,7 @@ import com.jonathanev.review.ui.model.ContentType
 import com.jonathanev.review.ui.preview.ComponentsPreviews
 import com.jonathanev.review.ui.preview.providers.DataMediaContentPagerProvider
 import com.jonathanev.review.ui.preview.providers.MediaContentPagerProvider
-import com.jonathanev.review.ui.theme.BorderPasos
+import com.jonathanev.review.ui.theme.BorderGray
 import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.cardStepBackground
 
@@ -114,7 +114,7 @@ fun MediaContentPager(
                 }
             )
             .clip(RoundedCornerShape(24.dp))
-            .border(1.5.dp, BorderPasos, RoundedCornerShape(24.dp))
+            .border(1.5.dp, BorderGray, RoundedCornerShape(24.dp))
             .background(cardStepBackground)
     ) {
         if (assets.isEmpty()) {

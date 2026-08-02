@@ -43,27 +43,6 @@ fun PreviewSelectedPickerColor() {
     }
 }
 
-/*@Composable
-fun SelectedPickerColor(onChangeColor: (Int) -> Unit) {
-    val controller = rememberColorPickerController()
-    val color = baseColor
-
-    LaunchedEffect(Unit) {
-        controller.selectByColor(color = color, fromUser = false)
-    }
-
-    HsvColorPicker(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(160.dp)
-            .padding(10.dp),
-        controller = controller,
-        onColorChanged = { colorEnvelope: ColorEnvelope ->
-            onChangeColor(colorEnvelope.color.toArgb())
-        },
-    )
-}*/
-
 @Composable
 fun SelectedPickerColor(
     onChangeColor: (Int) -> Unit
