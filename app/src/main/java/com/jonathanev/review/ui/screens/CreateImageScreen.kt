@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
@@ -35,7 +36,7 @@ import com.jonathanev.review.ui.components.OptionsCreateImage
 import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.CreateImageContentProv
 import com.jonathanev.review.ui.preview.providers.CreateImageContentProvider
-import com.jonathanev.review.ui.theme.ColorBotones
+import com.jonathanev.review.ui.theme.HardColorButton
 import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.cardStepBackground
 
@@ -100,9 +101,10 @@ fun CreateImageScreen(
             if (guideMode !is GuideMode.Review) {
                 FloatingActionButton(
                     onClick = selectedImage,
-                    containerColor = ColorBotones
+                    containerColor = HardColorButton
                 ) {
                     Icon(
+                        modifier = Modifier.size(35.dp),
                         painter = painterResource(R.drawable.ic_file_image),
                         contentDescription = "Seleccionar imagen",
                         tint = Color.White
