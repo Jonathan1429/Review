@@ -28,7 +28,7 @@ import com.jonathanev.review.presentation.viewmodel.PreviewViewModel
 import com.jonathanev.review.ui.components.QuestionCard
 import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.PreviewQuestionsProvider
-import com.jonathanev.review.ui.theme.ColorBotones
+import com.jonathanev.review.ui.theme.HardColorButton
 import com.jonathanev.review.ui.theme.ReviewTheme
 
 @DevicePreviews
@@ -100,7 +100,7 @@ fun PreviewQuestionsScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onCreateQuestionClick,
-                containerColor = ColorBotones
+                containerColor = HardColorButton
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
