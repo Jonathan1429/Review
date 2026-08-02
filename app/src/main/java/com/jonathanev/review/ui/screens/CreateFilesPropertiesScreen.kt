@@ -36,6 +36,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -82,18 +83,20 @@ fun PreviewCreatingFile(
     @PreviewParameter(CreateFilesScreenDataProvider::class) data: PropertiesCreateFilesScreen
 ) {
     ReviewTheme {
-        CreateFilesPropertiesScreen(
-            state = data.state,
-            fileFormMode = data.fileFormMode,
-            onClickApply = {},
-            onNameChange = {},
-            onDescriptionChange = {},
-            onConfirmDialog = {},
-            onChangeIcon = { _, _ -> },
-            onChangeColor = {},
-            onShowToast = {},
-            onDismissDialogs = {}
-        )
+        Surface(color = MaterialTheme.colorScheme.background) {
+            CreateFilesPropertiesScreen(
+                state = data.state,
+                fileFormMode = data.fileFormMode,
+                onClickApply = {},
+                onNameChange = {},
+                onDescriptionChange = {},
+                onConfirmDialog = {},
+                onChangeIcon = { _, _ -> },
+                onChangeColor = {},
+                onShowToast = {},
+                onDismissDialogs = {}
+            )
+        }
     }
 }
 
