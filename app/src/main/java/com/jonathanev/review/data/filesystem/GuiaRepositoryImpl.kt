@@ -36,6 +36,7 @@ import com.jonathanev.review.domain.result.UpdateGuideError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -89,23 +90,29 @@ class GuiaRepositoryImpl @Inject constructor(
         return listFiles + listFromFolders
     }
 
-    override suspend fun hasGuides(): Boolean = withContext(Dispatchers.IO) {
-        val path = File(filePathResolver.mapToFolderPath(PathKind.GUIAS).value)
-        val allItems = path.listFiles() ?: return@withContext false
+    override fun hasGuides(): Flow<Boolean> = flow {
+        val hasFiles = withContext(Dispatchers.IO) {
+            val path = File(filePathResolver.mapToFolderPath(PathKind.GUIAS).value)
+            val allItems = path.listFiles() ?: return@withContext false
 
-        val hasDirectFile = allItems.any { file ->
-            file.isFile && file.extension == Extensions.XML_EXTENSION
-        }
-        if (hasDirectFile) return@withContext true
-
-        for (folder in allItems.filter { it.isDirectory }) {
-            val hasFolderFile = folder.listFiles().orEmpty().any { file ->
+            val hasDirectFile = allItems.any { file ->
                 file.isFile && file.extension == Extensions.XML_EXTENSION
             }
-            if (hasFolderFile) return@withContext true
+
+            if (hasDirectFile) return@withContext true
+
+            val hasFile = allItems.filter { it.isDirectory }.any { folder ->
+                folder.listFiles().orEmpty().any { file ->
+                    file.isFile && file.extension == Extensions.XML_EXTENSION
+                }
+            }
+
+            return@withContext hasFile
+
         }
 
-        false
+        // 4. Emitimos el resultado único al Flow
+        emit(hasFiles)
     }
 
     override fun getGuides(): Flow<List<GuideDomainModel>> {

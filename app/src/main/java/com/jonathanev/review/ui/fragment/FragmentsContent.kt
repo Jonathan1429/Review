@@ -1,15 +1,12 @@
 package com.jonathanev.review.ui.fragment
 
 import android.os.Bundle
-import android.util.Log
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
@@ -60,6 +57,6 @@ class FragmentsContent : Fragment(R.layout.fragment_compose_container) {
     }
 
     private fun initUI() {
-        viewModel.getAllFolders()
+        //viewModel.getAllFolders()
     }
 }

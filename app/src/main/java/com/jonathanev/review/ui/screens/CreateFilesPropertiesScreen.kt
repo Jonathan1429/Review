@@ -104,7 +104,8 @@ fun PreviewCreatingFile(
 fun CreateFilesPropertiesRoute(
     viewModel: CreateFilesViewModel,
     fileFormMode: FileFormMode,
-    onNavBack: () -> Unit,
+    onRenameFile: () -> Unit,
+    onCreateFolder: () -> Unit,
     onNavFillingGuide: (PropertiesGuide) -> Unit
 ) {
     val state by viewModel.uiStateComposable.collectAsStateWithLifecycle()
@@ -144,12 +145,12 @@ fun CreateFilesPropertiesRoute(
                             newFileName = state.name,
                             newDescription = state.description
                         )
-                        onNavBack()
+                        onRenameFile()
                     }
 
                     is CreatingUIState.CreateFolder -> {
                         viewModel.saveMetadata(isDarkTheme)
-                        onNavBack()
+                        onCreateFolder()
                     }
 
                     is CreatingUIState.Message -> {

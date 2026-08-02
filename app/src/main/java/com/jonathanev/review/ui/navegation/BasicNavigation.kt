@@ -5,9 +5,12 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
@@ -44,6 +47,9 @@ fun BasicNavigation() {
 
     NavDisplay(
         backStack = backStack,
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
         onBack = {
             backStack.removeLastOrNull()
         },
@@ -85,8 +91,8 @@ fun BasicNavigation() {
                     onNavWithoutFolderScreen = {
                         backStack.add(AppRoutes.WithoutFoldersScreen)
                     },
-                    onNavListFoldersScreen = { listFolders ->
-                        backStack.add(AppRoutes.ListFoldersScreen(listFolders = listFolders))
+                    onNavListFoldersScreen = {
+                        backStack.add(AppRoutes.ListFoldersScreen())
                     }
                 )
             }
@@ -102,14 +108,16 @@ fun BasicNavigation() {
 
                 ListFoldersRoute(
                     viewModel = viewModel,
-                    guias = values.listFolders,
                     onCreateFolderClick = {
                         backStack.add(AppRoutes.CreateFilesPropertiesScreen(FileFormMode.CreatingFolder))
                     },
                     onFolderClick = { folderAction ->
                         backStack.add(AppRoutes.EntryGuidesScreen(folderAction))
                     },
-                    fileInteractionMode = values.fileInteractionMode
+                    fileInteractionMode = values.fileInteractionMode,
+                    onNavWithoutFolders = {
+                        backStack.add(AppRoutes.WithoutFoldersScreen)
+                    }
                 )
             }
             entry<AppRoutes.EntryGuidesScreen> { action ->
@@ -118,11 +126,13 @@ fun BasicNavigation() {
                 GuidesEntryRoute(
                     viewModel = viewModel,
                     onNavigateListGuidesRoute = {
+                        backStack.removeLastOrNull()
                         backStack.add(
                             AppRoutes.ListGuidesScreen(action.fileInteractionMode)
                         )
                     },
                     onNavigateWithoutFilesScreen = {
+                        backStack.removeLastOrNull()
                         backStack.add(AppRoutes.WithoutGuidesScreen(action.fileInteractionMode))
                     },
                 )
@@ -180,13 +190,20 @@ fun BasicNavigation() {
                 CreateFilesPropertiesRoute(
                     viewModel = viewModel,
                     fileFormMode = mode.fileFormMode,
-                    onNavBack = { backStack.removeLastOrNull() },
+                    onRenameFile = {
+                        backStack.removeLastOrNull()
+                    },
                     onNavFillingGuide = { propertiesGuide ->
+                        backStack.removeLastOrNull()
                         backStack.add(
                             AppRoutes.FillingGuideScreen(
                                 GuideMode.Create(propertiesGuide.name, propertiesGuide.description)
                             )
                         )
+                    },
+                    onCreateFolder = {
+                        backStack.clear()
+                        backStack.add(AppRoutes.MainScreen)
                     }
                 )
             }
@@ -301,8 +318,6 @@ fun BasicNavigation() {
             }
             entry<AppRoutes.PreviewQuestionsScreen> {
                 val viewModel: PreviewViewModel = viewModel()
-
-                val propertiesGuide = viewModel.uiState.collectAsStateWithLifecycle().value
 
                 PreviewQuestionsRoute(
                     viewModel = viewModel,

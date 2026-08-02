@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.Flow
 interface GuiaRepository {
     val guidesRecovery: List<GuideDomainModel>
     fun getGuides(): Flow<List<GuideDomainModel>>
-    suspend fun hasGuides(): Boolean
+    fun hasGuides(): Flow<Boolean>
     suspend fun getXMLGuide(guideDomainModel: GuideDomainModel): GetGuideResult
 
     suspend fun existXMLGuideV1(

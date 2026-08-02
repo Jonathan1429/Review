@@ -3,7 +3,6 @@ package com.jonathanev.review.ui.navegation
 import androidx.navigation3.runtime.NavKey
 import com.jonathanev.review.presentation.model.FileFormMode
 import com.jonathanev.review.presentation.model.FileInteractionMode
-import com.jonathanev.review.presentation.model.FolderUiModel
 import com.jonathanev.review.presentation.model.GuideMode
 import com.jonathanev.review.presentation.model.QuestionContentMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
@@ -20,8 +19,7 @@ sealed interface AppRoutes : NavKey {
 
     @Serializable
     data class ListFoldersScreen(
-        val fileInteractionMode: FileInteractionMode = FileInteractionMode.Default,
-        val listFolders: List<FolderUiModel>
+        val fileInteractionMode: FileInteractionMode = FileInteractionMode.Default
     ) : AppRoutes
 
     @Serializable

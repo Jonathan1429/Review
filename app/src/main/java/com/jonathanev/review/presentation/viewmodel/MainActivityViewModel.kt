@@ -8,13 +8,15 @@ import com.jonathanev.review.domain.NextNavigationUseCase
 import com.jonathanev.review.domain.ResetNavigationUseCase
 import com.jonathanev.review.presentation.event.MainUiEvent
 import com.jonathanev.review.presentation.mapper.toUi
-import com.jonathanev.review.presentation.model.FolderUiModel
+import com.jonathanev.review.presentation.state.FoldersUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -25,30 +27,28 @@ class MainActivityViewModel @Inject constructor(
     private val resetNavigationUseCase: ResetNavigationUseCase,
     private val nextNavigationUseCase: NextNavigationUseCase
 ) : ViewModel() {
-    /*private val _shouldRequestPermission = MutableLiveData<Boolean>()
-    val shouldRequestPermission: LiveData<Boolean> get() = _shouldRequestPermission*/
-
-    private val _folders = MutableStateFlow<List<FolderUiModel>>(emptyList())
-    val folders: StateFlow<List<FolderUiModel>> = _folders.asStateFlow()
+    val uiState: StateFlow<FoldersUiState> = getFoldersWithNumGuidesUseCase.invoke()
+        .take(1)
+        .map { list ->
+            if (list.isEmpty()) FoldersUiState.Empty
+            else {
+                val foldersUiModel = list.map { it.toUi() }
+                FoldersUiState.Success(foldersUiModel)
+            }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = FoldersUiState.Loading
+        )
 
     private val _uiEvent = MutableSharedFlow<MainUiEvent>()
     val uiEvent = _uiEvent.asSharedFlow()
-
-    companion object {
-        private const val KEY_GUIDES_PATH = "guides_path"
-    }
-
     fun createFolders() {
         val isSuccess = initializeGuideStorageUseCase.invoke()
         if (!isSuccess){
             emitEvent(MainUiEvent.ShowCreateFoldersError)
         }
-    }
-
-    fun getAllFolders() {
-        val foldersDomainModel = getFoldersWithNumGuidesUseCase.invoke()
-        val foldersUiModel = foldersDomainModel.map { it.toUi() }
-        _folders.value = foldersUiModel
     }
 
     private fun emitEvent(event: MainUiEvent) {

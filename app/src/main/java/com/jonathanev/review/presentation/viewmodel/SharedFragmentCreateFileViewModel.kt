@@ -518,9 +518,9 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         description: String,
         mode: SaveGuideMode
     ) {
-        if (!isDataValid()) {
+        /*if (!isDataValid()) {
             return
-        }
+        }*/
 
         viewModelScope.launch {
             val response = setCrearXmlUseCase.invoke(

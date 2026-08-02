@@ -236,9 +236,9 @@ class CreateFilesViewModel @Inject constructor(
     suspend fun fileExist(mode: FileFormMode, name: String): Boolean {
         return when (mode) {
             FileFormMode.CreatingFile,
-            is FileFormMode.RenameFile -> isExistFileUseCase(name = name)
+            is FileFormMode.RenameFile -> isExistFileUseCase.invoke(name = name)
 
-            FileFormMode.CreatingFolder -> isExistFolderUseCase(name = name)
+            FileFormMode.CreatingFolder -> isExistFolderUseCase.invoke(name = name)
         }
     }
 
@@ -296,6 +296,13 @@ class CreateFilesViewModel @Inject constructor(
     }*/
 
     fun initWithMode(mode: FileFormMode) {
+        if (mode == FileFormMode.CreatingFile) {
+            _uiStateComposable.value = PropertiesFilesState()
+        }
+
+        if (mode == FileFormMode.CreatingFolder) {
+            _uiStateComposable.value = PropertiesFilesState()
+        }
         loadIconsFor(mode)
         initForm(mode)
     }
@@ -355,7 +362,7 @@ class CreateFilesViewModel @Inject constructor(
         val state = uiStateComposable.value
         val mode = currentMode
 
-        if (mode == null){
+        if (mode == null) {
             emitEvent(Message("No se pudo crear el archivo"))
             return false
         }

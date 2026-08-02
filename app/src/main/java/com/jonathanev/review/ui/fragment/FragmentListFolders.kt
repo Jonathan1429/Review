@@ -1,17 +1,12 @@
 package com.jonathanev.review.ui.fragment
 
 import android.annotation.SuppressLint
-import android.app.AlertDialog
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Toast
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.os.BundleCompat
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -25,7 +20,6 @@ import com.jonathanev.review.data.filesystem.FilePathsProviderImpl
 import com.jonathanev.review.presentation.event.FolderActionEvent
 import com.jonathanev.review.presentation.event.UIMovingEvent
 import com.jonathanev.review.presentation.model.FolderAction
-import com.jonathanev.review.presentation.model.FolderResultUi
 import com.jonathanev.review.presentation.viewmodel.ListFoldersViewModel
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
 import com.jonathanev.review.presentation.viewmodel.MainToolbarViewModel
@@ -64,12 +58,12 @@ class FragmentListFolders : Fragment(R.layout.fragment_compose_container) {
 
                 CreateFiles(name) { name = it }*/
 
-                val uiState by viewModel.foldersUiState.collectAsState()
+                /*val uiState by viewModel.foldersUiState.collectAsState()
                 val error = uiState.error
 
                 if (error != null) {
                     showToast(text = error)
-                }
+                }*/
 
                 /*ListFoldersScreen(
                     guias = uiState.folders,
@@ -97,7 +91,7 @@ class FragmentListFolders : Fragment(R.layout.fragment_compose_container) {
                 viewModel.eventsMessages.collect { event ->
                     when (event) {
                         FolderActionEvent.DeleteFolderSuccess -> {
-                            viewModel.getAllFolders()
+                            //viewModel.getAllFolders()
                             showToast("Se ha borrado la carpeta correctamente")
                         }
 
@@ -128,7 +122,7 @@ class FragmentListFolders : Fragment(R.layout.fragment_compose_container) {
                 launch {
                     viewModelToolbar.onCancel.collect {
                         viewModelToolbar.initButtons()
-                        viewModel.moveFileCancel()
+                        //viewModel.moveFileCancel()
 
                         findNavController().navigate(
                             findNavController().graph.startDestinationId,
@@ -153,7 +147,7 @@ class FragmentListFolders : Fragment(R.layout.fragment_compose_container) {
 
         //binding.progressBar.visibility = View.VISIBLE
 
-        viewModel.getAllFolders()
+        //viewModel.getAllFolders()
     }
 
     @SuppressLint("SdCardPath")
@@ -161,7 +155,7 @@ class FragmentListFolders : Fragment(R.layout.fragment_compose_container) {
         //val a = guiasViewModel.guias.value
         //var fileClickeado: File = filePathsProvider.fileGuides
 
-        when (val folderResult = viewModel.getFolderSelected(position)) {
+        /*when (val folderResult = viewModel.getFolderSelected(position)) {
             //GuiaResult.Empty -> Log.i("Vacio", "Vacio")
             is FolderResultUi.Error -> Log.i("Error", "Error")
             is FolderResultUi.Success -> {
@@ -208,7 +202,7 @@ class FragmentListFolders : Fragment(R.layout.fragment_compose_container) {
                 }
                 builder.create().show()
             }
-        }
+        }*/
     }
 
     private fun showToast(text: String) {

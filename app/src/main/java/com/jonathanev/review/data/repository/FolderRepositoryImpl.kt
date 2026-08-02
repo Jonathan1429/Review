@@ -12,6 +12,8 @@ import com.jonathanev.review.domain.provider.FilePathsProvider
 import com.jonathanev.review.domain.repository.FilePathResolver
 import com.jonathanev.review.domain.repository.FolderRepository
 import com.jonathanev.review.domain.repository.NavigationPathRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import java.io.File
 import javax.inject.Inject
 
@@ -51,8 +53,9 @@ class FolderRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun getFolders(): List<FolderDomainModel> {
-        return File(navigationPathRepository.getRootGuides().value).listFiles()
+    override fun getFolders(): Flow<List<FolderDomainModel>> = flow {
+        val rootPath = navigationPathRepository.getRootGuides().value
+        val folderList = File(rootPath).listFiles()
             ?.filter { it.isDirectory }
             ?.sortedBy { it.name }
             ?.map { item ->
@@ -77,5 +80,7 @@ class FolderRepositoryImpl @Inject constructor(
                     numGuides = guidesV1 + guidesV2
                 )
             } ?: emptyList()
+
+        emit(folderList)
     }
 }
