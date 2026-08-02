@@ -3,9 +3,15 @@ package com.jonathanev.review.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,7 +34,23 @@ fun PreviewBoxItemFolder(
     @PreviewParameter(BoxItemFolderDataProvider::class) data: PropertiesItemFolder
 ) {
     ReviewTheme {
-        BoxItemFolder(data.iconRes, data.iconcolor)
+        Surface(color = MaterialTheme.colorScheme.background) {
+            Column {
+                Surface(
+                    color = MaterialTheme.colorScheme.tertiaryContainer,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "PREVIEW: ${data.iconRes.name} - ${data::class.simpleName}",
+                        style = MaterialTheme.typography.labelMedium,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        color = MaterialTheme.colorScheme.onTertiaryContainer
+                    )
+                }
+
+                BoxItemFolder(data.iconRes, data.iconcolor)
+            }
+        }
     }
 }
 

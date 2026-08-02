@@ -14,7 +14,10 @@ data class PropertiesItemFolder(
 class BoxItemFolderDataProvider : PreviewParameterProvider<PropertiesItemFolder> {
     override val values: Sequence<PropertiesItemFolder> = sequenceOf(
         PropertiesItemFolder(iconRes = IconType.ANCHOR_SOLID_FULL, iconcolor = ColorType.Black),
-        PropertiesItemFolder(iconRes = IconType.BACTERIA_SOLID_FULL, iconcolor = ColorType.White),
+        PropertiesItemFolder(
+            iconRes = IconType.BACTERIA_SOLID_FULL,
+            iconcolor = ColorType.RandomColor(Color.Blue.toArgb())
+        ),
         PropertiesItemFolder(
             iconRes = IconType.ANGELLIST_BRANDS_SOLID_FULL,
             iconcolor = ColorType.RandomColor(Color.Red.toArgb())
