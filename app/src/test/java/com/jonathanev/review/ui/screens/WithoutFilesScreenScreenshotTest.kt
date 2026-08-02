@@ -2,7 +2,7 @@ package com.jonathanev.review.ui.screens
 
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -13,6 +13,7 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.dp
 import com.github.takahirom.roborazzi.RobolectricDeviceQualifiers
 import com.jonathanev.review.presentation.model.FileInteractionMode
+import com.jonathanev.review.ui.preview.providers.WithoutFilesScreenProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.utils.captureTestOutput
 import org.junit.Rule
@@ -32,7 +33,8 @@ import org.robolectric.annotation.GraphicsMode
 )
 class WithoutFilesScreenScreenshotTest(
     private val variantName: String,
-    private val themeQualifier: String
+    private val themeQualifier: String,
+    private val data: FileInteractionMode
 ) {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
@@ -41,23 +43,30 @@ class WithoutFilesScreenScreenshotTest(
         @JvmStatic
         @ParameterizedRobolectricTestRunner.Parameters(name = "{0}")
         fun data(): Collection<Array<Any>> {
+            val provider = WithoutFilesScreenProvider()
             val testCases = mutableListOf<Array<Any>>()
 
-            // MODO CLARO
-            testCases.add(
-                arrayOf(
-                    "light",
-                    "+notnight"
-                )
-            )
+            provider.values.forEachIndexed { index, dataState ->
+                val nameScreenshot = provider.getDisplayName(index) ?: "item_$index"
 
-            // MODO OSCURO
-            testCases.add(
-                arrayOf(
-                    "dark",
-                    "+night"
+                // MODO CLARO
+                testCases.add(
+                    arrayOf(
+                        "${nameScreenshot}_light",
+                        "+notnight",
+                        dataState
+                    )
                 )
-            )
+
+                // MODO OSCURO
+                testCases.add(
+                    arrayOf(
+                        "${nameScreenshot}_dark",
+                        "+night",
+                        dataState
+                    )
+                )
+            }
 
             return testCases
         }
@@ -66,7 +75,6 @@ class WithoutFilesScreenScreenshotTest(
     @Test
     fun captureVariant() {
         RuntimeEnvironment.setQualifiers(themeQualifier)
-        //val pageCount = dataState.listQuestionContent.size.coerceAtLeast(1)
 
         composeTestRule.setContent {
             ReviewTheme {
@@ -74,10 +82,10 @@ class WithoutFilesScreenScreenshotTest(
                     Column {
                         Surface(
                             color = MaterialTheme.colorScheme.tertiaryContainer,
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(
-                                text = "PREVIEW: $variantName",
+                                text = "PREVIEW: $variantName - ${data::class.simpleName}",
                                 style = MaterialTheme.typography.labelMedium,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                                 color = MaterialTheme.colorScheme.onTertiaryContainer
@@ -85,7 +93,7 @@ class WithoutFilesScreenScreenshotTest(
                         }
 
                         WithoutFilesScreen(
-                            fileInteractionMode = FileInteractionMode.MovingItem,
+                            fileInteractionMode = data,
                             onAddGuideClick = {},
                             onMoveCancelGuideClick = {},
                             onMoveSuccessGuideClick = {}
