@@ -25,6 +25,7 @@ import com.jonathanev.review.ui.preview.ComponentsPreviews
 import com.jonathanev.review.ui.theme.Teal200
 import com.jonathanev.review.ui.theme.TextGray
 import com.jonathanev.review.ui.theme.cardStepBackground
+import com.jonathanev.review.ui.theme.getAlerDialogContainerColor
 
 @ComponentsPreviews
 @Composable
@@ -43,7 +44,7 @@ fun CardWithTextAndSwitch(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(color = cardStepBackground, shape = RoundedCornerShape(16.dp))
+            .background(color = getAlerDialogContainerColor(), shape = RoundedCornerShape(16.dp))
             .padding(16.dp)
     ) {
         Row(

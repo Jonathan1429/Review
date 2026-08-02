@@ -45,7 +45,6 @@ import com.jonathanev.review.ui.theme.BorderPasos
 import com.jonathanev.review.ui.theme.BorderSelected
 import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.cardStepBackground
-import com.jonathanev.review.ui.theme.degradientColor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -116,7 +115,7 @@ fun StepNavigationCarousel(
 
         Spacer(modifier = Modifier.width(8.dp))
 
-        val colorDegradient = degradientColor
+        val colorDegradient = MaterialTheme.colorScheme.background
         LazyRow(
             state = lazyRowState,
             modifier = Modifier

@@ -85,6 +85,24 @@ fun getCardContainerColor(): Color {
 }
 
 @Composable
+fun getAlertDialogColor(): Color {
+    return if (isSystemInDarkTheme()) {
+        ContainerCard.lighten(0.2f)
+    } else {
+        ContainerCard.lighten(0.9f)
+    }
+}
+
+@Composable
+fun getAlerDialogContainerColor(): Color {
+    return if (isSystemInDarkTheme()) {
+        ContainerCard100.darken()
+    } else {
+        ContainerCard100.lighten(0.8f)
+    }
+}
+
+@Composable
 fun getColorSubtitle(): Color {
     return if (isSystemInDarkTheme()) {
         ColorDarkSubtitle
@@ -139,29 +157,28 @@ object ComponentTheme {
     @Composable
     fun getSelectedBorderBrush(): Brush {
         return if (isSystemInDarkTheme()) {
-            Brush.verticalGradient(listOf(Color.Transparent, BorderSelectedDark))
+            Brush.verticalGradient(listOf(Color.Transparent, HardColorButton.lighten(0.1f)))
         } else {
-            // Modo Claro: De transparente a tu verde primario real
-            Brush.verticalGradient(listOf(Color.Transparent, PrimaryTeal))
+            Brush.verticalGradient(listOf(Color.Transparent, HardColorButton))
         }
     }
 
     @Composable
     fun getSelectedBackgroundBrush(): Brush {
         return if (isSystemInDarkTheme()) {
-            Brush.linearGradient(listOf(ContentsDark, Color(0xFF1E293B)))
+            Brush.linearGradient(listOf(getAlerDialogContainerColor(), Color.Transparent))
         } else {
-            Brush.linearGradient(listOf(TealBgLightNormal, Color(0xFFE6F4F1)))
+            Brush.linearGradient(listOf(getAlerDialogContainerColor(), Color.Transparent))
         }
     }
 
     @Composable
     fun getUnselectedBorderColor(): Color {
-        return if (isSystemInDarkTheme()) Color(0xFF374151) else TealBorderLightNormal
+        return if (isSystemInDarkTheme()) getAlertDialogColor() else getAlerDialogContainerColor()
     }
 
     @Composable
     fun getUnselectedBackgroundColor(): Color {
-        return if (isSystemInDarkTheme()) ContentsDark else TealBgLightNormal
+        return Color.Transparent
     }
 }
