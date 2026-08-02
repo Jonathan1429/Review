@@ -62,7 +62,7 @@ import com.jonathanev.review.presentation.model.IconType
 import com.jonathanev.review.presentation.state.CreatingUIState
 import com.jonathanev.review.presentation.state.PropertiesFilesState
 import com.jonathanev.review.presentation.viewmodel.CreateFilesViewModel
-import com.jonathanev.review.ui.components.CardBoxItemFolder
+import com.jonathanev.review.ui.components.CardBoxPrevItem
 import com.jonathanev.review.ui.components.CustomTextField
 import com.jonathanev.review.ui.components.IconsForSelect
 import com.jonathanev.review.ui.components.SelectedPickerColor
@@ -282,7 +282,7 @@ fun CreateFilesPropertiesScreen(
                 .padding(padding)
         ) {
             // Preview
-            CardBoxItemFolder(state, fileFormMode)
+            CardBoxPrevItem(state.name, state.icon, state.color, fileFormMode)
 
             // Items Collapsados
             Column(

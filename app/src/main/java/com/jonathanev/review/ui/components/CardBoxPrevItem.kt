@@ -17,57 +17,37 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.jonathanev.review.presentation.model.ColorType
 import com.jonathanev.review.presentation.model.FileFormMode
 import com.jonathanev.review.presentation.model.IconType
-import com.jonathanev.review.presentation.state.PropertiesFilesState
+import com.jonathanev.review.ui.preview.ComponentsPreviews
+import com.jonathanev.review.ui.preview.providers.CardBoxItemFolderProv
+import com.jonathanev.review.ui.preview.providers.CardBoxItemFolderProviders
 import com.jonathanev.review.ui.theme.getCardContainerColor
 import com.jonathanev.review.ui.theme.getColorSubtitle
 
-@Preview
+@ComponentsPreviews
 @Composable
-fun A() {
-    CardBoxItemFolder(
-        state = PropertiesFilesState(
-            name = "",
-            description = "",
-            oldName = "",
-            oldDescription = "",
-            icon = IconType.BACTERIA_SOLID_FULL,
-            color = ColorType.Default,
-            selectedIndex = 0,
-            icons = listOf(IconType.BACTERIA_SOLID_FULL),
-            showOverwriteDialogFile = false,
-            showOverwriteDialogFolder = false
-        ),
-        fileFormMode = FileFormMode.CreatingFile
-    )
-}
-
-@Preview
-@Composable
-fun B() {
-    CardBoxItemFolder(
-        state = PropertiesFilesState(
-            name = "",
-            description = "",
-            oldName = "",
-            oldDescription = "",
-            icon = IconType.BACTERIA_SOLID_FULL,
-            color = ColorType.Default,
-            selectedIndex = 0,
-            icons = listOf(IconType.BACTERIA_SOLID_FULL),
-            showOverwriteDialogFile = false,
-            showOverwriteDialogFolder = false
-        ),
-        fileFormMode = FileFormMode.CreatingFile
+fun PreviewCardBoxPrevItem(
+    @PreviewParameter(CardBoxItemFolderProviders::class) data: CardBoxItemFolderProv
+) {
+    CardBoxPrevItem(
+        name = "",
+        icon = data.icon,
+        color = data.color,
+        fileFormMode = data.fileFormMode
     )
 }
 
 @Composable
-fun CardBoxItemFolder(state: PropertiesFilesState, fileFormMode: FileFormMode) {
+fun CardBoxPrevItem(
+    name: String,
+    icon: IconType,
+    color: ColorType,
+    fileFormMode: FileFormMode
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -83,15 +63,15 @@ fun CardBoxItemFolder(state: PropertiesFilesState, fileFormMode: FileFormMode) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             BoxItemFolder(
-                iconRes = state.icon,
-                iconColor = state.color,
+                iconRes = icon,
+                iconColor = color,
                 modifier = Modifier.size(80.dp)
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = state.name.ifEmpty { "Nuevo Proyecto" },
+                text = name.ifEmpty { "Nuevo Proyecto" },
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Bold
