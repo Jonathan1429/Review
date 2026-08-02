@@ -1,13 +1,13 @@
 package com.jonathanev.review.ui.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,11 +22,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jonathanev.review.R
 import com.jonathanev.review.ui.preview.ComponentsPreviews
-import com.jonathanev.review.ui.theme.CircleContentSVG
 import com.jonathanev.review.ui.theme.Inter
 import com.jonathanev.review.ui.theme.ReviewTheme
-import com.jonathanev.review.ui.theme.TextGray
-import com.jonathanev.review.ui.theme.cardStepBackground
+import com.jonathanev.review.ui.theme.getCardContainerColor
+import com.jonathanev.review.ui.theme.getColorSubtitle
 
 @ComponentsPreviews
 @Composable
@@ -42,19 +41,23 @@ fun SinFolders() {
         Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(10.dp))
-            .background(cardStepBackground) //Contents
+            .background(getCardContainerColor())
             .padding(15.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Image(
+        Box(
             modifier = Modifier
                 .size(50.dp)
-                .clip(CircleShape)
-                .background(CircleContentSVG)
-                .padding(8.dp),
-            painter = painterResource(R.drawable.ic_folder_off),
-            contentDescription = "imagen folders"
-        )
+                .clip(RoundedCornerShape(10.dp))
+                .background(MaterialTheme.colorScheme.primary),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_folder_off),
+                contentDescription = "imagen folders",
+                tint = MaterialTheme.colorScheme.onPrimary
+            )
+        }
 
         Text(
             modifier = Modifier.padding(top = 10.dp),
@@ -68,7 +71,7 @@ fun SinFolders() {
         Text(
             modifier = Modifier.padding(top = 10.dp),
             text = stringResource(R.string.lblWithoutFoldersDes),
-            color = TextGray,
+            color = getColorSubtitle(),
             textAlign = TextAlign.Center
         )
     }
