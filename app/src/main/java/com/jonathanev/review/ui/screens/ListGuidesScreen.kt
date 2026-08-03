@@ -28,7 +28,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -82,8 +81,7 @@ fun ListGuidesRoute(
     onOpenGuideClick: () -> Unit,
     onRenameGuideClick: (GuideUiModel) -> Unit,
     onMoveGuideClick: () -> Unit,
-    onBackNav: () -> Unit,
-    onNavigateWithoutFilesScreen: () -> Unit,
+    onBackNav: () -> Unit
 ) {
     val context = LocalContext.current
     var currentDialog by remember { mutableStateOf<DialogState?>(null) }
@@ -93,13 +91,6 @@ fun ListGuidesRoute(
     }
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
-    LaunchedEffect(uiState) {
-        if (uiState is GuidesUiState.Empty) {
-            onNavigateWithoutFilesScreen()
-        }
-    }
-
 
     when (val state = uiState) {
         is GuidesUiState.Loading -> {
@@ -163,6 +154,7 @@ fun ListGuidesRoute(
                                     nameGuide = stateDialog.item.guideUiModel.nameGuide
                                 )
                                 currentDialog = null
+                                onBackNav()
                             },
                             onCloseDialog = {
                                 currentDialog = null

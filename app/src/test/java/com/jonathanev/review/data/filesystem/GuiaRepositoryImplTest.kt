@@ -999,63 +999,20 @@ class GuiaRepositoryImplTest {
     }
 
     @Test
-    fun sino_existe_la_carpeta_ni_la_guia_v2_regresa_false() = runTest {
+    fun sino_existe_la_guia_v2_regresa_false() = runTest {
         val guideDomainModel = GuideDomainModel(GuideVersion.V2, "Test", "")
-        val relativeGuidePath =
-            RelativeGuidePath(File(folderKotlin, folderTest).absolutePath)
-
-        val pathFolderKotlin =
-            temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS, folderKotlin)
-        val pathFolderTest = File(pathFolderKotlin, folderTest)
-        val archivoGuia =
-            File(pathFolderTest, "Test${Extensions.POINT_XML_EXTENSION}")
-
-        coEvery {
-            filePathResolver.mapToJoinRelativePath(
-                guideDomainModel.nameGuide
-            )
-        } returns relativeGuidePath
-
-        coEvery {
-            filePathResolver.mapToFolderPath(PathKind.GUIAS)
-        } returns GuidePath(pathFolderTest.absolutePath)
-
-        assertFalse(
-            "El archivo NO debería existir, incluso antes de la eliminación",
-            archivoGuia.exists()
-        )
-
-        val response =
-            repository.deleteGuide(GuideContext.DeleteGuide(guideDomainModel))
-
-        assertFalse("La base de la ruta no existe por lo tanto regresará false", response)
-        assertFalse(
-            "El archivo JAMAS existió y seguirá regresando que no existe",
-            archivoGuia.exists()
-        )
-        assertFalse("Si la carpeta existe se borra", pathFolderTest.exists())
-    }
-
-    @Test
-    fun sino_existe_la_guia_v2_borra_la_carpeta_y_regresa_true() = runTest {
-        val guideDomainModel = GuideDomainModel(GuideVersion.V2, "Test", "")
-        val relativeGuidePath =
-            RelativeGuidePath(File(folderKotlin, folderTest).absolutePath)
-
         val pathFolderTest =
             temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS, folderKotlin, folderTest)
         val archivoGuia =
             File(pathFolderTest, "Test${Extensions.POINT_XML_EXTENSION}")
+        val pathGuide = archivoGuia.absolutePath
 
         coEvery {
-            filePathResolver.mapToJoinRelativePath(
-                guideDomainModel.nameGuide
+            filePathResolver.mapToFilePathSpecificGuide(
+                guideDomainModel,
+                PathKind.GUIAS
             )
-        } returns relativeGuidePath
-
-        coEvery {
-            filePathResolver.mapToFolderPath(PathKind.GUIAS)
-        } returns GuidePath(pathFolderTest.absolutePath)
+        } returns GuidePath(pathGuide)
 
         assertFalse(
             "El archivo NO debería existir, incluso antes de la eliminación",
@@ -1065,34 +1022,31 @@ class GuiaRepositoryImplTest {
         val response =
             repository.deleteGuide(GuideContext.DeleteGuide(guideDomainModel))
 
-        assertTrue("Va a borrar si existe algo en la ruta y regresará true", response)
+        assertFalse(
+            "La respuesta es false porque no borró ningun archivo",
+            response
+        )
         assertFalse(
             "El archivo JAMAS existió y seguirá regresando que no existe",
             archivoGuia.exists()
         )
-        assertFalse("Si la carpeta existe se borra", pathFolderTest.exists())
     }
 
     @Test
     fun se_borra_una_guia_v2() = runTest {
         val guideDomainModel = GuideDomainModel(GuideVersion.V2, "Test", "")
-        val relativeGuidePath =
-            RelativeGuidePath(File(folderKotlin, folderTest).absolutePath)
-
         val pathFolderTest =
             temporaryFolder.newFolder(folderFiles, StorageFolders.GUIAS, folderKotlin, folderTest)
         val archivoGuia =
             File(pathFolderTest, "Test${Extensions.POINT_XML_EXTENSION}").apply { createNewFile() }
+        val pathGuide = archivoGuia.absolutePath
 
         coEvery {
-            filePathResolver.mapToJoinRelativePath(
-                guideDomainModel.nameGuide
+            filePathResolver.mapToFilePathSpecificGuide(
+                guideDomainModel,
+                PathKind.GUIAS
             )
-        } returns relativeGuidePath
-
-        coEvery {
-            filePathResolver.mapToFolderPath(PathKind.GUIAS)
-        } returns GuidePath(pathFolderTest.absolutePath)
+        } returns GuidePath(pathGuide)
 
         assertTrue("El archivo debería existir antes de la eliminación", archivoGuia.exists())
 
@@ -1101,7 +1055,6 @@ class GuiaRepositoryImplTest {
 
         assertTrue("El método debería retornar true al eliminar con éxito", response)
         assertFalse("El archivo físico debería haber sido borrado del disco", archivoGuia.exists())
-        assertFalse("La carpeta no debería haber sido borrada del disco", pathFolderTest.exists())
     }
 
     @Test
