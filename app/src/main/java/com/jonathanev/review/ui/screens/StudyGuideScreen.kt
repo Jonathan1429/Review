@@ -1,7 +1,6 @@
 package com.jonathanev.review.ui.screens
 
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -128,11 +127,6 @@ fun FillingGuideRoute(
     }
     val coroutineScope = rememberCoroutineScope()
     var restartGuide by rememberSaveable { mutableIntStateOf(0) }
-
-    Log.d(
-        "DEBUG_NAV",
-        "FillingGuide - Preguntas: ${uiState.value.preguntas.size} | Respuestas: ${uiState.value.respuestas.size}"
-    )
 
     LaunchedEffect(Unit) {
         viewModel.loadInitialData(guideMode = guideMode)
@@ -423,6 +417,7 @@ private fun FloatingActionButtons(
             shape = RoundedCornerShape(16.dp),
             icon = {
                 Icon(
+                    modifier = Modifier.size(45.dp),
                     painter = painterResource(painter),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onPrimary
