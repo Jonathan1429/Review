@@ -1,64 +1,54 @@
 package com.jonathanev.review.presentation.viewmodel
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.domain.GetFoldersWithNumGuidesUseCase
 import com.jonathanev.review.domain.InitializeGuideStorageUseCase
-import com.jonathanev.review.domain.model.GuidePath
-import com.jonathanev.review.domain.model.RelativeGuidePath
-import com.jonathanev.review.domain.repository.NavigationPathRepository
+import com.jonathanev.review.domain.NextNavigationUseCase
+import com.jonathanev.review.domain.ResetNavigationUseCase
 import com.jonathanev.review.presentation.event.MainUiEvent
 import com.jonathanev.review.presentation.mapper.toUi
-import com.jonathanev.review.presentation.model.FolderUiModel
+import com.jonathanev.review.presentation.state.FoldersUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MainActivityViewModel @Inject constructor(
     private val initializeGuideStorageUseCase: InitializeGuideStorageUseCase,
-    private val savedStateHandle: SavedStateHandle,
-    private val navigationPathRepository: NavigationPathRepository,
-    private val getFoldersWithNumGuidesUseCase: GetFoldersWithNumGuidesUseCase
+    private val getFoldersWithNumGuidesUseCase: GetFoldersWithNumGuidesUseCase,
+    private val resetNavigationUseCase: ResetNavigationUseCase,
+    private val nextNavigationUseCase: NextNavigationUseCase
 ) : ViewModel() {
-    /*private val _shouldRequestPermission = MutableLiveData<Boolean>()
-    val shouldRequestPermission: LiveData<Boolean> get() = _shouldRequestPermission*/
-
-    private val _folders = MutableStateFlow<List<FolderUiModel>>(emptyList())
-    val folders: StateFlow<List<FolderUiModel>> = _folders.asStateFlow()
+    val uiState: StateFlow<FoldersUiState> = getFoldersWithNumGuidesUseCase.invoke()
+        .take(1)
+        .map { list ->
+            if (list.isEmpty()) FoldersUiState.Empty
+            else {
+                val foldersUiModel = list.map { it.toUi() }
+                FoldersUiState.Success(foldersUiModel)
+            }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = FoldersUiState.Loading
+        )
 
     private val _uiEvent = MutableSharedFlow<MainUiEvent>()
     val uiEvent = _uiEvent.asSharedFlow()
-
-    companion object {
-        private const val KEY_GUIDES_PATH = "guides_path"
-    }
-
-    private val _guidesPath =
-        MutableStateFlow(
-            savedStateHandle[KEY_GUIDES_PATH]
-                ?: ""
-        )
-    val guidesPath: StateFlow<String> = _guidesPath
     fun createFolders() {
         val isSuccess = initializeGuideStorageUseCase.invoke()
         if (!isSuccess){
             emitEvent(MainUiEvent.ShowCreateFoldersError)
         }
-    }
-
-    fun getAllFolders() {
-        val foldersDomainModel = getFoldersWithNumGuidesUseCase.invoke()
-        val foldersUiModel = foldersDomainModel.map { it.toUi() }
-        _folders.value = foldersUiModel
     }
 
     private fun emitEvent(event: MainUiEvent) {
@@ -68,26 +58,17 @@ class MainActivityViewModel @Inject constructor(
     }
 
     fun setMainPath() {
-        _guidesPath.value = ""
-        savedStateHandle[KEY_GUIDES_PATH] = ""
+        viewModelScope.launch {
+            resetNavigationUseCase.invoke()
+        }
     }
 
     fun next(folder: String) {
-        val nextGuides =
-            navigationPathRepository.next(RelativeGuidePath(guidesPath.value), folder)
-
-        _guidesPath.value = nextGuides.value
-
-        savedStateHandle[KEY_GUIDES_PATH] = nextGuides.value
+        viewModelScope.launch {
+            nextNavigationUseCase.invoke(folder)
+        }
     }
 
-    fun back() {
-        val backGuides =
-            navigationPathRepository.back(RelativeGuidePath(guidesPath.value))
-        _guidesPath.value = backGuides.value
-
-        savedStateHandle[KEY_GUIDES_PATH] = backGuides.value
-    }
     /*fun checkIfNeedsPermission(hasPermission: Boolean) {
         if (!hasPermission) {
             _shouldRequestPermission.value = true

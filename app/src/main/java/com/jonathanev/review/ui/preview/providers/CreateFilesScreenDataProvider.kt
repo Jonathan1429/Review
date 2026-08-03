@@ -4,7 +4,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.jonathanev.review.presentation.model.ColorType
 import com.jonathanev.review.presentation.model.FileFormMode
 import com.jonathanev.review.presentation.model.GuideUiModel
-import com.jonathanev.review.presentation.model.IconType
+import com.jonathanev.review.presentation.model.GuideVersion
 import com.jonathanev.review.presentation.state.PropertiesFilesState
 import com.jonathanev.review.presentation.state.PropertiesFilesState.Companion.FileIconsMock
 import com.jonathanev.review.presentation.state.PropertiesFilesState.Companion.FolderIconsMock
@@ -13,7 +13,6 @@ data class PropertiesCreateFilesScreen(
     val state: PropertiesFilesState,
     val fileFormMode: FileFormMode
 )
-
 class CreateFilesScreenDataProvider : PreviewParameterProvider<PropertiesCreateFilesScreen> {
     override val values: Sequence<PropertiesCreateFilesScreen>
         get() = sequenceOf(
@@ -22,7 +21,7 @@ class CreateFilesScreenDataProvider : PreviewParameterProvider<PropertiesCreateF
                     name = "",
                     description = "",
                     icon = FileIconsMock[0],
-                    color = ColorType.White,
+                    color = ColorType.Default,
                     selectedIndex = 0,
                     icons = FileIconsMock,
                     showOverwriteDialogFile = false
@@ -34,13 +33,14 @@ class CreateFilesScreenDataProvider : PreviewParameterProvider<PropertiesCreateF
                     name = "Testing",
                     description = "",
                     icon = FileIconsMock[0],
-                    color = ColorType.White,
+                    color = ColorType.Default,
                     selectedIndex = 0,
                     icons = FileIconsMock,
                     showOverwriteDialogFile = true
                 ),
                 fileFormMode = FileFormMode.RenameFile(
                     GuideUiModel(
+                        version = GuideVersion.V2,
                         nameGuide = "Test",
                         description = "Testing Unitarios"
                     )
@@ -51,7 +51,7 @@ class CreateFilesScreenDataProvider : PreviewParameterProvider<PropertiesCreateF
                     name = "",
                     description = "",
                     icon = FolderIconsMock[1],
-                    color = ColorType.White,
+                    color = ColorType.Default,
                     selectedIndex = 1,
                     icons = FolderIconsMock,
                     showOverwriteDialogFile = false

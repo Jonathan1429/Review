@@ -11,6 +11,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.dp
+import com.github.takahirom.roborazzi.RobolectricDeviceQualifiers
+import com.jonathanev.review.presentation.model.FileInteractionMode
+import com.jonathanev.review.ui.preview.providers.WithoutFilesScreenProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.utils.captureTestOutput
 import org.junit.Rule
@@ -25,11 +28,13 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(
     sdk = [34],
-    instrumentedPackages = ["androidx.loader.content"]
+    instrumentedPackages = ["androidx.loader.content"],
+    qualifiers = RobolectricDeviceQualifiers.Pixel5
 )
 class WithoutFilesScreenScreenshotTest(
     private val variantName: String,
-    private val themeQualifier: String
+    private val themeQualifier: String,
+    private val data: FileInteractionMode
 ) {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
@@ -38,23 +43,30 @@ class WithoutFilesScreenScreenshotTest(
         @JvmStatic
         @ParameterizedRobolectricTestRunner.Parameters(name = "{0}")
         fun data(): Collection<Array<Any>> {
+            val provider = WithoutFilesScreenProvider()
             val testCases = mutableListOf<Array<Any>>()
 
-            // MODO CLARO
-            testCases.add(
-                arrayOf(
-                    "light",
-                    "notnight"
-                )
-            )
+            provider.values.forEachIndexed { index, dataState ->
+                val nameScreenshot = provider.getDisplayName(index) ?: "item_$index"
 
-            // MODO OSCURO
-            testCases.add(
-                arrayOf(
-                    "dark",
-                    "night"
+                // MODO CLARO
+                testCases.add(
+                    arrayOf(
+                        "${nameScreenshot}_light",
+                        "+notnight",
+                        dataState
+                    )
                 )
-            )
+
+                // MODO OSCURO
+                testCases.add(
+                    arrayOf(
+                        "${nameScreenshot}_dark",
+                        "+night",
+                        dataState
+                    )
+                )
+            }
 
             return testCases
         }
@@ -63,7 +75,6 @@ class WithoutFilesScreenScreenshotTest(
     @Test
     fun captureVariant() {
         RuntimeEnvironment.setQualifiers(themeQualifier)
-        //val pageCount = dataState.listQuestionContent.size.coerceAtLeast(1)
 
         composeTestRule.setContent {
             ReviewTheme {
@@ -74,7 +85,7 @@ class WithoutFilesScreenScreenshotTest(
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(
-                                text = "PREVIEW: $variantName",
+                                text = "PREVIEW: $variantName - ${data::class.simpleName}",
                                 style = MaterialTheme.typography.labelMedium,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                                 color = MaterialTheme.colorScheme.onTertiaryContainer
@@ -82,7 +93,10 @@ class WithoutFilesScreenScreenshotTest(
                         }
 
                         WithoutFilesScreen(
-                            onAddGuideClick = {}
+                            fileInteractionMode = data,
+                            onAddGuideClick = {},
+                            onMoveCancelGuideClick = {},
+                            onMoveSuccessGuideClick = {}
                         )
                     }
                 }

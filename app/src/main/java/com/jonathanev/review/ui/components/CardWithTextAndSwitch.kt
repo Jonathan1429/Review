@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -18,21 +19,47 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jonathanev.review.R
 import com.jonathanev.review.ui.preview.ComponentsPreviews
-import com.jonathanev.review.ui.theme.Teal200
+import com.jonathanev.review.ui.preview.providers.CardWithTextAndSwitchProvider
+import com.jonathanev.review.ui.theme.HardColorButton
+import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.TextGray
 import com.jonathanev.review.ui.theme.cardStepBackground
+import com.jonathanev.review.ui.theme.getAlerDialogContainerColor
+import com.jonathanev.review.ui.theme.getColorSubtitle
+import com.jonathanev.review.ui.theme.lighten
 
 @ComponentsPreviews
 @Composable
-fun PreviewCardWithTextAndSwitch() {
-    CardWithTextAndSwitch(
-        isChecked = false,
-        onCheckedChange = {}
-    )
+fun PreviewCardWithTextAndSwitch(
+    @PreviewParameter(CardWithTextAndSwitchProvider::class) data: Boolean
+) {
+    ReviewTheme {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            Column {
+                Surface(
+                    color = MaterialTheme.colorScheme.tertiaryContainer,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "PREVIEW: Checked: $data",
+                        style = MaterialTheme.typography.labelMedium,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        color = MaterialTheme.colorScheme.onTertiaryContainer
+                    )
+                }
+
+                CardWithTextAndSwitch(
+                    isChecked = data,
+                    onCheckedChange = {}
+                )
+            }
+        }
+    }
 }
 
 @Composable
@@ -43,7 +70,7 @@ fun CardWithTextAndSwitch(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(color = cardStepBackground, shape = RoundedCornerShape(16.dp))
+            .background(color = getAlerDialogContainerColor(), shape = RoundedCornerShape(16.dp))
             .padding(16.dp)
     ) {
         Row(
@@ -60,7 +87,7 @@ fun CardWithTextAndSwitch(
                 )
                 Text(
                     text = stringResource(id = R.string.lblRecordarEleccion),
-                    color = TextGray,
+                    color = getColorSubtitle(),
                     fontSize = 12.sp
                 )
             }
@@ -70,7 +97,7 @@ fun CardWithTextAndSwitch(
                 onCheckedChange = onCheckedChange,
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = Color.White,
-                    checkedTrackColor = Teal200,
+                    checkedTrackColor = HardColorButton.lighten(0.4f),
                     uncheckedThumbColor = TextGray,
                     uncheckedTrackColor = cardStepBackground
                 )

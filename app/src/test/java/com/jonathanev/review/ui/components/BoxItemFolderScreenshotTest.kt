@@ -8,10 +8,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.dp
-import com.github.takahirom.roborazzi.captureRoboImage
 import com.jonathanev.review.ui.preview.providers.BoxItemFolderDataProvider
 import com.jonathanev.review.ui.preview.providers.PropertiesItemFolder
 import com.jonathanev.review.ui.theme.ReviewTheme
@@ -33,7 +32,7 @@ import org.robolectric.annotation.GraphicsMode
 class BoxItemFolderScreenshotTest(
     private val variantName: String,
     private val themeQualifier: String,
-    private val dataState: PropertiesItemFolder
+    private val data: PropertiesItemFolder
 ) {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
@@ -82,14 +81,14 @@ class BoxItemFolderScreenshotTest(
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(
-                                text = "PREVIEW: ${dataState.iconRes.name} - ${dataState::class.simpleName}",
+                                text = "PREVIEW: ${data.iconRes.name} - ${data::class.simpleName}",
                                 style = MaterialTheme.typography.labelMedium,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                                 color = MaterialTheme.colorScheme.onTertiaryContainer
                             )
                         }
 
-                        BoxItemFolder(dataState.iconRes)
+                        BoxItemFolder(data.iconRes, data.iconcolor)
                     }
                 }
             }

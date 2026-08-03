@@ -9,7 +9,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.dp
 import com.jonathanev.review.ui.preview.providers.QATypeItemProv
@@ -95,8 +95,8 @@ class QATypeItemScreenshotTest(
                         Row {
                             QATypeItem(
                                 qaTypeItem = data.qaTypeItem,
-                                typeSelected = data.typeSelected,
-                                onTypeClicked = {}
+                                cardType = data.typeSelected,
+                                onCardTypeClicked = {}
                             )
                         }
                     }

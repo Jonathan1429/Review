@@ -32,7 +32,7 @@ import org.robolectric.annotation.GraphicsMode
 class AssetCarouselViewerScreenshotTest(
     private val variantName: String,
     private val themeQualifier: String,
-    private val dataState: DataMediaContentPagerProvider
+    private val data: DataMediaContentPagerProvider
 ) {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
@@ -81,7 +81,7 @@ class AssetCarouselViewerScreenshotTest(
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(
-                                text = "PREVIEW: $dataState - ${dataState::class.simpleName}",
+                                text = "PREVIEW: $data - ${data::class.simpleName}",
                                 style = MaterialTheme.typography.labelMedium,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                                 color = MaterialTheme.colorScheme.onTertiaryContainer
@@ -89,12 +89,14 @@ class AssetCarouselViewerScreenshotTest(
                         }
 
                         AssetCarouselViewer(
-                            assets = dataState.listType,
-                            mediaForSelected = dataState.mediaForSelected,
-                            guideMode = dataState.guideMode,
+                            assets = data.listType,
+                            mediaForSelected = data.mediaForSelected,
+                            guideMode = data.guideMode,
+                            currentPosContent = 0,
                             onAddAssetClick = { },
-                            onAssetClick = {},
+                            onOpenAssetClick = {},
                             onDeleteItemClick = { _, _ -> },
+                            onCurrentPosContent = {},
                         )
                     }
                 }

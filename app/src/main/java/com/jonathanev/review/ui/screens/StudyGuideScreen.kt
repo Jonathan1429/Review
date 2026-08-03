@@ -1,6 +1,7 @@
 package com.jonathanev.review.ui.screens
 
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -42,11 +43,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jonathanev.review.R
-import com.jonathanev.review.domain.model.RelativeGuidePath
-import com.jonathanev.review.domain.model.SaveGuideMode
 import com.jonathanev.review.presentation.event.CreateGuideEvent
 import com.jonathanev.review.presentation.model.GuideMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
+import com.jonathanev.review.presentation.model.SaveGuideMode
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.ui.components.AssetCarouselViewer
 import com.jonathanev.review.ui.components.CustomAlertDialog
@@ -69,7 +69,7 @@ fun PreviewStudyGuideScreen(
 ) {
     ReviewTheme {
         FillingGuideScreen(
-            typeSelected = data.typeSelected,
+            cardType = data.typeSelected,
             typeForSelected = data.typeForSelected,
             mediaSelected = data.mediaSelected,
             mediaForSelected = data.mediaForSelected,
@@ -77,6 +77,7 @@ fun PreviewStudyGuideScreen(
             totalQuestions = data.totalQuestions,
             listTypeMedia = data.listTypeMedia,
             guideMode = data.guideMode,
+            currentPosContent = 0,
             showDialogDeleteQuestion = data.showDialogDeleteQuestion,
             showDialogRepeatGuide = data.showDialogRepeatGuide,
             onDissmissDialogRepeatGuide = {},
@@ -85,13 +86,16 @@ fun PreviewStudyGuideScreen(
             onBackQuestionClick = {},
             onNextQuestionClick = {},
             onDeleteQuestionClick = { },
-            onTypeClicked = {},
-            onFilterClicked = {},
-            onAssetClick = {},
-            onAddAssetClick = {},
+            onCardTypeClicked = {},
+            onFilterTypeClicked = {},
+            onOpenAssetClick = {},
             onDeleteItemClick = { _, _ -> },
+            onAddAssetClick = {},
             onAddQuestion = {},
-        ) {}
+            onCloseGuide = {},
+            onCurrentPosContent = {},
+            onDismissRequest = {}
+        )
     }
 }
 
@@ -99,23 +103,25 @@ fun PreviewStudyGuideScreen(
 fun FillingGuideRoute(
     viewModel: SharedFragmentCreateFileViewModel,
     guideMode: GuideMode,
-    relativeGuidePath: RelativeGuidePath,
-    onAssetClick: (QuestionContentUi) -> Unit,
+    onOpenAssetClick: (QuestionContentUi) -> Unit,
     onAddAssetClick: (ContentType) -> Unit,
     onActionGuideNone: () -> Unit,
     onCloseGuide: () -> Unit
 ) {
     val context = LocalContext.current
-    var typeSelected by rememberSaveable { mutableStateOf(QAType.QUESTION) }
     val typeForSelected = listOf(QAType.QUESTION, QAType.ANSWER)
-    var mediaSelected by rememberSaveable { mutableStateOf(ContentType.TEXT) }
+    var mediaSelected by remember { mutableStateOf(ContentType.TEXT) }
     val mediaForSelected = listOf(ContentType.TEXT, ContentType.IMAGE)
     var showDialogDeleteQuestion by remember { mutableStateOf(false) }
     var showDialogRepeatGuide by remember { mutableStateOf(false) }
 
-    val totalQuestions = viewModel.uiState.collectAsStateWithLifecycle().value.preguntas.size
-    val actualQuestion = viewModel.uiState.collectAsStateWithLifecycle().value.contadorPregunta + 1
-    val listTypeMedia = if (typeSelected == QAType.QUESTION) {
+    val uiState = viewModel.uiState.collectAsStateWithLifecycle()
+    val cardType = uiState.value.qAType
+    val currentPosContent = uiState.value.contadorContenido
+
+    val totalQuestions = uiState.value.preguntas.size
+    val actualQuestion = uiState.value.contadorPregunta + 1
+    val listTypeMedia = if (mediaSelected == ContentType.TEXT) {
         viewModel.textList.collectAsStateWithLifecycle().value
     } else {
         viewModel.imageList.collectAsStateWithLifecycle().value
@@ -123,28 +129,13 @@ fun FillingGuideRoute(
     val coroutineScope = rememberCoroutineScope()
     var restartGuide by rememberSaveable { mutableIntStateOf(0) }
 
-    LaunchedEffect(restartGuide) {
-        when (guideMode) {
-            is GuideMode.Create -> {
-                viewModel.initUIState()
-            }
+    Log.d(
+        "DEBUG_NAV",
+        "FillingGuide - Preguntas: ${uiState.value.preguntas.size} | Respuestas: ${uiState.value.respuestas.size}"
+    )
 
-            is GuideMode.Edit -> {
-                viewModel.getObtenerDatosXML(
-                    posQuestion = guideMode.posQuestion,
-                    nameGuide = guideMode.nameGuide,
-                    relativeGuidePath = relativeGuidePath
-                )
-            }
-
-            is GuideMode.Review -> {
-                viewModel.getObtenerDatosXML(
-                    posQuestion = guideMode.posQuestion,
-                    nameGuide = guideMode.nameGuide,
-                    relativeGuidePath = relativeGuidePath
-                )
-            }
-        }
+    LaunchedEffect(Unit) {
+        viewModel.loadInitialData(guideMode = guideMode)
     }
 
     LaunchedEffect(Unit) {
@@ -154,7 +145,14 @@ fun FillingGuideRoute(
                     showToast("Debes tener al menos un texto", context)
 
                 CreateGuideEvent.WithoutTextQA ->
-                    showToast("Debes tener al menos un texto en pregunta/respuesta", context)
+                    showToast("Debes tener al menos un texto en pregunta y respuesta", context)
+
+                is CreateGuideEvent.WithoutTextInPos -> {
+                    showToast(
+                        "Revisa la pregunta ${event.position} - Debes tener al menos un texto en pregunta/respuesta",
+                        context
+                    )
+                }
 
                 is CreateGuideEvent.ErrorGuideCreated -> {
                     showToast(event.text, context)
@@ -171,7 +169,7 @@ fun FillingGuideRoute(
     }
 
     FillingGuideScreen(
-        typeSelected = typeSelected,
+        cardType = cardType,
         typeForSelected = typeForSelected,
         mediaSelected = mediaSelected,
         mediaForSelected = mediaForSelected,
@@ -179,6 +177,7 @@ fun FillingGuideRoute(
         totalQuestions = totalQuestions,
         listTypeMedia = listTypeMedia,
         guideMode = guideMode,
+        currentPosContent = currentPosContent,
         showDialogDeleteQuestion = showDialogDeleteQuestion,
         showDialogRepeatGuide = showDialogRepeatGuide,
         onDissmissDialogRepeatGuide = { showDialogRepeatGuide = false },
@@ -225,16 +224,16 @@ fun FillingGuideRoute(
                 }
             }
         },
-        onTypeClicked = { typeClicked ->
-            typeSelected = typeClicked
+        onCardTypeClicked = { cardTypeClicked ->
+            viewModel.onCardTypeChanged(cardTypeClicked)
         },
-        onFilterClicked = { filterClicked ->
-            mediaSelected = filterClicked
+        onFilterTypeClicked = { filterTypeClicked ->
+            mediaSelected = filterTypeClicked
         },
-        onAssetClick = { typeContent -> onAssetClick(typeContent) },
+        onOpenAssetClick = { typeContent -> onOpenAssetClick(typeContent) },
         onAddAssetClick = { onAddAssetClick(mediaSelected) },
         onAddQuestion = {
-            viewModel.nextQuestion()
+            viewModel.addNextQuestion()
         },
         onCloseGuide = {
             when (guideMode) {
@@ -242,34 +241,34 @@ fun FillingGuideRoute(
                     viewModel.saveGuide(
                         nameGuide = guideMode.nameGuide,
                         description = guideMode.description,
-                        relativeGuidePath = relativeGuidePath,
                         mode = SaveGuideMode.Create
                     )
-                    onCloseGuide()
                 }
 
                 is GuideMode.Edit -> {
                     viewModel.saveGuide(
                         nameGuide = guideMode.nameGuide,
                         description = guideMode.description,
-                        relativeGuidePath = relativeGuidePath,
                         mode = SaveGuideMode.Update
                     )
-                    onCloseGuide()
                 }
 
                 is GuideMode.Review -> {
                     onCloseGuide()
                 }
             }
-        }
+        },
+        onCurrentPosContent = { position ->
+            viewModel.updatePosContent(position)
+        },
+        onDismissRequest = { showDialogRepeatGuide = false }
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FillingGuideScreen(
-    typeSelected: QAType,
+    cardType: QAType,
     typeForSelected: List<QAType>,
     mediaSelected: ContentType,
     mediaForSelected: List<ContentType>,
@@ -278,6 +277,7 @@ fun FillingGuideScreen(
     listTypeMedia: List<QuestionContentUi>,
     guideMode: GuideMode,
     showDialogDeleteQuestion: Boolean,
+    currentPosContent: Int,
     showDialogRepeatGuide: Boolean,
     onDissmissDialogRepeatGuide: () -> Unit,
     onConfirmDialogRepeatGuide: () -> Unit,
@@ -285,13 +285,15 @@ fun FillingGuideScreen(
     onBackQuestionClick: () -> Unit,
     onNextQuestionClick: () -> Unit,
     onDeleteQuestionClick: () -> Unit,
-    onTypeClicked: (QAType) -> Unit,
-    onFilterClicked: (ContentType) -> Unit,
-    onAssetClick: (QuestionContentUi) -> Unit,
+    onCardTypeClicked: (QAType) -> Unit,
+    onFilterTypeClicked: (ContentType) -> Unit,
+    onOpenAssetClick: (QuestionContentUi) -> Unit,
     onDeleteItemClick: (typeContent: QuestionContentUi, positionItem: Int) -> Unit,
     onAddAssetClick: () -> Unit,
     onAddQuestion: () -> Unit,
-    onCloseGuide: () -> Unit
+    onCloseGuide: () -> Unit,
+    onCurrentPosContent: (Int) -> Unit,
+    onDismissRequest: () -> Unit
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -318,17 +320,24 @@ fun FillingGuideScreen(
                 onBackQuestionClick = onBackQuestionClick,
                 onNextQuestionClick = onNextQuestionClick
             )
-            QASelectType(typeForSelected, typeSelected, onTypeClicked = { typeClicked ->
-                onTypeClicked(typeClicked)
-            })
-            FilterTypeItem(mediaForSelected, mediaSelected, onFilterClicked = { filterClicked ->
-                onFilterClicked(filterClicked)
-            })
+            QASelectType(
+                typeForSelected = typeForSelected,
+                cardType = cardType,
+                onCardTypeClicked = { cardTypeClicked ->
+                    onCardTypeClicked(cardTypeClicked)
+                })
+            FilterTypeItem(
+                mediaForSelected = mediaForSelected,
+                mediaSelected = mediaSelected,
+                onFilterTypeClicked = { filterTypeClicked ->
+                    onFilterTypeClicked(filterTypeClicked)
+                })
 
             AssetCarouselViewer(
                 assets = listTypeMedia,
                 mediaForSelected = mediaSelected,
                 guideMode = guideMode,
+                currentPosContent = currentPosContent,
                 onAddAssetClick = onAddAssetClick,
                 onDeleteItemClick = { typeContent, positionItem ->
                     onDeleteItemClick(
@@ -336,7 +345,8 @@ fun FillingGuideScreen(
                         positionItem
                     )
                 },
-                onAssetClick = { typeContent -> onAssetClick(typeContent) }
+                onOpenAssetClick = { typeContent -> onOpenAssetClick(typeContent) },
+                onCurrentPosContent = { position -> onCurrentPosContent(position) }
             )
         }
 
@@ -350,6 +360,7 @@ fun FillingGuideScreen(
                         onContinueClick = { isChecked ->
                             onContinueDialogDeleteQuestionClick(isChecked)
                         },
+                        onDismissRequest = { onDismissRequest() }
                     )
                 }
             }

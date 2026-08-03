@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.dp
+import com.github.takahirom.roborazzi.RobolectricDeviceQualifiers
 import com.jonathanev.review.ui.preview.providers.StudyGuideScreenProv
 import com.jonathanev.review.ui.preview.providers.StudyGuideScreenProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
@@ -27,7 +28,8 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(
     sdk = [34],
-    instrumentedPackages = ["androidx.loader.content"]
+    instrumentedPackages = ["androidx.loader.content"],
+    qualifiers = RobolectricDeviceQualifiers.Pixel5
 )
 class StudyGuideScreenScreenshotTest(
     private val variantName: String,
@@ -51,7 +53,7 @@ class StudyGuideScreenScreenshotTest(
                 testCases.add(
                     arrayOf(
                         "${nameScreenshot}_light",
-                        "notnight",
+                        "+notnight",
                         dataState
                     )
                 )
@@ -60,7 +62,7 @@ class StudyGuideScreenScreenshotTest(
                 testCases.add(
                     arrayOf(
                         "${nameScreenshot}_dark",
-                        "night",
+                        "+night",
                         dataState
                     )
                 )
@@ -91,7 +93,7 @@ class StudyGuideScreenScreenshotTest(
                         }
 
                         FillingGuideScreen(
-                            typeSelected = data.typeSelected,
+                            cardType = data.typeSelected,
                             typeForSelected = data.typeForSelected,
                             mediaSelected = data.mediaSelected,
                             mediaForSelected = data.mediaForSelected,
@@ -101,19 +103,23 @@ class StudyGuideScreenScreenshotTest(
                             guideMode = data.guideMode,
                             showDialogDeleteQuestion = data.showDialogDeleteQuestion,
                             showDialogRepeatGuide = data.showDialogRepeatGuide,
+                            currentPosContent = 0,
                             onDissmissDialogRepeatGuide = {},
                             onConfirmDialogRepeatGuide = {},
                             onContinueDialogDeleteQuestionClick = {},
                             onBackQuestionClick = {},
                             onNextQuestionClick = {},
                             onDeleteQuestionClick = { },
-                            onTypeClicked = {},
-                            onFilterClicked = {},
-                            onAssetClick = {},
-                            onAddAssetClick = {},
+                            onCardTypeClicked = {},
+                            onFilterTypeClicked = {},
+                            onOpenAssetClick = {},
                             onDeleteItemClick = { _, _ -> },
+                            onAddAssetClick = {},
                             onAddQuestion = {},
-                        ) {}
+                            onCloseGuide = {},
+                            onCurrentPosContent = {},
+                            onDismissRequest = {}
+                        )
                     }
                 }
             }

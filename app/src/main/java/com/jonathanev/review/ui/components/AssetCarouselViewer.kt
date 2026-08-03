@@ -18,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,27 +43,31 @@ fun PreviewAssetCarouselViewer(
     @PreviewParameter(MediaContentPagerProvider::class) data: DataMediaContentPagerProvider
 ) {
     ReviewTheme {
-        Column {
-            Surface(
-                color = MaterialTheme.colorScheme.tertiaryContainer,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = "PREVIEW: $data - ${data::class.simpleName}",
-                    style = MaterialTheme.typography.labelMedium,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                    color = MaterialTheme.colorScheme.onTertiaryContainer
+        Surface(color = MaterialTheme.colorScheme.background) {
+            Column {
+                Surface(
+                    color = MaterialTheme.colorScheme.tertiaryContainer,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "PREVIEW: $data - ${data::class.simpleName}",
+                        style = MaterialTheme.typography.labelMedium,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        color = MaterialTheme.colorScheme.onTertiaryContainer
+                    )
+                }
+
+                AssetCarouselViewer(
+                    assets = data.listType,
+                    mediaForSelected = data.mediaForSelected,
+                    guideMode = data.guideMode,
+                    currentPosContent = 0,
+                    onAddAssetClick = { },
+                    onOpenAssetClick = {},
+                    onDeleteItemClick = { _, _ -> },
+                    onCurrentPosContent = {},
                 )
             }
-
-            AssetCarouselViewer(
-                assets = data.listType,
-                mediaForSelected = data.mediaForSelected,
-                guideMode = data.guideMode,
-                onAddAssetClick = { },
-                onAssetClick = {},
-                onDeleteItemClick = { _, _ -> },
-            )
         }
     }
 }
@@ -73,13 +78,22 @@ fun AssetCarouselViewer(
     assets: List<QuestionContentUi>,
     mediaForSelected: ContentType,
     guideMode: GuideMode,
+    currentPosContent: Int,
     onAddAssetClick: () -> Unit,
-    onAssetClick: (QuestionContentUi) -> Unit,
+    onOpenAssetClick: (QuestionContentUi) -> Unit,
     onDeleteItemClick: (typeContent: QuestionContentUi, positionItem: Int) -> Unit,
+    onCurrentPosContent: (Int) -> Unit,
 ) {
-    val pagerState = rememberPagerState(pageCount = { assets.size })
+    val pagerState =
+        rememberPagerState(initialPage = currentPosContent, pageCount = { assets.size })
     val scope = rememberCoroutineScope()
     val lazyRowState = rememberLazyListState()
+
+    LaunchedEffect(currentPosContent) {
+        if (assets.isNotEmpty() && pagerState.currentPage != currentPosContent) {
+            pagerState.scrollToPage(currentPosContent)
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -92,7 +106,8 @@ fun AssetCarouselViewer(
             assets = assets,
             mediaForSelected = mediaForSelected,
             guideMode = guideMode,
-            onAssetClick = { typeContent -> onAssetClick(typeContent) }
+            onOpenAssetClick = { typeContent -> onOpenAssetClick(typeContent) },
+            onCurrentPosContent = { position -> onCurrentPosContent(position) }
         )
         val currentAsset = assets.getOrNull(pagerState.currentPage)
             .takeUnless { guideMode is GuideMode.Review }

@@ -4,8 +4,9 @@ import com.jonathanev.review.domain.model.GuidePath
 import com.jonathanev.review.domain.model.RelativeGuidePath
 
 interface NavigationPathRepository {
+    suspend fun getRelativePath(): RelativeGuidePath
     fun getRootGuides(): GuidePath
     fun getRootImages(): GuidePath
-    fun next(current: RelativeGuidePath, fileName: String): RelativeGuidePath
-    fun back(current: RelativeGuidePath): RelativeGuidePath
+    suspend fun next(fileName: String)
+    suspend fun reset()
 }

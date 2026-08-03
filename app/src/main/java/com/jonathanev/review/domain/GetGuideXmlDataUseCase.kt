@@ -8,13 +8,12 @@ import javax.inject.Inject
 class GetGuideXmlDataUseCase @Inject constructor(
     private val guiaRepository: GuiaRepository
 ) {
-    operator fun invoke(context: GuideContext): GetGuideResult {
+    suspend operator fun invoke(context: GuideContext): GetGuideResult {
         return when(context){
-            is GuideContext.Browsing -> guiaRepository.getXMLGuide(context.guide, context.relativeGuidePath)
-            is GuideContext.Editing -> guiaRepository.getXMLGuide(context.guide, context.relativeGuidePath)
-            is GuideContext.Moving -> guiaRepository.getXMLGuide(context.guide, context.oldRelativeGuidePath)
+            is GuideContext.Browsing -> guiaRepository.getXMLGuide(context.guide)
+            is GuideContext.Editing -> guiaRepository.getXMLGuide(context.guide)
+            is GuideContext.Moving -> guiaRepository.getXMLGuide(context.guide)
             else -> GetGuideResult.NotFound
         }
-        //return guiaRepository.getXMLGuide(context)
     }
 }

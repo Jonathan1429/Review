@@ -17,11 +17,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -29,8 +31,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -43,17 +46,14 @@ import com.jonathanev.review.R
 import com.jonathanev.review.presentation.model.FileInteractionMode
 import com.jonathanev.review.presentation.model.GuideResultUi
 import com.jonathanev.review.presentation.model.GuideUiModel
-import com.jonathanev.review.presentation.model.RelativeGuidePath
 import com.jonathanev.review.presentation.state.DialogState
+import com.jonathanev.review.presentation.state.GuidesUiState
 import com.jonathanev.review.presentation.viewmodel.FragmentListGuidesViewModel
-import com.jonathanev.review.presentation.viewmodel.NavigationViewModel
 import com.jonathanev.review.ui.components.ItemGuide
-import com.jonathanev.review.ui.model.PropertiesGuide
 import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.StudyGuidesProv
 import com.jonathanev.review.ui.preview.providers.StudyGuidesProvider
-import com.jonathanev.review.ui.theme.BorderPasos
-import com.jonathanev.review.ui.theme.ColorBotones
+import com.jonathanev.review.ui.theme.HardColorButton
 import com.jonathanev.review.ui.theme.ReviewTheme
 
 @DevicePreviews
@@ -77,92 +77,112 @@ fun PreviewMovingGuide(
 @Composable
 fun ListGuidesRoute(
     viewModel: FragmentListGuidesViewModel,
-    navigationViewModel: NavigationViewModel,
-    guides: List<GuideUiModel>,
     fileInteractionMode: FileInteractionMode,
     onAddGuideClick: () -> Unit,
-    onOpenGuideClick: (String) -> Unit,
+    onOpenGuideClick: () -> Unit,
     onDeleteGuideClick: () -> Unit,
-    onRenameGuideClick: (PropertiesGuide) -> Unit,
+    onRenameGuideClick: (GuideUiModel) -> Unit,
     onMoveGuideClick: () -> Unit,
-    onMoveCancelGuideClick: () -> Unit,
-    onMoveSuccessGuideClick: () -> Unit,
-    onBackNav: () -> Unit
+    onBackNav: () -> Unit,
+    onNavigateWithoutFilesScreen: () -> Unit,
 ) {
     val context = LocalContext.current
-    var currentDialog by rememberSaveable { mutableStateOf<DialogState?>(null) }
-    val relativeGuidePath =
-        RelativeGuidePath(navigationViewModel.relativeGuidePath.collectAsStateWithLifecycle().value)
+    var currentDialog by remember { mutableStateOf<DialogState?>(null) }
 
-    LaunchedEffect(relativeGuidePath) {
-        viewModel.getAllGuides(relativeGuidePath)
+    var currentInteractionMode by remember(fileInteractionMode) {
+        mutableStateOf(fileInteractionMode)
     }
 
-    ListGuidesScreen(
-        guides = guides,
-        onAddGuideClick = onAddGuideClick,
-        fileInteractionMode = fileInteractionMode,
-        onItemClick = { posGuide ->
-            when (val result = viewModel.getGuideSelected(posGuide)) {
-                GuideResultUi.Error -> {
-                    onBackNav()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(uiState) {
+        if (uiState is GuidesUiState.Empty) {
+            onNavigateWithoutFilesScreen()
+        }
+    }
+
+
+    when (val state = uiState) {
+        is GuidesUiState.Loading -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+
+        is GuidesUiState.Empty -> {
+            Box(modifier = Modifier.fillMaxSize())
+        }
+
+        is GuidesUiState.Success -> {
+            ListGuidesScreen(
+                guides = state.guides,
+                onAddGuideClick = onAddGuideClick,
+                fileInteractionMode = currentInteractionMode,
+                onItemClick = { posGuide ->
+                    when (val result = viewModel.getGuideSelected(posGuide)) {
+                        GuideResultUi.Error -> {
+                            onBackNav()
+                            Toast.makeText(
+                                /* context = */ context,
+                                /* text = */
+                                "No se pudo encontrar la guia en la posición $posGuide",
+                                /* duration = */
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+
+                        is GuideResultUi.Success -> {
+                            currentDialog = DialogState.OptionsMenu(result)
+                        }
+                    }
+                },
+                onMoveCancelGuideClick = {
+                    currentInteractionMode = FileInteractionMode.Default
+                },
+                onMoveSuccessGuideClick = {
+                    viewModel.movingGuide()
+                },
+                onErrorProcess = {
                     Toast.makeText(
                         /* context = */ context,
-                        /* text = */ "No se pudo encontrar la guia en la posición $posGuide",
+                        /* text = */ "Debes mover la guia antes de hacer otra accion",
                         /* duration = */ Toast.LENGTH_SHORT
                     ).show()
                 }
+            )
 
-                is GuideResultUi.Success -> {
-                    currentDialog = DialogState.OptionsMenu(result)
-                }
-            }
-        },
-        onMoveCancelGuideClick = onMoveCancelGuideClick,
-        onMoveSuccessGuideClick = {
-            viewModel.movingGuide(relativeGuidePath)
-            onMoveSuccessGuideClick()
-        },
-        onErrorProcess = {
-            Toast.makeText(
-                /* context = */ context,
-                /* text = */ "Debes mover la guia antes de hacer otra accion",
-                /* duration = */ Toast.LENGTH_SHORT
-            ).show()
-        }
-    )
-
-    currentDialog?.let { stateDialog ->
-        currentDialog = when (stateDialog) {
-            is DialogState.ConfirmDelete -> {
-                dialogConfirmDelete(
-                    currentDialog,
-                    viewModel,
-                    stateDialog,
-                    relativeGuidePath,
-                    onDeleteGuideClick
-                )
-            }
-
-            is DialogState.OptionsMenu -> {
-                dialogOptionsMenu(
-                    currDialog = currentDialog,
-                    stateDialog = stateDialog,
-                    onOpenGuideClick = onOpenGuideClick,
-                    onRenameGuideClick = { guideUiModel ->
-                        onRenameGuideClick(
-                            PropertiesGuide(
-                                name = guideUiModel.nameGuide,
-                                description = guideUiModel.description
-                            )
+            currentDialog?.let { stateDialog ->
+                currentDialog = when (stateDialog) {
+                    is DialogState.ConfirmDelete -> {
+                        dialogConfirmDelete(
+                            currentDialog,
+                            viewModel,
+                            stateDialog,
+                            onDeleteGuideClick
                         )
-                    },
-                    onMoveGuideClick = {
-                        viewModel.setContext(relativeGuidePath)
-                        navigationViewModel.setMainPath()
-                        onMoveGuideClick()
                     }
-                )
+
+                    is DialogState.OptionsMenu -> {
+                        dialogOptionsMenu(
+                            currDialog = currentDialog,
+                            stateDialog = stateDialog,
+                            onOpenGuideClick = { guideUIModel ->
+                                viewModel.setActiveGuide(guideUIModel)
+                                onOpenGuideClick()
+                            },
+                            onRenameGuideClick = { guideUiModel ->
+                                onRenameGuideClick(guideUiModel)
+                            },
+                            onMoveGuideClick = {
+                                viewModel.setContext()
+                                onMoveGuideClick()
+                            }
+                        )
+                    }
+                }
             }
         }
     }
@@ -213,7 +233,7 @@ fun ListGuidesScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onAddGuideClick,
-                containerColor = ColorBotones,
+                containerColor = HardColorButton,
                 contentColor = Color.White,
                 shape = CircleShape,
                 modifier = Modifier
@@ -255,7 +275,7 @@ fun ListGuidesScreen(
 
                         if (index < guides.lastIndex) {
                             HorizontalDivider(
-                                color = BorderPasos,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
                                 thickness = 1.dp,
                                 modifier = Modifier.padding(vertical = 4.dp)
                             )
@@ -272,7 +292,6 @@ private fun dialogConfirmDelete(
     currentDialog: DialogState?,
     viewModel: FragmentListGuidesViewModel,
     stateDialog: DialogState.ConfirmDelete,
-    relativeGuidePath: RelativeGuidePath,
     onDeleteGuideClick: () -> Unit
 ): DialogState? {
     var currentDialog1 = currentDialog
@@ -292,10 +311,7 @@ private fun dialogConfirmDelete(
         text = { Text(text = "¿Estás seguro que deseas eliminar la guia?") },
         confirmButton = {
             TextButton(onClick = {
-                viewModel.deleteGuide(
-                    nameGuide = stateDialog.guide.guideUiModel.nameGuide,
-                    relativeGuidePath = relativeGuidePath
-                )
+                viewModel.deleteGuide(nameGuide = stateDialog.item.guideUiModel.nameGuide)
                 onDeleteGuideClick()
                 currentDialog1 = null
             }) {
@@ -317,7 +333,7 @@ private fun dialogConfirmDelete(
 private fun dialogOptionsMenu(
     currDialog: DialogState?,
     stateDialog: DialogState.OptionsMenu,
-    onOpenGuideClick: (String) -> Unit,
+    onOpenGuideClick: (GuideUiModel) -> Unit,
     onRenameGuideClick: (GuideUiModel) -> Unit,
     onMoveGuideClick: () -> Unit
 ): DialogState? {
@@ -348,16 +364,16 @@ private fun dialogOptionsMenu(
                                 when (opcion) {
                                     "Abrir" -> {
                                         currentDialog = null
-                                        onOpenGuideClick(stateDialog.guide.guideUiModel.nameGuide)
+                                        onOpenGuideClick(stateDialog.item.guideUiModel)
                                     }
 
                                     "Eliminar" -> {
                                         currentDialog =
-                                            DialogState.ConfirmDelete(stateDialog.guide)
+                                            DialogState.ConfirmDelete(stateDialog.item)
                                     }
 
                                     "Cambiar nombre" -> {
-                                        onRenameGuideClick(stateDialog.guide.guideUiModel)
+                                        onRenameGuideClick(stateDialog.item.guideUiModel)
                                     }
 
                                     "Mover" -> {

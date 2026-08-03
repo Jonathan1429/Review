@@ -22,7 +22,7 @@ import com.jonathanev.review.R
 import com.jonathanev.review.ui.components.BasePasos
 import com.jonathanev.review.ui.components.SinFolders
 import com.jonathanev.review.ui.preview.DevicePreviews
-import com.jonathanev.review.ui.theme.ColorBotones
+import com.jonathanev.review.ui.theme.HardColorButton
 import com.jonathanev.review.ui.theme.ReviewTheme
 
 @DevicePreviews
@@ -43,7 +43,7 @@ fun WithoutFoldersScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onNavCreateFilesProperties,
-                containerColor = ColorBotones
+                containerColor = HardColorButton
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,

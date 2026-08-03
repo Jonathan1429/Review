@@ -1,5 +1,8 @@
 package com.jonathanev.review.presentation.model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 sealed class ColorType {
     data object Black: ColorType()
     data object Gray: ColorType()

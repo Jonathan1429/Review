@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.data.mapper.toColorType
 import com.jonathanev.review.domain.DeleteGuideUseCase
 import com.jonathanev.review.domain.ExistXMLGuideV1UseCase
+import com.jonathanev.review.domain.GetVersionGuideUseCase
 import com.jonathanev.review.domain.IsExistFileUseCase
 import com.jonathanev.review.domain.IsExistFolderUseCase
 import com.jonathanev.review.domain.LoadGuidesUseCase
@@ -14,16 +15,16 @@ import com.jonathanev.review.domain.SaveMetadataUseCase
 import com.jonathanev.review.domain.ValidateCreateFileUseCase
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuideVersion
-import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.result.DeleteGuideResult
 import com.jonathanev.review.domain.result.ExistGuideV1Result
+import com.jonathanev.review.domain.result.GuideResource
+import com.jonathanev.review.domain.result.ReadGuideError
 import com.jonathanev.review.domain.result.RenamedGuideResult
 import com.jonathanev.review.domain.result.ValidateCreateFileResult
 import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.presentation.model.ColorType
 import com.jonathanev.review.presentation.model.FileFormMode
 import com.jonathanev.review.presentation.model.IconType
-import com.jonathanev.review.presentation.model.QuestionItemUi
 import com.jonathanev.review.presentation.model.ScreenDataUi
 import com.jonathanev.review.presentation.state.CreatingUIState
 import com.jonathanev.review.presentation.state.CreatingUIState.CreateFile
@@ -49,9 +50,10 @@ class CreateFilesViewModel @Inject constructor(
     private val isExistFileUseCase: IsExistFileUseCase,
     private val isExistFolderUseCase: IsExistFolderUseCase,
     private val deleteGuideUseCase: DeleteGuideUseCase,
-    private val existXMLGuideV1UseCase: ExistXMLGuideV1UseCase
+    private val existXMLGuideV1UseCase: ExistXMLGuideV1UseCase,
+    private val getVersionGuideUseCase: GetVersionGuideUseCase
 ) : ViewModel() {
-    private var cachedGuides: List<GuideDomainModel> = emptyList()
+    //private var cachedGuides: List<GuideDomainModel> = emptyList()
 
     private val _uiStateComposable = MutableStateFlow(PropertiesFilesState())
     val uiStateComposable = _uiStateComposable.asStateFlow()
@@ -65,12 +67,6 @@ class CreateFilesViewModel @Inject constructor(
 
     private val _messages = MutableSharedFlow<CreatingUIState>()
     val messages = _messages.asSharedFlow()
-
-    private var _preguntas = mutableListOf<QuestionItemUi>()
-    val preguntas: List<QuestionItemUi> get() = _preguntas
-
-    private var _respuestas = mutableListOf<QuestionItemUi>()
-    val respuestas: List<QuestionItemUi> get() = _respuestas
 
     fun loadIconsFor(mode: FileFormMode) {
         val icons = when (mode) {
@@ -132,44 +128,39 @@ class CreateFilesViewModel @Inject constructor(
         saveMetadataUseCase.invoke(screenDataDomain)
     }
 
-    fun fillFields(fileName: String): Boolean {
-        val guideDomainModel = cachedGuides.find { it.nameGuide == fileName }
-
-        if (guideDomainModel == null) {
-            emitEvent(Message("Ocurrió un error al intentar renombrar"))
-            return false
-        }
-
+    fun fillFields(fileName: String, description: String) {
         _uiStateComposable.update { currentState ->
             currentState.copy(
-                name = guideDomainModel.nameGuide,
-                description = guideDomainModel.description,
-                oldName = guideDomainModel.nameGuide,
-                oldDescription = guideDomainModel.description
+                oldName = fileName,
+                oldDescription = description
             )
         }
-
-        return true
     }
 
     fun renameFile(
         oldName: String,
-        fileName: String,
-        description: String,
-        relativeGuidePath: String
+        newFileName: String,
+        newDescription: String
     ) {
-        val guide = cachedGuides.find { it.nameGuide == oldName }
-        if (guide == null) {
-            emitEvent(Message("No se ha encontrado la guia a renombrar"))
-            return
-        }
-
         viewModelScope.launch {
+            val guideResource = getVersionGuideUseCase(oldName)
+
+            if (guideResource is GuideResource.Error) {
+                val errorMessage = when (guideResource.exception) {
+                    ReadGuideError.FileNotFound -> "La guía no existe"
+                    ReadGuideError.InvalidXmlFormat -> "El archivo XML está dañado"
+                    ReadGuideError.EmptyOrCorruptFile -> "Archivo vacío o corrupto"
+                    is ReadGuideError.UnknownErrorRead -> "Error al leer la guía"
+                }
+                emitEvent(Message(errorMessage))
+                return@launch
+            }
+
+            val guideDomain = (guideResource as GuideResource.Success).data
+
             when (renameGuideUseCase.invoke(
-                guide = guide,
-                relativeGuidePath = RelativeGuidePath(relativeGuidePath),
-                newName = fileName,
-                description = description
+                oldGuide = guideDomain,
+                newGuide = GuideDomainModel(GuideVersion.V2, newFileName, newDescription)
             )) {
                 RenamedGuideResult.ImageError ->
                     emitEvent(Message("No se pasaron correctamente todas las imagenes"))
@@ -180,20 +171,14 @@ class CreateFilesViewModel @Inject constructor(
                 RenamedGuideResult.Success -> {
                     emitEvent(Message("Guia renombrada exitosamente"))
 
-                    val xmlGuideV1 = GuideDomainModel(GuideVersion.V1, fileName, description)
+                    val xmlGuideV1 = GuideDomainModel(GuideVersion.V1, newFileName, newDescription)
 
-                    when (existXMLGuideV1UseCase.invoke(
-                        xmlGuideV1,
-                        RelativeGuidePath(relativeGuidePath)
-                    )) {
+                    when (existXMLGuideV1UseCase.invoke(xmlGuideV1)) {
                         ExistGuideV1Result.Error ->
                             Log.d("RenameGuide", "Error al validar la guia V1")
 
                         ExistGuideV1Result.ExistGuide -> {
-                            when (deleteGuideUseCase.invoke(
-                                guideDomainModel = xmlGuideV1,
-                                relativeGuidePath = RelativeGuidePath(relativeGuidePath)
-                            )) {
+                            when (deleteGuideUseCase.invoke(guideDomainModel = xmlGuideV1)) {
                                 DeleteGuideResult.DeleteSuccess ->
                                     Log.d("RenameGuide", "Guia V1 eliminada correctamente")
 
@@ -248,21 +233,12 @@ class CreateFilesViewModel @Inject constructor(
         }
     }
 
-    fun fileExist(mode: FileFormMode, name: String): Boolean {
+    suspend fun fileExist(mode: FileFormMode, name: String): Boolean {
         return when (mode) {
-            FileFormMode.CreatingFile -> isExistFileUseCase.invoke(
-                cachedGuides = cachedGuides,
-                name = name,
-                oldName = ""
-            )
+            FileFormMode.CreatingFile,
+            is FileFormMode.RenameFile -> isExistFileUseCase.invoke(name = name)
 
-            is FileFormMode.RenameFile -> isExistFileUseCase.invoke(
-                cachedGuides = cachedGuides,
-                name = name,
-                oldName = mode.guideUiModel.nameGuide
-            )
-
-            FileFormMode.CreatingFolder -> isExistFolderUseCase.invoke(name)
+            FileFormMode.CreatingFolder -> isExistFolderUseCase.invoke(name = name)
         }
     }
 
@@ -273,14 +249,13 @@ class CreateFilesViewModel @Inject constructor(
         //validateData(name, description)
     }*/
 
-    fun uploadCachedGuides(relativeGuidePath: String) {
-        cachedGuides = loadGuidesUseCase.invoke(RelativeGuidePath(relativeGuidePath))
-    }
+    /*fun uploadCachedGuides() {
+        cachedGuides = loadGuidesUseCase.invoke())
+    }*/
 
-    fun dataUniqueScreen(): Boolean {
+    suspend fun dataUniqueScreen(): Boolean {
         val state = uiStateComposable.value
-        val mode = currentMode
-        if (mode == null) {
+        val mode = currentMode ?: run {
             emitEvent(Message("No fue posible procesar los datos"))
             return false
         }
@@ -291,25 +266,21 @@ class CreateFilesViewModel @Inject constructor(
         }
 
         when (mode) {
-            FileFormMode.CreatingFile, is FileFormMode.RenameFile -> {
+            FileFormMode.CreatingFile,
+            is FileFormMode.RenameFile -> {
                 _uiStateComposable.update { currentState ->
-                    currentState.copy(
-                        showOverwriteDialogFile = true
-                    )
+                    currentState.copy(showOverwriteDialogFile = true)
                 }
-
-                return false
             }
 
             FileFormMode.CreatingFolder -> {
                 _uiStateComposable.update { currentState ->
-                    currentState.copy(
-                        showOverwriteDialogFolder = true
-                    )
+                    currentState.copy(showOverwriteDialogFolder = true)
                 }
-                return false
             }
         }
+
+        return false
     }
 
     // Función para cuando el usuario pulsa "Confirmar" o "Cancelar"
@@ -325,6 +296,13 @@ class CreateFilesViewModel @Inject constructor(
     }*/
 
     fun initWithMode(mode: FileFormMode) {
+        if (mode == FileFormMode.CreatingFile) {
+            _uiStateComposable.value = PropertiesFilesState()
+        }
+
+        if (mode == FileFormMode.CreatingFolder) {
+            _uiStateComposable.value = PropertiesFilesState()
+        }
         loadIconsFor(mode)
         initForm(mode)
     }
@@ -384,7 +362,7 @@ class CreateFilesViewModel @Inject constructor(
         val state = uiStateComposable.value
         val mode = currentMode
 
-        if (mode == null){
+        if (mode == null) {
             emitEvent(Message("No se pudo crear el archivo"))
             return false
         }

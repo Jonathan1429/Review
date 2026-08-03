@@ -8,11 +8,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.dp
-import com.jonathanev.review.ui.preview.providers.IconSelected
-import com.jonathanev.review.ui.preview.providers.LayeredSelectedIconDataProvider
 import com.jonathanev.review.ui.preview.providers.OptionsCreateTextProv
 import com.jonathanev.review.ui.preview.providers.OptionsCreateTextProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
@@ -24,7 +22,6 @@ import org.robolectric.ParameterizedRobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
-import kotlin.intArrayOf
 
 @RunWith(ParameterizedRobolectricTestRunner::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)

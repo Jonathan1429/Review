@@ -34,10 +34,9 @@ import com.jonathanev.review.R
 import com.jonathanev.review.ui.preview.ComponentsPreviews
 import com.jonathanev.review.ui.preview.providers.QuestionItemProv
 import com.jonathanev.review.ui.preview.providers.QuestionItemProvider
-import com.jonathanev.review.ui.theme.CircleContentSVG
-import com.jonathanev.review.ui.theme.IconsCustom
+import com.jonathanev.review.ui.theme.HardColorButton
 import com.jonathanev.review.ui.theme.ReviewTheme
-import com.jonathanev.review.ui.theme.cardStepBackground
+import com.jonathanev.review.ui.theme.getCardContainerColor
 
 @ComponentsPreviews
 @Composable
@@ -59,7 +58,7 @@ fun QuestionCard(
 ) {
     Card(
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = cardStepBackground),
+        colors = CardDefaults.cardColors(containerColor = getCardContainerColor()),
         modifier = Modifier
             .fillMaxWidth()
             .border(1.dp, Color(0xFF263350), RoundedCornerShape(16.dp))
@@ -77,7 +76,10 @@ fun QuestionCard(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            HorizontalDivider(color = Color(0xFF263350), thickness = 1.dp)
+            HorizontalDivider(
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+                thickness = 1.dp
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -98,49 +100,36 @@ fun QuestionCard(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    /*Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .border(1.5.dp, CircleContentSVG, CircleShape)
-                            .background(Color.Transparent)
-                            .clickable(onClick = { /* Acción editar */ }),
-                        contentAlignment = Alignment.Center // Centramos el icono
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "Edit",
-                            tint = CircleContentSVG,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }*/
-
                     IconButton(
                         onClick = { onEditingGuideClick() },
                         modifier = Modifier
                             .size(40.dp)
-                            .border(1.5.dp, CircleContentSVG, CircleShape),
+                            .border(1.5.dp, HardColorButton.copy(alpha = 0.6f), CircleShape),
                         colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = Color.Transparent,
-                            contentColor = CircleContentSVG
+                            containerColor = Color.Transparent
                         )
                     ) {
                         Icon(
                             imageVector = Icons.Default.Edit,
                             contentDescription = "Edit",
-                            tint = CircleContentSVG,
+                            tint = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.size(18.dp)
                         )
                     }
 
                     IconButton(
                         onClick = onPlayGuideClick,
-                        colors = IconButtonDefaults.iconButtonColors(containerColor = CircleContentSVG),
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = HardColorButton.copy(
+                                alpha = 0.6f
+                            )
+                        ),
                         modifier = Modifier.size(40.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.PlayArrow,
                             contentDescription = "Play",
-                            tint = IconsCustom,
+                            tint = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.size(22.dp)
                         )
                     }

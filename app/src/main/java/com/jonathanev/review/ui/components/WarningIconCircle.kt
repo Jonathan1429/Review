@@ -14,7 +14,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.jonathanev.review.R
 import com.jonathanev.review.ui.preview.ComponentsPreviews
-import com.jonathanev.review.ui.theme.ColorBotones
+import com.jonathanev.review.ui.theme.HardColorButton
 
 @ComponentsPreviews
 @Composable
@@ -28,7 +28,7 @@ fun WarningIconCircle() {
         contentAlignment = Alignment.Center,
         modifier = Modifier
             .size(56.dp)
-            .background(color = ColorBotones, shape = CircleShape)
+            .background(color = HardColorButton, shape = CircleShape)
     ) {
         Icon(
             painter = painterResource(R.drawable.ic_advertencia),

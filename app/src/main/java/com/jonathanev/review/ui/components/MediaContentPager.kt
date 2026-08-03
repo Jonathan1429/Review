@@ -26,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,14 +45,14 @@ import com.jonathanev.review.R
 import com.jonathanev.review.presentation.model.GuideMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.ui.model.ContentType
-import com.jonathanev.review.ui.preview.DevicePreviews
+import com.jonathanev.review.ui.preview.ComponentsPreviews
 import com.jonathanev.review.ui.preview.providers.DataMediaContentPagerProvider
 import com.jonathanev.review.ui.preview.providers.MediaContentPagerProvider
-import com.jonathanev.review.ui.theme.BorderPasos
+import com.jonathanev.review.ui.theme.BorderGray
 import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.cardStepBackground
 
-@DevicePreviews
+@ComponentsPreviews
 @Composable
 fun PreviewMediaContentPager(
     @PreviewParameter(MediaContentPagerProvider::class) data: DataMediaContentPagerProvider
@@ -76,7 +77,8 @@ fun PreviewMediaContentPager(
                 assets = data.listType,
                 mediaForSelected = data.mediaForSelected,
                 guideMode = data.guideMode,
-                onAssetClick = {}
+                onOpenAssetClick = {},
+                onCurrentPosContent = {}
             )
         }
     }
@@ -88,12 +90,18 @@ fun MediaContentPager(
     assets: List<QuestionContentUi>,
     mediaForSelected: ContentType,
     guideMode: GuideMode,
-    onAssetClick: (QuestionContentUi) -> Unit,
+    onOpenAssetClick: (QuestionContentUi) -> Unit,
+    onCurrentPosContent: (Int) -> Unit
 ) {
     val resourceSelected =
         if (mediaForSelected == ContentType.TEXT) R.string.lblText else R.string.lblImage
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+    LaunchedEffect(pagerState.currentPage) {
+        val position = pagerState.currentPage
+        onCurrentPosContent(position)
+    }
 
     Box(
         modifier = Modifier
@@ -106,7 +114,7 @@ fun MediaContentPager(
                 }
             )
             .clip(RoundedCornerShape(24.dp))
-            .border(1.5.dp, BorderPasos, RoundedCornerShape(24.dp))
+            .border(1.5.dp, BorderGray, RoundedCornerShape(24.dp))
             .background(cardStepBackground)
     ) {
         if (assets.isEmpty()) {
@@ -193,7 +201,7 @@ fun MediaContentPager(
                                             }
                                         }
 
-                                    onAssetClick(typeContent)
+                                    onOpenAssetClick(typeContent)
                                 })
                         )
                     }

@@ -3,19 +3,17 @@ package com.jonathanev.review.domain
 import com.jonathanev.review.domain.model.QAItemDomain
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
-import com.jonathanev.review.domain.model.RelativeGuidePath
 import io.mockk.MockKAnnotations
-import io.mockk.every
+import io.mockk.coEvery
 import io.mockk.impl.annotations.MockK
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
 class GetPreviewQuestionsUseCaseTest {
     @MockK
     lateinit var setPintarTextosUseCase: SetPintarTextosUseCase
-
     private lateinit var useCase: GetPreviewQuestionsUseCase
 
     @Before
@@ -25,63 +23,59 @@ class GetPreviewQuestionsUseCaseTest {
     }
 
     @Test
-    fun `should take first text from question and count images from question and answer`() {
+    fun `should take first text from question and count images from question and answer`() =
+        runTest {
+            // -------- Given --------
+            val questionItem1 = QuestionContentDomain.Text("Primer texto", emptyList())
+            val questionItem2 = QuestionContentDomain.Image("uri", "img.png")
+            val answerItem1 = QuestionContentDomain.Text("Segundo texto", emptyList())
+            val answerItem2 = QuestionContentDomain.Image("uri2", "img2.png")
 
-        // -------- Given --------
+            // Configuramos qué devuelve el use case para cada item
+            coEvery {
+                setPintarTextosUseCase.invoke(questionItem1)
+            } returns questionItem1
 
-        val questionItem1 = QuestionContentDomain.Text("Primer texto", emptyList())
-        val questionItem2 = QuestionContentDomain.Image("uri", "img.png")
-        val answerItem1 = QuestionContentDomain.Image("uri2", "img2.png")
-        val answerItem2 = QuestionContentDomain.Text("Segundo texto", emptyList())
+            coEvery {
+                setPintarTextosUseCase.invoke(questionItem2)
+            } returns questionItem2
 
-        // Configuramos qué devuelve el use case para cada item
-        every {
-            setPintarTextosUseCase.invoke(questionItem1, any())
-        } returns questionItem1
+            coEvery {
+                setPintarTextosUseCase.invoke(answerItem2)
+            } returns answerItem2
 
-        every {
-            setPintarTextosUseCase.invoke(questionItem2, any())
-        } returns questionItem2
+            coEvery {
+                setPintarTextosUseCase.invoke(answerItem1)
+            } returns answerItem1
 
-        every {
-            setPintarTextosUseCase.invoke(answerItem1, any())
-        } returns answerItem1
+            val qaItem1 = QAItemDomain(
+                question = QuestionItemDomain(listOf(questionItem1, questionItem2, questionItem1)),
+                answer = QuestionItemDomain(listOf(answerItem2, answerItem1))
+            )
 
-        every {
-            setPintarTextosUseCase.invoke(answerItem2, any())
-        } returns answerItem2
+            val qaItem2 = QAItemDomain(
+                question = QuestionItemDomain(listOf(questionItem2)),
+                answer = QuestionItemDomain(listOf(answerItem2))
+            )
 
-        val qaItem1 = QAItemDomain(
-            question = QuestionItemDomain(listOf(questionItem1, questionItem2, questionItem1)),
-            answer = QuestionItemDomain(listOf(answerItem1, answerItem2, answerItem1))
-        )
+            // -------- When --------
+            val result = useCase.invoke(listOf(qaItem1, qaItem2))
 
-        val qaItem2 = QAItemDomain(
-            question = QuestionItemDomain(listOf(questionItem2)),
-            answer = QuestionItemDomain(listOf(answerItem1))
-        )
+            // -------- Then --------
+            assertEquals(2, result.size)
 
-        val relativePath = RelativeGuidePath("path")
+            val previewOne = result.first()
+            val previewTwo = result[1]
 
-        // -------- When --------
+            assertEquals(
+                /* expected = */ "Primer texto",
+                /* actual = */ previewOne.question.text
+            )
 
-        val result = useCase.invoke(listOf(qaItem1, qaItem2), relativePath)
+            assertEquals(3, previewOne.noTexts)
+            assertEquals(2, previewOne.noImages)
 
-        // -------- Then --------
-
-        assertEquals(2, result.size)
-
-        val previewOne = result.first()
-        val previewTwo = result[1]
-
-        assertTrue(previewOne.question is QuestionContentDomain.Text)
-        assertEquals(
-            "Primer texto",
-            (previewOne.question as QuestionContentDomain.Text).text
-        )
-
-        // 1 imagen en pregunta + 1 en respuesta
-        assertEquals(3, previewOne.noImages)
-        assertEquals(2, previewTwo.noImages)
-    }
+            assertEquals(0, previewTwo.noTexts)
+            assertEquals(2, previewTwo.noImages)
+        }
 }

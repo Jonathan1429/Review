@@ -122,6 +122,7 @@ android {
 
 dependencies {
     implementation platform('androidx.compose:compose-bom:2024.08.00')
+    androidTestImplementation platform('androidx.compose:compose-bom:2024.08.00')
 
     implementation 'androidx.compose.ui:ui'
     implementation 'androidx.compose.ui:ui-graphics'
@@ -156,13 +157,21 @@ dependencies {
     implementation 'com.github.skydoves:colorpicker-compose:1.1.2'
 
     // Dependencias de Roborazzi
+    /*androidTestImplementation("io.github.takahirom.roborazzi:roborazzi:1.44.0")
+    androidTestImplementation("io.github.takahirom.roborazzi:roborazzi-compose:1.44.0")*/
     testImplementation("io.github.takahirom.roborazzi:roborazzi:1.44.0")
     testImplementation("io.github.takahirom.roborazzi:roborazzi-compose:1.44.0")
 
     // Dependencias para robolectric y compose test
     testImplementation("org.robolectric:robolectric:4.14.1")
     testImplementation("androidx.compose.ui:ui-test-junit4")
+    //androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
+
+    // Correr Android Test
+    androidTestImplementation("androidx.test:runner:1.6.2")
+    androidTestImplementation("androidx.test:rules:1.6.1")
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
 
     //Bundle Compat
     implementation 'androidx.core:core-ktx:1.12.0'
@@ -196,6 +205,8 @@ dependencies {
 
     // UnitTesting
     testImplementation 'junit:junit:4.13.2'
+    // Para tests unitarios en la JVM (JUnit 4/5)
+    testImplementation("org.jetbrains.kotlin:kotlin-test")
 
     // Mockk
     testImplementation("io.mockk:mockk:1.13.12")
@@ -209,31 +220,36 @@ dependencies {
     // Robolectric
     testImplementation "org.robolectric:robolectric:4.12"
 
+    // Turbine
+    testImplementation("app.cash.turbine:turbine:1.2.1")
+
     // Opcional pero muy recomendado para testing de arquitectura:
     /*testImplementation "androidx.test:core-ktx:1.6.1"
     testImplementation "androidx.test.ext:junit-ktx:1.2.1"*/
 }
 
 kover {
-    htmlReport {
-        title = "Reporte de Cobertura con Kover"
-        reportDir = file("${buildDir}/reports/kover/html")
-
+    reports {
         filters {
             excludes {
-                classes([
-                        "**.*Generated*",
+                classes(
                         "*_Factory",
-                        "*_Factory\$*",
-                        "*_Factory*",
-                        "**.*_Factory",
-                        "**.*_Factory\$*"
-                ])
-                packages([
-                        "com.jonathanev.review.UI.View.*",
-                        "com.jonathanev.review.UI.View.**"
-                ])
+                        "*Factory",
+                        "*_Impl",
+                        "*Module*"
+                )
             }
         }
+    }
+}
+
+tasks.withType(Test).configureEach { testTask ->
+
+    def isKoverTask = gradle.startParameter.taskNames.any { taskName ->
+        taskName.toLowerCase().contains("kover")
+    }
+
+    if (isKoverTask) {
+        testTask.exclude("**/*ScreenshotTest*")
     }
 }

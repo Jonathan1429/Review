@@ -509,7 +509,7 @@ class FragmentCreateText : Fragment() {
 
         /*val resColocarEtiquetas =
             sharedViewModel.setColocarEtiquetas(editable.toString(), listSpans)*/
-        sharedViewModel.addTextContent(editable.toString(), listSpans)
+        //sharedViewModel.addTextContent(editable.toString(), listSpans, currentPosContent)
 
         return SpanPalabraModel()
         /*return if (isDoubleColors) {

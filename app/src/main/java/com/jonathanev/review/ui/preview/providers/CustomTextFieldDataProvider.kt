@@ -5,11 +5,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 data class PropertiesTF(
     val name: String,
     val label: String
-){
-    override fun toString(): String {
-        return "Label_$label"
-    }
-}
+)
 
 class CustomTextFieldDataProvider: PreviewParameterProvider<PropertiesTF> {
     override val values: Sequence<PropertiesTF>

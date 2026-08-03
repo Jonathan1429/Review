@@ -1,13 +1,21 @@
 package com.jonathanev.review.presentation.state
 
-import com.jonathanev.review.domain.model.QAType
 import com.jonathanev.review.presentation.model.QuestionItemUi
+import com.jonathanev.review.ui.model.QAType
 
 data class GuideUiState(
-    val preguntas: List<QuestionItemUi> = emptyList(),
-    val respuestas: List<QuestionItemUi> = emptyList(),
+    val preguntas: List<QuestionItemUi> = listOf(
+        QuestionItemUi(
+            content = listOf()
+        )
+    ),
+    val respuestas: List<QuestionItemUi> = listOf(
+        QuestionItemUi(
+            content = listOf()
+        )
+    ),
     val contadorPregunta: Int = 0,
-    val contadorContenido: Int = -1,
+    val contadorContenido: Int = 0,
     val qAType: QAType = QAType.QUESTION,
     val fileName: String = "",
     val description: String = "",

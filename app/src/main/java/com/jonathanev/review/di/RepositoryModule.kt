@@ -4,9 +4,11 @@ import com.jonathanev.review.data.filesystem.GuiaRepositoryImpl
 import com.jonathanev.review.data.filesystem.GuideMoveRepositoryImpl
 import com.jonathanev.review.data.infraestructure.AndroidXmlSerializerFactory
 import com.jonathanev.review.data.infraestructure.RealFileOutputStreamFactory
+import com.jonathanev.review.data.repository.ActiveGuideRepositoryImpl
 import com.jonathanev.review.data.repository.FolderRepositoryImpl
 import com.jonathanev.review.data.repository.ImagesRepositoryImpl
 import com.jonathanev.review.data.repository.NavigationPathRepositoryImpl
+import com.jonathanev.review.domain.repository.ActiveGuideRepository
 import com.jonathanev.review.domain.repository.FileOutputStreamFactory
 import com.jonathanev.review.domain.repository.FilePathResolver
 import com.jonathanev.review.domain.repository.FolderRepository
@@ -63,4 +65,9 @@ abstract class RepositoryModule {
     abstract fun bindFilePathResolver(
         impl: FilePathResolverService
     ): FilePathResolver
+
+    @Binds
+    abstract fun bindActiveGuideRepository(
+        impl: ActiveGuideRepositoryImpl
+    ): ActiveGuideRepository
 }

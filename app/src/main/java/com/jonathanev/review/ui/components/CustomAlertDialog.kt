@@ -24,7 +24,8 @@ import androidx.compose.ui.unit.sp
 import com.jonathanev.review.R
 import com.jonathanev.review.ui.preview.ComponentsPreviews
 import com.jonathanev.review.ui.theme.ReviewTheme
-import com.jonathanev.review.ui.theme.dialogBackground
+import com.jonathanev.review.ui.theme.getAlertDialogColor
+import com.jonathanev.review.ui.theme.getColorSubtitle
 
 @ComponentsPreviews
 @Composable
@@ -67,8 +68,7 @@ fun CustomAlertDialogContent(
 ) {
     Surface(
         shape = RoundedCornerShape(28.dp),
-        color = dialogBackground,
-        tonalElevation = 6.dp,
+        color = getAlertDialogColor(),
         modifier = modifier
             .fillMaxWidth()
             .padding(16.dp)
@@ -96,7 +96,7 @@ fun CustomAlertDialogContent(
             Text(
                 text = message,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = getColorSubtitle(),
                 textAlign = TextAlign.Center,
                 lineHeight = 20.sp
             )
@@ -112,7 +112,10 @@ fun CustomAlertDialogContent(
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text(text = stringResource(R.string.lblCancelar))
+                    Text(
+                        text = stringResource(R.string.lblCancelar),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
                 }
 
                 Button(

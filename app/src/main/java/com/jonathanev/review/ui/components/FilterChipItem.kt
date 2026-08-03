@@ -42,7 +42,7 @@ fun PreviewFilterChipItem(
             itemContentType = data.itemContentType,
             iconRes = data.iconRes,
             contentTypeSelected = data.contentTypeSelected,
-            onFilterClicked = {}
+            onFilterTypeClicked = {}
         )
     }
 }
@@ -52,12 +52,12 @@ fun FilterChipItem(
     itemContentType: ContentType,
     iconRes: Int,
     contentTypeSelected: ContentType,
-    onFilterClicked: (ContentType) -> Unit
+    onFilterTypeClicked: (ContentType) -> Unit
 ) {
     Box(
         modifier = Modifier
             .clickable(onClick = {
-                onFilterClicked(itemContentType)
+                onFilterTypeClicked(itemContentType)
             })
             .height(40.dp)
             .then(

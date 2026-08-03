@@ -21,10 +21,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.jonathanev.review.R
 import com.jonathanev.review.databinding.FragmentListGuidesBinding
 import com.jonathanev.review.presentation.event.GuideActionEvent
-import com.jonathanev.review.presentation.event.UIMovingEvent
-import com.jonathanev.review.presentation.model.GuideResultUi
 import com.jonathanev.review.presentation.model.FolderAction
-import com.jonathanev.review.presentation.model.RelativeGuidePath
+import com.jonathanev.review.presentation.model.GuideResultUi
 import com.jonathanev.review.presentation.viewmodel.FragmentListGuidesViewModel
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
 import com.jonathanev.review.presentation.viewmodel.MainToolbarViewModel
@@ -64,7 +62,7 @@ class FragmentListGuides : Fragment() {
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.eventsMovingFiles.collect { event ->
+                /*viewModel.eventsMovingFiles.collect { event ->
                     when (event) {
                         UIMovingEvent.ExistFile -> {
                             alertDialog { confirmed ->
@@ -102,7 +100,7 @@ class FragmentListGuides : Fragment() {
                             )
                         }
                     }
-                }
+                }*/
             }
         }
 
@@ -126,8 +124,8 @@ class FragmentListGuides : Fragment() {
 
                 launch {
                     viewModelToolbar.onSuccess.collect {
-                        val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
-                        viewModel.movingGuide(relativeGuidePath)
+                        //val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
+                        //viewModel.movingGuide(relativeGuidePath)
                         /*viewModelToolbar.initButtons()
                         navStateViewModel.setMainPath()
                         findNavController().navigate(
@@ -171,7 +169,7 @@ class FragmentListGuides : Fragment() {
             viewLifecycleOwner,
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
-                    navStateViewModel.back()
+                    //navStateViewModel.back()
 
                     findNavController().popBackStack(
                         R.id.fragmentListFolders,
@@ -219,8 +217,8 @@ class FragmentListGuides : Fragment() {
         binding.lvGuiasEstudioNew.setHasFixedSize(true)
         binding.lvGuiasEstudioNew.adapter = adaptListGuides
 
-        val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
-        viewModel.getAllGuides(relativeGuidePath)
+        //val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
+        //viewModel.getAllGuides(relativeGuidePath)
     }
 
     private fun showGuideOptions(position: Int, mode: FolderAction) {
@@ -271,8 +269,8 @@ class FragmentListGuides : Fragment() {
                                             " guia?"
                                 )
                                 .setPositiveButton("Si") { _, _ ->
-                                    val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
-                                    viewModel.deleteGuide(guideResult.guideUiModel.nameGuide, relativeGuidePath)
+                                    //val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
+                                    //viewModel.deleteGuide(guideResult.guideUiModel.nameGuide, relativeGuidePath)
                                 }
                                 .setNegativeButton("Cancelar") { _, _ -> dialog.dismiss() }
                                 .create().show()
@@ -285,8 +283,8 @@ class FragmentListGuides : Fragment() {
                         }
 
                         3 -> {
-                            val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
-                            viewModel.setContext(relativeGuidePath)
+                            //val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
+                            //viewModel.setContext(relativeGuidePath)
                             navStateViewModel.setMainPath()
                             findNavController().navigate(
                                 R.id.action_to_content_graph,
