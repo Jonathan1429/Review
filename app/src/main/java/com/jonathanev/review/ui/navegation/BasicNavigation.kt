@@ -284,8 +284,7 @@ fun BasicNavigation() {
                         backStack.removeLastOrNull()
                     },
                     onCloseGuide = {
-                        backStack.clear()
-                        backStack.add(AppRoutes.MainScreen)
+                        backStack.removeLastOrNull()
                     }
                 )
             }
