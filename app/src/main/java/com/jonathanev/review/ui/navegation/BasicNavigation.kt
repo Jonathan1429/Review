@@ -160,9 +160,6 @@ fun BasicNavigation() {
                     onOpenGuideClick = {
                         backStack.add(AppRoutes.PreviewQuestionsScreen)
                     },
-                    onDeleteGuideClick = {
-                        backStack.removeLastOrNull()
-                    },
                     onRenameGuideClick = { guideUIModel ->
                         backStack.add(
                             AppRoutes.CreateFilesPropertiesScreen(

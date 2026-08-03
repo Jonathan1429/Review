@@ -22,7 +22,6 @@ import com.jonathanev.review.R
 import com.jonathanev.review.databinding.FragmentListGuidesBinding
 import com.jonathanev.review.presentation.event.GuideActionEvent
 import com.jonathanev.review.presentation.model.FolderAction
-import com.jonathanev.review.presentation.model.GuideResultUi
 import com.jonathanev.review.presentation.viewmodel.FragmentListGuidesViewModel
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
 import com.jonathanev.review.presentation.viewmodel.MainToolbarViewModel
@@ -231,7 +230,7 @@ class FragmentListGuides : Fragment() {
             return
         }
 
-        when (val guideResult = viewModel.getGuideSelected(position)) {
+        /*when (val guideResult = viewModel.getGuideSelected(state.guides, position)) {
             is GuideResultUi.Error -> showToast("No se encontró la guia en la posición $position")
 
             is GuideResultUi.Success -> {
@@ -306,7 +305,7 @@ class FragmentListGuides : Fragment() {
                 }
                 builder.create().show()
             }
-        }
+        }*/
     }
 
     private fun alertDialog(onResult: (Boolean) -> Unit) {

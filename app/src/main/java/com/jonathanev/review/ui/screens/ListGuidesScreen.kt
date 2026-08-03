@@ -80,7 +80,6 @@ fun ListGuidesRoute(
     fileInteractionMode: FileInteractionMode,
     onAddGuideClick: () -> Unit,
     onOpenGuideClick: () -> Unit,
-    onDeleteGuideClick: () -> Unit,
     onRenameGuideClick: (GuideUiModel) -> Unit,
     onMoveGuideClick: () -> Unit,
     onBackNav: () -> Unit,
@@ -122,7 +121,7 @@ fun ListGuidesRoute(
                 onAddGuideClick = onAddGuideClick,
                 fileInteractionMode = currentInteractionMode,
                 onItemClick = { posGuide ->
-                    when (val result = viewModel.getGuideSelected(posGuide)) {
+                    when (val result = viewModel.getGuideSelected(state.guides, posGuide)) {
                         GuideResultUi.Error -> {
                             onBackNav()
                             Toast.makeText(
@@ -143,7 +142,7 @@ fun ListGuidesRoute(
                     currentInteractionMode = FileInteractionMode.Default
                 },
                 onMoveSuccessGuideClick = {
-                    viewModel.movingGuide()
+                    viewModel.movingGuide(state.guides)
                 },
                 onErrorProcess = {
                     Toast.makeText(
@@ -155,19 +154,24 @@ fun ListGuidesRoute(
             )
 
             currentDialog?.let { stateDialog ->
-                currentDialog = when (stateDialog) {
+                when (stateDialog) {
                     is DialogState.ConfirmDelete -> {
                         dialogConfirmDelete(
-                            currentDialog,
-                            viewModel,
-                            stateDialog,
-                            onDeleteGuideClick
+                            onDeleteGuideClick = {
+                                viewModel.deleteGuide(
+                                    state.guides,
+                                    nameGuide = stateDialog.item.guideUiModel.nameGuide
+                                )
+                                currentDialog = null
+                            },
+                            onCloseDialog = {
+                                currentDialog = null
+                            }
                         )
                     }
 
                     is DialogState.OptionsMenu -> {
                         dialogOptionsMenu(
-                            currDialog = currentDialog,
                             stateDialog = stateDialog,
                             onOpenGuideClick = { guideUIModel ->
                                 viewModel.setActiveGuide(guideUIModel)
@@ -179,6 +183,12 @@ fun ListGuidesRoute(
                             onMoveGuideClick = {
                                 viewModel.setContext()
                                 onMoveGuideClick()
+                            },
+                            onCloseDialog = {
+                                currentDialog = null
+                            },
+                            onDialogConfirmDelete = { state ->
+                                currentDialog = state
                             }
                         )
                     }
@@ -289,16 +299,11 @@ fun ListGuidesScreen(
 
 @Composable
 private fun dialogConfirmDelete(
-    currentDialog: DialogState?,
-    viewModel: FragmentListGuidesViewModel,
-    stateDialog: DialogState.ConfirmDelete,
-    onDeleteGuideClick: () -> Unit
-): DialogState? {
-    var currentDialog1 = currentDialog
+    onDeleteGuideClick: () -> Unit,
+    onCloseDialog: () -> Unit
+) {
     AlertDialog(
-        onDismissRequest = {
-            currentDialog1 = null
-        },
+        onDismissRequest = onCloseDialog,
         icon = {
             Icon(
                 painter = painterResource(id = R.drawable.ic_advertencia),
@@ -311,36 +316,31 @@ private fun dialogConfirmDelete(
         text = { Text(text = "¿Estás seguro que deseas eliminar la guia?") },
         confirmButton = {
             TextButton(onClick = {
-                viewModel.deleteGuide(nameGuide = stateDialog.item.guideUiModel.nameGuide)
                 onDeleteGuideClick()
-                currentDialog1 = null
             }) {
                 Text("Confirmar")
             }
         },
         dismissButton = {
-            TextButton(onClick = {
-                currentDialog1 = null
-            }) {
+            TextButton(onClick = onCloseDialog) {
                 Text("Cancelar")
             }
         }
     )
-    return currentDialog1
 }
 
 @Composable
 private fun dialogOptionsMenu(
-    currDialog: DialogState?,
     stateDialog: DialogState.OptionsMenu,
     onOpenGuideClick: (GuideUiModel) -> Unit,
     onRenameGuideClick: (GuideUiModel) -> Unit,
-    onMoveGuideClick: () -> Unit
-): DialogState? {
-    var currentDialog = currDialog
+    onMoveGuideClick: () -> Unit,
+    onCloseDialog: () -> Unit,
+    onDialogConfirmDelete: (DialogState) -> Unit
+) {
     AlertDialog(
         onDismissRequest = {
-            currentDialog = null
+            onCloseDialog()
         },
         icon = {
             Icon(
@@ -363,20 +363,21 @@ private fun dialogOptionsMenu(
                             .clickable {
                                 when (opcion) {
                                     "Abrir" -> {
-                                        currentDialog = null
+                                        onCloseDialog()
                                         onOpenGuideClick(stateDialog.item.guideUiModel)
                                     }
 
                                     "Eliminar" -> {
-                                        currentDialog =
-                                            DialogState.ConfirmDelete(stateDialog.item)
+                                        onDialogConfirmDelete(DialogState.ConfirmDelete(stateDialog.item))
                                     }
 
                                     "Cambiar nombre" -> {
+                                        onCloseDialog()
                                         onRenameGuideClick(stateDialog.item.guideUiModel)
                                     }
 
                                     "Mover" -> {
+                                        onCloseDialog()
                                         onMoveGuideClick()
                                     }
                                 }
@@ -388,11 +389,10 @@ private fun dialogOptionsMenu(
         },
         confirmButton = {
             TextButton(onClick = {
-                currentDialog = null
+                onCloseDialog()
             }) {
                 Text("Cancelar")
             }
         }
     )
-    return currentDialog
 }

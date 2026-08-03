@@ -48,7 +48,6 @@ class FragmentListGuidesViewModel @Inject constructor(
     private val resetNavigationUseCase: ResetNavigationUseCase,
     private val setActiveGuideUseCase: SetActiveGuideUseCase
 ) : ViewModel() {
-    private var cachedGuides: List<GuideDomainModel> = emptyList()
     private var selectedGuideDomain: GuideDomainModel? = null
 
     val uiState: StateFlow<GuidesUiState> = loadGuidesUseCase.invoke()
@@ -71,8 +70,9 @@ class FragmentListGuidesViewModel @Inject constructor(
     private val _eventsMovingFiles = MutableSharedFlow<UIMovingEvent>()
     val eventsMovingFiles = _eventsMovingFiles.asSharedFlow() // usar estos eventos en compose
 
-    fun getGuideSelected(position: Int): GuideResultUi {
-        return when (val result = getGuidePosicionUseCase.invoke(position, cachedGuides)) {
+    fun getGuideSelected(guides: List<GuideUiModel>, position: Int): GuideResultUi {
+        return when (val result =
+            getGuidePosicionUseCase.invoke(position, guides.map { it.toDomain() })) {
             GuideResultDomain.Error -> result.toUi()
             is GuideResultDomain.Success -> {
                 selectedGuideDomain = result.guideDomainModel
@@ -81,14 +81,15 @@ class FragmentListGuidesViewModel @Inject constructor(
         }
     }
 
-    fun deleteGuide(nameGuide: String) {
+    fun deleteGuide(guides: List<GuideUiModel>, nameGuide: String) {
         viewModelScope.launch {
-            val guideDomainModel = cachedGuides.find { it.nameGuide == nameGuide }
-            if (guideDomainModel == null) {
+            val guideUIModel = guides.find { it.nameGuide == nameGuide }
+            if (guideUIModel == null) {
                 emitMessage(GuideActionEvent.ShowMessage("No se ha encontrado la guia"))
                 return@launch
             }
 
+            val guideDomainModel = guideUIModel.toDomain()
             val response = deleteGuideUseCase.invoke(guideDomainModel)
             when (response) {
                 DeleteGuideResult.DeleteSuccess -> {
@@ -110,12 +111,12 @@ class FragmentListGuidesViewModel @Inject constructor(
         }
     }
 
-    fun movingGuide() {
+    fun movingGuide(guides: List<GuideUiModel>) {
         when (val context = getGuideMoveUseCase.invoke()) {
             is GuideContext.Moving -> {
-                val guideDomainModel = cachedGuides.find { it.nameGuide == context.guide.nameGuide }
+                val isExistGuide = guides.any { it.nameGuide == context.guide.nameGuide }
 
-                if (guideDomainModel != null) {
+                if (isExistGuide) {
                     viewModelScope.launch {
                         _eventsMovingFiles.emit(UIMovingEvent.ExistFile)
                     }
