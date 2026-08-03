@@ -156,7 +156,7 @@ fun ListGuidesRoute(
             currentDialog?.let { stateDialog ->
                 when (stateDialog) {
                     is DialogState.ConfirmDelete -> {
-                        dialogConfirmDelete(
+                        DialogConfirmDelete(
                             onDeleteGuideClick = {
                                 viewModel.deleteGuide(
                                     state.guides,
@@ -171,7 +171,7 @@ fun ListGuidesRoute(
                     }
 
                     is DialogState.OptionsMenu -> {
-                        dialogOptionsMenu(
+                        DialogOptionsMenu(
                             stateDialog = stateDialog,
                             onOpenGuideClick = { guideUIModel ->
                                 viewModel.setActiveGuide(guideUIModel)
@@ -298,7 +298,7 @@ fun ListGuidesScreen(
 }
 
 @Composable
-private fun dialogConfirmDelete(
+private fun DialogConfirmDelete(
     onDeleteGuideClick: () -> Unit,
     onCloseDialog: () -> Unit
 ) {
@@ -330,7 +330,7 @@ private fun dialogConfirmDelete(
 }
 
 @Composable
-private fun dialogOptionsMenu(
+private fun DialogOptionsMenu(
     stateDialog: DialogState.OptionsMenu,
     onOpenGuideClick: (GuideUiModel) -> Unit,
     onRenameGuideClick: (GuideUiModel) -> Unit,

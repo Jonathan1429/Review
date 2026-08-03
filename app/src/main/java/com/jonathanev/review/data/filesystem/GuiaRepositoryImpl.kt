@@ -307,15 +307,10 @@ class GuiaRepositoryImpl @Inject constructor(
     override suspend fun deleteGuide(
         deleteGuide: GuideContext.DeleteGuide
     ): Boolean {
-        val pathGuide =
-            if (deleteGuide.guide.version == GuideVersion.V2) {
-                filePathResolver.mapToFolderPath(PathKind.GUIAS)
-            } else {
-                filePathResolver.mapToFilePathSpecificGuide(
-                    deleteGuide.guide,
-                    PathKind.GUIAS
-                )
-            }
+        val pathGuide = filePathResolver.mapToFilePathSpecificGuide(
+            guideDomainModel = deleteGuide.guide,
+            kind = PathKind.GUIAS
+        )
 
         val pathGuideFile = File(pathGuide.value)
 
