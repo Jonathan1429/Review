@@ -7,6 +7,7 @@ import com.jonathanev.review.domain.constants.Extensions
 import com.jonathanev.review.domain.factory.DefaultFolderAttributesProvider
 import com.jonathanev.review.domain.model.FolderAttributesDomain
 import com.jonathanev.review.domain.model.FolderDomainModel
+import com.jonathanev.review.domain.model.FolderScreenInfoDomain
 import com.jonathanev.review.domain.model.PathKind
 import com.jonathanev.review.domain.provider.FilePathsProvider
 import com.jonathanev.review.domain.repository.FilePathResolver
@@ -19,7 +20,9 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import java.io.File
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class FolderRepositoryImpl @Inject constructor(
     private val jsonManager: JsonManager,
     private val navigationPathRepository: NavigationPathRepository,
@@ -57,6 +60,26 @@ class FolderRepositoryImpl @Inject constructor(
         } else {
             false
         }
+    }
+
+    override suspend fun createFolder(data: FolderScreenInfoDomain): Boolean {
+        val guidesPath =
+            File(filePathResolver.mapToFolderPath(PathKind.GUIAS).value)
+        val imagesPath =
+            File(filePathResolver.mapToFolderPath(PathKind.IMAGENES).value)
+
+        if (!guidesPath.exists()) {
+            val pathGuides = guidesPath.mkdir()
+            if (!pathGuides) return false
+        }
+
+        if (!imagesPath.exists()) {
+            val pathImages = imagesPath.mkdir()
+            if (!pathImages) return false
+        }
+
+        refreshFolders.value = System.currentTimeMillis()
+        return true
     }
 
     override fun getFolders(): Flow<List<FolderDomainModel>> {

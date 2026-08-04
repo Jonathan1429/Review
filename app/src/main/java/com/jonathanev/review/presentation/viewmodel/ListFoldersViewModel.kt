@@ -39,10 +39,7 @@ class ListFoldersViewModel @Inject constructor(
     val uiState: StateFlow<FoldersUiState> = getFoldersWithNumGuidesUseCase.invoke()
         .map { list ->
             if (list.isEmpty()) FoldersUiState.Empty
-            else {
-                val foldersUiModel = list.map { it.toUi() }
-                FoldersUiState.Success(foldersUiModel)
-            }
+            else FoldersUiState.Success(list.map { it.toUi() })
         }
         .stateIn(
             scope = viewModelScope,
@@ -96,14 +93,12 @@ class ListFoldersViewModel @Inject constructor(
             val nameFolder = folder.folder.name
             nextNavigationUseCase.invoke(nameFolder)
             val message = deleteFolderUseCase.invoke()
-            _eventsMessages.emit(
-                if (message) {
-                    FolderActionEvent.DeleteFolderSuccess
-                } else {
-                    FolderActionEvent.ShowMessage("No se pudo borrar la carpeta correctamente")
-                }
-            )
             resetNavigationUseCase.invoke()
+            if (message) {
+                _eventsMessages.emit(FolderActionEvent.DeleteFolderSuccess)
+            } else {
+                FolderActionEvent.ShowMessage("No se pudo borrar la carpeta correctamente")
+            }
         }
     }
 

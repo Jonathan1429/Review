@@ -4,13 +4,15 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.data.mapper.toColorType
+import com.jonathanev.review.domain.CreateFolderUseCase
 import com.jonathanev.review.domain.DeleteGuideUseCase
 import com.jonathanev.review.domain.ExistXMLGuideV1UseCase
 import com.jonathanev.review.domain.GetVersionGuideUseCase
 import com.jonathanev.review.domain.IsExistFileUseCase
 import com.jonathanev.review.domain.IsExistFolderUseCase
-import com.jonathanev.review.domain.LoadGuidesUseCase
+import com.jonathanev.review.domain.NextNavigationUseCase
 import com.jonathanev.review.domain.RenameGuideUseCase
+import com.jonathanev.review.domain.ResetNavigationUseCase
 import com.jonathanev.review.domain.SaveMetadataUseCase
 import com.jonathanev.review.domain.ValidateCreateFileUseCase
 import com.jonathanev.review.domain.model.GuideDomainModel
@@ -46,12 +48,14 @@ class CreateFilesViewModel @Inject constructor(
     private val renameGuideUseCase: RenameGuideUseCase,
     private val validateCreateFileUseCase: ValidateCreateFileUseCase,
     private val saveMetadataUseCase: SaveMetadataUseCase,
-    private val loadGuidesUseCase: LoadGuidesUseCase,
     private val isExistFileUseCase: IsExistFileUseCase,
     private val isExistFolderUseCase: IsExistFolderUseCase,
     private val deleteGuideUseCase: DeleteGuideUseCase,
     private val existXMLGuideV1UseCase: ExistXMLGuideV1UseCase,
-    private val getVersionGuideUseCase: GetVersionGuideUseCase
+    private val getVersionGuideUseCase: GetVersionGuideUseCase,
+    private val createFolderUseCase: CreateFolderUseCase,
+    private val resetNavigationUseCase: ResetNavigationUseCase,
+    private val nextNavigationUseCase: NextNavigationUseCase
 ) : ViewModel() {
     //private var cachedGuides: List<GuideDomainModel> = emptyList()
 
@@ -112,7 +116,7 @@ class CreateFilesViewModel @Inject constructor(
         }
     }
 
-    fun saveMetadata(isDarkTheme: Boolean) {
+    suspend fun saveMetadata(isDarkTheme: Boolean) {
         val state = uiStateComposable.value
 
         val icon = state.icons[state.selectedIndex]
@@ -324,38 +328,58 @@ class CreateFilesViewModel @Inject constructor(
         }
     }
 
-    fun processSaveRequest() {
+    fun processSaveRequest(isDarkTheme: Boolean) {
         viewModelScope.launch {
+            dismissOverwriteDialog()
             val dataUniqueScreen = dataUniqueScreen()
 
             if (dataUniqueScreen) {
-                proceedWithSave()
+                proceedWithSave(isDarkTheme)
             }
         }
     }
 
-    private fun proceedWithSave() {
+    private suspend fun proceedWithSave(isDarkTheme: Boolean) {
         if (validateData()) {
-            saveData()
+            saveData(isDarkTheme)
         }
     }
 
-    fun saveData() {
-        /*val icon = state.icons[state.selectedIndex]
+    suspend fun saveData(isDarkTheme: Boolean) {
+        val state = uiStateComposable.value
 
+        val icon = state.icons[state.selectedIndex]
         val data = ScreenDataUi(
-            name = uiStateComposable.name,
-            description = uiStateComposable.description,
+            name = state.name,
+            description = state.description,
             imgFolder = icon,
             color = state.color
-        )*/
+        )
 
         when (currentMode) {
             FileFormMode.CreatingFile -> emitEvent(CreateFile)
-            FileFormMode.CreatingFolder -> emitEvent(CreateFolder)
-            is FileFormMode.RenameFile -> emitEvent(RenameFile)
+            FileFormMode.CreatingFolder -> {
+                nextNavigationUseCase.invoke(data.name)
+                val pathCreate = createFolder(isDarkTheme, data)
+                resetNavigationUseCase.invoke()
+                if (!pathCreate) {
+                    emitEvent(Message("No se pudo crear la carpeta"))
+                    return
+                }
+                saveMetadata(isDarkTheme)
+                emitEvent(CreateFolder)
+            }
+
+            is FileFormMode.RenameFile -> {
+                emitEvent(RenameFile)
+            }
+
             null -> emitEvent(Message("No se pudo crear el archivo"))
         }
+    }
+
+    private suspend fun createFolder(isDarkTheme: Boolean, data: ScreenDataUi): Boolean {
+        return createFolderUseCase.invoke(data.toDomain(isDarkTheme))
     }
 
     fun validateData(): Boolean {

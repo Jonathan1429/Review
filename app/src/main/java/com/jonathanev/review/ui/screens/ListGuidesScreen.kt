@@ -1,5 +1,6 @@
 package com.jonathanev.review.ui.screens
 
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,6 +40,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jonathanev.review.R
+import com.jonathanev.review.presentation.event.GuideActionEvent
 import com.jonathanev.review.presentation.model.FileInteractionMode
 import com.jonathanev.review.presentation.model.GuideMenuOption
 import com.jonathanev.review.presentation.model.GuideResultUi
@@ -89,6 +92,21 @@ fun ListGuidesRoute(
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val dialogState by viewModel.dialogState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        viewModel.eventsMessages.collect { event ->
+            when (event) {
+                is GuideActionEvent.ShowMessage -> {
+                    showToast(event.text, context)
+                }
+
+                is GuideActionEvent.Success -> {
+                    showToast(event.text, context)
+                    onBackNav()
+                }
+            }
+        }
+    }
 
     when (val state = uiState) {
         is GuidesUiState.Loading -> {
@@ -148,7 +166,6 @@ fun ListGuidesRoute(
                         description = "¿Estás seguro que deseas eliminar la guia?",
                         onDeleteItemClick = {
                             viewModel.onConfirmDelete(state.item)
-                            onBackNav()
                         },
                         onCloseDialog = {
                             viewModel.onDismissDialog()
@@ -293,4 +310,8 @@ fun ListGuidesScreen(
             }
         }
     }
+}
+
+private fun showToast(text: String, context: Context) {
+    Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
 }

@@ -138,8 +138,6 @@ fun CreateFilesPropertiesRoute(
                     }
 
                     is CreatingUIState.RenameFile -> {
-                        //viewModel.uploadCachedGuides()
-
                         viewModel.renameFile(
                             oldName = state.oldName,
                             newFileName = state.name,
@@ -149,7 +147,6 @@ fun CreateFilesPropertiesRoute(
                     }
 
                     is CreatingUIState.CreateFolder -> {
-                        viewModel.saveMetadata(isDarkTheme)
                         onCreateFolder()
                     }
 
@@ -165,8 +162,7 @@ fun CreateFilesPropertiesRoute(
         fileFormMode = fileFormMode,
         onClickApply = {
             focusManager.clearFocus()
-            viewModel.dismissOverwriteDialog()
-            viewModel.processSaveRequest()
+            viewModel.processSaveRequest(isDarkTheme)
         },
         onNameChange = { viewModel.onNameChange(it) },
         onDescriptionChange = { viewModel.onDescriptionChange(it) },

@@ -1,5 +1,6 @@
 package com.jonathanev.review.ui.screens
 
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -36,6 +37,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jonathanev.review.R
+import com.jonathanev.review.presentation.event.FolderActionEvent
 import com.jonathanev.review.presentation.model.FileInteractionMode
 import com.jonathanev.review.presentation.model.FolderMenuOption
 import com.jonathanev.review.presentation.model.FolderResultUi
@@ -74,27 +76,35 @@ fun ListFoldersRoute(
     viewModel: ListFoldersViewModel,
     fileInteractionMode: FileInteractionMode,
     onCreateFolderClick: () -> Unit,
-    onFolderClick: (FileInteractionMode) -> Unit,
-    onNavWithoutFolders: () -> Unit
+    onFolderOpen: (FileInteractionMode) -> Unit,
+    onDeleteFolder: () -> Unit,
 ) {
-    val uiState = viewModel.uiState.collectAsStateWithLifecycle().value
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val dialogState by viewModel.dialogState.collectAsStateWithLifecycle()
     var currentInteractionMode by remember(fileInteractionMode) {
         mutableStateOf(fileInteractionMode)
     }
     val context = LocalContext.current
 
-    LaunchedEffect(uiState) {
-        if (uiState is FoldersUiState.Empty) {
-            onNavWithoutFolders()
+    LaunchedEffect(Unit) {
+        viewModel.eventsMessages.collect { event ->
+            when (event) {
+                is FolderActionEvent.DeleteFolderSuccess -> {
+                    showToast("Se ha borrado la carpeta correctamente", context)
+                    onDeleteFolder()
+                }
+
+                is FolderActionEvent.ShowMessage -> {
+                    showToast(event.text, context)
+                }
+            }
         }
     }
 
-    when (uiState) {
+    when (val state = uiState) {
         FoldersUiState.Empty -> {
             Box(modifier = Modifier.fillMaxSize())
         }
-
         FoldersUiState.Loading -> {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -103,17 +113,16 @@ fun ListFoldersRoute(
                 CircularProgressIndicator()
             }
         }
-
         is FoldersUiState.Success -> {
             val isDarkTheme = isSystemInDarkTheme()
 
             ListFoldersScreen(
-                guias = uiState.folders,
+                guias = state.folders,
                 fileInteractionMode = currentInteractionMode,
                 onCreateFolderClick = onCreateFolderClick,
                 onFolderClick = { posFolder ->
                     when (val result =
-                        viewModel.getFolderSelected(uiState.folders, posFolder, isDarkTheme)) {
+                        viewModel.getFolderSelected(state.folders, posFolder, isDarkTheme)) {
                         is FolderResultUi.Error -> {
                             Toast.makeText(
                                 /* context = */ context,
@@ -159,7 +168,7 @@ fun ListFoldersRoute(
                             when (option) {
                                 FolderMenuOption.OPEN -> {
                                     viewModel.navigateToDirectory(state.item)
-                                    onFolderClick(currentInteractionMode)
+                                    onFolderOpen(currentInteractionMode)
                                 }
 
                                 FolderMenuOption.DELETE -> {
@@ -237,4 +246,8 @@ fun ListFoldersScreen(
             }
         }
     }
+}
+
+private fun showToast(text: String, context: Context) {
+    Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
 }

@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -28,7 +27,7 @@ class MainActivityViewModel @Inject constructor(
     private val nextNavigationUseCase: NextNavigationUseCase
 ) : ViewModel() {
     val uiState: StateFlow<FoldersUiState> = getFoldersWithNumGuidesUseCase.invoke()
-        .take(1)
+        //.take(1)
         .map { list ->
             if (list.isEmpty()) FoldersUiState.Empty
             else {
@@ -38,7 +37,7 @@ class MainActivityViewModel @Inject constructor(
         }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.Eagerly,
             initialValue = FoldersUiState.Loading
         )
 

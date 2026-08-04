@@ -45,10 +45,13 @@ import com.jonathanev.review.ui.screens.WithoutFoldersScreen
 fun BasicNavigation() {
     val backStack = rememberNavBackStack(AppRoutes.MainScreen)
 
-    /*backStack.forEachIndexed { index, key ->
+    backStack.forEachIndexed { index, key ->
+        //Log.i("BACKSTACK", "[$index]: $key")
         println("BACKSTACK [$index]: $key")
     }
-    println("BACKSTACK: ========================================")*/
+
+    //Log.i("BACKSTACK", "========================================")
+    println("BACKSTACK: ========================================")
 
     NavDisplay(
         backStack = backStack,
@@ -104,6 +107,7 @@ fun BasicNavigation() {
             entry<AppRoutes.WithoutFoldersScreen> {
                 WithoutFoldersScreen(
                     onNavCreateFilesProperties = {
+                        backStack.removeLastOrNull()
                         backStack.add(AppRoutes.CreateFilesPropertiesScreen(FileFormMode.CreatingFolder))
                     }
                 )
@@ -116,13 +120,14 @@ fun BasicNavigation() {
                     onCreateFolderClick = {
                         backStack.add(AppRoutes.CreateFilesPropertiesScreen(FileFormMode.CreatingFolder))
                     },
-                    onFolderClick = { folderAction ->
+                    onFolderOpen = { folderAction ->
+                        backStack.removeLastOrNull()
                         backStack.add(AppRoutes.EntryGuidesScreen(folderAction))
                     },
-                    fileInteractionMode = values.fileInteractionMode,
-                    onNavWithoutFolders = {
-                        backStack.add(AppRoutes.WithoutFoldersScreen)
-                    }
+                    onDeleteFolder = {
+                        backStack.removeLastOrNull()
+                    },
+                    fileInteractionMode = values.fileInteractionMode
                 )
             }
             entry<AppRoutes.EntryGuidesScreen> { action ->
@@ -205,8 +210,7 @@ fun BasicNavigation() {
                         )
                     },
                     onCreateFolder = {
-                        backStack.clear()
-                        backStack.add(AppRoutes.MainScreen)
+                        backStack.removeLastOrNull()
                     }
                 )
             }

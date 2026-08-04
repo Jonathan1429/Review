@@ -4,40 +4,19 @@ import com.jonathanev.review.data.JsonManager
 import com.jonathanev.review.data.mapper.json.toDto
 import com.jonathanev.review.data.model.json.ScreenDataDto
 import com.jonathanev.review.domain.model.FolderScreenInfoDomain
-import com.jonathanev.review.domain.provider.FilePathsProvider
+import com.jonathanev.review.domain.model.PathKind
+import com.jonathanev.review.domain.repository.FilePathResolver
 import com.jonathanev.review.domain.repository.MetadataRepository
-import com.jonathanev.review.domain.repository.NavigationPathRepository
 import java.io.File
 import javax.inject.Inject
 
 class MetadataRepositoryImpl @Inject constructor(
-    private val filePathsProvider: FilePathsProvider,
     private val jsonManager: JsonManager,
-    private val navigationPathRepository: NavigationPathRepository
+    private val filePathResolver: FilePathResolver
 ) : MetadataRepository {
-    override fun saveMetadata(data: FolderScreenInfoDomain) {
+    override suspend fun saveMetadata(data: FolderScreenInfoDomain) {
         val guidesPath =
-            File(
-                filePathsProvider.buildFolder(
-                    navigationPathRepository.getRootGuides().value,
-                    data.name
-                )
-            )
-        val imagesPath =
-            File(
-                filePathsProvider.buildFolder(
-                    navigationPathRepository.getRootImages().value,
-                    data.name
-                )
-            )
-        if (!guidesPath.exists()) {
-            guidesPath.mkdir()
-        }
-
-        if (!imagesPath.exists()) {
-            imagesPath.mkdir()
-        }
-
+            File(filePathResolver.mapToFolderPath(PathKind.GUIAS).value)
         val screenFile = File(guidesPath, "screen.json").path
 
         val screenDataDto = data.toDto()
