@@ -57,8 +57,13 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(GuideUiState())
     val uiState = _uiState.asStateFlow()
 
+    private var isDataLoaded = false
+
     private val _createGuideEvent = MutableSharedFlow<CreateGuideEvent>()
     val createGuideEvent = _createGuideEvent.asSharedFlow()
+
+    private val _updateItemTriger = MutableSharedFlow<Unit>()
+    val updateItemTriger = _updateItemTriger.asSharedFlow()
 
     val imageList: StateFlow<List<QuestionContentUi.Image>> = _uiState
         .map { state ->
@@ -110,10 +115,8 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     val draftTextValue: StateFlow<TextFieldValue?> = _draftTextValue.asStateFlow()
 
     fun initTextDraft(initialContent: QuestionContentUi.Text) {
-        if (_draftTextValue.value == null) {
-            _draftTextValue.value =
-                TextFieldValue(annotatedString = initialContent.toAnnotatedString())
-        }
+        _draftTextValue.value =
+            TextFieldValue(annotatedString = initialContent.toAnnotatedString())
     }
 
     fun onDraftTextChange(newValue: TextFieldValue) {
@@ -123,11 +126,14 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     fun clearTextDraft() {
         _draftTextValue.value = null
     }
+
     fun initUIState() {
         _uiState.value = GuideUiState()
     }
 
     fun loadInitialData(guideMode: GuideMode) {
+        if (isDataLoaded) return
+
         when (guideMode) {
             is GuideMode.Create -> initUIState()
             is GuideMode.Edit -> {
@@ -144,6 +150,8 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 )
             }
         }
+
+        isDataLoaded = true
     }
 
     fun setEditingMode(value: Boolean, position: Int) {
@@ -169,43 +177,46 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         questionContentMode: QuestionContentMode
     ) {
         val newContent = QuestionContentUi.Text(textWithLabels, listSpans)
+        viewModelScope.launch {
+            _uiState.update { state ->
+                val currentPosContent = when (questionContentMode) {
+                    QuestionContentMode.CREATING -> state.contadorContenido + 1
+                    QuestionContentMode.EDITING -> state.contadorContenido
+                }
+                val isQuestion = state.qAType == QATypeUI.QUESTION
+                val sourceListUi = if (isQuestion) state.preguntas else state.respuestas
 
-        _uiState.update { state ->
-            val currentPosContent = when (questionContentMode) {
-                QuestionContentMode.CREATING -> state.contadorContenido + 1
-                QuestionContentMode.EDITING -> state.contadorContenido
-            }
-            val isQuestion = state.qAType == QATypeUI.QUESTION
-            val sourceListUi = if (isQuestion) state.preguntas else state.respuestas
+                val currentQuestionUi = sourceListUi.getOrNull(state.contadorPregunta)
 
-            val currentQuestionUi = sourceListUi.getOrNull(state.contadorPregunta)
+                // Agregar una pregunta + contenido
+                val updatedList: List<QuestionItemUi> = if (currentQuestionUi == null) {
+                    sourceListUi + QuestionItemUi(content = listOf(newContent))
+                } else { // Agregar o editar contenido
+                    val sourceListDomain = sourceListUi.map { it.toDomain() }
 
-            // Agregar una pregunta + contenido
-            val updatedList: List<QuestionItemUi> = if (currentQuestionUi == null) {
-                sourceListUi + QuestionItemUi(content = listOf(newContent))
-            } else { // Agregar o editar contenido
-                val sourceListDomain = sourceListUi.map { it.toDomain() }
+                    val updatedDomainList = setContentUseCase.invoke(
+                        newContent = newContent.toDomain(),
+                        sourceList = sourceListDomain,
+                        contadorPregunta = state.contadorPregunta,
+                        contadorContenido = currentPosContent,
+                        isEditingMode = questionContentMode == QuestionContentMode.EDITING,
+                        filterType = QuestionContentDomain.Text::class.java
+                    )
 
-                val updatedDomainList = setContentUseCase.invoke(
-                    newContent = newContent.toDomain(),
-                    sourceList = sourceListDomain,
-                    contadorPregunta = state.contadorPregunta,
-                    contadorContenido = currentPosContent,
-                    isEditingMode = questionContentMode == QuestionContentMode.EDITING,
-                    filterType = QuestionContentDomain.Text::class.java
+                    updatedDomainList.map { it.toUi() }
+                }
+
+                state.copy(
+                    preguntas = if (isQuestion) updatedList else state.preguntas,
+                    respuestas = if (!isQuestion) updatedList else state.respuestas,
+                    contadorContenido = currentPosContent
                 )
-
-                updatedDomainList.map { it.toUi() }
             }
 
-            state.copy(
-                preguntas = if (isQuestion) updatedList else state.preguntas,
-                respuestas = if (!isQuestion) updatedList else state.respuestas,
-                contadorContenido = currentPosContent
-            )
-        }
+            _updateItemTriger.emit(Unit)
 
-        clearTextDraft()
+            clearTextDraft()
+        }
     }
 
     fun addImageContent(questionContentMode: QuestionContentMode) {

@@ -66,13 +66,16 @@ fun PreviewTextScreen(
 fun CreateTextRoute(
     guideMode: GuideMode,
     viewModel: SharedFragmentCreateFileViewModel,
-    contentType: QuestionContentUi.Text,
+    posItem: Int,
     onSaveText: () -> Unit,
     onBackNav: () -> Unit,
     questionContentMode: QuestionContentMode
 ) {
-    LaunchedEffect(Unit) {
-        viewModel.initTextDraft(contentType)
+    val textList by viewModel.textList.collectAsStateWithLifecycle()
+    val item = textList.getOrNull(posItem) ?: QuestionContentUi.Text("", emptyList())
+
+    LaunchedEffect(item) {
+        viewModel.initTextDraft(item)
     }
 
     val colorInitial = MaterialTheme.colorScheme.onSurface
@@ -80,8 +83,13 @@ fun CreateTextRoute(
     var showDialog by remember { mutableStateOf(false) }
     val textValueState by viewModel.draftTextValue.collectAsStateWithLifecycle()
     val textValue =
-        textValueState ?: TextFieldValue(annotatedString = contentType.toAnnotatedString())
+        textValueState ?: TextFieldValue(annotatedString = item.toAnnotatedString())
 
+    LaunchedEffect(Unit) {
+        viewModel.updateItemTriger.collect {
+            onSaveText()
+        }
+    }
     CreateTextScreen(
         guideMode = guideMode,
         colorInitial = colorInitial,
@@ -90,7 +98,6 @@ fun CreateTextRoute(
         showDialog = showDialog,
         onSaveText = { text, colors ->
             viewModel.addTextContent(textWithLabels = text, listSpans = colors, questionContentMode)
-            onSaveText()
         },
         onClearColorClick = {
             viewModel.onDraftTextChange(newValue = TextFieldValue(textValue.text))

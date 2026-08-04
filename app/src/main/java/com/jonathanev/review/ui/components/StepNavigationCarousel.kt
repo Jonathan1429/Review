@@ -78,7 +78,7 @@ fun PreviewCarousel(
                 pagerState = pagerState,
                 scope = scope,
                 guideMode = data.mode,
-                onAddAssetClick = {}
+                onAddAssetClick = { _ -> }
             )
         }
     }
@@ -91,7 +91,7 @@ fun StepNavigationCarousel(
     pagerState: PagerState,
     scope: CoroutineScope,
     guideMode: GuideMode,
-    onAddAssetClick: () -> Unit
+    onAddAssetClick: (posItem: Int) -> Unit
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -103,7 +103,7 @@ fun StepNavigationCarousel(
                     .size(50.dp)
                     .clip(RoundedCornerShape(16.dp))
                     .background(MaterialTheme.colorScheme.primary)
-                    .clickable(onClick = onAddAssetClick),
+                    .clickable(onClick = { onAddAssetClick(pagerState.currentPage) }),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(

@@ -77,7 +77,7 @@ fun PreviewMediaContentPager(
                 assets = data.listType,
                 mediaForSelected = data.mediaForSelected,
                 guideMode = data.guideMode,
-                onOpenAssetClick = {},
+                onOpenAssetClick = { _, _ -> },
                 onCurrentPosContent = {}
             )
         }
@@ -90,7 +90,7 @@ fun MediaContentPager(
     assets: List<QuestionContentUi>,
     mediaForSelected: ContentType,
     guideMode: GuideMode,
-    onOpenAssetClick: (QuestionContentUi) -> Unit,
+    onOpenAssetClick: (QuestionContentUi, posItem: Int) -> Unit,
     onCurrentPosContent: (Int) -> Unit
 ) {
     val resourceSelected =
@@ -201,7 +201,7 @@ fun MediaContentPager(
                                             }
                                         }
 
-                                    onOpenAssetClick(typeContent)
+                                    onOpenAssetClick(typeContent, pagerState.currentPage)
                                 })
                         )
                     }

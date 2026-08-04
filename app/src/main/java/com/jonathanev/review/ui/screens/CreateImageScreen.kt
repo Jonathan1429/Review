@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jonathanev.review.R
 import com.jonathanev.review.presentation.model.GuideMode
 import com.jonathanev.review.presentation.model.QuestionContentMode
@@ -60,13 +61,15 @@ fun PreviewCreateImageScreen(
 
 fun CreateImageRoute(
     guideMode: GuideMode,
-    contentType: QuestionContentUi.Image,
+    posItem: Int,
     viewModel: SharedFragmentCreateFileViewModel,
     imageUploaded: () -> Unit,
     questionContentMode: QuestionContentMode,
     onBackNav: () -> Unit
 ) {
-    var uriImage by rememberSaveable { mutableStateOf(contentType.uri) }
+    val imageList by viewModel.imageList.collectAsStateWithLifecycle()
+    val item = imageList.getOrNull(posItem) ?: QuestionContentUi.Image("", "")
+    var uriImage by rememberSaveable { mutableStateOf(item.uri) }
     val resultLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri: Uri? ->

@@ -87,7 +87,7 @@ fun PreviewStudyGuideScreen(
             onDeleteQuestionClick = { },
             onCardTypeClicked = {},
             onFilterTypeClicked = {},
-            onOpenAssetClick = {},
+            onOpenAssetClick = { _, _ -> },
             onDeleteItemClick = { _, _ -> },
             onAddAssetClick = {},
             onAddQuestion = {},
@@ -102,8 +102,8 @@ fun PreviewStudyGuideScreen(
 fun FillingGuideRoute(
     viewModel: SharedFragmentCreateFileViewModel,
     guideMode: GuideMode,
-    onOpenAssetClick: (QuestionContentUi) -> Unit,
-    onAddAssetClick: (ContentType) -> Unit,
+    onOpenAssetClick: (QuestionContentUi, posItem: Int) -> Unit,
+    onAddAssetClick: (ContentType, posItem: Int) -> Unit,
     onActionGuideNone: () -> Unit,
     onCloseGuide: () -> Unit
 ) {
@@ -114,21 +114,24 @@ fun FillingGuideRoute(
     var showDialogDeleteQuestion by remember { mutableStateOf(false) }
     var showDialogRepeatGuide by remember { mutableStateOf(false) }
 
-    val uiState = viewModel.uiState.collectAsStateWithLifecycle()
-    val cardType = uiState.value.qAType
-    val currentPosContent = uiState.value.contadorContenido
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val cardType = uiState.qAType
+    val currentPosContent = uiState.contadorContenido
 
-    val totalQuestions = uiState.value.preguntas.size
-    val actualQuestion = uiState.value.contadorPregunta + 1
+    val totalQuestions = uiState.preguntas.size
+    val actualQuestion = uiState.contadorPregunta + 1
+    val textList by viewModel.textList.collectAsStateWithLifecycle()
+    val imageList by viewModel.imageList.collectAsStateWithLifecycle()
+
     val listTypeMedia = if (mediaSelected == ContentType.TEXT) {
-        viewModel.textList.collectAsStateWithLifecycle().value
+        textList
     } else {
-        viewModel.imageList.collectAsStateWithLifecycle().value
+        imageList
     }
     val coroutineScope = rememberCoroutineScope()
     var restartGuide by rememberSaveable { mutableIntStateOf(0) }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(guideMode) {
         viewModel.loadInitialData(guideMode = guideMode)
     }
 
@@ -224,8 +227,8 @@ fun FillingGuideRoute(
         onFilterTypeClicked = { filterTypeClicked ->
             mediaSelected = filterTypeClicked
         },
-        onOpenAssetClick = { typeContent -> onOpenAssetClick(typeContent) },
-        onAddAssetClick = { onAddAssetClick(mediaSelected) },
+        onOpenAssetClick = { typeContent, posItem -> onOpenAssetClick(typeContent, posItem) },
+        onAddAssetClick = { posItem -> onAddAssetClick(mediaSelected, posItem) },
         onAddQuestion = {
             viewModel.addNextQuestion()
         },
@@ -281,9 +284,9 @@ fun FillingGuideScreen(
     onDeleteQuestionClick: () -> Unit,
     onCardTypeClicked: (QAType) -> Unit,
     onFilterTypeClicked: (ContentType) -> Unit,
-    onOpenAssetClick: (QuestionContentUi) -> Unit,
+    onOpenAssetClick: (QuestionContentUi, posItem: Int) -> Unit,
     onDeleteItemClick: (typeContent: QuestionContentUi, positionItem: Int) -> Unit,
-    onAddAssetClick: () -> Unit,
+    onAddAssetClick: (posItem: Int) -> Unit,
     onAddQuestion: () -> Unit,
     onCloseGuide: () -> Unit,
     onCurrentPosContent: (Int) -> Unit,
@@ -332,14 +335,19 @@ fun FillingGuideScreen(
                 mediaForSelected = mediaSelected,
                 guideMode = guideMode,
                 currentPosContent = currentPosContent,
-                onAddAssetClick = onAddAssetClick,
+                onAddAssetClick = { posItem -> onAddAssetClick(posItem) },
                 onDeleteItemClick = { typeContent, positionItem ->
                     onDeleteItemClick(
                         typeContent,
                         positionItem
                     )
                 },
-                onOpenAssetClick = { typeContent -> onOpenAssetClick(typeContent) },
+                onOpenAssetClick = { typeContent, posItem ->
+                    onOpenAssetClick(
+                        typeContent,
+                        posItem
+                    )
+                },
                 onCurrentPosContent = { position -> onCurrentPosContent(position) }
             )
         }

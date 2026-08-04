@@ -162,7 +162,7 @@ class MediaContentPagerScreenshotTest(
                             assets = dataState.listType,
                             mediaForSelected = dataState.mediaForSelected,
                             guideMode = dataState.guideMode,
-                            onOpenAssetClick = {},
+                            onOpenAssetClick = { _, _ -> },
                             onCurrentPosContent = {}
                         )
                     }

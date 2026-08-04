@@ -220,16 +220,13 @@ fun BasicNavigation() {
                 FillingGuideRoute(
                     viewModel = viewModelSharedCreateFile,
                     guideMode = action.guideMode,
-                    onOpenAssetClick = { typeContent ->
+                    onOpenAssetClick = { typeContent, posItem ->
                         when (typeContent) {
                             is QuestionContentUi.Image -> {
                                 backStack.add(
                                     AppRoutes.CreateImageScreen(
                                         questionContentMode = QuestionContentMode.EDITING,
-                                        contentType = QuestionContentUi.Image(
-                                            uri = typeContent.uri,
-                                            nameFile = typeContent.nameFile
-                                        ),
+                                        posItem = posItem,
                                         guideMode = action.guideMode
                                     )
                                 )
@@ -247,26 +244,20 @@ fun BasicNavigation() {
                                 backStack.add(
                                     AppRoutes.CreateTextScreen(
                                         questionContentMode = QuestionContentMode.EDITING,
-                                        contentType = QuestionContentUi.Text(
-                                            typeContent.text,
-                                            typeContent.colorRanges
-                                        ),
+                                        posItem = posItem,
                                         guideMode = action.guideMode
                                     )
                                 )
                             }
                         }
                     },
-                    onAddAssetClick = { mediaSelected ->
+                    onAddAssetClick = { mediaSelected, posItem ->
                         when (mediaSelected) {
                             ContentType.TEXT ->
                                 backStack.add(
                                     AppRoutes.CreateTextScreen(
                                         questionContentMode = QuestionContentMode.CREATING,
-                                        contentType = QuestionContentUi.Text(
-                                            text = "",
-                                            colorRanges = emptyList()
-                                        ),
+                                        posItem = posItem,
                                         guideMode = action.guideMode
                                     )
                                 )
@@ -275,10 +266,7 @@ fun BasicNavigation() {
                                 backStack.add(
                                     AppRoutes.CreateImageScreen(
                                         questionContentMode = QuestionContentMode.CREATING,
-                                        contentType = QuestionContentUi.Image(
-                                            uri = "",
-                                            nameFile = ""
-                                        ),
+                                        posItem = posItem,
                                         guideMode = action.guideMode
                                     )
                                 )
@@ -302,7 +290,7 @@ fun BasicNavigation() {
                 CreateImageRoute(
                     questionContentMode = values.questionContentMode,
                     guideMode = values.guideMode,
-                    contentType = values.contentType,
+                    posItem = values.posItem,
                     viewModel = viewModelSharedCreateFile,
                     imageUploaded = {
                         backStack.removeLastOrNull()
@@ -317,7 +305,7 @@ fun BasicNavigation() {
                     questionContentMode = values.questionContentMode,
                     guideMode = values.guideMode,
                     viewModel = viewModelSharedCreateFile,
-                    contentType = values.contentType,
+                    posItem = values.posItem,
                     onSaveText = { backStack.removeLastOrNull() },
                     onBackNav = { backStack.removeLastOrNull() }
                 )

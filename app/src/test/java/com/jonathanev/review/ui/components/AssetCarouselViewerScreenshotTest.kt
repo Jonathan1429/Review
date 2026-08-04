@@ -94,7 +94,7 @@ class AssetCarouselViewerScreenshotTest(
                             guideMode = data.guideMode,
                             currentPosContent = 0,
                             onAddAssetClick = { },
-                            onOpenAssetClick = {},
+                            onOpenAssetClick = { _, _ -> },
                             onDeleteItemClick = { _, _ -> },
                             onCurrentPosContent = {},
                         )

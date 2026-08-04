@@ -63,7 +63,7 @@ fun PreviewAssetCarouselViewer(
                     guideMode = data.guideMode,
                     currentPosContent = 0,
                     onAddAssetClick = { },
-                    onOpenAssetClick = {},
+                    onOpenAssetClick = { _, _ -> },
                     onDeleteItemClick = { _, _ -> },
                     onCurrentPosContent = {},
                 )
@@ -79,8 +79,8 @@ fun AssetCarouselViewer(
     mediaForSelected: ContentType,
     guideMode: GuideMode,
     currentPosContent: Int,
-    onAddAssetClick: () -> Unit,
-    onOpenAssetClick: (QuestionContentUi) -> Unit,
+    onAddAssetClick: (posItem: Int) -> Unit,
+    onOpenAssetClick: (QuestionContentUi, posItem: Int) -> Unit,
     onDeleteItemClick: (typeContent: QuestionContentUi, positionItem: Int) -> Unit,
     onCurrentPosContent: (Int) -> Unit,
 ) {
@@ -106,7 +106,7 @@ fun AssetCarouselViewer(
             assets = assets,
             mediaForSelected = mediaForSelected,
             guideMode = guideMode,
-            onOpenAssetClick = { typeContent -> onOpenAssetClick(typeContent) },
+            onOpenAssetClick = { typeContent, posItem -> onOpenAssetClick(typeContent, posItem) },
             onCurrentPosContent = { position -> onCurrentPosContent(position) }
         )
         val currentAsset = assets.getOrNull(pagerState.currentPage)
@@ -128,7 +128,7 @@ fun AssetCarouselViewer(
             pagerState = pagerState,
             scope = scope,
             guideMode = guideMode,
-            onAddAssetClick = onAddAssetClick
+            onAddAssetClick = { posItem -> onAddAssetClick(posItem) }
         )
     }
 }
