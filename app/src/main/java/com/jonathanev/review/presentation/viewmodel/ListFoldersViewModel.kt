@@ -78,6 +78,7 @@ class ListFoldersViewModel @Inject constructor(
 
     fun navigateToDirectory(item: FolderUiModel) {
         viewModelScope.launch {
+            onDismissDialog()
             val name = item.folder.name
             nextNavigationUseCase.invoke(name)
         }
