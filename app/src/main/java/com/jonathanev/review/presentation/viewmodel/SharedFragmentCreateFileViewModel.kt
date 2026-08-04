@@ -54,7 +54,6 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     private val guideQuestionExtractor: GuideQuestionExtractor,
     private val setCrearXmlUseCase: SetCrearXmlUseCase
 ) : ViewModel() {
-    private var isInitialized = false
     private val _uiState = MutableStateFlow(GuideUiState())
     val uiState = _uiState.asStateFlow()
 
@@ -129,9 +128,6 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     }
 
     fun loadInitialData(guideMode: GuideMode) {
-        if (isInitialized) return
-        isInitialized = true
-
         when (guideMode) {
             is GuideMode.Create -> initUIState()
             is GuideMode.Edit -> {
@@ -463,8 +459,6 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         nameGuide: String,
     ) {
         viewModelScope.launch {
-            if (uiState.value.respuestas.isNotEmpty()) return@launch
-
             val guide = findGuide(nameGuide) ?: run {
                 showMessage("No se ha encontrado la guia a renombrar")
                 return@launch

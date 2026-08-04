@@ -255,7 +255,7 @@ fun FillingGuideRoute(
         onCurrentPosContent = { position ->
             viewModel.updatePosContent(position)
         },
-        onDismissRequest = { showDialogRepeatGuide = false }
+        onDismissRequest = { showDialogDeleteQuestion = false }
     )
 }
 
@@ -354,7 +354,7 @@ fun FillingGuideScreen(
                         onContinueClick = { isChecked ->
                             onContinueDialogDeleteQuestionClick(isChecked)
                         },
-                        onDismissRequest = { onDismissRequest() }
+                        onDismissRequest = onDismissRequest
                     )
                 }
             }
