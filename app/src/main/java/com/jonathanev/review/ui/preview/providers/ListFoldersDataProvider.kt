@@ -1,5 +1,7 @@
 package com.jonathanev.review.ui.preview.providers
 
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.jonathanev.review.presentation.model.ColorType
 import com.jonathanev.review.presentation.model.FileInteractionMode
@@ -17,7 +19,7 @@ val list = listOf(
         folder = FolderAttributesUi(
             name = "Abap",
             imgFolder = IconType.BACTERIA_SOLID_FULL,
-            color = ColorType.White
+            color = ColorType.RandomColor(Color.Red.toArgb())
         ),
         numGuides = 5
     ),

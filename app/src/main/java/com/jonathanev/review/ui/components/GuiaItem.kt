@@ -28,13 +28,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jonathanev.review.presentation.model.FolderUiModel
 import com.jonathanev.review.ui.mapper.toDrawableRes
+import com.jonathanev.review.ui.mapper.toInt
 import com.jonathanev.review.ui.preview.ComponentsPreviews
 import com.jonathanev.review.ui.preview.providers.ListFoldersDataProv
 import com.jonathanev.review.ui.preview.providers.ListFoldersDataProvider
-import com.jonathanev.review.ui.theme.Black
 import com.jonathanev.review.ui.theme.Inter
 import com.jonathanev.review.ui.theme.ReviewTheme
-import com.jonathanev.review.ui.theme.White
 import com.jonathanev.review.ui.theme.getCardContainerColor
 
 @ComponentsPreviews
@@ -54,7 +53,7 @@ fun GuiaItem(
 ) {
     //val color50 = ColorUtils.setAlphaComponent(guia.folder.color.toColorRes(), 50)
     val isDark = isSystemInDarkTheme()
-    val backgroundColor = if (isDark) White else Black
+    val backgroundColor = Color(guia.folder.color.toInt(isDark))
     val colorTwentyPercent = backgroundColor.copy(alpha = 0.2f)
 
     Card(

@@ -3,7 +3,6 @@ package com.jonathanev.review.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.domain.DeleteFolderUseCase
-import com.jonathanev.review.domain.GetFolderPosicionUseCase
 import com.jonathanev.review.domain.GetFoldersWithNumGuidesUseCase
 import com.jonathanev.review.domain.NextNavigationUseCase
 import com.jonathanev.review.domain.ResetNavigationUseCase
@@ -23,7 +22,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ListFoldersViewModel @Inject constructor(
-    private val getFolderPosicionUseCase: GetFolderPosicionUseCase,
     private val getFoldersWithNumGuidesUseCase: GetFoldersWithNumGuidesUseCase,
     private val deleteFolderUseCase: DeleteFolderUseCase,
     private val nextNavigationUseCase: NextNavigationUseCase,
