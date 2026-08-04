@@ -88,7 +88,7 @@ class GuiaItemScreenshotTest(
                             )
                         }
 
-                        GuiaItem(data) {}
+                        FolderItem(data) {}
                     }
                 }
             }

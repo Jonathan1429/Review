@@ -38,16 +38,16 @@ import com.jonathanev.review.ui.theme.getCardContainerColor
 
 @ComponentsPreviews
 @Composable
-fun PreviewGuiaItem(
+fun PreviewFolderItem(
     @PreviewParameter(ListFoldersDataProvider::class) data: ListFoldersDataProv
 ) {
     ReviewTheme {
-        GuiaItem(data.listFolders[0]) { }
+        FolderItem(data.listFolders[0]) { }
     }
 }
 
 @Composable
-fun GuiaItem(
+fun FolderItem(
     guia: FolderUiModel,
     onClick: () -> Unit
 ) {

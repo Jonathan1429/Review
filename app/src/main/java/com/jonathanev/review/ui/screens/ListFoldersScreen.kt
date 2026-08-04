@@ -47,7 +47,7 @@ import com.jonathanev.review.presentation.state.FoldersUiState
 import com.jonathanev.review.presentation.viewmodel.ListFoldersViewModel
 import com.jonathanev.review.ui.components.DialogConfirmDelete
 import com.jonathanev.review.ui.components.DialogOptionsMenu
-import com.jonathanev.review.ui.components.GuiaItem
+import com.jonathanev.review.ui.components.FolderItem
 import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.ListFoldersDataProv
 import com.jonathanev.review.ui.preview.providers.ListFoldersDataProvider
@@ -237,7 +237,7 @@ fun ListFoldersScreen(
             modifier = Modifier.padding(padding)
         ) {
             itemsIndexed(guias) { index, guia ->
-                GuiaItem(
+                FolderItem(
                     guia = guia,
                     onClick = {
                         onFolderClick(index)
