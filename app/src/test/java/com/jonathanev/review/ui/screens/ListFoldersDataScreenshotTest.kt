@@ -96,7 +96,7 @@ class ListFoldersDataScreenshotTest(
                             guias = data.listFolders,
                             fileInteractionMode = data.fildeInteractionMode,
                             onCreateFolderClick = {},
-                            onFolderClick = { _, _ -> },
+                            onFolderClick = { _ -> },
                             onMoveCancelGuideClick = {}
                         )
                     }

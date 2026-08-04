@@ -1,7 +1,6 @@
 package com.jonathanev.review.ui.screens
 
 import android.widget.Toast
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,12 +9,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -26,7 +23,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,11 +39,14 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jonathanev.review.R
 import com.jonathanev.review.presentation.model.FileInteractionMode
+import com.jonathanev.review.presentation.model.GuideMenuOption
 import com.jonathanev.review.presentation.model.GuideResultUi
 import com.jonathanev.review.presentation.model.GuideUiModel
 import com.jonathanev.review.presentation.state.ActionDialogState
 import com.jonathanev.review.presentation.state.GuidesUiState
 import com.jonathanev.review.presentation.viewmodel.FragmentListGuidesViewModel
+import com.jonathanev.review.ui.components.DialogConfirmDelete
+import com.jonathanev.review.ui.components.DialogOptionsMenu
 import com.jonathanev.review.ui.components.ItemGuide
 import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.StudyGuidesProv
@@ -146,7 +145,8 @@ fun ListGuidesRoute(
             when (val state = dialogState) {
                 is ActionDialogState.ConfirmDelete<GuideUiModel> -> {
                     DialogConfirmDelete(
-                        onDeleteGuideClick = {
+                        description = "¿Estás seguro que deseas eliminar la guia?",
+                        onDeleteItemClick = {
                             viewModel.onConfirmDelete(state.item)
                             onBackNav()
                         },
@@ -162,23 +162,32 @@ fun ListGuidesRoute(
 
                 is ActionDialogState.OptionsMenu<GuideUiModel> -> {
                     DialogOptionsMenu(
-                        onOpenGuideClick = {
-                            viewModel.setActiveGuide(state.item)
-                            onOpenGuideClick()
-                        },
-                        onRenameGuideClick = {
-                            viewModel.onDismissDialog()
-                            onRenameGuideClick(state.item)
-                        },
-                        onMoveGuideClick = {
-                            viewModel.setContext()
-                            onMoveGuideClick()
+                        options = GuideMenuOption.entries,
+                        optionTitle = { it.title },
+                        onOptionSelected = { option ->
+                            when (option) {
+                                GuideMenuOption.OPEN -> {
+                                    viewModel.setActiveGuide(state.item)
+                                    onOpenGuideClick()
+                                }
+
+                                GuideMenuOption.RENAME -> {
+                                    viewModel.onDismissDialog()
+                                    onRenameGuideClick(state.item)
+                                }
+
+                                GuideMenuOption.MOVE -> {
+                                    viewModel.setContext(state.item)
+                                    onMoveGuideClick()
+                                }
+
+                                GuideMenuOption.DELETE -> {
+                                    viewModel.onRequestDelete(state.item)
+                                }
+                            }
                         },
                         onCloseDialog = {
                             viewModel.onDismissDialog()
-                        },
-                        onDialogConfirmDelete = {
-                            viewModel.onRequestDelete(state.item)
                         }
                     )
                 }
@@ -284,92 +293,4 @@ fun ListGuidesScreen(
             }
         }
     }
-}
-
-@Composable
-private fun DialogConfirmDelete(
-    onDeleteGuideClick: () -> Unit,
-    onCloseDialog: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onCloseDialog,
-        icon = {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_advertencia),
-                contentDescription = "Advertencia"
-            )
-        },
-        title = {
-            Text(text = "¡Atención!")
-        },
-        text = { Text(text = "¿Estás seguro que deseas eliminar la guia?") },
-        confirmButton = {
-            TextButton(onClick = {
-                onDeleteGuideClick()
-            }) {
-                Text("Confirmar")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onCloseDialog) {
-                Text("Cancelar")
-            }
-        }
-    )
-}
-
-@Composable
-private fun DialogOptionsMenu(
-    onOpenGuideClick: () -> Unit,
-    onRenameGuideClick: () -> Unit,
-    onMoveGuideClick: () -> Unit,
-    onCloseDialog: () -> Unit,
-    onDialogConfirmDelete: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = {
-            onCloseDialog()
-        },
-        icon = {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_advertencia),
-                contentDescription = "Advertencia"
-            )
-        },
-        title = {
-            Text(text = "¿Qué acción deseas realizar?")
-        },
-        text = {
-            val opciones = listOf("Abrir", "Eliminar", "Cambiar nombre", "Mover")
-
-            LazyColumn {
-                items(opciones) { opcion ->
-                    Text(
-                        text = opcion,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                when (opcion) {
-                                    "Abrir" -> onOpenGuideClick()
-
-                                    "Eliminar" -> onDialogConfirmDelete()
-
-                                    "Cambiar nombre" -> onRenameGuideClick()
-
-                                    "Mover" -> onMoveGuideClick()
-                                }
-                            }
-                            .padding(vertical = 12.dp, horizontal = 8.dp)
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = {
-                onCloseDialog()
-            }) {
-                Text("Cancelar")
-            }
-        }
-    )
 }

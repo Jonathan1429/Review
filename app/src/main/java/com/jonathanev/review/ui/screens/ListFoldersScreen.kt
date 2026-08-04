@@ -1,5 +1,7 @@
 package com.jonathanev.review.ui.screens
 
+import android.widget.Toast
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -7,7 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -28,15 +30,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jonathanev.review.R
 import com.jonathanev.review.presentation.model.FileInteractionMode
+import com.jonathanev.review.presentation.model.FolderMenuOption
+import com.jonathanev.review.presentation.model.FolderResultUi
 import com.jonathanev.review.presentation.model.FolderUiModel
+import com.jonathanev.review.presentation.state.ActionDialogState
 import com.jonathanev.review.presentation.state.FoldersUiState
 import com.jonathanev.review.presentation.viewmodel.ListFoldersViewModel
+import com.jonathanev.review.ui.components.DialogConfirmDelete
+import com.jonathanev.review.ui.components.DialogOptionsMenu
 import com.jonathanev.review.ui.components.GuiaItem
 import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.ListFoldersDataProv
@@ -55,7 +63,7 @@ fun PreviewFoldersScreen(
             guias = data.listFolders,
             fileInteractionMode = data.fildeInteractionMode,
             onCreateFolderClick = {},
-            onFolderClick = { _, _ -> },
+            onFolderClick = { _ -> },
             onMoveCancelGuideClick = {}
         )
     }
@@ -70,9 +78,11 @@ fun ListFoldersRoute(
     onNavWithoutFolders: () -> Unit
 ) {
     val uiState = viewModel.uiState.collectAsStateWithLifecycle().value
+    val dialogState by viewModel.dialogState.collectAsStateWithLifecycle()
     var currentInteractionMode by remember(fileInteractionMode) {
         mutableStateOf(fileInteractionMode)
     }
+    val context = LocalContext.current
 
     LaunchedEffect(uiState) {
         if (uiState is FoldersUiState.Empty) {
@@ -95,18 +105,74 @@ fun ListFoldersRoute(
         }
 
         is FoldersUiState.Success -> {
+            val isDarkTheme = isSystemInDarkTheme()
+
             ListFoldersScreen(
                 guias = uiState.folders,
                 fileInteractionMode = currentInteractionMode,
                 onCreateFolderClick = onCreateFolderClick,
-                onFolderClick = { name, interactionMode ->
-                    viewModel.navigateToDirectory(name)
-                    onFolderClick(interactionMode)
+                onFolderClick = { posFolder ->
+                    when (val result =
+                        viewModel.getFolderSelected(uiState.folders, posFolder, isDarkTheme)) {
+                        is FolderResultUi.Error -> {
+                            Toast.makeText(
+                                /* context = */ context,
+                                /* text = */
+                                "No se pudo encontrar la guia en la posición $posFolder",
+                                /* duration = */
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+
+                        is FolderResultUi.Success -> {
+                            viewModel.onOpenMenu(result.folderUi)
+                        }
+                    }
                 },
                 onMoveCancelGuideClick = {
                     currentInteractionMode = FileInteractionMode.Default
                 }
             )
+
+            when (val state = dialogState) {
+                is ActionDialogState.ConfirmDelete<FolderUiModel> -> {
+                    DialogConfirmDelete(
+                        description = "¿Estás seguro que deseas eliminar el folder y su contenido?",
+                        onDeleteItemClick = {
+                            viewModel.onConfirmDelete(state.item)
+                        },
+                        onCloseDialog = {
+                            viewModel.onDismissDialog()
+                        },
+                    )
+                }
+
+                ActionDialogState.Hidden -> {
+                    /* No se renderiza ningún diálogo */
+                }
+
+                is ActionDialogState.OptionsMenu<FolderUiModel> -> {
+                    DialogOptionsMenu(
+                        options = FolderMenuOption.entries,
+                        optionTitle = { it.title },
+                        onOptionSelected = { option ->
+                            when (option) {
+                                FolderMenuOption.OPEN -> {
+                                    viewModel.navigateToDirectory(state.item)
+                                    onFolderClick(currentInteractionMode)
+                                }
+
+                                FolderMenuOption.DELETE -> {
+                                    viewModel.onRequestDelete(state.item)
+                                }
+                            }
+                        },
+                        onCloseDialog = {
+                            viewModel.onDismissDialog()
+                        }
+                    )
+                }
+            }
         }
     }
 }
@@ -118,7 +184,7 @@ fun ListFoldersScreen(
     guias: List<FolderUiModel>,
     fileInteractionMode: FileInteractionMode,
     onCreateFolderClick: () -> Unit,
-    onFolderClick: (String, FileInteractionMode) -> Unit,
+    onFolderClick: (Int) -> Unit,
     onMoveCancelGuideClick: () -> Unit
 ) {
     Scaffold(
@@ -161,11 +227,11 @@ fun ListFoldersScreen(
             columns = GridCells.Fixed(2),
             modifier = Modifier.padding(padding)
         ) {
-            items(guias) { guia ->
+            itemsIndexed(guias) { index, guia ->
                 GuiaItem(
-                    guia,
+                    guia = guia,
                     onClick = {
-                        onFolderClick(guia.folder.name, fileInteractionMode)
+                        onFolderClick(index)
                     }
                 )
             }

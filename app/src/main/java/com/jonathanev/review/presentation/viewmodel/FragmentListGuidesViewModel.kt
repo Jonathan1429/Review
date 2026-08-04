@@ -79,10 +79,7 @@ class FragmentListGuidesViewModel @Inject constructor(
         return when (val result =
             getGuidePosicionUseCase.invoke(position, guides.map { it.toDomain() })) {
             GuideResultDomain.Error -> result.toUi()
-            is GuideResultDomain.Success -> {
-                selectedGuideDomain = result.guideDomainModel
-                result.toUi()
-            }
+            is GuideResultDomain.Success -> result.toUi()
         }
     }
 
@@ -187,11 +184,11 @@ class FragmentListGuidesViewModel @Inject constructor(
         eventMovingFile("Se ha cancelado la acción")
     }
 
-    fun setContext() {
+    fun setContext(guide: GuideUiModel) {
         viewModelScope.launch {
             onDismissDialog()
-            val guide = selectedGuideDomain ?: return@launch
-            setContextMoveUseCase.invoke(guide)
+            val guideDomainModel = guide.toDomain()
+            setContextMoveUseCase.invoke(guideDomainModel)
             resetNavigationUseCase.invoke()
         }
     }

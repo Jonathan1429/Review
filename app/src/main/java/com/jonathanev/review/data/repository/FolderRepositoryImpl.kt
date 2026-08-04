@@ -12,8 +12,11 @@ import com.jonathanev.review.domain.provider.FilePathsProvider
 import com.jonathanev.review.domain.repository.FilePathResolver
 import com.jonathanev.review.domain.repository.FolderRepository
 import com.jonathanev.review.domain.repository.NavigationPathRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import java.io.File
 import javax.inject.Inject
 
@@ -23,6 +26,8 @@ class FolderRepositoryImpl @Inject constructor(
     private val filePathsProvider: FilePathsProvider,
     private val filePathResolver: FilePathResolver
 ) : FolderRepository {
+    private val refreshFolders = MutableStateFlow(System.currentTimeMillis())
+
     private fun loadFolderAttributes(nameFolder: String): FolderAttributesDomain {
         val currentPath =
             filePathsProvider.buildFolder(
@@ -47,40 +52,51 @@ class FolderRepositoryImpl @Inject constructor(
 
         return if (pathGuides.deleteRecursively()) {
             pathImages.deleteRecursively()
+            refreshFolders.value = System.currentTimeMillis()
             true
         } else {
             false
         }
     }
 
-    override fun getFolders(): Flow<List<FolderDomainModel>> = flow {
-        val rootPath = navigationPathRepository.getRootGuides().value
-        val folderList = File(rootPath).listFiles()
-            ?.filter { it.isDirectory }
-            ?.sortedBy { it.name }
-            ?.map { item ->
-                val guidesV1 =
-                    item.listFiles()?.filter { file ->
+    override fun getFolders(): Flow<List<FolderDomainModel>> {
+        return refreshFolders.map {
+            val rootPath = navigationPathRepository.getRootGuides().value
+            val rootDir = File(rootPath)
+
+            if (!rootDir.exists() || !rootDir.isDirectory) {
+                return@map emptyList()
+            }
+
+            rootDir.listFiles()
+                ?.filter { it.isDirectory }
+                ?.sortedBy { it.name }
+                ?.map { item ->
+                    val itemChildren = item.listFiles() ?: emptyArray()
+
+                    val guidesV1 = itemChildren.count { file ->
                         file.isFile && file.extension == Extensions.XML_EXTENSION
-                    }?.size ?: 0
+                    }
 
-                val guidesV2 = item.listFiles()?.filter { it.isDirectory }?.sumOf { folder ->
-                    folder.listFiles()
-                        ?.filter { it.isFile && it.extension == Extensions.XML_EXTENSION }?.size
-                        ?: 0
-                } ?: 0
+                    val guidesV2 = itemChildren
+                        .filter { it.isDirectory }
+                        .sumOf { subFolder ->
+                            subFolder.listFiles()?.count { file ->
+                                file.isFile && file.extension == Extensions.XML_EXTENSION
+                            } ?: 0
+                        }
 
-                val attributes = loadFolderAttributes(item.name)
-                FolderDomainModel(
-                    folder = FolderAttributesDomain(
-                        name = attributes.name,
-                        imgFolder = attributes.imgFolder,
-                        color = attributes.color
-                    ),
-                    numGuides = guidesV1 + guidesV2
-                )
-            } ?: emptyList()
+                    val attributes = loadFolderAttributes(item.name)
 
-        emit(folderList)
+                    FolderDomainModel(
+                        folder = FolderAttributesDomain(
+                            name = attributes.name,
+                            imgFolder = attributes.imgFolder,
+                            color = attributes.color
+                        ),
+                        numGuides = guidesV1 + guidesV2
+                    )
+                } ?: emptyList()
+        }.flowOn(Dispatchers.IO)
     }
 }
