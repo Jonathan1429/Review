@@ -45,7 +45,7 @@ import com.jonathanev.review.R
 import com.jonathanev.review.presentation.model.FileInteractionMode
 import com.jonathanev.review.presentation.model.GuideResultUi
 import com.jonathanev.review.presentation.model.GuideUiModel
-import com.jonathanev.review.presentation.state.DialogState
+import com.jonathanev.review.presentation.state.ActionDialogState
 import com.jonathanev.review.presentation.state.GuidesUiState
 import com.jonathanev.review.presentation.viewmodel.FragmentListGuidesViewModel
 import com.jonathanev.review.ui.components.ItemGuide
@@ -84,13 +84,12 @@ fun ListGuidesRoute(
     onBackNav: () -> Unit
 ) {
     val context = LocalContext.current
-    var currentDialog by remember { mutableStateOf<DialogState?>(null) }
-
     var currentInteractionMode by remember(fileInteractionMode) {
         mutableStateOf(fileInteractionMode)
     }
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val dialogState by viewModel.dialogState.collectAsStateWithLifecycle()
 
     when (val state = uiState) {
         is GuidesUiState.Loading -> {
@@ -125,7 +124,7 @@ fun ListGuidesRoute(
                         }
 
                         is GuideResultUi.Success -> {
-                            currentDialog = DialogState.OptionsMenu(result)
+                            viewModel.onOpenMenu(result.guideUiModel)
                         }
                     }
                 },
@@ -144,46 +143,44 @@ fun ListGuidesRoute(
                 }
             )
 
-            currentDialog?.let { stateDialog ->
-                when (stateDialog) {
-                    is DialogState.ConfirmDelete -> {
-                        DialogConfirmDelete(
-                            onDeleteGuideClick = {
-                                viewModel.deleteGuide(
-                                    state.guides,
-                                    nameGuide = stateDialog.item.guideUiModel.nameGuide
-                                )
-                                currentDialog = null
-                                onBackNav()
-                            },
-                            onCloseDialog = {
-                                currentDialog = null
-                            }
-                        )
-                    }
+            when (val state = dialogState) {
+                is ActionDialogState.ConfirmDelete<GuideUiModel> -> {
+                    DialogConfirmDelete(
+                        onDeleteGuideClick = {
+                            viewModel.onConfirmDelete(state.item)
+                            onBackNav()
+                        },
+                        onCloseDialog = {
+                            viewModel.onDismissDialog()
+                        }
+                    )
+                }
 
-                    is DialogState.OptionsMenu -> {
-                        DialogOptionsMenu(
-                            stateDialog = stateDialog,
-                            onOpenGuideClick = { guideUIModel ->
-                                viewModel.setActiveGuide(guideUIModel)
-                                onOpenGuideClick()
-                            },
-                            onRenameGuideClick = { guideUiModel ->
-                                onRenameGuideClick(guideUiModel)
-                            },
-                            onMoveGuideClick = {
-                                viewModel.setContext()
-                                onMoveGuideClick()
-                            },
-                            onCloseDialog = {
-                                currentDialog = null
-                            },
-                            onDialogConfirmDelete = { state ->
-                                currentDialog = state
-                            }
-                        )
-                    }
+                ActionDialogState.Hidden -> {
+                    /* No se renderiza ningún diálogo */
+                }
+
+                is ActionDialogState.OptionsMenu<GuideUiModel> -> {
+                    DialogOptionsMenu(
+                        onOpenGuideClick = {
+                            viewModel.setActiveGuide(state.item)
+                            onOpenGuideClick()
+                        },
+                        onRenameGuideClick = {
+                            viewModel.onDismissDialog()
+                            onRenameGuideClick(state.item)
+                        },
+                        onMoveGuideClick = {
+                            viewModel.setContext()
+                            onMoveGuideClick()
+                        },
+                        onCloseDialog = {
+                            viewModel.onDismissDialog()
+                        },
+                        onDialogConfirmDelete = {
+                            viewModel.onRequestDelete(state.item)
+                        }
+                    )
                 }
             }
         }
@@ -323,12 +320,11 @@ private fun DialogConfirmDelete(
 
 @Composable
 private fun DialogOptionsMenu(
-    stateDialog: DialogState.OptionsMenu,
-    onOpenGuideClick: (GuideUiModel) -> Unit,
-    onRenameGuideClick: (GuideUiModel) -> Unit,
+    onOpenGuideClick: () -> Unit,
+    onRenameGuideClick: () -> Unit,
     onMoveGuideClick: () -> Unit,
     onCloseDialog: () -> Unit,
-    onDialogConfirmDelete: (DialogState) -> Unit
+    onDialogConfirmDelete: () -> Unit
 ) {
     AlertDialog(
         onDismissRequest = {
@@ -354,24 +350,13 @@ private fun DialogOptionsMenu(
                             .fillMaxWidth()
                             .clickable {
                                 when (opcion) {
-                                    "Abrir" -> {
-                                        onCloseDialog()
-                                        onOpenGuideClick(stateDialog.item.guideUiModel)
-                                    }
+                                    "Abrir" -> onOpenGuideClick()
 
-                                    "Eliminar" -> {
-                                        onDialogConfirmDelete(DialogState.ConfirmDelete(stateDialog.item))
-                                    }
+                                    "Eliminar" -> onDialogConfirmDelete()
 
-                                    "Cambiar nombre" -> {
-                                        onCloseDialog()
-                                        onRenameGuideClick(stateDialog.item.guideUiModel)
-                                    }
+                                    "Cambiar nombre" -> onRenameGuideClick()
 
-                                    "Mover" -> {
-                                        onCloseDialog()
-                                        onMoveGuideClick()
-                                    }
+                                    "Mover" -> onMoveGuideClick()
                                 }
                             }
                             .padding(vertical = 12.dp, horizontal = 8.dp)

@@ -23,6 +23,7 @@ import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.GuideResultUi
 import com.jonathanev.review.presentation.model.GuideUiModel
+import com.jonathanev.review.presentation.state.ActionDialogState
 import com.jonathanev.review.presentation.state.GuidesUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -60,6 +61,10 @@ class FragmentListGuidesViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = GuidesUiState.Loading
         )
+
+    private val _dialogState =
+        MutableStateFlow<ActionDialogState<GuideUiModel>>(ActionDialogState.Hidden)
+    val dialogState: StateFlow<ActionDialogState<GuideUiModel>> = _dialogState.asStateFlow()
 
     private val _guides = MutableStateFlow<List<GuideUiModel>>(listOf())
     val guides = _guides.asStateFlow()
@@ -184,6 +189,7 @@ class FragmentListGuidesViewModel @Inject constructor(
 
     fun setContext() {
         viewModelScope.launch {
+            onDismissDialog()
             val guide = selectedGuideDomain ?: return@launch
             setContextMoveUseCase.invoke(guide)
             resetNavigationUseCase.invoke()
@@ -192,7 +198,28 @@ class FragmentListGuidesViewModel @Inject constructor(
 
     fun setActiveGuide(guideUIModel: GuideUiModel) {
         viewModelScope.launch {
+            onDismissDialog()
             setActiveGuideUseCase.invoke(guideUIModel.toDomain())
+        }
+    }
+
+    fun onOpenMenu(guide: GuideUiModel) {
+        _dialogState.value = ActionDialogState.OptionsMenu(guide)
+    }
+
+    fun onRequestDelete(guide: GuideUiModel) {
+        _dialogState.value = ActionDialogState.ConfirmDelete(guide)
+    }
+
+    fun onDismissDialog() {
+        _dialogState.value = ActionDialogState.Hidden
+    }
+
+    fun onConfirmDelete(guide: GuideUiModel) {
+        viewModelScope.launch {
+            onDismissDialog()
+            val guideDomainModel = guide.toDomain()
+            deleteGuideUseCase.invoke(guideDomainModel)
         }
     }
 }
