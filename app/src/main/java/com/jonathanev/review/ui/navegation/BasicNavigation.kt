@@ -1,6 +1,8 @@
 package com.jonathanev.review.ui.navegation
 
+import android.app.Activity
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
@@ -9,6 +11,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -40,18 +47,41 @@ import com.jonathanev.review.ui.screens.MainActivityEntryRoute
 import com.jonathanev.review.ui.screens.PreviewQuestionsRoute
 import com.jonathanev.review.ui.screens.WithoutFilesRoute
 import com.jonathanev.review.ui.screens.WithoutFoldersScreen
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun BasicNavigation() {
     val backStack = rememberNavBackStack(AppRoutes.MainScreen)
 
-    backStack.forEachIndexed { index, key ->
+    val context = LocalContext.current
+
+    // Estado y efecto para el aviso de doble toque
+    var showExitWarning by remember { mutableStateOf(false) }
+
+    BackHandler(enabled = backStack.size == 1) {
+        if (showExitWarning) {
+            (context as? Activity)?.finish()
+        } else {
+            Toast.makeText(context, "Presiona atrás de nuevo para salir", Toast.LENGTH_SHORT).show()
+            showExitWarning = true
+        }
+    }
+
+    LaunchedEffect(showExitWarning) {
+        if (showExitWarning) {
+            delay(2000L.milliseconds)
+            showExitWarning = false
+        }
+    }
+
+    /*backStack.forEachIndexed { index, key ->
         //Log.i("BACKSTACK", "[$index]: $key")
         println("BACKSTACK [$index]: $key")
     }
 
     //Log.i("BACKSTACK", "========================================")
-    println("BACKSTACK: ========================================")
+    println("BACKSTACK: ========================================")*/
 
     NavDisplay(
         backStack = backStack,
