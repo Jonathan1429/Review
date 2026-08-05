@@ -29,7 +29,7 @@ class PreviewViewModel @Inject constructor(
     private val getActiveGuideUseCase: GetActiveGuideUseCase
 ) : ViewModel() {
     @OptIn(ExperimentalCoroutinesApi::class)
-    val uiState: StateFlow<PreviewQuestionStateUi> = getActiveGuideUseCase()
+    val uiState: StateFlow<PreviewQuestionStateUi> = getActiveGuideUseCase.invoke()
         .flatMapLatest { activeGuideDomain ->
             if (activeGuideDomain == null) {
                 flowOf(

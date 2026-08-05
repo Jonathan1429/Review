@@ -80,7 +80,6 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
-    // 3. Estado Derivado: Para la lista de textos
     val textList: StateFlow<List<QuestionContentUi.Text>> = _uiState
         .map { state ->
             val currentSource =
@@ -137,14 +136,13 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         when (guideMode) {
             is GuideMode.Create -> initUIState()
             is GuideMode.Edit -> {
-                getObtenerDatosXML(
+                getDataXML(
                     posQuestion = guideMode.posQuestion,
                     nameGuide = guideMode.nameGuide
                 )
             }
-
             is GuideMode.Review -> {
-                getObtenerDatosXML(
+                getDataXML(
                     posQuestion = guideMode.posQuestion,
                     nameGuide = guideMode.nameGuide
                 )
@@ -465,17 +463,21 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     private fun calculatePosition(noQuestion: Int, totalAnswers: Int): Int =
         if (noQuestion == -1) totalAnswers else noQuestion
 
-    fun getObtenerDatosXML(
+    fun getDataXML(
         posQuestion: Int,
         nameGuide: String,
     ) {
         viewModelScope.launch {
             val guide = findGuide(nameGuide) ?: run {
+                isDataLoaded = false
                 showMessage("No se ha encontrado la guia a renombrar")
                 return@launch
             }
 
             val result = loadGuideXml(guide)
+            if (result !is GetGuideResult.Success) {
+                isDataLoaded = false
+            }
             handleGuideResult(result, posQuestion)
         }
     }
