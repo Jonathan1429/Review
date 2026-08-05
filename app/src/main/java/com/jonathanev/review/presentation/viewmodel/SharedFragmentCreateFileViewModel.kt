@@ -141,6 +141,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                     nameGuide = guideMode.nameGuide
                 )
             }
+
             is GuideMode.Review -> {
                 getDataXML(
                     posQuestion = guideMode.posQuestion,
@@ -569,31 +570,21 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     }
 
     fun deleteQuesAns() {
+        val total = _uiState.value.preguntas.size
+
+        // CASO 1 de 1: Usamos la inicialización general de la UI
+        if (total <= 1) {
+            initUIState()
+            return
+        }
+
+        // CASO 1 de N y N de N
         _uiState.update { state ->
             val index = state.contadorPregunta
 
-            // 1. Eliminamos pregunta y respuesta en la misma posición
-            val newPreguntas = state.preguntas.toMutableList().apply {
-                if (index in indices) removeAt(index)
-            }
+            val newPreguntas = state.preguntas.filterIndexed { i, _ -> i != index }
+            val newRespuestas = state.respuestas.filterIndexed { i, _ -> i != index }
 
-            val newRespuestas = state.respuestas.toMutableList().apply {
-                if (index in indices) removeAt(index)
-            }
-
-            // 2. Si ya no queda nada → limpiar todo
-            if (newPreguntas.isEmpty()) {
-                return@update state.copy(
-                    preguntas = emptyList(),
-                    respuestas = emptyList(),
-                    contadorPregunta = 0,
-                    contadorContenido = 0,
-                    isEditing = false,
-                    actualUri = null
-                )
-            }
-
-            // 3. Calcular nuevo índice
             val newIndex = if (index > 0) index - 1 else 0
 
             state.copy(
@@ -624,6 +615,54 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 isLastQuestion = false,
                 contadorPregunta = state.contadorPregunta + 1
             )
+        }
+    }
+
+    fun onDeleteQuestionRequested() {
+        viewModelScope.launch {
+            val dontAskQuestion = getDontAskDeleteOnce()
+            if (dontAskQuestion) {
+                deleteQuesAns()
+            } else {
+                _uiState.update { state ->
+                    state.copy(showDialogDeleteQuestion = true)
+                }
+            }
+        }
+
+    }
+
+    fun onConfirmDeleteQuestion(dontAskAgain: Boolean) {
+        _uiState.update { state ->
+            state.copy(showDialogDeleteQuestion = false)
+        }
+
+        if (dontAskAgain) {
+            saveDontAskDelete()
+        }
+
+        deleteQuesAns()
+    }
+
+    fun onDismissDialogDeleteQuestion() {
+        _uiState.update { state ->
+            state.copy(showDialogDeleteQuestion = false)
+        }
+    }
+
+    fun onDismissDialogRepeatGuide() {
+        _uiState.update { state ->
+            state.copy(showDialogRepeatGuide = false)
+        }
+    }
+
+    fun onNextQuestionRequested(actualQuestion: Int, totalQuestions: Int) {
+        if (actualQuestion == totalQuestions) {
+            _uiState.update { state ->
+                state.copy(showDialogRepeatGuide = true)
+            }
+        } else {
+            nextQuestion()
         }
     }
 

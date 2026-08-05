@@ -21,5 +21,7 @@ data class GuideUiState(
     val description: String = "",
     val isEditing: Boolean = false,
     val actualUri: String? = null,
-    val isLastQuestion: Boolean? = false
+    val isLastQuestion: Boolean? = false,
+    val showDialogDeleteQuestion: Boolean = false,
+    val showDialogRepeatGuide: Boolean = false
 )

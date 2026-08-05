@@ -27,7 +27,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -59,7 +58,6 @@ import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.StudyGuideScreenProv
 import com.jonathanev.review.ui.preview.providers.StudyGuideScreenProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
-import kotlinx.coroutines.launch
 
 @DevicePreviews
 @Composable
@@ -111,8 +109,6 @@ fun FillingGuideRoute(
     val typeForSelected = listOf(QAType.QUESTION, QAType.ANSWER)
     var mediaSelected by remember { mutableStateOf(ContentType.TEXT) }
     val mediaForSelected = listOf(ContentType.TEXT, ContentType.IMAGE)
-    var showDialogDeleteQuestion by remember { mutableStateOf(false) }
-    var showDialogRepeatGuide by remember { mutableStateOf(false) }
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val cardType = uiState.qAType
@@ -128,7 +124,6 @@ fun FillingGuideRoute(
     } else {
         imageList
     }
-    val coroutineScope = rememberCoroutineScope()
     var restartGuide by rememberSaveable { mutableIntStateOf(0) }
 
     LaunchedEffect(guideMode) {
@@ -175,39 +170,27 @@ fun FillingGuideRoute(
         listTypeMedia = listTypeMedia,
         guideMode = guideMode,
         currentPosContent = currentPosContent,
-        showDialogDeleteQuestion = showDialogDeleteQuestion,
-        showDialogRepeatGuide = showDialogRepeatGuide,
-        onDissmissDialogRepeatGuide = { showDialogRepeatGuide = false },
+        showDialogDeleteQuestion = uiState.showDialogDeleteQuestion,
+        showDialogRepeatGuide = uiState.showDialogRepeatGuide,
+        onDissmissDialogRepeatGuide = { viewModel.onDismissDialogRepeatGuide() },
         onConfirmDialogRepeatGuide = {
-            showDialogRepeatGuide = false
             viewModel.initUIState()
             restartGuide++
         },
         onContinueDialogDeleteQuestionClick = { isChecked ->
-            showDialogDeleteQuestion = false
-            if (isChecked) {
-                viewModel.saveDontAskDelete()
-            }
+            viewModel.onConfirmDeleteQuestion(dontAskAgain = isChecked)
         },
         onBackQuestionClick = {
             viewModel.previousQuestion()
         },
         onNextQuestionClick = {
-            if (actualQuestion == totalQuestions) {
-                showDialogRepeatGuide = true
-            } else {
-                viewModel.nextQuestion()
-            }
+            viewModel.onNextQuestionRequested(
+                actualQuestion = actualQuestion,
+                totalQuestions = totalQuestions
+            )
         },
         onDeleteQuestionClick = {
-            coroutineScope.launch {
-                val dontAskQuestion = viewModel.getDontAskDeleteOnce()
-                if (dontAskQuestion) {
-                    viewModel.deleteQuesAns()
-                } else {
-                    showDialogDeleteQuestion = true
-                }
-            }
+            viewModel.onDeleteQuestionRequested()
         },
         onDeleteItemClick = { typeContent, positionItem ->
             when (typeContent) {
@@ -258,7 +241,7 @@ fun FillingGuideRoute(
         onCurrentPosContent = { position ->
             viewModel.updatePosContent(position)
         },
-        onDismissRequest = { showDialogDeleteQuestion = false }
+        onDismissRequest = { viewModel.onDismissDialogDeleteQuestion() }
     )
 }
 
