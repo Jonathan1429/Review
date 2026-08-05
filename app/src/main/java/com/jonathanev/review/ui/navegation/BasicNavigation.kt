@@ -97,17 +97,20 @@ fun BasicNavigation() {
                 MainActivityEntryRoute(
                     viewModel = viewModel,
                     onNavWithoutFolderScreen = {
-                        backStack.add(AppRoutes.WithoutFoldersScreen)
+                        if (backStack.isNotEmpty()) {
+                            backStack[backStack.lastIndex] = AppRoutes.WithoutFoldersScreen
+                        }
                     },
                     onNavListFoldersScreen = {
-                        backStack.add(AppRoutes.ListFoldersScreen())
+                        if (backStack.isNotEmpty()) {
+                            backStack[backStack.lastIndex] = AppRoutes.ListFoldersScreen()
+                        }
                     }
                 )
             }
             entry<AppRoutes.WithoutFoldersScreen> {
                 WithoutFoldersScreen(
                     onNavCreateFilesProperties = {
-                        backStack.removeLastOrNull()
                         backStack.add(AppRoutes.CreateFilesPropertiesScreen(FileFormMode.CreatingFolder))
                     }
                 )
@@ -121,11 +124,12 @@ fun BasicNavigation() {
                         backStack.add(AppRoutes.CreateFilesPropertiesScreen(FileFormMode.CreatingFolder))
                     },
                     onFolderOpen = { folderAction ->
-                        backStack.removeLastOrNull()
                         backStack.add(AppRoutes.EntryGuidesScreen(folderAction))
                     },
                     onDeleteFolder = {
-                        backStack.removeLastOrNull()
+                        if (backStack.isNotEmpty()) {
+                            backStack[backStack.lastIndex] = AppRoutes.MainScreen
+                        }
                     },
                     fileInteractionMode = values.fileInteractionMode
                 )
@@ -136,14 +140,16 @@ fun BasicNavigation() {
                 GuidesEntryRoute(
                     viewModel = viewModel,
                     onNavigateListGuidesRoute = {
-                        //backStack.removeLastOrNull()
-                        backStack.add(
-                            AppRoutes.ListGuidesScreen(action.fileInteractionMode)
-                        )
+                        if (backStack.isNotEmpty()) {
+                            backStack[backStack.lastIndex] =
+                                AppRoutes.ListGuidesScreen(action.fileInteractionMode)
+                        }
                     },
                     onNavigateWithoutFilesScreen = {
-                        //backStack.removeLastOrNull()
-                        backStack.add(AppRoutes.WithoutGuidesScreen(action.fileInteractionMode))
+                        if (backStack.isNotEmpty()) {
+                            backStack[backStack.lastIndex] =
+                                AppRoutes.WithoutGuidesScreen(action.fileInteractionMode)
+                        }
                     },
                 )
             }
@@ -154,7 +160,6 @@ fun BasicNavigation() {
                     viewModel = viewModel,
                     fileInteractionMode = value.fileInteractionMode,
                     onAddGuideClick = {
-                        backStack.removeLastOrNull()
                         backStack.add(AppRoutes.CreateFilesPropertiesScreen(FileFormMode.CreatingFile))
                     }
                 )
@@ -166,15 +171,12 @@ fun BasicNavigation() {
                     viewModel = viewModel,
                     fileInteractionMode = value.fileInteractionMode,
                     onAddGuideClick = {
-                        backStack.removeLastOrNull()
                         backStack.add(AppRoutes.CreateFilesPropertiesScreen(FileFormMode.CreatingFile))
                     },
                     onOpenGuideClick = {
-                        backStack.removeLastOrNull()
                         backStack.add(AppRoutes.PreviewQuestionsScreen)
                     },
                     onRenameGuideClick = { guideUIModel ->
-                        backStack.removeLastOrNull()
                         backStack.add(
                             AppRoutes.CreateFilesPropertiesScreen(
                                 FileFormMode.RenameFile(
@@ -185,10 +187,7 @@ fun BasicNavigation() {
                     },
                     onMoveGuideClick = {
                         backStack.clear()
-                        backStack.add(AppRoutes.ListGuidesScreen(FileInteractionMode.MovingItem))
-                    },
-                    onBackNav = {
-                        backStack.removeLastOrNull()
+                        backStack.add(AppRoutes.ListFoldersScreen(FileInteractionMode.MovingItem))
                     }
                 )
             }

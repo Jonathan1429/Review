@@ -82,8 +82,7 @@ fun ListGuidesRoute(
     onAddGuideClick: () -> Unit,
     onOpenGuideClick: () -> Unit,
     onRenameGuideClick: (GuideUiModel) -> Unit,
-    onMoveGuideClick: () -> Unit,
-    onBackNav: () -> Unit
+    onMoveGuideClick: () -> Unit
 ) {
     val context = LocalContext.current
     var currentInteractionMode by remember(fileInteractionMode) {
@@ -102,7 +101,6 @@ fun ListGuidesRoute(
 
                 is GuideActionEvent.Success -> {
                     showToast(event.text, context)
-                    onBackNav()
                 }
             }
         }
@@ -130,7 +128,6 @@ fun ListGuidesRoute(
                 onItemClick = { posGuide ->
                     when (val result = viewModel.getGuideSelected(state.guides, posGuide)) {
                         GuideResultUi.Error -> {
-                            onBackNav()
                             Toast.makeText(
                                 /* context = */ context,
                                 /* text = */
