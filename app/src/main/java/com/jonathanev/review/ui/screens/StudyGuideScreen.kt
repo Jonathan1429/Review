@@ -156,6 +156,10 @@ fun FillingGuideRoute(
                     showToast(event.text, context)
                     onCloseGuide()
                 }
+
+                CreateGuideEvent.QADeleted -> {
+                    showToast("Se ha eliminado la pregunta y respuesta", context)
+                }
             }
         }
     }

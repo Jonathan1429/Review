@@ -623,6 +623,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             val dontAskQuestion = getDontAskDeleteOnce()
             if (dontAskQuestion) {
                 deleteQuesAns()
+                sendNotification(CreateGuideEvent.QADeleted)
             } else {
                 _uiState.update { state ->
                     state.copy(showDialogDeleteQuestion = true)
@@ -642,6 +643,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         }
 
         deleteQuesAns()
+        sendNotification(CreateGuideEvent.QADeleted)
     }
 
     fun onDismissDialogDeleteQuestion() {
