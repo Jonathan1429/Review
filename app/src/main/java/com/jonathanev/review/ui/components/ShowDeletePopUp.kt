@@ -115,7 +115,10 @@ fun ShowDeletePopUp(
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text(text = stringResource(R.string.btnContinuar))
+                    Text(
+                        text = stringResource(R.string.btnContinuar),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
                 }
             }
         }

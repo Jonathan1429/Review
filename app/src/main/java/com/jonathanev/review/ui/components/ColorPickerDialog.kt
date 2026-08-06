@@ -96,7 +96,7 @@ fun ColorPickerDialogContent(
                 Button(
                     onClick = singleClick { onColorSelected(selectedColor) }
                 ) {
-                    Text("Continuar")
+                    Text(text = "Continuar")
                 }
 
                 OutlinedButton(

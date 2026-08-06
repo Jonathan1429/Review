@@ -6,14 +6,13 @@ import com.jonathanev.review.domain.GetFoldersWithNumGuidesUseCase
 import com.jonathanev.review.domain.InitializeGuideStorageUseCase
 import com.jonathanev.review.domain.NextNavigationUseCase
 import com.jonathanev.review.domain.ResetNavigationUseCase
-import com.jonathanev.review.presentation.event.MainUiEvent
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.state.FoldersUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -41,18 +40,14 @@ class MainActivityViewModel @Inject constructor(
             initialValue = FoldersUiState.Loading
         )
 
-    private val _uiEvent = MutableSharedFlow<MainUiEvent>()
-    val uiEvent = _uiEvent.asSharedFlow()
+    private val _showDialogCreateFoldersError = MutableStateFlow(false)
+    val showDialogCreateFoldersError: StateFlow<Boolean> =
+        _showDialogCreateFoldersError.asStateFlow()
+
     fun createFolders() {
         val isSuccess = initializeGuideStorageUseCase.invoke()
-        if (!isSuccess){
-            emitEvent(MainUiEvent.ShowCreateFoldersError)
-        }
-    }
-
-    private fun emitEvent(event: MainUiEvent) {
-        viewModelScope.launch {
-            _uiEvent.emit(event)
+        if (!isSuccess) {
+            _showDialogCreateFoldersError.value = true
         }
     }
 
@@ -66,6 +61,10 @@ class MainActivityViewModel @Inject constructor(
         viewModelScope.launch {
             nextNavigationUseCase.invoke(folder)
         }
+    }
+
+    fun onDismissErrorDialog() {
+        _showDialogCreateFoldersError.value = false
     }
 
     /*fun checkIfNeedsPermission(hasPermission: Boolean) {
