@@ -25,8 +25,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -108,11 +106,11 @@ fun FillingGuideRoute(
 ) {
     val context = LocalContext.current
     val typeForSelected = listOf(QAType.QUESTION, QAType.ANSWER)
-    var mediaSelected by remember { mutableStateOf(ContentType.TEXT) }
     val mediaForSelected = listOf(ContentType.TEXT, ContentType.IMAGE)
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val cardType = uiState.qAType
+    val mediaSelected = uiState.mediaSelected
     val currentPosContent = uiState.contadorContenido
 
     val totalQuestions = uiState.preguntas.size
@@ -120,7 +118,7 @@ fun FillingGuideRoute(
     val textList by viewModel.textList.collectAsStateWithLifecycle()
     val imageList by viewModel.imageList.collectAsStateWithLifecycle()
 
-    val listTypeMedia = if (mediaSelected == ContentType.TEXT) {
+    val listTypeMedia = if (uiState.mediaSelected == ContentType.TEXT) {
         textList
     } else {
         imageList
@@ -213,7 +211,7 @@ fun FillingGuideRoute(
             viewModel.onCardTypeChanged(cardTypeClicked)
         },
         onFilterTypeClicked = { filterTypeClicked ->
-            mediaSelected = filterTypeClicked
+            viewModel.onFilterTypeChanged(filterTypeClicked = filterTypeClicked)
         },
         onOpenAssetClick = { typeContent, posItem -> onOpenAssetClick(typeContent, posItem) },
         onAddAssetClick = { posItem -> onAddAssetClick(mediaSelected, posItem) },

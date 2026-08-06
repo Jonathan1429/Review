@@ -1,6 +1,7 @@
 package com.jonathanev.review.presentation.state
 
 import com.jonathanev.review.presentation.model.QuestionItemUi
+import com.jonathanev.review.ui.model.ContentType
 import com.jonathanev.review.ui.model.QAType
 
 data class GuideUiState(
@@ -17,6 +18,7 @@ data class GuideUiState(
     val contadorPregunta: Int = 0,
     val contadorContenido: Int = 0,
     val qAType: QAType = QAType.QUESTION,
+    val mediaSelected: ContentType = ContentType.TEXT,
     val fileName: String = "",
     val description: String = "",
     val isEditing: Boolean = false,

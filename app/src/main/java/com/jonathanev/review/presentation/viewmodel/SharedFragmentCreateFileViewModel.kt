@@ -29,6 +29,7 @@ import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.presentation.model.QuestionItemUi
 import com.jonathanev.review.presentation.model.SaveGuideMode
 import com.jonathanev.review.presentation.state.GuideUiState
+import com.jonathanev.review.ui.model.ContentType
 import com.jonathanev.review.ui.screens.toAnnotatedString
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -703,6 +704,14 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             }
         } else {
             nextQuestion()
+        }
+    }
+
+    fun onFilterTypeChanged(filterTypeClicked: ContentType) {
+        _uiState.update { state ->
+            state.copy(
+                mediaSelected = filterTypeClicked
+            )
         }
     }
 
