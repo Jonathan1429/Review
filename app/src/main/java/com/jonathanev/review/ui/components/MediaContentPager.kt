@@ -149,7 +149,7 @@ fun MediaContentPager(
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(top = 56.dp)
+                                .padding(top = 72.dp, start = 20.dp, end = 20.dp, bottom = 20.dp)
                         ) {
                             CustomBoxCreateText(
                                 textValue = textFieldValueWrapper,

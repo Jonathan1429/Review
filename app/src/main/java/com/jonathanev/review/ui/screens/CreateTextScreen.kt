@@ -9,6 +9,7 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -72,24 +73,43 @@ fun CreateTextRoute(
     questionContentMode: QuestionContentMode
 ) {
     val textList by viewModel.textList.collectAsStateWithLifecycle()
-    val item = textList.getOrNull(posItem) ?: QuestionContentUi.Text("", emptyList())
 
-    LaunchedEffect(item) {
+    val item = remember(textList, posItem, questionContentMode) {
+        if (questionContentMode == QuestionContentMode.CREATING) {
+            QuestionContentUi.Text("", emptyList())
+        } else {
+            textList.getOrNull(posItem) ?: QuestionContentUi.Text("", emptyList())
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.clearTextDraft()
+        }
+    }
+
+    // 2. Inicializamos el borrador con el ítem correcto
+    LaunchedEffect(item, questionContentMode) {
         viewModel.initTextDraft(item)
     }
 
     val colorInitial = MaterialTheme.colorScheme.onSurface
     var selectedColor by remember { mutableStateOf(colorInitial) }
     var showDialog by remember { mutableStateOf(false) }
+
     val textValueState by viewModel.draftTextValue.collectAsStateWithLifecycle()
-    val textValue =
-        textValueState ?: TextFieldValue(annotatedString = item.toAnnotatedString())
+
+    // 3. Si textValueState es null (porque DisposableEffect o clearTextDraft lo limpiaron), usa el item
+    val textValue = textValueState ?: remember(item) {
+        TextFieldValue(annotatedString = item.toAnnotatedString())
+    }
 
     LaunchedEffect(Unit) {
         viewModel.updateItemTriger.collect {
             onSaveText()
         }
     }
+
     CreateTextScreen(
         guideMode = guideMode,
         colorInitial = colorInitial,
