@@ -17,13 +17,14 @@ import com.jonathanev.review.presentation.model.GuideMode
 
 @Composable
 fun OptionsCreateImage(
+    modifier: Modifier = Modifier,
     uriImage: String,
     imageUploaded: () -> Unit,
     guideMode: GuideMode,
     onBackNav: () -> Unit
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(16.dp)
     ) {
