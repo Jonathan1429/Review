@@ -218,6 +218,12 @@ fun BasicNavigation() {
                     onMoveGuideClick = {
                         backStack.clear()
                         backStack.add(AppRoutes.ListFoldersScreen(FileInteractionMode.MovingItem))
+                    },
+                    onNavWithoutGuides = {
+                        if (backStack.isNotEmpty()) {
+                            backStack[backStack.lastIndex] =
+                                AppRoutes.WithoutGuidesScreen()
+                        }
                     }
                 )
             }

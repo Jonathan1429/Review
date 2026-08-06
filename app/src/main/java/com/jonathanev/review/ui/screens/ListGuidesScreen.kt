@@ -79,7 +79,8 @@ fun ListGuidesRoute(
     onAddGuideClick: () -> Unit,
     onOpenGuideClick: () -> Unit,
     onRenameGuideClick: (GuideUiModel) -> Unit,
-    onMoveGuideClick: () -> Unit
+    onMoveGuideClick: () -> Unit,
+    onNavWithoutGuides: () -> Unit
 ) {
     val context = LocalContext.current
     var currentInteractionMode by remember(fileInteractionMode) {
@@ -88,6 +89,12 @@ fun ListGuidesRoute(
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val dialogState by viewModel.dialogState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(uiState) {
+        if (uiState is GuidesUiState.Empty) {
+            onNavWithoutGuides()
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.eventsMessages.collect { event ->

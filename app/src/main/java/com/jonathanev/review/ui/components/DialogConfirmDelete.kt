@@ -2,6 +2,7 @@ package com.jonathanev.review.ui.components
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -28,12 +29,12 @@ fun DialogConfirmDelete(
         text = { Text(text = description) },
         confirmButton = {
             TextButton(onClick = singleClick { onDeleteItemClick() }) {
-                Text("Confirmar")
+                Text(text = "Confirmar", color = MaterialTheme.colorScheme.onSurface)
             }
         },
         dismissButton = {
             TextButton(onClick = singleClick { onCloseDialog() }) {
-                Text("Cancelar")
+                Text(text = "Cancelar", color = MaterialTheme.colorScheme.onSurface)
             }
         }
     )

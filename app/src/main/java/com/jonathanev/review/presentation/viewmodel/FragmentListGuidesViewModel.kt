@@ -210,6 +210,7 @@ class FragmentListGuidesViewModel @Inject constructor(
     fun onOpenGuide(guideUIModel: GuideUiModel) {
         onDismissDialog()
         setActiveGuide(guideUIModel)
+        emitMessage(GuideActionEvent.OpenGuide)
     }
 
     fun onRenameGuide(guideUIModel: GuideUiModel) {
@@ -220,5 +221,6 @@ class FragmentListGuidesViewModel @Inject constructor(
     fun onMoveGuide(guideUIModel: GuideUiModel) {
         onDismissDialog()
         setContext(guideUIModel)
+        emitMessage(GuideActionEvent.MoveGuide)
     }
 }
