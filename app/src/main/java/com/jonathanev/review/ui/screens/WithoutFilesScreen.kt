@@ -19,6 +19,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -30,8 +32,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jonathanev.review.R
 import com.jonathanev.review.presentation.model.FileInteractionMode
+import com.jonathanev.review.presentation.state.GuidesUiState
 import com.jonathanev.review.presentation.viewmodel.FragmentWithoutFilesViewModel
 import com.jonathanev.review.ui.components.singleClick
 import com.jonathanev.review.ui.preview.DevicePreviews
@@ -57,9 +61,19 @@ fun WithoutFilesScreenPreview(
 @Composable
 fun WithoutFilesRoute(
     fileInteractionMode: FileInteractionMode,
+    viewModel: FragmentWithoutFilesViewModel,
     onAddGuideClick: () -> Unit,
-    viewModel: FragmentWithoutFilesViewModel
+    onNavListGuides: () -> Unit
 ) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(uiState) {
+        if (uiState is GuidesUiState.Success) {
+            onNavListGuides()
+        }
+    }
+
+    // Renderizamos la pantalla directamente sin reemplazarla por un spinner
     WithoutFilesScreen(
         fileInteractionMode = fileInteractionMode,
         onAddGuideClick = onAddGuideClick,

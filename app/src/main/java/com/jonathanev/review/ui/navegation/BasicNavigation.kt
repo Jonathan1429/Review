@@ -191,6 +191,12 @@ fun BasicNavigation() {
                     fileInteractionMode = value.fileInteractionMode,
                     onAddGuideClick = {
                         backStack.add(AppRoutes.CreateFilesPropertiesScreen(FileFormMode.CreatingFile))
+                    },
+                    onNavListGuides = {
+                        if (backStack.isNotEmpty()) {
+                            backStack[backStack.lastIndex] =
+                                AppRoutes.ListGuidesScreen()
+                        }
                     }
                 )
             }
