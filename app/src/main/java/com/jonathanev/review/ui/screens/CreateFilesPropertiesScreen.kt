@@ -8,7 +8,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -67,6 +66,7 @@ import com.jonathanev.review.ui.components.CardBoxPrevItem
 import com.jonathanev.review.ui.components.CustomTextField
 import com.jonathanev.review.ui.components.IconsForSelect
 import com.jonathanev.review.ui.components.SelectedPickerColor
+import com.jonathanev.review.ui.components.singleClick
 import com.jonathanev.review.ui.model.PropertiesGuide
 import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.CreateFilesScreenDataProvider
@@ -166,10 +166,8 @@ fun CreateFilesPropertiesRoute(
         },
         onNameChange = { viewModel.onNameChange(it) },
         onDescriptionChange = { viewModel.onDescriptionChange(it) },
-        onConfirmDialog = { response ->
-            if (response) {
-                viewModel.validateData()
-            }
+        onConfirmDialog = {
+            viewModel.onConfirmCreateFile(isDarkTheme = isDarkTheme)
         },
         onChangeIcon = { position, icon -> viewModel.changeIconSelected(position, icon) },
         onChangeColor = { color -> viewModel.changeColorSelected(color) },
@@ -185,7 +183,7 @@ fun CreateFilesPropertiesScreen(
     onClickApply: () -> Unit,
     onNameChange: (String) -> Unit,
     onDescriptionChange: (String) -> Unit,
-    onConfirmDialog: (Boolean) -> Unit,
+    onConfirmDialog: () -> Unit,
     onChangeIcon: (Int, IconType) -> Unit,
     onChangeColor: (Int) -> Unit,
     onShowToast: (String) -> Unit,
@@ -193,12 +191,9 @@ fun CreateFilesPropertiesScreen(
 ) {
     if (state.showOverwriteDialogFile) {
         AlertDialog(
-            onDismissRequest = { onConfirmDialog(false) },
+            onDismissRequest = { onDismissDialogs() },
             confirmButton = {
-                TextButton(onClick = {
-                    onConfirmDialog(true)
-                    onDismissDialogs()
-                }) {
+                TextButton(onClick = singleClick { onConfirmDialog() }) {
                     Text(
                         text = "Continuar",
                         color = MaterialTheme.colorScheme.onSurface
@@ -206,10 +201,7 @@ fun CreateFilesPropertiesScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = {
-                    onConfirmDialog(false)
-                    onDismissDialogs()
-                }) {
+                TextButton(onClick = singleClick { onDismissDialogs() }) {
                     Text(
                         text = "Cancelar",
                         color = MaterialTheme.colorScheme.onSurface
@@ -246,7 +238,7 @@ fun CreateFilesPropertiesScreen(
                     .imePadding()
             ) {
                 Button(
-                    onClick = onClickApply,
+                    onClick = singleClick { onClickApply() },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(52.dp),
@@ -415,7 +407,7 @@ fun CollapsibleCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { onToggle() },
+                    .singleClick(onClick = { onToggle() }),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {

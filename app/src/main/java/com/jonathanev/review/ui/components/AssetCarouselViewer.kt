@@ -143,7 +143,7 @@ private fun DeleteAsset(mediaForSelected: ContentType, onDeleteItemClick: () -> 
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .padding(end = 8.dp)
-                .clickable(onClick = onDeleteItemClick),
+                .clickable(onClick = singleClick { onDeleteItemClick() }),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {

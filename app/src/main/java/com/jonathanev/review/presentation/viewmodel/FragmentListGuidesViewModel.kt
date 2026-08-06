@@ -195,7 +195,7 @@ class FragmentListGuidesViewModel @Inject constructor(
             val response = deleteGuideUseCase.invoke(guideDomainModel)
             when (response) {
                 DeleteGuideResult.DeleteSuccess -> {
-                    emitMessage(GuideActionEvent.Success("Guia borrada exitosamente"))
+                    emitMessage(GuideActionEvent.GuideDeleteSuccess)
                 }
 
                 DeleteGuideResult.ErrorGuide -> emitMessage(GuideActionEvent.ShowMessage("Hubo un error al borrar la guia"))
@@ -205,5 +205,20 @@ class FragmentListGuidesViewModel @Inject constructor(
                 else -> emitMessage(GuideActionEvent.ShowMessage("Ocurrió un error al eliminar la guia"))
             }
         }
+    }
+
+    fun onOpenGuide(guideUIModel: GuideUiModel) {
+        onDismissDialog()
+        setActiveGuide(guideUIModel)
+    }
+
+    fun onRenameGuide(guideUIModel: GuideUiModel) {
+        onDismissDialog()
+        emitMessage(GuideActionEvent.RenameGuide(guideUIModel))
+    }
+
+    fun onMoveGuide(guideUIModel: GuideUiModel) {
+        onDismissDialog()
+        setContext(guideUIModel)
     }
 }

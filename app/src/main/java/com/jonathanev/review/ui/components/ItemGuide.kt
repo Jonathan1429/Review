@@ -1,6 +1,5 @@
 package com.jonathanev.review.ui.components
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -52,14 +51,14 @@ fun ItemGuide(
         ),
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() }
+            .singleClick(onClick = { onClick() })
             .padding(4.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(ShapeDefaults.ExtraLarge)
-                .clickable(onClick = onClick)
+                .singleClick(onClick = { onClick() })
                 .padding(vertical = 14.dp, horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {

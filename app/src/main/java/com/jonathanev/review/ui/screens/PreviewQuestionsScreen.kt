@@ -26,6 +26,7 @@ import com.jonathanev.review.presentation.model.ActiveGuideUIState
 import com.jonathanev.review.presentation.state.PreviewQuestionStateUi
 import com.jonathanev.review.presentation.viewmodel.PreviewViewModel
 import com.jonathanev.review.ui.components.QuestionCard
+import com.jonathanev.review.ui.components.singleClick
 import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.PreviewQuestionsProvider
 import com.jonathanev.review.ui.theme.HardColorButton
@@ -99,7 +100,7 @@ fun PreviewQuestionsScreen(
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
-                onClick = onCreateQuestionClick,
+                onClick = singleClick { onCreateQuestionClick() },
                 containerColor = HardColorButton
             ) {
                 Icon(

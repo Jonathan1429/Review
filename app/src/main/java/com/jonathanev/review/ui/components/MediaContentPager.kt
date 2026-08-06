@@ -3,7 +3,6 @@ package com.jonathanev.review.ui.components
 import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -182,7 +181,7 @@ fun MediaContentPager(
                             tint = Color.White,
                             modifier = Modifier
                                 .size(16.dp)
-                                .clickable(onClick = {
+                                .singleClick(onClick = {
                                     val typeContent =
                                         when (val asset = assets[pagerState.currentPage]) {
                                             is QuestionContentUi.Image -> {

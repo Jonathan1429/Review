@@ -100,7 +100,7 @@ fun CreateTextRoute(
             viewModel.addTextContent(textWithLabels = text, listSpans = colors, questionContentMode)
         },
         onClearColorClick = {
-            viewModel.onDraftTextChange(newValue = TextFieldValue(textValue.text))
+            viewModel.clearTextDraft()
         },
         onSelectColorClick = { showDialog = true },
         onChangeTextValue = { textFieldValue ->
@@ -111,6 +111,7 @@ fun CreateTextRoute(
         },
         onColorSelected = { actualColor ->
             selectedColor = actualColor
+            showDialog = false
         },
         onBackNav = onBackNav
     )

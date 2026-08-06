@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.jonathanev.review.R
 import com.jonathanev.review.ui.components.BasePasos
 import com.jonathanev.review.ui.components.SinFolders
+import com.jonathanev.review.ui.components.singleClick
 import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.theme.HardColorButton
 import com.jonathanev.review.ui.theme.ReviewTheme
@@ -42,7 +43,7 @@ fun WithoutFoldersScreen(
         contentWindowInsets = androidx.compose.foundation.layout.WindowInsets.safeDrawing,
         floatingActionButton = {
             FloatingActionButton(
-                onClick = onNavCreateFilesProperties,
+                onClick = singleClick { onNavCreateFilesProperties() },
                 containerColor = HardColorButton
             ) {
                 Icon(

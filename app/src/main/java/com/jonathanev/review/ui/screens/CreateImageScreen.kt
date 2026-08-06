@@ -34,6 +34,7 @@ import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.ui.components.CustomBoxCreateImage
 import com.jonathanev.review.ui.components.OptionsCreateImage
+import com.jonathanev.review.ui.components.singleClick
 import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.CreateImageContentProv
 import com.jonathanev.review.ui.preview.providers.CreateImageContentProvider
@@ -103,7 +104,7 @@ fun CreateImageScreen(
         floatingActionButton = {
             if (guideMode !is GuideMode.Review) {
                 FloatingActionButton(
-                    onClick = selectedImage,
+                    onClick = singleClick { selectedImage() },
                     containerColor = HardColorButton
                 ) {
                     Icon(

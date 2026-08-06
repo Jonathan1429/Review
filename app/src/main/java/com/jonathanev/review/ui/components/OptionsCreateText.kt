@@ -62,7 +62,7 @@ fun OptionsCreateText(
     ) {
         if (guideMode !is GuideMode.Review) {
             IconButton(
-                onClick = onClearColorClick,
+                onClick = singleClick { onClearColorClick() },
                 modifier = Modifier
                     .padding(end = 10.dp)
                     .size(34.dp)
@@ -75,7 +75,7 @@ fun OptionsCreateText(
             }
 
             IconButton(
-                onClick = onSelectColorClick,
+                onClick = singleClick { onSelectColorClick() },
                 modifier = Modifier
                     .padding(end = 10.dp)
                     .size(34.dp)
@@ -100,7 +100,7 @@ fun OptionsCreateText(
         Spacer(modifier = Modifier.weight(1f))
 
         IconButton(
-            onClick = {
+            onClick = singleClick {
                 if (guideMode is GuideMode.Review) {
                     onBackNav()
                 } else {

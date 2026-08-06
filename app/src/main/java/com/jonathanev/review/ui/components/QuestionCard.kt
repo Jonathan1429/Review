@@ -101,7 +101,7 @@ fun QuestionCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(
-                        onClick = { onEditingGuideClick() },
+                        onClick = singleClick { onEditingGuideClick() },
                         modifier = Modifier
                             .size(40.dp)
                             .border(1.5.dp, HardColorButton.copy(alpha = 0.6f), CircleShape),
@@ -118,7 +118,7 @@ fun QuestionCard(
                     }
 
                     IconButton(
-                        onClick = onPlayGuideClick,
+                        onClick = singleClick { onPlayGuideClick() },
                         colors = IconButtonDefaults.iconButtonColors(
                             containerColor = HardColorButton.copy(
                                 alpha = 0.6f

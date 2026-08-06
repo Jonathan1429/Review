@@ -20,7 +20,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jonathanev.review.R
 import com.jonathanev.review.databinding.FragmentListGuidesBinding
-import com.jonathanev.review.presentation.event.GuideActionEvent
 import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.presentation.viewmodel.FragmentListGuidesViewModel
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
@@ -142,12 +141,12 @@ class FragmentListGuides : Fragment() {
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.eventsMessages.collect { event ->
-                    when (event) {
+                    /*when (event) {
                         is GuideActionEvent.ShowMessage -> {
                             showToast(event.text)
                         }
 
-                        is GuideActionEvent.Success -> {
+                        is GuideActionEvent.GuideDeleteSuccess -> {
                             navStateViewModel.setMainPath()
                             showToast(event.text)
 
@@ -159,7 +158,7 @@ class FragmentListGuides : Fragment() {
                                     .build()
                             )
                         }
-                    }
+                    }*/
                 }
             }
         }

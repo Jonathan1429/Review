@@ -28,7 +28,7 @@ fun OptionsCreateImage(
             .padding(16.dp)
     ) {
         IconButton(
-            onClick = {
+            onClick = singleClick {
                 if (guideMode is GuideMode.Review) {
                     onBackNav()
                 } else {

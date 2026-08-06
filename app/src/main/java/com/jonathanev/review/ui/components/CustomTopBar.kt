@@ -68,7 +68,7 @@ fun CustomTopBar(
             Box(
                 modifier = Modifier
                     .padding(10.dp)
-                    .clickable(onClick = onDeleteQuestionClick),
+                    .clickable(onClick = singleClick { onDeleteQuestionClick() }),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(

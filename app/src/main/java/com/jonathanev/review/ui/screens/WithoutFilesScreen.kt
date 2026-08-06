@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import com.jonathanev.review.R
 import com.jonathanev.review.presentation.model.FileInteractionMode
 import com.jonathanev.review.presentation.viewmodel.FragmentWithoutFilesViewModel
+import com.jonathanev.review.ui.components.singleClick
 import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.WithoutFilesScreenProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
@@ -89,7 +90,7 @@ fun WithoutFilesScreen(
                         Text(stringResource(R.string.lblMoving))
                     },
                     navigationIcon = {
-                        IconButton(onClick = onMoveCancelGuideClick) {
+                        IconButton(onClick = singleClick { onMoveCancelGuideClick() }) {
                             Icon(
                                 painterResource(R.drawable.ic_cancel),
                                 contentDescription = "Cancelar"
@@ -97,7 +98,7 @@ fun WithoutFilesScreen(
                         }
                     },
                     actions = {
-                        IconButton(onClick = onMoveSuccessGuideClick) {
+                        IconButton(onClick = singleClick { onMoveSuccessGuideClick() }) {
                             Icon(
                                 painterResource(R.drawable.ic_success),
                                 contentDescription = "Aceptar"
@@ -109,7 +110,7 @@ fun WithoutFilesScreen(
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                onClick = onAddGuideClick,
+                onClick = singleClick { onAddGuideClick() },
                 containerColor = MaterialTheme.colorScheme.primary,
                 shape = RoundedCornerShape(16.dp),
                 icon = {

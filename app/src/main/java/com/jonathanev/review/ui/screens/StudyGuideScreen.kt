@@ -52,6 +52,7 @@ import com.jonathanev.review.ui.components.CustomTopBar
 import com.jonathanev.review.ui.components.FilterTypeItem
 import com.jonathanev.review.ui.components.QASelectType
 import com.jonathanev.review.ui.components.ShowDeletePopUp
+import com.jonathanev.review.ui.components.singleClick
 import com.jonathanev.review.ui.model.ContentType
 import com.jonathanev.review.ui.model.QAType
 import com.jonathanev.review.ui.preview.DevicePreviews
@@ -386,7 +387,7 @@ private fun FloatingActionButtons(
     ) {
         if (guideMode !is GuideMode.Review) {
             FloatingActionButton(
-                onClick = onAddQuestion,
+                onClick = singleClick { onAddQuestion() },
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 shape = CircleShape,
@@ -407,7 +408,7 @@ private fun FloatingActionButtons(
             else
                 stringResource(R.string.lblCloseGuide)
         ExtendedFloatingActionButton(
-            onClick = onCloseGuide,
+            onClick = singleClick { onCloseGuide() },
             containerColor = MaterialTheme.colorScheme.primary,
             shape = RoundedCornerShape(16.dp),
             icon = {

@@ -34,7 +34,6 @@ fun PreviewColorPickerDialog() {
             controller = controller,
             colorInitial = MaterialTheme.colorScheme.onSurface,
             selectedColor = MaterialTheme.colorScheme.onSurface,
-            onDismissRequest = {},
             onColorSelected = {},
             onDefaultClick = {}
         )
@@ -57,7 +56,6 @@ fun ColorPickerDialog(
             colorInitial,
             onColorSelected,
             selectedColor,
-            onDismissRequest,
             onDefaultClick
         )
     }
@@ -69,7 +67,6 @@ fun ColorPickerDialogContent(
     colorInitial: Color,
     onColorSelected: (Color) -> Unit,
     selectedColor: Color,
-    onDismissRequest: () -> Unit,
     onDefaultClick: () -> Unit
 ) {
     Card(
@@ -97,19 +94,13 @@ fun ColorPickerDialogContent(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Button(
-                    onClick = {
-                        onColorSelected(selectedColor)
-                        onDismissRequest()
-                    }
+                    onClick = singleClick { onColorSelected(selectedColor) }
                 ) {
                     Text("Continuar")
                 }
 
                 OutlinedButton(
-                    onClick = {
-                        onDefaultClick()
-                        onDismissRequest()
-                    }
+                    onClick = singleClick { onDefaultClick() }
                 ) {
                     Text(
                         text = "Default",

@@ -1,6 +1,5 @@
 package com.jonathanev.review.ui.components
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -44,16 +43,14 @@ fun <T> DialogOptionsMenu(
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { onOptionSelected(option) }
+                            .singleClick(onClick = { onOptionSelected(option) })
                             .padding(vertical = 14.dp, horizontal = 16.dp)
                     )
                 }
             }
         },
         confirmButton = {
-            TextButton(onClick = {
-                onCloseDialog()
-            }) {
+            TextButton(onClick = singleClick { onCloseDialog() }) {
                 Text("Cancelar")
             }
         }

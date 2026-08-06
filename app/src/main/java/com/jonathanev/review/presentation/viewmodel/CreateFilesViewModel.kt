@@ -330,7 +330,6 @@ class CreateFilesViewModel @Inject constructor(
 
     fun processSaveRequest(isDarkTheme: Boolean) {
         viewModelScope.launch {
-            dismissOverwriteDialog()
             val dataUniqueScreen = dataUniqueScreen()
 
             if (dataUniqueScreen) {
@@ -408,6 +407,13 @@ class CreateFilesViewModel @Inject constructor(
                 showOverwriteDialogFile = false,
                 showOverwriteDialogFolder = false
             )
+        }
+    }
+
+    fun onConfirmCreateFile(isDarkTheme: Boolean) {
+        viewModelScope.launch {
+            dismissOverwriteDialog()
+            proceedWithSave(isDarkTheme)
         }
     }
 }

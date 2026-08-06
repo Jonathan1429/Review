@@ -2,7 +2,6 @@ package com.jonathanev.review.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -103,7 +102,7 @@ fun StepNavigationCarousel(
                     .size(50.dp)
                     .clip(RoundedCornerShape(16.dp))
                     .background(MaterialTheme.colorScheme.primary)
-                    .clickable(onClick = { onAddAssetClick(pagerState.currentPage) }),
+                    .singleClick(onClick = { onAddAssetClick(pagerState.currentPage) }),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -150,15 +149,12 @@ fun StepNavigationCarousel(
                         )
                         .clip(RoundedCornerShape(12.dp))
                         .background(cardStepBackground)
-                        .clickable {
-                            scope.launch { pagerState.animateScrollToPage(index) }
-                        },
+                        .singleClick(onClick = { scope.launch { pagerState.animateScrollToPage(index) } }),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = "${index + 1}",
                         color = MaterialTheme.colorScheme.onSurface,
-                        //color = Color.Red,
                         fontSize = 15.sp
                     )
                 }

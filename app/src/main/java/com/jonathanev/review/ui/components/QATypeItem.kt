@@ -3,7 +3,6 @@ package com.jonathanev.review.ui.components
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -46,11 +45,7 @@ fun PreviewQATypeItem(
 fun RowScope.QATypeItem(qaTypeItem: QAType, cardType: QAType, onCardTypeClicked: (QAType) -> Unit) {
     Box(
         modifier = Modifier
-            .clickable(
-                onClick = {
-                    onCardTypeClicked(qaTypeItem)
-                }
-            )
+            .singleClick(onClick = { onCardTypeClicked(qaTypeItem) })
             .weight(1f)
             .height(56.dp)
             .then(

@@ -27,14 +27,12 @@ fun DialogConfirmDelete(
         },
         text = { Text(text = description) },
         confirmButton = {
-            TextButton(onClick = {
-                onDeleteItemClick()
-            }) {
+            TextButton(onClick = singleClick { onDeleteItemClick() }) {
                 Text("Confirmar")
             }
         },
         dismissButton = {
-            TextButton(onClick = onCloseDialog) {
+            TextButton(onClick = singleClick { onCloseDialog() }) {
                 Text("Cancelar")
             }
         }

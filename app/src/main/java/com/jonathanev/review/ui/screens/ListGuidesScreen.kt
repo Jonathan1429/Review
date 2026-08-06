@@ -8,16 +8,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,10 +29,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -51,10 +48,10 @@ import com.jonathanev.review.presentation.viewmodel.FragmentListGuidesViewModel
 import com.jonathanev.review.ui.components.DialogConfirmDelete
 import com.jonathanev.review.ui.components.DialogOptionsMenu
 import com.jonathanev.review.ui.components.ItemGuide
+import com.jonathanev.review.ui.components.singleClick
 import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.StudyGuidesProv
 import com.jonathanev.review.ui.preview.providers.StudyGuidesProvider
-import com.jonathanev.review.ui.theme.HardColorButton
 import com.jonathanev.review.ui.theme.ReviewTheme
 
 @DevicePreviews
@@ -99,8 +96,20 @@ fun ListGuidesRoute(
                     showToast(event.text, context)
                 }
 
-                is GuideActionEvent.Success -> {
-                    showToast(event.text, context)
+                is GuideActionEvent.GuideDeleteSuccess -> {
+                    showToast("Guia borrada exitosamente", context)
+                }
+
+                GuideActionEvent.OpenGuide -> {
+                    onOpenGuideClick()
+                }
+
+                is GuideActionEvent.RenameGuide -> {
+                    onRenameGuideClick(event.guideUiModel)
+                }
+
+                GuideActionEvent.MoveGuide -> {
+                    onMoveGuideClick()
                 }
             }
         }
@@ -181,18 +190,15 @@ fun ListGuidesRoute(
                         onOptionSelected = { option ->
                             when (option) {
                                 GuideMenuOption.OPEN -> {
-                                    viewModel.setActiveGuide(state.item)
-                                    onOpenGuideClick()
+                                    viewModel.onOpenGuide(guideUIModel = state.item)
                                 }
 
                                 GuideMenuOption.RENAME -> {
-                                    viewModel.onDismissDialog()
-                                    onRenameGuideClick(state.item)
+                                    viewModel.onRenameGuide(guideUIModel = state.item)
                                 }
 
                                 GuideMenuOption.MOVE -> {
-                                    viewModel.setContext(state.item)
-                                    onMoveGuideClick()
+                                    viewModel.onMoveGuide(guideUIModel = state.item)
                                 }
 
                                 GuideMenuOption.DELETE -> {
@@ -234,7 +240,7 @@ fun ListGuidesScreen(
                         Text(stringResource(R.string.lblMoving))
                     },
                     navigationIcon = {
-                        IconButton(onClick = onMoveCancelGuideClick) {
+                        IconButton(onClick = singleClick { onMoveCancelGuideClick() }) {
                             Icon(
                                 painterResource(R.drawable.ic_cancel),
                                 contentDescription = "Cancelar"
@@ -242,7 +248,7 @@ fun ListGuidesScreen(
                         }
                     },
                     actions = {
-                        IconButton(onClick = onMoveSuccessGuideClick) {
+                        IconButton(onClick = singleClick { onMoveSuccessGuideClick() }) {
                             Icon(
                                 painterResource(R.drawable.ic_success),
                                 contentDescription = "Aceptar"
@@ -253,22 +259,25 @@ fun ListGuidesScreen(
             }
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = onAddGuideClick,
-                containerColor = HardColorButton,
-                contentColor = Color.White,
-                shape = CircleShape,
-                modifier = Modifier
-                    //.align(Alignment.BottomEnd)
-                    .padding(end = 24.dp, bottom = 32.dp)
-                    .size(56.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Agregar Guía de Estudio",
-                    modifier = Modifier.size(28.dp)
-                )
-            }
+            ExtendedFloatingActionButton(
+                onClick = singleClick { onAddGuideClick() },
+                containerColor = MaterialTheme.colorScheme.primary,
+                shape = RoundedCornerShape(16.dp),
+                icon = {
+                    Icon(
+                        painter = painterResource(R.drawable.plus),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
+                },
+                text = {
+                    Text(
+                        stringResource(R.string.btnAddGuide),
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+            )
         }
     ) { padding ->
         Box(
