@@ -131,9 +131,48 @@ fun MediaContentPager(
                 )
             }
         } else {
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxSize()
+            ) { page ->
+                when (val currentAsset = assets[page]) {
+                    is QuestionContentUi.Image -> {
+                        CustomBoxCreateImage(
+                            modifier = Modifier.fillMaxSize(),
+                            uriImage = currentAsset.uri
+                        )
+                    }
+
+                    is QuestionContentUi.Text -> {
+                        val textFieldValueWrapper = TextFieldValue(text = currentAsset.text)
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(top = 56.dp)
+                        ) {
+                            CustomBoxCreateText(
+                                textValue = textFieldValueWrapper,
+                                hint = false,
+                                onTextValueChange = {}
+                            )
+                        }
+                    }
+
+                    QuestionContentUi.None -> {
+                        EmptyStateView(
+                            icon = painterResource(R.drawable.ic_empty_notes),
+                            title = "Sin contenido",
+                            subtitle = "No se pudo cargar el contenido para mostrar"
+                        )
+                    }
+                }
+            }
+
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxWidth()
+                    .align(Alignment.TopCenter)
                     .padding(16.dp)
             ) {
                 if (assets.size > 1) {
@@ -151,7 +190,7 @@ fun MediaContentPager(
                                     .clip(CircleShape)
                                     .background(
                                         if (index == pagerState.currentPage) MaterialTheme.colorScheme.primary
-                                        else MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                                        else MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
                                     )
                             )
                         }
@@ -159,13 +198,12 @@ fun MediaContentPager(
                 }
 
                 val painter =
-                    if (guideMode !is GuideMode.Review)
-                        R.drawable.ic_edit
-                    else
-                        R.drawable.ic_eye
+                    if (guideMode !is GuideMode.Review) R.drawable.ic_edit else R.drawable.ic_eye
+
                 Box(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth()
                 ) {
+                    // Botón Editar/Ver
                     Box(
                         modifier = Modifier
                             .background(
@@ -218,39 +256,6 @@ fun MediaContentPager(
                             color = Color.White,
                             fontSize = 12.sp
                         )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                HorizontalPager(
-                    state = pagerState,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                ) { page ->
-                    when (val currentAsset = assets[page]) {
-                        is QuestionContentUi.Image -> {
-                            CustomBoxCreateImage(uriImage = currentAsset.uri)
-                        }
-
-                        is QuestionContentUi.Text -> {
-                            val textFieldValueWrapper = TextFieldValue(text = currentAsset.text)
-
-                            CustomBoxCreateText(
-                                textValue = textFieldValueWrapper,
-                                hint = false,
-                                onTextValueChange = {}
-                            )
-                        }
-
-                        QuestionContentUi.None -> {
-                            EmptyStateView(
-                                icon = painterResource(R.drawable.ic_empty_notes),
-                                title = "Sin contenido",
-                                subtitle = "No se pudo cargar el contenido para mostrar"
-                            )
-                        }
                     }
                 }
             }
