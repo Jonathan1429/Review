@@ -75,13 +75,13 @@ fun BasicNavigation() {
         }
     }
 
-    /*backStack.forEachIndexed { index, key ->
+    backStack.forEachIndexed { index, key ->
         //Log.i("BACKSTACK", "[$index]: $key")
         println("BACKSTACK [$index]: $key")
     }
 
     //Log.i("BACKSTACK", "========================================")
-    println("BACKSTACK: ========================================")*/
+    println("BACKSTACK: ========================================")
 
     NavDisplay(
         backStack = backStack,
