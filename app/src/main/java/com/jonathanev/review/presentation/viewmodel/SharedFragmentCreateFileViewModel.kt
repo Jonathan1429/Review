@@ -69,10 +69,11 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         .map { state ->
             val currentSource =
                 if (state.qAType == QATypeUI.QUESTION) state.preguntas else state.respuestas
-            currentSource.getOrNull(state.contadorPregunta)
-                ?.content
-                ?.filterIsInstance<QuestionContentUi.Image>()
-                ?: emptyList()
+            val itemActual = currentSource.getOrNull(state.contadorPregunta)
+            val contenidosImagenes =
+                itemActual?.content?.filterIsInstance<QuestionContentUi.Image>() ?: emptyList()
+
+            contenidosImagenes
         }
         .stateIn(
             scope = viewModelScope,
@@ -184,7 +185,6 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 }
                 val isQuestion = state.qAType == QATypeUI.QUESTION
                 val sourceListUi = if (isQuestion) state.preguntas else state.respuestas
-
                 val currentQuestionUi = sourceListUi.getOrNull(state.contadorPregunta)
 
                 // Agregar una pregunta + contenido
@@ -218,7 +218,45 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         }
     }
 
-    fun addImageContent(questionContentMode: QuestionContentMode) {
+    fun addImageContent(uri: String, questionContentMode: QuestionContentMode) {
+        val newContent = QuestionContentUi.Image(uri = uri, nameFile = "")
+
+        _uiState.update { state ->
+            val currentPosContent = when (questionContentMode) {
+                QuestionContentMode.CREATING -> state.contadorContenido + 1
+                QuestionContentMode.EDITING -> state.contadorContenido
+            }
+            val isQuestion = state.qAType == QATypeUI.QUESTION
+            val sourceListUi = if (isQuestion) state.preguntas else state.respuestas
+            val currentQuestionUi = sourceListUi.getOrNull(state.contadorPregunta)
+
+            // Agregar una pregunta + contenido
+            val updatedList: List<QuestionItemUi> = if (currentQuestionUi == null) {
+                sourceListUi + QuestionItemUi(content = listOf(newContent))
+            } else { // Agregar o editar contenido
+                val sourceListDomain = sourceListUi.map { it.toDomain() }
+
+                val updatedDomainList = setContentUseCase.invoke(
+                    newContent = newContent.toDomain(),
+                    sourceList = sourceListDomain,
+                    contadorPregunta = state.contadorPregunta,
+                    contadorContenido = currentPosContent,
+                    isEditingMode = questionContentMode == QuestionContentMode.EDITING,
+                    filterType = QuestionContentDomain.Image::class.java
+                )
+
+                updatedDomainList.map { it.toUi() }
+            }
+
+            state.copy(
+                preguntas = if (isQuestion) updatedList else state.preguntas,
+                respuestas = if (!isQuestion) updatedList else state.respuestas,
+                contadorContenido = currentPosContent
+            )
+        }
+    }
+
+    /*fun addImageContents(questionContentMode: QuestionContentMode) {
         _uiState.update { state ->
             val currentPosContent =
                 if (questionContentMode == QuestionContentMode.CREATING) {
@@ -226,7 +264,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 } else {
                     uiState.value.contadorContenido
                 }
-            val uriAAgregar = state.actualUri ?: return@update state
+            //val uriAAgregar = state.actualUri ?: return@update state
 
             val isQuestion = state.qAType == QATypeUI.QUESTION
             val sourceListUi = if (isQuestion) state.preguntas else state.respuestas
@@ -255,17 +293,17 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             state.copy(
                 preguntas = if (isQuestion) updatedList else state.preguntas,
                 respuestas = if (!isQuestion) updatedList else state.respuestas,
-                actualUri = null,
+                //actualUri = null,
                 contadorContenido = currentPosContent
             )
         }
-    }
+    }*/
 
-    fun setActualUri(uri: String) {
+    /*fun setActualUri(uri: String) {
         _uiState.update {
             it.copy(actualUri = uri)
         }
-    }
+    }*/
 
     fun deleteImage(position: Int) {
         _uiState.update { currentState ->
@@ -285,7 +323,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             currentState.copy(
                 preguntas = if (isQuestion) updatedListToUi else currentState.preguntas,
                 respuestas = if (!isQuestion) updatedListToUi else currentState.respuestas,
-                actualUri = null,         // resetContentLists integrado
+                //actualUri = null,         // resetContentLists integrado
                 isEditing = false,
                 contadorContenido = 0
                 //contadorContenido = -1
@@ -313,7 +351,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             currentState.copy(
                 preguntas = if (isQuestion) updatedListToUi else currentState.preguntas,
                 respuestas = if (!isQuestion) updatedListToUi else currentState.respuestas,
-                actualUri = null, // resetContentLists integrado
+                //actualUri = null, // resetContentLists integrado
                 isEditing = false,
                 contadorContenido = 0
                 //contadorContenido = -1
@@ -593,7 +631,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 contadorPregunta = newIndex,
                 contadorContenido = 0,
                 isEditing = false,
-                actualUri = null
+                //actualUri = null
             )
         }
     }

@@ -20,7 +20,6 @@ data class GuideUiState(
     val fileName: String = "",
     val description: String = "",
     val isEditing: Boolean = false,
-    val actualUri: String? = null,
     val isLastQuestion: Boolean? = false,
     val showDialogDeleteQuestion: Boolean = false,
     val showDialogRepeatGuide: Boolean = false

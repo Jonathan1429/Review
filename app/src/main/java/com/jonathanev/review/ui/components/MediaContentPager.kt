@@ -89,7 +89,7 @@ fun MediaContentPager(
     assets: List<QuestionContentUi>,
     mediaForSelected: ContentType,
     guideMode: GuideMode,
-    onOpenAssetClick: (QuestionContentUi, posItem: Int) -> Unit,
+    onOpenAssetClick: (typeContent: QuestionContentUi, posItem: Int) -> Unit,
     onCurrentPosContent: (Int) -> Unit
 ) {
     val resourceSelected =
@@ -231,7 +231,7 @@ fun MediaContentPager(
                 ) { page ->
                     when (val currentAsset = assets[page]) {
                         is QuestionContentUi.Image -> {
-                            CustomBoxCreateImage(uriImage = currentAsset.nameFile)
+                            CustomBoxCreateImage(uriImage = currentAsset.uri)
                         }
 
                         is QuestionContentUi.Text -> {

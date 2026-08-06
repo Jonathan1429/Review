@@ -321,9 +321,6 @@ fun BasicNavigation() {
                     guideMode = values.guideMode,
                     posItem = values.posItem,
                     viewModel = viewModelSharedCreateFile,
-                    imageUploaded = {
-                        backStack.removeLastOrNull()
-                    },
                     onBackNav = {
                         backStack.removeLastOrNull()
                     }
