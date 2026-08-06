@@ -12,7 +12,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jonathanev.review.presentation.state.FoldersUiState
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
-import com.jonathanev.review.ui.components.ShowCreateFoldersPopUp
+import com.jonathanev.review.ui.components.CreateFoldersPopUpContent
 
 @Composable
 fun MainActivityEntryRoute(
@@ -29,7 +29,7 @@ fun MainActivityEntryRoute(
             Box(
                 Modifier.fillMaxSize()
             ) {
-                ShowCreateFoldersPopUp(
+                CreateFoldersPopUpContent(
                     modifier = Modifier.align(Alignment.Center),
                     onRetryRequest = {
                         viewModel.createFolders()
