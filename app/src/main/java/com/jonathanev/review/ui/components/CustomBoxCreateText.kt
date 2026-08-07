@@ -19,6 +19,7 @@ fun CustomBoxCreateText(
     modifier: Modifier = Modifier,
     textValue: TextFieldValue,
     hint: Boolean,
+    enabled: Boolean = false,
     onTextValueChange: (TextFieldValue) -> Unit
 ) {
     val hint = if (hint) stringResource(R.string.lblCuestionario) else ""
@@ -31,6 +32,7 @@ fun CustomBoxCreateText(
             value = textValue,
             onValueChange = onTextValueChange,
             modifier = Modifier.fillMaxSize(),
+            enabled = enabled,
             textStyle = TextStyle(
                 fontSize = 18.sp,
                 color = MaterialTheme.colorScheme.onSurface

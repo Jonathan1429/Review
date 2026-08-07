@@ -192,6 +192,7 @@ fun CreateTextScreen(
                     modifier = Modifier.padding(20.dp),
                     textValue = textValue,
                     hint = textValue.text.isNotEmpty(),
+                    enabled = true,
                     onTextValueChange = { actualText ->
                         val oldText = textValue.text
                         val newText = actualText.text
