@@ -135,6 +135,8 @@ class CreateFilesViewModel @Inject constructor(
     fun fillFields(fileName: String, description: String) {
         _uiStateComposable.update { currentState ->
             currentState.copy(
+                name = fileName,
+                description = description,
                 oldName = fileName,
                 oldDescription = description
             )

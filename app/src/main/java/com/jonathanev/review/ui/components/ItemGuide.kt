@@ -82,7 +82,7 @@ fun ItemGuide(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = guide.description,
+                    text = guide.displayDescription,
                     color = getColorSubtitle(),
                     fontSize = 13.sp,
                     lineHeight = 18.sp
