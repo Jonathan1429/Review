@@ -10,6 +10,7 @@ class GetGuideXmlDataUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(context: GuideContext): GetGuideResult {
         return when(context){
+            is GuideContext.Creating -> GetGuideResult.Success(context.guide, emptyList())
             is GuideContext.Browsing -> guiaRepository.getXMLGuide(context.guide)
             is GuideContext.Editing -> guiaRepository.getXMLGuide(context.guide)
             is GuideContext.Moving -> guiaRepository.getXMLGuide(context.guide)

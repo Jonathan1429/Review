@@ -90,6 +90,8 @@ fun ListGuidesRoute(
     }
 
     LaunchedEffect(Unit) {
+        viewModel.clearActiveGuide()
+
         viewModel.eventsMessages.collect { event ->
             when (event) {
                 is GuideActionEvent.ShowMessage -> {

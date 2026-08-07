@@ -4,10 +4,10 @@ import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.repository.GuideContextRepository
 import javax.inject.Inject
 
-class SetContextMoveUseCase @Inject constructor(
+class SetContextCreateUseCase @Inject constructor(
     private val guideContextRepository: GuideContextRepository
 ) {
-    suspend operator fun invoke(contextMoving: GuideContext.Moving) {
-        guideContextRepository.start(contextMoving)
+    suspend operator fun invoke(contextCreate: GuideContext.Creating) {
+        guideContextRepository.start(contextCreate)
     }
 }

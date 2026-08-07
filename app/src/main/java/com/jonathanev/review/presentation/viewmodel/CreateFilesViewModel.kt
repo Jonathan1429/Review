@@ -14,7 +14,10 @@ import com.jonathanev.review.domain.NextNavigationUseCase
 import com.jonathanev.review.domain.RenameGuideUseCase
 import com.jonathanev.review.domain.ResetNavigationUseCase
 import com.jonathanev.review.domain.SaveMetadataUseCase
+import com.jonathanev.review.domain.SetActiveGuideUseCase
+import com.jonathanev.review.domain.SetContextCreateUseCase
 import com.jonathanev.review.domain.ValidateCreateFileUseCase
+import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.result.DeleteGuideResult
@@ -55,7 +58,9 @@ class CreateFilesViewModel @Inject constructor(
     private val getVersionGuideUseCase: GetVersionGuideUseCase,
     private val createFolderUseCase: CreateFolderUseCase,
     private val resetNavigationUseCase: ResetNavigationUseCase,
-    private val nextNavigationUseCase: NextNavigationUseCase
+    private val nextNavigationUseCase: NextNavigationUseCase,
+    private val setActiveGuideUseCase: SetActiveGuideUseCase,
+    private val setContextCreateUseCase: SetContextCreateUseCase
 ) : ViewModel() {
     //private var cachedGuides: List<GuideDomainModel> = emptyList()
 
@@ -358,7 +363,13 @@ class CreateFilesViewModel @Inject constructor(
         )
 
         when (currentMode) {
-            FileFormMode.CreatingFile -> emitEvent(CreateFile)
+            FileFormMode.CreatingFile -> {
+                val guideDomainModel =
+                    GuideDomainModel(GuideVersion.V2, state.name, state.description)
+                setActiveGuideUseCase.invoke(guideDomainModel)
+                setContextCreateUseCase.invoke(GuideContext.Creating(guideDomainModel))
+                emitEvent(CreateFile)
+            }
             FileFormMode.CreatingFolder -> {
                 nextNavigationUseCase.invoke(data.name)
                 val pathCreate = createFolder(isDarkTheme, data)

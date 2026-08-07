@@ -17,7 +17,7 @@ class StepNavigationCarouselProviders: PreviewParameterProvider<StepNavigationCa
     override val values: Sequence<StepNavigationCarouselProv>
         get() = sequenceOf(
             StepNavigationCarouselProv(
-                mode = GuideMode.Create("", ""),
+                mode = GuideMode.Create,
                 listQuestionContent =
                     listOf(
                         QuestionContentUi.Text("Hola", listOf()),
@@ -26,12 +26,12 @@ class StepNavigationCarouselProviders: PreviewParameterProvider<StepNavigationCa
                     )
             ),
             StepNavigationCarouselProv(
-                mode = GuideMode.Edit("", "", 0),
+                mode = GuideMode.Edit,
                 listQuestionContent =
                     emptyList()
             ),
             StepNavigationCarouselProv(
-                mode = GuideMode.Review("", 0),
+                mode = GuideMode.Review,
                 listQuestionContent =
                     listOf(
                         QuestionContentUi.Text("Adios", listOf()),

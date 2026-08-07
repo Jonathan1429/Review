@@ -33,7 +33,7 @@ class StudyGuideScreenProvider : PreviewParameterProvider<StudyGuideScreenProv> 
                     QuestionContentUi.Text("Primer texto de prueba", emptyList()),
                     QuestionContentUi.Text("Segundo texto de prueba", emptyList())
                 ),
-                guideMode = GuideMode.Create("", ""),
+                guideMode = GuideMode.Create,
                 showDialogDeleteQuestion = false,
                 showDialogRepeatGuide = false
             ),
@@ -48,7 +48,7 @@ class StudyGuideScreenProvider : PreviewParameterProvider<StudyGuideScreenProv> 
                     QuestionContentUi.Text("Primer texto de prueba", emptyList()),
                     QuestionContentUi.Text("Segundo texto de prueba", emptyList())
                 ),
-                guideMode = GuideMode.Create("", ""),
+                guideMode = GuideMode.Create,
                 showDialogDeleteQuestion = true,
                 showDialogRepeatGuide = false
             ),
@@ -63,7 +63,7 @@ class StudyGuideScreenProvider : PreviewParameterProvider<StudyGuideScreenProv> 
                     QuestionContentUi.Text("Primer texto de prueba", emptyList()),
                     QuestionContentUi.Text("Segundo texto de prueba", emptyList())
                 ),
-                guideMode = GuideMode.Create("", ""),
+                guideMode = GuideMode.Create,
                 showDialogDeleteQuestion = false,
                 showDialogRepeatGuide = true
             )

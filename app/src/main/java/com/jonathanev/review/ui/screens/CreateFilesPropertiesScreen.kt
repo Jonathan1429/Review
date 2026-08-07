@@ -67,7 +67,6 @@ import com.jonathanev.review.ui.components.CustomTextField
 import com.jonathanev.review.ui.components.IconsForSelect
 import com.jonathanev.review.ui.components.SelectedPickerColor
 import com.jonathanev.review.ui.components.singleClick
-import com.jonathanev.review.ui.model.PropertiesGuide
 import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.CreateFilesScreenDataProvider
 import com.jonathanev.review.ui.preview.providers.PropertiesCreateFilesScreen
@@ -106,7 +105,7 @@ fun CreateFilesPropertiesRoute(
     fileFormMode: FileFormMode,
     onRenameFile: () -> Unit,
     onCreateFolder: () -> Unit,
-    onNavFillingGuide: (PropertiesGuide) -> Unit
+    onNavFillingGuide: () -> Unit
 ) {
     val state by viewModel.uiStateComposable.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -134,7 +133,7 @@ fun CreateFilesPropertiesRoute(
             .collect { event ->
                 when (event) {
                     is CreatingUIState.CreateFile -> {
-                        onNavFillingGuide(PropertiesGuide(state.name, state.description))
+                        onNavFillingGuide()
                     }
 
                     is CreatingUIState.RenameFile -> {

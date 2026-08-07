@@ -3,9 +3,9 @@ package com.jonathanev.review.domain.model
 sealed class GuideContext {
     data class DeleteGuide(val guide: GuideDomainModel) : GuideContext()
 
-    data class Browsing(val guide: GuideDomainModel) : GuideContext()
+    data class Browsing(val guide: GuideDomainModel, val position: Int) : GuideContext()
 
-    data class Editing(val guide: GuideDomainModel) : GuideContext()
+    data class Editing(val guide: GuideDomainModel, val position: Int) : GuideContext()
 
     data class Moving(
         val guide: GuideDomainModel,
@@ -17,4 +17,6 @@ sealed class GuideContext {
         val name: RequiredAttrGuide,
         val description: OptionalAttrGuide
     ) : GuideContext()
+
+    data class Creating(val guide: GuideDomainModel) : GuideContext()
 }

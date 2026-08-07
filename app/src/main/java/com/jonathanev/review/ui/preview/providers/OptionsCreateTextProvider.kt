@@ -17,32 +17,32 @@ class OptionsCreateTextProvider : PreviewParameterProvider<OptionsCreateTextProv
             OptionsCreateTextProv(
                 text = AnnotatedString(""),
                 color = Color.Red,
-                guideMode = GuideMode.Create("", "")
+                guideMode = GuideMode.Create
             ),
             OptionsCreateTextProv(
                 text = AnnotatedString("Esto es una prueba de texto"),
                 color = Color.Gray,
-                guideMode = GuideMode.Create("", "")
+                guideMode = GuideMode.Create
             ),
             OptionsCreateTextProv(
                 text = AnnotatedString(""),
                 color = Color.Blue,
-                guideMode = GuideMode.Edit("", "", 0)
+                guideMode = GuideMode.Edit
             ),
             OptionsCreateTextProv(
                 text = AnnotatedString("Esto es una prueba de texto"),
                 color = Color.Cyan,
-                guideMode = GuideMode.Edit("", "", 0)
+                guideMode = GuideMode.Edit
             ),
             OptionsCreateTextProv(
                 text = AnnotatedString(""),
                 color = Color.DarkGray,
-                guideMode = GuideMode.Review("", 0)
+                guideMode = GuideMode.Review
             ),
             OptionsCreateTextProv(
                 text = AnnotatedString("Esto es una prueba de texto"),
                 color = Color.Green,
-                guideMode = GuideMode.Review("", 0)
+                guideMode = GuideMode.Review
             )
         )
 

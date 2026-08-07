@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
@@ -43,10 +44,12 @@ import com.jonathanev.review.presentation.event.CreateGuideEvent
 import com.jonathanev.review.presentation.model.GuideMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.presentation.model.SaveGuideMode
+import com.jonathanev.review.presentation.state.GuideScreenUiState
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.ui.components.AssetCarouselViewer
 import com.jonathanev.review.ui.components.CustomAlertDialog
 import com.jonathanev.review.ui.components.CustomTopBar
+import com.jonathanev.review.ui.components.ErrorComponent
 import com.jonathanev.review.ui.components.FilterTypeItem
 import com.jonathanev.review.ui.components.QASelectType
 import com.jonathanev.review.ui.components.ShowDeletePopUp
@@ -109,143 +112,158 @@ fun FillingGuideRoute(
     val mediaForSelected = listOf(ContentType.TEXT, ContentType.IMAGE)
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val cardType = uiState.qAType
-    val mediaSelected = uiState.mediaSelected
-    val currentPosContent = uiState.contadorContenido
 
-    val totalQuestions = uiState.preguntas.size
-    val actualQuestion = uiState.contadorPregunta + 1
-    val textList by viewModel.textList.collectAsStateWithLifecycle()
-    val imageList by viewModel.imageList.collectAsStateWithLifecycle()
-
-    val listTypeMedia = if (uiState.mediaSelected == ContentType.TEXT) {
-        textList
-    } else {
-        imageList
-    }
-    var restartGuide by rememberSaveable { mutableIntStateOf(0) }
-
-    LaunchedEffect(guideMode) {
-        viewModel.loadInitialData(guideMode = guideMode)
-    }
-
-    LaunchedEffect(Unit) {
-        viewModel.createGuideEvent.collect { event ->
-            when (event) {
-                CreateGuideEvent.WithoutText ->
-                    showToast("Debes tener al menos un texto", context)
-
-                CreateGuideEvent.WithoutTextQA ->
-                    showToast("Debes tener al menos un texto en pregunta y respuesta", context)
-
-                is CreateGuideEvent.WithoutTextInPos -> {
-                    showToast(
-                        "Revisa la pregunta ${event.position} - Debes tener al menos un texto en pregunta/respuesta",
-                        context
-                    )
-                }
-
-                is CreateGuideEvent.ErrorGuideCreated -> {
-                    showToast(event.text, context)
-                    onCloseGuide()
-                }
-
-                is CreateGuideEvent.SuccessGuideCreated -> {
-                    viewModel.initUIState()
-                    showToast(event.text, context)
-                    onCloseGuide()
-                }
-
-                CreateGuideEvent.QADeleted -> {
-                    showToast("Se ha eliminado la pregunta y respuesta", context)
-                }
+    when (val state = uiState) {
+        is GuideScreenUiState.Loading -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
             }
         }
-    }
 
-    FillingGuideScreen(
-        cardType = cardType,
-        typeForSelected = typeForSelected,
-        mediaSelected = mediaSelected,
-        mediaForSelected = mediaForSelected,
-        actualQuestion = actualQuestion,
-        totalQuestions = totalQuestions,
-        listTypeMedia = listTypeMedia,
-        guideMode = guideMode,
-        currentPosContent = currentPosContent,
-        showDialogDeleteQuestion = uiState.showDialogDeleteQuestion,
-        showDialogRepeatGuide = uiState.showDialogRepeatGuide,
-        onDissmissDialogRepeatGuide = { viewModel.onDismissDialogRepeatGuide() },
-        onConfirmDialogRepeatGuide = {
-            viewModel.initUIState()
-            restartGuide++
-        },
-        onContinueDialogDeleteQuestionClick = { isChecked ->
-            viewModel.onConfirmDeleteQuestion(dontAskAgain = isChecked)
-        },
-        onBackQuestionClick = {
-            viewModel.previousQuestion()
-        },
-        onNextQuestionClick = {
-            viewModel.onNextQuestionRequested(
-                actualQuestion = actualQuestion,
-                totalQuestions = totalQuestions
+        is GuideScreenUiState.Error -> {
+            ErrorComponent(
+                onRetry = viewModel::retryLoad,
+                onBack = onCloseGuide
             )
-        },
-        onDeleteQuestionClick = {
-            viewModel.onDeleteQuestionRequested()
-        },
-        onDeleteItemClick = { typeContent, positionItem ->
-            when (typeContent) {
-                is QuestionContentUi.Image -> {
-                    viewModel.deleteImage(positionItem)
-                }
+        }
 
-                QuestionContentUi.None -> onActionGuideNone()
-                is QuestionContentUi.Text -> {
-                    viewModel.deleteText(positionItem)
+        is GuideScreenUiState.Success -> {
+            val cardType = state.qAType
+            val mediaSelected = state.mediaSelected
+            val currentPosContent = state.contadorContenido
+
+            val totalQuestions = state.preguntas.size
+            val actualQuestion = state.contadorPregunta + 1
+            val textList by viewModel.textList.collectAsStateWithLifecycle()
+            val imageList by viewModel.imageList.collectAsStateWithLifecycle()
+
+            val listTypeMedia = if (state.mediaSelected == ContentType.TEXT) {
+                textList
+            } else {
+                imageList
+            }
+            var restartGuide by rememberSaveable { mutableIntStateOf(0) }
+
+            LaunchedEffect(Unit) {
+                viewModel.createGuideEvent.collect { event ->
+                    when (event) {
+                        CreateGuideEvent.WithoutText ->
+                            showToast("Debes tener al menos un texto", context)
+
+                        CreateGuideEvent.WithoutTextQA ->
+                            showToast(
+                                "Debes tener al menos un texto en pregunta y respuesta",
+                                context
+                            )
+
+                        is CreateGuideEvent.WithoutTextInPos -> {
+                            showToast(
+                                "Revisa la pregunta ${event.position} - Debes tener al menos un texto en pregunta/respuesta",
+                                context
+                            )
+                        }
+
+                        is CreateGuideEvent.ErrorGuideCreated -> {
+                            showToast(event.text, context)
+                            onCloseGuide()
+                        }
+
+                        is CreateGuideEvent.SuccessGuideCreated -> {
+                            showToast(event.text, context)
+                            onCloseGuide()
+                        }
+
+                        CreateGuideEvent.QADeleted -> {
+                            showToast("Se ha eliminado la pregunta y respuesta", context)
+                        }
+                    }
                 }
             }
-        },
-        onCardTypeClicked = { cardTypeClicked ->
-            viewModel.onCardTypeChanged(cardTypeClicked)
-        },
-        onFilterTypeClicked = { filterTypeClicked ->
-            viewModel.onFilterTypeChanged(filterTypeClicked = filterTypeClicked)
-        },
-        onOpenAssetClick = { typeContent, posItem -> onOpenAssetClick(typeContent, posItem) },
-        onAddAssetClick = { posItem -> onAddAssetClick(mediaSelected, posItem) },
-        onAddQuestion = {
-            viewModel.addNextQuestion()
-        },
-        onCloseGuide = {
-            when (guideMode) {
-                is GuideMode.Create -> {
-                    viewModel.saveGuide(
-                        nameGuide = guideMode.nameGuide,
-                        description = guideMode.description,
-                        mode = SaveGuideMode.Create
-                    )
-                }
 
-                is GuideMode.Edit -> {
-                    viewModel.saveGuide(
-                        nameGuide = guideMode.nameGuide,
-                        description = guideMode.description,
-                        mode = SaveGuideMode.Update
+            FillingGuideScreen(
+                cardType = cardType,
+                typeForSelected = typeForSelected,
+                mediaSelected = mediaSelected,
+                mediaForSelected = mediaForSelected,
+                actualQuestion = actualQuestion,
+                totalQuestions = totalQuestions,
+                listTypeMedia = listTypeMedia,
+                guideMode = guideMode,
+                currentPosContent = currentPosContent,
+                showDialogDeleteQuestion = state.showDialogDeleteQuestion,
+                showDialogRepeatGuide = state.showDialogRepeatGuide,
+                onDissmissDialogRepeatGuide = viewModel::onDismissDialogRepeatGuide,
+                onConfirmDialogRepeatGuide = {
+                    restartGuide++
+                },
+                onContinueDialogDeleteQuestionClick = { isChecked ->
+                    viewModel.onConfirmDeleteQuestion(dontAskAgain = isChecked)
+                },
+                onBackQuestionClick = {
+                    viewModel.previousQuestion()
+                },
+                onNextQuestionClick = {
+                    viewModel.onNextQuestionRequested(
+                        actualQuestion = actualQuestion,
+                        totalQuestions = totalQuestions
                     )
-                }
+                },
+                onDeleteQuestionClick = viewModel::onDeleteQuestionRequested,
+                onDeleteItemClick = { typeContent, positionItem ->
+                    when (typeContent) {
+                        is QuestionContentUi.Image -> {
+                            viewModel.deleteImage(positionItem)
+                        }
 
-                is GuideMode.Review -> {
-                    onCloseGuide()
-                }
-            }
-        },
-        onCurrentPosContent = { position ->
-            viewModel.updatePosContent(position)
-        },
-        onDismissRequest = { viewModel.onDismissDialogDeleteQuestion() }
-    )
+                        QuestionContentUi.None -> onActionGuideNone()
+                        is QuestionContentUi.Text -> {
+                            viewModel.deleteText(positionItem)
+                        }
+                    }
+                },
+                onCardTypeClicked = { cardTypeClicked ->
+                    viewModel.onCardTypeChanged(cardTypeClicked)
+                },
+                onFilterTypeClicked = { filterTypeClicked ->
+                    viewModel.onFilterTypeChanged(filterTypeClicked = filterTypeClicked)
+                },
+                onOpenAssetClick = { typeContent, posItem ->
+                    onOpenAssetClick(
+                        typeContent,
+                        posItem
+                    )
+                },
+                onAddAssetClick = { posItem -> onAddAssetClick(mediaSelected, posItem) },
+                onAddQuestion = viewModel::addNextQuestion,
+                onCloseGuide = {
+                    when (guideMode) {
+                        is GuideMode.Create -> {
+                            viewModel.saveGuide(
+                                mode = SaveGuideMode.Create
+                            )
+                        }
+
+                        is GuideMode.Edit -> {
+                            viewModel.saveGuide(
+                                mode = SaveGuideMode.Update
+                            )
+                        }
+
+                        is GuideMode.Review -> {
+                            onCloseGuide()
+                        }
+                    }
+                },
+                onCurrentPosContent = { position ->
+                    viewModel.updatePosContent(position)
+                },
+                onDismissRequest = viewModel::onDismissDialogDeleteQuestion
+            )
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

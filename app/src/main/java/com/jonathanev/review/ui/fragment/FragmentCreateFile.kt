@@ -68,7 +68,7 @@ class FragmentCreateFile : Fragment() {
 
         val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                viewModel.initUIState()
+                //viewModel.initUIState()
                 findNavController().popBackStack()
             }
         }

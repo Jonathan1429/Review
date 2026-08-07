@@ -16,7 +16,7 @@ class CreateTextScreenProvider : PreviewParameterProvider<CreateTextScreenProv> 
     override val values: Sequence<CreateTextScreenProv>
         get() = sequenceOf(
             CreateTextScreenProv(
-                guideMode = GuideMode.Review("", 0),
+                guideMode = GuideMode.Review,
                 textValue = TextFieldValue(
                     annotatedString = QuestionContentUi.Text(
                         "Texto de prueba",
@@ -26,7 +26,7 @@ class CreateTextScreenProvider : PreviewParameterProvider<CreateTextScreenProv> 
                 showDialog = false
             ),
             CreateTextScreenProv(
-                guideMode = GuideMode.Create("", ""),
+                guideMode = GuideMode.Create,
                 textValue = TextFieldValue(
                     annotatedString = QuestionContentUi.Text(
                         "Texto de prueba",
@@ -36,7 +36,7 @@ class CreateTextScreenProvider : PreviewParameterProvider<CreateTextScreenProv> 
                 showDialog = false,
             ),
             CreateTextScreenProv(
-                guideMode = GuideMode.Edit("", "", 0),
+                guideMode = GuideMode.Edit,
                 textValue = TextFieldValue(
                     annotatedString = QuestionContentUi.Text(
                         "Texto de prueba",
@@ -46,7 +46,7 @@ class CreateTextScreenProvider : PreviewParameterProvider<CreateTextScreenProv> 
                 showDialog = false,
             ),
             CreateTextScreenProv(
-                guideMode = GuideMode.Review("", 0),
+                guideMode = GuideMode.Review,
                 textValue = TextFieldValue(
                     annotatedString = QuestionContentUi.Text(
                         "",
@@ -56,7 +56,7 @@ class CreateTextScreenProvider : PreviewParameterProvider<CreateTextScreenProv> 
                 showDialog = false,
             ),
             CreateTextScreenProv(
-                guideMode = GuideMode.Create("", ""),
+                guideMode = GuideMode.Create,
                 textValue = TextFieldValue(
                     annotatedString = QuestionContentUi.Text(
                         "",
@@ -66,7 +66,7 @@ class CreateTextScreenProvider : PreviewParameterProvider<CreateTextScreenProv> 
                 showDialog = false,
             ),
             CreateTextScreenProv(
-                guideMode = GuideMode.Edit("", "", 0),
+                guideMode = GuideMode.Edit,
                 textValue = TextFieldValue(
                     annotatedString = QuestionContentUi.Text(
                         "",
@@ -76,7 +76,7 @@ class CreateTextScreenProvider : PreviewParameterProvider<CreateTextScreenProv> 
                 showDialog = false,
             ),
             CreateTextScreenProv(
-                guideMode = GuideMode.Edit("", "", 0),
+                guideMode = GuideMode.Edit,
                 textValue = TextFieldValue(
                     annotatedString = QuestionContentUi.Text(
                         "Texto de prueba",

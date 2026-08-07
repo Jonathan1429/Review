@@ -15,17 +15,17 @@ class CustomTopBarProvider: PreviewParameterProvider<CustomTopBarProv> {
             CustomTopBarProv(
                 actualQuestion = 2,
                 totalQuestion = 7,
-                guideMode = GuideMode.Review("", 0)
+                guideMode = GuideMode.Review
             ),
             CustomTopBarProv(
                 actualQuestion = 2,
                 totalQuestion = 7,
-                guideMode = GuideMode.Edit("", "", 0)
+                guideMode = GuideMode.Edit
             ),
             CustomTopBarProv(
                 actualQuestion = 2,
                 totalQuestion = 7,
-                guideMode = GuideMode.Create("", "")
+                guideMode = GuideMode.Create
             ),
         )
 

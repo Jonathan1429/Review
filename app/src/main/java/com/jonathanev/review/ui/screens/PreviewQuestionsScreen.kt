@@ -16,12 +16,14 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.jonathanev.review.presentation.event.PreviewGuideEvent
 import com.jonathanev.review.presentation.model.ActiveGuideUIState
 import com.jonathanev.review.presentation.state.PreviewQuestionStateUi
 import com.jonathanev.review.presentation.viewmodel.PreviewViewModel
@@ -51,11 +53,25 @@ fun PreviewPreviewQuestionsScreen(
 @Composable
 fun PreviewQuestionsRoute(
     viewModel: PreviewViewModel,
-    onEditingGuideClick: (nameGuide: String, descriptionGuide: String, posQuestionEdit: Int) -> Unit,
-    onPlayGuideClick: (nameGuide: String, posQuestionPlay: Int) -> Unit
+    onEditingGuideClick: () -> Unit,
+    onPlayGuideClick: () -> Unit
 ) {
     val uiState = viewModel.uiState.collectAsStateWithLifecycle().value
     val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        viewModel.previewGuideEvent.collect { event ->
+            when (event) {
+                PreviewGuideEvent.Editing -> {
+                    onEditingGuideClick()
+                }
+
+                PreviewGuideEvent.Review -> {
+                    onPlayGuideClick()
+                }
+            }
+        }
+    }
 
     when (uiState.activeGuide) {
         ActiveGuideUIState.Error -> {
@@ -71,17 +87,10 @@ fun PreviewQuestionsRoute(
             PreviewQuestionsScreen(
                 previewQuestions = uiState,
                 onEditingGuideClick = { position ->
-                    onEditingGuideClick(
-                        uiState.activeGuide.guide.nameGuide,
-                        uiState.activeGuide.guide.description,
-                        position
-                    )
+                    viewModel.editingGuide(position = position)
                 },
                 onPlayGuideClick = { position ->
-                    onPlayGuideClick(
-                        uiState.activeGuide.guide.nameGuide,
-                        position
-                    )
+                    viewModel.reviewGuide(position = position)
                 },
                 onCreateQuestionClick = {}
             )

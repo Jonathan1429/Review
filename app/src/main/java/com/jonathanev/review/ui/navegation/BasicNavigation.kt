@@ -245,12 +245,10 @@ fun BasicNavigation() {
                     onRenameFile = {
                         backStack.removeLastOrNull()
                     },
-                    onNavFillingGuide = { propertiesGuide ->
+                    onNavFillingGuide = {
                         backStack.removeLastOrNull()
                         backStack.add(
-                            AppRoutes.FillingGuideScreen(
-                                GuideMode.Create(propertiesGuide.name, propertiesGuide.description)
-                            )
+                            AppRoutes.FillingGuideScreen(GuideMode.Create)
                         )
                     },
                     onCreateFolder = {
@@ -356,25 +354,12 @@ fun BasicNavigation() {
 
                 PreviewQuestionsRoute(
                     viewModel = viewModel,
-                    onEditingGuideClick = { nameGuide: String, descriptionGuide: String, posQuestionEdit: Int ->
-                        backStack.add(
-                            AppRoutes.FillingGuideScreen(
-                                GuideMode.Edit(
-                                    nameGuide,
-                                    descriptionGuide,
-                                    posQuestionEdit
-                                )
-                            )
-                        )
+                    onEditingGuideClick = {
+                        backStack.add(AppRoutes.FillingGuideScreen(GuideMode.Edit))
                     },
-                    onPlayGuideClick = { nameGuide: String, posQuestionPlay: Int ->
+                    onPlayGuideClick = {
                         backStack.add(
-                            AppRoutes.FillingGuideScreen(
-                                GuideMode.Review(
-                                    nameGuide = nameGuide,
-                                    posQuestion = posQuestionPlay
-                                )
-                            )
+                            AppRoutes.FillingGuideScreen(GuideMode.Review)
                         )
                     }
                 )

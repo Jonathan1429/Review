@@ -3,6 +3,8 @@ package com.jonathanev.review.presentation.viewmodel
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jonathanev.review.domain.GetActiveGuideUseCase
+import com.jonathanev.review.domain.GetGuideContextUseCase
 import com.jonathanev.review.domain.GetGuideXmlDataUseCase
 import com.jonathanev.review.domain.GetSaveGuidesUseCase
 import com.jonathanev.review.domain.SetContentUseCase
@@ -23,22 +25,25 @@ import com.jonathanev.review.presentation.event.CreateGuideEvent.SuccessGuideCre
 import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.ColorRangeUi
-import com.jonathanev.review.presentation.model.GuideMode
 import com.jonathanev.review.presentation.model.QuestionContentMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.presentation.model.QuestionItemUi
 import com.jonathanev.review.presentation.model.SaveGuideMode
-import com.jonathanev.review.presentation.state.GuideUiState
+import com.jonathanev.review.presentation.state.GuideScreenUiState
 import com.jonathanev.review.ui.model.ContentType
 import com.jonathanev.review.ui.screens.toAnnotatedString
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -53,12 +58,76 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     private val getSaveGuidesUseCase: GetSaveGuidesUseCase,
     private val userPreferencesRepository: UserPreferencesRepository,
     private val guideQuestionExtractor: GuideQuestionExtractor,
-    private val setCrearXmlUseCase: SetCrearXmlUseCase
+    private val setCrearXmlUseCase: SetCrearXmlUseCase,
+    private val getActiveGuideUseCase: GetActiveGuideUseCase,
+    private val getGuideContextUseCase: GetGuideContextUseCase
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(GuideUiState())
-    val uiState = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow<GuideScreenUiState>(GuideScreenUiState.Loading)
+    val uiState: StateFlow<GuideScreenUiState> = _uiState.asStateFlow()
 
-    private var isDataLoaded = false
+    init {
+        viewModelScope.launch {
+            combine(
+                getActiveGuideUseCase.invoke(),
+                getGuideContextUseCase.invoke()
+            ) { activeGuideDomain, moveContext ->
+                activeGuideDomain to moveContext
+            }
+                .flowOn(Dispatchers.IO)
+                .collect { (activeGuideDomain, guideContext) ->
+                    val context = guideContext ?: activeGuideDomain?.let {
+                        GuideContext.Browsing(guide = it, position = 0)
+                    }
+
+                    if (context == null) {
+                        _uiState.value = GuideScreenUiState.Error
+                        return@collect
+                    }
+
+                    val guide = when (context) {
+                        is GuideContext.Browsing -> {
+                            context.guide
+                        }
+
+                        is GuideContext.Creating -> {
+                            context.guide
+                        }
+
+                        is GuideContext.Editing -> {
+                            context.guide
+                        }
+
+                        else -> {
+                            _uiState.value = GuideScreenUiState.Error
+                            return@collect
+                        }
+                    }
+
+                    val currentSuccess = _uiState.value as? GuideScreenUiState.Success
+                    if (currentSuccess?.fileName == guide.nameGuide) {
+                        return@collect
+                    }
+
+                    _uiState.value = GuideScreenUiState.Loading
+
+                    when (val result = getGuideXmlDataUseCase.invoke(context = context)) {
+                        is GetGuideResult.Success -> {
+                            val questions = result.list.map { it.question.toUi() }
+                            val answers = result.list.map { it.answer.toUi() }
+
+                            _uiState.value = GuideScreenUiState.Success(
+                                fileName = guide.nameGuide,
+                                description = guide.description,
+                                preguntas = questions.ifEmpty { listOf(QuestionItemUi(content = emptyList())) },
+                                respuestas = answers.ifEmpty { listOf(QuestionItemUi(content = emptyList())) }
+                            )
+                        }
+
+                        else -> _uiState.value = GuideScreenUiState.Error
+                    }
+                }
+        }
+    }
 
     private val _createGuideEvent = MutableSharedFlow<CreateGuideEvent>()
     val createGuideEvent = _createGuideEvent.asSharedFlow()
@@ -68,13 +137,17 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
     val imageList: StateFlow<List<QuestionContentUi.Image>> = _uiState
         .map { state ->
-            val currentSource =
-                if (state.qAType == QATypeUI.QUESTION) state.preguntas else state.respuestas
-            val itemActual = currentSource.getOrNull(state.contadorPregunta)
-            val contenidosImagenes =
-                itemActual?.content?.filterIsInstance<QuestionContentUi.Image>() ?: emptyList()
+            if (state is GuideScreenUiState.Success) {
+                val currentSource =
+                    if (state.qAType == QATypeUI.QUESTION) state.preguntas else state.respuestas
+                val itemActual = currentSource.getOrNull(state.contadorPregunta)
+                val contenidosImage =
+                    itemActual?.content?.filterIsInstance<QuestionContentUi.Image>() ?: emptyList()
 
-            contenidosImagenes
+                contenidosImage
+            } else {
+                emptyList()
+            }
         }
         .stateIn(
             scope = viewModelScope,
@@ -84,13 +157,17 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
     val textList: StateFlow<List<QuestionContentUi.Text>> = _uiState
         .map { state ->
-            val currentSource =
-                if (state.qAType == QATypeUI.QUESTION) state.preguntas else state.respuestas
-            val itemActual = currentSource.getOrNull(state.contadorPregunta)
-            val contenidosText =
-                itemActual?.content?.filterIsInstance<QuestionContentUi.Text>() ?: emptyList()
+            if (state is GuideScreenUiState.Success) {
+                val currentSource =
+                    if (state.qAType == QATypeUI.QUESTION) state.preguntas else state.respuestas
+                val itemActual = currentSource.getOrNull(state.contadorPregunta)
+                val contenidosText =
+                    itemActual?.content?.filterIsInstance<QuestionContentUi.Text>() ?: emptyList()
 
-            contenidosText
+                contenidosText
+            } else {
+                emptyList()
+            }
         }
         .stateIn(
             scope = viewModelScope,
@@ -128,47 +205,58 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         _draftTextValue.value = null
     }
 
-    fun initUIState() {
-        _uiState.value = GuideUiState()
+    fun retryLoad() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val guide = getActiveGuideUseCase.invoke().firstOrNull()
+
+            if (guide == null) {
+                _uiState.value = GuideScreenUiState.Error
+                return@launch
+            }
+
+            fetchAndEmitGuideXml(guide)
+        }
     }
 
-    fun loadInitialData(guideMode: GuideMode) {
-        if (isDataLoaded) return
+    private suspend fun fetchAndEmitGuideXml(guide: GuideDomainModel) {
+        _uiState.value = GuideScreenUiState.Loading
+        val context = GuideContext.Browsing(guide = guide, position = 0)
 
-        when (guideMode) {
-            is GuideMode.Create -> initUIState()
-            is GuideMode.Edit -> {
-                getDataXML(
-                    posQuestion = guideMode.posQuestion,
-                    nameGuide = guideMode.nameGuide
+        when (val result = getGuideXmlDataUseCase.invoke(context = context)) {
+            is GetGuideResult.Success -> {
+                val questions = result.list.map { it.question.toUi() }
+                val answers = result.list.map { it.answer.toUi() }
+
+                _uiState.value = GuideScreenUiState.Success(
+                    fileName = guide.nameGuide,
+                    description = guide.description,
+                    preguntas = questions.ifEmpty { listOf(QuestionItemUi(content = emptyList())) },
+                    respuestas = answers.ifEmpty { listOf(QuestionItemUi(content = emptyList())) }
                 )
             }
 
-            is GuideMode.Review -> {
-                getDataXML(
-                    posQuestion = guideMode.posQuestion,
-                    nameGuide = guideMode.nameGuide
-                )
-            }
+            else -> _uiState.value = GuideScreenUiState.Error
         }
-
-        isDataLoaded = true
     }
 
     fun setEditingMode(value: Boolean, position: Int) {
-        _uiState.update {
-            it.copy(
-                isEditing = value,
-                contadorContenido = position
-            )
+        _uiState.update { state ->
+            if (state is GuideScreenUiState.Success) {
+                state.copy(
+                    isEditing = value,
+                    contadorContenido = position
+                )
+            } else state
         }
     }
 
     fun updatePosContent(currentPos: Int) {
         _uiState.update { state ->
-            state.copy(
-                contadorContenido = currentPos
-            )
+            if (state is GuideScreenUiState.Success) {
+                state.copy(
+                    contadorContenido = currentPos
+                )
+            } else state
         }
     }
 
@@ -180,6 +268,52 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         val newContent = QuestionContentUi.Text(textWithLabels, listSpans)
         viewModelScope.launch {
             _uiState.update { state ->
+                if (state is GuideScreenUiState.Success) {
+                    val currentPosContent = when (questionContentMode) {
+                        QuestionContentMode.CREATING -> state.contadorContenido + 1
+                        QuestionContentMode.EDITING -> state.contadorContenido
+                    }
+                    val isQuestion = state.qAType == QATypeUI.QUESTION
+                    val sourceListUi = if (isQuestion) state.preguntas else state.respuestas
+                    val currentQuestionUi = sourceListUi.getOrNull(state.contadorPregunta)
+
+                    // Agregar una pregunta + contenido
+                    val updatedList: List<QuestionItemUi> = if (currentQuestionUi == null) {
+                        sourceListUi + QuestionItemUi(content = listOf(newContent))
+                    } else { // Agregar o editar contenido
+                        val sourceListDomain = sourceListUi.map { it.toDomain() }
+
+                        val updatedDomainList = setContentUseCase.invoke(
+                            newContent = newContent.toDomain(),
+                            sourceList = sourceListDomain,
+                            contadorPregunta = state.contadorPregunta,
+                            contadorContenido = currentPosContent,
+                            isEditingMode = questionContentMode == QuestionContentMode.EDITING,
+                            filterType = QuestionContentDomain.Text::class.java
+                        )
+
+                        updatedDomainList.map { it.toUi() }
+                    }
+                    state.copy(
+                        preguntas = if (isQuestion) updatedList else state.preguntas,
+                        respuestas = if (!isQuestion) updatedList else state.respuestas,
+                        contadorContenido = currentPosContent
+                    )
+                } else state
+
+            }
+
+            _updateItemTriger.emit(Unit)
+
+            clearTextDraft()
+        }
+    }
+
+    fun addImageContent(uri: String, questionContentMode: QuestionContentMode) {
+        val newContent = QuestionContentUi.Image(uri = uri, nameFile = "")
+
+        _uiState.update { state ->
+            if (state is GuideScreenUiState.Success) {
                 val currentPosContent = when (questionContentMode) {
                     QuestionContentMode.CREATING -> state.contadorContenido + 1
                     QuestionContentMode.EDITING -> state.contadorContenido
@@ -200,7 +334,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                         contadorPregunta = state.contadorPregunta,
                         contadorContenido = currentPosContent,
                         isEditingMode = questionContentMode == QuestionContentMode.EDITING,
-                        filterType = QuestionContentDomain.Text::class.java
+                        filterType = QuestionContentDomain.Image::class.java
                     )
 
                     updatedDomainList.map { it.toUi() }
@@ -211,49 +345,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                     respuestas = if (!isQuestion) updatedList else state.respuestas,
                     contadorContenido = currentPosContent
                 )
-            }
-
-            _updateItemTriger.emit(Unit)
-
-            clearTextDraft()
-        }
-    }
-
-    fun addImageContent(uri: String, questionContentMode: QuestionContentMode) {
-        val newContent = QuestionContentUi.Image(uri = uri, nameFile = "")
-
-        _uiState.update { state ->
-            val currentPosContent = when (questionContentMode) {
-                QuestionContentMode.CREATING -> state.contadorContenido + 1
-                QuestionContentMode.EDITING -> state.contadorContenido
-            }
-            val isQuestion = state.qAType == QATypeUI.QUESTION
-            val sourceListUi = if (isQuestion) state.preguntas else state.respuestas
-            val currentQuestionUi = sourceListUi.getOrNull(state.contadorPregunta)
-
-            // Agregar una pregunta + contenido
-            val updatedList: List<QuestionItemUi> = if (currentQuestionUi == null) {
-                sourceListUi + QuestionItemUi(content = listOf(newContent))
-            } else { // Agregar o editar contenido
-                val sourceListDomain = sourceListUi.map { it.toDomain() }
-
-                val updatedDomainList = setContentUseCase.invoke(
-                    newContent = newContent.toDomain(),
-                    sourceList = sourceListDomain,
-                    contadorPregunta = state.contadorPregunta,
-                    contadorContenido = currentPosContent,
-                    isEditingMode = questionContentMode == QuestionContentMode.EDITING,
-                    filterType = QuestionContentDomain.Image::class.java
-                )
-
-                updatedDomainList.map { it.toUi() }
-            }
-
-            state.copy(
-                preguntas = if (isQuestion) updatedList else state.preguntas,
-                respuestas = if (!isQuestion) updatedList else state.respuestas,
-                contadorContenido = currentPosContent
-            )
+            } else state
         }
     }
 
@@ -307,56 +399,60 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     }*/
 
     fun deleteImage(position: Int) {
-        _uiState.update { currentState ->
-            val isQuestion = currentState.qAType == QATypeUI.QUESTION
-            val sourceListUi = if (isQuestion) currentState.preguntas else currentState.respuestas
+        _uiState.update { state ->
+            if (state is GuideScreenUiState.Success) {
+                val isQuestion = state.qAType == QATypeUI.QUESTION
+                val sourceListUi = if (isQuestion) state.preguntas else state.respuestas
 
-            // 1. Calculamos la lista actualizada usando la lógica funcional de borrado
-            val sourceListToDomain = sourceListUi.map { it.toDomain() }
-            val updatedListDomain = deleteFilteredContent(
-                sourceList = sourceListToDomain,
-                contadorPregunta = currentState.contadorPregunta,
-                posFiltered = position,
-                filterType = QuestionContentDomain.Image::class.java
-            )
-            val updatedListToUi = updatedListDomain.map { it.toUi() }
-            // 3. Emitimos el nuevo estado con todas las limpiezas integradas
-            currentState.copy(
-                preguntas = if (isQuestion) updatedListToUi else currentState.preguntas,
-                respuestas = if (!isQuestion) updatedListToUi else currentState.respuestas,
-                //actualUri = null,         // resetContentLists integrado
-                isEditing = false,
-                contadorContenido = 0
-                //contadorContenido = -1
-            )
+                // 1. Calculamos la lista actualizada usando la lógica funcional de borrado
+                val sourceListToDomain = sourceListUi.map { it.toDomain() }
+                val updatedListDomain = deleteFilteredContent(
+                    sourceList = sourceListToDomain,
+                    contadorPregunta = state.contadorPregunta,
+                    posFiltered = position,
+                    filterType = QuestionContentDomain.Image::class.java
+                )
+                val updatedListToUi = updatedListDomain.map { it.toUi() }
+                // 3. Emitimos el nuevo estado con todas las limpiezas integradas
+                state.copy(
+                    preguntas = if (isQuestion) updatedListToUi else state.preguntas,
+                    respuestas = if (!isQuestion) updatedListToUi else state.respuestas,
+                    //actualUri = null,         // resetContentLists integrado
+                    isEditing = false,
+                    contadorContenido = 0
+                    //contadorContenido = -1
+                )
+            } else state
         }
     }
 
     fun deleteText(position: Int) {
-        _uiState.update { currentState ->
-            val isQuestion = currentState.qAType == QATypeUI.QUESTION
-            val sourceListUi = if (isQuestion) currentState.preguntas else currentState.respuestas
+        _uiState.update { state ->
+            if (state is GuideScreenUiState.Success) {
+                val isQuestion = state.qAType == QATypeUI.QUESTION
+                val sourceListUi = if (isQuestion) state.preguntas else state.respuestas
 
-            // 1. Obtenemos la lista actualizada usando la función de borrado funcional
-            val sourceListToDomain = sourceListUi.map { it.toDomain() }
+                // 1. Obtenemos la lista actualizada usando la función de borrado funcional
+                val sourceListToDomain = sourceListUi.map { it.toDomain() }
 
-            val updatedListDomain = deleteFilteredContent(
-                sourceList = sourceListToDomain,
-                contadorPregunta = currentState.contadorPregunta,
-                posFiltered = position,
-                filterType = QuestionContentDomain.Text::class.java
-            )
-            val updatedListToUi = updatedListDomain.map { it.toUi() }
+                val updatedListDomain = deleteFilteredContent(
+                    sourceList = sourceListToDomain,
+                    contadorPregunta = state.contadorPregunta,
+                    posFiltered = position,
+                    filterType = QuestionContentDomain.Text::class.java
+                )
+                val updatedListToUi = updatedListDomain.map { it.toUi() }
 
-            // 3. Emitimos el nuevo estado completo
-            currentState.copy(
-                preguntas = if (isQuestion) updatedListToUi else currentState.preguntas,
-                respuestas = if (!isQuestion) updatedListToUi else currentState.respuestas,
-                //actualUri = null, // resetContentLists integrado
-                isEditing = false,
-                contadorContenido = 0
-                //contadorContenido = -1
-            )
+                // 3. Emitimos el nuevo estado completo
+                state.copy(
+                    preguntas = if (isQuestion) updatedListToUi else state.preguntas,
+                    respuestas = if (!isQuestion) updatedListToUi else state.respuestas,
+                    //actualUri = null, // resetContentLists integrado
+                    isEditing = false,
+                    contadorContenido = 0
+                    //contadorContenido = -1
+                )
+            } else state
         }
     }
 
@@ -393,19 +489,23 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
     fun onCardTypeChanged(cardTypeClicked: QATypeUI) {
         _uiState.update { state ->
-            state.copy(qAType = cardTypeClicked)
+            if (state is GuideScreenUiState.Success) {
+                state.copy(qAType = cardTypeClicked)
+            } else state
         }
     }
 
     fun previousQuestion() {
         _uiState.update { state ->
-            val nuevoContador = state.contadorPregunta - 1
+            if (state is GuideScreenUiState.Success) {
+                val nuevoContador = state.contadorPregunta - 1
 
-            state.copy(
-                contadorPregunta = nuevoContador,
-                qAType = QATypeUI.QUESTION,
-                contadorContenido = 0
-            )
+                state.copy(
+                    contadorPregunta = nuevoContador,
+                    qAType = QATypeUI.QUESTION,
+                    contadorContenido = 0
+                )
+            } else state
         }
     }
 
@@ -423,19 +523,23 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
     fun nextQuestion() {
         _uiState.update { state ->
-            state.copy(
-                contadorPregunta = state.contadorPregunta + 1,
-                qAType = QATypeUI.QUESTION,
-                contadorContenido = 0
-            )
+            if (state is GuideScreenUiState.Success) {
+                state.copy(
+                    contadorPregunta = state.contadorPregunta + 1,
+                    qAType = QATypeUI.QUESTION,
+                    contadorContenido = 0
+                )
+            } else state
         }
     }
 
     fun addNextQuestion() {
         _uiState.update { state ->
-            state.copy(
-                contadorPregunta = state.contadorPregunta + 1
-            )
+            if (state is GuideScreenUiState.Success) {
+                state.copy(
+                    contadorPregunta = state.contadorPregunta + 1
+                )
+            } else state
         }
 
         addContentEmpty()
@@ -443,26 +547,28 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
     private fun addContentEmpty() {
         _uiState.update { state ->
-            val pos = state.contadorPregunta
+            if (state is GuideScreenUiState.Success) {
+                val pos = state.contadorPregunta
 
-            val updatedPreguntas = state.preguntas.toMutableList().apply {
-                val index = pos.coerceIn(0, size)
-                add(index, QuestionItemDomain(content = emptyList()).toUi())
-            }
+                val updatedPreguntas = state.preguntas.toMutableList().apply {
+                    val index = pos.coerceIn(0, size)
+                    add(index, QuestionItemDomain(content = emptyList()).toUi())
+                }
 
-            val updatedRespuestas = state.respuestas.toMutableList().apply {
-                val index = pos.coerceIn(0, size)
-                add(index, QuestionItemDomain(content = emptyList()).toUi())
-            }
+                val updatedRespuestas = state.respuestas.toMutableList().apply {
+                    val index = pos.coerceIn(0, size)
+                    add(index, QuestionItemDomain(content = emptyList()).toUi())
+                }
 
-            state.copy(
-                preguntas = updatedPreguntas,
-                respuestas = updatedRespuestas
-            )
+                state.copy(
+                    preguntas = updatedPreguntas,
+                    respuestas = updatedRespuestas
+                )
+            } else state
         }
     }
 
-    private fun findGuide(nameGuide: String): GuideDomainModel? =
+    /*private fun findGuide(nameGuide: String): GuideDomainModel? =
         getSaveGuidesUseCase.invoke().find { it.nameGuide == nameGuide }
 
     private suspend fun loadGuideXml(
@@ -480,7 +586,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             GetGuideResult.NotFound -> showMessage("No se ha encontrado la guia")
             GetGuideResult.UnknownError -> showMessage("Error desconocido")
         }
-    }
+    }*/
 
 
     private fun updateUiWithContent(
@@ -490,13 +596,15 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         val (questions, answers) = guideQuestionExtractor.map(result)
 
         _uiState.update { state ->
-            state.copy(
-                contadorPregunta = calculatePosition(noQuestion, answers.size),
-                qAType = QATypeUI.QUESTION,
-                preguntas = questions.map { it.toUi() },
-                respuestas = answers.map { it.toUi() },
-                isLastQuestion = if (noQuestion == -1) false else null
-            )
+            if (state is GuideScreenUiState.Success) {
+                state.copy(
+                    contadorPregunta = calculatePosition(noQuestion, answers.size),
+                    qAType = QATypeUI.QUESTION,
+                    preguntas = questions.map { it.toUi() },
+                    respuestas = answers.map { it.toUi() },
+                    isLastQuestion = if (noQuestion == -1) false else null
+                )
+            } else state
         }
     }
 
@@ -508,7 +616,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         nameGuide: String,
     ) {
         viewModelScope.launch {
-            val guide = findGuide(nameGuide) ?: run {
+            /*val guide = findGuide(nameGuide) ?: run {
                 isDataLoaded = false
                 showMessage("No se ha encontrado la guia a renombrar")
                 return@launch
@@ -518,11 +626,11 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             if (result !is GetGuideResult.Success) {
                 isDataLoaded = false
             }
-            handleGuideResult(result, posQuestion)
+            handleGuideResult(result, posQuestion)*/
         }
     }
 
-    private fun isDataValid(): Boolean {
+    /*private fun isDataValid(): Boolean {
         val stateUi = uiState.value
         val preguntasDomain = stateUi.preguntas.map { it.toDomain() }
         val respuestasDomain = stateUi.respuestas.map { it.toDomain() }
@@ -553,7 +661,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         }
 
         return true
-    }
+    }*/
 
     // Extension function para limpiar el código de las listas
     private fun QuestionItemDomain.hasText(): Boolean {
@@ -561,8 +669,6 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     }
 
     fun saveGuide(
-        nameGuide: String,
-        description: String,
         mode: SaveGuideMode
     ) {
         /*if (!isDataValid()) {
@@ -570,10 +676,32 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         }*/
 
         viewModelScope.launch {
+            val currentState = uiState.value as? GuideScreenUiState.Success ?: return@launch
+
+            val currentContext = getGuideContextUseCase.invoke().firstOrNull()
+                ?: GuideContext.Browsing(
+                    guide = GuideDomainModel(GuideVersion.V2, "", ""),
+                    position = 0
+                )
+
+            val guideDomainModel = when (currentContext) {
+                is GuideContext.Creating -> {
+                    currentContext.guide
+                }
+
+                is GuideContext.Editing -> {
+                    currentContext.guide
+                }
+
+                else -> {
+                    sendNotification(ErrorGuideCreated("Error al guardar la guia"))
+                    return@launch
+                }
+            }
             val response = setCrearXmlUseCase.invoke(
-                guideDomainModel = GuideDomainModel(GuideVersion.V2, nameGuide, description),
-                preguntas = uiState.value.preguntas.map { it.toDomain() },
-                respuestas = uiState.value.respuestas.map { it.toDomain() },
+                guideDomainModel = guideDomainModel,
+                preguntas = currentState.preguntas.map { it.toDomain() },
+                respuestas = currentState.respuestas.map { it.toDomain() },
                 saveGuideMode = mode.toDomain()
             )
 
@@ -609,31 +737,40 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     }
 
     fun deleteQuesAns() {
-        val total = _uiState.value.preguntas.size
-
-        // CASO 1 de 1: Usamos la inicialización general de la UI
-        if (total <= 1) {
-            initUIState()
-            return
-        }
-
-        // CASO 1 de N y N de N
         _uiState.update { state ->
-            val index = state.contadorPregunta
+            if (state is GuideScreenUiState.Success) {
+                val total = state.preguntas.size
+                val index = state.contadorPregunta
 
-            val newPreguntas = state.preguntas.filterIndexed { i, _ -> i != index }
-            val newRespuestas = state.respuestas.filterIndexed { i, _ -> i != index }
+                if (total <= 1) {
+                    // Caso 1 de 1: Limpia el contenido al estado inicial por defecto
+                    state.copy(
+                        preguntas = listOf(QuestionItemUi(content = emptyList())),
+                        respuestas = listOf(QuestionItemUi(content = emptyList())),
+                        contadorPregunta = 0,
+                        contadorContenido = 0,
+                        qAType = QATypeUI.QUESTION,
+                        mediaSelected = ContentType.TEXT,
+                        isEditing = false,
+                        isLastQuestion = false,
+                        showDialogDeleteQuestion = false,
+                        showDialogRepeatGuide = false
+                    )
+                } else {
+                    // Caso N de N: Elimina el elemento actual y ajusta el índice
+                    val newPreguntas = state.preguntas.filterIndexed { i, _ -> i != index }
+                    val newRespuestas = state.respuestas.filterIndexed { i, _ -> i != index }
+                    val newIndex = if (index > 0) index - 1 else 0
 
-            val newIndex = if (index > 0) index - 1 else 0
-
-            state.copy(
-                preguntas = newPreguntas,
-                respuestas = newRespuestas,
-                contadorPregunta = newIndex,
-                contadorContenido = 0,
-                isEditing = false,
-                //actualUri = null
-            )
+                    state.copy(
+                        preguntas = newPreguntas,
+                        respuestas = newRespuestas,
+                        contadorPregunta = newIndex,
+                        contadorContenido = 0,
+                        isEditing = false
+                    )
+                }
+            } else state
         }
     }
 
@@ -648,13 +785,13 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         .first()
 
     fun updateLastQuestion() {
-        _uiState.update { state ->
+        /*_uiState.update { state ->
             state.copy(
                 qAType = QATypeUI.QUESTION,
                 isLastQuestion = false,
                 contadorPregunta = state.contadorPregunta + 1
             )
-        }
+        }*/
     }
 
     fun onDeleteQuestionRequested() {
@@ -665,7 +802,9 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 sendNotification(CreateGuideEvent.QADeleted)
             } else {
                 _uiState.update { state ->
-                    state.copy(showDialogDeleteQuestion = true)
+                    if (state is GuideScreenUiState.Success) {
+                        state.copy(showDialogDeleteQuestion = true)
+                    } else state
                 }
             }
         }
@@ -674,7 +813,9 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
     fun onConfirmDeleteQuestion(dontAskAgain: Boolean) {
         _uiState.update { state ->
-            state.copy(showDialogDeleteQuestion = false)
+            if (state is GuideScreenUiState.Success) {
+                state.copy(showDialogDeleteQuestion = false)
+            } else state
         }
 
         if (dontAskAgain) {
@@ -687,20 +828,26 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
     fun onDismissDialogDeleteQuestion() {
         _uiState.update { state ->
-            state.copy(showDialogDeleteQuestion = false)
+            if (state is GuideScreenUiState.Success) {
+                state.copy(showDialogDeleteQuestion = false)
+            } else state
         }
     }
 
     fun onDismissDialogRepeatGuide() {
         _uiState.update { state ->
-            state.copy(showDialogRepeatGuide = false)
+            if (state is GuideScreenUiState.Success) {
+                state.copy(showDialogRepeatGuide = false)
+            } else state
         }
     }
 
     fun onNextQuestionRequested(actualQuestion: Int, totalQuestions: Int) {
         if (actualQuestion == totalQuestions) {
             _uiState.update { state ->
-                state.copy(showDialogRepeatGuide = true)
+                if (state is GuideScreenUiState.Success) {
+                    state.copy(showDialogRepeatGuide = true)
+                } else state
             }
         } else {
             nextQuestion()
@@ -709,9 +856,9 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
     fun onFilterTypeChanged(filterTypeClicked: ContentType) {
         _uiState.update { state ->
-            state.copy(
-                mediaSelected = filterTypeClicked
-            )
+            if (state is GuideScreenUiState.Success) {
+                state.copy(mediaSelected = filterTypeClicked)
+            } else state
         }
     }
 

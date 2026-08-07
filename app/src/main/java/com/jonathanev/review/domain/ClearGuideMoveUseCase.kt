@@ -1,12 +1,12 @@
 package com.jonathanev.review.domain
 
-import com.jonathanev.review.domain.repository.GuideMoveRepository
+import com.jonathanev.review.domain.repository.GuideContextRepository
 import javax.inject.Inject
 
 class ClearGuideMoveUseCase @Inject constructor(
-    private val guideMoveRepository: GuideMoveRepository
+    private val guideContextRepository: GuideContextRepository
 ) {
-    operator fun invoke() {
-        guideMoveRepository.clear()
+    suspend operator fun invoke() {
+        guideContextRepository.clear()
     }
 }

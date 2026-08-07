@@ -2,9 +2,10 @@ package com.jonathanev.review.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jonathanev.review.domain.ClearActiveGuideUseCase
 import com.jonathanev.review.domain.ClearGuideMoveUseCase
 import com.jonathanev.review.domain.DeleteGuideUseCase
-import com.jonathanev.review.domain.GetGuideMoveUseCase
+import com.jonathanev.review.domain.GetGuideContextUseCase
 import com.jonathanev.review.domain.GetGuidePosicionUseCase
 import com.jonathanev.review.domain.GetGuideXmlDataUseCase
 import com.jonathanev.review.domain.LoadGuidesUseCase
@@ -13,6 +14,7 @@ import com.jonathanev.review.domain.ResetNavigationUseCase
 import com.jonathanev.review.domain.SetActiveGuideUseCase
 import com.jonathanev.review.domain.SetContextMoveUseCase
 import com.jonathanev.review.domain.model.GuideContext
+import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.result.DeleteGuideResult
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.GuideResultDomain
@@ -44,11 +46,12 @@ class FragmentListGuidesViewModel @Inject constructor(
     private val getGuidePosicionUseCase: GetGuidePosicionUseCase,
     private val deleteGuideUseCase: DeleteGuideUseCase,
     private val setContextMoveUseCase: SetContextMoveUseCase,
-    private val getGuideMoveUseCase: GetGuideMoveUseCase,
+    private val getGuideContextUseCase: GetGuideContextUseCase,
     private val getGuideXmlDataUseCase: GetGuideXmlDataUseCase,
     private val moveGuideUseCase: MoveGuideUseCase,
     private val resetNavigationUseCase: ResetNavigationUseCase,
     private val setActiveGuideUseCase: SetActiveGuideUseCase,
+    private val clearActiveGuideUseCase: ClearActiveGuideUseCase,
     private val clearGuideMoveUseCase: ClearGuideMoveUseCase
 ) : ViewModel() {
     val uiState: StateFlow<GuidesUiState> = loadGuidesUseCase.invoke()
@@ -72,22 +75,20 @@ class FragmentListGuidesViewModel @Inject constructor(
     private val _eventsMovingFiles = MutableSharedFlow<UIMovingEvent>()
     val eventsMovingFiles = _eventsMovingFiles.asSharedFlow() // usar estos eventos en compose
 
-    val interactionMode: StateFlow<FileInteractionMode> = getGuideMoveUseCase()
+    val interactionMode: StateFlow<FileInteractionMode> = getGuideContextUseCase()
         .map { activeMoving ->
-            if (activeMoving != null) FileInteractionMode.MovingItem else FileInteractionMode.Default
+            if (activeMoving is GuideContext.Moving) FileInteractionMode.MovingItem else FileInteractionMode.Default
         }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Eagerly,
-            initialValue = if (getGuideMoveUseCase().value != null) {
-                FileInteractionMode.MovingItem
-            } else {
-                FileInteractionMode.Default
-            }
+            initialValue = FileInteractionMode.Default
         )
 
     fun onCancelMove() {
-        clearGuideMoveUseCase.invoke()
+        viewModelScope.launch {
+            clearGuideMoveUseCase.invoke()
+        }
     }
 
     fun getGuideSelected(guides: List<GuideUiModel>, position: Int): GuideResultUi {
@@ -105,7 +106,7 @@ class FragmentListGuidesViewModel @Inject constructor(
     }
 
     fun movingGuide(guides: List<GuideUiModel>) {
-        when (val context = getGuideMoveUseCase.invoke()) {
+        when (val context = getGuideContextUseCase.invoke()) {
             is GuideContext.Moving -> {
                 val isExistGuide = guides.any { it.nameGuide == context.guide.nameGuide }
 
@@ -127,7 +128,7 @@ class FragmentListGuidesViewModel @Inject constructor(
         viewModelScope.launch {
             if (!confirmed) return@launch
 
-            when (val context = getGuideMoveUseCase.invoke()) {
+            when (val context = getGuideContextUseCase.invoke()) {
                 is GuideContext.Moving -> {
                     when (val guideData = getGuideXmlDataUseCase.invoke(context)) {
                         is GetGuideResult.Success -> {
@@ -171,19 +172,27 @@ class FragmentListGuidesViewModel @Inject constructor(
         }
     }
 
-    fun setContext(guide: GuideUiModel) {
+    fun setContextMoving(guide: GuideUiModel) {
         viewModelScope.launch {
-            onDismissDialog()
             val guideDomainModel = guide.toDomain()
-            setContextMoveUseCase.invoke(guideDomainModel)
+            val guideContext = GuideContext.Moving(
+                guide = guideDomainModel,
+                oldRelativeGuidePath = RelativeGuidePath("")
+            )
+            setContextMoveUseCase.invoke(guideContext)
             resetNavigationUseCase.invoke()
         }
     }
 
     fun setActiveGuide(guideUIModel: GuideUiModel) {
         viewModelScope.launch {
-            onDismissDialog()
             setActiveGuideUseCase.invoke(guideUIModel.toDomain())
+        }
+    }
+
+    fun clearActiveGuide() {
+        viewModelScope.launch {
+            clearActiveGuideUseCase.invoke()
         }
     }
 
@@ -231,7 +240,7 @@ class FragmentListGuidesViewModel @Inject constructor(
 
     fun onMoveGuide(guideUIModel: GuideUiModel) {
         onDismissDialog()
-        setContext(guideUIModel)
+        setContextMoving(guideUIModel)
         emitMessage(GuideActionEvent.MoveGuide)
     }
 }

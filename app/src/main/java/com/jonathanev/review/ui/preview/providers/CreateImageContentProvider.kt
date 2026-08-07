@@ -12,19 +12,19 @@ class CreateImageContentProvider : PreviewParameterProvider<CreateImageContentPr
     override val values: Sequence<CreateImageContentProv>
         get() = sequenceOf(
             CreateImageContentProv(
-                guideMode = GuideMode.Edit("", "", 0),
+                guideMode = GuideMode.Edit,
                 uriImage = "path/uri_cargada.png",
             ),
             CreateImageContentProv(
-                guideMode = GuideMode.Create("", ""),
+                guideMode = GuideMode.Create,
                 uriImage = "",
             ),
             CreateImageContentProv(
-                guideMode = GuideMode.Review("", 0),
+                guideMode = GuideMode.Review,
                 uriImage = "",
             ),
             CreateImageContentProv(
-                guideMode = GuideMode.Review("", 0),
+                guideMode = GuideMode.Review,
                 uriImage = "path/uri_cargada.png",
             ),
         )

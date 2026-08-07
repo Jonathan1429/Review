@@ -26,7 +26,7 @@ class MediaContentPagerProvider : PreviewParameterProvider<DataMediaContentPager
                 ),
                 sizeList = 2,
                 mediaForSelected = ContentType.TEXT,
-                guideMode = GuideMode.Create("", "")
+                guideMode = GuideMode.Create
             ),
             DataMediaContentPagerProvider(
                 listType = listOf(
@@ -35,7 +35,7 @@ class MediaContentPagerProvider : PreviewParameterProvider<DataMediaContentPager
                 ),
                 sizeList = 2,
                 mediaForSelected = ContentType.IMAGE,
-                guideMode = GuideMode.Create("", "")
+                guideMode = GuideMode.Create
             ),
             DataMediaContentPagerProvider(
                 listType = listOf(
@@ -43,19 +43,19 @@ class MediaContentPagerProvider : PreviewParameterProvider<DataMediaContentPager
                 ),
                 sizeList = 1,
                 mediaForSelected = ContentType.TEXT,
-                guideMode = GuideMode.Create("", "")
+                guideMode = GuideMode.Create
             ),
             DataMediaContentPagerProvider(
                 listType = emptyList(),
                 sizeList = 0,
                 mediaForSelected = ContentType.TEXT,
-                guideMode = GuideMode.Create("", "")
+                guideMode = GuideMode.Create
             ),
             DataMediaContentPagerProvider(
                 listType = emptyList(),
                 sizeList = 0,
                 mediaForSelected = ContentType.IMAGE,
-                guideMode = GuideMode.Create("", "")
+                guideMode = GuideMode.Create
             ),
             DataMediaContentPagerProvider(
                 listType = listOf(
@@ -64,7 +64,7 @@ class MediaContentPagerProvider : PreviewParameterProvider<DataMediaContentPager
                 ),
                 sizeList = 2,
                 mediaForSelected = ContentType.TEXT,
-                guideMode = GuideMode.Edit("", "", 0)
+                guideMode = GuideMode.Edit
             ),
             DataMediaContentPagerProvider(
                 listType = listOf(
@@ -73,7 +73,7 @@ class MediaContentPagerProvider : PreviewParameterProvider<DataMediaContentPager
                 ),
                 sizeList = 2,
                 mediaForSelected = ContentType.TEXT,
-                guideMode = GuideMode.Review("", 0)
+                guideMode = GuideMode.Review
             )
         )
 }
