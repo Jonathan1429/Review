@@ -74,7 +74,7 @@ fun ListFoldersRoute(
     viewModel: ListFoldersViewModel,
     onCreateFolderClick: () -> Unit,
     onFolderOpen: () -> Unit,
-    onDeleteFolder: () -> Unit
+    onNavWithoutFolders: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val interactionMode by viewModel.interactionMode.collectAsStateWithLifecycle()
@@ -86,7 +86,6 @@ fun ListFoldersRoute(
             when (event) {
                 is FolderActionEvent.DeleteFolderSuccess -> {
                     showToast("Se ha borrado la carpeta correctamente", context)
-                    onDeleteFolder()
                 }
 
                 is FolderActionEvent.ShowMessage -> {
@@ -102,7 +101,7 @@ fun ListFoldersRoute(
 
     when (val state = uiState) {
         FoldersUiState.Empty -> {
-            Box(modifier = Modifier.fillMaxSize())
+            onNavWithoutFolders()
         }
         FoldersUiState.Loading -> {
             Box(

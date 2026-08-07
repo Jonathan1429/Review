@@ -34,6 +34,7 @@ import com.jonathanev.review.presentation.viewmodel.ListFoldersViewModel
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
 import com.jonathanev.review.presentation.viewmodel.PreviewViewModel
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
+import com.jonathanev.review.presentation.viewmodel.WithoutFoldersViewModel
 import com.jonathanev.review.ui.model.ContentType
 import com.jonathanev.review.ui.screens.CreateFilesPropertiesRoute
 import com.jonathanev.review.ui.screens.CreateImageRoute
@@ -45,7 +46,7 @@ import com.jonathanev.review.ui.screens.ListGuidesRoute
 import com.jonathanev.review.ui.screens.MainActivityEntryRoute
 import com.jonathanev.review.ui.screens.PreviewQuestionsRoute
 import com.jonathanev.review.ui.screens.WithoutFilesRoute
-import com.jonathanev.review.ui.screens.WithoutFoldersScreen
+import com.jonathanev.review.ui.screens.WithoutFoldersRoute
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -138,9 +139,17 @@ fun BasicNavigation() {
                 )
             }
             entry<AppRoutes.WithoutFoldersScreen> {
-                WithoutFoldersScreen(
+                val viewModel: WithoutFoldersViewModel = viewModel()
+
+                WithoutFoldersRoute(
+                    viewModel = viewModel,
                     onNavCreateFilesProperties = {
                         backStack.add(AppRoutes.CreateFilesPropertiesScreen(FileFormMode.CreatingFolder))
+                    },
+                    onNavListFolders = {
+                        if (backStack.isNotEmpty()) {
+                            backStack[backStack.lastIndex] = AppRoutes.ListFoldersScreen
+                        }
                     }
                 )
             }
@@ -155,9 +164,9 @@ fun BasicNavigation() {
                     onFolderOpen = {
                         backStack.add(AppRoutes.EntryGuidesScreen)
                     },
-                    onDeleteFolder = {
+                    onNavWithoutFolders = {
                         if (backStack.isNotEmpty()) {
-                            backStack[backStack.lastIndex] = AppRoutes.MainScreen
+                            backStack[backStack.lastIndex] = AppRoutes.WithoutFoldersScreen
                         }
                     }
                 )
@@ -181,7 +190,7 @@ fun BasicNavigation() {
                     },
                 )
             }
-            entry<AppRoutes.WithoutGuidesScreen> { value ->
+            entry<AppRoutes.WithoutGuidesScreen> {
                 val viewModel: FragmentWithoutFilesViewModel = viewModel()
 
                 WithoutFilesRoute(

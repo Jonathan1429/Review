@@ -48,7 +48,7 @@ class ListFoldersViewModel @Inject constructor(
         }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.Eagerly,
             initialValue = FoldersUiState.Loading
         )
     private val _dialogState =

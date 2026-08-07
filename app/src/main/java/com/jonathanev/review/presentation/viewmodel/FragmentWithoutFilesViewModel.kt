@@ -7,7 +7,6 @@ import com.jonathanev.review.domain.GetGuideMoveUseCase
 import com.jonathanev.review.domain.GetGuideXmlDataUseCase
 import com.jonathanev.review.domain.LoadGuidesUseCase
 import com.jonathanev.review.domain.MoveGuideUseCase
-import com.jonathanev.review.domain.ResetNavigationUseCase
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.MoveGuideResponse
@@ -31,7 +30,6 @@ class FragmentWithoutFilesViewModel @Inject constructor(
     private val moveGuideUseCase: MoveGuideUseCase,
     private val getGuideMoveUseCase: GetGuideMoveUseCase,
     private val getGuideXmlDataUseCase: GetGuideXmlDataUseCase,
-    private val resetNavigationUseCase: ResetNavigationUseCase,
     private val loadGuidesUseCase: LoadGuidesUseCase,
     private val clearGuideMoveUseCase: ClearGuideMoveUseCase
 ) : ViewModel() {
