@@ -60,12 +60,12 @@ fun WithoutFilesScreenPreview(
 
 @Composable
 fun WithoutFilesRoute(
-    fileInteractionMode: FileInteractionMode,
     viewModel: FragmentWithoutFilesViewModel,
     onAddGuideClick: () -> Unit,
     onNavListGuides: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val interactionMode by viewModel.interactionMode.collectAsStateWithLifecycle()
 
     LaunchedEffect(uiState) {
         if (uiState is GuidesUiState.Success) {
@@ -73,15 +73,14 @@ fun WithoutFilesRoute(
         }
     }
 
-    // Renderizamos la pantalla directamente sin reemplazarla por un spinner
     WithoutFilesScreen(
-        fileInteractionMode = fileInteractionMode,
+        fileInteractionMode = interactionMode,
         onAddGuideClick = onAddGuideClick,
         onMoveCancelGuideClick = {
-            viewModel.initRelativeGuide()
+            viewModel.onCancelMove()
         },
         onMoveSuccessGuideClick = {
-            viewModel.initRelativeGuide()
+            viewModel.movingGuide()
         }
     )
 }

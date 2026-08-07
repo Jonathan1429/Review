@@ -2,6 +2,7 @@ package com.jonathanev.review.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jonathanev.review.domain.ClearGuideMoveUseCase
 import com.jonathanev.review.domain.DeleteGuideUseCase
 import com.jonathanev.review.domain.GetGuideMoveUseCase
 import com.jonathanev.review.domain.GetGuidePosicionUseCase
@@ -20,6 +21,7 @@ import com.jonathanev.review.presentation.event.GuideActionEvent
 import com.jonathanev.review.presentation.event.UIMovingEvent
 import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.presentation.mapper.toUi
+import com.jonathanev.review.presentation.model.FileInteractionMode
 import com.jonathanev.review.presentation.model.GuideResultUi
 import com.jonathanev.review.presentation.model.GuideUiModel
 import com.jonathanev.review.presentation.state.ActionDialogState
@@ -46,7 +48,8 @@ class FragmentListGuidesViewModel @Inject constructor(
     private val getGuideXmlDataUseCase: GetGuideXmlDataUseCase,
     private val moveGuideUseCase: MoveGuideUseCase,
     private val resetNavigationUseCase: ResetNavigationUseCase,
-    private val setActiveGuideUseCase: SetActiveGuideUseCase
+    private val setActiveGuideUseCase: SetActiveGuideUseCase,
+    private val clearGuideMoveUseCase: ClearGuideMoveUseCase
 ) : ViewModel() {
     val uiState: StateFlow<GuidesUiState> = loadGuidesUseCase.invoke()
         .map { list ->
@@ -69,17 +72,29 @@ class FragmentListGuidesViewModel @Inject constructor(
     private val _eventsMovingFiles = MutableSharedFlow<UIMovingEvent>()
     val eventsMovingFiles = _eventsMovingFiles.asSharedFlow() // usar estos eventos en compose
 
+    val interactionMode: StateFlow<FileInteractionMode> = getGuideMoveUseCase()
+        .map { activeMoving ->
+            if (activeMoving != null) FileInteractionMode.MovingItem else FileInteractionMode.Default
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = if (getGuideMoveUseCase().value != null) {
+                FileInteractionMode.MovingItem
+            } else {
+                FileInteractionMode.Default
+            }
+        )
+
+    fun onCancelMove() {
+        clearGuideMoveUseCase.invoke()
+    }
+
     fun getGuideSelected(guides: List<GuideUiModel>, position: Int): GuideResultUi {
         return when (val result =
             getGuidePosicionUseCase.invoke(position, guides.map { it.toDomain() })) {
             GuideResultDomain.Error -> result.toUi()
             is GuideResultDomain.Success -> result.toUi()
-        }
-    }
-
-    fun deleteGuide(guides: List<GuideUiModel>, nameGuide: String) {
-        viewModelScope.launch {
-
         }
     }
 
@@ -154,10 +169,6 @@ class FragmentListGuidesViewModel @Inject constructor(
         viewModelScope.launch {
             _eventsMovingFiles.emit(UIMovingEvent.ShowMessage(message))
         }
-    }
-
-    fun moveFileCancel() {
-        eventMovingFile("Se ha cancelado la acción")
     }
 
     fun setContext(guide: GuideUiModel) {

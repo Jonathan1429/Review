@@ -108,7 +108,7 @@ class FragmentListGuides : Fragment() {
                     viewModelToolbar.onCancel.collect {
                         viewModelToolbar.initButtons()
                         navStateViewModel.setMainPath()
-                        viewModel.moveFileCancel()
+                        //viewModel.moveFileCancel()
 
                         findNavController().navigate(
                             R.id.action_to_content_graph,

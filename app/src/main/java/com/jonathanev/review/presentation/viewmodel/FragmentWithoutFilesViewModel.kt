@@ -2,6 +2,7 @@ package com.jonathanev.review.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jonathanev.review.domain.ClearGuideMoveUseCase
 import com.jonathanev.review.domain.GetGuideMoveUseCase
 import com.jonathanev.review.domain.GetGuideXmlDataUseCase
 import com.jonathanev.review.domain.LoadGuidesUseCase
@@ -12,6 +13,7 @@ import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.MoveGuideResponse
 import com.jonathanev.review.presentation.event.UIMovingEvent
 import com.jonathanev.review.presentation.mapper.toUi
+import com.jonathanev.review.presentation.model.FileInteractionMode
 import com.jonathanev.review.presentation.model.QuestionItemUi
 import com.jonathanev.review.presentation.state.GuidesUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,7 +32,8 @@ class FragmentWithoutFilesViewModel @Inject constructor(
     private val getGuideMoveUseCase: GetGuideMoveUseCase,
     private val getGuideXmlDataUseCase: GetGuideXmlDataUseCase,
     private val resetNavigationUseCase: ResetNavigationUseCase,
-    private val loadGuidesUseCase: LoadGuidesUseCase
+    private val loadGuidesUseCase: LoadGuidesUseCase,
+    private val clearGuideMoveUseCase: ClearGuideMoveUseCase
 ) : ViewModel() {
     private val _eventsMovingFiles = MutableSharedFlow<UIMovingEvent>()
     val eventsMovingFiles = _eventsMovingFiles.asSharedFlow()
@@ -51,6 +54,24 @@ class FragmentWithoutFilesViewModel @Inject constructor(
 
     private var _respuestas: MutableList<QuestionItemUi> = mutableListOf()
     val respuestas: List<QuestionItemUi> get() = _respuestas
+
+    val interactionMode: StateFlow<FileInteractionMode> = getGuideMoveUseCase()
+        .map { activeMoving ->
+            if (activeMoving != null) FileInteractionMode.MovingItem else FileInteractionMode.Default
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = if (getGuideMoveUseCase().value != null) {
+                FileInteractionMode.MovingItem
+            } else {
+                FileInteractionMode.Default
+            }
+        )
+
+    fun onCancelMove() {
+        clearGuideMoveUseCase.invoke()
+    }
 
     private fun eventMovingFile(message: String) {
         viewModelScope.launch {
@@ -97,12 +118,6 @@ class FragmentWithoutFilesViewModel @Inject constructor(
 
                 else -> eventMovingFile("Error inesperado")
             }
-        }
-    }
-
-    fun initRelativeGuide() {
-        viewModelScope.launch {
-            resetNavigationUseCase.invoke()
         }
     }
 }

@@ -24,9 +24,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -75,7 +72,6 @@ fun PreviewMovingGuide(
 @Composable
 fun ListGuidesRoute(
     viewModel: FragmentListGuidesViewModel,
-    fileInteractionMode: FileInteractionMode,
     onAddGuideClick: () -> Unit,
     onOpenGuideClick: () -> Unit,
     onRenameGuideClick: (GuideUiModel) -> Unit,
@@ -83,10 +79,7 @@ fun ListGuidesRoute(
     onNavWithoutGuides: () -> Unit
 ) {
     val context = LocalContext.current
-    var currentInteractionMode by remember(fileInteractionMode) {
-        mutableStateOf(fileInteractionMode)
-    }
-
+    val interactionMode by viewModel.interactionMode.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val dialogState by viewModel.dialogState.collectAsStateWithLifecycle()
 
@@ -140,7 +133,7 @@ fun ListGuidesRoute(
             ListGuidesScreen(
                 guides = state.guides,
                 onAddGuideClick = onAddGuideClick,
-                fileInteractionMode = currentInteractionMode,
+                fileInteractionMode = interactionMode,
                 onItemClick = { posGuide ->
                     when (val result = viewModel.getGuideSelected(state.guides, posGuide)) {
                         GuideResultUi.Error -> {
@@ -159,7 +152,7 @@ fun ListGuidesRoute(
                     }
                 },
                 onMoveCancelGuideClick = {
-                    currentInteractionMode = FileInteractionMode.Default
+                    viewModel.onCancelMove()
                 },
                 onMoveSuccessGuideClick = {
                     viewModel.movingGuide(state.guides)

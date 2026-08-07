@@ -25,9 +25,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -75,16 +72,13 @@ fun PreviewFoldersScreen(
 @Composable
 fun ListFoldersRoute(
     viewModel: ListFoldersViewModel,
-    fileInteractionMode: FileInteractionMode,
     onCreateFolderClick: () -> Unit,
-    onFolderOpen: (FileInteractionMode) -> Unit,
-    onDeleteFolder: () -> Unit,
+    onFolderOpen: () -> Unit,
+    onDeleteFolder: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val interactionMode by viewModel.interactionMode.collectAsStateWithLifecycle()
     val dialogState by viewModel.dialogState.collectAsStateWithLifecycle()
-    var currentInteractionMode by remember(fileInteractionMode) {
-        mutableStateOf(fileInteractionMode)
-    }
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
@@ -97,6 +91,10 @@ fun ListFoldersRoute(
 
                 is FolderActionEvent.ShowMessage -> {
                     showToast(event.text, context)
+                }
+
+                FolderActionEvent.OpenFolder -> {
+                    onFolderOpen()
                 }
             }
         }
@@ -119,7 +117,7 @@ fun ListFoldersRoute(
 
             ListFoldersScreen(
                 guias = state.folders,
-                fileInteractionMode = currentInteractionMode,
+                fileInteractionMode = interactionMode,
                 onCreateFolderClick = onCreateFolderClick,
                 onFolderClick = { posFolder ->
                     when (val result =
@@ -140,7 +138,7 @@ fun ListFoldersRoute(
                     }
                 },
                 onMoveCancelGuideClick = {
-                    currentInteractionMode = FileInteractionMode.Default
+                    viewModel.onCancelMove()
                 }
             )
 
@@ -169,7 +167,6 @@ fun ListFoldersRoute(
                             when (option) {
                                 FolderMenuOption.OPEN -> {
                                     viewModel.navigateToDirectory(state.item)
-                                    onFolderOpen(currentInteractionMode)
                                 }
 
                                 FolderMenuOption.DELETE -> {

@@ -2,9 +2,11 @@ package com.jonathanev.review.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jonathanev.review.domain.ClearGuideMoveUseCase
 import com.jonathanev.review.domain.DeleteFolderUseCase
 import com.jonathanev.review.domain.GetFolderPosicionUseCase
 import com.jonathanev.review.domain.GetFoldersWithNumGuidesUseCase
+import com.jonathanev.review.domain.GetGuideMoveUseCase
 import com.jonathanev.review.domain.NextNavigationUseCase
 import com.jonathanev.review.domain.ResetNavigationUseCase
 import com.jonathanev.review.domain.result.FolderResultDomain
@@ -12,6 +14,7 @@ import com.jonathanev.review.presentation.event.FolderActionEvent
 import com.jonathanev.review.presentation.event.UIMovingEvent
 import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.presentation.mapper.toUi
+import com.jonathanev.review.presentation.model.FileInteractionMode
 import com.jonathanev.review.presentation.model.FolderResultUi
 import com.jonathanev.review.presentation.model.FolderUiModel
 import com.jonathanev.review.presentation.state.ActionDialogState
@@ -34,7 +37,9 @@ class ListFoldersViewModel @Inject constructor(
     private val getFolderPosicionUseCase: GetFolderPosicionUseCase,
     private val deleteFolderUseCase: DeleteFolderUseCase,
     private val nextNavigationUseCase: NextNavigationUseCase,
-    private val resetNavigationUseCase: ResetNavigationUseCase
+    private val resetNavigationUseCase: ResetNavigationUseCase,
+    private val getGuideMoveUseCase: GetGuideMoveUseCase,
+    private val clearGuideMoveUseCase: ClearGuideMoveUseCase
 ) : ViewModel() {
     val uiState: StateFlow<FoldersUiState> = getFoldersWithNumGuidesUseCase.invoke()
         .map { list ->
@@ -55,6 +60,24 @@ class ListFoldersViewModel @Inject constructor(
 
     private val _eventsMovingFiles = MutableSharedFlow<UIMovingEvent>()
     val eventsMovingFiles = _eventsMovingFiles.asSharedFlow()
+
+    val interactionMode: StateFlow<FileInteractionMode> = getGuideMoveUseCase()
+        .map { activeMoving ->
+            if (activeMoving != null) FileInteractionMode.MovingItem else FileInteractionMode.Default
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = if (getGuideMoveUseCase().value != null) {
+                FileInteractionMode.MovingItem
+            } else {
+                FileInteractionMode.Default
+            }
+        )
+
+    fun onCancelMove() {
+        clearGuideMoveUseCase.invoke()
+    }
 
     fun getFolderSelected(
         folders: List<FolderUiModel>,
@@ -81,6 +104,7 @@ class ListFoldersViewModel @Inject constructor(
             onDismissDialog()
             val name = item.folder.name
             nextNavigationUseCase.invoke(name)
+            _eventsMessages.emit(FolderActionEvent.OpenFolder)
         }
     }
 

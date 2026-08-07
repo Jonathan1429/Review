@@ -23,7 +23,6 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.jonathanev.review.presentation.model.FileFormMode
-import com.jonathanev.review.presentation.model.FileInteractionMode
 import com.jonathanev.review.presentation.model.GuideMode
 import com.jonathanev.review.presentation.model.QuestionContentMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
@@ -133,7 +132,7 @@ fun BasicNavigation() {
                     },
                     onNavListFoldersScreen = {
                         if (backStack.isNotEmpty()) {
-                            backStack[backStack.lastIndex] = AppRoutes.ListFoldersScreen()
+                            backStack[backStack.lastIndex] = AppRoutes.ListFoldersScreen
                         }
                     }
                 )
@@ -145,7 +144,7 @@ fun BasicNavigation() {
                     }
                 )
             }
-            entry<AppRoutes.ListFoldersScreen> { values ->
+            entry<AppRoutes.ListFoldersScreen> {
                 val viewModel: ListFoldersViewModel = viewModel()
 
                 ListFoldersRoute(
@@ -153,18 +152,17 @@ fun BasicNavigation() {
                     onCreateFolderClick = {
                         backStack.add(AppRoutes.CreateFilesPropertiesScreen(FileFormMode.CreatingFolder))
                     },
-                    onFolderOpen = { folderAction ->
-                        backStack.add(AppRoutes.EntryGuidesScreen(folderAction))
+                    onFolderOpen = {
+                        backStack.add(AppRoutes.EntryGuidesScreen)
                     },
                     onDeleteFolder = {
                         if (backStack.isNotEmpty()) {
                             backStack[backStack.lastIndex] = AppRoutes.MainScreen
                         }
-                    },
-                    fileInteractionMode = values.fileInteractionMode
+                    }
                 )
             }
-            entry<AppRoutes.EntryGuidesScreen> { action ->
+            entry<AppRoutes.EntryGuidesScreen> {
                 val viewModel: FragReviewEntryViewModel = viewModel()
 
                 GuidesEntryRoute(
@@ -172,13 +170,13 @@ fun BasicNavigation() {
                     onNavigateListGuidesRoute = {
                         if (backStack.isNotEmpty()) {
                             backStack[backStack.lastIndex] =
-                                AppRoutes.ListGuidesScreen(action.fileInteractionMode)
+                                AppRoutes.ListGuidesScreen
                         }
                     },
                     onNavigateWithoutFilesScreen = {
                         if (backStack.isNotEmpty()) {
                             backStack[backStack.lastIndex] =
-                                AppRoutes.WithoutGuidesScreen(action.fileInteractionMode)
+                                AppRoutes.WithoutGuidesScreen
                         }
                     },
                 )
@@ -188,24 +186,21 @@ fun BasicNavigation() {
 
                 WithoutFilesRoute(
                     viewModel = viewModel,
-                    fileInteractionMode = value.fileInteractionMode,
                     onAddGuideClick = {
                         backStack.add(AppRoutes.CreateFilesPropertiesScreen(FileFormMode.CreatingFile))
                     },
                     onNavListGuides = {
                         if (backStack.isNotEmpty()) {
-                            backStack[backStack.lastIndex] =
-                                AppRoutes.ListGuidesScreen()
+                            backStack[backStack.lastIndex] = AppRoutes.ListGuidesScreen
                         }
                     }
                 )
             }
-            entry<AppRoutes.ListGuidesScreen> { value ->
+            entry<AppRoutes.ListGuidesScreen> {
                 val viewModel: FragmentListGuidesViewModel = viewModel()
 
                 ListGuidesRoute(
                     viewModel = viewModel,
-                    fileInteractionMode = value.fileInteractionMode,
                     onAddGuideClick = {
                         backStack.add(AppRoutes.CreateFilesPropertiesScreen(FileFormMode.CreatingFile))
                     },
@@ -223,12 +218,11 @@ fun BasicNavigation() {
                     },
                     onMoveGuideClick = {
                         backStack.clear()
-                        backStack.add(AppRoutes.ListFoldersScreen(FileInteractionMode.MovingItem))
+                        backStack.add(AppRoutes.ListFoldersScreen)
                     },
                     onNavWithoutGuides = {
                         if (backStack.isNotEmpty()) {
-                            backStack[backStack.lastIndex] =
-                                AppRoutes.WithoutGuidesScreen()
+                            backStack[backStack.lastIndex] = AppRoutes.WithoutGuidesScreen
                         }
                     }
                 )
