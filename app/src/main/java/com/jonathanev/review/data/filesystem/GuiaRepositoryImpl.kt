@@ -623,6 +623,7 @@ class GuiaRepositoryImpl @Inject constructor(
                 .item(0) as? Element
 
             val description = cuestionarioNode?.getAttribute(Attributes.DESCRIPCION).orEmpty()
+                .ifEmpty { "Sin descripción" }
             val version = guiaEstudioNode?.getAttribute(Attributes.VERSION).orEmpty()
 
             val name = if (version == Versions.VERSION1) {
