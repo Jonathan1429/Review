@@ -10,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.jonathanev.review.presentation.state.CreateFoldersState
 import com.jonathanev.review.presentation.state.FoldersUiState
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
 import com.jonathanev.review.ui.components.CreateFoldersPopUpContent
@@ -21,14 +22,11 @@ fun MainActivityEntryRoute(
     onNavListFoldersScreen: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val foldersState by viewModel.foldersState.collectAsStateWithLifecycle()
 
-    val showDialogCreateFoldersError by viewModel.showDialogCreateFoldersError.collectAsStateWithLifecycle()
-
-    if (showDialogCreateFoldersError) {
+    if (foldersState is CreateFoldersState.Error) {
         Dialog(onDismissRequest = {}) {
-            Box(
-                Modifier.fillMaxSize()
-            ) {
+            Box(Modifier.fillMaxSize()) {
                 CreateFoldersPopUpContent(
                     modifier = Modifier.align(Alignment.Center),
                     onRetryRequest = {

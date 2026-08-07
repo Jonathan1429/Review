@@ -7,6 +7,7 @@ import com.jonathanev.review.domain.InitializeGuideStorageUseCase
 import com.jonathanev.review.domain.NextNavigationUseCase
 import com.jonathanev.review.domain.ResetNavigationUseCase
 import com.jonathanev.review.presentation.mapper.toUi
+import com.jonathanev.review.presentation.state.CreateFoldersState
 import com.jonathanev.review.presentation.state.FoldersUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,15 +41,22 @@ class MainActivityViewModel @Inject constructor(
             initialValue = FoldersUiState.Loading
         )
 
-    private val _showDialogCreateFoldersError = MutableStateFlow(false)
-    val showDialogCreateFoldersError: StateFlow<Boolean> =
-        _showDialogCreateFoldersError.asStateFlow()
+    private val _foldersState = MutableStateFlow<CreateFoldersState>(CreateFoldersState.Idle)
+    val foldersState: StateFlow<CreateFoldersState> = _foldersState.asStateFlow()
 
     fun createFolders() {
+        _foldersState.value = CreateFoldersState.Loading
+
         val isSuccess = initializeGuideStorageUseCase.invoke()
-        if (!isSuccess) {
-            _showDialogCreateFoldersError.value = true
+        if (isSuccess) {
+            _foldersState.value = CreateFoldersState.Idle
+        } else {
+            _foldersState.value = CreateFoldersState.Error
         }
+    }
+
+    fun onDismissErrorDialog() {
+        _foldersState.value = CreateFoldersState.Idle
     }
 
     fun setMainPath() {
@@ -61,10 +69,6 @@ class MainActivityViewModel @Inject constructor(
         viewModelScope.launch {
             nextNavigationUseCase.invoke(folder)
         }
-    }
-
-    fun onDismissErrorDialog() {
-        _showDialogCreateFoldersError.value = false
     }
 
     /*fun checkIfNeedsPermission(hasPermission: Boolean) {
