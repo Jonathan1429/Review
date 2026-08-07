@@ -42,7 +42,7 @@ class GetGuideXmlDataUseCaseTest {
 
     @Test
     fun search_for_a_guide_correctly_with_context_browsing() = runTest {
-        val context = GuideContext.Browsing(guideDomainModel)
+        val context = GuideContext.Browsing(guideDomainModel, 0)
 
         coEvery {
             guiaRepository.getXMLGuide(guideDomainModel)
@@ -59,7 +59,7 @@ class GetGuideXmlDataUseCaseTest {
 
     @Test
     fun search_for_a_guide_correctly_with_context_editing() = runTest {
-        val context = GuideContext.Editing(guideDomainModel)
+        val context = GuideContext.Editing(guideDomainModel, 0)
 
         coEvery {
             guiaRepository.getXMLGuide(guideDomainModel)
