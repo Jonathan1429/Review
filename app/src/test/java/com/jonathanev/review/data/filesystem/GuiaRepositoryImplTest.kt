@@ -2,6 +2,7 @@ package com.jonathanev.review.data.filesystem
 
 import app.cash.turbine.test
 import com.jonathanev.review.data.storage.StorageFolders
+import com.jonathanev.review.data.util.LabelsHandler
 import com.jonathanev.review.data.util.PathHandler
 import com.jonathanev.review.data.xml.Attributes
 import com.jonathanev.review.data.xml.Structure
@@ -70,10 +71,11 @@ class GuiaRepositoryImplTest {
 
     // Instancia real de tu PathHandler
     private val pathHandler = PathHandler()
-
+    private val labelsHandler = LabelsHandler()
     private val xmlSerializerFactory: XmlSerializerFactory = mockk()
     private val fileOutputStreamFactory: FileOutputStreamFactory = mockk()
     private val filePathResolver: FilePathResolver = mockk()
+
     private lateinit var xmlTestV2: String
     private lateinit var xmlTestIntegracionV2: String
     private lateinit var xmlSintaxisV1: String
@@ -117,7 +119,8 @@ class GuiaRepositoryImplTest {
             pathHandler = pathHandler,
             xmlSerializerFactory = xmlSerializerFactory,
             fileOutputStreamFactory = fileOutputStreamFactory,
-            filePathResolver = filePathResolver
+            filePathResolver = filePathResolver,
+            labelsHandler = labelsHandler
         )
     }
 
@@ -800,7 +803,8 @@ class GuiaRepositoryImplTest {
             pathHandler = pathHandlerMock,
             xmlSerializerFactory = xmlSerializerFactory,
             fileOutputStreamFactory = fileOutputStreamFactory,
-            filePathResolver = filePathResolver
+            filePathResolver = filePathResolver,
+            labelsHandler = labelsHandler
         )
 
         val carpetaKotlin =
@@ -945,7 +949,8 @@ class GuiaRepositoryImplTest {
             pathHandler = pathHandlerMock,
             xmlSerializerFactory = xmlSerializerFactory,
             fileOutputStreamFactory = fileOutputStreamFactory,
-            filePathResolver = filePathResolver
+            filePathResolver = filePathResolver,
+            labelsHandler = labelsHandler
         )
 
         val carpetaKotlin =

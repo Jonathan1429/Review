@@ -245,6 +245,7 @@ fun FillingGuideRoute(
                         is GuideContext.Moving -> onCloseGuide()
                         is GuideContext.Rename -> onCloseGuide()
                     }
+                    viewModel.clearSavedState()
                 },
                 onCurrentPosContent = { position ->
                     viewModel.updatePosContent(position)

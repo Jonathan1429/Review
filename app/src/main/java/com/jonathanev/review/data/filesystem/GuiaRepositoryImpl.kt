@@ -7,6 +7,7 @@ import com.jonathanev.review.data.model.xml.GuideXmlDto
 import com.jonathanev.review.data.model.xml.QAItemXmlDto
 import com.jonathanev.review.data.model.xml.QuestionContentXmlDto
 import com.jonathanev.review.data.model.xml.QuestionItemXmlDto
+import com.jonathanev.review.data.util.LabelsHandler
 import com.jonathanev.review.data.util.PathHandler
 import com.jonathanev.review.data.xml.Attributes
 import com.jonathanev.review.data.xml.Structure
@@ -57,6 +58,7 @@ import javax.xml.parsers.DocumentBuilderFactory
 @Singleton
 class GuiaRepositoryImpl @Inject constructor(
     private val pathHandler: PathHandler,
+    private val labelsHandler: LabelsHandler,
     private val xmlSerializerFactory: XmlSerializerFactory,
     private val fileOutputStreamFactory: FileOutputStreamFactory,
     private val filePathResolver: FilePathResolver
@@ -395,19 +397,14 @@ class GuiaRepositoryImpl @Inject constructor(
             for (j in 0 until texts.length) {
                 val t = texts.item(j) as Element
                 val textValue = t.getAttribute(ContentType.TEXT.toTagXml())
-
-                contentList.add(
-                    QuestionContentXmlDto.Text(
-                        text = textValue,
-                        colorRangeXmlDto = emptyList()
-                    )
-                )
+                val simpleText = labelsHandler.sanitizeLabels(textValue)
+                val processAndSanitizeLabels = labelsHandler.processAndSanitizeLabels(simpleText)
+                contentList.add(processAndSanitizeLabels)
             }
 
             val images = element.getElementsByTagName(ContentType.IMAGE.toTagXml())
             for (j in 0 until images.length) {
                 val img = images.item(j) as Element
-                //val uri = img.getAttribute(URI)
                 val nameFile = img.getAttribute(Attributes.NAMEFILE)
                 val uri = pathHandler.getSubstringPath(
                     path = path,
@@ -466,8 +463,10 @@ class GuiaRepositoryImpl @Inject constructor(
                     val nameFile = decoded.substringAfterLast("/")
                     QuestionContentXmlDto.Image(uri = decoded, nameFile = nameFile)
                 } else {
+                    val simpleText = labelsHandler.sanitizeLabels(ques)
+
                     QuestionContentXmlDto.Text(
-                        text = ques,
+                        text = simpleText,
                         colorRangeXmlDto = emptyList()
                     )
                 }
@@ -487,8 +486,9 @@ class GuiaRepositoryImpl @Inject constructor(
                     val nameFile = decoded.substringAfterLast("/")
                     QuestionContentXmlDto.Image(uri = decoded, nameFile = nameFile)
                 } else {
+                    val simpleText = labelsHandler.sanitizeLabels(ans)
                     QuestionContentXmlDto.Text(
-                        text = ans,
+                        text = simpleText,
                         colorRangeXmlDto = emptyList()
                     )
                 }

@@ -404,23 +404,62 @@ private fun saveCurrentQuestion(
     var isDoubleColors = false
     val listSpans = mutableListOf<ColorRangeUi>()
 
-    spanStyles.forEachIndexed { index, range ->
+    if (text.isEmpty()) {
+        onSaveContent(text, emptyList())
+        return SpanPalabraModel()
+    }
+
+    // 1. Creamos un mapa/array del tamaño del texto para evaluar el color exacto de cada carácter
+    val characterColors = Array(text.length) { Color.Unspecified }
+
+    // 2. Aplicamos los spans. Si un rango nuevo cae sobre un color distinto, detectamos sobreescritura
+    spanStyles.forEach { range ->
         if (range.item.color != Color.Unspecified) {
-            if (index > 0) {
-                val previousRange = spanStyles[index - 1]
-                if (range.start < previousRange.end) {
+            val start = range.start.coerceIn(0, text.length)
+            val end = range.end.coerceIn(0, text.length)
+
+            for (i in start until end) {
+                if (characterColors[i] != Color.Unspecified && characterColors[i] != range.item.color) {
                     isDoubleColors = true
                 }
+                characterColors[i] = range.item.color
             }
-
-            listSpans.add(
-                ColorRangeUi(
-                    start = range.start,
-                    end = range.end,
-                    color = range.item.color.toArgb()
-                )
-            )
         }
+    }
+
+    // 3. Recorremos el array e identificamos bloques continuos del mismo color
+    var currentStart = -1
+    var currentColor = Color.Unspecified
+
+    for (i in text.indices) {
+        val colorAtChar = characterColors[i]
+
+        if (colorAtChar != currentColor) {
+            // Guardamos el bloque acumulado previo si tenía color válido
+            if (currentColor != Color.Unspecified && currentStart != -1) {
+                listSpans.add(
+                    ColorRangeUi(
+                        start = currentStart,
+                        end = i,
+                        color = currentColor.toArgb()
+                    )
+                )
+            }
+            // Iniciamos un nuevo bloque
+            currentStart = if (colorAtChar != Color.Unspecified) i else -1
+            currentColor = colorAtChar
+        }
+    }
+
+    // 4. Guardamos el último bloque activo al llegar al final del texto
+    if (currentColor != Color.Unspecified && currentStart != -1) {
+        listSpans.add(
+            ColorRangeUi(
+                start = currentStart,
+                end = text.length,
+                color = currentColor.toArgb()
+            )
+        )
     }
 
     onSaveContent(text, listSpans)

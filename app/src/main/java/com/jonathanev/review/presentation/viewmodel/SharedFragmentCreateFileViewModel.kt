@@ -11,7 +11,6 @@ import com.jonathanev.review.domain.GetGuideXmlDataUseCase
 import com.jonathanev.review.domain.SaveTempImageUseCase
 import com.jonathanev.review.domain.SetContentUseCase
 import com.jonathanev.review.domain.SetCrearXmlUseCase
-import com.jonathanev.review.domain.SetPintarTextosUseCase
 import com.jonathanev.review.domain.mapper.GuideQuestionExtractor
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
@@ -66,17 +65,13 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     private val getGuideContextUseCase: GetGuideContextUseCase,
     private val saveTempImageUseCase: SaveTempImageUseCase,
     private val savedStateHandle: SavedStateHandle,
-    private val clearTempImagesUseCase: ClearTempImagesUseCase,
-    private val setPintarTextosUseCase: SetPintarTextosUseCase
+    private val clearTempImagesUseCase: ClearTempImagesUseCase
 ) : ViewModel() {
     private companion object {
         const val KEY_GUIDE_STATE = "key_guide_ui_state"
     }
 
-    private val _uiState = MutableStateFlow(
-        savedStateHandle.get<GuideScreenUiState.Success>(KEY_GUIDE_STATE)
-            ?: GuideScreenUiState.Loading
-    )
+    private val _uiState = MutableStateFlow<GuideScreenUiState>(GuideScreenUiState.Loading)
     val uiState: StateFlow<GuideScreenUiState> = _uiState.asStateFlow()
 
     init {
@@ -108,14 +103,18 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                         }
                     }
 
-                    val currentSuccess = _uiState.value as? GuideScreenUiState.Success
-                    if (currentSuccess != null &&
-                        currentSuccess.fileName == guide.nameGuide &&
-                        currentSuccess.guideContext == context
+                    val restoredState =
+                        savedStateHandle.get<GuideScreenUiState.Success>(KEY_GUIDE_STATE)
+
+                    if (restoredState != null &&
+                        restoredState.fileName == guide.nameGuide &&
+                        restoredState.guideContext == context
                     ) {
+                        _uiState.value = restoredState
                         return@collect
                     }
 
+                    // 3. Si es una entrada normal a la pantalla, mostramos Loading y cargamos desde la fuente de datos
                     _uiState.value = GuideScreenUiState.Loading
 
                     when (val result = getGuideXmlDataUseCase.invoke(context = context)) {
@@ -863,6 +862,10 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 state.copy(mediaSelected = filterTypeClicked)
             } else state
         }
+    }
+
+    fun clearSavedState() {
+        savedStateHandle.remove<GuideScreenUiState>(KEY_GUIDE_STATE)
     }
 
     /*fun restartGuide() {
