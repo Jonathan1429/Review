@@ -40,10 +40,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jonathanev.review.R
+import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.presentation.event.CreateGuideEvent
-import com.jonathanev.review.presentation.model.GuideMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
-import com.jonathanev.review.presentation.model.SaveGuideMode
 import com.jonathanev.review.presentation.state.GuideScreenUiState
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.ui.components.AssetCarouselViewer
@@ -75,7 +74,7 @@ fun PreviewStudyGuideScreen(
             actualQuestion = data.actualQuestion,
             totalQuestions = data.totalQuestions,
             listTypeMedia = data.listTypeMedia,
-            guideMode = data.guideMode,
+            guideContext = data.guideContext,
             currentPosContent = 0,
             showDialogDeleteQuestion = data.showDialogDeleteQuestion,
             showDialogRepeatGuide = data.showDialogRepeatGuide,
@@ -101,7 +100,6 @@ fun PreviewStudyGuideScreen(
 @Composable
 fun FillingGuideRoute(
     viewModel: SharedFragmentCreateFileViewModel,
-    guideMode: GuideMode,
     onOpenAssetClick: (QuestionContentUi, posItem: Int) -> Unit,
     onAddAssetClick: (ContentType, posItem: Int) -> Unit,
     onActionGuideNone: () -> Unit,
@@ -191,7 +189,7 @@ fun FillingGuideRoute(
                 actualQuestion = actualQuestion,
                 totalQuestions = totalQuestions,
                 listTypeMedia = listTypeMedia,
-                guideMode = guideMode,
+                guideContext = state.guideContext,
                 currentPosContent = currentPosContent,
                 showDialogDeleteQuestion = state.showDialogDeleteQuestion,
                 showDialogRepeatGuide = state.showDialogRepeatGuide,
@@ -239,22 +237,13 @@ fun FillingGuideRoute(
                 onAddAssetClick = { posItem -> onAddAssetClick(mediaSelected, posItem) },
                 onAddQuestion = viewModel::addNextQuestion,
                 onCloseGuide = {
-                    when (guideMode) {
-                        is GuideMode.Create -> {
-                            viewModel.saveGuide(
-                                mode = SaveGuideMode.Create
-                            )
-                        }
-
-                        is GuideMode.Edit -> {
-                            viewModel.saveGuide(
-                                mode = SaveGuideMode.Update
-                            )
-                        }
-
-                        is GuideMode.Review -> {
-                            onCloseGuide()
-                        }
+                    when (state.guideContext) {
+                        is GuideContext.Browsing -> onCloseGuide()
+                        is GuideContext.Creating -> viewModel.saveGuide(guideContext = state.guideContext)
+                        is GuideContext.DeleteGuide -> onCloseGuide()
+                        is GuideContext.Editing -> viewModel.saveGuide(guideContext = state.guideContext)
+                        is GuideContext.Moving -> onCloseGuide()
+                        is GuideContext.Rename -> onCloseGuide()
                     }
                 },
                 onCurrentPosContent = { position ->
@@ -276,7 +265,7 @@ fun FillingGuideScreen(
     actualQuestion: Int,
     totalQuestions: Int,
     listTypeMedia: List<QuestionContentUi>,
-    guideMode: GuideMode,
+    guideContext: GuideContext,
     showDialogDeleteQuestion: Boolean,
     currentPosContent: Int,
     showDialogRepeatGuide: Boolean,
@@ -301,7 +290,7 @@ fun FillingGuideScreen(
         contentWindowInsets = androidx.compose.foundation.layout.WindowInsets.safeDrawing,
         floatingActionButton = {
             FloatingActionButtons(
-                guideMode = guideMode,
+                guideContext = guideContext,
                 onAddQuestion = onAddQuestion,
                 onCloseGuide = onCloseGuide
             )
@@ -316,7 +305,7 @@ fun FillingGuideScreen(
             CustomTopBar(
                 actualQuestion = actualQuestion,
                 totalQuestions = totalQuestions,
-                guideMode = guideMode,
+                guideContext = guideContext,
                 onDeleteQuestionClick = onDeleteQuestionClick,
                 onBackQuestionClick = onBackQuestionClick,
                 onNextQuestionClick = onNextQuestionClick
@@ -337,7 +326,7 @@ fun FillingGuideScreen(
             AssetCarouselViewer(
                 assets = listTypeMedia,
                 mediaForSelected = mediaSelected,
-                guideMode = guideMode,
+                guideContext = guideContext,
                 currentPosContent = currentPosContent,
                 onAddAssetClick = { posItem -> onAddAssetClick(posItem) },
                 onDeleteItemClick = { typeContent, positionItem ->
@@ -393,7 +382,7 @@ fun FillingGuideScreen(
 
 @Composable
 private fun FloatingActionButtons(
-    guideMode: GuideMode,
+    guideContext: GuideContext,
     onAddQuestion: () -> Unit,
     onCloseGuide: () -> Unit
 ) {
@@ -401,7 +390,7 @@ private fun FloatingActionButtons(
         horizontalAlignment = Alignment.End,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        if (guideMode !is GuideMode.Review) {
+        if (guideContext !is GuideContext.Browsing) {
             FloatingActionButton(
                 onClick = singleClick { onAddQuestion() },
                 containerColor = MaterialTheme.colorScheme.primary,
@@ -414,12 +403,12 @@ private fun FloatingActionButtons(
         }
 
         val painter =
-            if (guideMode !is GuideMode.Review)
+            if (guideContext !is GuideContext.Browsing)
                 android.R.drawable.ic_menu_save
             else
                 R.drawable.ic_success
         val text =
-            if (guideMode !is GuideMode.Review)
+            if (guideContext !is GuideContext.Browsing)
                 stringResource(R.string.btnGuardarGuia)
             else
                 stringResource(R.string.lblCloseGuide)

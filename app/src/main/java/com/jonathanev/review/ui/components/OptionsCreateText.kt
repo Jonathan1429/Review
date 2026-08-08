@@ -20,7 +20,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.jonathanev.review.R
-import com.jonathanev.review.presentation.model.GuideMode
+import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.ui.preview.ComponentsPreviews
 import com.jonathanev.review.ui.preview.providers.OptionsCreateTextProv
 import com.jonathanev.review.ui.preview.providers.OptionsCreateTextProvider
@@ -35,7 +35,7 @@ fun PreviewOptionsCreateText(
         OptionsCreateText(
             textValue = data.text,
             selectedColor = data.color,
-            guideMode = data.guideMode,
+            guideContext = data.guideContext,
             onClearColorClick = {},
             onSelectColorClick = {},
             onSaveTextClick = {},
@@ -48,7 +48,7 @@ fun PreviewOptionsCreateText(
 fun OptionsCreateText(
     textValue: AnnotatedString,
     selectedColor: Color,
-    guideMode: GuideMode,
+    guideContext: GuideContext,
     onClearColorClick: () -> Unit,
     onSelectColorClick: () -> Unit,
     onSaveTextClick: () -> Unit,
@@ -60,7 +60,7 @@ fun OptionsCreateText(
             .padding(horizontal = 20.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (guideMode !is GuideMode.Review) {
+        if (guideContext !is GuideContext.Browsing) {
             IconButton(
                 onClick = singleClick { onClearColorClick() },
                 modifier = Modifier
@@ -101,7 +101,7 @@ fun OptionsCreateText(
 
         IconButton(
             onClick = singleClick {
-                if (guideMode is GuideMode.Review) {
+                if (guideContext is GuideContext.Browsing) {
                     onBackNav()
                 } else {
                     if (textValue.isNotEmpty()) {

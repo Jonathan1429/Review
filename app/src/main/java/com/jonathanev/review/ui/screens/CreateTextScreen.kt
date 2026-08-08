@@ -1,10 +1,12 @@
 package com.jonathanev.review.ui.screens
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -15,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -25,14 +28,16 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.presentation.model.ColorRangeUi
-import com.jonathanev.review.presentation.model.GuideMode
 import com.jonathanev.review.presentation.model.QuestionContentMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.presentation.model.SpanPalabraModel
+import com.jonathanev.review.presentation.state.GuideScreenUiState
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.ui.components.ColorPickerDialog
 import com.jonathanev.review.ui.components.CustomBoxCreateText
+import com.jonathanev.review.ui.components.ErrorComponent
 import com.jonathanev.review.ui.components.OptionsCreateText
 import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.CreateTextScreenProv
@@ -47,7 +52,7 @@ fun PreviewTextScreen(
 ) {
     ReviewTheme {
         CreateTextScreen(
-            guideMode = data.guideMode,
+            guideContext = data.guideContext,
             colorInitial = MaterialTheme.colorScheme.onSurface,
             selectedColor = MaterialTheme.colorScheme.onSurface,
             textValue = data.textValue,
@@ -65,82 +70,107 @@ fun PreviewTextScreen(
 
 @Composable
 fun CreateTextRoute(
-    guideMode: GuideMode,
     viewModel: SharedFragmentCreateFileViewModel,
     posItem: Int,
     onSaveText: () -> Unit,
     onBackNav: () -> Unit,
     questionContentMode: QuestionContentMode
 ) {
-    val textList by viewModel.textList.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    val item = remember(textList, posItem, questionContentMode) {
-        if (questionContentMode == QuestionContentMode.CREATING) {
-            QuestionContentUi.Text("", emptyList())
-        } else {
-            textList.getOrNull(posItem) ?: QuestionContentUi.Text("", emptyList())
+    when (val state = uiState) {
+        is GuideScreenUiState.Loading -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+
+        is GuideScreenUiState.Error -> {
+            ErrorComponent(
+                onRetry = viewModel::retryLoad,
+                onBack = onBackNav
+            )
+        }
+
+        is GuideScreenUiState.Success -> {
+            val textList by viewModel.textList.collectAsStateWithLifecycle()
+
+            val item = remember(textList, posItem, questionContentMode) {
+                if (questionContentMode == QuestionContentMode.CREATING) {
+                    QuestionContentUi.Text("", emptyList())
+                } else {
+                    textList.getOrNull(posItem) ?: QuestionContentUi.Text("", emptyList())
+                }
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    viewModel.clearTextDraft()
+                }
+            }
+
+            // 2. Inicializamos el borrador con el ítem correcto
+            LaunchedEffect(item, questionContentMode) {
+                viewModel.initTextDraft(item)
+            }
+
+            val colorInitial = MaterialTheme.colorScheme.onSurface
+            var selectedColor by remember { mutableStateOf(colorInitial) }
+            var showDialog by remember { mutableStateOf(false) }
+
+            val textValueState by viewModel.draftTextValue.collectAsStateWithLifecycle()
+
+            // 3. Si textValueState es null (porque DisposableEffect o clearTextDraft lo limpiaron), usa el item
+            val textValue = textValueState ?: remember(item) {
+                TextFieldValue(annotatedString = item.toAnnotatedString())
+            }
+
+            LaunchedEffect(Unit) {
+                viewModel.updateItemTriger.collect {
+                    onSaveText()
+                }
+            }
+
+            CreateTextScreen(
+                guideContext = state.guideContext,
+                colorInitial = colorInitial,
+                selectedColor = selectedColor,
+                textValue = textValue,
+                showDialog = showDialog,
+                onSaveText = { text, colors ->
+                    viewModel.addTextContent(
+                        textWithLabels = text,
+                        listSpans = colors,
+                        questionContentMode
+                    )
+                },
+                onClearColorClick = {
+                    viewModel.clearTextDraft()
+                },
+                onSelectColorClick = { showDialog = true },
+                onChangeTextValue = { textFieldValue ->
+                    viewModel.onDraftTextChange(newValue = textFieldValue)
+                },
+                onDissmissDialog = {
+                    showDialog = false
+                },
+                onColorSelected = { actualColor ->
+                    selectedColor = actualColor
+                    showDialog = false
+                },
+                onBackNav = onBackNav
+            )
         }
     }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            viewModel.clearTextDraft()
-        }
-    }
-
-    // 2. Inicializamos el borrador con el ítem correcto
-    LaunchedEffect(item, questionContentMode) {
-        viewModel.initTextDraft(item)
-    }
-
-    val colorInitial = MaterialTheme.colorScheme.onSurface
-    var selectedColor by remember { mutableStateOf(colorInitial) }
-    var showDialog by remember { mutableStateOf(false) }
-
-    val textValueState by viewModel.draftTextValue.collectAsStateWithLifecycle()
-
-    // 3. Si textValueState es null (porque DisposableEffect o clearTextDraft lo limpiaron), usa el item
-    val textValue = textValueState ?: remember(item) {
-        TextFieldValue(annotatedString = item.toAnnotatedString())
-    }
-
-    LaunchedEffect(Unit) {
-        viewModel.updateItemTriger.collect {
-            onSaveText()
-        }
-    }
-
-    CreateTextScreen(
-        guideMode = guideMode,
-        colorInitial = colorInitial,
-        selectedColor = selectedColor,
-        textValue = textValue,
-        showDialog = showDialog,
-        onSaveText = { text, colors ->
-            viewModel.addTextContent(textWithLabels = text, listSpans = colors, questionContentMode)
-        },
-        onClearColorClick = {
-            viewModel.clearTextDraft()
-        },
-        onSelectColorClick = { showDialog = true },
-        onChangeTextValue = { textFieldValue ->
-            viewModel.onDraftTextChange(newValue = textFieldValue)
-        },
-        onDissmissDialog = {
-            showDialog = false
-        },
-        onColorSelected = { actualColor ->
-            selectedColor = actualColor
-            showDialog = false
-        },
-        onBackNav = onBackNav
-    )
 }
 
 
 @Composable
 fun CreateTextScreen(
-    guideMode: GuideMode,
+    guideContext: GuideContext,
     onSaveText: (String, List<ColorRangeUi>) -> Unit,
     colorInitial: Color,
     selectedColor: Color,
@@ -175,7 +205,7 @@ fun CreateTextScreen(
                     .padding(bottom = 16.dp)
             ) {
                 OptionsCreateText(
-                    guideMode = guideMode,
+                    guideContext = guideContext,
                     textValue = textValue.annotatedString,
                     selectedColor = selectedColor,
                     onClearColorClick = onClearColorClick,
@@ -192,7 +222,7 @@ fun CreateTextScreen(
                     modifier = Modifier.padding(20.dp),
                     textValue = textValue,
                     hint = textValue.text.isNotEmpty(),
-                    enabled = guideMode !is GuideMode.Review,
+                    enabled = guideContext !is GuideContext.Browsing,
                     onTextValueChange = { actualText ->
                         val oldText = textValue.text
                         val newText = actualText.text

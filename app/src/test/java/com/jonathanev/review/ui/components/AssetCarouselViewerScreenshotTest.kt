@@ -91,7 +91,7 @@ class AssetCarouselViewerScreenshotTest(
                         AssetCarouselViewer(
                             assets = data.listType,
                             mediaForSelected = data.mediaForSelected,
-                            guideMode = data.guideMode,
+                            guideContext = data.guideContext,
                             currentPosContent = 0,
                             onAddAssetClick = { },
                             onOpenAssetClick = { _, _ -> },

@@ -2,7 +2,6 @@ package com.jonathanev.review.ui.navegation
 
 import androidx.navigation3.runtime.NavKey
 import com.jonathanev.review.presentation.model.FileFormMode
-import com.jonathanev.review.presentation.model.GuideMode
 import com.jonathanev.review.presentation.model.QuestionContentMode
 import kotlinx.serialization.Serializable
 
@@ -28,19 +27,17 @@ sealed interface AppRoutes : NavKey {
     data class CreateFilesPropertiesScreen(val fileFormMode: FileFormMode): AppRoutes
 
     @Serializable
-    data class FillingGuideScreen(val guideMode: GuideMode): AppRoutes
+    data object FillingGuideScreen : AppRoutes
 
     @Serializable
     data class CreateImageScreen(
         val questionContentMode: QuestionContentMode,
-        val posItem: Int,
-        val guideMode: GuideMode
+        val posItem: Int
     ) : AppRoutes
 
     data class CreateTextScreen(
         val questionContentMode: QuestionContentMode,
-        val posItem: Int,
-        val guideMode: GuideMode
+        val posItem: Int
     ) : AppRoutes
     @Serializable
     data object PreviewQuestionsScreen : AppRoutes

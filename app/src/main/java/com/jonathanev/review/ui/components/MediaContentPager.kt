@@ -41,7 +41,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jonathanev.review.R
-import com.jonathanev.review.presentation.model.GuideMode
+import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.ui.model.ContentType
 import com.jonathanev.review.ui.preview.ComponentsPreviews
@@ -75,7 +75,7 @@ fun PreviewMediaContentPager(
                 pagerState = pagerState,
                 assets = data.listType,
                 mediaForSelected = data.mediaForSelected,
-                guideMode = data.guideMode,
+                guideContext = data.guideContext,
                 onOpenAssetClick = { _, _ -> },
                 onCurrentPosContent = {}
             )
@@ -88,7 +88,7 @@ fun MediaContentPager(
     pagerState: PagerState,
     assets: List<QuestionContentUi>,
     mediaForSelected: ContentType,
-    guideMode: GuideMode,
+    guideContext: GuideContext,
     onOpenAssetClick: (typeContent: QuestionContentUi, posItem: Int) -> Unit,
     onCurrentPosContent: (Int) -> Unit
 ) {
@@ -198,7 +198,7 @@ fun MediaContentPager(
                 }
 
                 val painter =
-                    if (guideMode !is GuideMode.Review) R.drawable.ic_edit else R.drawable.ic_eye
+                    if (guideContext !is GuideContext.Browsing) R.drawable.ic_edit else R.drawable.ic_eye
 
                 Box(
                     modifier = Modifier.fillMaxWidth()

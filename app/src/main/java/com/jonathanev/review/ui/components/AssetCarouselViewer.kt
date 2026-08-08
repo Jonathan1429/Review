@@ -29,7 +29,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jonathanev.review.R
-import com.jonathanev.review.presentation.model.GuideMode
+import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.ui.model.ContentType
 import com.jonathanev.review.ui.preview.ComponentsPreviews
@@ -60,7 +60,7 @@ fun PreviewAssetCarouselViewer(
                 AssetCarouselViewer(
                     assets = data.listType,
                     mediaForSelected = data.mediaForSelected,
-                    guideMode = data.guideMode,
+                    guideContext = data.guideContext,
                     currentPosContent = 0,
                     onAddAssetClick = { },
                     onOpenAssetClick = { _, _ -> },
@@ -77,7 +77,7 @@ fun PreviewAssetCarouselViewer(
 fun AssetCarouselViewer(
     assets: List<QuestionContentUi>,
     mediaForSelected: ContentType,
-    guideMode: GuideMode,
+    guideContext: GuideContext,
     currentPosContent: Int,
     onAddAssetClick: (posItem: Int) -> Unit,
     onOpenAssetClick: (QuestionContentUi, posItem: Int) -> Unit,
@@ -105,12 +105,12 @@ fun AssetCarouselViewer(
             pagerState = pagerState,
             assets = assets,
             mediaForSelected = mediaForSelected,
-            guideMode = guideMode,
+            guideContext = guideContext,
             onOpenAssetClick = { typeContent, posItem -> onOpenAssetClick(typeContent, posItem) },
             onCurrentPosContent = { position -> onCurrentPosContent(position) }
         )
         val currentAsset = assets.getOrNull(pagerState.currentPage)
-            .takeUnless { guideMode is GuideMode.Review }
+            .takeUnless { guideContext is GuideContext.Browsing }
 
         if (currentAsset != null) {
             DeleteAsset(mediaForSelected = mediaForSelected, onDeleteItemClick = {
@@ -127,7 +127,7 @@ fun AssetCarouselViewer(
             assets = assets,
             pagerState = pagerState,
             scope = scope,
-            guideMode = guideMode,
+            guideContext = guideContext,
             onAddAssetClick = { posItem -> onAddAssetClick(posItem) }
         )
     }

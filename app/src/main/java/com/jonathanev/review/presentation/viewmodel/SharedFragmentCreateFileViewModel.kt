@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.domain.GetActiveGuideUseCase
 import com.jonathanev.review.domain.GetGuideContextUseCase
 import com.jonathanev.review.domain.GetGuideXmlDataUseCase
-import com.jonathanev.review.domain.GetSaveGuidesUseCase
 import com.jonathanev.review.domain.SetContentUseCase
 import com.jonathanev.review.domain.SetCrearXmlUseCase
 import com.jonathanev.review.domain.mapper.GuideQuestionExtractor
@@ -55,7 +54,6 @@ import com.jonathanev.review.ui.model.QAType as QATypeUI
 class SharedFragmentCreateFileViewModel @Inject constructor(
     private val setContentUseCase: SetContentUseCase,
     private val getGuideXmlDataUseCase: GetGuideXmlDataUseCase,
-    private val getSaveGuidesUseCase: GetSaveGuidesUseCase,
     private val userPreferencesRepository: UserPreferencesRepository,
     private val guideQuestionExtractor: GuideQuestionExtractor,
     private val setCrearXmlUseCase: SetCrearXmlUseCase,
@@ -119,7 +117,8 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                                 fileName = guide.nameGuide,
                                 description = guide.description,
                                 preguntas = questions.ifEmpty { listOf(QuestionItemUi(content = emptyList())) },
-                                respuestas = answers.ifEmpty { listOf(QuestionItemUi(content = emptyList())) }
+                                respuestas = answers.ifEmpty { listOf(QuestionItemUi(content = emptyList())) },
+                                guideContext = context
                             )
                         }
 
@@ -231,7 +230,8 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                     fileName = guide.nameGuide,
                     description = guide.description,
                     preguntas = questions.ifEmpty { listOf(QuestionItemUi(content = emptyList())) },
-                    respuestas = answers.ifEmpty { listOf(QuestionItemUi(content = emptyList())) }
+                    respuestas = answers.ifEmpty { listOf(QuestionItemUi(content = emptyList())) },
+                    guideContext = context
                 )
             }
 
@@ -669,7 +669,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     }
 
     fun saveGuide(
-        mode: SaveGuideMode
+        guideContext: GuideContext
     ) {
         /*if (!isDataValid()) {
             return
@@ -684,13 +684,13 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                     position = 0
                 )
 
-            val guideDomainModel = when (currentContext) {
+            val (guideDomainModel, saveGuideMode) = when (currentContext) {
                 is GuideContext.Creating -> {
-                    currentContext.guide
+                    currentContext.guide to SaveGuideMode.Create
                 }
 
                 is GuideContext.Editing -> {
-                    currentContext.guide
+                    currentContext.guide to SaveGuideMode.Update
                 }
 
                 else -> {
@@ -702,7 +702,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 guideDomainModel = guideDomainModel,
                 preguntas = currentState.preguntas.map { it.toDomain() },
                 respuestas = currentState.respuestas.map { it.toDomain() },
-                saveGuideMode = mode.toDomain()
+                saveGuideMode = saveGuideMode.toDomain()
             )
 
             when (response) {

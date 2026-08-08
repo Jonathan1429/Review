@@ -1,31 +1,34 @@
 package com.jonathanev.review.ui.preview.providers
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.jonathanev.review.presentation.model.GuideMode
+import com.jonathanev.review.domain.model.GuideContext
+import com.jonathanev.review.domain.model.GuideDomainModel
+import com.jonathanev.review.domain.model.GuideVersion
 
 data class CustomTopBarProv(
     val actualQuestion: Int,
     val totalQuestion: Int,
-    val guideMode: GuideMode
+    val guideContext: GuideContext
 )
 
+private val guideDomainModel = GuideDomainModel(GuideVersion.V2, "", "")
 class CustomTopBarProvider: PreviewParameterProvider<CustomTopBarProv> {
     override val values: Sequence<CustomTopBarProv>
         get() = sequenceOf(
             CustomTopBarProv(
                 actualQuestion = 2,
                 totalQuestion = 7,
-                guideMode = GuideMode.Review
+                guideContext = GuideContext.Browsing(guideDomainModel, 0)
             ),
             CustomTopBarProv(
                 actualQuestion = 2,
                 totalQuestion = 7,
-                guideMode = GuideMode.Edit
+                guideContext = GuideContext.Editing(guideDomainModel, 0)
             ),
             CustomTopBarProv(
                 actualQuestion = 2,
                 totalQuestion = 7,
-                guideMode = GuideMode.Create
+                guideContext = GuideContext.Creating(guideDomainModel)
             ),
         )
 

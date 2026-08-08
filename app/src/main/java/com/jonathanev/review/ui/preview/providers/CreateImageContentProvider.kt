@@ -1,30 +1,34 @@
 package com.jonathanev.review.ui.preview.providers
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.jonathanev.review.presentation.model.GuideMode
+import com.jonathanev.review.domain.model.GuideContext
+import com.jonathanev.review.domain.model.GuideDomainModel
+import com.jonathanev.review.domain.model.GuideVersion
 
 data class CreateImageContentProv(
-    val guideMode: GuideMode,
+    val guideContext: GuideContext,
     val uriImage: String
 )
+
+val guideDomain = GuideDomainModel(GuideVersion.V2, "Test", "")
 
 class CreateImageContentProvider : PreviewParameterProvider<CreateImageContentProv> {
     override val values: Sequence<CreateImageContentProv>
         get() = sequenceOf(
             CreateImageContentProv(
-                guideMode = GuideMode.Edit,
+                guideContext = GuideContext.Editing(guideDomain, 0),
                 uriImage = "path/uri_cargada.png",
             ),
             CreateImageContentProv(
-                guideMode = GuideMode.Create,
+                guideContext = GuideContext.Creating(guideDomain),
                 uriImage = "",
             ),
             CreateImageContentProv(
-                guideMode = GuideMode.Review,
+                guideContext = GuideContext.Browsing(guideDomain, 0),
                 uriImage = "",
             ),
             CreateImageContentProv(
-                guideMode = GuideMode.Review,
+                guideContext = GuideContext.Browsing(guideDomain, 0),
                 uriImage = "path/uri_cargada.png",
             ),
         )

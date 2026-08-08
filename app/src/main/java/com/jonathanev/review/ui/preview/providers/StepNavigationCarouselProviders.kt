@@ -1,23 +1,26 @@
 package com.jonathanev.review.ui.preview.providers
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.jonathanev.review.presentation.model.GuideMode
+import com.jonathanev.review.domain.model.GuideContext
+import com.jonathanev.review.domain.model.GuideDomainModel
+import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.presentation.model.QuestionContentUi
 
 data class StepNavigationCarouselProv(
-    val mode: GuideMode,
+    val guideContext: GuideContext,
     val listQuestionContent: List<QuestionContentUi>
 ) {
     override fun toString(): String {
-        return "Size_${listQuestionContent.size}_Mode_$mode"
+        return "Size_${listQuestionContent.size}_Mode_$guideContext"
     }
 }
 
+private val guideDomainModel = GuideDomainModel(GuideVersion.V2, "", "")
 class StepNavigationCarouselProviders: PreviewParameterProvider<StepNavigationCarouselProv> {
     override val values: Sequence<StepNavigationCarouselProv>
         get() = sequenceOf(
             StepNavigationCarouselProv(
-                mode = GuideMode.Create,
+                guideContext = GuideContext.Creating(guideDomainModel),
                 listQuestionContent =
                     listOf(
                         QuestionContentUi.Text("Hola", listOf()),
@@ -26,12 +29,12 @@ class StepNavigationCarouselProviders: PreviewParameterProvider<StepNavigationCa
                     )
             ),
             StepNavigationCarouselProv(
-                mode = GuideMode.Edit,
+                guideContext = GuideContext.Editing(guideDomainModel, 0),
                 listQuestionContent =
                     emptyList()
             ),
             StepNavigationCarouselProv(
-                mode = GuideMode.Review,
+                guideContext = GuideContext.Browsing(guideDomainModel, 0),
                 listQuestionContent =
                     listOf(
                         QuestionContentUi.Text("Adios", listOf()),

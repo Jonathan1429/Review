@@ -100,7 +100,7 @@ class StudyGuideScreenScreenshotTest(
                             actualQuestion = data.actualQuestion,
                             totalQuestions = data.totalQuestions,
                             listTypeMedia = data.listTypeMedia,
-                            guideMode = data.guideMode,
+                            guideContext = data.guideContext,
                             showDialogDeleteQuestion = data.showDialogDeleteQuestion,
                             showDialogRepeatGuide = data.showDialogRepeatGuide,
                             currentPosContent = 0,

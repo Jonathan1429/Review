@@ -1,7 +1,9 @@
 package com.jonathanev.review.ui.preview.providers
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.jonathanev.review.presentation.model.GuideMode
+import com.jonathanev.review.domain.model.GuideContext
+import com.jonathanev.review.domain.model.GuideDomainModel
+import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.ui.model.ContentType
 
@@ -9,12 +11,14 @@ data class DataMediaContentPagerProvider(
     val listType: List<QuestionContentUi>,
     val sizeList: Int,
     val mediaForSelected: ContentType,
-    val guideMode: GuideMode
+    val guideContext: GuideContext
 ) {
     override fun toString(): String {
-        return "Size_${sizeList}_Type_${mediaForSelected}_Mode_$guideMode"
+        return "Size_${sizeList}_Type_${mediaForSelected}_Mode_$guideContext"
     }
 }
+
+private val guideDomainModel = GuideDomainModel(GuideVersion.V2, "", "")
 
 class MediaContentPagerProvider : PreviewParameterProvider<DataMediaContentPagerProvider> {
     override val values: Sequence<DataMediaContentPagerProvider>
@@ -26,7 +30,7 @@ class MediaContentPagerProvider : PreviewParameterProvider<DataMediaContentPager
                 ),
                 sizeList = 2,
                 mediaForSelected = ContentType.TEXT,
-                guideMode = GuideMode.Create
+                guideContext = GuideContext.Creating(guideDomainModel)
             ),
             DataMediaContentPagerProvider(
                 listType = listOf(
@@ -35,7 +39,7 @@ class MediaContentPagerProvider : PreviewParameterProvider<DataMediaContentPager
                 ),
                 sizeList = 2,
                 mediaForSelected = ContentType.IMAGE,
-                guideMode = GuideMode.Create
+                guideContext = GuideContext.Creating(guideDomainModel)
             ),
             DataMediaContentPagerProvider(
                 listType = listOf(
@@ -43,19 +47,19 @@ class MediaContentPagerProvider : PreviewParameterProvider<DataMediaContentPager
                 ),
                 sizeList = 1,
                 mediaForSelected = ContentType.TEXT,
-                guideMode = GuideMode.Create
+                guideContext = GuideContext.Creating(guideDomainModel)
             ),
             DataMediaContentPagerProvider(
                 listType = emptyList(),
                 sizeList = 0,
                 mediaForSelected = ContentType.TEXT,
-                guideMode = GuideMode.Create
+                guideContext = GuideContext.Creating(guideDomainModel)
             ),
             DataMediaContentPagerProvider(
                 listType = emptyList(),
                 sizeList = 0,
                 mediaForSelected = ContentType.IMAGE,
-                guideMode = GuideMode.Create
+                guideContext = GuideContext.Creating(guideDomainModel)
             ),
             DataMediaContentPagerProvider(
                 listType = listOf(
@@ -64,7 +68,7 @@ class MediaContentPagerProvider : PreviewParameterProvider<DataMediaContentPager
                 ),
                 sizeList = 2,
                 mediaForSelected = ContentType.TEXT,
-                guideMode = GuideMode.Edit
+                guideContext = GuideContext.Editing(guideDomainModel, 0)
             ),
             DataMediaContentPagerProvider(
                 listType = listOf(
@@ -73,7 +77,7 @@ class MediaContentPagerProvider : PreviewParameterProvider<DataMediaContentPager
                 ),
                 sizeList = 2,
                 mediaForSelected = ContentType.TEXT,
-                guideMode = GuideMode.Review
+                guideContext = GuideContext.Browsing(guideDomainModel, 0)
             )
         )
 }

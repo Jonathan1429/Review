@@ -1,5 +1,6 @@
 package com.jonathanev.review.presentation.state
 
+import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.presentation.model.QuestionItemUi
 import com.jonathanev.review.ui.model.ContentType
 import com.jonathanev.review.ui.model.QAType
@@ -19,6 +20,7 @@ sealed interface GuideScreenUiState {
         val mediaSelected: ContentType = ContentType.TEXT,
         val isEditing: Boolean = false,
         val isLastQuestion: Boolean? = false,
+        val guideContext: GuideContext,
         val showDialogDeleteQuestion: Boolean = false,
         val showDialogRepeatGuide: Boolean = false
     ) : GuideScreenUiState

@@ -23,7 +23,6 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.jonathanev.review.presentation.model.FileFormMode
-import com.jonathanev.review.presentation.model.GuideMode
 import com.jonathanev.review.presentation.model.QuestionContentMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.presentation.viewmodel.CreateFilesViewModel
@@ -247,29 +246,25 @@ fun BasicNavigation() {
                     },
                     onNavFillingGuide = {
                         backStack.removeLastOrNull()
-                        backStack.add(
-                            AppRoutes.FillingGuideScreen(GuideMode.Create)
-                        )
+                        backStack.add(AppRoutes.FillingGuideScreen)
                     },
                     onCreateFolder = {
                         backStack.removeLastOrNull()
                     }
                 )
             }
-            entry<AppRoutes.FillingGuideScreen> { action ->
+            entry<AppRoutes.FillingGuideScreen> {
                 val context = LocalContext.current
 
                 FillingGuideRoute(
                     viewModel = viewModelSharedCreateFile,
-                    guideMode = action.guideMode,
                     onOpenAssetClick = { typeContent, posItem ->
                         when (typeContent) {
                             is QuestionContentUi.Image -> {
                                 backStack.add(
                                     AppRoutes.CreateImageScreen(
                                         questionContentMode = QuestionContentMode.EDITING,
-                                        posItem = posItem,
-                                        guideMode = action.guideMode
+                                        posItem = posItem
                                     )
                                 )
                             }
@@ -286,8 +281,7 @@ fun BasicNavigation() {
                                 backStack.add(
                                     AppRoutes.CreateTextScreen(
                                         questionContentMode = QuestionContentMode.EDITING,
-                                        posItem = posItem,
-                                        guideMode = action.guideMode
+                                        posItem = posItem
                                     )
                                 )
                             }
@@ -299,8 +293,7 @@ fun BasicNavigation() {
                                 backStack.add(
                                     AppRoutes.CreateTextScreen(
                                         questionContentMode = QuestionContentMode.CREATING,
-                                        posItem = posItem,
-                                        guideMode = action.guideMode
+                                        posItem = posItem
                                     )
                                 )
 
@@ -308,8 +301,7 @@ fun BasicNavigation() {
                                 backStack.add(
                                     AppRoutes.CreateImageScreen(
                                         questionContentMode = QuestionContentMode.CREATING,
-                                        posItem = posItem,
-                                        guideMode = action.guideMode
+                                        posItem = posItem
                                     )
                                 )
                             }
@@ -331,7 +323,6 @@ fun BasicNavigation() {
             entry<AppRoutes.CreateImageScreen> { values ->
                 CreateImageRoute(
                     questionContentMode = values.questionContentMode,
-                    guideMode = values.guideMode,
                     posItem = values.posItem,
                     viewModel = viewModelSharedCreateFile,
                     onBackNav = {
@@ -342,7 +333,6 @@ fun BasicNavigation() {
             entry<AppRoutes.CreateTextScreen> { values ->
                 CreateTextRoute(
                     questionContentMode = values.questionContentMode,
-                    guideMode = values.guideMode,
                     viewModel = viewModelSharedCreateFile,
                     posItem = values.posItem,
                     onSaveText = { backStack.removeLastOrNull() },
@@ -355,12 +345,10 @@ fun BasicNavigation() {
                 PreviewQuestionsRoute(
                     viewModel = viewModel,
                     onEditingGuideClick = {
-                        backStack.add(AppRoutes.FillingGuideScreen(GuideMode.Edit))
+                        backStack.add(AppRoutes.FillingGuideScreen)
                     },
                     onPlayGuideClick = {
-                        backStack.add(
-                            AppRoutes.FillingGuideScreen(GuideMode.Review)
-                        )
+                        backStack.add(AppRoutes.FillingGuideScreen)
                     }
                 )
             }

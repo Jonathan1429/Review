@@ -18,7 +18,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.jonathanev.review.R
-import com.jonathanev.review.presentation.model.GuideMode
+import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.ui.preview.ComponentsPreviews
 import com.jonathanev.review.ui.preview.providers.CustomTopBarProv
 import com.jonathanev.review.ui.preview.providers.CustomTopBarProvider
@@ -33,7 +33,7 @@ fun PreviewCustomTopBar(
         CustomTopBar(
             actualQuestion = data.actualQuestion,
             totalQuestions = data.totalQuestion,
-            guideMode = data.guideMode,
+            guideContext = data.guideContext,
             onDeleteQuestionClick = {},
             onBackQuestionClick = {},
             onNextQuestionClick = {}
@@ -45,7 +45,7 @@ fun PreviewCustomTopBar(
 fun CustomTopBar(
     actualQuestion: Int,
     totalQuestions: Int,
-    guideMode: GuideMode,
+    guideContext: GuideContext,
     onDeleteQuestionClick: () -> Unit,
     onBackQuestionClick: () -> Unit,
     onNextQuestionClick: () -> Unit
@@ -64,7 +64,7 @@ fun CustomTopBar(
             onNextQuestionClick = onNextQuestionClick
         )
         Spacer(modifier = Modifier.width(5.dp))
-        if (guideMode !is GuideMode.Review) {
+        if (guideContext !is GuideContext.Browsing) {
             Box(
                 modifier = Modifier
                     .padding(10.dp)

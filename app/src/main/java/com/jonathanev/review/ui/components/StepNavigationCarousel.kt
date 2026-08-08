@@ -35,7 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.jonathanev.review.presentation.model.GuideMode
+import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.ui.preview.ComponentsPreviews
 import com.jonathanev.review.ui.preview.providers.StepNavigationCarouselProv
@@ -76,7 +76,7 @@ fun PreviewCarousel(
                 assets = data.listQuestionContent,
                 pagerState = pagerState,
                 scope = scope,
-                guideMode = data.mode,
+                guideContext = data.guideContext,
                 onAddAssetClick = { _ -> }
             )
         }
@@ -89,14 +89,14 @@ fun StepNavigationCarousel(
     assets: List<QuestionContentUi>,
     pagerState: PagerState,
     scope: CoroutineScope,
-    guideMode: GuideMode,
+    guideContext: GuideContext,
     onAddAssetClick: (posItem: Int) -> Unit
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (guideMode !is GuideMode.Review) {
+        if (guideContext !is GuideContext.Browsing) {
             Box(
                 modifier = Modifier
                     .size(50.dp)

@@ -101,7 +101,7 @@ class StepNavigationCarouselScreenshotTest(
                             assets = dataState.listQuestionContent,
                             pagerState = pagerState,
                             scope = scope,
-                            guideMode = dataState.mode,
+                            guideContext = dataState.guideContext,
                             onAddAssetClick = {}
                         )
                     }

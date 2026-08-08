@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -29,10 +30,12 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jonathanev.review.R
-import com.jonathanev.review.presentation.model.GuideMode
+import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.presentation.model.QuestionContentMode
+import com.jonathanev.review.presentation.state.GuideScreenUiState
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.ui.components.CustomBoxCreateImage
+import com.jonathanev.review.ui.components.ErrorComponent
 import com.jonathanev.review.ui.components.OptionsCreateImage
 import com.jonathanev.review.ui.components.singleClick
 import com.jonathanev.review.ui.preview.DevicePreviews
@@ -50,7 +53,7 @@ fun PreviewCreateImageScreen(
 ) {
     ReviewTheme {
         CreateImageScreen(
-            guideMode = data.guideMode,
+            guideContext = data.guideContext,
             uriImage = data.uriImage,
             selectedImage = { },
             imageUploaded = { },
@@ -61,7 +64,6 @@ fun PreviewCreateImageScreen(
 
 @Composable
 fun CreateImageRoute(
-    guideMode: GuideMode,
     posItem: Int,
     viewModel: SharedFragmentCreateFileViewModel,
     questionContentMode: QuestionContentMode,
@@ -69,45 +71,66 @@ fun CreateImageRoute(
 ) {
     val context = LocalContext.current
     val imageList by viewModel.imageList.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var newlyPickedUri by rememberSaveable { mutableStateOf<String?>(null) }
 
-    val uriImage = when (questionContentMode) {
-        QuestionContentMode.CREATING -> {
-            newlyPickedUri ?: ""
-        }
-
-        QuestionContentMode.EDITING -> {
-            newlyPickedUri ?: imageList.getOrNull(posItem)?.uri ?: ""
-        }
-    }
-
-    val resultLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia()
-    ) { uri ->
-        uri?.let { selectedUri ->
-            val tempPath = createTempImageFile(context, selectedUri)
-            if (tempPath != null) {
-                newlyPickedUri = tempPath
-
-                viewModel.addImageContent(
-                    uri = tempPath,
-                    questionContentMode = questionContentMode
-                )
+    when (val state = uiState) {
+        is GuideScreenUiState.Loading -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
             }
         }
-    }
 
-    CreateImageScreen(
-        guideMode = guideMode,
-        uriImage = uriImage,
-        selectedImage = {
-            resultLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-        },
-        imageUploaded = {
-            onBackNav()
-        },
-        onBackNav = onBackNav
-    )
+        is GuideScreenUiState.Error -> {
+            ErrorComponent(
+                onRetry = viewModel::retryLoad,
+                onBack = onBackNav
+            )
+        }
+
+        is GuideScreenUiState.Success -> {
+            val uriImage = when (questionContentMode) {
+                QuestionContentMode.CREATING -> {
+                    newlyPickedUri ?: ""
+                }
+
+                QuestionContentMode.EDITING -> {
+                    newlyPickedUri ?: imageList.getOrNull(posItem)?.uri ?: ""
+                }
+            }
+
+            val resultLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.PickVisualMedia()
+            ) { uri ->
+                uri?.let { selectedUri ->
+                    val tempPath = createTempImageFile(context, selectedUri)
+                    if (tempPath != null) {
+                        newlyPickedUri = tempPath
+
+                        viewModel.addImageContent(
+                            uri = tempPath,
+                            questionContentMode = questionContentMode
+                        )
+                    }
+                }
+            }
+
+            CreateImageScreen(
+                guideContext = state.guideContext,
+                uriImage = uriImage,
+                selectedImage = {
+                    resultLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                },
+                imageUploaded = {
+                    onBackNav()
+                },
+                onBackNav = onBackNav
+            )
+        }
+    }
 }
 
 private fun createTempImageFile(context: Context, uri: Uri): String? {
@@ -126,7 +149,7 @@ private fun createTempImageFile(context: Context, uri: Uri): String? {
 
 @Composable
 fun CreateImageScreen(
-    guideMode: GuideMode,
+    guideContext: GuideContext,
     uriImage: String,
     selectedImage: () -> Unit,
     imageUploaded: () -> Unit,
@@ -135,7 +158,7 @@ fun CreateImageScreen(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         floatingActionButton = {
-            if (guideMode !is GuideMode.Review) {
+            if (guideContext !is GuideContext.Browsing) {
                 FloatingActionButton(
                     onClick = singleClick { selectedImage() },
                     containerColor = HardColorButton
@@ -175,7 +198,7 @@ fun CreateImageScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .then(
-                                if (guideMode !is GuideMode.Review) {
+                                if (guideContext !is GuideContext.Browsing) {
                                     Modifier
                                 } else {
                                     Modifier.padding(20.dp)
@@ -188,7 +211,7 @@ fun CreateImageScreen(
                         modifier = Modifier
                             .align(Alignment.TopCenter)
                             .padding(bottom = 16.dp),
-                        guideMode = guideMode,
+                        guideContext = guideContext,
                         uriImage = uriImage,
                         imageUploaded = imageUploaded,
                         onBackNav = onBackNav
