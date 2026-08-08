@@ -11,6 +11,7 @@ import com.jonathanev.review.domain.GetGuideXmlDataUseCase
 import com.jonathanev.review.domain.SaveTempImageUseCase
 import com.jonathanev.review.domain.SetContentUseCase
 import com.jonathanev.review.domain.SetCrearXmlUseCase
+import com.jonathanev.review.domain.SetPintarTextosUseCase
 import com.jonathanev.review.domain.mapper.GuideQuestionExtractor
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
@@ -65,7 +66,8 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     private val getGuideContextUseCase: GetGuideContextUseCase,
     private val saveTempImageUseCase: SaveTempImageUseCase,
     private val savedStateHandle: SavedStateHandle,
-    private val clearTempImagesUseCase: ClearTempImagesUseCase
+    private val clearTempImagesUseCase: ClearTempImagesUseCase,
+    private val setPintarTextosUseCase: SetPintarTextosUseCase
 ) : ViewModel() {
     private companion object {
         const val KEY_GUIDE_STATE = "key_guide_ui_state"
