@@ -107,7 +107,10 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                     }
 
                     val currentSuccess = _uiState.value as? GuideScreenUiState.Success
-                    if (currentSuccess != null && currentSuccess.fileName == guide.nameGuide) {
+                    if (currentSuccess != null &&
+                        currentSuccess.fileName == guide.nameGuide &&
+                        currentSuccess.guideContext == context
+                    ) {
                         return@collect
                     }
 

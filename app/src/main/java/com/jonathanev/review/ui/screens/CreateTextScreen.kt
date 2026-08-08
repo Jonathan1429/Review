@@ -121,9 +121,10 @@ fun CreateTextRoute(
             }
 
 
-            val colorInitial = state.colorType.toInt(isDark)
-            var selectedColorInt by remember(colorInitial) {
-                mutableIntStateOf(colorInitial)
+            val colorInitial = MaterialTheme.colorScheme.onSurface
+            val colorSelected = state.colorType.toInt(isDark)
+            var selectedColorInt by remember(colorSelected) {
+                mutableIntStateOf(colorSelected)
             }
             val selectedColor = Color(selectedColorInt)
 
@@ -142,7 +143,7 @@ fun CreateTextRoute(
 
             CreateTextScreen(
                 guideContext = state.guideContext,
-                colorInitial = selectedColor,
+                colorInitial = colorInitial,
                 selectedColor = selectedColor,
                 textValue = textValue,
                 showDialog = state.showDialogColor,
@@ -229,29 +230,17 @@ fun CreateTextScreen(
                     hint = textValue.text.isNotEmpty(),
                     enabled = guideContext !is GuideContext.Browsing,
                     onTextValueChange = { actualText ->
-                        val oldText = textValue.text
-                        val newText = actualText.text
-                        val isSingleCharacterAdded = (newText.length - oldText.length) == 1
-                        val cursorPosition = actualText.selection.start
-                        val addedChar =
-                            if (cursorPosition > 0 && cursorPosition <= newText.length) {
-                                newText[cursorPosition - 1]
-                            } else {
-                                null
-                            }
+                        val newAnnotatedString = updateAnnotatedStringWithSpans(
+                            oldAnnotatedString = textValue.annotatedString,
+                            newTextFieldValue = actualText,
+                            selectedColor = selectedColor,
+                            colorInitial = colorInitial
+                        )
 
-                        val response =
-                            if (isSingleCharacterAdded && addedChar != '\n' && selectedColor != colorInitial) {
-                                val newAnnotatedString = applyColorToCharacter(
-                                    currentAnnotatedString = actualText.annotatedString,
-                                    cursorPosition = cursorPosition,
-                                    color = selectedColor
-                                )
-
-                                actualText.copy(annotatedString = newAnnotatedString)
-                            } else {
-                                actualText
-                            }
+                        val response = actualText.copy(
+                            annotatedString = newAnnotatedString,
+                            composition = null
+                        )
 
                         onChangeTextValue(response)
                     }
@@ -272,6 +261,104 @@ fun CreateTextScreen(
             }
         }
     }
+}
+
+fun applyColorToRange(
+    oldAnnotatedString: AnnotatedString,
+    actualText: TextFieldValue,
+    start: Int,
+    end: Int,
+    color: Color
+): AnnotatedString {
+    val newText = actualText.text
+    val builder = AnnotatedString.Builder(newText)
+
+    val lengthDiff = newText.length - oldAnnotatedString.text.length
+
+    // 1. Recuperar los estilos anteriores y reajustar sus posiciones al nuevo texto
+    for (span in oldAnnotatedString.spanStyles) {
+        var newStart = span.start
+        var newEnd = span.end
+
+        if (newStart >= start) {
+            newStart += lengthDiff
+        }
+        if (newEnd > start) {
+            newEnd += lengthDiff
+        }
+
+        if (newStart in 0..newText.length && newEnd in newStart..newText.length) {
+            builder.addStyle(span.item, newStart, newEnd)
+        }
+    }
+
+    // 2. Aplicar el nuevo color al rango recién insertado
+    if (start in 0..end && end <= newText.length) {
+        builder.addStyle(
+            style = SpanStyle(color = color),
+            start = start,
+            end = end
+        )
+    }
+
+    return builder.toAnnotatedString()
+}
+
+fun updateAnnotatedStringWithSpans(
+    oldAnnotatedString: AnnotatedString,
+    newTextFieldValue: TextFieldValue,
+    selectedColor: Color,
+    colorInitial: Color
+): AnnotatedString {
+    val oldText = oldAnnotatedString.text
+    val newText = newTextFieldValue.text
+    val lengthDiff = newText.length - oldText.length
+    val cursorPosition = newTextFieldValue.selection.start
+    val editPosition = (cursorPosition - lengthDiff).coerceAtLeast(0)
+
+    val builder = AnnotatedString.Builder(newText)
+
+    // A) PRESERVAR Y REAJUSTAR COLORES ANTERIORES
+    for (span in oldAnnotatedString.spanStyles) {
+        var newStart = span.start
+        var newEnd = span.end
+
+        if (lengthDiff > 0) {
+            // Inserción de texto: desplaza los estilos que están después del cursor
+            if (newStart >= editPosition) newStart += lengthDiff
+            if (newEnd > editPosition) newEnd += lengthDiff
+        } else if (lengthDiff < 0) {
+            // Borrado de texto: recorta o desplaza los estilos afectados
+            val deleteStart = cursorPosition
+            if (newStart > deleteStart) {
+                newStart = (newStart + lengthDiff).coerceAtLeast(deleteStart)
+            }
+            if (newEnd > deleteStart) {
+                newEnd = (newEnd + lengthDiff).coerceAtLeast(deleteStart)
+            }
+        }
+
+        // Mantiene el span si sigue dentro del rango válido
+        if (newStart < newEnd && newStart in 0..newText.length && newEnd in 0..newText.length) {
+            builder.addStyle(span.item, newStart, newEnd)
+        }
+    }
+
+    // B) APLICAR EL NUEVO COLOR ÚNICAMENTE A LO RECIÉN INSERTADO
+    val isDifferentColor = selectedColor.toArgb() != colorInitial.toArgb()
+    if (lengthDiff > 0 && isDifferentColor) {
+        val endInsert = cursorPosition.coerceAtMost(newText.length)
+
+        if (editPosition in 0..endInsert && endInsert <= newText.length) {
+            builder.addStyle(
+                style = SpanStyle(color = selectedColor),
+                start = editPosition,
+                end = endInsert
+            )
+        }
+    }
+
+    return builder.toAnnotatedString()
 }
 
 private fun applyColorToCharacter(
