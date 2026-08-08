@@ -2,6 +2,7 @@ package com.jonathanev.review.presentation.state
 
 import android.os.Parcelable
 import com.jonathanev.review.domain.model.GuideContext
+import com.jonathanev.review.presentation.model.ColorType
 import com.jonathanev.review.presentation.model.QuestionItemUi
 import com.jonathanev.review.ui.model.ContentType
 import com.jonathanev.review.ui.model.QAType
@@ -24,7 +25,9 @@ sealed interface GuideScreenUiState {
         val isEditing: Boolean = false,
         val isLastQuestion: Boolean? = false,
         val guideContext: GuideContext,
+        val colorType: ColorType = ColorType.Default,
         val showDialogDeleteQuestion: Boolean = false,
-        val showDialogRepeatGuide: Boolean = false
+        val showDialogRepeatGuide: Boolean = false,
+        val showDialogColor: Boolean = false
     ) : GuideScreenUiState, Parcelable
 }

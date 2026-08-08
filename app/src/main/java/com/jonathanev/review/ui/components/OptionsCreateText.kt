@@ -37,7 +37,7 @@ fun PreviewOptionsCreateText(
             selectedColor = data.color,
             guideContext = data.guideContext,
             onClearColorClick = {},
-            onSelectColorClick = {},
+            onShowColorDialog = {},
             onSaveTextClick = {},
             onBackNav = {}
         )
@@ -50,7 +50,7 @@ fun OptionsCreateText(
     selectedColor: Color,
     guideContext: GuideContext,
     onClearColorClick: () -> Unit,
-    onSelectColorClick: () -> Unit,
+    onShowColorDialog: () -> Unit,
     onSaveTextClick: () -> Unit,
     onBackNav: () -> Unit
 ) {
@@ -75,7 +75,7 @@ fun OptionsCreateText(
             }
 
             IconButton(
-                onClick = singleClick { onSelectColorClick() },
+                onClick = singleClick { onShowColorDialog() },
                 modifier = Modifier
                     .padding(end = 10.dp)
                     .size(34.dp)

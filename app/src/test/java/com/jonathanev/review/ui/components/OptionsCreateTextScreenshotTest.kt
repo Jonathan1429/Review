@@ -96,7 +96,7 @@ class OptionsCreateTextScreenshotTest(
                             selectedColor = data.color,
                             guideContext = data.guideContext,
                             onClearColorClick = {},
-                            onSelectColorClick = {},
+                            onShowColorDialog = {},
                             onSaveTextClick = {},
                             onBackNav = {}
                         )

@@ -27,6 +27,7 @@ import com.jonathanev.review.presentation.event.CreateGuideEvent.SuccessGuideCre
 import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.ColorRangeUi
+import com.jonathanev.review.presentation.model.ColorType
 import com.jonathanev.review.presentation.model.QuestionContentMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.presentation.model.QuestionItemUi
@@ -798,6 +799,43 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         _uiState.update { state ->
             if (state is GuideScreenUiState.Success) {
                 state.copy(showDialogRepeatGuide = false)
+            } else state
+        }
+    }
+
+    fun onDismissDialogSelectColor() {
+        _uiState.update { state ->
+            if (state is GuideScreenUiState.Success) {
+                state.copy(showDialogColor = false)
+            } else state
+        }
+    }
+
+    fun showDialogSelectColor() {
+        _uiState.update { state ->
+            if (state is GuideScreenUiState.Success) {
+                state.copy(showDialogColor = true)
+            } else state
+        }
+    }
+
+    fun onChangeColor(actualColor: Int) {
+        _uiState.update { state ->
+            if (state is GuideScreenUiState.Success) {
+                state.copy(
+                    colorType = ColorType.RandomColor(actualColor),
+                )
+            } else state
+        }
+    }
+
+    fun onDefaultcolor() {
+        _uiState.update { state ->
+            if (state is GuideScreenUiState.Success) {
+                state.copy(
+                    colorType = ColorType.Default,
+                    showDialogColor = false
+                )
             } else state
         }
     }

@@ -1,5 +1,6 @@
 package com.jonathanev.review.ui.screens
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,7 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -39,6 +40,7 @@ import com.jonathanev.review.ui.components.ColorPickerDialog
 import com.jonathanev.review.ui.components.CustomBoxCreateText
 import com.jonathanev.review.ui.components.ErrorComponent
 import com.jonathanev.review.ui.components.OptionsCreateText
+import com.jonathanev.review.ui.mapper.toInt
 import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.CreateTextScreenProv
 import com.jonathanev.review.ui.preview.providers.CreateTextScreenProvider
@@ -58,10 +60,11 @@ fun PreviewTextScreen(
             textValue = data.textValue,
             showDialog = data.showDialog,
             onClearColorClick = {},
-            onSelectColorClick = {},
+            onShowColorDialog = {},
             onChangeTextValue = {},
             onDissmissDialog = {},
             onColorSelected = {},
+            onDefaultColor = {},
             onSaveText = { _, _ -> },
             onBackNav = {}
         )
@@ -97,7 +100,7 @@ fun CreateTextRoute(
 
         is GuideScreenUiState.Success -> {
             val textList by viewModel.textList.collectAsStateWithLifecycle()
-
+            val isDark = isSystemInDarkTheme()
             val item = remember(textList, posItem, questionContentMode) {
                 if (questionContentMode == QuestionContentMode.CREATING) {
                     QuestionContentUi.Text("", emptyList())
@@ -117,9 +120,12 @@ fun CreateTextRoute(
                 viewModel.initTextDraft(item)
             }
 
-            val colorInitial = MaterialTheme.colorScheme.onSurface
-            var selectedColor by remember { mutableStateOf(colorInitial) }
-            var showDialog by remember { mutableStateOf(false) }
+
+            val colorInitial = state.colorType.toInt(isDark)
+            var selectedColorInt by remember(colorInitial) {
+                mutableIntStateOf(colorInitial)
+            }
+            val selectedColor = Color(selectedColorInt)
 
             val textValueState by viewModel.draftTextValue.collectAsStateWithLifecycle()
 
@@ -136,10 +142,10 @@ fun CreateTextRoute(
 
             CreateTextScreen(
                 guideContext = state.guideContext,
-                colorInitial = colorInitial,
+                colorInitial = selectedColor,
                 selectedColor = selectedColor,
                 textValue = textValue,
-                showDialog = showDialog,
+                showDialog = state.showDialogColor,
                 onSaveText = { text, colors ->
                     viewModel.addTextContent(
                         textWithLabels = text,
@@ -150,17 +156,15 @@ fun CreateTextRoute(
                 onClearColorClick = {
                     viewModel.clearTextDraft()
                 },
-                onSelectColorClick = { showDialog = true },
+                onShowColorDialog = viewModel::showDialogSelectColor,
                 onChangeTextValue = { textFieldValue ->
                     viewModel.onDraftTextChange(newValue = textFieldValue)
                 },
-                onDissmissDialog = {
-                    showDialog = false
-                },
+                onDissmissDialog = viewModel::onDismissDialogSelectColor,
                 onColorSelected = { actualColor ->
-                    selectedColor = actualColor
-                    showDialog = false
+                    viewModel.onChangeColor(actualColor = actualColor)
                 },
+                onDefaultColor = viewModel::onDefaultcolor,
                 onBackNav = onBackNav
             )
         }
@@ -177,10 +181,11 @@ fun CreateTextScreen(
     textValue: TextFieldValue,
     showDialog: Boolean,
     onClearColorClick: () -> Unit,
-    onSelectColorClick: () -> Unit,
+    onShowColorDialog: () -> Unit,
     onChangeTextValue: (actualText: TextFieldValue) -> Unit,
     onDissmissDialog: () -> Unit,
-    onColorSelected: (Color) -> Unit,
+    onColorSelected: (Int) -> Unit,
+    onDefaultColor: () -> Unit,
     onBackNav: () -> Unit
 ) {
     Scaffold(
@@ -209,7 +214,7 @@ fun CreateTextScreen(
                     textValue = textValue.annotatedString,
                     selectedColor = selectedColor,
                     onClearColorClick = onClearColorClick,
-                    onSelectColorClick = onSelectColorClick,
+                    onShowColorDialog = onShowColorDialog,
                     onSaveTextClick = {
                         saveCurrentQuestion(
                             textFieldValue = textValue,
@@ -256,13 +261,12 @@ fun CreateTextScreen(
             if (showDialog) {
                 ColorPickerDialog(
                     colorInitial = colorInitial,
-                    selectedColor = selectedColor,
                     onDismissRequest = onDissmissDialog,
                     onColorSelected = { colorActual ->
                         onColorSelected(colorActual)
                     },
                     onDefaultClick = {
-                        onColorSelected(colorInitial)
+                        onDefaultColor()
                     }
                 )
             }
