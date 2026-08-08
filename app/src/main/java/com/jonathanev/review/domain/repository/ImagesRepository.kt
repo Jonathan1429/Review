@@ -9,7 +9,8 @@ interface ImagesRepository {
         image: QuestionContentDomain.Image,
         guide: GuideDomainModel
     )
-
+    suspend fun saveTempImage(uriString: String): String
+    suspend fun clearTempImages()
     suspend fun moveImages(
         images: List<QuestionContentDomain.Image>,
         guideRenameContext: GuideRenameContext

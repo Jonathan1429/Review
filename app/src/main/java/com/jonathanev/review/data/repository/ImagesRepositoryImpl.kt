@@ -15,6 +15,8 @@ import com.jonathanev.review.domain.repository.FilePathResolver
 import com.jonathanev.review.domain.repository.ImagesRepository
 import com.jonathanev.review.domain.service.FileNamingRules
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
 import javax.inject.Inject
 
@@ -39,6 +41,33 @@ class ImagesRepositoryImpl @Inject constructor(
                 input.copyTo(output)
             }
         } ?: throw IllegalStateException("No se pudo abrir imagen")
+    }
+
+    override suspend fun saveTempImage(uriString: String): String = withContext(Dispatchers.IO) {
+        val uri = uriString.toUri()
+        val tempFile = File(context.cacheDir, "temp_img_${System.currentTimeMillis()}.jpg")
+
+        context.contentResolver.openInputStream(uri)?.use { input ->
+            tempFile.outputStream().use { output ->
+                input.copyTo(output)
+            }
+        } ?: throw IllegalStateException("No se pudo leer la imagen seleccionada")
+
+        tempFile.toUri()
+            .toString() // Retorna la nueva URI local "file:///.../cache/temp_img_xxx.jpg"
+    }
+
+    override suspend fun clearTempImages() {
+        withContext(Dispatchers.IO) {
+            val cacheFolder = context.cacheDir
+            val files = cacheFolder.listFiles() ?: return@withContext
+
+            files.forEach { file ->
+                if (file.name.startsWith("temp_img_")) {
+                    file.delete()
+                }
+            }
+        }
     }
 
     override fun moveUnassignedImages(movedFiles: List<String>) {

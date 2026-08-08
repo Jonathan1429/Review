@@ -239,9 +239,9 @@ fun FillingGuideRoute(
                 onCloseGuide = {
                     when (state.guideContext) {
                         is GuideContext.Browsing -> onCloseGuide()
-                        is GuideContext.Creating -> viewModel.saveGuide(guideContext = state.guideContext)
+                        is GuideContext.Creating -> viewModel.saveGuide()
                         is GuideContext.DeleteGuide -> onCloseGuide()
-                        is GuideContext.Editing -> viewModel.saveGuide(guideContext = state.guideContext)
+                        is GuideContext.Editing -> viewModel.saveGuide()
                         is GuideContext.Moving -> onCloseGuide()
                         is GuideContext.Rename -> onCloseGuide()
                     }

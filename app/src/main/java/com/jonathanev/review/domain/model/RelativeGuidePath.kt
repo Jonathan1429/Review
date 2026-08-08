@@ -1,4 +1,8 @@
 package com.jonathanev.review.domain.model
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
 @JvmInline
-value class RelativeGuidePath(val value: String)
+@Parcelize
+value class RelativeGuidePath(val value: String) : Parcelable
