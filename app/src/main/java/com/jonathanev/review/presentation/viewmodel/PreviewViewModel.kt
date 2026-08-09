@@ -37,47 +37,66 @@ class PreviewViewModel @Inject constructor(
     private val setContextEditUseCase: SetContextEditUseCase,
     private val setContextPlayUseCase: SetContextPlayUseCase
 ) : ViewModel() {
+    private val retryTrigger = MutableSharedFlow<Unit>(extraBufferCapacity = 1).apply {
+        tryEmit(Unit)
+    }
+
     @OptIn(ExperimentalCoroutinesApi::class)
-    val uiState: StateFlow<PreviewQuestionStateUi> = getActiveGuideUseCase.invoke()
-        .flatMapLatest { activeGuideDomain ->
-            if (activeGuideDomain == null) {
-                flowOf(
-                    PreviewQuestionStateUi(
-                        activeGuide = ActiveGuideUIState.Error,
-                        previewState = emptyList()
-                    )
-                )
-            } else {
-                flow {
-                    val context = GuideContext.Browsing(guide = activeGuideDomain, -1)
-                    when (val result = getGuideXmlDataUseCase(context = context)) {
-                        is GetGuideResult.Success -> {
-                            val response = getPreviewQuestionsUseCase.invoke(result.list)
-                            val responseToUi = response.map { it.toUi() }
-
-                            emit(
-                                PreviewQuestionStateUi(
-                                    activeGuide = ActiveGuideUIState.Success(activeGuideDomain.toUi()),
-                                    previewState = responseToUi
-                                )
-                            )
-                        }
-
-                        else -> emit(
+    val uiState: StateFlow<PreviewQuestionStateUi> = retryTrigger
+        .flatMapLatest {
+            getActiveGuideUseCase.invoke()
+                .flatMapLatest { activeGuideDomain ->
+                    if (activeGuideDomain == null) {
+                        flowOf(
                             PreviewQuestionStateUi(
-                                activeGuide = ActiveGuideUIState.Success(activeGuideDomain.toUi()),
+                                activeGuide = ActiveGuideUIState.Loading,
                                 previewState = emptyList()
                             )
                         )
+                    } else {
+                        flow {
+                            emit(
+                                PreviewQuestionStateUi(
+                                    activeGuide = ActiveGuideUIState.Loading,
+                                    previewState = emptyList()
+                                )
+                            )
+
+                            val context = GuideContext.Browsing(guide = activeGuideDomain, -1)
+                            when (val result = getGuideXmlDataUseCase(context = context)) {
+                                is GetGuideResult.Success -> {
+                                    val response = getPreviewQuestionsUseCase.invoke(result.list)
+                                    val responseToUi = response.map { it.toUi() }
+
+                                    emit(
+                                        PreviewQuestionStateUi(
+                                            activeGuide = ActiveGuideUIState.Success(
+                                                activeGuideDomain.toUi()
+                                            ),
+                                            previewState = responseToUi
+                                        )
+                                    )
+                                }
+
+                                else -> emit(
+                                    PreviewQuestionStateUi(
+                                        activeGuide = ActiveGuideUIState.Error,
+                                        previewState = emptyList()
+                                    )
+                                )
+                            }
+                        }
                     }
                 }
-            }
         }
         .flowOn(Dispatchers.IO)
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = PreviewQuestionStateUi(previewState = emptyList())
+            initialValue = PreviewQuestionStateUi(
+                activeGuide = ActiveGuideUIState.Loading,
+                previewState = emptyList()
+            )
         )
 
     private val _previewGuideEvent = MutableSharedFlow<PreviewGuideEvent>()
@@ -103,5 +122,9 @@ class PreviewViewModel @Inject constructor(
             setContextPlayUseCase.invoke(GuideContext.Browsing(activeGuide, position))
             sendEvent(PreviewGuideEvent.Review)
         }
+    }
+
+    fun retryLoad() {
+        retryTrigger.tryEmit(Unit)
     }
 }

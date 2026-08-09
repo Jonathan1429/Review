@@ -27,6 +27,7 @@ import com.jonathanev.review.presentation.event.PreviewGuideEvent
 import com.jonathanev.review.presentation.model.ActiveGuideUIState
 import com.jonathanev.review.presentation.state.PreviewQuestionStateUi
 import com.jonathanev.review.presentation.viewmodel.PreviewViewModel
+import com.jonathanev.review.ui.components.ErrorComponent
 import com.jonathanev.review.ui.components.QuestionCard
 import com.jonathanev.review.ui.components.singleClick
 import com.jonathanev.review.ui.preview.DevicePreviews
@@ -54,10 +55,21 @@ fun PreviewPreviewQuestionsScreen(
 fun PreviewQuestionsRoute(
     viewModel: PreviewViewModel,
     onEditingGuideClick: () -> Unit,
-    onPlayGuideClick: () -> Unit
+    onPlayGuideClick: () -> Unit,
+    onBackNav: () -> Unit
 ) {
     val uiState = viewModel.uiState.collectAsStateWithLifecycle().value
     val context = LocalContext.current
+
+    LaunchedEffect(uiState.activeGuide) {
+        if (uiState.activeGuide is ActiveGuideUIState.Error) {
+            Toast.makeText(
+                context,
+                "No se pudieron cargar los datos",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.previewGuideEvent.collect { event ->
@@ -74,24 +86,18 @@ fun PreviewQuestionsRoute(
     }
 
     when (uiState.activeGuide) {
-        ActiveGuideUIState.Error -> {
-            Toast.makeText(
-                context,
-                "No se pudieron cargar los datos",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
-
         ActiveGuideUIState.Loading -> CircularProgressIndicator()
+        ActiveGuideUIState.Error -> {
+            ErrorComponent(
+                onRetry = viewModel::retryLoad,
+                onBack = onBackNav
+            )
+        }
         is ActiveGuideUIState.Success -> {
             PreviewQuestionsScreen(
                 previewQuestions = uiState,
-                onEditingGuideClick = { position ->
-                    viewModel.editingGuide(position = position)
-                },
-                onPlayGuideClick = { position ->
-                    viewModel.reviewGuide(position = position)
-                },
+                onEditingGuideClick = { position -> viewModel.editingGuide(position = position) },
+                onPlayGuideClick = { position -> viewModel.reviewGuide(position = position) },
                 onCreateQuestionClick = {}
             )
         }
