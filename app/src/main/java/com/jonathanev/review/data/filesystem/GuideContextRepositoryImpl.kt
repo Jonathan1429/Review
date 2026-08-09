@@ -132,7 +132,6 @@ class GuideContextRepositoryImpl @Inject constructor(
                 }
             }
         }
-        Unit
     }
 
     private fun saveGuideDomain(preferences: MutablePreferences, guide: GuideDomainModel) {

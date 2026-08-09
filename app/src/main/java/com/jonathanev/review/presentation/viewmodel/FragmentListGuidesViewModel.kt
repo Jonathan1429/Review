@@ -183,7 +183,25 @@ class FragmentListGuidesViewModel @Inject constructor(
                     oldRelativeGuidePath = RelativeGuidePath("")
                 )
                 setContextMoveUseCase.invoke(guideContext)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                e.printStackTrace()
+                emitMessage(
+                    GuideActionEvent.ShowMessage(
+                        e.message ?: "Ocurrió un error inesperado"
+                    )
+                )
+            } finally {
                 resetNavigationUseCase.invoke()
+            }
+        }
+    }
+
+    fun setActiveGuide(guideUIModel: GuideUiModel) {
+        viewModelScope.launch {
+            try {
+                setActiveGuideUseCase.invoke(guideUIModel.toDomain())
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -197,15 +215,20 @@ class FragmentListGuidesViewModel @Inject constructor(
         }
     }
 
-    fun setActiveGuide(guideUIModel: GuideUiModel) {
-        viewModelScope.launch {
-            setActiveGuideUseCase.invoke(guideUIModel.toDomain())
-        }
-    }
-
     fun clearActiveGuide() {
         viewModelScope.launch {
-            clearActiveGuideUseCase.invoke()
+            try {
+                clearActiveGuideUseCase.invoke()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                e.printStackTrace()
+                emitMessage(
+                    GuideActionEvent.ShowMessage(
+                        e.message ?: "Ocurrió un error inesperado"
+                    )
+                )
+            }
         }
     }
 

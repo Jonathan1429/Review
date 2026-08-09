@@ -7,7 +7,7 @@ import javax.inject.Inject
 class SetActiveGuideUseCase @Inject constructor(
     private val activeGuideRepository: ActiveGuideRepository
 ) {
-    suspend operator fun invoke(guideDomainModel: GuideDomainModel) {
-        activeGuideRepository.setActiveGuide(guideDomainModel)
+    suspend operator fun invoke(guideDomainModel: GuideDomainModel): Result<Unit> {
+        return activeGuideRepository.setActiveGuide(guideDomainModel)
     }
 }

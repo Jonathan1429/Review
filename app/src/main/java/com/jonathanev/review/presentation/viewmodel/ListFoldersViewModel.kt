@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
 
 @HiltViewModel
 class ListFoldersViewModel @Inject constructor(
@@ -100,10 +101,21 @@ class ListFoldersViewModel @Inject constructor(
 
     fun navigateToDirectory(item: FolderUiModel) {
         viewModelScope.launch {
-            onDismissDialog()
-            val name = item.folder.name
-            nextNavigationUseCase.invoke(name)
-            _eventsMessages.emit(FolderActionEvent.OpenFolder)
+            try {
+                onDismissDialog()
+                val name = item.folder.name
+                nextNavigationUseCase.invoke(name)
+                _eventsMessages.emit(FolderActionEvent.OpenFolder)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _eventsMessages.emit(
+                    FolderActionEvent.ShowMessage(
+                        e.message ?: "Ocurrió un error inesperado"
+                    )
+                )
+            }
         }
     }
 
@@ -113,15 +125,27 @@ class ListFoldersViewModel @Inject constructor(
 
     fun onConfirmDelete(folder: FolderUiModel) {
         viewModelScope.launch {
-            onDismissDialog()
-            val nameFolder = folder.folder.name
-            nextNavigationUseCase.invoke(nameFolder)
-            val message = deleteFolderUseCase.invoke()
-            resetNavigationUseCase.invoke()
-            if (message) {
-                _eventsMessages.emit(FolderActionEvent.DeleteFolderSuccess)
-            } else {
-                FolderActionEvent.ShowMessage("No se pudo borrar la carpeta correctamente")
+            try {
+                onDismissDialog()
+                val nameFolder = folder.folder.name
+                nextNavigationUseCase.invoke(nameFolder)
+                val message = deleteFolderUseCase.invoke()
+                if (message) {
+                    _eventsMessages.emit(FolderActionEvent.DeleteFolderSuccess)
+                } else {
+                    FolderActionEvent.ShowMessage("No se pudo borrar la carpeta correctamente")
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _eventsMessages.emit(
+                    FolderActionEvent.ShowMessage(
+                        e.message ?: "Ocurrió un error inesperado"
+                    )
+                )
+            } finally {
+                resetNavigationUseCase.invoke()
             }
         }
     }

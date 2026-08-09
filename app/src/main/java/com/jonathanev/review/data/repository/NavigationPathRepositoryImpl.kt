@@ -10,7 +10,7 @@ import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.provider.FilePathsProvider
 import com.jonathanev.review.domain.repository.NavigationPathRepository
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import java.io.IOException
 import javax.inject.Inject
@@ -27,30 +27,38 @@ class NavigationPathRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getRelativePath(): RelativeGuidePath {
-        return preferencesDataStore.data
-            .catch { exception ->
-                if (exception is IOException) {
-                    emit(emptyPreferences())
-                } else {
-                    throw exception
+        return runCatching {
+            preferencesDataStore.data
+                .catch { exception ->
+                    if (exception is IOException) {
+                        emit(emptyPreferences())
+                    } else {
+                        throw exception
+                    }
                 }
-            }
-            .map { prefs -> RelativeGuidePath(prefs[KEY_PATH] ?: "") }
-            .first()
+                .map { prefs ->
+                    val rawPath = prefs[KEY_PATH].orEmpty()
+                    RelativeGuidePath(rawPath)
+                }
+                .firstOrNull()
+        }.getOrNull() ?: RelativeGuidePath("")
     }
 
     override fun getRootGuides() = GuidePath(filePathsProvider.fileGuides)
     override fun getRootImages() = GuidePath(filePathsProvider.fileImages)
 
-    override suspend fun next(fileName: String) {
+    override suspend fun next(fileName: String): Result<Unit> = runCatching {
+        val sanitizedPath = fileName.trim()
         preferencesDataStore.edit { preferences ->
-            preferences[KEY_PATH] = fileName
+            preferences[KEY_PATH] = sanitizedPath
         }
+        Unit
     }
 
-    override suspend fun reset() {
+    override suspend fun reset(): Result<Unit> = runCatching {
         preferencesDataStore.edit { preferences ->
             preferences[KEY_PATH] = ""
         }
+        Unit
     }
 }

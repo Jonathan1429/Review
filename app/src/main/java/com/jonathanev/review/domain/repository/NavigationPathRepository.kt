@@ -7,6 +7,6 @@ interface NavigationPathRepository {
     suspend fun getRelativePath(): RelativeGuidePath
     fun getRootGuides(): GuidePath
     fun getRootImages(): GuidePath
-    suspend fun next(fileName: String)
-    suspend fun reset()
+    suspend fun next(fileName: String): Result<Unit>
+    suspend fun reset(): Result<Unit>
 }

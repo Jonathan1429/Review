@@ -6,7 +6,7 @@ import javax.inject.Inject
 class ClearActiveGuideUseCase @Inject constructor(
     private val activeGuideRepository: ActiveGuideRepository
 ) {
-    suspend operator fun invoke() {
-        activeGuideRepository.clearActiveGuide()
+    suspend operator fun invoke(): Result<Unit> {
+        return activeGuideRepository.clearActiveGuide()
     }
 }

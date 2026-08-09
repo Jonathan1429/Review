@@ -9,6 +9,9 @@ import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.provider.FilePathsProvider
 import com.jonathanev.review.domain.repository.FilePathResolver
 import com.jonathanev.review.domain.repository.NavigationPathRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.io.File
 import javax.inject.Inject
 
 class FilePathResolverService @Inject constructor(
@@ -75,7 +78,7 @@ class FilePathResolverService @Inject constructor(
     private suspend fun getFilePathSpecificGuide(
         guideDomainModel: GuideDomainModel,
         kind: PathKind
-    ): GuidePath {
+    ): GuidePath = withContext(Dispatchers.IO) {
         val relativePath = navigationPathRepository.getRelativePath()
 
         val root = when (kind) {
@@ -83,16 +86,19 @@ class FilePathResolverService @Inject constructor(
             PathKind.IMAGENES -> navigationPathRepository.getRootImages()
         }
 
-        val pathRelative =
-            if (relativePath.value.isBlank()) root.value else "${root.value}/${relativePath.value}"
+        val pathRelative = if (relativePath.value.isBlank()) {
+            root.value
+        } else {
+            File(root.value, relativePath.value).path
+        }
+
+        val file = FileNamingRules.buildXmlFileName(guideDomainModel.nameGuide)
         val path = if (guideDomainModel.version == GuideVersion.V1) {
-            val file = FileNamingRules.buildXmlFileName(guideDomainModel.nameGuide)
             filePathsProvider.buildGuide(
                 base = pathRelative,
                 file = file
             )
         } else {
-            val file = FileNamingRules.buildXmlFileName(guideDomainModel.nameGuide)
             filePathsProvider.buildFolderGuide(
                 base = pathRelative,
                 folder = guideDomainModel.nameGuide,
@@ -100,7 +106,7 @@ class FilePathResolverService @Inject constructor(
             )
         }
 
-        return GuidePath(path)
+        GuidePath(path)
     }
 
     private suspend fun getFolderPathSpecificGuide(

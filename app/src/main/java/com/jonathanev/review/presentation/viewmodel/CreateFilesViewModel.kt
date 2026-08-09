@@ -380,15 +380,23 @@ class CreateFilesViewModel @Inject constructor(
             }
 
             FileFormMode.CreatingFolder -> {
-                nextNavigationUseCase.invoke(data.name)
-                val pathCreate = createFolder(isDarkTheme, data)
-                resetNavigationUseCase.invoke()
-                if (!pathCreate) {
-                    emitEvent(Message("No se pudo crear la carpeta"))
-                    return
+                try {
+                    nextNavigationUseCase.invoke(data.name)
+                    val isFolderCreate = createFolder(isDarkTheme, data)
+                    if (!isFolderCreate) {
+                        emitEvent(Message("No se pudo crear la carpeta"))
+                        return
+                    }
+                    saveMetadata(isDarkTheme)
+                    emitEvent(CreateFolder)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    emitEvent(Message(e.message ?: "Ocurrió un error inesperado"))
+                } finally {
+                    resetNavigationUseCase.invoke()
                 }
-                saveMetadata(isDarkTheme)
-                emitEvent(CreateFolder)
             }
 
             is FileFormMode.RenameFile -> {
