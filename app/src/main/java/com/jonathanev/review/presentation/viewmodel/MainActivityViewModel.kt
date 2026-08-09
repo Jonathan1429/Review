@@ -52,13 +52,15 @@ class MainActivityViewModel @Inject constructor(
     val eventsMain = _eventsMain.asSharedFlow()
 
     fun createFolders() {
-        _foldersState.value = CreateFoldersState.Loading
+        viewModelScope.launch {
+            _foldersState.value = CreateFoldersState.Loading
 
-        val isSuccess = initializeGuideStorageUseCase.invoke()
-        if (isSuccess) {
-            _foldersState.value = CreateFoldersState.Idle
-        } else {
-            _foldersState.value = CreateFoldersState.Error
+            val isSuccess = initializeGuideStorageUseCase.invoke()
+            if (isSuccess) {
+                _foldersState.value = CreateFoldersState.Idle
+            } else {
+                _foldersState.value = CreateFoldersState.Error
+            }
         }
     }
 

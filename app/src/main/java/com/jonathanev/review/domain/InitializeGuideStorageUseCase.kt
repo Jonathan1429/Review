@@ -1,6 +1,5 @@
 package com.jonathanev.review.domain
 
-import android.util.Log
 import com.jonathanev.review.domain.repository.DirectoryManager
 import com.jonathanev.review.domain.repository.GuiaMigrationRepository
 import com.jonathanev.review.domain.repository.ImagesRepository
@@ -11,7 +10,7 @@ class InitializeGuideStorageUseCase @Inject constructor(
     private val migrationRepository: GuiaMigrationRepository,
     private val imagesRepository: ImagesRepository
 ) {
-    operator fun invoke(): Boolean {
+    suspend operator fun invoke(): Boolean {
         val foldersCreated = directoryManager.createFoldersMain()
 
         if (!foldersCreated){

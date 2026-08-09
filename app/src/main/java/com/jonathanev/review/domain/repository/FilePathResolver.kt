@@ -23,10 +23,6 @@ interface FilePathResolver {
         kind: PathKind
     ): GuidePath
 
-    suspend fun mapToJoinRelativePath(
-        nameFolder: String
-    ): RelativeGuidePath
-
     suspend fun mapToFolderPath(
         kind: PathKind
     ): GuidePath

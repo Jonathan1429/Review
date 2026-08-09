@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -47,14 +48,37 @@ class FolderRepositoryImpl @Inject constructor(
         return attributesFolderDomain
     }
 
-    override suspend fun deleteFolder(): Boolean {
-        val pathGuides =
-            File(filePathResolver.mapToFolderPath(PathKind.GUIAS).value)
-        val pathImages =
-            File(filePathResolver.mapToFolderPath(PathKind.IMAGENES).value)
+    override suspend fun deleteFolder(): Boolean = withContext(Dispatchers.IO) {
+        val pathGuides = File(filePathResolver.mapToFolderPath(PathKind.GUIAS).value)
+        val pathImages = File(filePathResolver.mapToFolderPath(PathKind.IMAGENES).value)
 
-        return if (pathGuides.deleteRecursively()) {
-            pathImages.deleteRecursively()
+        val guidesDeleted = deleteSafely(pathGuides)
+        val imagesDeleted = deleteSafely(pathImages)
+
+        val isSuccess = guidesDeleted && imagesDeleted
+
+        if (isSuccess) {
+            refreshFolders.value = System.currentTimeMillis()
+        }
+
+        isSuccess
+    }
+
+    private fun deleteSafely(folder: File): Boolean {
+        if (!folder.exists()) return true
+        return folder.deleteRecursively()
+    }
+
+    override suspend fun createFolder(
+        data: FolderScreenInfoDomain
+    ): Boolean = withContext(Dispatchers.IO) {
+        val guidesPath = File(filePathResolver.mapToFolderPath(PathKind.GUIAS).value)
+        val imagesPath = File(filePathResolver.mapToFolderPath(PathKind.IMAGENES).value)
+
+        val guidesCreated = guidesPath.ensureDirectory()
+        val imagesCreated = imagesPath.ensureDirectory()
+
+        if (guidesCreated && imagesCreated) {
             refreshFolders.value = System.currentTimeMillis()
             true
         } else {
@@ -62,25 +86,7 @@ class FolderRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun createFolder(data: FolderScreenInfoDomain): Boolean {
-        val guidesPath =
-            File(filePathResolver.mapToFolderPath(PathKind.GUIAS).value)
-        val imagesPath =
-            File(filePathResolver.mapToFolderPath(PathKind.IMAGENES).value)
-
-        if (!guidesPath.exists()) {
-            val pathGuides = guidesPath.mkdir()
-            if (!pathGuides) return false
-        }
-
-        if (!imagesPath.exists()) {
-            val pathImages = imagesPath.mkdir()
-            if (!pathImages) return false
-        }
-
-        refreshFolders.value = System.currentTimeMillis()
-        return true
-    }
+    private fun File.ensureDirectory(): Boolean = exists() || mkdirs()
 
     override fun getFolders(): Flow<List<FolderDomainModel>> {
         return refreshFolders.map {
@@ -92,24 +98,11 @@ class FolderRepositoryImpl @Inject constructor(
             }
 
             rootDir.listFiles()
+                ?.asSequence()
                 ?.filter { it.isDirectory }
                 ?.sortedBy { it.name }
-                ?.map { item ->
-                    val itemChildren = item.listFiles() ?: emptyArray()
-
-                    val guidesV1 = itemChildren.count { file ->
-                        file.isFile && file.extension == Extensions.XML_EXTENSION
-                    }
-
-                    val guidesV2 = itemChildren
-                        .filter { it.isDirectory }
-                        .sumOf { subFolder ->
-                            subFolder.listFiles()?.count { file ->
-                                file.isFile && file.extension == Extensions.XML_EXTENSION
-                            } ?: 0
-                        }
-
-                    val attributes = loadFolderAttributes(item.name)
+                ?.map { folder ->
+                    val attributes = loadFolderAttributes(folder.name)
 
                     FolderDomainModel(
                         folder = FolderAttributesDomain(
@@ -117,9 +110,28 @@ class FolderRepositoryImpl @Inject constructor(
                             imgFolder = attributes.imgFolder,
                             color = attributes.color
                         ),
-                        numGuides = guidesV1 + guidesV2
+                        numGuides = countGuidesInFolder(folder)
                     )
-                } ?: emptyList()
+                }
+                ?.toList()
+                ?: emptyList()
         }.flowOn(Dispatchers.IO)
     }
+
+    private fun countGuidesInFolder(folder: File): Int {
+        val children = folder.listFiles().orEmpty()
+
+        val guidesV1 = children.count { it.isXmlFile() }
+
+        val guidesV2 = children.asSequence()
+            .filter { it.isDirectory }
+            .sumOf { subFolder ->
+                subFolder.listFiles().orEmpty().count { it.isXmlFile() }
+            }
+
+        return guidesV1 + guidesV2
+    }
+
+    private fun File.isXmlFile(): Boolean =
+        isFile && extension.equals(Extensions.XML_EXTENSION, ignoreCase = true)
 }

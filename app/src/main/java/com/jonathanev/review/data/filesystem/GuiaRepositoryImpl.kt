@@ -68,43 +68,48 @@ class GuiaRepositoryImpl @Inject constructor(
         get() = _guidesRecovery
     private val refreshGuides = MutableStateFlow(System.currentTimeMillis())
 
-    private suspend fun listGuides(): List<File> {
+    private suspend fun listGuides(): List<File> = withContext(Dispatchers.IO) {
         val guidePath = filePathResolver.mapToFolderPath(PathKind.GUIAS)
-
         val path = File(guidePath.value)
+
+        if (!path.exists() || !path.isDirectory) {
+            return@withContext emptyList()
+        }
+
         val allItems = path.listFiles().orEmpty()
 
-        val listFiles = allItems
-            .filter { file -> file.isFile }
-            .filter { file -> file.extension == Extensions.XML_EXTENSION }
+        fun File.isXmlFile(): Boolean =
+            isFile && extension.equals(Extensions.XML_EXTENSION, ignoreCase = true)
+
+        val listFiles = allItems.filter { it.isXmlFile() }
 
         val listFromFolders = allItems
             .filter { it.isDirectory }
             .flatMap { folder ->
-                folder.listFiles().orEmpty()
-                    .filter { file -> file.isFile }
-                    .filter { file -> file.extension == Extensions.XML_EXTENSION }
+                folder.listFiles().orEmpty().filter { it.isXmlFile() }
             }
 
-        return listFiles + listFromFolders
+        listFiles + listFromFolders
     }
 
     override fun hasGuides(): Flow<Boolean> = refreshGuides.map {
         val path = File(filePathResolver.mapToFolderPath(PathKind.GUIAS).value)
-        val allItems = path.listFiles() ?: return@map false
 
-        val hasDirectFile = allItems.any { file ->
-            file.isFile && file.extension == Extensions.XML_EXTENSION
-        }
+        if (!path.exists() || !path.isDirectory) return@map false
 
+        val allItems = path.listFiles().orEmpty()
+
+        fun File.isXmlFile(): Boolean =
+            isFile && extension.equals(Extensions.XML_EXTENSION, ignoreCase = true)
+
+        val hasDirectFile = allItems.any { it.isXmlFile() }
         if (hasDirectFile) return@map true
 
-        val hastFile = allItems.filter { it.isDirectory }.any { folder ->
-            folder.listFiles().orEmpty().any { file ->
-                file.isFile && file.extension == Extensions.XML_EXTENSION
+        allItems.asSequence()
+            .filter { it.isDirectory }
+            .any { folder ->
+                folder.listFiles().orEmpty().any { file -> file.isXmlFile() }
             }
-        }
-        return@map hastFile
     }.flowOn(Dispatchers.IO)
 
     override fun getGuides(): Flow<List<GuideDomainModel>> {
@@ -560,21 +565,26 @@ class GuiaRepositoryImpl @Inject constructor(
 
     override suspend fun existXMLGuideV1(
         guideDomainModel: GuideDomainModel
-    ): ExistGuideV1Result {
+    ): ExistGuideV1Result = withContext(Dispatchers.IO) {
         val pathComplete = File(
             filePathResolver.mapToFilePathSpecificGuide(
-                guideDomainModel,
-                PathKind.GUIAS
+                guideDomainModel = guideDomainModel,
+                kind = PathKind.GUIAS
             ).value
         )
 
-        return when (val guideDomainModel: GuideResource<GuideDomainModel, ReadGuideError> =
-            getAttributesGuide(pathComplete)) {
+        if (!pathComplete.exists()) {
+            return@withContext ExistGuideV1Result.NoExistGuide
+        }
+
+        when (val resource = getAttributesGuide(pathComplete)) {
             is GuideResource.Error -> ExistGuideV1Result.NoExistGuide
             is GuideResource.Success -> {
-                val version = guideDomainModel.data.version
-                if (version != GuideVersion.V1) return ExistGuideV1Result.NoExistGuide
-                ExistGuideV1Result.ExistGuide
+                if (resource.data.version == GuideVersion.V1) {
+                    ExistGuideV1Result.ExistGuide
+                } else {
+                    ExistGuideV1Result.NoExistGuide
+                }
             }
         }
     }
