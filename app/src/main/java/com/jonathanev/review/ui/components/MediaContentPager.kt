@@ -73,7 +73,6 @@ fun PreviewMediaContentPager(
             }
 
             MediaContentPager(
-                currentAsset = data.currentAsset,
                 pagerState = pagerState,
                 assets = data.listType,
                 mediaForSelected = data.mediaForSelected,
@@ -95,16 +94,16 @@ fun MediaContentPager(
     onOpenAssetClick: (typeContent: QuestionContentUi, posItem: Int) -> Unit,
     onDeleteAssetClick: (typeContent: QuestionContentUi, posItem: Int) -> Unit,
     onCurrentPosContent: (Int) -> Unit,
-    currentAsset: QuestionContentUi?
 ) {
     val resourceSelected =
         if (mediaForSelected == ContentType.TEXT) R.string.lblText else R.string.lblImage
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-    LaunchedEffect(pagerState.currentPage) {
-        val position = pagerState.currentPage
-        onCurrentPosContent(position)
+    LaunchedEffect(pagerState.currentPage, assets.size) {
+        if (assets.isNotEmpty() && pagerState.currentPage in assets.indices) {
+            onCurrentPosContent(pagerState.currentPage)
+        }
     }
 
     Box(
@@ -136,44 +135,29 @@ fun MediaContentPager(
                 )
             }
         } else {
-            val typeContent =
-                when (val asset = assets[pagerState.currentPage]) {
-                    is QuestionContentUi.Image -> {
-                        QuestionContentUi.Image(
-                            asset.uri,
-                            asset.nameFile
-                        )
-                    }
-
-                    QuestionContentUi.None -> QuestionContentUi.None
-                    is QuestionContentUi.Text -> {
-                        QuestionContentUi.Text(
-                            asset.text,
-                            asset.colorRanges
-                        )
-                    }
-                }
+            val currentAsset = assets.getOrNull(pagerState.currentPage)
 
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier.fillMaxSize()
             ) { page ->
-                when (val currentAsset = assets[page]) {
+                // 2. Obtenemos el elemento específico de cada página
+                when (val assetInPage = assets.getOrNull(page)) {
                     is QuestionContentUi.Image -> {
                         CustomBoxCreateImage(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .singleClick(onClick = {
-                                    if (guideContext is GuideContext.Browsing) {
-                                        onOpenAssetClick(typeContent, pagerState.currentPage)
+                                    if (guideContext is GuideContext.Browsing && currentAsset != null) {
+                                        onOpenAssetClick(currentAsset, pagerState.currentPage)
                                     }
                                 }),
-                            uriImage = currentAsset.uri
+                            uriImage = assetInPage.uri
                         )
                     }
 
                     is QuestionContentUi.Text -> {
-                        val textFieldValueWrapper = TextFieldValue(text = currentAsset.text)
+                        val textFieldValueWrapper = TextFieldValue(text = assetInPage.text)
 
                         Box(
                             modifier = Modifier
@@ -182,8 +166,8 @@ fun MediaContentPager(
                         ) {
                             CustomBoxCreateText(
                                 Modifier.singleClick(onClick = {
-                                    if (guideContext is GuideContext.Browsing) {
-                                        onOpenAssetClick(typeContent, pagerState.currentPage)
+                                    if (guideContext is GuideContext.Browsing && currentAsset != null) {
+                                        onOpenAssetClick(currentAsset, pagerState.currentPage)
                                     }
                                 }),
                                 textValue = textFieldValueWrapper,
@@ -194,7 +178,7 @@ fun MediaContentPager(
                         }
                     }
 
-                    QuestionContentUi.None -> {
+                    null, QuestionContentUi.None -> {
                         EmptyStateView(
                             icon = painterResource(R.drawable.ic_empty_notes),
                             title = "Sin contenido",
@@ -251,7 +235,9 @@ fun MediaContentPager(
                         Box(
                             modifier = Modifier
                                 .singleClick(onClick = {
-                                    onOpenAssetClick(typeContent, pagerState.currentPage)
+                                    currentAsset?.let { asset ->
+                                        onOpenAssetClick(asset, pagerState.currentPage)
+                                    }
                                 })
                                 .padding(6.dp)
                         ) {
@@ -276,7 +262,9 @@ fun MediaContentPager(
                         Box(
                             modifier = Modifier
                                 .singleClick(onClick = {
-                                    onDeleteAssetClick(typeContent, pagerState.currentPage)
+                                    currentAsset?.let { asset ->
+                                        onDeleteAssetClick(asset, pagerState.currentPage)
+                                    }
                                 })
                                 .padding(6.dp)
                         ) {

@@ -73,14 +73,21 @@ fun AssetCarouselViewer(
     onDeleteItemClick: (typeContent: QuestionContentUi, positionItem: Int) -> Unit,
     onCurrentPosContent: (Int) -> Unit,
 ) {
-    val pagerState =
-        rememberPagerState(initialPage = currentPosContent, pageCount = { assets.size })
     val scope = rememberCoroutineScope()
     val lazyRowState = rememberLazyListState()
+    val maxIndex = (assets.size - 1).coerceAtLeast(0)
+    val safeInitialPage = currentPosContent.coerceIn(0, maxIndex)
 
-    LaunchedEffect(currentPosContent) {
-        if (assets.isNotEmpty() && pagerState.currentPage != currentPosContent) {
-            pagerState.scrollToPage(currentPosContent)
+    val pagerState = rememberPagerState(
+        initialPage = safeInitialPage,
+        pageCount = { assets.size }
+    )
+
+    LaunchedEffect(currentPosContent, assets.size) {
+        if (assets.isNotEmpty() && currentPosContent in assets.indices) {
+            if (pagerState.currentPage != currentPosContent) {
+                pagerState.scrollToPage(currentPosContent)
+            }
         }
     }
 
@@ -90,11 +97,7 @@ fun AssetCarouselViewer(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val currentAsset = assets.getOrNull(pagerState.currentPage)
-            .takeUnless { guideContext is GuideContext.Browsing }
-
         MediaContentPager(
-            currentAsset = currentAsset,
             pagerState = pagerState,
             assets = assets,
             mediaForSelected = mediaForSelected,

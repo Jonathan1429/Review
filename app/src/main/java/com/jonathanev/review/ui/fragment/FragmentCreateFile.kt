@@ -220,7 +220,7 @@ class FragmentCreateFile : Fragment() {
     }
 
     private fun goEditImage(position: Int) {
-        viewModel.setEditingMode(true, position)
+        //viewModel.setEditingMode(true, position)
 
         findNavController().navigate(
             R.id.action_to_images,
@@ -229,7 +229,7 @@ class FragmentCreateFile : Fragment() {
     }
 
     private fun goEditText(position: Int) {
-        viewModel.setEditingMode(true, position)
+        //viewModel.setEditingMode(true, position)
 
         findNavController().navigate(
             R.id.action_to_text,

@@ -116,16 +116,16 @@ fun BasicNavigation() {
 
 // 3. Obtenemos el ViewModel solo si el Owner existe
     val viewModelSharedCreateFile: SharedFragmentCreateFileViewModel? = scopedOwner?.let { owner ->
-        viewModel(viewModelStoreOwner = owner)
+        hiltViewModel(viewModelStoreOwner = owner)
     }
 
-    backStack.forEachIndexed { index, key ->
+    /*backStack.forEachIndexed { index, key ->
         //Log.i("BACKSTACK", "[$index]: $key")
         println("BACKSTACK [$index]: $key")
     }
 
     //Log.i("BACKSTACK", "========================================")
-    println("BACKSTACK: ========================================")
+    println("BACKSTACK: ========================================")*/
 
     NavDisplay(
         backStack = backStack,
@@ -301,14 +301,6 @@ fun BasicNavigation() {
 
             entry<AppRoutes.FillingGuideScreen> {
                 val context = LocalContext.current
-
-                val scopedOwner = rememberScopedViewModelStoreOwner(key = "filling_guide_key")
-
-                val viewModelSharedCreateFile: SharedFragmentCreateFileViewModel? =
-                    scopedOwner?.let { owner ->
-                        hiltViewModel(viewModelStoreOwner = owner)
-                    }
-
                 val viewModel = viewModelSharedCreateFile ?: return@entry
 
                 FillingGuideRoute(
@@ -383,9 +375,7 @@ fun BasicNavigation() {
                     questionContentMode = values.questionContentMode,
                     posItem = values.posItem,
                     viewModel = viewModel,
-                    onBackNav = {
-                        backStack.removeLastOrNull()
-                    }
+                    onBackNav = { backStack.removeLastOrNull() }
                 )
             }
 
