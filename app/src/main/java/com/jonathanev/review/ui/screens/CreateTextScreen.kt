@@ -45,7 +45,7 @@ import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.CreateTextScreenProv
 import com.jonathanev.review.ui.preview.providers.CreateTextScreenProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
-import com.jonathanev.review.ui.theme.degradientColor
+import com.jonathanev.review.ui.theme.cardStepBackground
 
 @DevicePreviews
 @Composable
@@ -199,7 +199,7 @@ fun CreateTextScreen(
                 .padding(16.dp),
             shape = RoundedCornerShape(42.dp),
             colors = CardDefaults.elevatedCardColors(
-                containerColor = degradientColor
+                containerColor = cardStepBackground
             ),
             elevation = CardDefaults.elevatedCardElevation(
                 defaultElevation = 8.dp
