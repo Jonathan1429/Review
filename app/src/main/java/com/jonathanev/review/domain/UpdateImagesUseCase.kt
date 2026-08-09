@@ -12,7 +12,7 @@ import javax.inject.Inject
 
 class UpdateImagesUseCase @Inject constructor(
     private val directoryManager: DirectoryManager,
-    private val imagesRepository: ImagesRepository,
+    private val imagesRepository: ImagesRepository
 ) {
     suspend operator fun invoke(
         guideDomain: GuideDomainModel,
@@ -68,6 +68,9 @@ class UpdateImagesUseCase @Inject constructor(
             guideDomain,
             listImages
         )
+
+        // Borra imagenes de la ruta cache
+        imagesRepository.clearTempImages()
 
         return true
     }

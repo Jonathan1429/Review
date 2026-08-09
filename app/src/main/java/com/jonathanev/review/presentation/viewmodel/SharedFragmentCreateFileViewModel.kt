@@ -4,7 +4,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jonathanev.review.domain.ClearTempImagesUseCase
 import com.jonathanev.review.domain.GetActiveGuideUseCase
 import com.jonathanev.review.domain.GetGuideContextUseCase
 import com.jonathanev.review.domain.GetGuideXmlDataUseCase
@@ -64,8 +63,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     private val getActiveGuideUseCase: GetActiveGuideUseCase,
     private val getGuideContextUseCase: GetGuideContextUseCase,
     private val saveTempImageUseCase: SaveTempImageUseCase,
-    private val savedStateHandle: SavedStateHandle,
-    private val clearTempImagesUseCase: ClearTempImagesUseCase
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private companion object {
         const val KEY_GUIDE_STATE = "key_guide_ui_state"
@@ -697,10 +695,14 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                     )
             }
 
-            clearTempImagesUseCase.invoke()
+            clearSavedState()
         }
     }
 
+    fun onCloseGuide() {
+        clearSavedState()
+        sendNotification(CreateGuideEvent.CloseGuide)
+    }
     fun deleteQuesAns() {
         _uiState.update { state ->
             if (state is GuideScreenUiState.Success) {
@@ -864,7 +866,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         }
     }
 
-    fun clearSavedState() {
+    private fun clearSavedState() {
         savedStateHandle.remove<GuideScreenUiState>(KEY_GUIDE_STATE)
     }
 

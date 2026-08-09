@@ -1,7 +1,5 @@
 package com.jonathanev.review.ui.screens
 
-import android.content.Context
-import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -24,7 +22,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -44,7 +41,6 @@ import com.jonathanev.review.ui.preview.providers.CreateImageContentProvider
 import com.jonathanev.review.ui.theme.HardColorButton
 import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.cardStepBackground
-import java.io.File
 
 @DevicePreviews
 @Composable
@@ -69,7 +65,6 @@ fun CreateImageRoute(
     questionContentMode: QuestionContentMode,
     onBackNav: () -> Unit
 ) {
-    val context = LocalContext.current
     val imageList by viewModel.imageList.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var newlyPickedUri by rememberSaveable { mutableStateOf<String?>(null) }
@@ -106,15 +101,12 @@ fun CreateImageRoute(
                 contract = ActivityResultContracts.PickVisualMedia()
             ) { uri ->
                 uri?.let { selectedUri ->
-                    val tempPath = createTempImageFile(context, selectedUri)
-                    if (tempPath != null) {
-                        newlyPickedUri = tempPath
+                    newlyPickedUri = selectedUri.toString()
 
-                        viewModel.addImageContent(
-                            uri = tempPath,
-                            questionContentMode = questionContentMode
-                        )
-                    }
+                    viewModel.addImageContent(
+                        uri = selectedUri.toString(),
+                        questionContentMode = questionContentMode
+                    )
                 }
             }
 
@@ -130,20 +122,6 @@ fun CreateImageRoute(
                 onBackNav = onBackNav
             )
         }
-    }
-}
-
-private fun createTempImageFile(context: Context, uri: Uri): String? {
-    return try {
-        val inputStream = context.contentResolver.openInputStream(uri) ?: return null
-        val tempFile = File.createTempFile("temp_guide_", ".jpg", context.cacheDir)
-        tempFile.outputStream().use { output ->
-            inputStream.copyTo(output)
-        }
-        tempFile.absolutePath
-    } catch (e: Exception) {
-        e.printStackTrace()
-        null
     }
 }
 

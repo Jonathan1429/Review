@@ -177,6 +177,10 @@ fun FillingGuideRoute(
                         CreateGuideEvent.QADeleted -> {
                             showToast("Se ha eliminado la pregunta y respuesta", context)
                         }
+
+                        CreateGuideEvent.CloseGuide -> {
+                            onCloseGuide()
+                        }
                     }
                 }
             }
@@ -238,14 +242,13 @@ fun FillingGuideRoute(
                 onAddQuestion = viewModel::addNextQuestion,
                 onCloseGuide = {
                     when (state.guideContext) {
-                        is GuideContext.Browsing -> onCloseGuide()
+                        is GuideContext.Browsing -> viewModel.onCloseGuide()
                         is GuideContext.Creating -> viewModel.saveGuide()
-                        is GuideContext.DeleteGuide -> onCloseGuide()
+                        is GuideContext.DeleteGuide -> viewModel.onCloseGuide()
                         is GuideContext.Editing -> viewModel.saveGuide()
-                        is GuideContext.Moving -> onCloseGuide()
-                        is GuideContext.Rename -> onCloseGuide()
+                        is GuideContext.Moving -> viewModel.onCloseGuide()
+                        is GuideContext.Rename -> viewModel.onCloseGuide()
                     }
-                    viewModel.clearSavedState()
                 },
                 onCurrentPosContent = { position ->
                     viewModel.updatePosContent(position)

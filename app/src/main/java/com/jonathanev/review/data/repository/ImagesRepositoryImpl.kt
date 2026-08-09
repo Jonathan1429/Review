@@ -51,10 +51,9 @@ class ImagesRepositoryImpl @Inject constructor(
             tempFile.outputStream().use { output ->
                 input.copyTo(output)
             }
-        } ?: throw IllegalStateException("No se pudo leer la imagen seleccionada")
+        } ?: throw IllegalStateException("No se pudo leer la imagen desde: $uri")
 
-        tempFile.toUri()
-            .toString() // Retorna la nueva URI local "file:///.../cache/temp_img_xxx.jpg"
+        tempFile.toUri().toString()
     }
 
     override suspend fun clearTempImages() {
