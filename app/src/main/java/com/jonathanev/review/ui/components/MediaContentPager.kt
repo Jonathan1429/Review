@@ -259,29 +259,31 @@ fun MediaContentPager(
                         }
 
                         // Botón Eliminar (Bote de basura)
-                        Box(
-                            modifier = Modifier
-                                .singleClick(onClick = {
-                                    currentAsset?.let { asset ->
-                                        onDeleteAssetClick(asset, pagerState.currentPage)
-                                    }
-                                })
-                                .padding(6.dp)
-                        ) {
+                        if (guideContext !is GuideContext.Browsing) {
                             Box(
                                 modifier = Modifier
-                                    .background(
-                                        Color.Black.copy(alpha = 0.6f),
-                                        RoundedCornerShape(12.dp)
-                                    )
-                                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                                    .singleClick(onClick = {
+                                        currentAsset?.let { asset ->
+                                            onDeleteAssetClick(asset, pagerState.currentPage)
+                                        }
+                                    })
+                                    .padding(6.dp)
                             ) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_trash),
-                                    contentDescription = "Eliminar",
-                                    tint = Rojo100,
-                                    modifier = Modifier.size(16.dp)
-                                )
+                                Box(
+                                    modifier = Modifier
+                                        .background(
+                                            Color.Black.copy(alpha = 0.6f),
+                                            RoundedCornerShape(12.dp)
+                                        )
+                                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_trash),
+                                        contentDescription = "Eliminar",
+                                        tint = Rojo100,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
                             }
                         }
                     }
