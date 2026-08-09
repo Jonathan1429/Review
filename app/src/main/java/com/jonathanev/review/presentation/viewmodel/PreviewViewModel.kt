@@ -38,57 +38,55 @@ class PreviewViewModel @Inject constructor(
     private val setContextEditUseCase: SetContextEditUseCase,
     private val setContextPlayUseCase: SetContextPlayUseCase
 ) : ViewModel() {
-    private val retryTrigger = MutableSharedFlow<Unit>(extraBufferCapacity = 1).apply {
+    private val retryTrigger = MutableSharedFlow<Unit>(replay = 1).apply {
         tryEmit(Unit)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val uiState: StateFlow<PreviewQuestionStateUi> = retryTrigger
         .flatMapLatest {
-            getActiveGuideUseCase.invoke()
-                .flatMapLatest { activeGuideDomain ->
-                    if (activeGuideDomain == null) {
-                        flowOf(
+            getActiveGuideUseCase()
+        }
+        .flatMapLatest { activeGuideDomain ->
+            if (activeGuideDomain == null) {
+                flowOf(
+                    PreviewQuestionStateUi(
+                        activeGuide = ActiveGuideUIState.Loading,
+                        previewState = emptyList()
+                    )
+                )
+            } else {
+                flow {
+                    emit(
+                        PreviewQuestionStateUi(
+                            activeGuide = ActiveGuideUIState.Loading,
+                            previewState = emptyList()
+                        )
+                    )
+
+                    val context = GuideContext.Browsing(guide = activeGuideDomain, -1)
+                    when (val result = getGuideXmlDataUseCase(context = context)) {
+                        is GetGuideResult.Success -> {
+                            val response = getPreviewQuestionsUseCase(result.list)
+                            emit(
+                                PreviewQuestionStateUi(
+                                    activeGuide = ActiveGuideUIState.Success(
+                                        activeGuideDomain.toUi()
+                                    ),
+                                    previewState = response.map { it.toUi() }
+                                )
+                            )
+                        }
+
+                        else -> emit(
                             PreviewQuestionStateUi(
-                                activeGuide = ActiveGuideUIState.Loading,
+                                activeGuide = ActiveGuideUIState.Error,
                                 previewState = emptyList()
                             )
                         )
-                    } else {
-                        flow {
-                            emit(
-                                PreviewQuestionStateUi(
-                                    activeGuide = ActiveGuideUIState.Loading,
-                                    previewState = emptyList()
-                                )
-                            )
-
-                            val context = GuideContext.Browsing(guide = activeGuideDomain, -1)
-                            when (val result = getGuideXmlDataUseCase(context = context)) {
-                                is GetGuideResult.Success -> {
-                                    val response = getPreviewQuestionsUseCase.invoke(result.list)
-                                    val responseToUi = response.map { it.toUi() }
-
-                                    emit(
-                                        PreviewQuestionStateUi(
-                                            activeGuide = ActiveGuideUIState.Success(
-                                                activeGuideDomain.toUi()
-                                            ),
-                                            previewState = responseToUi
-                                        )
-                                    )
-                                }
-
-                                else -> emit(
-                                    PreviewQuestionStateUi(
-                                        activeGuide = ActiveGuideUIState.Error,
-                                        previewState = emptyList()
-                                    )
-                                )
-                            }
-                        }
                     }
                 }
+            }
         }
         .flowOn(Dispatchers.IO)
         .stateIn(
