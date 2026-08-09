@@ -120,7 +120,7 @@ fun PreviewQuestionsRoute(
                 previewQuestions = uiState,
                 onEditingGuideClick = { position -> viewModel.editingGuide(position = position) },
                 onPlayGuideClick = { position -> viewModel.reviewGuide(position = position) },
-                onCreateQuestionClick = {}
+                onCreateQuestionClick = { position -> viewModel.editingGuide(position = position) }
             )
         }
     }
@@ -132,12 +132,12 @@ fun PreviewQuestionsScreen(
     previewQuestions: PreviewQuestionStateUi,
     onEditingGuideClick: (Int) -> Unit,
     onPlayGuideClick: (Int) -> Unit,
-    onCreateQuestionClick: () -> Unit
+    onCreateQuestionClick: (Int) -> Unit
 ) {
     Scaffold(
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                onClick = singleClick { onCreateQuestionClick() },
+                onClick = singleClick { onCreateQuestionClick(previewQuestions.previewState.size) },
                 containerColor = MaterialTheme.colorScheme.primary,
                 shape = RoundedCornerShape(16.dp),
                 icon = {

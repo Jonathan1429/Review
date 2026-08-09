@@ -89,7 +89,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                         return@collect
                     }
 
-                    // 1. SI YA EXISTE UN ESTADO EN SavedStateHandle, SE RESPETA Y NO SE REEVALÚA EL XML
+                    // 1. SI YA EXISTE UN ESTADO EN SavedStateHandle, SE RESPETA
                     val restoredState =
                         savedStateHandle.get<GuideScreenUiState.Success>(KEY_GUIDE_STATE)
                     if (restoredState != null && restoredState.guideContext == context) {
@@ -97,7 +97,6 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                         return@collect
                     }
 
-                    // 2. SI YA HAY UN SUCCESS EN MEMORIA (Y CAMBIÓ ALGO EN EL FLOW), NO REESCRÍBIMALO
                     if (_uiState.value is GuideScreenUiState.Success) {
                         return@collect
                     }
@@ -109,22 +108,54 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                         else -> return@collect
                     }
 
+                    // Extraemos la posición solicitada desde el contexto
+                    val targetPosition = when (context) {
+                        is GuideContext.Browsing -> context.position
+                        is GuideContext.Creating -> 0
+                        is GuideContext.Editing -> context.position
+                        else -> return@collect
+                    }
+
                     _uiState.value = GuideScreenUiState.Loading
+
+                    if (context is GuideContext.Creating) {
+                        val newState = GuideScreenUiState.Success(
+                            fileName = guide.nameGuide,
+                            description = guide.description,
+                            guideContext = context
+                        )
+                        _uiState.value = newState
+                        savedStateHandle[KEY_GUIDE_STATE] = newState
+                        return@collect
+                    }
 
                     when (val result = getGuideXmlDataUseCase.invoke(context = context)) {
                         is GetGuideResult.Success -> {
                             val questions = result.list.map { it.question.toUi() }
                             val answers = result.list.map { it.answer.toUi() }
 
+                            val isAddingAtEnd = targetPosition >= questions.size
+
+                            val finalQuestions =
+                                if (isAddingAtEnd) questions + QuestionItemUi(content = emptyList()) else questions
+                            val finalAnswers =
+                                if (isAddingAtEnd) answers + QuestionItemUi(content = emptyList()) else answers
+
+                            val initialContador =
+                                if (isAddingAtEnd) questions.size else targetPosition.coerceIn(
+                                    0,
+                                    questions.lastIndex
+                                )
+
                             val newState = GuideScreenUiState.Success(
                                 fileName = guide.nameGuide,
                                 description = guide.description,
-                                preguntas = questions.ifEmpty { listOf(QuestionItemUi(content = emptyList())) },
-                                respuestas = answers.ifEmpty { listOf(QuestionItemUi(content = emptyList())) },
+                                preguntas = finalQuestions,
+                                respuestas = finalAnswers,
+                                contadorPregunta = initialContador,
                                 guideContext = context
                             )
 
-                            // CARGA INICIAL: Se asigna tanto en memoria como en SavedStateHandle
                             _uiState.value = newState
                             savedStateHandle[KEY_GUIDE_STATE] = newState
                         }
@@ -471,16 +502,15 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         }
     }
 
-    fun addNextQuestion() {
+    private fun appendEmptyQuestion(targetIndex: Int) {
         updateSuccessState { state ->
-            val targetIndex = state.contadorPregunta + 1
+            val safeIndex = targetIndex.coerceIn(0, state.preguntas.size)
 
             val updatedPreguntas = state.preguntas.toMutableList().apply {
-                add(targetIndex, QuestionItemDomain(content = emptyList()).toUi())
+                add(safeIndex, QuestionItemDomain(content = emptyList()).toUi())
             }
-
             val updatedRespuestas = state.respuestas.toMutableList().apply {
-                add(targetIndex, QuestionItemDomain(content = emptyList()).toUi())
+                add(safeIndex, QuestionItemDomain(content = emptyList()).toUi())
             }
 
             state.copy(
@@ -488,33 +518,20 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 respuestas = updatedRespuestas,
                 qAType = QATypeUI.QUESTION,
                 mediaSelected = ContentType.TEXT,
-                contadorPregunta = targetIndex,
+                contadorPregunta = safeIndex,
                 contadorContenido = -1
             )
         }
-
-        //addContentEmpty()
     }
 
-    private fun addContentEmpty() {
-        updateSuccessState { state ->
-            val pos = state.contadorPregunta
+    fun addNextQuestion() {
+        val currentIndex = (uiState.value as? GuideScreenUiState.Success)?.contadorPregunta ?: 0
+        appendEmptyQuestion(targetIndex = currentIndex + 1)
+    }
 
-            val updatedPreguntas = state.preguntas.toMutableList().apply {
-                val index = pos.coerceIn(0, size)
-                add(index, QuestionItemDomain(content = emptyList()).toUi())
-            }
-
-            val updatedRespuestas = state.respuestas.toMutableList().apply {
-                val index = pos.coerceIn(0, size)
-                add(index, QuestionItemDomain(content = emptyList()).toUi())
-            }
-
-            state.copy(
-                preguntas = updatedPreguntas,
-                respuestas = updatedRespuestas
-            )
-        }
+    fun addQuestionAtEnd() {
+        val totalItems = (uiState.value as? GuideScreenUiState.Success)?.preguntas?.size ?: 0
+        appendEmptyQuestion(targetIndex = totalItems)
     }
 
     fun saveGuide() {
