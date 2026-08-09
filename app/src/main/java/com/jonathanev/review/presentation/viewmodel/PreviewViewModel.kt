@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
 
 @HiltViewModel
 class PreviewViewModel @Inject constructor(
@@ -110,17 +111,32 @@ class PreviewViewModel @Inject constructor(
 
     fun editingGuide(position: Int) {
         viewModelScope.launch {
-            val activeGuide = getActiveGuideUseCase.invoke().firstOrNull() ?: return@launch
-            setContextEditUseCase.invoke(GuideContext.Editing(activeGuide, position))
-            sendEvent(PreviewGuideEvent.Editing)
+            try {
+                val activeGuide = getActiveGuideUseCase.invoke().firstOrNull() ?: return@launch
+                setContextEditUseCase.invoke(GuideContext.Editing(activeGuide, position))
+                sendEvent(PreviewGuideEvent.Editing)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                e.printStackTrace()
+                sendEvent(PreviewGuideEvent.ShowError(e.message ?: "Ocurrió un error inesperado"))
+            }
         }
     }
 
     fun reviewGuide(position: Int) {
         viewModelScope.launch {
-            val activeGuide = getActiveGuideUseCase.invoke().firstOrNull() ?: return@launch
-            setContextPlayUseCase.invoke(GuideContext.Browsing(activeGuide, position))
-            sendEvent(PreviewGuideEvent.Review)
+            try {
+                val activeGuide = getActiveGuideUseCase.invoke().firstOrNull() ?: return@launch
+                setContextPlayUseCase.invoke(GuideContext.Browsing(activeGuide, position))
+                sendEvent(PreviewGuideEvent.Review)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                e.printStackTrace()
+
+                sendEvent(PreviewGuideEvent.ShowError(e.message ?: "Ocurrió un error inesperado"))
+            }
         }
     }
 

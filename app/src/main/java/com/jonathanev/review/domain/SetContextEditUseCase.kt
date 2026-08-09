@@ -7,7 +7,7 @@ import javax.inject.Inject
 class SetContextEditUseCase @Inject constructor(
     private val guideContextRepository: GuideContextRepository
 ) {
-    suspend operator fun invoke(guideContextEdit: GuideContext.Editing) {
+    suspend operator fun invoke(guideContextEdit: GuideContext.Editing): Result<Unit> {
         return guideContextRepository.start(guideContextEdit)
     }
 }

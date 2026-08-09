@@ -87,7 +87,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                     }
 
                     if (context == null) {
-                        _uiState.value = GuideScreenUiState.Error
+                        _uiState.value = GuideScreenUiState.Loading
                         return@collect
                     }
 
@@ -96,14 +96,12 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                         is GuideContext.Creating -> context.guide
                         is GuideContext.Editing -> context.guide
                         else -> {
-                            _uiState.value = GuideScreenUiState.Error
                             return@collect
                         }
                     }
 
                     val restoredState =
                         savedStateHandle.get<GuideScreenUiState.Success>(KEY_GUIDE_STATE)
-
                     if (restoredState != null &&
                         restoredState.fileName == guide.nameGuide &&
                         restoredState.guideContext == context
@@ -112,7 +110,6 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                         return@collect
                     }
 
-                    // 3. Si es una entrada normal a la pantalla, mostramos Loading y cargamos desde la fuente de datos
                     _uiState.value = GuideScreenUiState.Loading
 
                     when (val result = getGuideXmlDataUseCase.invoke(context = context)) {

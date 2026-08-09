@@ -40,6 +40,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
 
 @HiltViewModel
 class FragmentListGuidesViewModel @Inject constructor(
@@ -175,13 +176,24 @@ class FragmentListGuidesViewModel @Inject constructor(
 
     fun setContextMoving(guide: GuideUiModel) {
         viewModelScope.launch {
-            val guideDomainModel = guide.toDomain()
-            val guideContext = GuideContext.Moving(
-                guide = guideDomainModel,
-                oldRelativeGuidePath = RelativeGuidePath("")
-            )
-            setContextMoveUseCase.invoke(guideContext)
-            resetNavigationUseCase.invoke()
+            try {
+                val guideDomainModel = guide.toDomain()
+                val guideContext = GuideContext.Moving(
+                    guide = guideDomainModel,
+                    oldRelativeGuidePath = RelativeGuidePath("")
+                )
+                setContextMoveUseCase.invoke(guideContext)
+                resetNavigationUseCase.invoke()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                e.printStackTrace()
+                emitMessage(
+                    GuideActionEvent.ShowMessage(
+                        e.message ?: "Ocurrió un error inesperado"
+                    )
+                )
+            }
         }
     }
 

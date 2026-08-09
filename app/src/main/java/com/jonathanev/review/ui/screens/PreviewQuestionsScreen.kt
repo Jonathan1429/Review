@@ -81,6 +81,14 @@ fun PreviewQuestionsRoute(
                 PreviewGuideEvent.Review -> {
                     onPlayGuideClick()
                 }
+
+                is PreviewGuideEvent.ShowError -> {
+                    Toast.makeText(
+                        /* context = */ context,
+                        /* text = */ event.error,
+                        /* duration = */ Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
         }
     }
@@ -93,6 +101,7 @@ fun PreviewQuestionsRoute(
                 onBack = onBackNav
             )
         }
+
         is ActiveGuideUIState.Success -> {
             PreviewQuestionsScreen(
                 previewQuestions = uiState,

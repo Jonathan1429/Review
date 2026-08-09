@@ -411,6 +411,9 @@ fun BasicNavigation() {
                     },
                     onPlayGuideClick = {
                         backStack.add(AppRoutes.FillingGuideScreen)
+                    },
+                    onBackNav = {
+                        backStack.removeLastOrNull()
                     }
                 )
             }

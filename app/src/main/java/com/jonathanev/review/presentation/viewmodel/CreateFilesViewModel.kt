@@ -45,6 +45,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
 
 @HiltViewModel
 class CreateFilesViewModel @Inject constructor(
@@ -364,12 +365,20 @@ class CreateFilesViewModel @Inject constructor(
 
         when (currentMode) {
             FileFormMode.CreatingFile -> {
-                val guideDomainModel =
-                    GuideDomainModel(GuideVersion.V2, state.name, state.description)
-                setActiveGuideUseCase.invoke(guideDomainModel)
-                setContextCreateUseCase.invoke(GuideContext.Creating(guideDomainModel))
-                emitEvent(CreateFile)
+                try {
+                    val guideDomainModel =
+                        GuideDomainModel(GuideVersion.V2, state.name, state.description)
+                    setActiveGuideUseCase.invoke(guideDomainModel)
+                    setContextCreateUseCase.invoke(GuideContext.Creating(guideDomainModel))
+                    emitEvent(CreateFile)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    emitEvent(Message(e.message ?: "Ocurrió un error inesperado"))
+                }
             }
+
             FileFormMode.CreatingFolder -> {
                 nextNavigationUseCase.invoke(data.name)
                 val pathCreate = createFolder(isDarkTheme, data)

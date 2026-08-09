@@ -7,7 +7,7 @@ import javax.inject.Inject
 class SetContextMoveUseCase @Inject constructor(
     private val guideContextRepository: GuideContextRepository
 ) {
-    suspend operator fun invoke(contextMoving: GuideContext.Moving) {
-        guideContextRepository.start(contextMoving)
+    suspend operator fun invoke(contextMoving: GuideContext.Moving): Result<Unit> {
+        return guideContextRepository.start(contextMoving)
     }
 }

@@ -7,7 +7,7 @@ import javax.inject.Inject
 class SetContextPlayUseCase @Inject constructor(
     private val guideContextRepository: GuideContextRepository
 ) {
-    suspend operator fun invoke(guideContextPlay: GuideContext.Browsing) {
+    suspend operator fun invoke(guideContextPlay: GuideContext.Browsing): Result<Unit> {
         return guideContextRepository.start(guideContextPlay)
     }
 }

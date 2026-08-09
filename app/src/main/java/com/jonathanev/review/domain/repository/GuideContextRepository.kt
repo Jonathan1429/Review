@@ -5,6 +5,6 @@ import kotlinx.coroutines.flow.Flow
 
 interface GuideContextRepository {
     val guideContext: Flow<GuideContext?>
-    suspend fun start(guideContext: GuideContext)
+    suspend fun start(guideContext: GuideContext): Result<Unit>
     suspend fun clear()
 }

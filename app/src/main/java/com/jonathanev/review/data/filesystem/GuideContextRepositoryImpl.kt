@@ -78,10 +78,9 @@ class GuideContextRepositoryImpl @Inject constructor(
             }
         }
 
-    override suspend fun start(guideContext: GuideContext) {
-        val relativePath = navigationPathRepository.getRelativePath()
-
+    override suspend fun start(guideContext: GuideContext): Result<Unit> = runCatching {
         val finalContext = if (guideContext is GuideContext.Moving) {
+            val relativePath = navigationPathRepository.getRelativePath()
             guideContext.copy(oldRelativeGuidePath = relativePath)
         } else {
             guideContext
@@ -93,6 +92,7 @@ class GuideContextRepositoryImpl @Inject constructor(
                     preferences[KEY_CONTEXT_TYPE] = TYPE_CREATING
                     saveGuideDomain(preferences, finalContext.guide)
                     preferences.remove(KEY_OLD_RELATIVE_PATH)
+                    preferences.remove(KEY_POSITION)
                 }
 
                 is GuideContext.Moving -> {
@@ -100,17 +100,20 @@ class GuideContextRepositoryImpl @Inject constructor(
                     saveGuideDomain(preferences, finalContext.guide)
                     preferences[KEY_OLD_RELATIVE_PATH] =
                         finalContext.oldRelativeGuidePath.toString()
+                    preferences.remove(KEY_POSITION)
                 }
 
                 is GuideContext.Browsing -> {
                     preferences[KEY_CONTEXT_TYPE] = TYPE_BROWSING
                     saveGuideDomain(preferences, finalContext.guide)
+                    preferences[KEY_POSITION] = finalContext.position
                     preferences.remove(KEY_OLD_RELATIVE_PATH)
                 }
 
                 is GuideContext.Editing -> {
                     preferences[KEY_CONTEXT_TYPE] = TYPE_EDITING
                     saveGuideDomain(preferences, finalContext.guide)
+                    preferences[KEY_POSITION] = finalContext.position
                     preferences.remove(KEY_OLD_RELATIVE_PATH)
                 }
 
@@ -118,15 +121,18 @@ class GuideContextRepositoryImpl @Inject constructor(
                     preferences[KEY_CONTEXT_TYPE] = TYPE_DELETE
                     saveGuideDomain(preferences, finalContext.guide)
                     preferences.remove(KEY_OLD_RELATIVE_PATH)
+                    preferences.remove(KEY_POSITION)
                 }
 
                 is GuideContext.Rename -> {
                     preferences[KEY_CONTEXT_TYPE] = TYPE_EDITING
                     saveGuideDomain(preferences, finalContext.guide)
                     preferences.remove(KEY_OLD_RELATIVE_PATH)
+                    preferences.remove(KEY_POSITION)
                 }
             }
         }
+        Unit
     }
 
     private fun saveGuideDomain(preferences: MutablePreferences, guide: GuideDomainModel) {
