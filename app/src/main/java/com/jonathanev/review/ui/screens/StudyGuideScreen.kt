@@ -25,9 +25,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -143,7 +140,6 @@ fun FillingGuideRoute(
             } else {
                 imageList
             }
-            var restartGuide by rememberSaveable { mutableIntStateOf(0) }
 
             LaunchedEffect(Unit) {
                 viewModel.createGuideEvent.collect { event ->
@@ -198,9 +194,7 @@ fun FillingGuideRoute(
                 showDialogDeleteQuestion = state.showDialogDeleteQuestion,
                 showDialogRepeatGuide = state.showDialogRepeatGuide,
                 onDissmissDialogRepeatGuide = viewModel::onDismissDialogRepeatGuide,
-                onConfirmDialogRepeatGuide = {
-                    restartGuide++
-                },
+                onConfirmDialogRepeatGuide = viewModel::restartGuide,
                 onContinueDialogDeleteQuestionClick = { isChecked ->
                     viewModel.onConfirmDeleteQuestion(dontAskAgain = isChecked)
                 },

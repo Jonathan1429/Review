@@ -22,7 +22,6 @@ sealed interface GuideScreenUiState {
         val contadorContenido: Int = -1,
         val qAType: QAType = QAType.QUESTION,
         val mediaSelected: ContentType = ContentType.TEXT,
-        val isLastQuestion: Boolean? = false,
         val guideContext: GuideContext,
         val colorType: ColorType = ColorType.Default,
         val showDialogDeleteQuestion: Boolean = false,

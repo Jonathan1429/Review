@@ -49,7 +49,7 @@ fun RowScope.NavigationPagerBar(
     ) {
         IconButton(
             enabled = actualQuestion > 1,
-            onClick = singleClick { onBackQuestionClick() }
+            onClick = onBackQuestionClick //singleClick { onBackQuestionClick() }
         ) {
             Icon(
                 Icons.Default.ArrowBack,
@@ -65,7 +65,7 @@ fun RowScope.NavigationPagerBar(
         )
         IconButton(
             enabled = totalQuestions > 1,
-            onClick = singleClick { onNextQuestionClick() }
+            onClick = onNextQuestionClick //singleClick { onNextQuestionClick() }
         ) {
             Icon(
                 Icons.Default.ArrowForward,

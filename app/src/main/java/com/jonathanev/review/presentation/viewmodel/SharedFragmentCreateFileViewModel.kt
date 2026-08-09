@@ -618,7 +618,6 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                     contadorContenido = -1,
                     qAType = QATypeUI.QUESTION,
                     mediaSelected = ContentType.TEXT,
-                    isLastQuestion = false,
                     showDialogDeleteQuestion = false,
                     showDialogRepeatGuide = false
                 )
@@ -743,19 +742,14 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         savedStateHandle.remove<GuideScreenUiState.Success>(KEY_GUIDE_STATE)
     }
 
-    /*fun restartGuide() {
-        _uiState.update { state ->
-            state.copy(contadorPregunta = 0)
-        }
-
-        _uiState.update { state ->
+    fun restartGuide() {
+        updateSuccessState { state ->
             state.copy(
-                contadorPregunta = calculatePosition(noQuestion, answers.size),
-                qAType = QAType.QUESTION,
-                preguntas = questions.map { it.toUi() },
-                respuestas = answers.map { it.toUi() },
-                isLastQuestion = if (noQuestion == -1) false else null
+                contadorPregunta = 0,
+                qAType = QATypeUI.QUESTION,
+                mediaSelected = ContentType.TEXT,
+                showDialogRepeatGuide = false
             )
         }
-    }*/
+    }
 }
