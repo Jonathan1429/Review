@@ -1,6 +1,7 @@
 package com.jonathanev.review.ui.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -34,10 +35,17 @@ fun CustomTextField(name: String, label: String, onValueChange: (String) -> Unit
         label = { Text(label) },
         colors = OutlinedTextFieldDefaults.colors(
             focusedLabelColor = MaterialTheme.colorScheme.onPrimary,
-            unfocusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f), // Cuando está vacío/sin seleccionar
+            unfocusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
 
             focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
             unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+
+            cursorColor = MaterialTheme.colorScheme.onSurface,
+
+            selectionColors = TextSelectionColors(
+                handleColor = MaterialTheme.colorScheme.primary,
+                backgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+            )
         )
     )
 }

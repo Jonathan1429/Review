@@ -93,7 +93,7 @@ class CustomBoxCreateTextScreenshotTest(
                         CustomBoxCreateText(
                             textValue = TextFieldValue(text),
                             hint = showHint,
-                            onTextValueChange = {}
+                            onTextValueChange = {},
                         )
                     }
                 }

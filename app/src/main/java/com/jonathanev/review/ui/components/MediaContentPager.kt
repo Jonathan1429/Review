@@ -188,7 +188,8 @@ fun MediaContentPager(
                                 }),
                                 textValue = textFieldValueWrapper,
                                 hint = false,
-                                onTextValueChange = {}
+                                onTextValueChange = {},
+                                selectedColor = MaterialTheme.colorScheme.onSurface
                             )
                         }
                     }

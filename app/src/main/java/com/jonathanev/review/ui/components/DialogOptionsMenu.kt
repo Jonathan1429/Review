@@ -51,7 +51,7 @@ fun <T> DialogOptionsMenu(
         },
         confirmButton = {
             TextButton(onClick = singleClick { onCloseDialog() }) {
-                Text("Cancelar")
+                Text(text = "Cancelar", color = MaterialTheme.colorScheme.onSurface)
             }
         }
     )

@@ -229,6 +229,7 @@ fun CreateTextScreen(
                     textValue = textValue,
                     hint = textValue.text.isNotEmpty(),
                     enabled = guideContext !is GuideContext.Browsing,
+                    selectedColor = selectedColor,
                     onTextValueChange = { actualText ->
                         val newAnnotatedString = updateAnnotatedStringWithSpans(
                             oldAnnotatedString = textValue.annotatedString,
