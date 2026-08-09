@@ -694,13 +694,10 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                         SuccessGuideCreated("Guia guardada satisfactoriamente")
                     )
             }
-
-            clearSavedState()
         }
     }
 
     fun onCloseGuide() {
-        clearSavedState()
         sendNotification(CreateGuideEvent.CloseGuide)
     }
     fun deleteQuesAns() {
@@ -864,10 +861,6 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 state.copy(mediaSelected = filterTypeClicked)
             } else state
         }
-    }
-
-    private fun clearSavedState() {
-        savedStateHandle.remove<GuideScreenUiState>(KEY_GUIDE_STATE)
     }
 
     /*fun restartGuide() {
