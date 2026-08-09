@@ -217,23 +217,34 @@ class GuiaRepositoryImpl @Inject constructor(
         guideDomainModel: GuideDomainModel,
         preguntas: List<QuestionItemDomain>,
         respuestas: List<QuestionItemDomain>
-    ): GuideResource<GuideDomainModel, SaveGuideErrors> {
+    ): GuideResource<GuideDomainModel, SaveGuideErrors> = withContext(Dispatchers.IO) {
         val currentPath = filePathResolver.mapToFilePathSpecificGuide(
             guideDomainModel = guideDomainModel,
             kind = PathKind.GUIAS
         )
 
         val finalFile = File(currentPath.value)
-        val parentDir = finalFile.parentFile
-            ?: throw IllegalStateException("El archivo no tiene directorio padre")
 
-        if (!parentDir.exists() && !parentDir.mkdirs()) {
-            throw IOException("No se pudo crear el directorio: ${parentDir.absolutePath}")
+        val newGuideDomain = GuideDomainModel(
+            version = GuideVersion.V2,
+            nameGuide = guideDomainModel.nameGuide,
+            description = guideDomainModel.description
+        )
+        val newPathValue = filePathResolver.mapToFilePathSpecificGuide(
+            guideDomainModel = newGuideDomain,
+            kind = PathKind.GUIAS
+        ).value
+
+        val targetFile = File(newPathValue)
+        val targetParentDir = targetFile.parentFile
+
+        if (targetParentDir != null && !targetParentDir.exists() && !targetParentDir.mkdirs()) {
+            return@withContext GuideResource.Error(SaveGuideErrors.InsufficientStorageOrDiskError)
         }
 
-        val tempFile = File("$finalFile.tmp")
+        val tempFile = File("${finalFile.path}.tmp")
 
-        return try {
+        try {
             val serializer = xmlSerializerFactory.create()
             fileOutputStreamFactory.create(tempFile.path).use { fos ->
                 serializer.setOutput(fos, "UTF-8")
@@ -259,58 +270,47 @@ class GuiaRepositoryImpl @Inject constructor(
                 serializer.endTag("", Structure.GUIAESTUDIO)
                 serializer.endDocument()
             }
-
-            val newPath =
-                filePathResolver.mapToFilePathSpecificGuide(
-                    guideDomainModel = GuideDomainModel(
-                        version = GuideVersion.V2,
-                        nameGuide = guideDomainModel.nameGuide,
-                        description = guideDomainModel.description
-                    ),
-                    kind = PathKind.GUIAS
-                ).value
-
-            try {
-                withContext(Dispatchers.IO) {
-                    Files.move(
-                        tempFile.toPath(),
-                        File(newPath).toPath(),
-                        StandardCopyOption.REPLACE_EXISTING,
-                        StandardCopyOption.ATOMIC_MOVE
-                    )
-                }
-
-                if (finalFile.path != File(newPath).path) {
-                    try {
-                        finalFile.delete()
-                    } catch (_: Exception) {
-                    }
-                }
-
-                refreshGuides.value = System.currentTimeMillis()
-                GuideResource.Success(
-                    GuideDomainModel(
-                        GuideVersion.V2,
-                        guideDomainModel.nameGuide,
-                        guideDomainModel.description
-                    )
-                )
-            } catch (_: Exception) {
-                tempFile.delete()
-                GuideResource.Error(SaveGuideErrors.CommitChangesFailed)
-            }
-        } catch (_: IOException) {
-            tempFile.delete()
-            GuideResource.Error(SaveGuideErrors.InsufficientStorageOrDiskError)
         } catch (_: SecurityException) {
-            tempFile.delete()
-            GuideResource.Error(SaveGuideErrors.StoragePermissionDenied)
+            return@withContext GuideResource.Error(SaveGuideErrors.StoragePermissionDenied)
+        } catch (_: IOException) {
+            return@withContext GuideResource.Error(SaveGuideErrors.InsufficientStorageOrDiskError)
+        }
+
+        try {
+            Files.move(
+                tempFile.toPath(),
+                targetFile.toPath(),
+                StandardCopyOption.REPLACE_EXISTING
+            )
+
+            if (finalFile.path != targetFile.path && finalFile.exists()) {
+                val oldParentFolder = finalFile.parentFile
+                finalFile.delete()
+
+                if (guideDomainModel.version == GuideVersion.V2 &&
+                    oldParentFolder != null &&
+                    oldParentFolder.isDirectory &&
+                    oldParentFolder.listFiles()?.isEmpty() == true
+                ) {
+                    oldParentFolder.delete()
+                }
+            }
+
+            refreshGuides.value = System.currentTimeMillis()
+            GuideResource.Success(newGuideDomain)
+
+        } catch (_: Exception) {
+            GuideResource.Error(SaveGuideErrors.CommitChangesFailed)
+        } finally {
+            if (tempFile.exists()) {
+                tempFile.delete()
+            }
         }
     }
 
     override suspend fun deleteGuide(
         deleteGuide: GuideContext.DeleteGuide
-    ): Boolean {
+    ): Boolean = withContext(Dispatchers.IO) {
         val pathGuide = filePathResolver.mapToFilePathSpecificGuide(
             guideDomainModel = deleteGuide.guide,
             kind = PathKind.GUIAS
@@ -318,10 +318,23 @@ class GuiaRepositoryImpl @Inject constructor(
 
         val pathGuideFile = File(pathGuide.value)
 
-        if (!pathGuideFile.exists()) return false
+        if (!pathGuideFile.exists()) return@withContext false
 
-        refreshGuides.value = System.currentTimeMillis()
-        return pathGuideFile.deleteRecursively()
+        val oldParentFolder = pathGuideFile.parentFile
+        val deleted = pathGuideFile.deleteRecursively()
+
+        if (deleted) {
+            if (oldParentFolder != null &&
+                oldParentFolder.isDirectory &&
+                oldParentFolder.listFiles()?.isEmpty() == true
+            ) {
+                oldParentFolder.delete()
+            }
+
+            refreshGuides.value = System.currentTimeMillis()
+        }
+
+        deleted
     }
 
     private fun writeQuestionsAnswers(
@@ -528,16 +541,21 @@ class GuiaRepositoryImpl @Inject constructor(
 
     override suspend fun getXMLGuide(
         guideDomainModel: GuideDomainModel
-    ): GetGuideResult {
-        val version = guideDomainModel.version
+    ): GetGuideResult = withContext(Dispatchers.IO) {
         val path = filePathResolver.mapToFilePathSpecificGuide(
-            guideDomainModel,
-            PathKind.GUIAS
+            guideDomainModel = guideDomainModel,
+            kind = PathKind.GUIAS
         )
-        return if (version == GuideVersion.V1)
-            obtenerDatosXMLV1(guideDomainModel, path)
-        else
-            obtenerDatosXMLV2(guideDomainModel, path)
+
+        val guideFile = File(path.value)
+        if (!guideFile.exists()) {
+            return@withContext GetGuideResult.NotFound
+        }
+
+        when (guideDomainModel.version) {
+            GuideVersion.V1 -> obtenerDatosXMLV1(guideDomainModel, path)
+            GuideVersion.V2 -> obtenerDatosXMLV2(guideDomainModel, path)
+        }
     }
 
     override suspend fun existXMLGuideV1(
@@ -563,36 +581,44 @@ class GuiaRepositoryImpl @Inject constructor(
 
     override suspend fun moveGuide(
         guideContext: GuideContext.Moving
-    ): Boolean {
-        val newGuidePath = filePathResolver.mapToFilePathSpecificGuide(
-            guideDomainModel = guideContext.guide,
-            kind = PathKind.GUIAS
-        )
+    ): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val newGuidePath = filePathResolver.mapToFilePathSpecificGuide(
+                guideDomainModel = guideContext.guide,
+                kind = PathKind.GUIAS
+            )
 
-        val oldGuidePath = filePathResolver.mapToOldFolderPathSpecificGuide(
-            guideDomainModel = guideContext.guide,
-            kind = PathKind.GUIAS,
-            originContext = guideContext
-        )
+            val oldGuidePath = filePathResolver.mapToOldFolderPathSpecificGuide(
+                guideDomainModel = guideContext.guide,
+                kind = PathKind.GUIAS,
+                originContext = guideContext
+            )
 
-        return withContext(Dispatchers.IO) {
-            try {
-                val source = Paths.get(oldGuidePath.value)
-                val target = Paths.get(newGuidePath.value)
+            val source = Paths.get(oldGuidePath.value)
+            val target = Paths.get(newGuidePath.value)
 
-                target.parent?.let { Files.createDirectories(it) }
+            if (!Files.exists(source)) return@withContext false
 
-                Files.move(
-                    source,
-                    target,
-                    StandardCopyOption.REPLACE_EXISTING
-                )
+            target.parent?.let { Files.createDirectories(it) }
 
-                refreshGuides.value = System.currentTimeMillis()
-                true
-            } catch (_: Exception) {
-                false
+            Files.move(
+                source,
+                target,
+                StandardCopyOption.REPLACE_EXISTING
+            )
+
+            val oldParentFolder = source.parent?.toFile()
+            if (oldParentFolder != null &&
+                oldParentFolder.isDirectory &&
+                oldParentFolder.listFiles()?.isEmpty() == true
+            ) {
+                oldParentFolder.delete()
             }
+
+            refreshGuides.value = System.currentTimeMillis()
+            true
+        } catch (_: Exception) {
+            false
         }
     }
 
