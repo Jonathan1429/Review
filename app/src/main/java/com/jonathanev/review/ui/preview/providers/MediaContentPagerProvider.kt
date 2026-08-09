@@ -8,6 +8,7 @@ import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.ui.model.ContentType
 
 data class DataMediaContentPagerProvider(
+    val currentAsset: QuestionContentUi?,
     val listType: List<QuestionContentUi>,
     val sizeList: Int,
     val mediaForSelected: ContentType,
@@ -24,6 +25,7 @@ class MediaContentPagerProvider : PreviewParameterProvider<DataMediaContentPager
     override val values: Sequence<DataMediaContentPagerProvider>
         get() = sequenceOf(
             DataMediaContentPagerProvider(
+                currentAsset = null,
                 listType = listOf(
                     QuestionContentUi.Text("Hola", emptyList()),
                     QuestionContentUi.Text("Adios", emptyList())
@@ -33,6 +35,7 @@ class MediaContentPagerProvider : PreviewParameterProvider<DataMediaContentPager
                 guideContext = GuideContext.Creating(guideDomainModel)
             ),
             DataMediaContentPagerProvider(
+                currentAsset = QuestionContentUi.Image("Uri", "1.png"),
                 listType = listOf(
                     QuestionContentUi.Image("Uri", "1.png"),
                     QuestionContentUi.Image("Uri", "2.png")
@@ -42,6 +45,7 @@ class MediaContentPagerProvider : PreviewParameterProvider<DataMediaContentPager
                 guideContext = GuideContext.Creating(guideDomainModel)
             ),
             DataMediaContentPagerProvider(
+                currentAsset = null,
                 listType = listOf(
                     QuestionContentUi.Text("Hola", emptyList()),
                 ),
@@ -50,18 +54,21 @@ class MediaContentPagerProvider : PreviewParameterProvider<DataMediaContentPager
                 guideContext = GuideContext.Creating(guideDomainModel)
             ),
             DataMediaContentPagerProvider(
+                currentAsset = null,
                 listType = emptyList(),
                 sizeList = 0,
                 mediaForSelected = ContentType.TEXT,
                 guideContext = GuideContext.Creating(guideDomainModel)
             ),
             DataMediaContentPagerProvider(
+                currentAsset = null,
                 listType = emptyList(),
                 sizeList = 0,
                 mediaForSelected = ContentType.IMAGE,
                 guideContext = GuideContext.Creating(guideDomainModel)
             ),
             DataMediaContentPagerProvider(
+                currentAsset = null,
                 listType = listOf(
                     QuestionContentUi.Text("Hola", emptyList()),
                     QuestionContentUi.Text("Adios", emptyList())
@@ -71,6 +78,7 @@ class MediaContentPagerProvider : PreviewParameterProvider<DataMediaContentPager
                 guideContext = GuideContext.Editing(guideDomainModel, 0)
             ),
             DataMediaContentPagerProvider(
+                currentAsset = null,
                 listType = listOf(
                     QuestionContentUi.Text("Hola", emptyList()),
                     QuestionContentUi.Text("Adios", emptyList())

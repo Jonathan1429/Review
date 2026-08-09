@@ -49,6 +49,7 @@ import com.jonathanev.review.ui.preview.providers.DataMediaContentPagerProvider
 import com.jonathanev.review.ui.preview.providers.MediaContentPagerProvider
 import com.jonathanev.review.ui.theme.BorderGray
 import com.jonathanev.review.ui.theme.ReviewTheme
+import com.jonathanev.review.ui.theme.Rojo100
 import com.jonathanev.review.ui.theme.cardStepBackground
 
 @ComponentsPreviews
@@ -72,12 +73,14 @@ fun PreviewMediaContentPager(
             }
 
             MediaContentPager(
+                currentAsset = data.currentAsset,
                 pagerState = pagerState,
                 assets = data.listType,
                 mediaForSelected = data.mediaForSelected,
                 guideContext = data.guideContext,
                 onOpenAssetClick = { _, _ -> },
-                onCurrentPosContent = {}
+                onDeleteAssetClick = { _, _ -> },
+                onCurrentPosContent = {},
             )
         }
     }
@@ -90,7 +93,9 @@ fun MediaContentPager(
     mediaForSelected: ContentType,
     guideContext: GuideContext,
     onOpenAssetClick: (typeContent: QuestionContentUi, posItem: Int) -> Unit,
-    onCurrentPosContent: (Int) -> Unit
+    onDeleteAssetClick: (typeContent: QuestionContentUi, posItem: Int) -> Unit,
+    onCurrentPosContent: (Int) -> Unit,
+    currentAsset: QuestionContentUi?
 ) {
     val resourceSelected =
         if (mediaForSelected == ContentType.TEXT) R.string.lblText else R.string.lblImage
@@ -131,6 +136,24 @@ fun MediaContentPager(
                 )
             }
         } else {
+            val typeContent =
+                when (val asset = assets[pagerState.currentPage]) {
+                    is QuestionContentUi.Image -> {
+                        QuestionContentUi.Image(
+                            asset.uri,
+                            asset.nameFile
+                        )
+                    }
+
+                    QuestionContentUi.None -> QuestionContentUi.None
+                    is QuestionContentUi.Text -> {
+                        QuestionContentUi.Text(
+                            asset.text,
+                            asset.colorRanges
+                        )
+                    }
+                }
+
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier.fillMaxSize()
@@ -138,7 +161,13 @@ fun MediaContentPager(
                 when (val currentAsset = assets[page]) {
                     is QuestionContentUi.Image -> {
                         CustomBoxCreateImage(
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .singleClick(onClick = {
+                                    if (guideContext is GuideContext.Browsing) {
+                                        onOpenAssetClick(typeContent, pagerState.currentPage)
+                                    }
+                                }),
                             uriImage = currentAsset.uri
                         )
                     }
@@ -152,6 +181,11 @@ fun MediaContentPager(
                                 .padding(top = 72.dp, start = 20.dp, end = 20.dp, bottom = 20.dp)
                         ) {
                             CustomBoxCreateText(
+                                Modifier.singleClick(onClick = {
+                                    if (guideContext is GuideContext.Browsing) {
+                                        onOpenAssetClick(typeContent, pagerState.currentPage)
+                                    }
+                                }),
                                 textValue = textFieldValueWrapper,
                                 hint = false,
                                 onTextValueChange = {}
@@ -169,6 +203,7 @@ fun MediaContentPager(
                 }
             }
 
+            // Capa Superior de Controles (Indicators + Action Bar)
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -200,54 +235,73 @@ fun MediaContentPager(
                 val painter =
                     if (guideContext !is GuideContext.Browsing) R.drawable.ic_edit else R.drawable.ic_eye
 
-                Box(
-                    modifier = Modifier.fillMaxWidth()
+                // Barra de Acciones (Editar/Ver + Eliminar en TopStart | Contadores en TopEnd)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Botón Editar/Ver
-                    Box(
-                        modifier = Modifier
-                            .background(
-                                Color.Black.copy(alpha = 0.6f),
-                                RoundedCornerShape(12.dp)
-                            )
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                            .align(Alignment.TopStart)
+                    // Grupo de Botones de Acción (Izquierda)
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            painter = painterResource(painter),
-                            contentDescription = null,
-                            tint = Color.White,
+                        // Botón Editar / Ver
+                        Box(
                             modifier = Modifier
-                                .size(16.dp)
                                 .singleClick(onClick = {
-                                    val typeContent =
-                                        when (val asset = assets[pagerState.currentPage]) {
-                                            is QuestionContentUi.Image -> {
-                                                QuestionContentUi.Image(
-                                                    asset.uri,
-                                                    asset.nameFile
-                                                )
-                                            }
-
-                                            QuestionContentUi.None -> QuestionContentUi.None
-                                            is QuestionContentUi.Text -> {
-                                                QuestionContentUi.Text(
-                                                    asset.text,
-                                                    asset.colorRanges
-                                                )
-                                            }
-                                        }
-
                                     onOpenAssetClick(typeContent, pagerState.currentPage)
                                 })
-                        )
+                                .padding(6.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        Color.Black.copy(alpha = 0.6f),
+                                        RoundedCornerShape(12.dp)
+                                    )
+                                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                            ) {
+                                Icon(
+                                    painter = painterResource(painter),
+                                    contentDescription = null,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                        }
+
+                        // Botón Eliminar (Bote de basura)
+                        Box(
+                            modifier = Modifier
+                                .singleClick(onClick = {
+                                    onDeleteAssetClick(typeContent, pagerState.currentPage)
+                                })
+                                .padding(6.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        Color.Black.copy(alpha = 0.6f),
+                                        RoundedCornerShape(12.dp)
+                                    )
+                                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_trash),
+                                    contentDescription = "Eliminar",
+                                    tint = Rojo100,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                        }
                     }
 
+                    // Contador / Badge (Derecha)
                     Box(
                         modifier = Modifier
                             .background(Color.Black.copy(alpha = 0.6f), RoundedCornerShape(12.dp))
                             .padding(horizontal = 12.dp, vertical = 6.dp)
-                            .align(Alignment.TopEnd)
                     ) {
                         Text(
                             text = "${stringResource(resourceSelected)} ${pagerState.currentPage + 1} ${
