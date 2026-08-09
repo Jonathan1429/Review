@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -106,21 +107,21 @@ class FragmentListGuidesViewModel @Inject constructor(
     }
 
     fun movingGuide(guides: List<GuideUiModel>) {
-        when (val context = getGuideContextUseCase.invoke()) {
-            is GuideContext.Moving -> {
-                val isExistGuide = guides.any { it.nameGuide == context.guide.nameGuide }
+        viewModelScope.launch {
+            when (val context = getGuideContextUseCase.invoke().firstOrNull()) {
+                is GuideContext.Moving -> {
+                    val isExistGuide = guides.any { it.nameGuide == context.guide.nameGuide }
 
-                if (isExistGuide) {
-                    viewModelScope.launch {
+                    if (isExistGuide) {
                         _eventsMovingFiles.emit(UIMovingEvent.ExistFile)
+                        return@launch
                     }
-                    return
+
+                    onContinueProcess(true)
                 }
 
-                onContinueProcess(true)
+                else -> eventMovingFile("Error inesperado")
             }
-
-            else -> eventMovingFile("Error inesperado")
         }
     }
 
@@ -128,7 +129,7 @@ class FragmentListGuidesViewModel @Inject constructor(
         viewModelScope.launch {
             if (!confirmed) return@launch
 
-            when (val context = getGuideContextUseCase.invoke()) {
+            when (val context = getGuideContextUseCase.invoke().firstOrNull()) {
                 is GuideContext.Moving -> {
                     when (val guideData = getGuideXmlDataUseCase.invoke(context)) {
                         is GetGuideResult.Success -> {
