@@ -8,6 +8,7 @@ import com.jonathanev.review.domain.GetFolderPosicionUseCase
 import com.jonathanev.review.domain.GetFoldersWithNumGuidesUseCase
 import com.jonathanev.review.domain.GetGuideContextUseCase
 import com.jonathanev.review.domain.NextNavigationUseCase
+import com.jonathanev.review.domain.ObservePathUseCase
 import com.jonathanev.review.domain.ResetNavigationUseCase
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.result.FolderResultDomain
@@ -21,12 +22,14 @@ import com.jonathanev.review.presentation.model.FolderUiModel
 import com.jonathanev.review.presentation.state.ActionDialogState
 import com.jonathanev.review.presentation.state.FoldersUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -41,9 +44,14 @@ class ListFoldersViewModel @Inject constructor(
     private val nextNavigationUseCase: NextNavigationUseCase,
     private val resetNavigationUseCase: ResetNavigationUseCase,
     private val getGuideContextUseCase: GetGuideContextUseCase,
-    private val clearGuideMoveUseCase: ClearGuideMoveUseCase
+    private val clearGuideMoveUseCase: ClearGuideMoveUseCase,
+    private val observePathUseCase: ObservePathUseCase,
 ) : ViewModel() {
-    val uiState: StateFlow<FoldersUiState> = getFoldersWithNumGuidesUseCase.invoke()
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val uiState: StateFlow<FoldersUiState> = observePathUseCase.invoke()
+        .flatMapLatest { _ ->
+            getFoldersWithNumGuidesUseCase.invoke()
+        }
         .map { list ->
             if (list.isEmpty()) FoldersUiState.Empty
             else FoldersUiState.Success(list.map { it.toUi() })
@@ -53,6 +61,7 @@ class ListFoldersViewModel @Inject constructor(
             started = SharingStarted.Eagerly,
             initialValue = FoldersUiState.Loading
         )
+
     private val _dialogState =
         MutableStateFlow<ActionDialogState<FolderUiModel>>(ActionDialogState.Hidden)
     val dialogState: StateFlow<ActionDialogState<FolderUiModel>> = _dialogState.asStateFlow()
@@ -156,5 +165,22 @@ class ListFoldersViewModel @Inject constructor(
 
     fun onRequestDelete(guide: FolderUiModel) {
         _dialogState.value = ActionDialogState.ConfirmDelete(guide)
+    }
+
+    fun resetNavigationPath() {
+        viewModelScope.launch {
+            try {
+                resetNavigationUseCase.invoke()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _eventsMessages.emit(
+                    FolderActionEvent.ShowMessage(
+                        e.message ?: "Ocurrió un error inesperado"
+                    )
+                )
+            }
+        }
     }
 }

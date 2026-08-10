@@ -7,6 +7,7 @@ import com.jonathanev.review.domain.GetGuideContextUseCase
 import com.jonathanev.review.domain.GetGuideXmlDataUseCase
 import com.jonathanev.review.domain.LoadGuidesUseCase
 import com.jonathanev.review.domain.MoveGuideUseCase
+import com.jonathanev.review.domain.ResetNavigationUseCase
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.MoveGuideResponse
@@ -20,10 +21,12 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
 
 @HiltViewModel
 class FragmentWithoutFilesViewModel @Inject constructor(
@@ -31,7 +34,8 @@ class FragmentWithoutFilesViewModel @Inject constructor(
     private val getGuideContextUseCase: GetGuideContextUseCase,
     private val getGuideXmlDataUseCase: GetGuideXmlDataUseCase,
     private val loadGuidesUseCase: LoadGuidesUseCase,
-    private val clearGuideMoveUseCase: ClearGuideMoveUseCase
+    private val clearGuideMoveUseCase: ClearGuideMoveUseCase,
+    private val resetNavigationUseCase: ResetNavigationUseCase,
 ) : ViewModel() {
     private val _eventsMovingFiles = MutableSharedFlow<UIMovingEvent>()
     val eventsMovingFiles = _eventsMovingFiles.asSharedFlow()
@@ -81,7 +85,7 @@ class FragmentWithoutFilesViewModel @Inject constructor(
 
     fun movingGuide() {
         viewModelScope.launch {
-            when (val context = getGuideContextUseCase.invoke()) {
+            when (val context = getGuideContextUseCase.invoke().firstOrNull()) {
                 is GuideContext.Moving -> {
                     when (val guideData = getGuideXmlDataUseCase.invoke(context)) {
                         is GetGuideResult.Success -> {
@@ -113,6 +117,19 @@ class FragmentWithoutFilesViewModel @Inject constructor(
                 }
 
                 else -> eventMovingFile("Error inesperado")
+            }
+        }
+    }
+
+    fun resetNavigationPath() {
+        viewModelScope.launch {
+            try {
+                resetNavigationUseCase.invoke()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                e.printStackTrace()
+                eventMovingFile(e.message ?: "Ocurrió un error inesperado")
             }
         }
     }

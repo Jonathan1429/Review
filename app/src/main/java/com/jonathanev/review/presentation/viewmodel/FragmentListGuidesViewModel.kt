@@ -10,6 +10,7 @@ import com.jonathanev.review.domain.GetGuidePosicionUseCase
 import com.jonathanev.review.domain.GetGuideXmlDataUseCase
 import com.jonathanev.review.domain.LoadGuidesUseCase
 import com.jonathanev.review.domain.MoveGuideUseCase
+import com.jonathanev.review.domain.ObservePathUseCase
 import com.jonathanev.review.domain.ResetNavigationUseCase
 import com.jonathanev.review.domain.SetActiveGuideUseCase
 import com.jonathanev.review.domain.SetContextMoveUseCase
@@ -29,6 +30,7 @@ import com.jonathanev.review.presentation.model.GuideUiModel
 import com.jonathanev.review.presentation.state.ActionDialogState
 import com.jonathanev.review.presentation.state.GuidesUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -36,6 +38,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -54,9 +57,14 @@ class FragmentListGuidesViewModel @Inject constructor(
     private val resetNavigationUseCase: ResetNavigationUseCase,
     private val setActiveGuideUseCase: SetActiveGuideUseCase,
     private val clearActiveGuideUseCase: ClearActiveGuideUseCase,
-    private val clearGuideMoveUseCase: ClearGuideMoveUseCase
+    private val clearGuideMoveUseCase: ClearGuideMoveUseCase,
+    private val observePathUseCase: ObservePathUseCase
 ) : ViewModel() {
-    val uiState: StateFlow<GuidesUiState> = loadGuidesUseCase.invoke()
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val uiState: StateFlow<GuidesUiState> = observePathUseCase.invoke()
+        .flatMapLatest { _ ->
+            loadGuidesUseCase()
+        }
         .map { list ->
             if (list.isEmpty()) GuidesUiState.Empty
             else GuidesUiState.Success(list.map { it.toUi() })
@@ -279,4 +287,17 @@ class FragmentListGuidesViewModel @Inject constructor(
         setContextMoving(guideUIModel)
         emitMessage(GuideActionEvent.MoveGuide)
     }
+
+    /*fun resetNavigationPath() {
+        viewModelScope.launch {
+            try {
+                resetNavigationUseCase.invoke()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                e.printStackTrace()
+                emitMessage(GuideActionEvent.ShowMessage(e.message ?: "Ocurrió un error inesperado"))
+            }
+        }
+    }*/
 }

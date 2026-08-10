@@ -9,7 +9,9 @@ import com.jonathanev.review.domain.model.GuidePath
 import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.provider.FilePathsProvider
 import com.jonathanev.review.domain.repository.NavigationPathRepository
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import java.io.IOException
@@ -26,22 +28,24 @@ class NavigationPathRepositoryImpl @Inject constructor(
         private val KEY_PATH = stringPreferencesKey("relative_path")
     }
 
+    override fun getRelativePathFlow(): Flow<RelativeGuidePath> {
+        return preferencesDataStore.data
+            .catch { exception ->
+                if (exception is IOException) {
+                    emit(emptyPreferences())
+                } else {
+                    throw exception
+                }
+            }
+            .map { preferences ->
+                val rawPath = preferences[KEY_PATH].orEmpty()
+                RelativeGuidePath(rawPath)
+            }
+            .distinctUntilChanged()
+    }    // 2. La consulta puntual (reutiliza el Flow con .firstOrNull)
+
     override suspend fun getRelativePath(): RelativeGuidePath {
-        return runCatching {
-            preferencesDataStore.data
-                .catch { exception ->
-                    if (exception is IOException) {
-                        emit(emptyPreferences())
-                    } else {
-                        throw exception
-                    }
-                }
-                .map { prefs ->
-                    val rawPath = prefs[KEY_PATH].orEmpty()
-                    RelativeGuidePath(rawPath)
-                }
-                .firstOrNull()
-        }.getOrNull() ?: RelativeGuidePath("")
+        return getRelativePathFlow().firstOrNull() ?: RelativeGuidePath("")
     }
 
     override fun getRootGuides() = GuidePath(filePathsProvider.fileGuides)

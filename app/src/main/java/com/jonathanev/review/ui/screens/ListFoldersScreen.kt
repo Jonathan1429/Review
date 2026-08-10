@@ -82,6 +82,10 @@ fun ListFoldersRoute(
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
+        viewModel.resetNavigationPath()
+    }
+
+    LaunchedEffect(Unit) {
         viewModel.eventsMessages.collect { event ->
             when (event) {
                 is FolderActionEvent.DeleteFolderSuccess -> {
@@ -103,6 +107,7 @@ fun ListFoldersRoute(
         FoldersUiState.Empty -> {
             onNavWithoutFolders()
         }
+
         FoldersUiState.Loading -> {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -111,6 +116,7 @@ fun ListFoldersRoute(
                 CircularProgressIndicator()
             }
         }
+
         is FoldersUiState.Success -> {
             val isDarkTheme = isSystemInDarkTheme()
 
