@@ -27,7 +27,6 @@ import com.jonathanev.review.domain.result.ReadGuideError
 import com.jonathanev.review.domain.result.RenamedGuideResult
 import com.jonathanev.review.domain.result.ValidateCreateFileResult
 import com.jonathanev.review.presentation.mapper.toDomain
-import com.jonathanev.review.presentation.model.ColorType
 import com.jonathanev.review.presentation.model.FileFormMode
 import com.jonathanev.review.presentation.model.IconType
 import com.jonathanev.review.presentation.model.ScreenDataUi
@@ -95,8 +94,7 @@ class CreateFilesViewModel @Inject constructor(
             currentState.copy(
                 icons = icons,
                 selectedIndex = 0,
-                icon = icons.first(),
-                color = ColorType.Gray
+                icon = icons.first()
             )
         }
     }
