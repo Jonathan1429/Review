@@ -338,6 +338,15 @@ class CreateFilesViewModel @Inject constructor(
 
     fun processSaveRequest(isDarkTheme: Boolean) {
         viewModelScope.launch {
+            _uiStateComposable.update { currentState ->
+                currentState.copy(
+                    name = currentState.name.trim(),
+                    description = currentState.description.trim(),
+                    oldName = currentState.oldName.trim(),
+                    oldDescription = currentState.oldDescription.trim()
+                )
+            }
+
             val dataUniqueScreen = dataUniqueScreen()
 
             if (dataUniqueScreen) {

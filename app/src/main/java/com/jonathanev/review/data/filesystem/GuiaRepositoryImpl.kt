@@ -95,7 +95,8 @@ class GuiaRepositoryImpl @Inject constructor(
     override fun hasGuides(): Flow<Boolean> = refreshGuides.map {
         val path = File(filePathResolver.mapToFolderPath(PathKind.GUIAS).value)
 
-        if (!path.exists() || !path.isDirectory) return@map false
+        if (!path.isDirectory) return@map false
+        if (!path.exists()) return@map false
 
         val allItems = path.listFiles().orEmpty()
 
@@ -646,9 +647,8 @@ class GuiaRepositoryImpl @Inject constructor(
     override suspend fun existGuide(
         nameFile: String
     ): Boolean {
-        // 2. Verificamos la existencia física (V1 o V2)
         return listGuides().any { file ->
-            file.name.equals(nameFile, ignoreCase = true) ||
+            file.name.equals(nameFile) ||
                     file.nameWithoutExtension.equals(nameFile, ignoreCase = true)
         }
     }
