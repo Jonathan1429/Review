@@ -495,11 +495,7 @@ class GuiaRepositoryImpl @Inject constructor(
                     QuestionContentXmlDto.Image(uri = decoded, nameFile = nameFile)
                 } else {
                     val simpleText = labelsHandler.sanitizeLabels(ques)
-
-                    QuestionContentXmlDto.Text(
-                        text = simpleText,
-                        colorRangeXmlDto = emptyList()
-                    )
+                    labelsHandler.processAndSanitizeLabels(simpleText)
                 }
 
                 preguntaContent.add(preguntaProcesada)
@@ -518,10 +514,7 @@ class GuiaRepositoryImpl @Inject constructor(
                     QuestionContentXmlDto.Image(uri = decoded, nameFile = nameFile)
                 } else {
                     val simpleText = labelsHandler.sanitizeLabels(ans)
-                    QuestionContentXmlDto.Text(
-                        text = simpleText,
-                        colorRangeXmlDto = emptyList()
-                    )
+                    labelsHandler.processAndSanitizeLabels(simpleText)
                 }
 
                 respuestaContent.add(respuestaProcesada)
