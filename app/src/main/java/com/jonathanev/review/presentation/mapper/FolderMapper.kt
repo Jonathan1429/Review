@@ -5,14 +5,30 @@ import com.jonathanev.review.data.mapper.toIconType
 import com.jonathanev.review.domain.model.FolderAttributesDomain
 import com.jonathanev.review.domain.model.FolderDomainModel
 import com.jonathanev.review.domain.result.FolderResultDomain
-import com.jonathanev.review.presentation.model.FolderUiModel
 import com.jonathanev.review.presentation.model.FolderAttributesUi
 import com.jonathanev.review.presentation.model.FolderResultUi
+import com.jonathanev.review.presentation.model.FolderUiModel
+import com.jonathanev.review.ui.mapper.toInt
 
-fun FolderDomainModel.toUi(): FolderUiModel{
+fun FolderDomainModel.toUi(): FolderUiModel {
     return FolderUiModel(
         folder = this.folder.toUi(),
         numGuides = this.numGuides
+    )
+}
+
+fun FolderUiModel.toDomain(isDarkTheme: Boolean): FolderDomainModel {
+    return FolderDomainModel(
+        folder = this.folder.toDomain(isDarkTheme),
+        numGuides = this.numGuides
+    )
+}
+
+fun FolderAttributesUi.toDomain(isDarkTheme: Boolean): FolderAttributesDomain {
+    return FolderAttributesDomain(
+        name = this.name,
+        imgFolder = this.imgFolder.name,
+        color = this.color.toInt(isDarkTheme)
     )
 }
 
@@ -25,7 +41,7 @@ fun FolderAttributesDomain.toUi(): FolderAttributesUi {
 }
 
 fun FolderResultDomain.toUi(): FolderResultUi {
-    return when(this){
+    return when (this) {
         is FolderResultDomain.Error -> FolderResultUi.Error(this.message)
         is FolderResultDomain.Success -> FolderResultUi.Success(this.folderDomain.toUi())
     }

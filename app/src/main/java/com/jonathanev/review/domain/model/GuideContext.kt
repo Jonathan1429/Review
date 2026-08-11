@@ -1,20 +1,32 @@
 package com.jonathanev.review.domain.model
 
-sealed class GuideContext {
-    data class DeleteGuide(val guide: GuideDomainModel) : GuideContext()
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 
-    data class Browsing(val guide: GuideDomainModel) : GuideContext()
+@Parcelize
+sealed class GuideContext : Parcelable {
+    @Parcelize
+    data class DeleteGuide(val guide: GuideDomainModel) : GuideContext(), Parcelable
 
-    data class Editing(val guide: GuideDomainModel) : GuideContext()
+    @Parcelize
+    data class Browsing(val guide: GuideDomainModel, val position: Int) : GuideContext(), Parcelable
 
+    @Parcelize
+    data class Editing(val guide: GuideDomainModel, val position: Int) : GuideContext(), Parcelable
+
+    @Parcelize
     data class Moving(
         val guide: GuideDomainModel,
         override val oldRelativeGuidePath: RelativeGuidePath
-    ) : GuideContext(), HasOriginPath
+    ) : GuideContext(), HasOriginPath, Parcelable
 
+    @Parcelize
     data class Rename(
         val guide: GuideDomainModel,
         val name: RequiredAttrGuide,
         val description: OptionalAttrGuide
-    ) : GuideContext()
+    ) : GuideContext(), Parcelable
+
+    @Parcelize
+    data class Creating(val guide: GuideDomainModel) : GuideContext(), Parcelable
 }

@@ -2,33 +2,42 @@ package com.jonathanev.review.ui.screens
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.jonathanev.review.R
+import com.jonathanev.review.presentation.event.PreviewGuideEvent
 import com.jonathanev.review.presentation.model.ActiveGuideUIState
 import com.jonathanev.review.presentation.state.PreviewQuestionStateUi
 import com.jonathanev.review.presentation.viewmodel.PreviewViewModel
+import com.jonathanev.review.ui.components.ErrorComponent
 import com.jonathanev.review.ui.components.QuestionCard
+import com.jonathanev.review.ui.components.singleClick
 import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.PreviewQuestionsProvider
-import com.jonathanev.review.ui.theme.HardColorButton
 import com.jonathanev.review.ui.theme.ReviewTheme
 
 @DevicePreviews
@@ -50,39 +59,68 @@ fun PreviewPreviewQuestionsScreen(
 @Composable
 fun PreviewQuestionsRoute(
     viewModel: PreviewViewModel,
-    onEditingGuideClick: (nameGuide: String, descriptionGuide: String, posQuestionEdit: Int) -> Unit,
-    onPlayGuideClick: (nameGuide: String, posQuestionPlay: Int) -> Unit
+    onEditingGuideClick: () -> Unit,
+    onPlayGuideClick: () -> Unit,
+    onBackNav: () -> Unit
 ) {
     val uiState = viewModel.uiState.collectAsStateWithLifecycle().value
     val context = LocalContext.current
 
-    when (uiState.activeGuide) {
-        ActiveGuideUIState.Error -> {
+    LaunchedEffect(uiState.activeGuide) {
+        if (uiState.activeGuide is ActiveGuideUIState.Error) {
             Toast.makeText(
                 context,
                 "No se pudieron cargar los datos",
                 Toast.LENGTH_SHORT
             ).show()
         }
+    }
 
-        ActiveGuideUIState.Loading -> CircularProgressIndicator()
+    LaunchedEffect(Unit) {
+        viewModel.previewGuideEvent.collect { event ->
+            when (event) {
+                PreviewGuideEvent.Editing -> {
+                    onEditingGuideClick()
+                }
+
+                PreviewGuideEvent.Review -> {
+                    onPlayGuideClick()
+                }
+
+                is PreviewGuideEvent.ShowError -> {
+                    Toast.makeText(
+                        /* context = */ context,
+                        /* text = */ event.error,
+                        /* duration = */ Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+    }
+
+    when (uiState.activeGuide) {
+        ActiveGuideUIState.Loading -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+
+        ActiveGuideUIState.Error -> {
+            ErrorComponent(
+                onRetry = viewModel::retryLoad,
+                onBack = onBackNav
+            )
+        }
+
         is ActiveGuideUIState.Success -> {
             PreviewQuestionsScreen(
                 previewQuestions = uiState,
-                onEditingGuideClick = { position ->
-                    onEditingGuideClick(
-                        uiState.activeGuide.guide.nameGuide,
-                        uiState.activeGuide.guide.description,
-                        position
-                    )
-                },
-                onPlayGuideClick = { position ->
-                    onPlayGuideClick(
-                        uiState.activeGuide.guide.nameGuide,
-                        position
-                    )
-                },
-                onCreateQuestionClick = {}
+                onEditingGuideClick = { position -> viewModel.editingGuide(position = position) },
+                onPlayGuideClick = { position -> viewModel.reviewGuide(position = position) },
+                onCreateQuestionClick = { position -> viewModel.editingGuide(position = position) }
             )
         }
     }
@@ -94,20 +132,29 @@ fun PreviewQuestionsScreen(
     previewQuestions: PreviewQuestionStateUi,
     onEditingGuideClick: (Int) -> Unit,
     onPlayGuideClick: (Int) -> Unit,
-    onCreateQuestionClick: () -> Unit
+    onCreateQuestionClick: (Int) -> Unit
 ) {
     Scaffold(
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = onCreateQuestionClick,
-                containerColor = HardColorButton
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Boton crear carpeta",
-                    tint = Color.White
-                )
-            }
+            ExtendedFloatingActionButton(
+                onClick = singleClick { onCreateQuestionClick(previewQuestions.previewState.size) },
+                containerColor = MaterialTheme.colorScheme.primary,
+                shape = RoundedCornerShape(16.dp),
+                icon = {
+                    Icon(
+                        painter = painterResource(R.drawable.plus),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
+                },
+                text = {
+                    Text(
+                        stringResource(R.string.btnAddQuestions),
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+            )
         }
     ) { paddingValues ->
         Column(

@@ -1,7 +1,9 @@
 package com.jonathanev.review.ui.preview.providers
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.jonathanev.review.presentation.model.GuideMode
+import com.jonathanev.review.domain.model.GuideContext
+import com.jonathanev.review.domain.model.GuideDomainModel
+import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.ui.model.ContentType
 import com.jonathanev.review.ui.model.QAType
@@ -14,11 +16,12 @@ data class StudyGuideScreenProv(
     val actualQuestion: Int,
     val totalQuestions: Int,
     val listTypeMedia: List<QuestionContentUi.Text>,
-    val guideMode: GuideMode,
+    val guideContext: GuideContext,
     val showDialogDeleteQuestion: Boolean,
     val showDialogRepeatGuide: Boolean,
 )
 
+private val guideDomainModel = GuideDomainModel(GuideVersion.V2, "", "")
 class StudyGuideScreenProvider : PreviewParameterProvider<StudyGuideScreenProv> {
     override val values: Sequence<StudyGuideScreenProv>
         get() = sequenceOf(
@@ -33,7 +36,7 @@ class StudyGuideScreenProvider : PreviewParameterProvider<StudyGuideScreenProv> 
                     QuestionContentUi.Text("Primer texto de prueba", emptyList()),
                     QuestionContentUi.Text("Segundo texto de prueba", emptyList())
                 ),
-                guideMode = GuideMode.Create("", ""),
+                guideContext = GuideContext.Creating(guideDomainModel),
                 showDialogDeleteQuestion = false,
                 showDialogRepeatGuide = false
             ),
@@ -48,7 +51,7 @@ class StudyGuideScreenProvider : PreviewParameterProvider<StudyGuideScreenProv> 
                     QuestionContentUi.Text("Primer texto de prueba", emptyList()),
                     QuestionContentUi.Text("Segundo texto de prueba", emptyList())
                 ),
-                guideMode = GuideMode.Create("", ""),
+                guideContext = GuideContext.Creating(guideDomainModel),
                 showDialogDeleteQuestion = true,
                 showDialogRepeatGuide = false
             ),
@@ -63,7 +66,7 @@ class StudyGuideScreenProvider : PreviewParameterProvider<StudyGuideScreenProv> 
                     QuestionContentUi.Text("Primer texto de prueba", emptyList()),
                     QuestionContentUi.Text("Segundo texto de prueba", emptyList())
                 ),
-                guideMode = GuideMode.Create("", ""),
+                guideContext = GuideContext.Creating(guideDomainModel),
                 showDialogDeleteQuestion = false,
                 showDialogRepeatGuide = true
             )

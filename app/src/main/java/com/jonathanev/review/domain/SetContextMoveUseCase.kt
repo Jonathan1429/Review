@@ -1,13 +1,13 @@
 package com.jonathanev.review.domain
 
-import com.jonathanev.review.domain.model.GuideDomainModel
-import com.jonathanev.review.domain.repository.GuideMoveRepository
+import com.jonathanev.review.domain.model.GuideContext
+import com.jonathanev.review.domain.repository.GuideContextRepository
 import javax.inject.Inject
 
 class SetContextMoveUseCase @Inject constructor(
-    private val guideMoveRepository: GuideMoveRepository
+    private val guideContextRepository: GuideContextRepository
 ) {
-    suspend operator fun invoke(guideDomainModel: GuideDomainModel) {
-        guideMoveRepository.start(guideDomainModel)
+    suspend operator fun invoke(contextMoving: GuideContext.Moving): Result<Unit> {
+        return guideContextRepository.start(contextMoving)
     }
 }

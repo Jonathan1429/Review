@@ -2,17 +2,20 @@ package com.jonathanev.review.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jonathanev.review.domain.ClearActiveGuideUseCase
+import com.jonathanev.review.domain.ClearGuideMoveUseCase
 import com.jonathanev.review.domain.DeleteGuideUseCase
-import com.jonathanev.review.domain.GetGuideMoveUseCase
+import com.jonathanev.review.domain.GetGuideContextUseCase
 import com.jonathanev.review.domain.GetGuidePosicionUseCase
 import com.jonathanev.review.domain.GetGuideXmlDataUseCase
 import com.jonathanev.review.domain.LoadGuidesUseCase
 import com.jonathanev.review.domain.MoveGuideUseCase
+import com.jonathanev.review.domain.ObservePathUseCase
 import com.jonathanev.review.domain.ResetNavigationUseCase
 import com.jonathanev.review.domain.SetActiveGuideUseCase
 import com.jonathanev.review.domain.SetContextMoveUseCase
 import com.jonathanev.review.domain.model.GuideContext
-import com.jonathanev.review.domain.model.GuideDomainModel
+import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.result.DeleteGuideResult
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.GuideResultDomain
@@ -21,20 +24,26 @@ import com.jonathanev.review.presentation.event.GuideActionEvent
 import com.jonathanev.review.presentation.event.UIMovingEvent
 import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.presentation.mapper.toUi
+import com.jonathanev.review.presentation.model.FileInteractionMode
 import com.jonathanev.review.presentation.model.GuideResultUi
 import com.jonathanev.review.presentation.model.GuideUiModel
+import com.jonathanev.review.presentation.state.ActionDialogState
 import com.jonathanev.review.presentation.state.GuidesUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
 
 @HiltViewModel
 class FragmentListGuidesViewModel @Inject constructor(
@@ -42,28 +51,33 @@ class FragmentListGuidesViewModel @Inject constructor(
     private val getGuidePosicionUseCase: GetGuidePosicionUseCase,
     private val deleteGuideUseCase: DeleteGuideUseCase,
     private val setContextMoveUseCase: SetContextMoveUseCase,
-    private val getGuideMoveUseCase: GetGuideMoveUseCase,
+    private val getGuideContextUseCase: GetGuideContextUseCase,
     private val getGuideXmlDataUseCase: GetGuideXmlDataUseCase,
     private val moveGuideUseCase: MoveGuideUseCase,
     private val resetNavigationUseCase: ResetNavigationUseCase,
-    private val setActiveGuideUseCase: SetActiveGuideUseCase
+    private val setActiveGuideUseCase: SetActiveGuideUseCase,
+    private val clearActiveGuideUseCase: ClearActiveGuideUseCase,
+    private val clearGuideMoveUseCase: ClearGuideMoveUseCase,
+    private val observePathUseCase: ObservePathUseCase
 ) : ViewModel() {
-    private var cachedGuides: List<GuideDomainModel> = emptyList()
-    private var selectedGuideDomain: GuideDomainModel? = null
-
-    val uiState: StateFlow<GuidesUiState> = loadGuidesUseCase.invoke()
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val uiState: StateFlow<GuidesUiState> = observePathUseCase.invoke()
+        .flatMapLatest { _ ->
+            loadGuidesUseCase.invoke()
+        }
         .map { list ->
             if (list.isEmpty()) GuidesUiState.Empty
             else GuidesUiState.Success(list.map { it.toUi() })
         }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
+            started = SharingStarted.Eagerly,
             initialValue = GuidesUiState.Loading
         )
 
-    private val _guides = MutableStateFlow<List<GuideUiModel>>(listOf())
-    val guides = _guides.asStateFlow()
+    private val _dialogState =
+        MutableStateFlow<ActionDialogState<GuideUiModel>>(ActionDialogState.Hidden)
+    val dialogState: StateFlow<ActionDialogState<GuideUiModel>> = _dialogState.asStateFlow()
 
     private val _eventsMessages = MutableSharedFlow<GuideActionEvent>()
     val eventsMessages = _eventsMessages.asSharedFlow()
@@ -71,36 +85,27 @@ class FragmentListGuidesViewModel @Inject constructor(
     private val _eventsMovingFiles = MutableSharedFlow<UIMovingEvent>()
     val eventsMovingFiles = _eventsMovingFiles.asSharedFlow() // usar estos eventos en compose
 
-    fun getGuideSelected(position: Int): GuideResultUi {
-        return when (val result = getGuidePosicionUseCase.invoke(position, cachedGuides)) {
-            GuideResultDomain.Error -> result.toUi()
-            is GuideResultDomain.Success -> {
-                selectedGuideDomain = result.guideDomainModel
-                result.toUi()
-            }
+    val interactionMode: StateFlow<FileInteractionMode> = getGuideContextUseCase()
+        .map { activeMoving ->
+            if (activeMoving is GuideContext.Moving) FileInteractionMode.MovingItem else FileInteractionMode.Default
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = FileInteractionMode.Default
+        )
+
+    fun onCancelMove() {
+        viewModelScope.launch {
+            clearGuideMoveUseCase.invoke()
         }
     }
 
-    fun deleteGuide(nameGuide: String) {
-        viewModelScope.launch {
-            val guideDomainModel = cachedGuides.find { it.nameGuide == nameGuide }
-            if (guideDomainModel == null) {
-                emitMessage(GuideActionEvent.ShowMessage("No se ha encontrado la guia"))
-                return@launch
-            }
-
-            val response = deleteGuideUseCase.invoke(guideDomainModel)
-            when (response) {
-                DeleteGuideResult.DeleteSuccess -> {
-                    emitMessage(GuideActionEvent.Success("Guia borrada exitosamente"))
-                }
-
-                DeleteGuideResult.ErrorGuide -> emitMessage(GuideActionEvent.ShowMessage("Hubo un error al borrar la guia"))
-                DeleteGuideResult.ErrorImage ->
-                    emitMessage(GuideActionEvent.ShowMessage("Hubo inconvenientes en el borrado completo de archivos"))
-
-                else -> emitMessage(GuideActionEvent.ShowMessage("Ocurrió un error al eliminar la guia"))
-            }
+    fun getGuideSelected(guides: List<GuideUiModel>, position: Int): GuideResultUi {
+        return when (val result =
+            getGuidePosicionUseCase.invoke(position, guides.map { it.toDomain() })) {
+            GuideResultDomain.Error -> result.toUi()
+            is GuideResultDomain.Success -> result.toUi()
         }
     }
 
@@ -110,22 +115,22 @@ class FragmentListGuidesViewModel @Inject constructor(
         }
     }
 
-    fun movingGuide() {
-        when (val context = getGuideMoveUseCase.invoke()) {
-            is GuideContext.Moving -> {
-                val guideDomainModel = cachedGuides.find { it.nameGuide == context.guide.nameGuide }
+    fun movingGuide(guides: List<GuideUiModel>) {
+        viewModelScope.launch {
+            when (val context = getGuideContextUseCase.invoke().firstOrNull()) {
+                is GuideContext.Moving -> {
+                    val isExistGuide = guides.any { it.nameGuide == context.guide.nameGuide }
 
-                if (guideDomainModel != null) {
-                    viewModelScope.launch {
+                    if (isExistGuide) {
                         _eventsMovingFiles.emit(UIMovingEvent.ExistFile)
+                        return@launch
                     }
-                    return
+
+                    onContinueProcess(true)
                 }
 
-                onContinueProcess(true)
+                else -> eventMovingFile("Error inesperado")
             }
-
-            else -> eventMovingFile("Error inesperado")
         }
     }
 
@@ -133,7 +138,7 @@ class FragmentListGuidesViewModel @Inject constructor(
         viewModelScope.launch {
             if (!confirmed) return@launch
 
-            when (val context = getGuideMoveUseCase.invoke()) {
+            when (val context = getGuideContextUseCase.invoke().firstOrNull()) {
                 is GuideContext.Moving -> {
                     when (val guideData = getGuideXmlDataUseCase.invoke(context)) {
                         is GetGuideResult.Success -> {
@@ -177,21 +182,122 @@ class FragmentListGuidesViewModel @Inject constructor(
         }
     }
 
-    fun moveFileCancel() {
-        eventMovingFile("Se ha cancelado la acción")
-    }
-
-    fun setContext() {
+    fun setContextMoving(guide: GuideUiModel) {
         viewModelScope.launch {
-            val guide = selectedGuideDomain ?: return@launch
-            setContextMoveUseCase.invoke(guide)
-            resetNavigationUseCase.invoke()
+            try {
+                val guideDomainModel = guide.toDomain()
+                val guideContext = GuideContext.Moving(
+                    guide = guideDomainModel,
+                    oldRelativeGuidePath = RelativeGuidePath("")
+                )
+                setContextMoveUseCase.invoke(guideContext)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                e.printStackTrace()
+                emitMessage(
+                    GuideActionEvent.ShowMessage(
+                        e.message ?: "Ocurrió un error inesperado"
+                    )
+                )
+            } finally {
+                resetNavigationUseCase.invoke()
+            }
         }
     }
 
     fun setActiveGuide(guideUIModel: GuideUiModel) {
         viewModelScope.launch {
-            setActiveGuideUseCase.invoke(guideUIModel.toDomain())
+            try {
+                setActiveGuideUseCase.invoke(guideUIModel.toDomain())
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                e.printStackTrace()
+                emitMessage(
+                    GuideActionEvent.ShowMessage(
+                        e.message ?: "Ocurrió un error inesperado"
+                    )
+                )
+            }
         }
     }
+
+    fun clearActiveGuide() {
+        viewModelScope.launch {
+            try {
+                clearActiveGuideUseCase.invoke()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                e.printStackTrace()
+                emitMessage(
+                    GuideActionEvent.ShowMessage(
+                        e.message ?: "Ocurrió un error inesperado"
+                    )
+                )
+            }
+        }
+    }
+
+    fun onOpenMenu(guide: GuideUiModel) {
+        _dialogState.value = ActionDialogState.OptionsMenu(guide)
+    }
+
+    fun onRequestDelete(guide: GuideUiModel) {
+        _dialogState.value = ActionDialogState.ConfirmDelete(guide)
+    }
+
+    fun onDismissDialog() {
+        _dialogState.value = ActionDialogState.Hidden
+    }
+
+    fun onConfirmDelete(guide: GuideUiModel) {
+        viewModelScope.launch {
+            onDismissDialog()
+            val guideDomainModel = guide.toDomain()
+            val response = deleteGuideUseCase.invoke(guideDomainModel)
+            when (response) {
+                DeleteGuideResult.DeleteSuccess -> {
+                    emitMessage(GuideActionEvent.GuideDeleteSuccess)
+                }
+
+                DeleteGuideResult.ErrorGuide -> emitMessage(GuideActionEvent.ShowMessage("Hubo un error al borrar la guia"))
+                DeleteGuideResult.ErrorImage ->
+                    emitMessage(GuideActionEvent.ShowMessage("Hubo inconvenientes en el borrado completo de archivos"))
+
+                else -> emitMessage(GuideActionEvent.ShowMessage("Ocurrió un error al eliminar la guia"))
+            }
+        }
+    }
+
+    fun onOpenGuide(guideUIModel: GuideUiModel) {
+        onDismissDialog()
+        setActiveGuide(guideUIModel)
+        emitMessage(GuideActionEvent.OpenGuide)
+    }
+
+    fun onRenameGuide(guideUIModel: GuideUiModel) {
+        onDismissDialog()
+        emitMessage(GuideActionEvent.RenameGuide(guideUIModel))
+    }
+
+    fun onMoveGuide(guideUIModel: GuideUiModel) {
+        onDismissDialog()
+        setContextMoving(guideUIModel)
+        emitMessage(GuideActionEvent.MoveGuide)
+    }
+
+    /*fun resetNavigationPath() {
+        viewModelScope.launch {
+            try {
+                resetNavigationUseCase.invoke()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                e.printStackTrace()
+                emitMessage(GuideActionEvent.ShowMessage(e.message ?: "Ocurrió un error inesperado"))
+            }
+        }
+    }*/
 }

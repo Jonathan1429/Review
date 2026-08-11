@@ -94,9 +94,9 @@ class OptionsCreateTextScreenshotTest(
                         OptionsCreateText(
                             textValue = data.text,
                             selectedColor = data.color,
-                            guideMode = data.guideMode,
+                            guideContext = data.guideContext,
                             onClearColorClick = {},
-                            onSelectColorClick = {},
+                            onShowColorDialog = {},
                             onSaveTextClick = {},
                             onBackNav = {}
                         )

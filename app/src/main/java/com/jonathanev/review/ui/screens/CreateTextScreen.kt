@@ -1,19 +1,24 @@
 package com.jonathanev.review.ui.screens
 
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -24,20 +29,23 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.presentation.model.ColorRangeUi
-import com.jonathanev.review.presentation.model.GuideMode
 import com.jonathanev.review.presentation.model.QuestionContentMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.presentation.model.SpanPalabraModel
+import com.jonathanev.review.presentation.state.GuideScreenUiState
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.ui.components.ColorPickerDialog
 import com.jonathanev.review.ui.components.CustomBoxCreateText
+import com.jonathanev.review.ui.components.ErrorComponent
 import com.jonathanev.review.ui.components.OptionsCreateText
+import com.jonathanev.review.ui.mapper.toInt
 import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.CreateTextScreenProv
 import com.jonathanev.review.ui.preview.providers.CreateTextScreenProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
-import com.jonathanev.review.ui.theme.degradientColor
+import com.jonathanev.review.ui.theme.cardStepBackground
 
 @DevicePreviews
 @Composable
@@ -46,16 +54,17 @@ fun PreviewTextScreen(
 ) {
     ReviewTheme {
         CreateTextScreen(
-            guideMode = data.guideMode,
+            guideContext = data.guideContext,
             colorInitial = MaterialTheme.colorScheme.onSurface,
             selectedColor = MaterialTheme.colorScheme.onSurface,
             textValue = data.textValue,
             showDialog = data.showDialog,
             onClearColorClick = {},
-            onSelectColorClick = {},
+            onShowColorDialog = {},
             onChangeTextValue = {},
             onDissmissDialog = {},
             onColorSelected = {},
+            onDefaultColor = {},
             onSaveText = { _, _ -> },
             onBackNav = {}
         )
@@ -64,65 +73,120 @@ fun PreviewTextScreen(
 
 @Composable
 fun CreateTextRoute(
-    guideMode: GuideMode,
     viewModel: SharedFragmentCreateFileViewModel,
-    contentType: QuestionContentUi.Text,
+    posItem: Int,
     onSaveText: () -> Unit,
     onBackNav: () -> Unit,
     questionContentMode: QuestionContentMode
 ) {
-    LaunchedEffect(Unit) {
-        viewModel.initTextDraft(contentType)
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    when (val state = uiState) {
+        is GuideScreenUiState.Loading -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+
+        is GuideScreenUiState.Error -> {
+            ErrorComponent(
+                onRetry = viewModel::retryLoad,
+                onBack = onBackNav
+            )
+        }
+
+        is GuideScreenUiState.Success -> {
+            val textList by viewModel.textList.collectAsStateWithLifecycle()
+            val isDark = isSystemInDarkTheme()
+            val item = remember(textList, posItem, questionContentMode) {
+                if (questionContentMode == QuestionContentMode.CREATING) {
+                    QuestionContentUi.Text("", emptyList())
+                } else {
+                    textList.getOrNull(posItem) ?: QuestionContentUi.Text("", emptyList())
+                }
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    viewModel.clearTextDraft()
+                }
+            }
+
+            // 2. Inicializamos el borrador con el ítem correcto
+            LaunchedEffect(item, questionContentMode) {
+                viewModel.initTextDraft(item)
+            }
+
+
+            val colorInitial = MaterialTheme.colorScheme.onSurface
+            val colorSelected = state.colorType.toInt(isDark)
+            var selectedColorInt by remember(colorSelected) {
+                mutableIntStateOf(colorSelected)
+            }
+            val selectedColor = Color(selectedColorInt)
+
+            val textValueState by viewModel.draftTextValue.collectAsStateWithLifecycle()
+
+            // 3. Si textValueState es null (porque DisposableEffect o clearTextDraft lo limpiaron), usa el item
+            val textValue = textValueState ?: remember(item) {
+                TextFieldValue(annotatedString = item.toAnnotatedString())
+            }
+
+            LaunchedEffect(Unit) {
+                viewModel.updateItemTriger.collect {
+                    onSaveText()
+                }
+            }
+
+            CreateTextScreen(
+                guideContext = state.guideContext,
+                colorInitial = colorInitial,
+                selectedColor = selectedColor,
+                textValue = textValue,
+                showDialog = state.showDialogColor,
+                onSaveText = { text, colors ->
+                    viewModel.addTextContent(
+                        textWithLabels = text,
+                        listSpans = colors,
+                        questionContentMode
+                    )
+                },
+                onClearColorClick = {
+                    viewModel.clearTextDraft()
+                },
+                onShowColorDialog = viewModel::showDialogSelectColor,
+                onChangeTextValue = { textFieldValue ->
+                    viewModel.onDraftTextChange(newValue = textFieldValue)
+                },
+                onDissmissDialog = viewModel::onDismissDialogSelectColor,
+                onColorSelected = { actualColor ->
+                    viewModel.onChangeColor(actualColor = actualColor)
+                },
+                onDefaultColor = viewModel::onDefaultcolor,
+                onBackNav = onBackNav
+            )
+        }
     }
-
-    val colorInitial = MaterialTheme.colorScheme.onSurface
-    var selectedColor by remember { mutableStateOf(colorInitial) }
-    var showDialog by remember { mutableStateOf(false) }
-    val textValueState by viewModel.draftTextValue.collectAsStateWithLifecycle()
-    val textValue =
-        textValueState ?: TextFieldValue(annotatedString = contentType.toAnnotatedString())
-
-    CreateTextScreen(
-        guideMode = guideMode,
-        colorInitial = colorInitial,
-        selectedColor = selectedColor,
-        textValue = textValue,
-        showDialog = showDialog,
-        onSaveText = { text, colors ->
-            viewModel.addTextContent(textWithLabels = text, listSpans = colors, questionContentMode)
-            onSaveText()
-        },
-        onClearColorClick = {
-            viewModel.onDraftTextChange(newValue = TextFieldValue(textValue.text))
-        },
-        onSelectColorClick = { showDialog = true },
-        onChangeTextValue = { textFieldValue ->
-            viewModel.onDraftTextChange(newValue = textFieldValue)
-        },
-        onDissmissDialog = {
-            showDialog = false
-        },
-        onColorSelected = { actualColor ->
-            selectedColor = actualColor
-        },
-        onBackNav = onBackNav
-    )
 }
 
 
 @Composable
 fun CreateTextScreen(
-    guideMode: GuideMode,
+    guideContext: GuideContext,
     onSaveText: (String, List<ColorRangeUi>) -> Unit,
     colorInitial: Color,
     selectedColor: Color,
     textValue: TextFieldValue,
     showDialog: Boolean,
     onClearColorClick: () -> Unit,
-    onSelectColorClick: () -> Unit,
+    onShowColorDialog: () -> Unit,
     onChangeTextValue: (actualText: TextFieldValue) -> Unit,
     onDissmissDialog: () -> Unit,
-    onColorSelected: (Color) -> Unit,
+    onColorSelected: (Int) -> Unit,
+    onDefaultColor: () -> Unit,
     onBackNav: () -> Unit
 ) {
     Scaffold(
@@ -135,7 +199,7 @@ fun CreateTextScreen(
                 .padding(16.dp),
             shape = RoundedCornerShape(42.dp),
             colors = CardDefaults.elevatedCardColors(
-                containerColor = degradientColor
+                containerColor = cardStepBackground
             ),
             elevation = CardDefaults.elevatedCardElevation(
                 defaultElevation = 8.dp
@@ -147,11 +211,11 @@ fun CreateTextScreen(
                     .padding(bottom = 16.dp)
             ) {
                 OptionsCreateText(
-                    guideMode = guideMode,
+                    guideContext = guideContext,
                     textValue = textValue.annotatedString,
                     selectedColor = selectedColor,
                     onClearColorClick = onClearColorClick,
-                    onSelectColorClick = onSelectColorClick,
+                    onShowColorDialog = onShowColorDialog,
                     onSaveTextClick = {
                         saveCurrentQuestion(
                             textFieldValue = textValue,
@@ -164,30 +228,20 @@ fun CreateTextScreen(
                     modifier = Modifier.padding(20.dp),
                     textValue = textValue,
                     hint = textValue.text.isNotEmpty(),
+                    enabled = guideContext !is GuideContext.Browsing,
+                    selectedColor = selectedColor,
                     onTextValueChange = { actualText ->
-                        val oldText = textValue.text
-                        val newText = actualText.text
-                        val isSingleCharacterAdded = (newText.length - oldText.length) == 1
-                        val cursorPosition = actualText.selection.start
-                        val addedChar =
-                            if (cursorPosition > 0 && cursorPosition <= newText.length) {
-                                newText[cursorPosition - 1]
-                            } else {
-                                null
-                            }
+                        val newAnnotatedString = updateAnnotatedStringWithSpans(
+                            oldAnnotatedString = textValue.annotatedString,
+                            newTextFieldValue = actualText,
+                            selectedColor = selectedColor,
+                            colorInitial = colorInitial
+                        )
 
-                        val response =
-                            if (isSingleCharacterAdded && addedChar != '\n' && selectedColor != colorInitial) {
-                                val newAnnotatedString = applyColorToCharacter(
-                                    currentAnnotatedString = actualText.annotatedString,
-                                    cursorPosition = cursorPosition,
-                                    color = selectedColor
-                                )
-
-                                actualText.copy(annotatedString = newAnnotatedString)
-                            } else {
-                                actualText
-                            }
+                        val response = actualText.copy(
+                            annotatedString = newAnnotatedString,
+                            composition = null
+                        )
 
                         onChangeTextValue(response)
                     }
@@ -197,18 +251,115 @@ fun CreateTextScreen(
             if (showDialog) {
                 ColorPickerDialog(
                     colorInitial = colorInitial,
-                    selectedColor = selectedColor,
                     onDismissRequest = onDissmissDialog,
                     onColorSelected = { colorActual ->
                         onColorSelected(colorActual)
                     },
                     onDefaultClick = {
-                        onColorSelected(colorInitial)
+                        onDefaultColor()
                     }
                 )
             }
         }
     }
+}
+
+fun applyColorToRange(
+    oldAnnotatedString: AnnotatedString,
+    actualText: TextFieldValue,
+    start: Int,
+    end: Int,
+    color: Color
+): AnnotatedString {
+    val newText = actualText.text
+    val builder = AnnotatedString.Builder(newText)
+
+    val lengthDiff = newText.length - oldAnnotatedString.text.length
+
+    // 1. Recuperar los estilos anteriores y reajustar sus posiciones al nuevo texto
+    for (span in oldAnnotatedString.spanStyles) {
+        var newStart = span.start
+        var newEnd = span.end
+
+        if (newStart >= start) {
+            newStart += lengthDiff
+        }
+        if (newEnd > start) {
+            newEnd += lengthDiff
+        }
+
+        if (newStart in 0..newText.length && newEnd in newStart..newText.length) {
+            builder.addStyle(span.item, newStart, newEnd)
+        }
+    }
+
+    // 2. Aplicar el nuevo color al rango recién insertado
+    if (start in 0..end && end <= newText.length) {
+        builder.addStyle(
+            style = SpanStyle(color = color),
+            start = start,
+            end = end
+        )
+    }
+
+    return builder.toAnnotatedString()
+}
+
+fun updateAnnotatedStringWithSpans(
+    oldAnnotatedString: AnnotatedString,
+    newTextFieldValue: TextFieldValue,
+    selectedColor: Color,
+    colorInitial: Color
+): AnnotatedString {
+    val oldText = oldAnnotatedString.text
+    val newText = newTextFieldValue.text
+    val lengthDiff = newText.length - oldText.length
+    val cursorPosition = newTextFieldValue.selection.start
+    val editPosition = (cursorPosition - lengthDiff).coerceAtLeast(0)
+
+    val builder = AnnotatedString.Builder(newText)
+
+    // A) PRESERVAR Y REAJUSTAR COLORES ANTERIORES
+    for (span in oldAnnotatedString.spanStyles) {
+        var newStart = span.start
+        var newEnd = span.end
+
+        if (lengthDiff > 0) {
+            // Inserción de texto: desplaza los estilos que están después del cursor
+            if (newStart >= editPosition) newStart += lengthDiff
+            if (newEnd > editPosition) newEnd += lengthDiff
+        } else if (lengthDiff < 0) {
+            // Borrado de texto: recorta o desplaza los estilos afectados
+            val deleteStart = cursorPosition
+            if (newStart > deleteStart) {
+                newStart = (newStart + lengthDiff).coerceAtLeast(deleteStart)
+            }
+            if (newEnd > deleteStart) {
+                newEnd = (newEnd + lengthDiff).coerceAtLeast(deleteStart)
+            }
+        }
+
+        // Mantiene el span si sigue dentro del rango válido
+        if (newStart < newEnd && newStart in 0..newText.length && newEnd in 0..newText.length) {
+            builder.addStyle(span.item, newStart, newEnd)
+        }
+    }
+
+    // B) APLICAR EL NUEVO COLOR ÚNICAMENTE A LO RECIÉN INSERTADO
+    val isDifferentColor = selectedColor.toArgb() != colorInitial.toArgb()
+    if (lengthDiff > 0 && isDifferentColor) {
+        val endInsert = cursorPosition.coerceAtMost(newText.length)
+
+        if (editPosition in 0..endInsert && endInsert <= newText.length) {
+            builder.addStyle(
+                style = SpanStyle(color = selectedColor),
+                start = editPosition,
+                end = endInsert
+            )
+        }
+    }
+
+    return builder.toAnnotatedString()
 }
 
 private fun applyColorToCharacter(
@@ -254,23 +405,62 @@ private fun saveCurrentQuestion(
     var isDoubleColors = false
     val listSpans = mutableListOf<ColorRangeUi>()
 
-    spanStyles.forEachIndexed { index, range ->
+    if (text.isEmpty()) {
+        onSaveContent(text, emptyList())
+        return SpanPalabraModel()
+    }
+
+    // 1. Creamos un mapa/array del tamaño del texto para evaluar el color exacto de cada carácter
+    val characterColors = Array(text.length) { Color.Unspecified }
+
+    // 2. Aplicamos los spans. Si un rango nuevo cae sobre un color distinto, detectamos sobreescritura
+    spanStyles.forEach { range ->
         if (range.item.color != Color.Unspecified) {
-            if (index > 0) {
-                val previousRange = spanStyles[index - 1]
-                if (range.start < previousRange.end) {
+            val start = range.start.coerceIn(0, text.length)
+            val end = range.end.coerceIn(0, text.length)
+
+            for (i in start until end) {
+                if (characterColors[i] != Color.Unspecified && characterColors[i] != range.item.color) {
                     isDoubleColors = true
                 }
+                characterColors[i] = range.item.color
             }
-
-            listSpans.add(
-                ColorRangeUi(
-                    start = range.start,
-                    end = range.end,
-                    color = range.item.color.toArgb()
-                )
-            )
         }
+    }
+
+    // 3. Recorremos el array e identificamos bloques continuos del mismo color
+    var currentStart = -1
+    var currentColor = Color.Unspecified
+
+    for (i in text.indices) {
+        val colorAtChar = characterColors[i]
+
+        if (colorAtChar != currentColor) {
+            // Guardamos el bloque acumulado previo si tenía color válido
+            if (currentColor != Color.Unspecified && currentStart != -1) {
+                listSpans.add(
+                    ColorRangeUi(
+                        start = currentStart,
+                        end = i,
+                        color = currentColor.toArgb()
+                    )
+                )
+            }
+            // Iniciamos un nuevo bloque
+            currentStart = if (colorAtChar != Color.Unspecified) i else -1
+            currentColor = colorAtChar
+        }
+    }
+
+    // 4. Guardamos el último bloque activo al llegar al final del texto
+    if (currentColor != Color.Unspecified && currentStart != -1) {
+        listSpans.add(
+            ColorRangeUi(
+                start = currentStart,
+                end = text.length,
+                color = currentColor.toArgb()
+            )
+        )
     }
 
     onSaveContent(text, listSpans)

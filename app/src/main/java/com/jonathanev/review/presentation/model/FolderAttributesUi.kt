@@ -1,10 +1,11 @@
 package com.jonathanev.review.presentation.model
 
-import kotlinx.serialization.Serializable
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 
-@Serializable
+@Parcelize
 data class FolderAttributesUi(
     val name: String,
     val imgFolder: IconType,
     val color: ColorType,
-)
+) : Parcelable

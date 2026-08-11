@@ -9,8 +9,10 @@ import com.jonathanev.review.domain.model.GuidePath
 import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.provider.FilePathsProvider
 import com.jonathanev.review.domain.repository.NavigationPathRepository
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import java.io.IOException
 import javax.inject.Inject
@@ -26,7 +28,7 @@ class NavigationPathRepositoryImpl @Inject constructor(
         private val KEY_PATH = stringPreferencesKey("relative_path")
     }
 
-    override suspend fun getRelativePath(): RelativeGuidePath {
+    override fun getRelativePathFlow(): Flow<RelativeGuidePath> {
         return preferencesDataStore.data
             .catch { exception ->
                 if (exception is IOException) {
@@ -35,22 +37,32 @@ class NavigationPathRepositoryImpl @Inject constructor(
                     throw exception
                 }
             }
-            .map { prefs -> RelativeGuidePath(prefs[KEY_PATH] ?: "") }
-            .first()
+            .map { preferences ->
+                val rawPath = preferences[KEY_PATH].orEmpty()
+                RelativeGuidePath(rawPath)
+            }
+            .distinctUntilChanged()
+    }    // 2. La consulta puntual (reutiliza el Flow con .firstOrNull)
+
+    override suspend fun getRelativePath(): RelativeGuidePath {
+        return getRelativePathFlow().firstOrNull() ?: RelativeGuidePath("")
     }
 
     override fun getRootGuides() = GuidePath(filePathsProvider.fileGuides)
     override fun getRootImages() = GuidePath(filePathsProvider.fileImages)
 
-    override suspend fun next(fileName: String) {
+    override suspend fun next(fileName: String): Result<Unit> = runCatching {
+        val sanitizedPath = fileName.trim()
         preferencesDataStore.edit { preferences ->
-            preferences[KEY_PATH] = fileName
+            preferences[KEY_PATH] = sanitizedPath
         }
+        Unit
     }
 
-    override suspend fun reset() {
+    override suspend fun reset(): Result<Unit> = runCatching {
         preferencesDataStore.edit { preferences ->
             preferences[KEY_PATH] = ""
         }
+        Unit
     }
 }

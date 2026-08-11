@@ -10,6 +10,8 @@ interface ImagesRepository {
         guide: GuideDomainModel
     )
 
+    suspend fun saveTempImage(uriString: String): String
+    suspend fun clearTempImages()
     suspend fun moveImages(
         images: List<QuestionContentDomain.Image>,
         guideRenameContext: GuideRenameContext
@@ -20,5 +22,5 @@ interface ImagesRepository {
         images: List<QuestionContentDomain.Image>,
     ): Boolean
 
-    fun moveUnassignedImages(movedFiles: List<String>)
+    suspend fun moveUnassignedImages(movedFiles: List<String>)
 }

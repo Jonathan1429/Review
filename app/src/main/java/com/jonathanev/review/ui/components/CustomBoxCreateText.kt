@@ -8,6 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
@@ -19,7 +20,9 @@ fun CustomBoxCreateText(
     modifier: Modifier = Modifier,
     textValue: TextFieldValue,
     hint: Boolean,
-    onTextValueChange: (TextFieldValue) -> Unit
+    enabled: Boolean = false,
+    onTextValueChange: (TextFieldValue) -> Unit,
+    selectedColor: Color
 ) {
     val hint = if (hint) stringResource(R.string.lblCuestionario) else ""
 
@@ -31,6 +34,8 @@ fun CustomBoxCreateText(
             value = textValue,
             onValueChange = onTextValueChange,
             modifier = Modifier.fillMaxSize(),
+            enabled = enabled,
+            cursorBrush = SolidColor(selectedColor),
             textStyle = TextStyle(
                 fontSize = 18.sp,
                 color = MaterialTheme.colorScheme.onSurface

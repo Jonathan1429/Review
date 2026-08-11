@@ -13,23 +13,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.jonathanev.review.R
-import com.jonathanev.review.presentation.model.GuideMode
+import com.jonathanev.review.domain.model.GuideContext
 
 @Composable
 fun OptionsCreateImage(
+    modifier: Modifier = Modifier,
     uriImage: String,
     imageUploaded: () -> Unit,
-    guideMode: GuideMode,
+    guideContext: GuideContext,
     onBackNav: () -> Unit
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(16.dp)
     ) {
         IconButton(
-            onClick = {
-                if (guideMode is GuideMode.Review) {
+            onClick = singleClick {
+                if (guideContext is GuideContext.Browsing) {
                     onBackNav()
                 } else {
                     if (uriImage.isNotEmpty()) {

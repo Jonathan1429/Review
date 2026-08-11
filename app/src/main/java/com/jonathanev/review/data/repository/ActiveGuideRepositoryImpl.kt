@@ -10,13 +10,17 @@ import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.repository.ActiveGuideRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import java.io.IOException
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class ActiveGuideRepositoryImpl @Inject constructor(
     private val preferencesDataStore: DataStore<Preferences>
 ) : ActiveGuideRepository {
+
     companion object {
         private val KEY_VERSION = stringPreferencesKey("active_guide_version")
         private val KEY_NAME = stringPreferencesKey("active_guide_name")
@@ -25,13 +29,16 @@ class ActiveGuideRepositoryImpl @Inject constructor(
 
     override val activeGuideFlow: Flow<GuideDomainModel?> = preferencesDataStore.data
         .catch { exception ->
-            if (exception is IOException) emit(emptyPreferences())
-            else throw exception
+            if (exception is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw exception
+            }
         }
         .map { prefs ->
+            val name = prefs[KEY_NAME] ?: return@map null
             val stringVersion = prefs[KEY_VERSION] ?: "-1"
             val version = stringVersion.toGuideVersion()
-            val name = prefs[KEY_NAME] ?: return@map null
             val description = prefs[KEY_DESCRIPTION].orEmpty()
 
             GuideDomainModel(
@@ -40,8 +47,9 @@ class ActiveGuideRepositoryImpl @Inject constructor(
                 description = description
             )
         }
+        .distinctUntilChanged()
 
-    override suspend fun setActiveGuide(guide: GuideDomainModel) {
+    override suspend fun setActiveGuide(guide: GuideDomainModel): Result<Unit> = runCatching {
         preferencesDataStore.edit { preferences ->
             preferences[KEY_VERSION] = guide.version.name
             preferences[KEY_NAME] = guide.nameGuide
@@ -49,7 +57,7 @@ class ActiveGuideRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun clearActiveGuide() {
+    override suspend fun clearActiveGuide(): Result<Unit> = runCatching {
         preferencesDataStore.edit { preferences ->
             preferences.remove(KEY_VERSION)
             preferences.remove(KEY_NAME)

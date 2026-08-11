@@ -1,7 +1,6 @@
 package com.jonathanev.review.ui.screens
 
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -15,6 +14,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButton
@@ -25,12 +25,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,24 +37,25 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jonathanev.review.R
+import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.presentation.event.CreateGuideEvent
-import com.jonathanev.review.presentation.model.GuideMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
-import com.jonathanev.review.presentation.model.SaveGuideMode
+import com.jonathanev.review.presentation.state.GuideScreenUiState
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.ui.components.AssetCarouselViewer
 import com.jonathanev.review.ui.components.CustomAlertDialog
 import com.jonathanev.review.ui.components.CustomTopBar
+import com.jonathanev.review.ui.components.ErrorComponent
 import com.jonathanev.review.ui.components.FilterTypeItem
 import com.jonathanev.review.ui.components.QASelectType
 import com.jonathanev.review.ui.components.ShowDeletePopUp
+import com.jonathanev.review.ui.components.singleClick
 import com.jonathanev.review.ui.model.ContentType
 import com.jonathanev.review.ui.model.QAType
 import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.StudyGuideScreenProv
 import com.jonathanev.review.ui.preview.providers.StudyGuideScreenProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
-import kotlinx.coroutines.launch
 
 @DevicePreviews
 @Composable
@@ -76,7 +71,7 @@ fun PreviewStudyGuideScreen(
             actualQuestion = data.actualQuestion,
             totalQuestions = data.totalQuestions,
             listTypeMedia = data.listTypeMedia,
-            guideMode = data.guideMode,
+            guideContext = data.guideContext,
             currentPosContent = 0,
             showDialogDeleteQuestion = data.showDialogDeleteQuestion,
             showDialogRepeatGuide = data.showDialogRepeatGuide,
@@ -88,7 +83,7 @@ fun PreviewStudyGuideScreen(
             onDeleteQuestionClick = { },
             onCardTypeClicked = {},
             onFilterTypeClicked = {},
-            onOpenAssetClick = {},
+            onOpenAssetClick = { _, _ -> },
             onDeleteItemClick = { _, _ -> },
             onAddAssetClick = {},
             onAddQuestion = {},
@@ -102,167 +97,160 @@ fun PreviewStudyGuideScreen(
 @Composable
 fun FillingGuideRoute(
     viewModel: SharedFragmentCreateFileViewModel,
-    guideMode: GuideMode,
-    onOpenAssetClick: (QuestionContentUi) -> Unit,
-    onAddAssetClick: (ContentType) -> Unit,
+    onOpenAssetClick: (QuestionContentUi, posItem: Int) -> Unit,
+    onAddAssetClick: (ContentType, posItem: Int) -> Unit,
     onActionGuideNone: () -> Unit,
     onCloseGuide: () -> Unit
 ) {
     val context = LocalContext.current
     val typeForSelected = listOf(QAType.QUESTION, QAType.ANSWER)
-    var mediaSelected by remember { mutableStateOf(ContentType.TEXT) }
     val mediaForSelected = listOf(ContentType.TEXT, ContentType.IMAGE)
-    var showDialogDeleteQuestion by remember { mutableStateOf(false) }
-    var showDialogRepeatGuide by remember { mutableStateOf(false) }
 
-    val uiState = viewModel.uiState.collectAsStateWithLifecycle()
-    val cardType = uiState.value.qAType
-    val currentPosContent = uiState.value.contadorContenido
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    val totalQuestions = uiState.value.preguntas.size
-    val actualQuestion = uiState.value.contadorPregunta + 1
-    val listTypeMedia = if (mediaSelected == ContentType.TEXT) {
-        viewModel.textList.collectAsStateWithLifecycle().value
-    } else {
-        viewModel.imageList.collectAsStateWithLifecycle().value
-    }
-    val coroutineScope = rememberCoroutineScope()
-    var restartGuide by rememberSaveable { mutableIntStateOf(0) }
-
-    Log.d(
-        "DEBUG_NAV",
-        "FillingGuide - Preguntas: ${uiState.value.preguntas.size} | Respuestas: ${uiState.value.respuestas.size}"
-    )
-
-    LaunchedEffect(Unit) {
-        viewModel.loadInitialData(guideMode = guideMode)
-    }
-
-    LaunchedEffect(Unit) {
-        viewModel.createGuideEvent.collect { event ->
-            when (event) {
-                CreateGuideEvent.WithoutText ->
-                    showToast("Debes tener al menos un texto", context)
-
-                CreateGuideEvent.WithoutTextQA ->
-                    showToast("Debes tener al menos un texto en pregunta y respuesta", context)
-
-                is CreateGuideEvent.WithoutTextInPos -> {
-                    showToast(
-                        "Revisa la pregunta ${event.position} - Debes tener al menos un texto en pregunta/respuesta",
-                        context
-                    )
-                }
-
-                is CreateGuideEvent.ErrorGuideCreated -> {
-                    showToast(event.text, context)
-                    onCloseGuide()
-                }
-
-                is CreateGuideEvent.SuccessGuideCreated -> {
-                    viewModel.initUIState()
-                    showToast(event.text, context)
-                    onCloseGuide()
-                }
+    when (val state = uiState) {
+        is GuideScreenUiState.Loading -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
             }
         }
-    }
 
-    FillingGuideScreen(
-        cardType = cardType,
-        typeForSelected = typeForSelected,
-        mediaSelected = mediaSelected,
-        mediaForSelected = mediaForSelected,
-        actualQuestion = actualQuestion,
-        totalQuestions = totalQuestions,
-        listTypeMedia = listTypeMedia,
-        guideMode = guideMode,
-        currentPosContent = currentPosContent,
-        showDialogDeleteQuestion = showDialogDeleteQuestion,
-        showDialogRepeatGuide = showDialogRepeatGuide,
-        onDissmissDialogRepeatGuide = { showDialogRepeatGuide = false },
-        onConfirmDialogRepeatGuide = {
-            showDialogRepeatGuide = false
-            viewModel.initUIState()
-            restartGuide++
-        },
-        onContinueDialogDeleteQuestionClick = { isChecked ->
-            showDialogDeleteQuestion = false
-            if (isChecked) {
-                viewModel.saveDontAskDelete()
-            }
-        },
-        onBackQuestionClick = {
-            viewModel.previousQuestion()
-        },
-        onNextQuestionClick = {
-            if (actualQuestion == totalQuestions) {
-                showDialogRepeatGuide = true
+        is GuideScreenUiState.Error -> {
+            ErrorComponent(
+                onRetry = viewModel::retryLoad,
+                onBack = onCloseGuide
+            )
+        }
+
+        is GuideScreenUiState.Success -> {
+            val cardType = state.qAType
+            val mediaSelected = state.mediaSelected
+            val currentPosContent = state.contadorContenido
+
+            val totalQuestions = state.preguntas.size
+            val actualQuestion = state.contadorPregunta + 1
+            val textList by viewModel.textList.collectAsStateWithLifecycle()
+            val imageList by viewModel.imageList.collectAsStateWithLifecycle()
+
+            val listTypeMedia = if (state.mediaSelected == ContentType.TEXT) {
+                textList
             } else {
-                viewModel.nextQuestion()
+                imageList
             }
-        },
-        onDeleteQuestionClick = {
-            coroutineScope.launch {
-                val dontAskQuestion = viewModel.getDontAskDeleteOnce()
-                if (dontAskQuestion) {
-                    viewModel.deleteQuesAns()
-                } else {
-                    showDialogDeleteQuestion = true
-                }
-            }
-        },
-        onDeleteItemClick = { typeContent, positionItem ->
-            when (typeContent) {
-                is QuestionContentUi.Image -> {
-                    viewModel.deleteImage(positionItem)
-                }
 
-                QuestionContentUi.None -> onActionGuideNone()
-                is QuestionContentUi.Text -> {
-                    viewModel.deleteText(positionItem)
+            LaunchedEffect(Unit) {
+                viewModel.createGuideEvent.collect { event ->
+                    when (event) {
+                        CreateGuideEvent.WithoutText ->
+                            showToast("Debes tener al menos un texto", context)
+
+                        CreateGuideEvent.WithoutTextQA ->
+                            showToast(
+                                "Debes tener al menos un texto en pregunta y respuesta",
+                                context
+                            )
+
+                        is CreateGuideEvent.WithoutTextInPos -> {
+                            showToast(
+                                "Revisa la pregunta ${event.position} - Debes tener al menos un texto en pregunta/respuesta",
+                                context
+                            )
+                        }
+
+                        is CreateGuideEvent.ErrorGuideCreated -> {
+                            showToast(event.text, context)
+                            onCloseGuide()
+                        }
+
+                        is CreateGuideEvent.SuccessGuideCreated -> {
+                            showToast(event.text, context)
+                            onCloseGuide()
+                        }
+
+                        CreateGuideEvent.QADeleted -> {
+                            showToast("Se ha eliminado la pregunta y respuesta", context)
+                        }
+
+                        CreateGuideEvent.CloseGuide -> {
+                            onCloseGuide()
+                        }
+                    }
                 }
             }
-        },
-        onCardTypeClicked = { cardTypeClicked ->
-            viewModel.onCardTypeChanged(cardTypeClicked)
-        },
-        onFilterTypeClicked = { filterTypeClicked ->
-            mediaSelected = filterTypeClicked
-        },
-        onOpenAssetClick = { typeContent -> onOpenAssetClick(typeContent) },
-        onAddAssetClick = { onAddAssetClick(mediaSelected) },
-        onAddQuestion = {
-            viewModel.addNextQuestion()
-        },
-        onCloseGuide = {
-            when (guideMode) {
-                is GuideMode.Create -> {
-                    viewModel.saveGuide(
-                        nameGuide = guideMode.nameGuide,
-                        description = guideMode.description,
-                        mode = SaveGuideMode.Create
+
+            FillingGuideScreen(
+                cardType = cardType,
+                typeForSelected = typeForSelected,
+                mediaSelected = mediaSelected,
+                mediaForSelected = mediaForSelected,
+                actualQuestion = actualQuestion,
+                totalQuestions = totalQuestions,
+                listTypeMedia = listTypeMedia,
+                guideContext = state.guideContext,
+                currentPosContent = currentPosContent,
+                showDialogDeleteQuestion = state.showDialogDeleteQuestion,
+                showDialogRepeatGuide = state.showDialogRepeatGuide,
+                onDissmissDialogRepeatGuide = viewModel::onDismissDialogRepeatGuide,
+                onConfirmDialogRepeatGuide = viewModel::restartGuide,
+                onContinueDialogDeleteQuestionClick = { isChecked ->
+                    viewModel.onConfirmDeleteQuestion(dontAskAgain = isChecked)
+                },
+                onBackQuestionClick = {
+                    viewModel.previousQuestion()
+                },
+                onNextQuestionClick = {
+                    viewModel.onNextQuestionRequested(
+                        actualQuestion = actualQuestion,
+                        totalQuestions = totalQuestions
                     )
-                }
+                },
+                onDeleteQuestionClick = viewModel::onDeleteQuestionRequested,
+                onDeleteItemClick = { typeContent, positionItem ->
+                    when (typeContent) {
+                        is QuestionContentUi.Image -> {
+                            viewModel.deleteImage(positionItem)
+                        }
 
-                is GuideMode.Edit -> {
-                    viewModel.saveGuide(
-                        nameGuide = guideMode.nameGuide,
-                        description = guideMode.description,
-                        mode = SaveGuideMode.Update
+                        QuestionContentUi.None -> onActionGuideNone()
+                        is QuestionContentUi.Text -> {
+                            viewModel.deleteText(positionItem)
+                        }
+                    }
+                },
+                onCardTypeClicked = { cardTypeClicked ->
+                    viewModel.onCardTypeChanged(cardTypeClicked)
+                },
+                onFilterTypeClicked = { filterTypeClicked ->
+                    viewModel.onFilterTypeChanged(filterTypeClicked = filterTypeClicked)
+                },
+                onOpenAssetClick = { typeContent, posItem ->
+                    onOpenAssetClick(
+                        typeContent,
+                        posItem
                     )
-                }
-
-                is GuideMode.Review -> {
-                    onCloseGuide()
-                }
-            }
-        },
-        onCurrentPosContent = { position ->
-            viewModel.updatePosContent(position)
-        },
-        onDismissRequest = { showDialogRepeatGuide = false }
-    )
+                },
+                onAddAssetClick = { posItem -> onAddAssetClick(mediaSelected, posItem) },
+                onAddQuestion = viewModel::addNextQuestion,
+                onCloseGuide = {
+                    when (state.guideContext) {
+                        is GuideContext.Browsing -> viewModel.onCloseGuide()
+                        is GuideContext.Creating -> viewModel.saveGuide()
+                        is GuideContext.DeleteGuide -> viewModel.onCloseGuide()
+                        is GuideContext.Editing -> viewModel.saveGuide()
+                        is GuideContext.Moving -> viewModel.onCloseGuide()
+                        is GuideContext.Rename -> viewModel.onCloseGuide()
+                    }
+                },
+                onCurrentPosContent = { position ->
+                    viewModel.updatePosContent(position)
+                },
+                onDismissRequest = viewModel::onDismissDialogDeleteQuestion
+            )
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -275,7 +263,7 @@ fun FillingGuideScreen(
     actualQuestion: Int,
     totalQuestions: Int,
     listTypeMedia: List<QuestionContentUi>,
-    guideMode: GuideMode,
+    guideContext: GuideContext,
     showDialogDeleteQuestion: Boolean,
     currentPosContent: Int,
     showDialogRepeatGuide: Boolean,
@@ -287,9 +275,9 @@ fun FillingGuideScreen(
     onDeleteQuestionClick: () -> Unit,
     onCardTypeClicked: (QAType) -> Unit,
     onFilterTypeClicked: (ContentType) -> Unit,
-    onOpenAssetClick: (QuestionContentUi) -> Unit,
+    onOpenAssetClick: (QuestionContentUi, posItem: Int) -> Unit,
     onDeleteItemClick: (typeContent: QuestionContentUi, positionItem: Int) -> Unit,
-    onAddAssetClick: () -> Unit,
+    onAddAssetClick: (posItem: Int) -> Unit,
     onAddQuestion: () -> Unit,
     onCloseGuide: () -> Unit,
     onCurrentPosContent: (Int) -> Unit,
@@ -300,7 +288,7 @@ fun FillingGuideScreen(
         contentWindowInsets = androidx.compose.foundation.layout.WindowInsets.safeDrawing,
         floatingActionButton = {
             FloatingActionButtons(
-                guideMode = guideMode,
+                guideContext = guideContext,
                 onAddQuestion = onAddQuestion,
                 onCloseGuide = onCloseGuide
             )
@@ -315,7 +303,7 @@ fun FillingGuideScreen(
             CustomTopBar(
                 actualQuestion = actualQuestion,
                 totalQuestions = totalQuestions,
-                guideMode = guideMode,
+                guideContext = guideContext,
                 onDeleteQuestionClick = onDeleteQuestionClick,
                 onBackQuestionClick = onBackQuestionClick,
                 onNextQuestionClick = onNextQuestionClick
@@ -336,16 +324,21 @@ fun FillingGuideScreen(
             AssetCarouselViewer(
                 assets = listTypeMedia,
                 mediaForSelected = mediaSelected,
-                guideMode = guideMode,
+                guideContext = guideContext,
                 currentPosContent = currentPosContent,
-                onAddAssetClick = onAddAssetClick,
+                onAddAssetClick = { posItem -> onAddAssetClick(posItem) },
                 onDeleteItemClick = { typeContent, positionItem ->
                     onDeleteItemClick(
                         typeContent,
                         positionItem
                     )
                 },
-                onOpenAssetClick = { typeContent -> onOpenAssetClick(typeContent) },
+                onOpenAssetClick = { typeContent, posItem ->
+                    onOpenAssetClick(
+                        typeContent,
+                        posItem
+                    )
+                },
                 onCurrentPosContent = { position -> onCurrentPosContent(position) }
             )
         }
@@ -360,7 +353,7 @@ fun FillingGuideScreen(
                         onContinueClick = { isChecked ->
                             onContinueDialogDeleteQuestionClick(isChecked)
                         },
-                        onDismissRequest = { onDismissRequest() }
+                        onDismissRequest = onDismissRequest
                     )
                 }
             }
@@ -387,7 +380,7 @@ fun FillingGuideScreen(
 
 @Composable
 private fun FloatingActionButtons(
-    guideMode: GuideMode,
+    guideContext: GuideContext,
     onAddQuestion: () -> Unit,
     onCloseGuide: () -> Unit
 ) {
@@ -395,9 +388,9 @@ private fun FloatingActionButtons(
         horizontalAlignment = Alignment.End,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        if (guideMode !is GuideMode.Review) {
+        if (guideContext !is GuideContext.Browsing) {
             FloatingActionButton(
-                onClick = onAddQuestion,
+                onClick = singleClick { onAddQuestion() },
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 shape = CircleShape,
@@ -408,21 +401,22 @@ private fun FloatingActionButtons(
         }
 
         val painter =
-            if (guideMode !is GuideMode.Review)
+            if (guideContext !is GuideContext.Browsing)
                 android.R.drawable.ic_menu_save
             else
                 R.drawable.ic_success
         val text =
-            if (guideMode !is GuideMode.Review)
+            if (guideContext !is GuideContext.Browsing)
                 stringResource(R.string.btnGuardarGuia)
             else
                 stringResource(R.string.lblCloseGuide)
         ExtendedFloatingActionButton(
-            onClick = onCloseGuide,
+            onClick = singleClick { onCloseGuide() },
             containerColor = MaterialTheme.colorScheme.primary,
             shape = RoundedCornerShape(16.dp),
             icon = {
                 Icon(
+                    modifier = Modifier.size(45.dp),
                     painter = painterResource(painter),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onPrimary

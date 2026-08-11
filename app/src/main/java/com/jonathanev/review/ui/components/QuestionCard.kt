@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -71,7 +72,9 @@ fun QuestionCard(
                 color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 15.sp,
                 lineHeight = 22.sp,
-                fontWeight = FontWeight.Medium
+                fontWeight = FontWeight.Medium,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -101,7 +104,7 @@ fun QuestionCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(
-                        onClick = { onEditingGuideClick() },
+                        onClick = singleClick { onEditingGuideClick() },
                         modifier = Modifier
                             .size(40.dp)
                             .border(1.5.dp, HardColorButton.copy(alpha = 0.6f), CircleShape),
@@ -118,7 +121,7 @@ fun QuestionCard(
                     }
 
                     IconButton(
-                        onClick = onPlayGuideClick,
+                        onClick = singleClick { onPlayGuideClick() },
                         colors = IconButtonDefaults.iconButtonColors(
                             containerColor = HardColorButton.copy(
                                 alpha = 0.6f

@@ -4,15 +4,20 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.data.mapper.toColorType
+import com.jonathanev.review.domain.CreateFolderUseCase
 import com.jonathanev.review.domain.DeleteGuideUseCase
 import com.jonathanev.review.domain.ExistXMLGuideV1UseCase
 import com.jonathanev.review.domain.GetVersionGuideUseCase
 import com.jonathanev.review.domain.IsExistFileUseCase
 import com.jonathanev.review.domain.IsExistFolderUseCase
-import com.jonathanev.review.domain.LoadGuidesUseCase
+import com.jonathanev.review.domain.NextNavigationUseCase
 import com.jonathanev.review.domain.RenameGuideUseCase
+import com.jonathanev.review.domain.ResetNavigationUseCase
 import com.jonathanev.review.domain.SaveMetadataUseCase
+import com.jonathanev.review.domain.SetActiveGuideUseCase
+import com.jonathanev.review.domain.SetContextCreateUseCase
 import com.jonathanev.review.domain.ValidateCreateFileUseCase
+import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.result.DeleteGuideResult
@@ -22,7 +27,6 @@ import com.jonathanev.review.domain.result.ReadGuideError
 import com.jonathanev.review.domain.result.RenamedGuideResult
 import com.jonathanev.review.domain.result.ValidateCreateFileResult
 import com.jonathanev.review.presentation.mapper.toDomain
-import com.jonathanev.review.presentation.model.ColorType
 import com.jonathanev.review.presentation.model.FileFormMode
 import com.jonathanev.review.presentation.model.IconType
 import com.jonathanev.review.presentation.model.ScreenDataUi
@@ -40,18 +44,23 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
 
 @HiltViewModel
 class CreateFilesViewModel @Inject constructor(
     private val renameGuideUseCase: RenameGuideUseCase,
     private val validateCreateFileUseCase: ValidateCreateFileUseCase,
     private val saveMetadataUseCase: SaveMetadataUseCase,
-    private val loadGuidesUseCase: LoadGuidesUseCase,
     private val isExistFileUseCase: IsExistFileUseCase,
     private val isExistFolderUseCase: IsExistFolderUseCase,
     private val deleteGuideUseCase: DeleteGuideUseCase,
     private val existXMLGuideV1UseCase: ExistXMLGuideV1UseCase,
-    private val getVersionGuideUseCase: GetVersionGuideUseCase
+    private val getVersionGuideUseCase: GetVersionGuideUseCase,
+    private val createFolderUseCase: CreateFolderUseCase,
+    private val resetNavigationUseCase: ResetNavigationUseCase,
+    private val nextNavigationUseCase: NextNavigationUseCase,
+    private val setActiveGuideUseCase: SetActiveGuideUseCase,
+    private val setContextCreateUseCase: SetContextCreateUseCase
 ) : ViewModel() {
     //private var cachedGuides: List<GuideDomainModel> = emptyList()
 
@@ -85,8 +94,7 @@ class CreateFilesViewModel @Inject constructor(
             currentState.copy(
                 icons = icons,
                 selectedIndex = 0,
-                icon = icons.first(),
-                color = ColorType.Gray
+                icon = icons.first()
             )
         }
     }
@@ -112,7 +120,7 @@ class CreateFilesViewModel @Inject constructor(
         }
     }
 
-    fun saveMetadata(isDarkTheme: Boolean) {
+    suspend fun saveMetadata(isDarkTheme: Boolean) {
         val state = uiStateComposable.value
 
         val icon = state.icons[state.selectedIndex]
@@ -131,6 +139,8 @@ class CreateFilesViewModel @Inject constructor(
     fun fillFields(fileName: String, description: String) {
         _uiStateComposable.update { currentState ->
             currentState.copy(
+                name = fileName,
+                description = description,
                 oldName = fileName,
                 oldDescription = description
             )
@@ -324,38 +334,88 @@ class CreateFilesViewModel @Inject constructor(
         }
     }
 
-    fun processSaveRequest() {
+    fun processSaveRequest(isDarkTheme: Boolean) {
         viewModelScope.launch {
+            _uiStateComposable.update { currentState ->
+                currentState.copy(
+                    name = currentState.name.trim(),
+                    description = currentState.description.trim(),
+                    oldName = currentState.oldName.trim(),
+                    oldDescription = currentState.oldDescription.trim()
+                )
+            }
+
             val dataUniqueScreen = dataUniqueScreen()
 
             if (dataUniqueScreen) {
-                proceedWithSave()
+                proceedWithSave(isDarkTheme)
             }
         }
     }
 
-    private fun proceedWithSave() {
+    private suspend fun proceedWithSave(isDarkTheme: Boolean) {
         if (validateData()) {
-            saveData()
+            saveData(isDarkTheme)
         }
     }
 
-    fun saveData() {
-        /*val icon = state.icons[state.selectedIndex]
+    suspend fun saveData(isDarkTheme: Boolean) {
+        val state = uiStateComposable.value
 
+        val icon = state.icons[state.selectedIndex]
         val data = ScreenDataUi(
-            name = uiStateComposable.name,
-            description = uiStateComposable.description,
+            name = state.name,
+            description = state.description,
             imgFolder = icon,
             color = state.color
-        )*/
+        )
 
         when (currentMode) {
-            FileFormMode.CreatingFile -> emitEvent(CreateFile)
-            FileFormMode.CreatingFolder -> emitEvent(CreateFolder)
-            is FileFormMode.RenameFile -> emitEvent(RenameFile)
+            FileFormMode.CreatingFile -> {
+                try {
+                    val guideDomainModel =
+                        GuideDomainModel(GuideVersion.V2, state.name, state.description)
+                    setActiveGuideUseCase.invoke(guideDomainModel)
+                    setContextCreateUseCase.invoke(GuideContext.Creating(guideDomainModel))
+                    emitEvent(CreateFile)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    emitEvent(Message(e.message ?: "Ocurrió un error inesperado"))
+                }
+            }
+
+            FileFormMode.CreatingFolder -> {
+                try {
+                    nextNavigationUseCase.invoke(data.name)
+                    val isFolderCreate = createFolder(isDarkTheme, data)
+                    if (!isFolderCreate) {
+                        emitEvent(Message("No se pudo crear la carpeta"))
+                        return
+                    }
+                    saveMetadata(isDarkTheme)
+                    emitEvent(CreateFolder)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    emitEvent(Message(e.message ?: "Ocurrió un error inesperado"))
+                } finally {
+                    resetNavigationUseCase.invoke()
+                }
+            }
+
+            is FileFormMode.RenameFile -> {
+                emitEvent(RenameFile)
+            }
+
             null -> emitEvent(Message("No se pudo crear el archivo"))
         }
+    }
+
+    private suspend fun createFolder(isDarkTheme: Boolean, data: ScreenDataUi): Boolean {
+        return createFolderUseCase.invoke(data.toDomain(isDarkTheme))
     }
 
     fun validateData(): Boolean {
@@ -384,6 +444,13 @@ class CreateFilesViewModel @Inject constructor(
                 showOverwriteDialogFile = false,
                 showOverwriteDialogFolder = false
             )
+        }
+    }
+
+    fun onConfirmCreateFile(isDarkTheme: Boolean) {
+        viewModelScope.launch {
+            dismissOverwriteDialog()
+            proceedWithSave(isDarkTheme)
         }
     }
 }

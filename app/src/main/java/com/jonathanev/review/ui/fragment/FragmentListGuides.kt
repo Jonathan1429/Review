@@ -20,9 +20,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jonathanev.review.R
 import com.jonathanev.review.databinding.FragmentListGuidesBinding
-import com.jonathanev.review.presentation.event.GuideActionEvent
 import com.jonathanev.review.presentation.model.FolderAction
-import com.jonathanev.review.presentation.model.GuideResultUi
 import com.jonathanev.review.presentation.viewmodel.FragmentListGuidesViewModel
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
 import com.jonathanev.review.presentation.viewmodel.MainToolbarViewModel
@@ -110,7 +108,7 @@ class FragmentListGuides : Fragment() {
                     viewModelToolbar.onCancel.collect {
                         viewModelToolbar.initButtons()
                         navStateViewModel.setMainPath()
-                        viewModel.moveFileCancel()
+                        //viewModel.moveFileCancel()
 
                         findNavController().navigate(
                             R.id.action_to_content_graph,
@@ -143,12 +141,12 @@ class FragmentListGuides : Fragment() {
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.eventsMessages.collect { event ->
-                    when (event) {
+                    /*when (event) {
                         is GuideActionEvent.ShowMessage -> {
                             showToast(event.text)
                         }
 
-                        is GuideActionEvent.Success -> {
+                        is GuideActionEvent.GuideDeleteSuccess -> {
                             navStateViewModel.setMainPath()
                             showToast(event.text)
 
@@ -160,7 +158,7 @@ class FragmentListGuides : Fragment() {
                                     .build()
                             )
                         }
-                    }
+                    }*/
                 }
             }
         }
@@ -231,7 +229,7 @@ class FragmentListGuides : Fragment() {
             return
         }
 
-        when (val guideResult = viewModel.getGuideSelected(position)) {
+        /*when (val guideResult = viewModel.getGuideSelected(state.guides, position)) {
             is GuideResultUi.Error -> showToast("No se encontró la guia en la posición $position")
 
             is GuideResultUi.Success -> {
@@ -306,7 +304,7 @@ class FragmentListGuides : Fragment() {
                 }
                 builder.create().show()
             }
-        }
+        }*/
     }
 
     private fun alertDialog(onResult: (Boolean) -> Unit) {

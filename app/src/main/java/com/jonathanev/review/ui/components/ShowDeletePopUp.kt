@@ -100,7 +100,7 @@ fun ShowDeletePopUp(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 OutlinedButton(
-                    onClick = onDismissRequest,
+                    onClick = singleClick { onDismissRequest() },
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(12.dp)
                 ) {
@@ -111,11 +111,14 @@ fun ShowDeletePopUp(
                 }
 
                 Button(
-                    onClick = { onContinueClick(isChecked) },
+                    onClick = singleClick { onContinueClick(isChecked) },
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text(text = stringResource(R.string.btnContinuar))
+                    Text(
+                        text = stringResource(R.string.btnContinuar),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
                 }
             }
         }

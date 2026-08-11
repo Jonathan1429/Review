@@ -3,13 +3,17 @@ package com.jonathanev.review.ui.preview.providers
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.jonathanev.review.presentation.model.GuideMode
+import com.jonathanev.review.domain.model.GuideContext
+import com.jonathanev.review.domain.model.GuideDomainModel
+import com.jonathanev.review.domain.model.GuideVersion
 
 data class OptionsCreateTextProv(
     val text: AnnotatedString,
     val color: Color,
-    val guideMode: GuideMode
+    val guideContext: GuideContext
 )
+
+private val guideDomainModel = GuideDomainModel(GuideVersion.V2, "", "")
 
 class OptionsCreateTextProvider : PreviewParameterProvider<OptionsCreateTextProv> {
     override val values: Sequence<OptionsCreateTextProv>
@@ -17,32 +21,32 @@ class OptionsCreateTextProvider : PreviewParameterProvider<OptionsCreateTextProv
             OptionsCreateTextProv(
                 text = AnnotatedString(""),
                 color = Color.Red,
-                guideMode = GuideMode.Create("", "")
+                guideContext = GuideContext.Creating(guideDomainModel)
             ),
             OptionsCreateTextProv(
                 text = AnnotatedString("Esto es una prueba de texto"),
                 color = Color.Gray,
-                guideMode = GuideMode.Create("", "")
+                guideContext = GuideContext.Creating(guideDomainModel)
             ),
             OptionsCreateTextProv(
                 text = AnnotatedString(""),
                 color = Color.Blue,
-                guideMode = GuideMode.Edit("", "", 0)
+                guideContext = GuideContext.Editing(guideDomainModel, 0)
             ),
             OptionsCreateTextProv(
                 text = AnnotatedString("Esto es una prueba de texto"),
                 color = Color.Cyan,
-                guideMode = GuideMode.Edit("", "", 0)
+                guideContext = GuideContext.Editing(guideDomainModel, 0)
             ),
             OptionsCreateTextProv(
                 text = AnnotatedString(""),
                 color = Color.DarkGray,
-                guideMode = GuideMode.Review("", 0)
+                guideContext = GuideContext.Browsing(guideDomainModel, 0)
             ),
             OptionsCreateTextProv(
                 text = AnnotatedString("Esto es una prueba de texto"),
                 color = Color.Green,
-                guideMode = GuideMode.Review("", 0)
+                guideContext = GuideContext.Browsing(guideDomainModel, 0)
             )
         )
 

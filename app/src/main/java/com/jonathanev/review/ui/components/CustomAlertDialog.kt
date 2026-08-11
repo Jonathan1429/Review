@@ -108,7 +108,7 @@ fun CustomAlertDialogContent(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 OutlinedButton(
-                    onClick = onDismissRequest,
+                    onClick = singleClick { onDismissRequest() },
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(12.dp)
                 ) {
@@ -119,11 +119,14 @@ fun CustomAlertDialogContent(
                 }
 
                 Button(
-                    onClick = onConfirm,
+                    onClick = singleClick { onConfirm() },
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text(text = stringResource(R.string.btnContinuar))
+                    Text(
+                        text = stringResource(R.string.btnContinuar),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
                 }
             }
         }

@@ -3,7 +3,6 @@ package com.jonathanev.review.ui.components
 import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,7 +41,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jonathanev.review.R
-import com.jonathanev.review.presentation.model.GuideMode
+import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.ui.model.ContentType
 import com.jonathanev.review.ui.preview.ComponentsPreviews
@@ -50,6 +49,7 @@ import com.jonathanev.review.ui.preview.providers.DataMediaContentPagerProvider
 import com.jonathanev.review.ui.preview.providers.MediaContentPagerProvider
 import com.jonathanev.review.ui.theme.BorderGray
 import com.jonathanev.review.ui.theme.ReviewTheme
+import com.jonathanev.review.ui.theme.Rojo100
 import com.jonathanev.review.ui.theme.cardStepBackground
 
 @ComponentsPreviews
@@ -76,9 +76,10 @@ fun PreviewMediaContentPager(
                 pagerState = pagerState,
                 assets = data.listType,
                 mediaForSelected = data.mediaForSelected,
-                guideMode = data.guideMode,
-                onOpenAssetClick = {},
-                onCurrentPosContent = {}
+                guideContext = data.guideContext,
+                onOpenAssetClick = { _, _ -> },
+                onDeleteAssetClick = { _, _ -> },
+                onCurrentPosContent = {},
             )
         }
     }
@@ -89,18 +90,20 @@ fun MediaContentPager(
     pagerState: PagerState,
     assets: List<QuestionContentUi>,
     mediaForSelected: ContentType,
-    guideMode: GuideMode,
-    onOpenAssetClick: (QuestionContentUi) -> Unit,
-    onCurrentPosContent: (Int) -> Unit
+    guideContext: GuideContext,
+    onOpenAssetClick: (typeContent: QuestionContentUi, posItem: Int) -> Unit,
+    onDeleteAssetClick: (typeContent: QuestionContentUi, posItem: Int) -> Unit,
+    onCurrentPosContent: (Int) -> Unit,
 ) {
     val resourceSelected =
         if (mediaForSelected == ContentType.TEXT) R.string.lblText else R.string.lblImage
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-    LaunchedEffect(pagerState.currentPage) {
-        val position = pagerState.currentPage
-        onCurrentPosContent(position)
+    LaunchedEffect(pagerState.currentPage, assets.size) {
+        if (assets.isNotEmpty() && pagerState.currentPage in assets.indices) {
+            onCurrentPosContent(pagerState.currentPage)
+        }
     }
 
     Box(
@@ -132,9 +135,64 @@ fun MediaContentPager(
                 )
             }
         } else {
+            val currentAsset = assets.getOrNull(pagerState.currentPage)
+
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxSize()
+            ) { page ->
+                // 2. Obtenemos el elemento específico de cada página
+                when (val assetInPage = assets.getOrNull(page)) {
+                    is QuestionContentUi.Image -> {
+                        CustomBoxCreateImage(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .singleClick(onClick = {
+                                    if (guideContext is GuideContext.Browsing && currentAsset != null) {
+                                        onOpenAssetClick(currentAsset, pagerState.currentPage)
+                                    }
+                                }),
+                            uriImage = assetInPage.uri
+                        )
+                    }
+
+                    is QuestionContentUi.Text -> {
+                        val textFieldValueWrapper = TextFieldValue(text = assetInPage.text)
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(top = 72.dp, start = 20.dp, end = 20.dp, bottom = 20.dp)
+                        ) {
+                            CustomBoxCreateText(
+                                Modifier.singleClick(onClick = {
+                                    if (guideContext is GuideContext.Browsing && currentAsset != null) {
+                                        onOpenAssetClick(currentAsset, pagerState.currentPage)
+                                    }
+                                }),
+                                textValue = textFieldValueWrapper,
+                                hint = false,
+                                onTextValueChange = {},
+                                selectedColor = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+
+                    null, QuestionContentUi.None -> {
+                        EmptyStateView(
+                            icon = painterResource(R.drawable.ic_empty_notes),
+                            title = "Sin contenido",
+                            subtitle = "No se pudo cargar el contenido para mostrar"
+                        )
+                    }
+                }
+            }
+
+            // Capa Superior de Controles (Indicators + Action Bar)
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxWidth()
+                    .align(Alignment.TopCenter)
                     .padding(16.dp)
             ) {
                 if (assets.size > 1) {
@@ -152,7 +210,7 @@ fun MediaContentPager(
                                     .clip(CircleShape)
                                     .background(
                                         if (index == pagerState.currentPage) MaterialTheme.colorScheme.primary
-                                        else MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                                        else MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
                                     )
                             )
                         }
@@ -160,57 +218,81 @@ fun MediaContentPager(
                 }
 
                 val painter =
-                    if (guideMode !is GuideMode.Review)
-                        R.drawable.ic_edit
-                    else
-                        R.drawable.ic_eye
-                Box(
+                    if (guideContext !is GuideContext.Browsing) R.drawable.ic_edit else R.drawable.ic_eye
+
+                // Barra de Acciones (Editar/Ver + Eliminar en TopStart | Contadores en TopEnd)
+                Row(
                     modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .background(
-                                Color.Black.copy(alpha = 0.6f),
-                                RoundedCornerShape(12.dp)
-                            )
-                            .padding(horizontal = 12.dp, vertical = 6.dp)
-                            .align(Alignment.TopStart)
+                    // Grupo de Botones de Acción (Izquierda)
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            painter = painterResource(painter),
-                            contentDescription = null,
-                            tint = Color.White,
+                        // Botón Editar / Ver
+                        Box(
                             modifier = Modifier
-                                .size(16.dp)
-                                .clickable(onClick = {
-                                    val typeContent =
-                                        when (val asset = assets[pagerState.currentPage]) {
-                                            is QuestionContentUi.Image -> {
-                                                QuestionContentUi.Image(
-                                                    asset.uri,
-                                                    asset.nameFile
-                                                )
-                                            }
-
-                                            QuestionContentUi.None -> QuestionContentUi.None
-                                            is QuestionContentUi.Text -> {
-                                                QuestionContentUi.Text(
-                                                    asset.text,
-                                                    asset.colorRanges
-                                                )
-                                            }
-                                        }
-
-                                    onOpenAssetClick(typeContent)
+                                .singleClick(onClick = {
+                                    currentAsset?.let { asset ->
+                                        onOpenAssetClick(asset, pagerState.currentPage)
+                                    }
                                 })
-                        )
+                                .padding(6.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        Color.Black.copy(alpha = 0.6f),
+                                        RoundedCornerShape(12.dp)
+                                    )
+                                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                            ) {
+                                Icon(
+                                    painter = painterResource(painter),
+                                    contentDescription = null,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                        }
+
+                        // Botón Eliminar (Bote de basura)
+                        if (guideContext !is GuideContext.Browsing) {
+                            Box(
+                                modifier = Modifier
+                                    .singleClick(onClick = {
+                                        currentAsset?.let { asset ->
+                                            onDeleteAssetClick(asset, pagerState.currentPage)
+                                        }
+                                    })
+                                    .padding(6.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .background(
+                                            Color.Black.copy(alpha = 0.6f),
+                                            RoundedCornerShape(12.dp)
+                                        )
+                                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_trash),
+                                        contentDescription = "Eliminar",
+                                        tint = Rojo100,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                            }
+                        }
                     }
 
+                    // Contador / Badge (Derecha)
                     Box(
                         modifier = Modifier
                             .background(Color.Black.copy(alpha = 0.6f), RoundedCornerShape(12.dp))
                             .padding(horizontal = 12.dp, vertical = 6.dp)
-                            .align(Alignment.TopEnd)
                     ) {
                         Text(
                             text = "${stringResource(resourceSelected)} ${pagerState.currentPage + 1} ${
@@ -219,39 +301,6 @@ fun MediaContentPager(
                             color = Color.White,
                             fontSize = 12.sp
                         )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                HorizontalPager(
-                    state = pagerState,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                ) { page ->
-                    when (val currentAsset = assets[page]) {
-                        is QuestionContentUi.Image -> {
-                            CustomBoxCreateImage(uriImage = currentAsset.nameFile)
-                        }
-
-                        is QuestionContentUi.Text -> {
-                            val textFieldValueWrapper = TextFieldValue(text = currentAsset.text)
-
-                            CustomBoxCreateText(
-                                textValue = textFieldValueWrapper,
-                                hint = false,
-                                onTextValueChange = {}
-                            )
-                        }
-
-                        QuestionContentUi.None -> {
-                            EmptyStateView(
-                                icon = painterResource(R.drawable.ic_empty_notes),
-                                title = "Sin contenido",
-                                subtitle = "No se pudo cargar el contenido para mostrar"
-                            )
-                        }
                     }
                 }
             }

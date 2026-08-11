@@ -65,7 +65,7 @@ class RenameGuideTest {
             directoryManager = directoryManager,
             navigationPathRepository = navigationPathRepository
         )
-        context = GuideContext.Editing(guide = guideDomain)
+        context = GuideContext.Editing(guide = guideDomain, position = 0)
 
         questionItemDomain = QuestionItemDomain(
             listOf(

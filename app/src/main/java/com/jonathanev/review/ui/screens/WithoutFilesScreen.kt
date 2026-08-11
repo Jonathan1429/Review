@@ -19,6 +19,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -30,9 +33,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jonathanev.review.R
 import com.jonathanev.review.presentation.model.FileInteractionMode
+import com.jonathanev.review.presentation.state.GuidesUiState
 import com.jonathanev.review.presentation.viewmodel.FragmentWithoutFilesViewModel
+import com.jonathanev.review.ui.components.singleClick
 import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.WithoutFilesScreenProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
@@ -55,18 +61,33 @@ fun WithoutFilesScreenPreview(
 
 @Composable
 fun WithoutFilesRoute(
-    fileInteractionMode: FileInteractionMode,
+    viewModel: FragmentWithoutFilesViewModel,
     onAddGuideClick: () -> Unit,
-    viewModel: FragmentWithoutFilesViewModel
+    onNavListGuides: () -> Unit
 ) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val interactionMode by viewModel.interactionMode.collectAsStateWithLifecycle()
+
+    LaunchedEffect(uiState) {
+        if (uiState is GuidesUiState.Success) {
+            onNavListGuides()
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.resetNavigationPath()
+        }
+    }
+
     WithoutFilesScreen(
-        fileInteractionMode = fileInteractionMode,
+        fileInteractionMode = interactionMode,
         onAddGuideClick = onAddGuideClick,
         onMoveCancelGuideClick = {
-            viewModel.initRelativeGuide()
+            viewModel.onCancelMove()
         },
         onMoveSuccessGuideClick = {
-            viewModel.initRelativeGuide()
+            viewModel.movingGuide()
         }
     )
 }
@@ -89,7 +110,7 @@ fun WithoutFilesScreen(
                         Text(stringResource(R.string.lblMoving))
                     },
                     navigationIcon = {
-                        IconButton(onClick = onMoveCancelGuideClick) {
+                        IconButton(onClick = singleClick { onMoveCancelGuideClick() }) {
                             Icon(
                                 painterResource(R.drawable.ic_cancel),
                                 contentDescription = "Cancelar"
@@ -97,7 +118,7 @@ fun WithoutFilesScreen(
                         }
                     },
                     actions = {
-                        IconButton(onClick = onMoveSuccessGuideClick) {
+                        IconButton(onClick = singleClick { onMoveSuccessGuideClick() }) {
                             Icon(
                                 painterResource(R.drawable.ic_success),
                                 contentDescription = "Aceptar"
@@ -109,7 +130,7 @@ fun WithoutFilesScreen(
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                onClick = onAddGuideClick,
+                onClick = singleClick { onAddGuideClick() },
                 containerColor = MaterialTheme.colorScheme.primary,
                 shape = RoundedCornerShape(16.dp),
                 icon = {

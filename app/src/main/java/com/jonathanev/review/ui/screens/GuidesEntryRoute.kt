@@ -21,31 +21,27 @@ fun GuidesEntryRoute(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(uiState) {
-        if (uiState == EntryGuidesUiState.Empty) {
-            onNavigateWithoutFilesScreen()
-        }
+        when (uiState) {
+            EntryGuidesUiState.HasGuides -> {
+                onNavigateListGuidesRoute()
+            }
 
-        if (uiState == EntryGuidesUiState.HasGuides) {
-            onNavigateListGuidesRoute()
+            EntryGuidesUiState.Empty -> {
+                onNavigateWithoutFilesScreen()
+            }
+
+            EntryGuidesUiState.Loading -> {
+                /* Esperar a que evalúe el disco */
+            }
         }
     }
 
-    when (uiState) {
-        EntryGuidesUiState.Empty -> {
-            Box(modifier = Modifier.fillMaxSize())
-        }
-
-        EntryGuidesUiState.HasGuides -> {
-            Box(modifier = Modifier.fillMaxSize())
-        }
-
-        EntryGuidesUiState.Loading -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        if (uiState == EntryGuidesUiState.Loading) {
+            CircularProgressIndicator()
         }
     }
 }

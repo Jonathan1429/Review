@@ -93,7 +93,7 @@ class CustomTopBarScreenshotTest(
                         CustomTopBar(
                             actualQuestion = dataState.actualQuestion,
                             totalQuestions = dataState.totalQuestion,
-                            guideMode = dataState.guideMode,
+                            guideContext = dataState.guideContext,
                             onDeleteQuestionClick = {},
                             onBackQuestionClick = {},
                             onNextQuestionClick = {}

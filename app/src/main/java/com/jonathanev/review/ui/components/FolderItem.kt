@@ -2,7 +2,6 @@ package com.jonathanev.review.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,40 +27,39 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jonathanev.review.presentation.model.FolderUiModel
 import com.jonathanev.review.ui.mapper.toDrawableRes
+import com.jonathanev.review.ui.mapper.toInt
 import com.jonathanev.review.ui.preview.ComponentsPreviews
 import com.jonathanev.review.ui.preview.providers.ListFoldersDataProv
 import com.jonathanev.review.ui.preview.providers.ListFoldersDataProvider
-import com.jonathanev.review.ui.theme.Black
 import com.jonathanev.review.ui.theme.Inter
 import com.jonathanev.review.ui.theme.ReviewTheme
-import com.jonathanev.review.ui.theme.White
 import com.jonathanev.review.ui.theme.getCardContainerColor
 
 @ComponentsPreviews
 @Composable
-fun PreviewGuiaItem(
+fun PreviewFolderItem(
     @PreviewParameter(ListFoldersDataProvider::class) data: ListFoldersDataProv
 ) {
     ReviewTheme {
-        GuiaItem(data.listFolders[0]) { }
+        FolderItem(data.listFolders[0]) { }
     }
 }
 
 @Composable
-fun GuiaItem(
+fun FolderItem(
     guia: FolderUiModel,
     onClick: () -> Unit
 ) {
     //val color50 = ColorUtils.setAlphaComponent(guia.folder.color.toColorRes(), 50)
     val isDark = isSystemInDarkTheme()
-    val backgroundColor = if (isDark) White else Black
+    val backgroundColor = Color(guia.folder.color.toInt(isDark))
     val colorTwentyPercent = backgroundColor.copy(alpha = 0.2f)
 
     Card(
         colors = CardDefaults.cardColors(containerColor = getCardContainerColor()),
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() }
+            .singleClick(onClick = { onClick() })
             .padding(4.dp)
     ) {
         Column(

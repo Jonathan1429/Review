@@ -6,4 +6,6 @@ sealed class CreateGuideEvent {
     data class WithoutTextInPos(val position: Int) : CreateGuideEvent()
     data object WithoutTextQA: CreateGuideEvent()
     data class ErrorGuideCreated(val text: String) : CreateGuideEvent()
+    data object QADeleted : CreateGuideEvent()
+    data object CloseGuide : CreateGuideEvent()
 }

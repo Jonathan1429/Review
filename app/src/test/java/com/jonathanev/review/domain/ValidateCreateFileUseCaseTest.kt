@@ -19,10 +19,16 @@ class ValidateCreateFileUseCaseTest {
     @Test
     fun validacion_sin_caracteres_raros() {
         val resultado = validateCreateFileUseCase.invoke("hola.mx", "", fileFormMode)
-        assertEquals(ValidateCreateFileResult.Error("No puede haber caracteres como / o . en el nombre"), resultado)
+        assertEquals(
+            ValidateCreateFileResult.Error("Solo se permiten letras, números, espacios y guiones"),
+            resultado
+        )
 
         val resultado2 = validateCreateFileUseCase.invoke("hola/m/x", "", fileFormMode)
-        assertEquals(ValidateCreateFileResult.Error("No puede haber caracteres como / o . en el nombre"), resultado2)
+        assertEquals(
+            ValidateCreateFileResult.Error("Solo se permiten letras, números, espacios y guiones"),
+            resultado2
+        )
     }
 
     @Test

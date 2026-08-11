@@ -37,6 +37,7 @@ class GuiaMigrationRepositoryImpl @Inject constructor(
                 val newPath = File(otrosDir, file.name)
                 if (newPath.exists()){
                     Log.i("Migration: ", "Archivo existente: ${file.name}")
+                    moved.add(file.name)
                 } else {
                     val success = file.renameTo(newPath)
                     if (success) {
@@ -45,7 +46,7 @@ class GuiaMigrationRepositoryImpl @Inject constructor(
                         failed.add(file.name)
                     }
                 }
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 failed.add(file.name)
             }
 

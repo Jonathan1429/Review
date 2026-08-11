@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.github.skydoves.colorpicker.compose.ColorPickerController
@@ -33,10 +34,9 @@ fun PreviewColorPickerDialog() {
         ColorPickerDialogContent(
             controller = controller,
             colorInitial = MaterialTheme.colorScheme.onSurface,
-            selectedColor = MaterialTheme.colorScheme.onSurface,
-            onDismissRequest = {},
             onColorSelected = {},
-            onDefaultClick = {}
+            onDefaultClick = {},
+            onDismissRequest = {}
         )
     }
 }
@@ -44,9 +44,8 @@ fun PreviewColorPickerDialog() {
 @Composable
 fun ColorPickerDialog(
     colorInitial: Color,
-    selectedColor: Color,
     onDismissRequest: () -> Unit,
-    onColorSelected: (Color) -> Unit,
+    onColorSelected: (Int) -> Unit,
     onDefaultClick: () -> Unit
 ) {
     val controller = rememberColorPickerController()
@@ -56,9 +55,8 @@ fun ColorPickerDialog(
             controller,
             colorInitial,
             onColorSelected,
-            selectedColor,
-            onDismissRequest,
-            onDefaultClick
+            onDefaultClick,
+            onDismissRequest
         )
     }
 }
@@ -67,10 +65,9 @@ fun ColorPickerDialog(
 fun ColorPickerDialogContent(
     controller: ColorPickerController,
     colorInitial: Color,
-    onColorSelected: (Color) -> Unit,
-    selectedColor: Color,
-    onDismissRequest: () -> Unit,
-    onDefaultClick: () -> Unit
+    onColorSelected: (Int) -> Unit,
+    onDefaultClick: () -> Unit,
+    onDismissRequest: () -> Unit
 ) {
     Card(
         modifier = Modifier.size(320.dp, 350.dp),
@@ -88,7 +85,7 @@ fun ColorPickerDialogContent(
                 controller = controller,
                 initialColor = colorInitial,
                 onColorChanged = { colorEnvelope ->
-                    onColorSelected(colorEnvelope.color)
+                    onColorSelected(colorEnvelope.color.toArgb())
                 }
             )
 
@@ -97,19 +94,13 @@ fun ColorPickerDialogContent(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Button(
-                    onClick = {
-                        onColorSelected(selectedColor)
-                        onDismissRequest()
-                    }
+                    onClick = singleClick { onDismissRequest() }
                 ) {
-                    Text("Continuar")
+                    Text(text = "Continuar")
                 }
 
                 OutlinedButton(
-                    onClick = {
-                        onDefaultClick()
-                        onDismissRequest()
-                    }
+                    onClick = singleClick { onDefaultClick() }
                 ) {
                     Text(
                         text = "Default",

@@ -2,10 +2,7 @@ package com.jonathanev.review.ui.navegation
 
 import androidx.navigation3.runtime.NavKey
 import com.jonathanev.review.presentation.model.FileFormMode
-import com.jonathanev.review.presentation.model.FileInteractionMode
-import com.jonathanev.review.presentation.model.GuideMode
 import com.jonathanev.review.presentation.model.QuestionContentMode
-import com.jonathanev.review.presentation.model.QuestionContentUi
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -14,20 +11,15 @@ sealed interface AppRoutes : NavKey {
     data object WithoutFoldersScreen : AppRoutes
 
     @Serializable
-    data class WithoutGuidesScreen(val fileInteractionMode: FileInteractionMode = FileInteractionMode.Default) :
-        AppRoutes
+    data object WithoutGuidesScreen : AppRoutes
 
     @Serializable
-    data class ListFoldersScreen(
-        val fileInteractionMode: FileInteractionMode = FileInteractionMode.Default
-    ) : AppRoutes
+    data object ListFoldersScreen : AppRoutes
 
     @Serializable
-    data class ListGuidesScreen(val fileInteractionMode: FileInteractionMode = FileInteractionMode.Default) :
-        AppRoutes
+    data object ListGuidesScreen : AppRoutes
     @Serializable
-    data class EntryGuidesScreen(val fileInteractionMode: FileInteractionMode = FileInteractionMode.Default) :
-        AppRoutes
+    data object EntryGuidesScreen : AppRoutes
 
     @Serializable
     data object MainScreen : AppRoutes
@@ -35,19 +27,17 @@ sealed interface AppRoutes : NavKey {
     data class CreateFilesPropertiesScreen(val fileFormMode: FileFormMode): AppRoutes
 
     @Serializable
-    data class FillingGuideScreen(val guideMode: GuideMode): AppRoutes
+    data object FillingGuideScreen : AppRoutes
 
     @Serializable
     data class CreateImageScreen(
         val questionContentMode: QuestionContentMode,
-        val contentType: QuestionContentUi.Image,
-        val guideMode: GuideMode
+        val posItem: Int
     ) : AppRoutes
 
     data class CreateTextScreen(
         val questionContentMode: QuestionContentMode,
-        val contentType: QuestionContentUi.Text,
-        val guideMode: GuideMode
+        val posItem: Int
     ) : AppRoutes
     @Serializable
     data object PreviewQuestionsScreen : AppRoutes

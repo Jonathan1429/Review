@@ -17,7 +17,6 @@ import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.jonathanev.review.R
 import com.jonathanev.review.data.filesystem.FilePathsProviderImpl
-import com.jonathanev.review.presentation.event.FolderActionEvent
 import com.jonathanev.review.presentation.event.UIMovingEvent
 import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.presentation.viewmodel.ListFoldersViewModel
@@ -88,7 +87,7 @@ class FragmentListFolders : Fragment(R.layout.fragment_compose_container) {
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.eventsMessages.collect { event ->
+                /*viewModel.eventsMessages.collect { event ->
                     when (event) {
                         FolderActionEvent.DeleteFolderSuccess -> {
                             //viewModel.getAllFolders()
@@ -97,7 +96,7 @@ class FragmentListFolders : Fragment(R.layout.fragment_compose_container) {
 
                         is FolderActionEvent.ShowMessage -> showToast(event.text)
                     }
-                }
+                }*/
             }
         }
 

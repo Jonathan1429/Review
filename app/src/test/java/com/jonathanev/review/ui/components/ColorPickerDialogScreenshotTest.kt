@@ -86,10 +86,9 @@ class ColorPickerDialogScreenshotTest(
                         ColorPickerDialogContent(
                             controller = controller,
                             colorInitial = MaterialTheme.colorScheme.onSurface,
-                            selectedColor = MaterialTheme.colorScheme.onSurface,
-                            onDismissRequest = {},
                             onColorSelected = {},
-                            onDefaultClick = {}
+                            onDefaultClick = {},
+                            onDismissRequest = {}
                         )
                     }
                 }

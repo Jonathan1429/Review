@@ -6,7 +6,6 @@ import com.jonathanev.review.R
 import com.jonathanev.review.presentation.model.ColorType
 import com.jonathanev.review.presentation.model.IconType
 import com.jonathanev.review.ui.model.ContentType
-import com.jonathanev.review.ui.theme.White
 
 /*fun ScreenDataUi.toNav(): PropertiesGuide = PropertiesGuide(
     name = name,
@@ -45,7 +44,7 @@ fun ColorType.toInt(isDark: Boolean): Int {
         ColorType.Black -> Color.Black.toArgb()
         ColorType.Gray -> Color.Gray.toArgb()
         is ColorType.RandomColor -> this.color
-        ColorType.White -> White.toArgb()
+        ColorType.White -> Color.White.toArgb()
         ColorType.Default -> if (isDark) Color.White.toArgb() else Color.Black.toArgb()
     }
 }

@@ -46,15 +46,23 @@ fun ColorRangeXmlDto.toDomain(): ColorRangeDomain {
 
 fun GuideXmlDto.toDomain(): GuideDomainModel =
     GuideDomainModel(
-        version = this.version.toGuideVersion(),
+        version = this.version.xmlToGuideVersion(),
         nameGuide = this.nameGuide,
         description = this.description
     )
 
-fun String.toGuideVersion(): GuideVersion {
-    return when(this){
+fun String.xmlToGuideVersion(): GuideVersion {
+    return when (this) {
         "1.0" -> GuideVersion.V1
         "2.0" -> GuideVersion.V2
+        else -> GuideVersion.V2
+    }
+}
+
+fun String.toGuideVersion(): GuideVersion {
+    return when(this){
+        GuideVersion.V1.name -> GuideVersion.V1
+        GuideVersion.V2.name -> GuideVersion.V2
         else -> GuideVersion.V2
     }
 }

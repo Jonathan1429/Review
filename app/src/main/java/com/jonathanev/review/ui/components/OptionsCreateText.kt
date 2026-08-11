@@ -20,7 +20,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.jonathanev.review.R
-import com.jonathanev.review.presentation.model.GuideMode
+import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.ui.preview.ComponentsPreviews
 import com.jonathanev.review.ui.preview.providers.OptionsCreateTextProv
 import com.jonathanev.review.ui.preview.providers.OptionsCreateTextProvider
@@ -35,9 +35,9 @@ fun PreviewOptionsCreateText(
         OptionsCreateText(
             textValue = data.text,
             selectedColor = data.color,
-            guideMode = data.guideMode,
+            guideContext = data.guideContext,
             onClearColorClick = {},
-            onSelectColorClick = {},
+            onShowColorDialog = {},
             onSaveTextClick = {},
             onBackNav = {}
         )
@@ -48,9 +48,9 @@ fun PreviewOptionsCreateText(
 fun OptionsCreateText(
     textValue: AnnotatedString,
     selectedColor: Color,
-    guideMode: GuideMode,
+    guideContext: GuideContext,
     onClearColorClick: () -> Unit,
-    onSelectColorClick: () -> Unit,
+    onShowColorDialog: () -> Unit,
     onSaveTextClick: () -> Unit,
     onBackNav: () -> Unit
 ) {
@@ -60,9 +60,9 @@ fun OptionsCreateText(
             .padding(horizontal = 20.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (guideMode !is GuideMode.Review) {
+        if (guideContext !is GuideContext.Browsing) {
             IconButton(
-                onClick = onClearColorClick,
+                onClick = singleClick { onClearColorClick() },
                 modifier = Modifier
                     .padding(end = 10.dp)
                     .size(34.dp)
@@ -75,7 +75,7 @@ fun OptionsCreateText(
             }
 
             IconButton(
-                onClick = onSelectColorClick,
+                onClick = singleClick { onShowColorDialog() },
                 modifier = Modifier
                     .padding(end = 10.dp)
                     .size(34.dp)
@@ -100,8 +100,8 @@ fun OptionsCreateText(
         Spacer(modifier = Modifier.weight(1f))
 
         IconButton(
-            onClick = {
-                if (guideMode is GuideMode.Review) {
+            onClick = singleClick {
+                if (guideContext is GuideContext.Browsing) {
                     onBackNav()
                 } else {
                     if (textValue.isNotEmpty()) {

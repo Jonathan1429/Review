@@ -1,13 +1,23 @@
 package com.jonathanev.review.ui.screens
 
-import android.app.AlertDialog
+import android.content.Context
+import android.widget.Toast
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.jonathanev.review.presentation.event.MainUiEvent
+import com.jonathanev.review.presentation.event.UIMainEvent
+import com.jonathanev.review.presentation.state.CreateFoldersState
 import com.jonathanev.review.presentation.state.FoldersUiState
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
+import com.jonathanev.review.ui.components.CreateFoldersPopUpContent
 
 @Composable
 fun MainActivityEntryRoute(
@@ -16,26 +26,34 @@ fun MainActivityEntryRoute(
     onNavListFoldersScreen: () -> Unit
 ) {
     val context = LocalContext.current
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val foldersState by viewModel.foldersState.collectAsStateWithLifecycle()
 
-    val uiState = viewModel.uiState.collectAsStateWithLifecycle().value
+    if (foldersState is CreateFoldersState.Error) {
+        Dialog(onDismissRequest = {}) {
+            Box(Modifier.fillMaxSize()) {
+                CreateFoldersPopUpContent(
+                    modifier = Modifier.align(Alignment.Center),
+                    onRetryRequest = {
+                        viewModel.createFolders()
+                    },
+                    onDismissRequest = {
+                        viewModel.onDismissErrorDialog()
+                    }
+                )
+            }
+        }
+    }
+
     LaunchedEffect(Unit) {
         viewModel.createFolders()
+    }
 
-        viewModel.uiEvent.collect { event ->
+    LaunchedEffect(Unit) {
+        viewModel.eventsMain.collect { event ->
             when (event) {
-                MainUiEvent.ShowCreateFoldersError -> {
-                    AlertDialog.Builder(context).apply {
-                        setTitle("Error")
-                        setMessage("No se pudieron crear los ficheros correctamente")
-                        setCancelable(false)
-                        setPositiveButton("Reintentar") { dialog, _ ->
-                            viewModel.createFolders()
-                            dialog.dismiss()
-                        }
-                        setNegativeButton("Cancelar") { dialog, _ ->
-                            dialog.dismiss()
-                        }
-                    }.create().show()
+                is UIMainEvent.ErrorMessage -> {
+                    showToast(event.error, context)
                 }
             }
         }
@@ -56,4 +74,17 @@ fun MainActivityEntryRoute(
             }
         }
     }
+
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        if (uiState == FoldersUiState.Loading) {
+            CircularProgressIndicator()
+        }
+    }
+}
+
+private fun showToast(text: String, context: Context) {
+    Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
 }

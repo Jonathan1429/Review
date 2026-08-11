@@ -114,7 +114,7 @@ class FragmentCreateImages : Fragment() {
         // Mostrar imagen sin crear archivo
         binding.ivImagen.setImage(ImageSource.uri(uri))
         // Guardas el URI para usarlo después al guardar todo
-        sharedViewModel.setActualUri(uri.toString())
+        //sharedViewModel.setActualUri(uri.toString())
         //processImage(uri)
     }
 

@@ -15,7 +15,11 @@ import com.jonathanev.review.domain.repository.FilePathResolver
 import com.jonathanev.review.domain.repository.ImagesRepository
 import com.jonathanev.review.domain.service.FileNamingRules
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 import javax.inject.Inject
 
 class ImagesRepositoryImpl @Inject constructor(
@@ -26,40 +30,89 @@ class ImagesRepositoryImpl @Inject constructor(
     override suspend fun save(
         image: QuestionContentDomain.Image,
         guide: GuideDomainModel
-    ) {
-        val currentPath =
-            filePathResolver.mapToFolderPathSpecificGuide(guide, PathKind.IMAGENES).value
+    ): Unit = withContext(Dispatchers.IO) {
+        val currentPath = File(
+            filePathResolver.mapToFolderPathSpecificGuide(
+                guideDomainModel = guide,
+                kind = PathKind.IMAGENES
+            ).value
+        )
+
+        // Asegurar que el directorio de imágenes exista antes de escribir
+        if (!currentPath.exists()) {
+            currentPath.mkdirs()
+        }
 
         val uri = image.uri.toUri()
-        val fileName = image.nameFile
-        val outputFile = File(currentPath, fileName)
+        val outputFile = File(currentPath, image.nameFile)
 
+        // Manejo seguro de streams
         context.contentResolver.openInputStream(uri)?.use { input ->
             outputFile.outputStream().use { output ->
                 input.copyTo(output)
             }
-        } ?: throw IllegalStateException("No se pudo abrir imagen")
+        } ?: throw IllegalStateException("No se pudo abrir el stream de la imagen")
     }
 
-    override fun moveUnassignedImages(movedFiles: List<String>) {
-        val currentPathImages = File(context.filesDir, StorageFolders.IMAGENES)
-        val images = currentPathImages.listFiles()
-            ?.filter { it.isFile && it.extension == Extensions.PNG_EXTENSION }
-            ?: emptyList()
+    override suspend fun saveTempImage(uriString: String): String = withContext(Dispatchers.IO) {
+        val uri = uriString.toUri()
+        val tempFile = File(context.cacheDir, "temp_img_${System.currentTimeMillis()}.jpg")
 
-        if (images.isNotEmpty()) {
-            val pathImageOtros = File(currentPathImages, StorageFolders.OTROS)
-            val isFolderReady = pathImageOtros.exists() || pathImageOtros.mkdirs()
-
-            if (!isFolderReady) {
-                Log.e("MIGRATION", "No se pudo preparar la carpeta de destino Otros.")
-                return
+        context.contentResolver.openInputStream(uri)?.use { input ->
+            tempFile.outputStream().use { output ->
+                input.copyTo(output)
             }
+        } ?: throw IllegalStateException("No se pudo leer la imagen desde: $uri")
 
-            // Mover cada archivo imagen
-            images.forEach { file ->
-                val newPath = File(pathImageOtros, file.name)
-                file.renameTo(newPath)
+        tempFile.toUri().toString()
+    }
+
+    override suspend fun clearTempImages() {
+        withContext(Dispatchers.IO) {
+            val cacheFolder = context.cacheDir
+            val files = cacheFolder.listFiles() ?: return@withContext
+
+            files.forEach { file ->
+                if (file.name.startsWith("temp_img_")) {
+                    file.delete()
+                }
+            }
+        }
+    }
+
+    override suspend fun moveUnassignedImages(
+        movedFiles: List<String>
+    ) = withContext(Dispatchers.IO) {
+        val currentPathImages = File(context.filesDir, StorageFolders.IMAGENES)
+
+        if (!currentPathImages.exists() || !currentPathImages.isDirectory) return@withContext
+
+        val movedFilesSet = movedFiles.toSet()
+
+        val unassignedImages = currentPathImages.listFiles()?.filter { file ->
+            file.isFile &&
+                    file.extension.equals(Extensions.PNG_EXTENSION, ignoreCase = true) &&
+                    file.name !in movedFilesSet
+        } ?: emptyList()
+
+        if (unassignedImages.isEmpty()) return@withContext
+
+        val pathImageOtros = File(currentPathImages, StorageFolders.OTROS)
+        if (!pathImageOtros.exists() && !pathImageOtros.mkdirs()) {
+            Log.e("MIGRATION", "No se pudo preparar la carpeta de destino Otros.")
+            return@withContext
+        }
+
+        unassignedImages.forEach { file ->
+            val targetFile = File(pathImageOtros, file.name)
+            try {
+                Files.move(
+                    file.toPath(),
+                    targetFile.toPath(),
+                    StandardCopyOption.REPLACE_EXISTING
+                )
+            } catch (e: Exception) {
+                Log.e("MIGRATION", "Error al mover archivo no asignado: ${file.name}", e)
             }
         }
     }

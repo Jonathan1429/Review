@@ -2,7 +2,6 @@ package com.jonathanev.review.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,7 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.jonathanev.review.presentation.model.GuideMode
+import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.ui.preview.ComponentsPreviews
 import com.jonathanev.review.ui.preview.providers.StepNavigationCarouselProv
@@ -77,8 +76,8 @@ fun PreviewCarousel(
                 assets = data.listQuestionContent,
                 pagerState = pagerState,
                 scope = scope,
-                guideMode = data.mode,
-                onAddAssetClick = {}
+                guideContext = data.guideContext,
+                onAddAssetClick = { _ -> }
             )
         }
     }
@@ -90,20 +89,20 @@ fun StepNavigationCarousel(
     assets: List<QuestionContentUi>,
     pagerState: PagerState,
     scope: CoroutineScope,
-    guideMode: GuideMode,
-    onAddAssetClick: () -> Unit
+    guideContext: GuideContext,
+    onAddAssetClick: (posItem: Int) -> Unit
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (guideMode !is GuideMode.Review) {
+        if (guideContext !is GuideContext.Browsing) {
             Box(
                 modifier = Modifier
                     .size(50.dp)
                     .clip(RoundedCornerShape(16.dp))
                     .background(MaterialTheme.colorScheme.primary)
-                    .clickable(onClick = onAddAssetClick),
+                    .singleClick(onClick = { onAddAssetClick(pagerState.currentPage) }),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -150,15 +149,12 @@ fun StepNavigationCarousel(
                         )
                         .clip(RoundedCornerShape(12.dp))
                         .background(cardStepBackground)
-                        .clickable {
-                            scope.launch { pagerState.animateScrollToPage(index) }
-                        },
+                        .singleClick(onClick = { scope.launch { pagerState.animateScrollToPage(index) } }),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = "${index + 1}",
                         color = MaterialTheme.colorScheme.onSurface,
-                        //color = Color.Red,
                         fontSize = 15.sp
                     )
                 }

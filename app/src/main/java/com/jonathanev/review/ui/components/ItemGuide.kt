@@ -1,6 +1,5 @@
 package com.jonathanev.review.ui.components
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,7 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -52,14 +51,14 @@ fun ItemGuide(
         ),
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() }
+            .singleClick(onClick = { onClick() })
             .padding(4.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(ShapeDefaults.ExtraLarge)
-                .clickable(onClick = onClick)
+                .singleClick(onClick = { onClick() })
                 .padding(vertical = 14.dp, horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -79,14 +78,17 @@ fun ItemGuide(
                     text = guide.nameGuide,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 17.sp,
-                    fontWeight = FontWeight.SemiBold
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = guide.description,
+                    text = guide.displayDescription,
                     color = getColorSubtitle(),
                     fontSize = 13.sp,
-                    lineHeight = 18.sp
+                    lineHeight = 18.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }

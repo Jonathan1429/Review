@@ -59,3 +59,5 @@ val ContainerCard = Color(0xFF171F33)
 val ContainerCard100 = Color(0xFF4C5F8D)
 val HardColorButton = Color(0xFF2E5BFF)
 val LightColorButton = Color(0xFFB8C3FF)
+
+val Rojo100 = Color(0xFFFF6B6B)

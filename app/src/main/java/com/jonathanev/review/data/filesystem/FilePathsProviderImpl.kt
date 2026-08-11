@@ -11,28 +11,36 @@ import javax.inject.Singleton
 @Singleton
 class FilePathsProviderImpl @Inject constructor(
     @param:ApplicationContext private val context: Context
-): FilePathsProvider {
-    private val basePath: String = context.filesDir.path
+) : FilePathsProvider {
+    private val basePath: File = context.filesDir
 
     override val fileGuides: String
-        get() = "$basePath/${StorageFolders.GUIAS}"
+        get() = File(basePath, StorageFolders.GUIAS).path
+
     override val fileImages: String
-        get() = "$basePath/${StorageFolders.IMAGENES}"
+        get() = File(basePath, StorageFolders.IMAGENES).path
 
     override fun buildGuide(base: String, file: String): String {
-        return "$base/$file"
+        return File(base, file).path
     }
 
     override fun buildImage(base: String, image: String): String {
-        return "$base/$image"
+        return File(base, image).path
     }
 
     override fun buildFolderGuide(base: String, folder: String, file: String): String {
-        return File(File(base, folder), file).path
-        //return "$base/$folder/$file"
+        return if (folder.isBlank()) {
+            File(base, file).path
+        } else {
+            File(File(base, folder), file).path
+        }
     }
 
     override fun buildFolder(base: String, folder: String): String {
-        return "$base/$folder"
+        return if (folder.isBlank()) {
+            base
+        } else {
+            File(base, folder).path
+        }
     }
 }
