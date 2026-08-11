@@ -63,7 +63,7 @@ class FragmentListGuidesViewModel @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     val uiState: StateFlow<GuidesUiState> = observePathUseCase.invoke()
         .flatMapLatest { _ ->
-            loadGuidesUseCase()
+            loadGuidesUseCase.invoke()
         }
         .map { list ->
             if (list.isEmpty()) GuidesUiState.Empty

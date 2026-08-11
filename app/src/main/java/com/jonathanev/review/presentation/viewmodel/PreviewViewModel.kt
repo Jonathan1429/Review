@@ -45,7 +45,7 @@ class PreviewViewModel @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     val uiState: StateFlow<PreviewQuestionStateUi> = retryTrigger
         .flatMapLatest {
-            getActiveGuideUseCase()
+            getActiveGuideUseCase.invoke()
         }
         .flatMapLatest { activeGuideDomain ->
             if (activeGuideDomain == null) {
@@ -65,7 +65,7 @@ class PreviewViewModel @Inject constructor(
                     )
 
                     val context = GuideContext.Browsing(guide = activeGuideDomain, -1)
-                    when (val result = getGuideXmlDataUseCase(context = context)) {
+                    when (val result = getGuideXmlDataUseCase.invoke(context = context)) {
                         is GetGuideResult.Success -> {
                             val response = getPreviewQuestionsUseCase(result.list)
                             emit(
