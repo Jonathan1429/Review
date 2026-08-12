@@ -2,6 +2,7 @@ package com.jonathanev.review.ui.screens
 
 import android.widget.Toast
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -53,6 +54,7 @@ import com.jonathanev.review.ui.components.singleClick
 import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.PreviewQuestionsProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
+import kotlinx.coroutines.delay
 import kotlin.math.abs
 
 @DevicePreviews
@@ -158,6 +160,64 @@ fun PreviewQuestionsScreen(
     var listStateForDrag by remember(items) { mutableStateOf(items) }
 
     val spacingPx = with(LocalDensity.current) { 16.dp.toPx() }
+
+    // Lógica de auto-scroll cuando se arrastra cerca de los bordes
+    LaunchedEffect(draggedIndex, dragOffset) {
+        if (draggedIndex == null) return@LaunchedEffect
+
+        while (true) {
+            val currentIdx = draggedIndex ?: break
+            val layoutInfo = lazyListState.layoutInfo
+            val itemInfo = layoutInfo.visibleItemsInfo.find { it.index == currentIdx + 1 } ?: break
+
+            val viewportHeight = layoutInfo.viewportEndOffset - layoutInfo.viewportStartOffset
+            val itemTop = itemInfo.offset + dragOffset
+            val itemBottom = itemTop + itemInfo.size
+
+            val threshold = 180f
+            var scrollAmount = 0f
+
+            if (itemTop < threshold) {
+                val intensity = ((threshold - itemTop) / threshold).coerceIn(0f, 1f)
+                scrollAmount = -intensity * 35f
+            } else if (itemBottom > viewportHeight - threshold) {
+                val intensity =
+                    ((itemBottom - (viewportHeight - threshold)) / threshold).coerceIn(0f, 1f)
+                scrollAmount = intensity * 35f
+            }
+
+            if (scrollAmount != 0f) {
+                val canScroll =
+                    if (scrollAmount > 0) lazyListState.canScrollForward else lazyListState.canScrollBackward
+                if (!canScroll) break
+
+                lazyListState.scrollBy(scrollAmount)
+                dragOffset += scrollAmount
+
+                // Swap durante el scroll para mantener la posición lógica
+                val direction = if (scrollAmount > 0) 1 else -1
+                val targetIdx = currentIdx + direction
+
+                if (targetIdx in listStateForDrag.indices) {
+                    val targetItemInfo =
+                        layoutInfo.visibleItemsInfo.find { it.index == targetIdx + 1 }
+                    if (targetItemInfo != null) {
+                        val fullStep = targetItemInfo.size + spacingPx
+                        if (abs(dragOffset) > fullStep * 0.8f) {
+                            val newList = listStateForDrag.toMutableList()
+                            java.util.Collections.swap(newList, currentIdx, targetIdx)
+                            listStateForDrag = newList
+                            draggedIndex = targetIdx
+                            dragOffset -= direction * fullStep
+                        }
+                    }
+                }
+                delay(16)
+            } else {
+                break
+            }
+        }
+    }
 
     Scaffold(
         floatingActionButton = {
