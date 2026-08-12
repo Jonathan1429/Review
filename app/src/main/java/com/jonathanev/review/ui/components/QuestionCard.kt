@@ -65,11 +65,11 @@ fun QuestionCard(
         modifier = modifier
             .fillMaxWidth()
             .border(1.dp, Color(0xFF263350), RoundedCornerShape(16.dp))
+            .singleClick(onClick = onPlayGuideClick)
+
     ) {
         Column(
-            modifier = Modifier
-                .padding(20.dp)
-                .singleClick(onClick = onPlayGuideClick)
+            modifier = Modifier.padding(20.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
