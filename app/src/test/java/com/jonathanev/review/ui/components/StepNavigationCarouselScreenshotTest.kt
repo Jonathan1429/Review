@@ -4,7 +4,6 @@ import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -94,10 +93,8 @@ class StepNavigationCarouselScreenshotTest(
 
                         val scope = rememberCoroutineScope()
                         val pagerState = rememberPagerState(pageCount = { dataState.listQuestionContent.size })
-                        val lazyRowState = rememberLazyListState()
 
                         StepNavigationCarousel(
-                            lazyRowState = lazyRowState,
                             assets = dataState.listQuestionContent,
                             pagerState = pagerState,
                             scope = scope,

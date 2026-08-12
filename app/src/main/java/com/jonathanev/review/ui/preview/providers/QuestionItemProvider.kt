@@ -1,14 +1,12 @@
 package com.jonathanev.review.ui.preview.providers
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.jonathanev.review.presentation.model.QuestionContentUi
-import com.jonathanev.review.presentation.model.QuestionItemUi
-import com.jonathanev.review.presentation.state.PreviewQuestionStateUi
 
 data class QuestionItemProv(
     val question: String,
     val noTexts: String,
-    val noImages: String
+    val noImages: String,
+    val indexLabel: String
 )
 
 class QuestionItemProvider() : PreviewParameterProvider<QuestionItemProv> {
@@ -17,12 +15,14 @@ class QuestionItemProvider() : PreviewParameterProvider<QuestionItemProv> {
             QuestionItemProv(
                 question = "¿Como se crea un test unitario?",
                 noTexts = "2",
-                noImages = "3"
+                noImages = "3",
+                indexLabel = "Q1"
             ),
             QuestionItemProv(
                 question = "¿Que significa una variable mutable?",
                 noTexts = "2",
-                noImages = "4"
+                noImages = "4",
+                indexLabel = "Q2"
             )
         )
 }
