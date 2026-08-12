@@ -228,7 +228,7 @@ fun CreateTextScreen(
                     modifier = Modifier.padding(20.dp),
                     textValue = textValue,
                     hint = textValue.text.isNotEmpty(),
-                    enabled = guideContext !is GuideContext.Browsing,
+                    readOnly = guideContext is GuideContext.Browsing,
                     selectedColor = selectedColor,
                     onTextValueChange = { actualText ->
                         val newAnnotatedString = updateAnnotatedStringWithSpans(
@@ -262,47 +262,6 @@ fun CreateTextScreen(
             }
         }
     }
-}
-
-fun applyColorToRange(
-    oldAnnotatedString: AnnotatedString,
-    actualText: TextFieldValue,
-    start: Int,
-    end: Int,
-    color: Color
-): AnnotatedString {
-    val newText = actualText.text
-    val builder = AnnotatedString.Builder(newText)
-
-    val lengthDiff = newText.length - oldAnnotatedString.text.length
-
-    // 1. Recuperar los estilos anteriores y reajustar sus posiciones al nuevo texto
-    for (span in oldAnnotatedString.spanStyles) {
-        var newStart = span.start
-        var newEnd = span.end
-
-        if (newStart >= start) {
-            newStart += lengthDiff
-        }
-        if (newEnd > start) {
-            newEnd += lengthDiff
-        }
-
-        if (newStart in 0..newText.length && newEnd in newStart..newText.length) {
-            builder.addStyle(span.item, newStart, newEnd)
-        }
-    }
-
-    // 2. Aplicar el nuevo color al rango recién insertado
-    if (start in 0..end && end <= newText.length) {
-        builder.addStyle(
-            style = SpanStyle(color = color),
-            start = start,
-            end = end
-        )
-    }
-
-    return builder.toAnnotatedString()
 }
 
 fun updateAnnotatedStringWithSpans(
@@ -360,25 +319,6 @@ fun updateAnnotatedStringWithSpans(
     }
 
     return builder.toAnnotatedString()
-}
-
-private fun applyColorToCharacter(
-    currentAnnotatedString: AnnotatedString,
-    cursorPosition: Int,
-    color: Color
-): AnnotatedString {
-    if (cursorPosition <= 0) return currentAnnotatedString
-
-    val targetIndex = cursorPosition - 1
-    return buildAnnotatedString {
-        append(currentAnnotatedString)
-
-        addStyle(
-            style = SpanStyle(color = color),
-            start = targetIndex,
-            end = cursorPosition
-        )
-    }
 }
 
 fun QuestionContentUi.Text.toAnnotatedString(): AnnotatedString {
