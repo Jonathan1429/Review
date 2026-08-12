@@ -239,6 +239,7 @@ fun PreviewQuestionsScreen(
                                 question = question.question.text,
                                 noTexts = question.noTexts,
                                 noImages = question.noImages,
+                                indexLabel = "Q${index + 1}",
                                 onEditingGuideClick = { onEditingGuideClick(index) },
                                 onPlayGuideClick = { onPlayGuideClick(index) }
                             )

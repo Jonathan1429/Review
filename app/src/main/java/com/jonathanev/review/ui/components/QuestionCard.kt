@@ -45,7 +45,7 @@ fun PreviewQuestionCard(
     @PreviewParameter(QuestionItemProvider::class) data: QuestionItemProv
 ) {
     ReviewTheme {
-        QuestionCard(data.question, data.noTexts, data.noImages, {}, {})
+        QuestionCard(data.question, data.noTexts, data.noImages, "Q1", {}, {})
     }
 }
 
@@ -54,6 +54,7 @@ fun QuestionCard(
     question: String,
     noTexts: String,
     noImages: String,
+    indexLabel: String,
     onEditingGuideClick: () -> Unit,
     onPlayGuideClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -68,6 +69,21 @@ fun QuestionCard(
         Column(
             modifier = Modifier.padding(20.dp)
         ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = indexLabel,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
             Text(
                 text = question,
                 color = MaterialTheme.colorScheme.onSurface,
