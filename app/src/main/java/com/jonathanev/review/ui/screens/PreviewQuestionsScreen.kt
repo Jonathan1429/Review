@@ -29,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -214,15 +215,25 @@ fun PreviewQuestionsScreen(
                         key = System.identityHashCode(question)
                     ) { isDragging ->
                         val elevation by animateDpAsState(
-                            targetValue = if (isDragging) 8.dp else 0.dp,
+                            targetValue = if (isDragging) 12.dp else 0.dp,
                             label = "elevation_animation"
+                        )
+                        val horizontalPaddingAnimation by animateDpAsState(
+                            targetValue = if (isDragging) 0.dp else 16.dp,
+                            label = "horizontal_padding_animation"
                         )
 
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .shadow(elevation, RoundedCornerShape(12.dp))
-                                // 3. Se notifica al ViewModel SOLO cuando termina el gesto completo
+                                .padding(horizontal = horizontalPaddingAnimation)
+                                .shadow(
+                                    elevation = elevation,
+                                    shape = RoundedCornerShape(12.dp),
+                                    clip = false,
+                                    ambientColor = Color.Black.copy(alpha = 0.5f),
+                                    spotColor = Color.Black.copy(alpha = 0.5f)
+                                )
                                 .longPressDraggableHandle(
                                     onDragStopped = {
                                         val start = initialDragIndex
