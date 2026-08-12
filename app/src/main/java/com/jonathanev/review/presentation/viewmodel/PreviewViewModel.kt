@@ -8,6 +8,7 @@ import com.jonathanev.review.domain.GetPreviewQuestionsUseCase
 import com.jonathanev.review.domain.SetContextEditUseCase
 import com.jonathanev.review.domain.SetContextPlayUseCase
 import com.jonathanev.review.domain.model.GuideContext
+import com.jonathanev.review.domain.repository.GuiaRepository
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.presentation.event.PreviewGuideEvent
 import com.jonathanev.review.presentation.mapper.toUi
@@ -36,7 +37,8 @@ class PreviewViewModel @Inject constructor(
     private val getPreviewQuestionsUseCase: GetPreviewQuestionsUseCase,
     private val getActiveGuideUseCase: GetActiveGuideUseCase,
     private val setContextEditUseCase: SetContextEditUseCase,
-    private val setContextPlayUseCase: SetContextPlayUseCase
+    private val setContextPlayUseCase: SetContextPlayUseCase,
+    private val guiaRepository: GuiaRepository
 ) : ViewModel() {
     private val retryTrigger = MutableSharedFlow<Unit>(replay = 1).apply {
         tryEmit(Unit)
@@ -140,5 +142,31 @@ class PreviewViewModel @Inject constructor(
 
     fun retryLoad() {
         retryTrigger.tryEmit(Unit)
+    }
+
+    fun moveQuestion(from: Int, to: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val activeGuide = getActiveGuideUseCase.invoke().firstOrNull() ?: return@launch
+                val context = GuideContext.Browsing(guide = activeGuide, -1)
+                val result = getGuideXmlDataUseCase.invoke(context = context)
+                if (result is GetGuideResult.Success) {
+                    val list = result.list.toMutableList()
+                    if (from in list.indices && to in list.indices) {
+                        val item = list.removeAt(from)
+                        list.add(to, item)
+
+                        guiaRepository.saveGuide(
+                            guideDomainModel = activeGuide,
+                            preguntas = list.map { it.question },
+                            respuestas = list.map { it.answer }
+                        )
+                        retryTrigger.emit(Unit)
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 }

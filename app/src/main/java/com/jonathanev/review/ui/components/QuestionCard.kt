@@ -55,12 +55,13 @@ fun QuestionCard(
     noTexts: String,
     noImages: String,
     onEditingGuideClick: () -> Unit,
-    onPlayGuideClick: () -> Unit
+    onPlayGuideClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = getCardContainerColor()),
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .border(1.dp, Color(0xFF263350), RoundedCornerShape(16.dp))
     ) {
