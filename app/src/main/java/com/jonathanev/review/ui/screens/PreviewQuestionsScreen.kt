@@ -28,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -148,12 +149,10 @@ fun PreviewQuestionsScreen(
 ) {
     val lazyListState = rememberLazyListState()
 
-    // 1. Estado local de la lista para renderizado continuo
     var items by remember(previewQuestions.previewState) {
         mutableStateOf(previewQuestions.previewState)
     }
 
-    // 2. Rastreamos la posición donde inició el drag y la posición final
     var initialDragIndex by remember { mutableStateOf<Int?>(null) }
     var currentDragIndex by remember { mutableStateOf<Int?>(null) }
 
@@ -199,7 +198,6 @@ fun PreviewQuestionsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 16.dp)
         ) {
             LazyColumn(
                 state = lazyListState,
@@ -210,6 +208,8 @@ fun PreviewQuestionsScreen(
                     items = items,
                     key = { _, question -> System.identityHashCode(question) }
                 ) { index, question ->
+                    val cardShape = RoundedCornerShape(16.dp)
+
                     ReorderableItem(
                         state = reorderableLazyColumnState,
                         key = System.identityHashCode(question)
@@ -229,11 +229,12 @@ fun PreviewQuestionsScreen(
                                 .padding(horizontal = horizontalPaddingAnimation)
                                 .shadow(
                                     elevation = elevation,
-                                    shape = RoundedCornerShape(12.dp),
+                                    shape = cardShape,
                                     clip = false,
                                     ambientColor = Color.Black.copy(alpha = 0.5f),
                                     spotColor = Color.Black.copy(alpha = 0.5f)
                                 )
+                                .clip(cardShape)
                                 .longPressDraggableHandle(
                                     onDragStopped = {
                                         val start = initialDragIndex
@@ -247,6 +248,7 @@ fun PreviewQuestionsScreen(
                                 )
                         ) {
                             QuestionCard(
+                                modifier = Modifier.fillMaxWidth(),
                                 question = question.question.text,
                                 noTexts = question.noTexts,
                                 noImages = question.noImages,
