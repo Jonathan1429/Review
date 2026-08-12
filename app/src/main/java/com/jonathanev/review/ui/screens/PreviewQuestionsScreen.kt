@@ -1,14 +1,17 @@
 package com.jonathanev.review.ui.screens
 
 import android.widget.Toast
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -19,8 +22,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -39,11 +49,12 @@ import com.jonathanev.review.ui.components.singleClick
 import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.PreviewQuestionsProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @DevicePreviews
 @Composable
 fun PreviewPreviewQuestionsScreen(
-    //@PreviewParameter(PreviewQuestionsProvider::class) data: PreviewQuestionsProv
     @PreviewParameter(PreviewQuestionsProvider::class) data: PreviewQuestionStateUi
 ) {
     ReviewTheme {
@@ -89,9 +100,9 @@ fun PreviewQuestionsRoute(
 
                 is PreviewGuideEvent.ShowError -> {
                     Toast.makeText(
-                        /* context = */ context,
-                        /* text = */ event.error,
-                        /* duration = */ Toast.LENGTH_SHORT
+                        context,
+                        event.error,
+                        Toast.LENGTH_SHORT
                     ).show()
                 }
             }
@@ -120,7 +131,8 @@ fun PreviewQuestionsRoute(
                 previewQuestions = uiState,
                 onEditingGuideClick = { position -> viewModel.editingGuide(position = position) },
                 onPlayGuideClick = { position -> viewModel.reviewGuide(position = position) },
-                onCreateQuestionClick = { position -> viewModel.editingGuide(position = position) }
+                onCreateQuestionClick = { position -> viewModel.editingGuide(position = position) },
+                onMoveQuestion = { from, to -> viewModel.moveQuestion(from, to) }
             )
         }
     }
@@ -132,8 +144,34 @@ fun PreviewQuestionsScreen(
     previewQuestions: PreviewQuestionStateUi,
     onEditingGuideClick: (Int) -> Unit,
     onPlayGuideClick: (Int) -> Unit,
-    onCreateQuestionClick: (Int) -> Unit
+    onCreateQuestionClick: (Int) -> Unit,
+    onMoveQuestion: (Int, Int) -> Unit = { _, _ -> }
 ) {
+    val lazyListState = rememberLazyListState()
+
+    // Items del previewState
+    var items by remember(previewQuestions.previewState) {
+        mutableStateOf(previewQuestions.previewState)
+    }
+
+    var initialDragIndex by remember { mutableStateOf<Int?>(null) }
+    var currentDragIndex by remember { mutableStateOf<Int?>(null) }
+
+    val reorderableLazyColumnState = rememberReorderableLazyListState(
+        lazyListState = lazyListState,
+        scrollThreshold = 120.dp,
+        onMove = { from, to ->
+            if (initialDragIndex == null) {
+                initialDragIndex = from.index
+            }
+
+            items = items.toMutableList().apply {
+                add(to.index, removeAt(from.index))
+            }
+            currentDragIndex = to.index
+        }
+    )
+
     Scaffold(
         floatingActionButton = {
             ExtendedFloatingActionButton(
@@ -161,20 +199,66 @@ fun PreviewQuestionsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 16.dp, vertical = 16.dp)
         ) {
             LazyColumn(
+                state = lazyListState,
                 verticalArrangement = Arrangement.spacedBy(16.dp),
-                contentPadding = PaddingValues(bottom = 24.dp)
+                contentPadding = PaddingValues(top = 16.dp, bottom = 88.dp)
             ) {
-                itemsIndexed(previewQuestions.previewState) { index, question ->
-                    QuestionCard(
-                        question = question.question.text,
-                        noTexts = previewQuestions.previewState[index].noTexts,
-                        noImages = previewQuestions.previewState[index].noImages,
-                        onEditingGuideClick = { onEditingGuideClick(index) },
-                        onPlayGuideClick = { onPlayGuideClick(index) }
-                    )
+                itemsIndexed(
+                    items = items,
+                    key = { _, question -> System.identityHashCode(question) }
+                ) { index, question ->
+                    val cardShape = RoundedCornerShape(16.dp)
+
+                    ReorderableItem(
+                        state = reorderableLazyColumnState,
+                        key = System.identityHashCode(question)
+                    ) { isDragging ->
+                        val elevation by animateDpAsState(
+                            targetValue = if (isDragging) 12.dp else 0.dp,
+                            label = "elevation_animation"
+                        )
+                        val horizontalPaddingAnimation by animateDpAsState(
+                            targetValue = if (isDragging) 0.dp else 16.dp,
+                            label = "horizontal_padding_animation"
+                        )
+
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = horizontalPaddingAnimation)
+                                .shadow(
+                                    elevation = elevation,
+                                    shape = cardShape,
+                                    clip = false,
+                                    ambientColor = Color.Black.copy(alpha = 0.5f),
+                                    spotColor = Color.Black.copy(alpha = 0.5f)
+                                )
+                                .clip(cardShape)
+                                .longPressDraggableHandle(
+                                    onDragStopped = {
+                                        val start = initialDragIndex
+                                        val end = currentDragIndex
+                                        if (start != null && end != null && start != end) {
+                                            onMoveQuestion(start, end)
+                                        }
+                                        initialDragIndex = null
+                                        currentDragIndex = null
+                                    }
+                                )
+                        ) {
+                            QuestionCard(
+                                modifier = Modifier.fillMaxWidth(),
+                                question = question.question.text,
+                                noTexts = question.noTexts,
+                                noImages = question.noImages,
+                                indexLabel = "Q${index + 1}",
+                                onEditingGuideClick = { onEditingGuideClick(index) },
+                                onPlayGuideClick = { onPlayGuideClick(index) }
+                            )
+                        }
+                    }
                 }
             }
         }

@@ -25,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -45,7 +46,7 @@ fun PreviewQuestionCard(
     @PreviewParameter(QuestionItemProvider::class) data: QuestionItemProv
 ) {
     ReviewTheme {
-        QuestionCard(data.question, data.noTexts, data.noImages, {}, {})
+        QuestionCard(data.question, data.noTexts, data.noImages, "Q1", {}, {})
     }
 }
 
@@ -54,19 +55,41 @@ fun QuestionCard(
     question: String,
     noTexts: String,
     noImages: String,
+    indexLabel: String,
     onEditingGuideClick: () -> Unit,
-    onPlayGuideClick: () -> Unit
+    onPlayGuideClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
+    val cardShape = RoundedCornerShape(16.dp)
+
     Card(
-        shape = RoundedCornerShape(16.dp),
+        shape = cardShape,
         colors = CardDefaults.cardColors(containerColor = getCardContainerColor()),
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .border(1.dp, Color(0xFF263350), RoundedCornerShape(16.dp))
+            .clip(cardShape)
+            .singleClick(onClick = onPlayGuideClick)
+
     ) {
         Column(
             modifier = Modifier.padding(20.dp)
         ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = indexLabel,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
             Text(
                 text = question,
                 color = MaterialTheme.colorScheme.onSurface,

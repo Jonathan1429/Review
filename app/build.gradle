@@ -224,6 +224,9 @@ dependencies {
     // Turbine
     testImplementation("app.cash.turbine:turbine:1.2.1")
 
+    // Desplazamiento en columns
+    implementation("sh.calvin.reorderable:reorderable:2.4.1")
+
     // Opcional pero muy recomendado para testing de arquitectura:
     /*testImplementation "androidx.test:core-ktx:1.6.1"
     testImplementation "androidx.test.ext:junit-ktx:1.2.1"*/

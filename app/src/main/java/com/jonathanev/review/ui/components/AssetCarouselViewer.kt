@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -72,9 +71,9 @@ fun AssetCarouselViewer(
     onOpenAssetClick: (QuestionContentUi, posItem: Int) -> Unit,
     onDeleteItemClick: (typeContent: QuestionContentUi, positionItem: Int) -> Unit,
     onCurrentPosContent: (Int) -> Unit,
+    onMoveItem: (Int, Int) -> Unit = { _, _ -> }
 ) {
     val scope = rememberCoroutineScope()
-    val lazyRowState = rememberLazyListState()
     val maxIndex = (assets.size - 1).coerceAtLeast(0)
     val safeInitialPage = currentPosContent.coerceIn(0, maxIndex)
 
@@ -113,12 +112,12 @@ fun AssetCarouselViewer(
         )
         Spacer(modifier = Modifier.height(24.dp))
         StepNavigationCarousel(
-            lazyRowState = lazyRowState,
             assets = assets,
             pagerState = pagerState,
             scope = scope,
             guideContext = guideContext,
-            onAddAssetClick = { posItem -> onAddAssetClick(posItem) }
+            onAddAssetClick = { posItem -> onAddAssetClick(posItem) },
+            onMoveItem = { from, to -> onMoveItem(from, to) }
         )
     }
 }

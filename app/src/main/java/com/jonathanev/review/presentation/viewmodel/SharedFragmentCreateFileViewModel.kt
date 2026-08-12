@@ -752,4 +752,59 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             )
         }
     }
+
+    fun onMoveItem(from: Int, to: Int) {
+        updateSuccessState { state ->
+            val isQuestion = state.qAType == QATypeUI.QUESTION
+            val list = if (isQuestion) state.preguntas else state.respuestas
+            val currentTarget = list.getOrNull(state.contadorPregunta)
+
+            val fullContent = currentTarget?.content?.toMutableList()
+            if (fullContent == null) {
+                sendNotification(CreateGuideEvent.ErrorMoveContent)
+                return@updateSuccessState state
+            }
+
+            // 1. Mapeamos qué sublista se está reordenando (por ejemplo, solo las Imágenes)
+            // Nota: Cambia QuestionContentUi.Image según el tipo de elemento que reordena este Carousel
+            val filteredContentIndices = fullContent.indices.filter { index ->
+                fullContent[index] is QuestionContentUi.Image
+            }
+
+            // Validar que los índices 'from' y 'to' estén dentro de la sublista filtrada
+            if (from !in filteredContentIndices.indices || to !in filteredContentIndices.indices) {
+                sendNotification(CreateGuideEvent.ErrorMoveContent)
+                return@updateSuccessState state
+            }
+
+            // 2. Obtener los índices REALES dentro de la lista completa 'fullContent'
+            val realFromIndex = filteredContentIndices[from]
+            val realToIndex = filteredContentIndices[to]
+
+            // 3. Reordenar en la lista global usando las posiciones reales
+            val itemToMove = fullContent.removeAt(realFromIndex)
+            fullContent.add(realToIndex, itemToMove)
+
+            // 4. Crear la copia con el contenido actualizado
+            val updatedTarget = currentTarget.copy(content = fullContent)
+
+            // 5. Reemplazar en la lista principal
+            val updatedList = list.toMutableList().apply {
+                set(state.contadorPregunta, updatedTarget)
+            }
+
+            // 6. Retornar el nuevo estado inmutable
+            if (isQuestion) {
+                state.copy(
+                    preguntas = updatedList,
+                    contadorContenido = to
+                )
+            } else {
+                state.copy(
+                    respuestas = updatedList,
+                    contadorContenido = to
+                )
+            }
+        }
+    }
 }

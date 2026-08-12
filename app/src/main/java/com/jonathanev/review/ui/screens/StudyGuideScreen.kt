@@ -177,6 +177,10 @@ fun FillingGuideRoute(
                         CreateGuideEvent.CloseGuide -> {
                             onCloseGuide()
                         }
+
+                        CreateGuideEvent.ErrorMoveContent -> {
+                            showToast("No se pudo mover el contenido", context)
+                        }
                     }
                 }
             }
@@ -247,7 +251,8 @@ fun FillingGuideRoute(
                 onCurrentPosContent = { position ->
                     viewModel.updatePosContent(position)
                 },
-                onDismissRequest = viewModel::onDismissDialogDeleteQuestion
+                onDismissRequest = viewModel::onDismissDialogDeleteQuestion,
+                onMoveItem = { from, to -> viewModel.onMoveItem(from, to) }
             )
         }
     }
@@ -281,7 +286,8 @@ fun FillingGuideScreen(
     onAddQuestion: () -> Unit,
     onCloseGuide: () -> Unit,
     onCurrentPosContent: (Int) -> Unit,
-    onDismissRequest: () -> Unit
+    onDismissRequest: () -> Unit,
+    onMoveItem: (Int, Int) -> Unit = { _, _ -> }
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -339,7 +345,8 @@ fun FillingGuideScreen(
                         posItem
                     )
                 },
-                onCurrentPosContent = { position -> onCurrentPosContent(position) }
+                onCurrentPosContent = { position -> onCurrentPosContent(position) },
+                onMoveItem = { from, to -> onMoveItem(from, to) }
             )
         }
 

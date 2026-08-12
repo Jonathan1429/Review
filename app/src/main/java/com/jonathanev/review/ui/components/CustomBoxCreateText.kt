@@ -20,7 +20,7 @@ fun CustomBoxCreateText(
     modifier: Modifier = Modifier,
     textValue: TextFieldValue,
     hint: Boolean,
-    enabled: Boolean = false,
+    readOnly: Boolean = false,
     onTextValueChange: (TextFieldValue) -> Unit,
     selectedColor: Color
 ) {
@@ -34,7 +34,7 @@ fun CustomBoxCreateText(
             value = textValue,
             onValueChange = onTextValueChange,
             modifier = Modifier.fillMaxSize(),
-            enabled = enabled,
+            readOnly = readOnly,
             cursorBrush = SolidColor(selectedColor),
             textStyle = TextStyle(
                 fontSize = 18.sp,

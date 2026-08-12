@@ -170,6 +170,7 @@ fun MediaContentPager(
                                         onOpenAssetClick(currentAsset, pagerState.currentPage)
                                     }
                                 }),
+                                readOnly = true,
                                 textValue = textFieldValueWrapper,
                                 hint = false,
                                 onTextValueChange = {},

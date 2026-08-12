@@ -94,7 +94,7 @@ class CustomBoxCreateTextScreenshotTest(
                             textValue = TextFieldValue(text),
                             hint = showHint,
                             onTextValueChange = {},
-                            enabled = false,
+                            readOnly = false,
                             selectedColor = MaterialTheme.colorScheme.onSurface,
                         )
                     }
