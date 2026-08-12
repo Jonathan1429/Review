@@ -16,17 +16,13 @@ import com.jonathanev.review.presentation.model.ActiveGuideUIState
 import com.jonathanev.review.presentation.state.PreviewQuestionStateUi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
@@ -40,68 +36,52 @@ class PreviewViewModel @Inject constructor(
     private val setContextPlayUseCase: SetContextPlayUseCase,
     private val guiaRepository: GuiaRepository
 ) : ViewModel() {
-    private val retryTrigger = MutableSharedFlow<Unit>(replay = 1).apply {
-        tryEmit(Unit)
-    }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val uiState: StateFlow<PreviewQuestionStateUi> = retryTrigger
-        .flatMapLatest {
-            getActiveGuideUseCase.invoke()
-        }
-        .flatMapLatest { activeGuideDomain ->
-            if (activeGuideDomain == null) {
-                flowOf(
-                    PreviewQuestionStateUi(
-                        activeGuide = ActiveGuideUIState.Loading,
-                        previewState = emptyList()
-                    )
-                )
-            } else {
-                flow {
-                    emit(
-                        PreviewQuestionStateUi(
-                            activeGuide = ActiveGuideUIState.Loading,
-                            previewState = emptyList()
-                        )
-                    )
-
-                    val context = GuideContext.Browsing(guide = activeGuideDomain, -1)
-                    when (val result = getGuideXmlDataUseCase.invoke(context = context)) {
-                        is GetGuideResult.Success -> {
-                            val response = getPreviewQuestionsUseCase(result.list)
-                            emit(
-                                PreviewQuestionStateUi(
-                                    activeGuide = ActiveGuideUIState.Success(
-                                        activeGuideDomain.toUi()
-                                    ),
-                                    previewState = response.map { it.toUi() }
-                                )
-                            )
-                        }
-
-                        else -> emit(
-                            PreviewQuestionStateUi(
-                                activeGuide = ActiveGuideUIState.Error,
-                                previewState = emptyList()
-                            )
-                        )
-                    }
-                }
-            }
-        }
-        .flowOn(Dispatchers.IO)
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = PreviewQuestionStateUi(
-                activeGuide = ActiveGuideUIState.Loading,
-                previewState = emptyList()
-            )
+    private val _uiState = MutableStateFlow(
+        PreviewQuestionStateUi(
+            activeGuide = ActiveGuideUIState.Loading,
+            previewState = emptyList()
         )
+    )
+    val uiState: StateFlow<PreviewQuestionStateUi> = _uiState.asStateFlow()
 
     private val _previewGuideEvent = MutableSharedFlow<PreviewGuideEvent>()
     val previewGuideEvent = _previewGuideEvent.asSharedFlow()
+
+    init {
+        loadInitialData()
+    }
+
+    fun retryLoad() {
+        loadInitialData()
+    }
+
+    private fun loadInitialData() {
+        viewModelScope.launch(Dispatchers.IO) {
+            _uiState.update { it.copy(activeGuide = ActiveGuideUIState.Loading) }
+
+            val activeGuideDomain = getActiveGuideUseCase.invoke().firstOrNull()
+            if (activeGuideDomain == null) {
+                _uiState.update { it.copy(activeGuide = ActiveGuideUIState.Error) }
+                return@launch
+            }
+
+            val context = GuideContext.Browsing(guide = activeGuideDomain, -1)
+            when (val result = getGuideXmlDataUseCase.invoke(context = context)) {
+                is GetGuideResult.Success -> {
+                    val previewQuestions = getPreviewQuestionsUseCase(result.list).map { it.toUi() }
+                    _uiState.update {
+                        it.copy(
+                            activeGuide = ActiveGuideUIState.Success(activeGuideDomain.toUi()),
+                            previewState = previewQuestions
+                        )
+                    }
+                }
+
+                else -> _uiState.update { it.copy(activeGuide = ActiveGuideUIState.Error) }
+            }
+        }
+    }
 
     private fun sendEvent(previewGuideEvent: PreviewGuideEvent) {
         viewModelScope.launch {
@@ -134,38 +114,44 @@ class PreviewViewModel @Inject constructor(
                 throw e
             } catch (e: Exception) {
                 e.printStackTrace()
-
                 sendEvent(PreviewGuideEvent.ShowError(e.message ?: "Ocurrió un error inesperado"))
             }
         }
     }
 
-    fun retryLoad() {
-        retryTrigger.tryEmit(Unit)
-    }
-
     fun moveQuestion(from: Int, to: Int) {
+        val currentPreviewList = _uiState.value.previewState.toMutableList()
+        if (from !in currentPreviewList.indices || to !in currentPreviewList.indices) return
+
+        // 1. Actualización inmediata de la UI (Optimistic UI update)
+        val item = currentPreviewList.removeAt(from)
+        currentPreviewList.add(to, item)
+        _uiState.update { it.copy(previewState = currentPreviewList) }
+
+        // 2. Persistencia en segundo plano
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val activeGuide = getActiveGuideUseCase.invoke().firstOrNull() ?: return@launch
                 val context = GuideContext.Browsing(guide = activeGuide, -1)
                 val result = getGuideXmlDataUseCase.invoke(context = context)
+
                 if (result is GetGuideResult.Success) {
-                    val list = result.list.toMutableList()
-                    if (from in list.indices && to in list.indices) {
-                        val item = list.removeAt(from)
-                        list.add(to, item)
+                    val domainList = result.list.toMutableList()
+                    if (from in domainList.indices && to in domainList.indices) {
+                        val domainItem = domainList.removeAt(from)
+                        domainList.add(to, domainItem)
 
                         guiaRepository.saveGuide(
                             guideDomainModel = activeGuide,
-                            preguntas = list.map { it.question },
-                            respuestas = list.map { it.answer }
+                            preguntas = domainList.map { it.question },
+                            respuestas = domainList.map { it.answer }
                         )
-                        retryTrigger.emit(Unit)
                     }
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
+                // Opcional: revertir UI si falla el guardado
+                loadInitialData()
             }
         }
     }
