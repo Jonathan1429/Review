@@ -48,7 +48,7 @@ import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.PreviewQuestionsProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
 import sh.calvin.reorderable.ReorderableItem
-import sh.calvin.reorderable.rememberReorderableLazyColumnState
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @DevicePreviews
 @Composable
@@ -156,18 +156,20 @@ fun PreviewQuestionsScreen(
     var initialDragIndex by remember { mutableStateOf<Int?>(null) }
     var currentDragIndex by remember { mutableStateOf<Int?>(null) }
 
-    val reorderableLazyColumnState = rememberReorderableLazyColumnState(lazyListState) { from, to ->
-        // Si no hemos guardado la posición inicial de este gesto, la registramos
-        if (initialDragIndex == null) {
-            initialDragIndex = from.index
-        }
+    val reorderableLazyColumnState = rememberReorderableLazyListState(
+        lazyListState = lazyListState,
+        scrollThreshold = 120.dp,
+        onMove = { from, to ->
+            if (initialDragIndex == null) {
+                initialDragIndex = from.index
+            }
 
-        // Actualizamos la lista local en cada salto para que la animación sea fluida
-        items = items.toMutableList().apply {
-            add(to.index, removeAt(from.index))
+            items = items.toMutableList().apply {
+                add(to.index, removeAt(from.index))
+            }
+            currentDragIndex = to.index
         }
-        currentDragIndex = to.index
-    }
+    )
 
     Scaffold(
         floatingActionButton = {
