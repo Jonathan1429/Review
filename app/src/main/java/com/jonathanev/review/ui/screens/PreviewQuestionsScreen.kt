@@ -196,19 +196,26 @@ fun PreviewQuestionsScreen(
 
                 // Swap durante el scroll para mantener la posición lógica
                 val direction = if (scrollAmount > 0) 1 else -1
-                val targetIdx = currentIdx + direction
 
-                if (targetIdx in listStateForDrag.indices) {
-                    val targetItemInfo =
-                        layoutInfo.visibleItemsInfo.find { it.index == targetIdx + 1 }
-                    if (targetItemInfo != null) {
-                        val fullStep = targetItemInfo.size + spacingPx
-                        if (abs(dragOffset) > fullStep * 0.8f) {
-                            val newList = listStateForDrag.toMutableList()
-                            java.util.Collections.swap(newList, currentIdx, targetIdx)
-                            listStateForDrag = newList
-                            draggedIndex = targetIdx
-                            dragOffset -= direction * fullStep
+                var foundSwap = true
+                while (foundSwap) {
+                    foundSwap = false
+                    val currentIdxInLoop = draggedIndex ?: break
+                    val targetIdx = currentIdxInLoop + direction
+
+                    if (targetIdx in listStateForDrag.indices) {
+                        val targetItemInfo =
+                            layoutInfo.visibleItemsInfo.find { it.index == targetIdx + 1 }
+                        if (targetItemInfo != null) {
+                            val fullStep = targetItemInfo.size + spacingPx
+                            if (abs(dragOffset) > fullStep * 0.8f) {
+                                val newList = listStateForDrag.toMutableList()
+                                java.util.Collections.swap(newList, currentIdxInLoop, targetIdx)
+                                listStateForDrag = newList
+                                draggedIndex = targetIdx
+                                dragOffset -= direction * fullStep
+                                foundSwap = true
+                            }
                         }
                     }
                 }
