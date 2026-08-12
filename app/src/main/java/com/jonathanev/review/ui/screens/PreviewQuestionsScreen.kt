@@ -149,6 +149,7 @@ fun PreviewQuestionsScreen(
 ) {
     val lazyListState = rememberLazyListState()
 
+    // Items del previewState
     var items by remember(previewQuestions.previewState) {
         mutableStateOf(previewQuestions.previewState)
     }
