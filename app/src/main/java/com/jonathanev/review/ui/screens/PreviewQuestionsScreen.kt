@@ -2,13 +2,14 @@ package com.jonathanev.review.ui.screens
 
 import android.widget.Toast
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
-import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -52,7 +53,6 @@ import com.jonathanev.review.ui.components.singleClick
 import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.PreviewQuestionsProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
-import kotlinx.coroutines.delay
 import kotlin.math.abs
 
 @DevicePreviews
@@ -159,61 +159,6 @@ fun PreviewQuestionsScreen(
 
     val spacingPx = with(LocalDensity.current) { 16.dp.toPx() }
 
-    // Lógica de auto-scroll
-    LaunchedEffect(draggedIndex, dragOffset) {
-        if (draggedIndex == null) return@LaunchedEffect
-
-        while (true) {
-            val currentIdx = draggedIndex ?: break
-            val layoutInfo = lazyListState.layoutInfo
-            val itemInfo = layoutInfo.visibleItemsInfo.find { it.index == currentIdx } ?: break
-
-            // Posición del item en el viewport
-            val itemTop = itemInfo.offset + dragOffset
-            val itemBottom = itemTop + itemInfo.size
-            val viewportHeight = layoutInfo.viewportEndOffset - layoutInfo.viewportStartOffset
-
-            val edgeThreshold = 120f // Distancia al borde para activar scroll
-            var scrollAmount = 0f
-
-            if (itemTop < edgeThreshold) {
-                scrollAmount = (itemTop - edgeThreshold) / 4f
-            } else if (itemBottom > viewportHeight - edgeThreshold) {
-                scrollAmount = (itemBottom - (viewportHeight - edgeThreshold)) / 4f
-            }
-
-            if (scrollAmount != 0f) {
-                val canScroll =
-                    if (scrollAmount > 0) lazyListState.canScrollForward else lazyListState.canScrollBackward
-                if (!canScroll) break
-
-                lazyListState.scrollBy(scrollAmount)
-                // Ajustamos el offset para que el item no se mueva respecto al dedo/pantalla
-                dragOffset += scrollAmount
-
-                // Swap durante el scroll para evitar culleo
-                val direction = if (scrollAmount > 0) 1 else -1
-                val targetIdx = currentIdx + direction
-                if (targetIdx in listStateForDrag.indices) {
-                    val targetItemInfo = layoutInfo.visibleItemsInfo.find { it.index == targetIdx }
-                    if (targetItemInfo != null) {
-                        val fullStep = targetItemInfo.size + spacingPx
-                        if (Math.abs(dragOffset) > fullStep / 2f) {
-                            val newList = listStateForDrag.toMutableList()
-                            java.util.Collections.swap(newList, currentIdx, targetIdx)
-                            listStateForDrag = newList
-                            draggedIndex = targetIdx
-                            dragOffset -= direction * fullStep
-                        }
-                    }
-                }
-                delay(16)
-            } else {
-                break
-            }
-        }
-    }
-
     Scaffold(
         floatingActionButton = {
             ExtendedFloatingActionButton(
@@ -248,6 +193,11 @@ fun PreviewQuestionsScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 contentPadding = PaddingValues(bottom = 24.dp)
             ) {
+                // Header Stabilizer: Evita saltos cuando el primer item cambia de posición
+                item(key = "header_stabilizer") {
+                    Spacer(Modifier.height(1.dp))
+                }
+
                 itemsIndexed(
                     items = listStateForDrag,
                     key = { _, question ->
@@ -266,7 +216,7 @@ fun PreviewQuestionsScreen(
                                 scaleY = if (isDragging) 1.05f else 1f
                                 shadowElevation = if (isDragging) 8.dp.toPx() else 0f
                             }
-                            .animateItem()
+                            .then(if (isDragging) Modifier else Modifier.animateItem())
                             .pointerInput(question) {
                                 detectDragGesturesAfterLongPress(
                                     onDragStart = { _ ->
@@ -287,8 +237,10 @@ fun PreviewQuestionsScreen(
                                         val layoutInfo = lazyListState.layoutInfo
                                         val viewportHeight =
                                             layoutInfo.viewportEndOffset - layoutInfo.viewportStartOffset
+
+                                        // Ajustamos el índice por el estabilizador en la posición 0
                                         val itemInfo =
-                                            layoutInfo.visibleItemsInfo.find { it.index == currentIdx }
+                                            layoutInfo.visibleItemsInfo.find { it.index == currentIdx + 1 }
 
                                         if (itemInfo != null) {
                                             val currentTop = itemInfo.offset + dragOffset
@@ -310,16 +262,16 @@ fun PreviewQuestionsScreen(
 
                                             if (targetIdx in listStateForDrag.indices) {
                                                 val targetItemInfo =
-                                                    layoutInfo.visibleItemsInfo.find { it.index == targetIdx }
+                                                    layoutInfo.visibleItemsInfo.find { it.index == targetIdx + 1 }
                                                 val currentItemInfo =
-                                                    layoutInfo.visibleItemsInfo.find { it.index == draggedIndex!! }
+                                                    layoutInfo.visibleItemsInfo.find { it.index == draggedIndex!! + 1 }
 
                                                 val stepSize =
                                                     targetItemInfo?.size ?: currentItemInfo?.size
                                                     ?: 300
                                                 val fullStep = stepSize + spacingPx
 
-                                                if (abs(dragOffset) > fullStep / 2f) {
+                                                if (abs(dragOffset) > fullStep * 0.8f) {
                                                     val newList = listStateForDrag.toMutableList()
                                                     java.util.Collections.swap(
                                                         newList,
