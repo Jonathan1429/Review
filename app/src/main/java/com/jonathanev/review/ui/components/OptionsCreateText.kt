@@ -1,13 +1,10 @@
 package com.jonathanev.review.ui.components
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -86,15 +83,6 @@ fun OptionsCreateText(
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-
-            Box(
-                modifier = Modifier
-                    .size(20.dp)
-                    .background(
-                        color = selectedColor,
-                        shape = CircleShape
-                    )
-            )
         }
 
         Spacer(modifier = Modifier.weight(1f))
