@@ -62,7 +62,7 @@ val LightColorButton = Color(0xFFB8C3FF)
 
 val Rojo100 = Color(0xFFFF6B6B)
 
-val LightSecondary = Color(0xFF00677D)
+val LightSecondary = Color(0xFF3482FF)
 val LightOnSecondary = Color(0xFFFFFFFF)
-val DarkSecondary = Color(0xFF5CD5EE)
-val DarkOnSecondary = Color(0xFF003643)
+val DarkSecondary = Color(0xFF3482FF)
+val DarkOnSecondary = Color(0xFFFFFFFF)

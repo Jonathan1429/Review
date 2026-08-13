@@ -442,7 +442,7 @@ private fun FloatingActionButtons(
                     modifier = Modifier.size(30.dp),
                     painter = painterResource(R.drawable.ic_edit),
                     contentDescription = "Editar guía",
-                    tint = MaterialTheme.colorScheme.onSecondary
+                    tint = Color.White
                 )
             }
         }

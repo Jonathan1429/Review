@@ -51,6 +51,21 @@ class StudyGuideScreenProvider : PreviewParameterProvider<StudyGuideScreenProv> 
                     QuestionContentUi.Text("Primer texto de prueba", emptyList()),
                     QuestionContentUi.Text("Segundo texto de prueba", emptyList())
                 ),
+                guideContext = GuideContext.Browsing(guideDomainModel, 0),
+                showDialogDeleteQuestion = false,
+                showDialogRepeatGuide = false
+            ),
+            StudyGuideScreenProv(
+                typeSelected = QAType.ANSWER,
+                typeForSelected = listOf(QAType.QUESTION, QAType.ANSWER),
+                mediaSelected = ContentType.IMAGE,
+                mediaForSelected = listOf(ContentType.TEXT, ContentType.IMAGE),
+                actualQuestion = 2,
+                totalQuestions = 4,
+                listTypeMedia = listOf(
+                    QuestionContentUi.Text("Primer texto de prueba", emptyList()),
+                    QuestionContentUi.Text("Segundo texto de prueba", emptyList())
+                ),
                 guideContext = GuideContext.Creating(guideDomainModel),
                 showDialogDeleteQuestion = true,
                 showDialogRepeatGuide = false
