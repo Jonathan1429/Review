@@ -2,11 +2,14 @@ package com.jonathanev.review.ui.screens
 
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
@@ -25,15 +28,23 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jonathanev.review.R
@@ -56,6 +67,7 @@ import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.StudyGuideScreenProv
 import com.jonathanev.review.ui.preview.providers.StudyGuideScreenProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
+import kotlin.math.roundToInt
 
 @DevicePreviews
 @Composable
@@ -291,65 +303,84 @@ fun FillingGuideScreen(
     onMoveItem: (Int, Int) -> Unit = { _, _ -> },
     onEditGuideClick: () -> Unit = {}
 ) {
+    var showPlusOneAnimation by remember { mutableStateOf(false) }
+    var isAnimating by remember { mutableStateOf(false) }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         contentWindowInsets = androidx.compose.foundation.layout.WindowInsets.safeDrawing,
         floatingActionButton = {
             FloatingActionButtons(
                 guideContext = guideContext,
-                onAddQuestion = onAddQuestion,
+                onAddQuestion = {
+                    if (!isAnimating) {
+                        isAnimating = true
+                        showPlusOneAnimation = true
+                    }
+                },
                 onCloseGuide = onCloseGuide,
                 onEditGuide = onEditGuideClick
             )
         }
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 16.dp)
-        ) {
-            CustomTopBar(
-                actualQuestion = actualQuestion,
-                totalQuestions = totalQuestions,
-                guideContext = guideContext,
-                onDeleteQuestionClick = onDeleteQuestionClick,
-                onBackQuestionClick = onBackQuestionClick,
-                onNextQuestionClick = onNextQuestionClick
-            )
-            QASelectType(
-                typeForSelected = typeForSelected,
-                cardType = cardType,
-                onCardTypeClicked = { cardTypeClicked ->
-                    onCardTypeClicked(cardTypeClicked)
-                })
-            FilterTypeItem(
-                mediaForSelected = mediaForSelected,
-                mediaSelected = mediaSelected,
-                onFilterTypeClicked = { filterTypeClicked ->
-                    onFilterTypeClicked(filterTypeClicked)
-                })
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(horizontal = 16.dp)
+            ) {
+                CustomTopBar(
+                    actualQuestion = actualQuestion,
+                    totalQuestions = totalQuestions,
+                    guideContext = guideContext,
+                    onDeleteQuestionClick = onDeleteQuestionClick,
+                    onBackQuestionClick = onBackQuestionClick,
+                    onNextQuestionClick = onNextQuestionClick
+                )
+                QASelectType(
+                    typeForSelected = typeForSelected,
+                    cardType = cardType,
+                    onCardTypeClicked = { cardTypeClicked ->
+                        onCardTypeClicked(cardTypeClicked)
+                    })
+                FilterTypeItem(
+                    mediaForSelected = mediaForSelected,
+                    mediaSelected = mediaSelected,
+                    onFilterTypeClicked = { filterTypeClicked ->
+                        onFilterTypeClicked(filterTypeClicked)
+                    })
 
-            AssetCarouselViewer(
-                assets = listTypeMedia,
-                mediaForSelected = mediaSelected,
-                guideContext = guideContext,
-                currentPosContent = currentPosContent,
-                onAddAssetClick = { posItem -> onAddAssetClick(posItem) },
-                onDeleteItemClick = { typeContent, positionItem ->
-                    onDeleteItemClick(
-                        typeContent,
-                        positionItem
-                    )
-                },
-                onOpenAssetClick = { typeContent, posItem ->
-                    onOpenAssetClick(
-                        typeContent,
-                        posItem
-                    )
-                },
-                onCurrentPosContent = { position -> onCurrentPosContent(position) },
-                onMoveItem = { from, to -> onMoveItem(from, to) }
+                AssetCarouselViewer(
+                    assets = listTypeMedia,
+                    mediaForSelected = mediaSelected,
+                    guideContext = guideContext,
+                    currentPosContent = currentPosContent,
+                    onAddAssetClick = { posItem -> onAddAssetClick(posItem) },
+                    onDeleteItemClick = { typeContent, positionItem ->
+                        onDeleteItemClick(
+                            typeContent,
+                            positionItem
+                        )
+                    },
+                    onOpenAssetClick = { typeContent, posItem ->
+                        onOpenAssetClick(
+                            typeContent,
+                            posItem
+                        )
+                    },
+                    onCurrentPosContent = { position -> onCurrentPosContent(position) },
+                    onMoveItem = { from, to -> onMoveItem(from, to) }
+                )
+            }
+
+            PlusOneAnimation(
+                visible = showPlusOneAnimation,
+                onAnimationFinish = {
+                    showPlusOneAnimation = false
+                    onAddQuestion()
+                    isAnimating = false
+                }
             )
         }
 
@@ -485,6 +516,133 @@ private fun NewQuestionIcon(modifier: Modifier = Modifier) {
                     CircleShape
                 )
                 .padding(1.dp)
+        )
+    }
+}
+
+@Composable
+private fun PlusOneAnimation(
+    visible: Boolean,
+    onAnimationFinish: () -> Unit
+) {
+    if (!visible) return
+
+    val configuration = LocalConfiguration.current
+    val density = LocalDensity.current
+
+    val screenWidth = with(density) { configuration.screenWidthDp.dp.toPx() }
+    val screenHeight = with(density) { configuration.screenHeightDp.dp.toPx() }
+
+    val animProgress = remember { Animatable(0f) }
+    val pulseScale = remember { Animatable(1f) }
+    var showPulse by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        // Fase de convergencia: los dos +1 viajan al centro
+        animProgress.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(durationMillis = 800)
+        )
+
+        // Fase de impacto: pequeño estallido en el destino
+        showPulse = true
+        pulseScale.animateTo(
+            targetValue = 2f,
+            animationSpec = tween(durationMillis = 300)
+        )
+        onAnimationFinish()
+    }
+
+    val endY = screenHeight * 0.08f
+
+    // Ajuste fino para terminar debajo de cada número
+    // Estimamos que el primer número está unos 40px a la izquierda del centro y el segundo 40px a la derecha
+    val targetActualX = screenWidth * 0.5f - 45f
+    val targetTotalX = screenWidth * 0.5f + 45f
+
+    val alpha = if (animProgress.value < 0.8f) {
+        (animProgress.value / 0.2f).coerceAtMost(1f)
+    } else {
+        (1f - animProgress.value) / 0.2f
+    }
+
+    Box(Modifier.fillMaxSize()) {
+        if (!showPulse) {
+            val startX = screenWidth * 0.85f
+            val startY = screenHeight * 0.85f
+
+            // +1 "Actual" (Hacia el primer número)
+            val currentActualX = startX + (targetActualX - startX) * animProgress.value
+            val currentActualY = startY + (endY - startY) * animProgress.value
+
+            Text(
+                text = "+1",
+                color = MaterialTheme.colorScheme.primary,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Black,
+                modifier = Modifier
+                    .offset {
+                        IntOffset(
+                            currentActualX.roundToInt(),
+                            currentActualY.roundToInt() + 60
+                        )
+                    }
+                    .graphicsLayer(
+                        alpha = alpha,
+                        scaleX = 0.6f + animProgress.value * 0.4f,
+                        scaleY = 0.6f + animProgress.value * 0.4f,
+                        rotationZ = -20f * (1f - animProgress.value)
+                    )
+            )
+
+            // +1 "Total" (Hacia el segundo número)
+            val currentTotalX = startX + (targetTotalX - startX) * animProgress.value
+            val currentTotalY = startY + (endY - startY) * animProgress.value
+
+            Text(
+                text = "+1",
+                color = MaterialTheme.colorScheme.primary,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Black,
+                modifier = Modifier
+                    .offset {
+                        IntOffset(
+                            currentTotalX.roundToInt(),
+                            currentTotalY.roundToInt() + 60
+                        )
+                    }
+                    .graphicsLayer(
+                        alpha = alpha,
+                        scaleX = 0.6f + animProgress.value * 0.4f,
+                        scaleY = 0.6f + animProgress.value * 0.4f,
+                        rotationZ = 20f * (1f - animProgress.value)
+                    )
+            )
+        } else {
+            // Animación de impacto doble debajo de los números
+            ImpactText(x = targetActualX, y = endY + 60, scale = pulseScale.value)
+            ImpactText(x = targetTotalX, y = endY + 60, scale = pulseScale.value)
+        }
+    }
+}
+
+@Composable
+private fun ImpactText(x: Float, y: Float, scale: Float) {
+    Box(
+        modifier = Modifier
+            .offset { IntOffset(x.roundToInt(), y.roundToInt()) }
+            .graphicsLayer(
+                scaleX = scale,
+                scaleY = scale,
+                alpha = 1f - (scale - 1f)
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "+1",
+            color = MaterialTheme.colorScheme.primary,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.ExtraBold
         )
     }
 }
