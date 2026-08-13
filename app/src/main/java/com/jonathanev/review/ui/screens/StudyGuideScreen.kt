@@ -252,7 +252,8 @@ fun FillingGuideRoute(
                     viewModel.updatePosContent(position)
                 },
                 onDismissRequest = viewModel::onDismissDialogDeleteQuestion,
-                onMoveItem = { from, to -> viewModel.onMoveItem(from, to) }
+                onMoveItem = { from, to -> viewModel.onMoveItem(from, to) },
+                onEditGuideClick = viewModel::switchToEditMode
             )
         }
     }
@@ -287,7 +288,8 @@ fun FillingGuideScreen(
     onCloseGuide: () -> Unit,
     onCurrentPosContent: (Int) -> Unit,
     onDismissRequest: () -> Unit,
-    onMoveItem: (Int, Int) -> Unit = { _, _ -> }
+    onMoveItem: (Int, Int) -> Unit = { _, _ -> },
+    onEditGuideClick: () -> Unit = {}
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -296,7 +298,8 @@ fun FillingGuideScreen(
             FloatingActionButtons(
                 guideContext = guideContext,
                 onAddQuestion = onAddQuestion,
-                onCloseGuide = onCloseGuide
+                onCloseGuide = onCloseGuide,
+                onEditGuide = onEditGuideClick
             )
         }
     ) { padding ->
@@ -389,17 +392,35 @@ fun FillingGuideScreen(
 private fun FloatingActionButtons(
     guideContext: GuideContext,
     onAddQuestion: () -> Unit,
-    onCloseGuide: () -> Unit
+    onCloseGuide: () -> Unit,
+    onEditGuide: () -> Unit
 ) {
     Column(
         horizontalAlignment = Alignment.End,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        if (guideContext is GuideContext.Browsing) {
+            FloatingActionButton(
+                onClick = singleClick { onEditGuide() },
+                containerColor = MaterialTheme.colorScheme.secondary,
+                contentColor = MaterialTheme.colorScheme.onSecondary,
+                shape = CircleShape,
+                modifier = Modifier.size(56.dp)
+            ) {
+                Icon(
+                    modifier = Modifier.size(30.dp),
+                    painter = painterResource(R.drawable.ic_edit),
+                    contentDescription = "Editar guía",
+                    tint = MaterialTheme.colorScheme.onSecondary
+                )
+            }
+        }
+
         if (guideContext !is GuideContext.Browsing) {
             FloatingActionButton(
                 onClick = singleClick { onAddQuestion() },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
+                containerColor = MaterialTheme.colorScheme.secondary,
+                contentColor = MaterialTheme.colorScheme.onSecondary,
                 shape = CircleShape,
                 modifier = Modifier.size(56.dp)
             ) {

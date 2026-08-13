@@ -11,18 +11,22 @@ import android.graphics.Color as AndroidColor
 
 val LightColors = lightColorScheme(
     primary = HardColorButton,
+    onPrimary = LightOnPrimary,
+    secondary = LightSecondary,
+    onSecondary = LightOnSecondary,
     background = LightBackground,
     surface = LightBackground,
-    onSurface = Black,
-    onPrimary = LightOnPrimary
+    onSurface = Black
 )
 
 val DarkColors = darkColorScheme(
     primary = HardColorButton,
+    onPrimary = LightOnPrimary,
+    secondary = DarkSecondary,
+    onSecondary = DarkOnSecondary,
     background = DarkBackground,
     surface = DarkBackground,
-    onSurface = White,
-    onPrimary = LightOnPrimary
+    onSurface = White
 )
 
 val cardStepBackground: Color
