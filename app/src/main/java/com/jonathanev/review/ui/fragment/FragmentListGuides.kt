@@ -138,7 +138,7 @@ class FragmentListGuides : Fragment() {
             }
         }
 
-        lifecycleScope.launch {
+        /*lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.eventsMessages.collect { event ->
                     /*when (event) {
@@ -161,7 +161,7 @@ class FragmentListGuides : Fragment() {
                     }*/
                 }
             }
-        }
+        }*/
 
         requireActivity().onBackPressedDispatcher.addCallback(
             viewLifecycleOwner,

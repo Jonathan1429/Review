@@ -11,7 +11,7 @@ import com.jonathanev.review.domain.ResetNavigationUseCase
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.MoveGuideResponse
-import com.jonathanev.review.presentation.event.UIMovingEvent
+import com.jonathanev.review.presentation.event.StateGuideActionEvent
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.FileInteractionMode
 import com.jonathanev.review.presentation.model.QuestionItemUi
@@ -37,7 +37,7 @@ class FragmentWithoutFilesViewModel @Inject constructor(
     private val clearGuideMoveUseCase: ClearGuideMoveUseCase,
     private val resetNavigationUseCase: ResetNavigationUseCase,
 ) : ViewModel() {
-    private val _eventsMovingFiles = MutableSharedFlow<UIMovingEvent>()
+    private val _eventsMovingFiles = MutableSharedFlow<StateGuideActionEvent>()
     val eventsMovingFiles = _eventsMovingFiles.asSharedFlow()
 
     val uiState: StateFlow<GuidesUiState> = loadGuidesUseCase.invoke()
@@ -75,7 +75,7 @@ class FragmentWithoutFilesViewModel @Inject constructor(
 
     private fun eventMovingFile(message: String) {
         viewModelScope.launch {
-            _eventsMovingFiles.emit(UIMovingEvent.ShowMessage(message))
+            _eventsMovingFiles.emit(StateGuideActionEvent.ShowMessage(message))
         }
     }
 

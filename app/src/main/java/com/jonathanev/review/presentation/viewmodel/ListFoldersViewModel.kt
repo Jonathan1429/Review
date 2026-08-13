@@ -13,7 +13,7 @@ import com.jonathanev.review.domain.ResetNavigationUseCase
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.result.FolderResultDomain
 import com.jonathanev.review.presentation.event.FolderActionEvent
-import com.jonathanev.review.presentation.event.UIMovingEvent
+import com.jonathanev.review.presentation.event.StateGuideActionEvent
 import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.FileInteractionMode
@@ -69,7 +69,7 @@ class ListFoldersViewModel @Inject constructor(
     private val _eventsMessages = MutableSharedFlow<FolderActionEvent>()
     val eventsMessages = _eventsMessages.asSharedFlow()
 
-    private val _eventsMovingFiles = MutableSharedFlow<UIMovingEvent>()
+    private val _eventsMovingFiles = MutableSharedFlow<StateGuideActionEvent>()
     val eventsMovingFiles = _eventsMovingFiles.asSharedFlow()
 
     val interactionMode: StateFlow<FileInteractionMode> = getGuideContextUseCase()

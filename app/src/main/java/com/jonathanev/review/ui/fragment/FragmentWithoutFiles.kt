@@ -19,7 +19,7 @@ import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.jonathanev.review.R
 import com.jonathanev.review.databinding.FragmentWithoutFilesBinding
-import com.jonathanev.review.presentation.event.UIMovingEvent
+import com.jonathanev.review.presentation.event.StateGuideActionEvent
 import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.presentation.viewmodel.FragmentWithoutFilesViewModel
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
@@ -61,7 +61,7 @@ class FragmentWithoutFiles : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.eventsMovingFiles.collect { message ->
                     when (message) {
-                        is UIMovingEvent.ShowMessage -> {
+                        is StateGuideActionEvent.ShowMessage -> {
                             Toast.makeText(
                                 requireContext(),
                                 message.text,
@@ -69,9 +69,12 @@ class FragmentWithoutFiles : Fragment() {
                             ).show()
                         }
 
-                        UIMovingEvent.ExistFile -> {
+                        StateGuideActionEvent.ExistFile -> {
                             Log.i("ExistFile: ", "Imposible que entre aquí")
                         }
+
+                        StateGuideActionEvent.GuideDeleteSuccess ->
+                            Log.i("GuideDeleteSuccess: ", "Imposible que entre aquí")
                     }
                 }
             }

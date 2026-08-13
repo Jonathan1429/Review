@@ -34,7 +34,8 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jonathanev.review.R
-import com.jonathanev.review.presentation.event.GuideActionEvent
+import com.jonathanev.review.presentation.event.NavGuideActionEvent
+import com.jonathanev.review.presentation.event.StateGuideActionEvent
 import com.jonathanev.review.presentation.model.FileInteractionMode
 import com.jonathanev.review.presentation.model.GuideMenuOption
 import com.jonathanev.review.presentation.model.GuideResultUi
@@ -92,27 +93,35 @@ fun ListGuidesRoute(
     LaunchedEffect(Unit) {
         viewModel.clearActiveGuide()
 
-        viewModel.eventsMessages.collect { event ->
+        viewModel.navGuideActionEvent.collect { event ->
             when (event) {
-                is GuideActionEvent.ShowMessage -> {
-                    showToast(event.text, context)
-                }
-
-                is GuideActionEvent.GuideDeleteSuccess -> {
-                    showToast("Guia borrada exitosamente", context)
-                }
-
-                GuideActionEvent.OpenGuide -> {
+                NavGuideActionEvent.OpenNavGuide -> {
                     onOpenGuideClick()
                 }
 
-                is GuideActionEvent.RenameGuide -> {
+                is NavGuideActionEvent.RenameNavGuide -> {
                     onRenameGuideClick(event.guideUiModel)
                 }
 
-                GuideActionEvent.MoveGuide -> {
+                NavGuideActionEvent.MoveNavGuide -> {
                     onMoveGuideClick()
                 }
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.stateGuideActionEvent.collect { event ->
+            when (event) {
+                StateGuideActionEvent.ExistFile -> {
+                    showToast("Ya existe un archivo con el mismo nombre", context)
+                }
+
+                StateGuideActionEvent.GuideDeleteSuccess ->
+                    showToast("Se ha borrado exitosamente la guia", context)
+
+                is StateGuideActionEvent.ShowMessage ->
+                    showToast(event.text, context)
             }
         }
     }

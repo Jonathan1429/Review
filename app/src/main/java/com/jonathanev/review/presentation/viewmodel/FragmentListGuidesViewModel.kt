@@ -20,8 +20,8 @@ import com.jonathanev.review.domain.result.DeleteGuideResult
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.GuideResultDomain
 import com.jonathanev.review.domain.result.MoveGuideResponse
-import com.jonathanev.review.presentation.event.GuideActionEvent
-import com.jonathanev.review.presentation.event.UIMovingEvent
+import com.jonathanev.review.presentation.event.NavGuideActionEvent
+import com.jonathanev.review.presentation.event.StateGuideActionEvent
 import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.FileInteractionMode
@@ -58,7 +58,7 @@ class FragmentListGuidesViewModel @Inject constructor(
     private val setActiveGuideUseCase: SetActiveGuideUseCase,
     private val clearActiveGuideUseCase: ClearActiveGuideUseCase,
     private val clearGuideMoveUseCase: ClearGuideMoveUseCase,
-    private val observePathUseCase: ObservePathUseCase
+    observePathUseCase: ObservePathUseCase
 ) : ViewModel() {
     @OptIn(ExperimentalCoroutinesApi::class)
     val uiState: StateFlow<GuidesUiState> = observePathUseCase.invoke()
@@ -79,11 +79,11 @@ class FragmentListGuidesViewModel @Inject constructor(
         MutableStateFlow<ActionDialogState<GuideUiModel>>(ActionDialogState.Hidden)
     val dialogState: StateFlow<ActionDialogState<GuideUiModel>> = _dialogState.asStateFlow()
 
-    private val _eventsMessages = MutableSharedFlow<GuideActionEvent>()
-    val eventsMessages = _eventsMessages.asSharedFlow()
+    private val _navGuideActionEvent = MutableSharedFlow<NavGuideActionEvent>()
+    val navGuideActionEvent = _navGuideActionEvent.asSharedFlow()
 
-    private val _eventsMovingFiles = MutableSharedFlow<UIMovingEvent>()
-    val eventsMovingFiles = _eventsMovingFiles.asSharedFlow() // usar estos eventos en compose
+    private val _stateGuideActionEvent = MutableSharedFlow<StateGuideActionEvent>()
+    val stateGuideActionEvent = _stateGuideActionEvent.asSharedFlow()
 
     val interactionMode: StateFlow<FileInteractionMode> = getGuideContextUseCase()
         .map { activeMoving ->
@@ -109,9 +109,15 @@ class FragmentListGuidesViewModel @Inject constructor(
         }
     }
 
-    private fun emitMessage(guideActionEvent: GuideActionEvent) {
+    private fun emitNavigation(navGuideActionEvent: NavGuideActionEvent) {
         viewModelScope.launch {
-            _eventsMessages.emit(guideActionEvent)
+            _navGuideActionEvent.emit(navGuideActionEvent)
+        }
+    }
+
+    private fun emitMessage(stateGuideActionEvent: StateGuideActionEvent) {
+        viewModelScope.launch {
+            _stateGuideActionEvent.emit(stateGuideActionEvent)
         }
     }
 
@@ -122,14 +128,14 @@ class FragmentListGuidesViewModel @Inject constructor(
                     val isExistGuide = guides.any { it.nameGuide == context.guide.nameGuide }
 
                     if (isExistGuide) {
-                        _eventsMovingFiles.emit(UIMovingEvent.ExistFile)
+                        emitMessage(StateGuideActionEvent.ExistFile)
                         return@launch
                     }
 
                     onContinueProcess(true)
                 }
 
-                else -> eventMovingFile("Error inesperado")
+                else -> emitMessage(StateGuideActionEvent.ShowMessage("Error inesperado"))
             }
         }
     }
@@ -146,39 +152,37 @@ class FragmentListGuidesViewModel @Inject constructor(
                                 moveGuideUseCase.invoke(guideData, context)
                             when (response) {
                                 MoveGuideResponse.ErrorMovingGuide ->
-                                    eventMovingFile("Error al intentar mover la guia")
+                                    emitMessage(StateGuideActionEvent.ShowMessage("Error al intentar mover la guia"))
 
                                 MoveGuideResponse.ErrorMovingImages ->
-                                    eventMovingFile("Error al intentar mover imagenes")
+                                    emitMessage(StateGuideActionEvent.ShowMessage("Error al intentar mover imagenes"))
 
                                 MoveGuideResponse.ErrorPathGuide ->
-                                    eventMovingFile("No existe la ruta para mover la guia")
+                                    emitMessage(StateGuideActionEvent.ShowMessage("No existe la ruta para mover la guia"))
 
                                 MoveGuideResponse.ErrorPathImages ->
-                                    eventMovingFile("No existe una ruta para guardar las imagenes")
+                                    emitMessage(StateGuideActionEvent.ShowMessage("No existe una ruta para guardar las imagenes"))
 
                                 MoveGuideResponse.Success -> {
-                                    eventMovingFile("Guia movida exitosamente")
+                                    emitMessage(StateGuideActionEvent.ShowMessage("Guia movida exitosamente"))
                                 }
                             }
                         }
 
-                        GetGuideResult.InvalidFormat -> eventMovingFile("La guia está dañada")
+                        GetGuideResult.InvalidFormat ->
+                            emitMessage(StateGuideActionEvent.ShowMessage("La guia está dañada"))
 
-                        GetGuideResult.NotFound -> eventMovingFile("No se ha encontrado la guia")
+                        GetGuideResult.NotFound ->
+                            emitMessage(StateGuideActionEvent.ShowMessage("No se ha encontrado la guia"))
 
-                        GetGuideResult.UnknownError -> eventMovingFile("Error desconocido")
+                        GetGuideResult.UnknownError ->
+                            emitMessage(StateGuideActionEvent.ShowMessage("Guia movida exitosamente"))
                     }
                 }
 
-                else -> eventMovingFile("Error inesperado")
+                else ->
+                    emitMessage(StateGuideActionEvent.ShowMessage("Error inesperado"))
             }
-        }
-    }
-
-    private fun eventMovingFile(message: String) {
-        viewModelScope.launch {
-            _eventsMovingFiles.emit(UIMovingEvent.ShowMessage(message))
         }
     }
 
@@ -196,7 +200,7 @@ class FragmentListGuidesViewModel @Inject constructor(
             } catch (e: Exception) {
                 e.printStackTrace()
                 emitMessage(
-                    GuideActionEvent.ShowMessage(
+                    StateGuideActionEvent.ShowMessage(
                         e.message ?: "Ocurrió un error inesperado"
                     )
                 )
@@ -215,7 +219,7 @@ class FragmentListGuidesViewModel @Inject constructor(
             } catch (e: Exception) {
                 e.printStackTrace()
                 emitMessage(
-                    GuideActionEvent.ShowMessage(
+                    StateGuideActionEvent.ShowMessage(
                         e.message ?: "Ocurrió un error inesperado"
                     )
                 )
@@ -232,7 +236,7 @@ class FragmentListGuidesViewModel @Inject constructor(
             } catch (e: Exception) {
                 e.printStackTrace()
                 emitMessage(
-                    GuideActionEvent.ShowMessage(
+                    StateGuideActionEvent.ShowMessage(
                         e.message ?: "Ocurrió un error inesperado"
                     )
                 )
@@ -259,14 +263,14 @@ class FragmentListGuidesViewModel @Inject constructor(
             val response = deleteGuideUseCase.invoke(guideDomainModel)
             when (response) {
                 DeleteGuideResult.DeleteSuccess -> {
-                    emitMessage(GuideActionEvent.GuideDeleteSuccess)
+                    emitMessage(StateGuideActionEvent.GuideDeleteSuccess)
                 }
 
-                DeleteGuideResult.ErrorGuide -> emitMessage(GuideActionEvent.ShowMessage("Hubo un error al borrar la guia"))
+                DeleteGuideResult.ErrorGuide -> emitMessage(StateGuideActionEvent.ShowMessage("Hubo un error al borrar la guia"))
                 DeleteGuideResult.ErrorImage ->
-                    emitMessage(GuideActionEvent.ShowMessage("Hubo inconvenientes en el borrado completo de archivos"))
+                    emitMessage(StateGuideActionEvent.ShowMessage("Hubo inconvenientes en el borrado completo de archivos"))
 
-                else -> emitMessage(GuideActionEvent.ShowMessage("Ocurrió un error al eliminar la guia"))
+                else -> emitMessage(StateGuideActionEvent.ShowMessage("Ocurrió un error al eliminar la guia"))
             }
         }
     }
@@ -274,18 +278,18 @@ class FragmentListGuidesViewModel @Inject constructor(
     fun onOpenGuide(guideUIModel: GuideUiModel) {
         onDismissDialog()
         setActiveGuide(guideUIModel)
-        emitMessage(GuideActionEvent.OpenGuide)
+        emitNavigation(NavGuideActionEvent.OpenNavGuide)
     }
 
     fun onRenameGuide(guideUIModel: GuideUiModel) {
         onDismissDialog()
-        emitMessage(GuideActionEvent.RenameGuide(guideUIModel))
+        emitNavigation(NavGuideActionEvent.RenameNavGuide(guideUIModel))
     }
 
     fun onMoveGuide(guideUIModel: GuideUiModel) {
         onDismissDialog()
         setContextMoving(guideUIModel)
-        emitMessage(GuideActionEvent.MoveGuide)
+        emitNavigation(NavGuideActionEvent.MoveNavGuide)
     }
 
     /*fun resetNavigationPath() {
