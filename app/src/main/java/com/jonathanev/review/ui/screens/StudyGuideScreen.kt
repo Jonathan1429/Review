@@ -35,9 +35,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -527,11 +527,11 @@ private fun PlusOneAnimation(
 ) {
     if (!visible) return
 
-    val configuration = LocalConfiguration.current
+    val configuration = LocalWindowInfo.current.containerSize
     val density = LocalDensity.current
 
-    val screenWidth = with(density) { configuration.screenWidthDp.dp.toPx() }
-    val screenHeight = with(density) { configuration.screenHeightDp.dp.toPx() }
+    val screenWidth = with(density) { configuration.width.dp.toPx() }
+    val screenHeight = with(density) { configuration.height.dp.toPx() }
 
     val animProgress = remember { Animatable(0f) }
     val pulseScale = remember { Animatable(1f) }
