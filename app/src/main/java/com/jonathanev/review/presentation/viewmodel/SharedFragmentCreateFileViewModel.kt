@@ -13,7 +13,6 @@ import com.jonathanev.review.domain.SetContextEditUseCase
 import com.jonathanev.review.domain.SetCrearXmlUseCase
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
-import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
 import com.jonathanev.review.domain.repository.UserPreferencesRepository
@@ -544,13 +543,8 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         viewModelScope.launch {
             val currentState = uiState.value as? GuideScreenUiState.Success ?: return@launch
 
-            val currentContext = getGuideContextUseCase.invoke().firstOrNull()
-                ?: GuideContext.Browsing(
-                    guide = GuideDomainModel(GuideVersion.V2, "", ""),
-                    position = 0
-                )
-
-            val (guideDomainModel, saveGuideMode) = when (currentContext) {
+            val (guideDomainModel, saveGuideMode) = when (val currentContext =
+                currentState.guideContext) {
                 is GuideContext.Creating -> {
                     currentContext.guide to SaveGuideMode.Create
                 }
@@ -564,6 +558,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                     return@launch
                 }
             }
+
             val response = setCrearXmlUseCase.invoke(
                 guideDomainModel = guideDomainModel,
                 preguntas = currentState.preguntas.map { it.toDomain() },

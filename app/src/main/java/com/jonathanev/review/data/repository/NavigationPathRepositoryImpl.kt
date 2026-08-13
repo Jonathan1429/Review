@@ -9,11 +9,14 @@ import com.jonathanev.review.domain.model.GuidePath
 import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.provider.FilePathsProvider
 import com.jonathanev.review.domain.repository.NavigationPathRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -53,16 +56,19 @@ class NavigationPathRepositoryImpl @Inject constructor(
 
     override suspend fun next(fileName: String): Result<Unit> = runCatching {
         val sanitizedPath = fileName.trim()
-        preferencesDataStore.edit { preferences ->
-            preferences[KEY_PATH] = sanitizedPath
+
+        withContext(Dispatchers.IO + NonCancellable) {
+            preferencesDataStore.edit { preferences ->
+                preferences[KEY_PATH] = sanitizedPath
+            }
         }
-        Unit
     }
 
     override suspend fun reset(): Result<Unit> = runCatching {
-        preferencesDataStore.edit { preferences ->
-            preferences[KEY_PATH] = ""
+        withContext(Dispatchers.IO + NonCancellable) {
+            preferencesDataStore.edit { preferences ->
+                preferences[KEY_PATH] = ""
+            }
         }
-        Unit
     }
 }
