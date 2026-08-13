@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -15,6 +17,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -65,9 +68,7 @@ fun CreateImageRoute(
     questionContentMode: QuestionContentMode,
     onBackNav: () -> Unit
 ) {
-    val imageList by viewModel.imageList.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    var newlyPickedUri by rememberSaveable { mutableStateOf<String?>(null) }
 
     when (val state = uiState) {
         is GuideScreenUiState.Loading -> {
@@ -87,13 +88,17 @@ fun CreateImageRoute(
         }
 
         is GuideScreenUiState.Success -> {
-            val uriImage = when (questionContentMode) {
-                QuestionContentMode.CREATING -> {
-                    newlyPickedUri ?: ""
-                }
+            val imageList by viewModel.imageList.collectAsStateWithLifecycle()
+            var newlyPickedUri by rememberSaveable { mutableStateOf<String?>(null) }
 
-                QuestionContentMode.EDITING -> {
-                    newlyPickedUri ?: imageList.getOrNull(posItem)?.uri ?: ""
+            val pagerState = rememberPagerState(initialPage = posItem) {
+                if (questionContentMode == QuestionContentMode.CREATING) 1 else imageList.size
+            }
+
+            // Sync with ViewModel when page changes
+            LaunchedEffect(pagerState.currentPage) {
+                if (questionContentMode == QuestionContentMode.EDITING) {
+                    viewModel.updatePosContent(pagerState.currentPage)
                 }
             }
 
@@ -110,17 +115,44 @@ fun CreateImageRoute(
                 }
             }
 
-            CreateImageScreen(
-                guideContext = state.guideContext,
-                uriImage = uriImage,
-                selectedImage = {
-                    resultLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                },
-                imageUploaded = {
-                    onBackNav()
-                },
-                onBackNav = onBackNav
-            )
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxSize(),
+                userScrollEnabled = questionContentMode == QuestionContentMode.EDITING
+            ) { page ->
+                val uriImage = when (questionContentMode) {
+                    QuestionContentMode.CREATING -> {
+                        newlyPickedUri ?: ""
+                    }
+
+                    QuestionContentMode.EDITING -> {
+                        if (page == pagerState.currentPage && newlyPickedUri != null) {
+                            newlyPickedUri!!
+                        } else {
+                            imageList.getOrNull(page)?.uri ?: ""
+                        }
+                    }
+                }
+
+                CreateImageScreen(
+                    guideContext = state.guideContext,
+                    uriImage = uriImage,
+                    selectedImage = {
+                        resultLauncher.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                        )
+                    },
+                    imageUploaded = {
+                        onBackNav()
+                    },
+                    onBackNav = onBackNav
+                )
+            }
+
+            // Reset newlyPickedUri when navigating away from a page or when list updates
+            LaunchedEffect(pagerState.currentPage) {
+                newlyPickedUri = null
+            }
         }
     }
 }
