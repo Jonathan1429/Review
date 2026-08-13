@@ -14,7 +14,6 @@ import com.jonathanev.review.domain.result.MoveGuideResponse
 import com.jonathanev.review.presentation.event.StateGuideActionEvent
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.FileInteractionMode
-import com.jonathanev.review.presentation.model.QuestionItemUi
 import com.jonathanev.review.presentation.state.GuidesUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -33,12 +32,12 @@ class FragmentWithoutFilesViewModel @Inject constructor(
     private val moveGuideUseCase: MoveGuideUseCase,
     private val getGuideContextUseCase: GetGuideContextUseCase,
     private val getGuideXmlDataUseCase: GetGuideXmlDataUseCase,
-    private val loadGuidesUseCase: LoadGuidesUseCase,
+    loadGuidesUseCase: LoadGuidesUseCase,
     private val clearGuideMoveUseCase: ClearGuideMoveUseCase,
     private val resetNavigationUseCase: ResetNavigationUseCase,
 ) : ViewModel() {
-    private val _eventsMovingFiles = MutableSharedFlow<StateGuideActionEvent>()
-    val eventsMovingFiles = _eventsMovingFiles.asSharedFlow()
+    private val _stateGuideActionEvent = MutableSharedFlow<StateGuideActionEvent>()
+    val stateGuideActionEvent = _stateGuideActionEvent.asSharedFlow()
 
     val uiState: StateFlow<GuidesUiState> = loadGuidesUseCase.invoke()
         .map { list ->
@@ -50,12 +49,6 @@ class FragmentWithoutFilesViewModel @Inject constructor(
             started = SharingStarted.Eagerly,
             initialValue = GuidesUiState.Loading
         )
-
-    private var _preguntas: MutableList<QuestionItemUi> = mutableListOf()
-    val preguntas: List<QuestionItemUi> get() = _preguntas
-
-    private var _respuestas: MutableList<QuestionItemUi> = mutableListOf()
-    val respuestas: List<QuestionItemUi> get() = _respuestas
 
     val interactionMode: StateFlow<FileInteractionMode> = getGuideContextUseCase()
         .map { activeMoving ->
@@ -75,7 +68,7 @@ class FragmentWithoutFilesViewModel @Inject constructor(
 
     private fun eventMovingFile(message: String) {
         viewModelScope.launch {
-            _eventsMovingFiles.emit(StateGuideActionEvent.ShowMessage(message))
+            _stateGuideActionEvent.emit(StateGuideActionEvent.ShowMessage(message))
         }
     }
 

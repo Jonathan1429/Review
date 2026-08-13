@@ -1,5 +1,7 @@
 package com.jonathanev.review.ui.screens
 
+import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -35,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jonathanev.review.R
+import com.jonathanev.review.presentation.event.StateGuideActionEvent
 import com.jonathanev.review.presentation.model.FileInteractionMode
 import com.jonathanev.review.presentation.state.GuidesUiState
 import com.jonathanev.review.presentation.viewmodel.FragmentWithoutFilesViewModel
@@ -65,6 +69,7 @@ fun WithoutFilesRoute(
     onAddGuideClick: () -> Unit,
     onNavListGuides: () -> Unit
 ) {
+    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val interactionMode by viewModel.interactionMode.collectAsStateWithLifecycle()
 
@@ -74,6 +79,21 @@ fun WithoutFilesRoute(
         }
     }
 
+    LaunchedEffect(Unit) {
+        viewModel.stateGuideActionEvent.collect { event ->
+            when (event) {
+                StateGuideActionEvent.ExistFile -> {
+                    showToast("Ya existe un archivo con el mismo nombre", context)
+                }
+
+                StateGuideActionEvent.GuideDeleteSuccess ->
+                    showToast("Se ha borrado exitosamente la guia", context)
+
+                is StateGuideActionEvent.ShowMessage ->
+                    showToast(event.text, context)
+            }
+        }
+    }
     DisposableEffect(Unit) {
         onDispose {
             viewModel.resetNavigationPath()
@@ -184,4 +204,8 @@ fun WithoutFilesScreen(
             )
         }
     }
+}
+
+private fun showToast(text: String, context: Context) {
+    Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
 }
