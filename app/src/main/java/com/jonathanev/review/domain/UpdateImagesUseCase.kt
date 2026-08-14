@@ -1,5 +1,6 @@
 package com.jonathanev.review.domain
 
+import com.jonathanev.review.domain.constants.Constants
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.ImageContext
@@ -57,7 +58,11 @@ class UpdateImagesUseCase @Inject constructor(
         )
 
         val addImages =
-            listImages.filter { it.nameFile !in imagesInDevice && it.uri.isNotEmpty() }
+            listImages.filter {
+                it.nameFile !in imagesInDevice &&
+                        it.uri.isNotEmpty() &&
+                        it.uri != Constants.IMAGE_CORRUPT
+            }
 
         addImages.forEach { image ->
             imagesRepository.save(image, guideDomain)

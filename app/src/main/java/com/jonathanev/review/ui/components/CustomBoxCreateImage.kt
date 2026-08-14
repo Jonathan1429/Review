@@ -7,6 +7,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import coil.request.ImageRequest
+import com.jonathanev.review.R
+import com.jonathanev.review.domain.constants.Constants
 import me.saket.telephoto.zoomable.coil.ZoomableAsyncImage
 import java.io.File
 
@@ -18,7 +20,13 @@ fun CustomBoxCreateImage(
     val context = LocalContext.current
 
     val imageModel: Any = remember(uriImage) {
-        if (uriImage.startsWith("/")) File(uriImage) else uriImage
+        if (uriImage == Constants.IMAGE_CORRUPT) {
+            R.drawable.archivo_corrupto
+        } else if (uriImage.startsWith("/")) {
+            File(uriImage)
+        } else {
+            uriImage
+        }
     }
 
     key(uriImage) {

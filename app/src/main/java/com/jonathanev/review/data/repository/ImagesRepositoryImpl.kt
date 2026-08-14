@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import androidx.core.net.toUri
 import com.jonathanev.review.data.storage.StorageFolders
+import com.jonathanev.review.domain.constants.Constants
 import com.jonathanev.review.domain.constants.Extensions
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuideRenameContext
@@ -31,40 +32,69 @@ class ImagesRepositoryImpl @Inject constructor(
         image: QuestionContentDomain.Image,
         guide: GuideDomainModel
     ): Unit = withContext(Dispatchers.IO) {
-        val currentPath = File(
-            filePathResolver.mapToFolderPathSpecificGuide(
-                guideDomainModel = guide,
-                kind = PathKind.IMAGENES
-            ).value
-        )
+        if (image.uri == Constants.IMAGE_CORRUPT) return@withContext
 
-        // Asegurar que el directorio de imágenes exista antes de escribir
-        if (!currentPath.exists()) {
-            currentPath.mkdirs()
-        }
+        try {
+            val currentPath = File(
+                filePathResolver.mapToFolderPathSpecificGuide(
+                    guideDomainModel = guide,
+                    kind = PathKind.IMAGENES
+                ).value
+            )
 
-        val uri = image.uri.toUri()
-        val outputFile = File(currentPath, image.nameFile)
-
-        // Manejo seguro de streams
-        context.contentResolver.openInputStream(uri)?.use { input ->
-            outputFile.outputStream().use { output ->
-                input.copyTo(output)
+            // Asegurar que el directorio de imágenes exista antes de escribir
+            if (!currentPath.exists()) {
+                currentPath.mkdirs()
             }
-        } ?: throw IllegalStateException("No se pudo abrir el stream de la imagen")
+
+            val uri = image.uri.toUri()
+            val outputFile = File(currentPath, image.nameFile)
+
+            // Manejo seguro de streams
+            val inputStream = if (image.uri.startsWith("/")) {
+                File(image.uri).inputStream()
+            } else {
+                context.contentResolver.openInputStream(uri)
+            }
+
+            inputStream?.use { input ->
+                outputFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            } ?: Log.e("ImagesRepositoryImpl", "No se pudo abrir el stream de la imagen")
+
+        } catch (e: Exception) {
+            Log.e(
+                "ImagesRepositoryImpl",
+                "Error al guardar la imagen ${image.nameFile}: ${e.message}"
+            )
+        }
     }
 
     override suspend fun saveTempImage(uriString: String): String = withContext(Dispatchers.IO) {
-        val uri = uriString.toUri()
-        val tempFile = File(context.cacheDir, "temp_img_${System.currentTimeMillis()}.jpg")
+        if (uriString == Constants.IMAGE_CORRUPT) return@withContext uriString
 
-        context.contentResolver.openInputStream(uri)?.use { input ->
-            tempFile.outputStream().use { output ->
-                input.copyTo(output)
+        try {
+            val uri = uriString.toUri()
+            val tempFile = File(context.cacheDir, "temp_img_${System.currentTimeMillis()}.jpg")
+
+            val inputStream = if (uriString.startsWith("/")) {
+                File(uriString).inputStream()
+            } else {
+                context.contentResolver.openInputStream(uri)
             }
-        } ?: throw IllegalStateException("No se pudo leer la imagen desde: $uri")
 
-        tempFile.toUri().toString()
+            inputStream?.use { input ->
+                tempFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            } ?: return@withContext uriString
+
+            tempFile.toUri().toString()
+        } catch (e: Exception) {
+            Log.e("ImagesRepositoryImpl", "Error al guardar imagen temporal: ${e.message}")
+            uriString
+        }
     }
 
     override suspend fun clearTempImages() {

@@ -14,6 +14,7 @@ import com.jonathanev.review.data.xml.Structure
 import com.jonathanev.review.data.xml.Versions
 import com.jonathanev.review.data.xml.XmlTagsV1
 import com.jonathanev.review.data.xml.XmlTagsV2
+import com.jonathanev.review.domain.constants.Constants
 import com.jonathanev.review.domain.constants.Extensions
 import com.jonathanev.review.domain.model.ContentType
 import com.jonathanev.review.domain.model.GuideContext
@@ -358,7 +359,14 @@ class GuiaRepositoryImpl @Inject constructor(
                     is QuestionContentDomain.Image -> {
                         serializer.startTag("", ContentType.IMAGE.toTagXml())
                         serializer.attribute("", Attributes.URI, "")
-                        serializer.attribute("", Attributes.NAMEFILE, content.nameFile)
+
+                        val finalNameFile = if (content.uri == Constants.IMAGE_CORRUPT) {
+                            Constants.IMAGE_CORRUPT
+                        } else {
+                            content.nameFile
+                        }
+
+                        serializer.attribute("", Attributes.NAMEFILE, finalNameFile)
                         serializer.endTag("", XmlTagsV2.IMAGEN)
                     }
 
@@ -437,11 +445,17 @@ class GuiaRepositoryImpl @Inject constructor(
             for (j in 0 until images.length) {
                 val img = images.item(j) as Element
                 val nameFile = img.getAttribute(Attributes.NAMEFILE)
-                val uri = pathHandler.getSubstringPath(
+
+                var uri = pathHandler.getSubstringPath(
                     path = path,
                     version = version,
                     nameFile = nameFile
                 )
+
+                if (nameFile == Constants.IMAGE_CORRUPT || !File(uri).exists()) {
+                    uri = Constants.IMAGE_CORRUPT
+                }
+                
                 contentList.add(
                     QuestionContentXmlDto.Image(uri, nameFile)
                 )
@@ -492,7 +506,9 @@ class GuiaRepositoryImpl @Inject constructor(
                         guideDomainModel.version
                     )
                     val nameFile = decoded.substringAfterLast("/")
-                    QuestionContentXmlDto.Image(uri = decoded, nameFile = nameFile)
+
+                    val finalUri = if (File(decoded).exists()) decoded else Constants.IMAGE_CORRUPT
+                    QuestionContentXmlDto.Image(uri = finalUri, nameFile = nameFile)
                 } else {
                     val simpleText = labelsHandler.sanitizeLabels(ques)
                     labelsHandler.processAndSanitizeLabels(simpleText)
@@ -511,7 +527,9 @@ class GuiaRepositoryImpl @Inject constructor(
                         guideDomainModel.version
                     )
                     val nameFile = decoded.substringAfterLast("/")
-                    QuestionContentXmlDto.Image(uri = decoded, nameFile = nameFile)
+
+                    val finalUri = if (File(decoded).exists()) decoded else Constants.IMAGE_CORRUPT
+                    QuestionContentXmlDto.Image(uri = finalUri, nameFile = nameFile)
                 } else {
                     val simpleText = labelsHandler.sanitizeLabels(ans)
                     labelsHandler.processAndSanitizeLabels(simpleText)
