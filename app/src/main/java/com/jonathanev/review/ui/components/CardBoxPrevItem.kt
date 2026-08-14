@@ -81,7 +81,7 @@ fun CardBoxPrevItem(
             )
 
             Text(
-                text = if (fileFormMode is FileFormMode.CreatingFolder) "Previsualización de Carpeta" else "Previsualización de Archivo",
+                text = if (fileFormMode is FileFormMode.CreatingFolder || fileFormMode is FileFormMode.RenameFolder) "Previsualización de Carpeta" else "Previsualización de Archivo",
                 style = MaterialTheme.typography.bodySmall,
                 color = getColorSubtitle()
             )

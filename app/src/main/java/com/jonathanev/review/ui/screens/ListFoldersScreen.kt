@@ -74,6 +74,7 @@ fun ListFoldersRoute(
     viewModel: ListFoldersViewModel,
     onCreateFolderClick: () -> Unit,
     onFolderOpen: () -> Unit,
+    onRenameFolderClick: (FolderUiModel) -> Unit,
     onNavWithoutFolders: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -98,6 +99,10 @@ fun ListFoldersRoute(
 
                 FolderActionEvent.OpenFolder -> {
                     onFolderOpen()
+                }
+
+                is FolderActionEvent.RenameFolder -> {
+                    onRenameFolderClick(event.folder)
                 }
             }
         }
@@ -172,6 +177,10 @@ fun ListFoldersRoute(
                             when (option) {
                                 FolderMenuOption.OPEN -> {
                                     viewModel.navigateToDirectory(state.item)
+                                }
+
+                                FolderMenuOption.EDIT -> {
+                                    viewModel.onEditFolder(state.item)
                                 }
 
                                 FolderMenuOption.DELETE -> {

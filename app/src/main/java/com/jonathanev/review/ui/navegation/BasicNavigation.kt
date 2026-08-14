@@ -212,6 +212,13 @@ fun BasicNavigation() {
                         if (backStack.isNotEmpty()) {
                             backStack[backStack.lastIndex] = AppRoutes.WithoutFoldersScreen
                         }
+                    },
+                    onRenameFolderClick = { folder ->
+                        backStack.add(
+                            AppRoutes.CreateFilesPropertiesScreen(
+                                FileFormMode.RenameFolder(folder)
+                            )
+                        )
                     }
                 )
             }

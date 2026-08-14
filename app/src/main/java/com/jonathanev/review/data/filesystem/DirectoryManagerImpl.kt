@@ -10,6 +10,7 @@ import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.provider.FilePathsProvider
 import com.jonathanev.review.domain.repository.DirectoryManager
 import com.jonathanev.review.domain.repository.FilePathResolver
+import com.jonathanev.review.domain.repository.NavigationPathRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -20,6 +21,7 @@ import javax.inject.Inject
 class DirectoryManagerImpl @Inject constructor(
     private val filePathResolver: FilePathResolver,
     private val filePathsProvider: FilePathsProvider,
+    private val navigationPathRepository: NavigationPathRepository
 ) : DirectoryManager {
     override suspend fun createPathImages(
         guideDomainModel: GuideDomainModel,
@@ -156,6 +158,21 @@ class DirectoryManagerImpl @Inject constructor(
             folder.mkdirs()
         }
     }
+
+    override suspend fun renameFolder(oldName: String, newName: String): Boolean =
+        withContext(Dispatchers.IO) {
+            if (oldName == newName) return@withContext true
+
+            val rootPath = navigationPathRepository.getRootGuides().value
+            val oldFolder = File(rootPath, oldName)
+            val newFolder = File(rootPath, newName)
+
+            if (oldFolder.exists() && oldFolder.isDirectory) {
+                oldFolder.renameTo(newFolder)
+            } else {
+                false
+            }
+        }
 
     override fun createFoldersMain(): Boolean {
         val paths = listOf(

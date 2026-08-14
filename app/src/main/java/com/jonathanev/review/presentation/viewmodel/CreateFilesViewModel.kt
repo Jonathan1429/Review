@@ -11,6 +11,7 @@ import com.jonathanev.review.domain.GetVersionGuideUseCase
 import com.jonathanev.review.domain.IsExistFileUseCase
 import com.jonathanev.review.domain.IsExistFolderUseCase
 import com.jonathanev.review.domain.NextNavigationUseCase
+import com.jonathanev.review.domain.RenameFolderUseCase
 import com.jonathanev.review.domain.RenameGuideUseCase
 import com.jonathanev.review.domain.ResetNavigationUseCase
 import com.jonathanev.review.domain.SaveMetadataUseCase
@@ -27,6 +28,7 @@ import com.jonathanev.review.domain.result.ReadGuideError
 import com.jonathanev.review.domain.result.RenamedGuideResult
 import com.jonathanev.review.domain.result.ValidateCreateFileResult
 import com.jonathanev.review.presentation.mapper.toDomain
+import com.jonathanev.review.presentation.model.ColorType
 import com.jonathanev.review.presentation.model.FileFormMode
 import com.jonathanev.review.presentation.model.IconType
 import com.jonathanev.review.presentation.model.ScreenDataUi
@@ -35,6 +37,7 @@ import com.jonathanev.review.presentation.state.CreatingUIState.CreateFile
 import com.jonathanev.review.presentation.state.CreatingUIState.CreateFolder
 import com.jonathanev.review.presentation.state.CreatingUIState.Message
 import com.jonathanev.review.presentation.state.CreatingUIState.RenameFile
+import com.jonathanev.review.presentation.state.CreatingUIState.RenameFolder
 import com.jonathanev.review.presentation.state.PropertiesFilesState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -57,6 +60,7 @@ class CreateFilesViewModel @Inject constructor(
     private val existXMLGuideV1UseCase: ExistXMLGuideV1UseCase,
     private val getVersionGuideUseCase: GetVersionGuideUseCase,
     private val createFolderUseCase: CreateFolderUseCase,
+    private val renameFolderUseCase: RenameFolderUseCase,
     private val resetNavigationUseCase: ResetNavigationUseCase,
     private val nextNavigationUseCase: NextNavigationUseCase,
     private val setActiveGuideUseCase: SetActiveGuideUseCase,
@@ -83,7 +87,7 @@ class CreateFilesViewModel @Inject constructor(
                 listOf(IconType.LIGHTBULB)
             }
 
-            FileFormMode.CreatingFolder -> listOf(
+            FileFormMode.CreatingFolder, is FileFormMode.RenameFolder -> listOf(
                 IconType.ANCHOR_SOLID_FULL,
                 IconType.ANGELLIST_BRANDS_SOLID_FULL,
                 IconType.BACTERIA_SOLID_FULL
@@ -136,13 +140,22 @@ class CreateFilesViewModel @Inject constructor(
         saveMetadataUseCase.invoke(screenDataDomain)
     }
 
-    fun fillFields(fileName: String, description: String) {
+    fun fillFields(
+        fileName: String,
+        description: String,
+        icon: IconType? = null,
+        color: ColorType? = null
+    ) {
         _uiStateComposable.update { currentState ->
             currentState.copy(
                 name = fileName,
                 description = description,
                 oldName = fileName,
-                oldDescription = description
+                oldDescription = description,
+                icon = icon ?: currentState.icon,
+                color = color ?: currentState.color,
+                selectedIndex = icon?.let { currentState.icons.indexOf(it) }
+                    ?: currentState.selectedIndex
             )
         }
     }
@@ -233,7 +246,7 @@ class CreateFilesViewModel @Inject constructor(
     private fun emitEvent(state: CreatingUIState) {
         viewModelScope.launch {
             when (state) {
-                CreateFile, RenameFile, CreateFolder ->
+                CreateFile, RenameFile, CreateFolder, RenameFolder ->
                     _eventUI.emit(state)
 
                 // RenameFolder and Message
@@ -249,6 +262,7 @@ class CreateFilesViewModel @Inject constructor(
             is FileFormMode.RenameFile -> isExistFileUseCase.invoke(name = name)
 
             FileFormMode.CreatingFolder -> isExistFolderUseCase.invoke(name = name)
+            is FileFormMode.RenameFolder -> isExistFolderUseCase.invoke(name = name)
         }
     }
 
@@ -270,6 +284,12 @@ class CreateFilesViewModel @Inject constructor(
             return false
         }
 
+        // Si el nombre no ha cambiado y estamos en modo renombrar, permitimos continuar directamente
+        val nameHasChanged = state.name != state.oldName
+        if (!nameHasChanged && (mode is FileFormMode.RenameFile || mode is FileFormMode.RenameFolder)) {
+            return true
+        }
+
         val existFile = fileExist(mode, state.name)
         if (!existFile) {
             return true
@@ -283,7 +303,8 @@ class CreateFilesViewModel @Inject constructor(
                 }
             }
 
-            FileFormMode.CreatingFolder -> {
+            FileFormMode.CreatingFolder,
+            is FileFormMode.RenameFolder -> {
                 _uiStateComposable.update { currentState ->
                     currentState.copy(showOverwriteDialogFolder = true)
                 }
@@ -306,11 +327,7 @@ class CreateFilesViewModel @Inject constructor(
     }*/
 
     fun initWithMode(mode: FileFormMode) {
-        if (mode == FileFormMode.CreatingFile) {
-            _uiStateComposable.value = PropertiesFilesState()
-        }
-
-        if (mode == FileFormMode.CreatingFolder) {
+        if (mode == FileFormMode.CreatingFile || mode == FileFormMode.CreatingFolder) {
             _uiStateComposable.value = PropertiesFilesState()
         }
         loadIconsFor(mode)
@@ -408,6 +425,24 @@ class CreateFilesViewModel @Inject constructor(
 
             is FileFormMode.RenameFile -> {
                 emitEvent(RenameFile)
+            }
+
+            is FileFormMode.RenameFolder -> {
+                try {
+                    val isRenamed = renameFolderUseCase.invoke(
+                        oldName = state.oldName,
+                        newName = state.name,
+                        data = data.toDomain(isDarkTheme)
+                    )
+                    if (isRenamed) {
+                        emitEvent(RenameFolder)
+                    } else {
+                        emitEvent(Message("No se pudo renombrar la carpeta"))
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    emitEvent(Message(e.message ?: "Ocurrió un error inesperado"))
+                }
             }
 
             null -> emitEvent(Message("No se pudo crear el archivo"))

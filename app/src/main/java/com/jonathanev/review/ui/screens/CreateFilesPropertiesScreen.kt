@@ -124,6 +124,15 @@ fun CreateFilesPropertiesRoute(
             }
 
             FileFormMode.CreatingFolder -> viewModel.initWithMode(fileFormMode)
+            is FileFormMode.RenameFolder -> {
+                viewModel.initWithMode(fileFormMode)
+                viewModel.fillFields(
+                    fileName = fileFormMode.folderUiModel.folder.name,
+                    description = "",
+                    icon = fileFormMode.folderUiModel.folder.imgFolder,
+                    color = fileFormMode.folderUiModel.folder.color
+                )
+            }
         }
     }
 
@@ -147,6 +156,10 @@ fun CreateFilesPropertiesRoute(
 
                     is CreatingUIState.CreateFolder -> {
                         onCreateFolder()
+                    }
+
+                    is CreatingUIState.RenameFolder -> {
+                        onCreateFolder() // Volvemos a la lista
                     }
 
                     is CreatingUIState.Message -> {
@@ -210,7 +223,7 @@ fun CreateFilesPropertiesScreen(
             title = { Text("Archivo existente") },
             text = {
                 Text(
-                    text = "Ya existe un archivo con ese nombre. ¿Deseas continuar?",
+                    text = "Ya existe un archivo con ese nombre. ¿Deseas reemplazar el viejo por el nuevo?",
                     color = MaterialTheme.colorScheme.onSurface
                 )
             }
@@ -329,7 +342,7 @@ private fun CollapseCardApariencia(
                 onChangeIcon(position, icon)
             }
 
-            if (fileFormMode is FileFormMode.CreatingFolder) {
+            if (fileFormMode is FileFormMode.CreatingFolder || fileFormMode is FileFormMode.RenameFolder) {
                 HorizontalDivider(
                     modifier = Modifier.padding(vertical = 4.dp),
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f)
@@ -378,7 +391,7 @@ private fun CollapseCardIdentidad(
                     ) { onDescriptionChange(it) }
                 }
 
-                FileFormMode.CreatingFolder -> {
+                FileFormMode.CreatingFolder, is FileFormMode.RenameFolder -> {
                     CustomTextField(
                         state.name,
                         "Nombra tu carpeta"

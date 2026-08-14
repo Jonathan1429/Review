@@ -132,6 +132,13 @@ class ListFoldersViewModel @Inject constructor(
         _dialogState.value = ActionDialogState.OptionsMenu(folder)
     }
 
+    fun onEditFolder(folder: FolderUiModel) {
+        viewModelScope.launch {
+            onDismissDialog()
+            _eventsMessages.emit(FolderActionEvent.RenameFolder(folder))
+        }
+    }
+
     fun onConfirmDelete(folder: FolderUiModel) {
         viewModelScope.launch {
             try {
