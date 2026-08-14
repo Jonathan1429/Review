@@ -21,6 +21,7 @@ import com.jonathanev.review.domain.ValidateCreateFileUseCase
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuideVersion
+import com.jonathanev.review.domain.repository.NavigationPathRepository
 import com.jonathanev.review.domain.result.DeleteGuideResult
 import com.jonathanev.review.domain.result.ExistGuideV1Result
 import com.jonathanev.review.domain.result.GuideResource
@@ -64,7 +65,8 @@ class CreateFilesViewModel @Inject constructor(
     private val resetNavigationUseCase: ResetNavigationUseCase,
     private val nextNavigationUseCase: NextNavigationUseCase,
     private val setActiveGuideUseCase: SetActiveGuideUseCase,
-    private val setContextCreateUseCase: SetContextCreateUseCase
+    private val setContextCreateUseCase: SetContextCreateUseCase,
+    private val navigationPathRepository: NavigationPathRepository
 ) : ViewModel() {
     //private var cachedGuides: List<GuideDomainModel> = emptyList()
 
@@ -412,6 +414,7 @@ class CreateFilesViewModel @Inject constructor(
                         return
                     }
                     saveMetadata(isDarkTheme)
+                    navigationPathRepository.setLastModifiedFolder(data.name)
                     emitEvent(CreateFolder)
                 } catch (e: CancellationException) {
                     throw e
@@ -435,6 +438,7 @@ class CreateFilesViewModel @Inject constructor(
                         data = data.toDomain(isDarkTheme)
                     )
                     if (isRenamed) {
+                        navigationPathRepository.setLastModifiedFolder(state.name)
                         emitEvent(RenameFolder)
                     } else {
                         emitEvent(Message("No se pudo renombrar la carpeta"))

@@ -12,6 +12,8 @@ import com.jonathanev.review.domain.repository.NavigationPathRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.firstOrNull
@@ -26,6 +28,8 @@ class NavigationPathRepositoryImpl @Inject constructor(
     private val filePathsProvider: FilePathsProvider,
     private val preferencesDataStore: DataStore<Preferences>
 ) : NavigationPathRepository {
+
+    private val _lastModifiedFolder = MutableStateFlow<String?>(null)
 
     companion object {
         private val KEY_PATH = stringPreferencesKey("relative_path")
@@ -70,5 +74,11 @@ class NavigationPathRepositoryImpl @Inject constructor(
                 preferences[KEY_PATH] = ""
             }
         }
+    }
+
+    override fun getLastModifiedFolderFlow(): Flow<String?> = _lastModifiedFolder.asStateFlow()
+
+    override suspend fun setLastModifiedFolder(folderName: String?) {
+        _lastModifiedFolder.value = folderName
     }
 }

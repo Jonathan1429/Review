@@ -80,6 +80,7 @@ fun ListFoldersRoute(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val interactionMode by viewModel.interactionMode.collectAsStateWithLifecycle()
     val dialogState by viewModel.dialogState.collectAsStateWithLifecycle()
+    val highlightedFolderName by viewModel.highlightedFolder.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
@@ -128,6 +129,7 @@ fun ListFoldersRoute(
             ListFoldersScreen(
                 guias = state.folders,
                 fileInteractionMode = interactionMode,
+                highlightedFolderName = highlightedFolderName,
                 onCreateFolderClick = onCreateFolderClick,
                 onFolderClick = { posFolder ->
                     when (val result =
@@ -204,10 +206,22 @@ fun ListFoldersRoute(
 fun ListFoldersScreen(
     guias: List<FolderUiModel>,
     fileInteractionMode: FileInteractionMode,
+    highlightedFolderName: String? = null,
     onCreateFolderClick: () -> Unit,
     onFolderClick: (Int) -> Unit,
     onMoveCancelGuideClick: () -> Unit
 ) {
+    val listState = androidx.compose.foundation.lazy.grid.rememberLazyGridState()
+
+    LaunchedEffect(highlightedFolderName) {
+        if (highlightedFolderName != null) {
+            val index = guias.indexOfFirst { it.folder.name == highlightedFolderName }
+            if (index != -1) {
+                listState.animateScrollToItem(index)
+            }
+        }
+    }
+
     Scaffold(
         contentWindowInsets = if (fileInteractionMode == FileInteractionMode.MovingItem) {
             ScaffoldDefaults.contentWindowInsets
@@ -255,11 +269,13 @@ fun ListFoldersScreen(
     ) { padding ->
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
+            state = listState,
             modifier = Modifier.padding(padding)
         ) {
             itemsIndexed(guias) { index, guia ->
                 FolderItem(
                     guia = guia,
+                    isHighlighted = guia.folder.name == highlightedFolderName,
                     onClick = { onFolderClick(index) }
                 )
             }
