@@ -6,13 +6,18 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -35,6 +40,7 @@ fun PreviewQATypeItem(
             QATypeItem(
                 qaTypeItem = data.qaTypeItem,
                 cardType = data.typeSelected,
+                hasContent = true,
                 onCardTypeClicked = {}
             )
         }
@@ -42,7 +48,12 @@ fun PreviewQATypeItem(
 }
 
 @Composable
-fun RowScope.QATypeItem(qaTypeItem: QAType, cardType: QAType, onCardTypeClicked: (QAType) -> Unit) {
+fun RowScope.QATypeItem(
+    qaTypeItem: QAType,
+    cardType: QAType,
+    hasContent: Boolean = false,
+    onCardTypeClicked: (QAType) -> Unit
+) {
     Box(
         modifier = Modifier
             .singleClick(onClick = { onCardTypeClicked(qaTypeItem) })
@@ -73,12 +84,27 @@ fun RowScope.QATypeItem(qaTypeItem: QAType, cardType: QAType, onCardTypeClicked:
             ),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = if (qaTypeItem == QAType.QUESTION)
-                stringResource(R.string.etPregunta)
-            else
-                stringResource(R.string.etRespuesta),
-            color = MaterialTheme.colorScheme.onSurface, fontSize = 18.sp
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = if (qaTypeItem == QAType.QUESTION)
+                    stringResource(R.string.etPregunta)
+                else
+                    stringResource(R.string.etRespuesta),
+                color = MaterialTheme.colorScheme.onSurface,
+                fontSize = 18.sp
+            )
+
+            if (hasContent) {
+                Spacer(modifier = Modifier.width(8.dp))
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary)
+                )
+            }
+        }
     }
 }

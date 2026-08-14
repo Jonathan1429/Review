@@ -265,7 +265,29 @@ fun FillingGuideRoute(
                 },
                 onDismissRequest = viewModel::onDismissDialogDeleteQuestion,
                 onMoveItem = { from, to -> viewModel.onMoveItem(from, to) },
-                onEditGuideClick = viewModel::switchToEditMode
+                onEditGuideClick = viewModel::switchToEditMode,
+                hasContentQA = { type ->
+                    val question = state.preguntas.getOrNull(state.contadorPregunta)
+                    val answer = state.respuestas.getOrNull(state.contadorPregunta)
+                    if (type == QAType.QUESTION) {
+                        question?.content?.isNotEmpty() ?: false
+                    } else {
+                        answer?.content?.isNotEmpty() ?: false
+                    }
+                },
+                hasContentMedia = { type ->
+                    val currentPart = if (state.qAType == QAType.QUESTION) {
+                        state.preguntas.getOrNull(state.contadorPregunta)
+                    } else {
+                        state.respuestas.getOrNull(state.contadorPregunta)
+                    }
+                    currentPart?.content?.any { content ->
+                        when (type) {
+                            ContentType.TEXT -> content is QuestionContentUi.Text
+                            ContentType.IMAGE -> content is QuestionContentUi.Image
+                        }
+                    } ?: false
+                }
             )
         }
     }
@@ -301,7 +323,9 @@ fun FillingGuideScreen(
     onCurrentPosContent: (Int) -> Unit,
     onDismissRequest: () -> Unit,
     onMoveItem: (Int, Int) -> Unit = { _, _ -> },
-    onEditGuideClick: () -> Unit = {}
+    onEditGuideClick: () -> Unit = {},
+    hasContentQA: (QAType) -> Boolean = { false },
+    hasContentMedia: (ContentType) -> Boolean = { false }
 ) {
     var showPlusOneAnimation by remember { mutableStateOf(false) }
     var isAnimating by remember { mutableStateOf(false) }
@@ -341,12 +365,14 @@ fun FillingGuideScreen(
                 QASelectType(
                     typeForSelected = typeForSelected,
                     cardType = cardType,
+                    hasContent = hasContentQA,
                     onCardTypeClicked = { cardTypeClicked ->
                         onCardTypeClicked(cardTypeClicked)
                     })
                 FilterTypeItem(
                     mediaForSelected = mediaForSelected,
                     mediaSelected = mediaSelected,
+                    hasContent = hasContentMedia,
                     onFilterTypeClicked = { filterTypeClicked ->
                         onFilterTypeClicked(filterTypeClicked)
                     })
