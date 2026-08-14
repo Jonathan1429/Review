@@ -45,7 +45,7 @@ fun CustomTextField(name: String, label: String, onValueChange: (String) -> Unit
         modifier = Modifier.fillMaxWidth(),
         singleLine = true,
         maxLines = 1,
-        label = { Text(label) },
+        label = { Text(text = label, color = MaterialTheme.colorScheme.onSurface) },
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Text,
             autoCorrectEnabled = true
@@ -54,7 +54,7 @@ fun CustomTextField(name: String, label: String, onValueChange: (String) -> Unit
             focusedLabelColor = MaterialTheme.colorScheme.onPrimary,
             unfocusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
 
-            focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
+            focusedBorderColor = MaterialTheme.colorScheme.onSurface,
             unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
 
             cursorColor = MaterialTheme.colorScheme.onSurface,
