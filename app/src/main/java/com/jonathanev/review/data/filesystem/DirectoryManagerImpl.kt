@@ -54,7 +54,7 @@ class DirectoryManagerImpl @Inject constructor(
     ): Boolean = withContext(Dispatchers.IO) {
         val (oldImagesPath, newImagesPath) = when (imageContext) {
             is ImageContext.MovingImage -> {
-                val old = filePathResolver.mapToOldFolderPathSpecificGuide(
+                val old = filePathResolver.mapToOldFolderPath(
                     guideDomainModel = guideDomainModel,
                     originContext = imageContext,
                     kind = PathKind.IMAGENES
@@ -144,8 +144,7 @@ class DirectoryManagerImpl @Inject constructor(
     override suspend fun createPathGuide(
         guideDomainModel: GuideDomainModel
     ): Boolean = withContext(Dispatchers.IO) {
-        val currentPath = filePathResolver.mapToFolderPathSpecificGuide(
-            guideDomainModel = guideDomainModel,
+        val currentPath = filePathResolver.mapToFolderPath(
             kind = PathKind.GUIAS
         )
 
@@ -175,7 +174,7 @@ class DirectoryManagerImpl @Inject constructor(
 
     override fun deleteFolderEmpty(context: GuideContext.Moving) {
         val pathGuides = File(
-            filePathResolver.mapToOldFolderPathSpecificGuide(
+            filePathResolver.mapToOldFolderPath(
                 guideDomainModel = context.guide,
                 originContext = context,
                 kind = PathKind.GUIAS
@@ -183,7 +182,7 @@ class DirectoryManagerImpl @Inject constructor(
         )
 
         val pathImages = File(
-            filePathResolver.mapToOldFolderPathSpecificGuide(
+            filePathResolver.mapToOldFolderPath(
                 guideDomainModel = context.guide,
                 originContext = context,
                 kind = PathKind.IMAGENES

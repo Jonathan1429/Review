@@ -17,14 +17,10 @@ class MoveGuideUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(
         guideData: GetGuideResult.Success,
-        contextMoving: GuideContext.Moving
+        context: GuideContext.Moving
     ): MoveGuideResponse {
         var isExistPathGuide = true
 
-        val context = GuideContext.Moving(
-            contextMoving.guide,
-            contextMoving.oldRelativeGuidePath
-        )
         if (context.guide.version == GuideVersion.V2) {
             isExistPathGuide = directoryManager.createPathGuide(
                 context.guide

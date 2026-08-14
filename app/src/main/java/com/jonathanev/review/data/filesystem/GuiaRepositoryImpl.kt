@@ -557,6 +557,25 @@ class GuiaRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getGuideToMove(context: GuideContext.Moving): GetGuideResult =
+        withContext(Dispatchers.IO) {
+            val path = filePathResolver.mapToOldGuidePathSpecificGuide(
+                guideDomainModel = context.guide,
+                kind = PathKind.GUIAS,
+                originContext = context
+            )
+
+            val guideFile = File(path.value)
+            if (!guideFile.exists()) {
+                return@withContext GetGuideResult.NotFound
+            }
+
+            when (context.guide.version) {
+                GuideVersion.V1 -> obtenerDatosXMLV1(context.guide, path)
+                GuideVersion.V2 -> obtenerDatosXMLV2(context.guide, path)
+            }
+        }
+
     override suspend fun existXMLGuideV1(
         guideDomainModel: GuideDomainModel
     ): ExistGuideV1Result = withContext(Dispatchers.IO) {
@@ -592,7 +611,7 @@ class GuiaRepositoryImpl @Inject constructor(
                 kind = PathKind.GUIAS
             )
 
-            val oldGuidePath = filePathResolver.mapToOldFolderPathSpecificGuide(
+            val oldGuidePath = filePathResolver.mapToOldGuidePathSpecificGuide(
                 guideDomainModel = guideContext.guide,
                 kind = PathKind.GUIAS,
                 originContext = guideContext

@@ -99,7 +99,7 @@ class GuideContextRepositoryImpl @Inject constructor(
                     preferences[KEY_CONTEXT_TYPE] = TYPE_MOVING
                     saveGuideDomain(preferences, finalContext.guide)
                     preferences[KEY_OLD_RELATIVE_PATH] =
-                        finalContext.oldRelativeGuidePath.toString()
+                        finalContext.oldRelativeGuidePath.value
                     preferences.remove(KEY_POSITION)
                 }
 

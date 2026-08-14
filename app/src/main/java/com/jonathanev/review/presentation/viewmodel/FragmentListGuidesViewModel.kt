@@ -97,7 +97,18 @@ class FragmentListGuidesViewModel @Inject constructor(
 
     fun onCancelMove() {
         viewModelScope.launch {
-            clearGuideMoveUseCase.invoke()
+            try {
+                clearGuideMoveUseCase.invoke()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                e.printStackTrace()
+                emitMessage(
+                    StateGuideActionEvent.ShowMessage(
+                        e.message ?: "Ocurrió un error inesperado"
+                    )
+                )
+            }
         }
     }
 
@@ -142,46 +153,50 @@ class FragmentListGuidesViewModel @Inject constructor(
 
     fun onContinueProcess(confirmed: Boolean) {
         viewModelScope.launch {
-            if (!confirmed) return@launch
+            try {
+                if (!confirmed) return@launch
 
-            when (val context = getGuideContextUseCase.invoke().firstOrNull()) {
-                is GuideContext.Moving -> {
-                    when (val guideData = getGuideXmlDataUseCase.invoke(context)) {
-                        is GetGuideResult.Success -> {
-                            val response =
-                                moveGuideUseCase.invoke(guideData, context)
-                            when (response) {
-                                MoveGuideResponse.ErrorMovingGuide ->
-                                    emitMessage(StateGuideActionEvent.ShowMessage("Error al intentar mover la guia"))
+                when (val context = getGuideContextUseCase.invoke().firstOrNull()) {
+                    is GuideContext.Moving -> {
+                        when (val guideData = getGuideXmlDataUseCase.invoke(context)) {
+                            is GetGuideResult.Success -> {
+                                val response =
+                                    moveGuideUseCase.invoke(guideData, context)
+                                when (response) {
+                                    MoveGuideResponse.ErrorMovingGuide ->
+                                        emitMessage(StateGuideActionEvent.ShowMessage("Error al intentar mover la guia"))
 
-                                MoveGuideResponse.ErrorMovingImages ->
-                                    emitMessage(StateGuideActionEvent.ShowMessage("Error al intentar mover imagenes"))
+                                    MoveGuideResponse.ErrorMovingImages ->
+                                        emitMessage(StateGuideActionEvent.ShowMessage("Error al intentar mover imagenes"))
 
-                                MoveGuideResponse.ErrorPathGuide ->
-                                    emitMessage(StateGuideActionEvent.ShowMessage("No existe la ruta para mover la guia"))
+                                    MoveGuideResponse.ErrorPathGuide ->
+                                        emitMessage(StateGuideActionEvent.ShowMessage("No existe la ruta para mover la guia"))
 
-                                MoveGuideResponse.ErrorPathImages ->
-                                    emitMessage(StateGuideActionEvent.ShowMessage("No existe una ruta para guardar las imagenes"))
+                                    MoveGuideResponse.ErrorPathImages ->
+                                        emitMessage(StateGuideActionEvent.ShowMessage("No existe una ruta para guardar las imagenes"))
 
-                                MoveGuideResponse.Success -> {
-                                    emitMessage(StateGuideActionEvent.ShowMessage("Guia movida exitosamente"))
+                                    MoveGuideResponse.Success -> {
+                                        emitMessage(StateGuideActionEvent.ShowMessage("Guia movida exitosamente"))
+                                    }
                                 }
                             }
+
+                            GetGuideResult.InvalidFormat ->
+                                emitMessage(StateGuideActionEvent.ShowMessage("La guia está dañada"))
+
+                            GetGuideResult.NotFound ->
+                                emitMessage(StateGuideActionEvent.ShowMessage("No se ha encontrado la guia"))
+
+                            GetGuideResult.UnknownError ->
+                                emitMessage(StateGuideActionEvent.ShowMessage("Guia movida exitosamente"))
                         }
-
-                        GetGuideResult.InvalidFormat ->
-                            emitMessage(StateGuideActionEvent.ShowMessage("La guia está dañada"))
-
-                        GetGuideResult.NotFound ->
-                            emitMessage(StateGuideActionEvent.ShowMessage("No se ha encontrado la guia"))
-
-                        GetGuideResult.UnknownError ->
-                            emitMessage(StateGuideActionEvent.ShowMessage("Guia movida exitosamente"))
                     }
-                }
 
-                else ->
-                    emitMessage(StateGuideActionEvent.ShowMessage("Error inesperado"))
+                    else ->
+                        emitMessage(StateGuideActionEvent.ShowMessage("Error inesperado"))
+                }
+            } finally {
+                clearGuideMoveUseCase.invoke()
             }
         }
     }

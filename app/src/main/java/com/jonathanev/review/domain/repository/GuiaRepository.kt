@@ -16,6 +16,7 @@ interface GuiaRepository {
     fun getGuides(): Flow<List<GuideDomainModel>>
     fun hasGuides(): Flow<Boolean>
     suspend fun getXMLGuide(guideDomainModel: GuideDomainModel): GetGuideResult
+    suspend fun getGuideToMove(context: GuideContext.Moving): GetGuideResult
 
     suspend fun existXMLGuideV1(
         guideDomainModel: GuideDomainModel
