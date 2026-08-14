@@ -2,6 +2,8 @@ package com.jonathanev.review.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jonathanev.review.domain.ClearActiveGuideUseCase
+import com.jonathanev.review.domain.ClearGuideMoveUseCase
 import com.jonathanev.review.domain.GetFoldersWithNumGuidesUseCase
 import com.jonathanev.review.domain.InitializeGuideStorageUseCase
 import com.jonathanev.review.domain.NextNavigationUseCase
@@ -28,7 +30,9 @@ class MainActivityViewModel @Inject constructor(
     private val initializeGuideStorageUseCase: InitializeGuideStorageUseCase,
     private val getFoldersWithNumGuidesUseCase: GetFoldersWithNumGuidesUseCase,
     private val resetNavigationUseCase: ResetNavigationUseCase,
-    private val nextNavigationUseCase: NextNavigationUseCase
+    private val nextNavigationUseCase: NextNavigationUseCase,
+    private val clearActiveGuideUseCase: ClearActiveGuideUseCase,
+    private val clearGuideMoveUseCase: ClearGuideMoveUseCase
 ) : ViewModel() {
     val uiState: StateFlow<FoldersUiState> = getFoldersWithNumGuidesUseCase.invoke()
         //.take(1)
@@ -50,6 +54,18 @@ class MainActivityViewModel @Inject constructor(
 
     private val _eventsMain = MutableSharedFlow<UIMainEvent>()
     val eventsMain = _eventsMain.asSharedFlow()
+
+    fun clearAllContext() {
+        viewModelScope.launch {
+            try {
+                resetNavigationUseCase.invoke()
+                clearActiveGuideUseCase.invoke()
+                clearGuideMoveUseCase.invoke()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
 
     fun createFolders() {
         viewModelScope.launch {

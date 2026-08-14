@@ -46,6 +46,7 @@ fun MainActivityEntryRoute(
     }
 
     LaunchedEffect(Unit) {
+        viewModel.clearAllContext()
         viewModel.createFolders()
     }
 
