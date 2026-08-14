@@ -3,7 +3,6 @@ package com.jonathanev.review.domain
 import com.jonathanev.review.data.storage.StorageFolders
 import com.jonathanev.review.domain.result.ValidateCreateFileResult
 import com.jonathanev.review.presentation.model.FileFormMode
-import com.jonathanev.review.presentation.model.FolderAction
 import javax.inject.Inject
 
 class ValidateCreateFileUseCase @Inject constructor() {
@@ -23,7 +22,7 @@ class ValidateCreateFileUseCase @Inject constructor() {
 
         val message = when {
             cleanName.isBlank() -> {
-                if (mode == FolderAction.CreatingFolder) {
+                if (mode is FileFormMode.CreatingFolder || mode is FileFormMode.RenameFolder) {
                     "Debes tener un nombre de carpeta"
                 } else {
                     "Debes tener un nombre de archivo"

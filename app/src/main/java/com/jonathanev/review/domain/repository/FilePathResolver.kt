@@ -12,7 +12,13 @@ interface FilePathResolver {
         kind: PathKind
     ): GuidePath
 
-    fun mapToOldFolderPathSpecificGuide(
+    fun mapToOldGuidePathSpecificGuide(
+        guideDomainModel: GuideDomainModel,
+        originContext: HasOriginPath,
+        kind: PathKind
+    ): GuidePath
+
+    fun mapToOldFolderPath(
         guideDomainModel: GuideDomainModel,
         originContext: HasOriginPath,
         kind: PathKind

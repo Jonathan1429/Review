@@ -17,7 +17,6 @@ import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.jonathanev.review.R
 import com.jonathanev.review.data.filesystem.FilePathsProviderImpl
-import com.jonathanev.review.presentation.event.UIMovingEvent
 import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.presentation.viewmodel.ListFoldersViewModel
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
@@ -100,21 +99,21 @@ class FragmentListFolders : Fragment(R.layout.fragment_compose_container) {
             }
         }
 
-        lifecycleScope.launch {
+        /*lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.eventsMovingFiles.collect { message ->
                     when (message) {
-                        is UIMovingEvent.ShowMessage -> {
+                        is StateGuideActionEvent.ShowMessage -> {
                             showToast(message.text)
                         }
 
-                        UIMovingEvent.ExistFile -> {
+                        StateGuideActionEvent.ExistFile -> {
                             showToast("No es posible guardar una guia aquí")
                         }
                     }
                 }
             }
-        }
+        }*/
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {

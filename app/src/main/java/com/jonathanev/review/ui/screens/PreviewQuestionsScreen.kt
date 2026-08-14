@@ -88,6 +88,7 @@ fun PreviewQuestionsRoute(
     }
 
     LaunchedEffect(Unit) {
+        viewModel.retryLoad()
         viewModel.previewGuideEvent.collect { event ->
             when (event) {
                 PreviewGuideEvent.Editing -> {

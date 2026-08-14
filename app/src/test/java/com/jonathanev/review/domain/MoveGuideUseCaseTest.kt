@@ -77,7 +77,7 @@ class MoveGuideUseCaseTest {
 
         val response = moveGuideUseCase.invoke(
             guideData = guideResult,
-            contextMoving = context
+            context = context
         )
 
         coVerify { directoryManager.createPathGuide(context.guide) }
@@ -95,7 +95,7 @@ class MoveGuideUseCaseTest {
 
         val response = moveGuideUseCase.invoke(
             guideData = guideResult,
-            contextMoving = localContext
+            context = localContext
         )
 
         coVerify { guiaRepository.moveGuide(localContext) }
@@ -119,7 +119,7 @@ class MoveGuideUseCaseTest {
 
         val response = moveGuideUseCase.invoke(
             guideData = guideResult,
-            contextMoving = context
+            context = context
         )
 
         coVerify { directoryManager.createPathGuide(context.guide) }
@@ -155,7 +155,7 @@ class MoveGuideUseCaseTest {
 
         val response = moveGuideUseCase.invoke(
             guideData = guideResult,
-            contextMoving = localContext
+            context = localContext
         )
 
         coVerify { guiaRepository.moveGuide(localContext) }
@@ -200,7 +200,7 @@ class MoveGuideUseCaseTest {
 
         val response = moveGuideUseCase.invoke(
             guideData = guideResult,
-            contextMoving = context
+            context = context
         )
 
         coVerify { directoryManager.createPathGuide(context.guide) }

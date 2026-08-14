@@ -9,10 +9,10 @@ import com.jonathanev.review.domain.GetGuideContextUseCase
 import com.jonathanev.review.domain.GetGuideXmlDataUseCase
 import com.jonathanev.review.domain.SaveTempImageUseCase
 import com.jonathanev.review.domain.SetContentUseCase
+import com.jonathanev.review.domain.SetContextEditUseCase
 import com.jonathanev.review.domain.SetCrearXmlUseCase
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
-import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
 import com.jonathanev.review.domain.repository.UserPreferencesRepository
@@ -60,6 +60,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     private val setCrearXmlUseCase: SetCrearXmlUseCase,
     private val getActiveGuideUseCase: GetActiveGuideUseCase,
     private val getGuideContextUseCase: GetGuideContextUseCase,
+    private val setContextEditUseCase: SetContextEditUseCase,
     private val saveTempImageUseCase: SaveTempImageUseCase,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -542,13 +543,8 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         viewModelScope.launch {
             val currentState = uiState.value as? GuideScreenUiState.Success ?: return@launch
 
-            val currentContext = getGuideContextUseCase.invoke().firstOrNull()
-                ?: GuideContext.Browsing(
-                    guide = GuideDomainModel(GuideVersion.V2, "", ""),
-                    position = 0
-                )
-
-            val (guideDomainModel, saveGuideMode) = when (currentContext) {
+            val (guideDomainModel, saveGuideMode) = when (val currentContext =
+                currentState.guideContext) {
                 is GuideContext.Creating -> {
                     currentContext.guide to SaveGuideMode.Create
                 }
@@ -562,6 +558,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                     return@launch
                 }
             }
+
             val response = setCrearXmlUseCase.invoke(
                 guideDomainModel = guideDomainModel,
                 preguntas = currentState.preguntas.map { it.toDomain() },
@@ -750,6 +747,27 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 mediaSelected = ContentType.TEXT,
                 showDialogRepeatGuide = false
             )
+        }
+    }
+
+    fun switchToEditMode() {
+        viewModelScope.launch {
+            val currentState = uiState.value as? GuideScreenUiState.Success ?: return@launch
+            val browsingContext =
+                currentState.guideContext as? GuideContext.Browsing ?: return@launch
+
+            val editingContext = GuideContext.Editing(
+                guide = browsingContext.guide,
+                position = currentState.contadorPregunta
+            )
+
+            // 1. Actualizamos el repositorio (DataStore) para que saveGuide() funcione correctamente
+            setContextEditUseCase(editingContext)
+
+            // 2. Actualizamos el estado UI local
+            updateSuccessState { state ->
+                state.copy(guideContext = editingContext)
+            }
         }
     }
 

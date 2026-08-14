@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -101,12 +103,9 @@ fun CreateTextRoute(
         is GuideScreenUiState.Success -> {
             val textList by viewModel.textList.collectAsStateWithLifecycle()
             val isDark = isSystemInDarkTheme()
-            val item = remember(textList, posItem, questionContentMode) {
-                if (questionContentMode == QuestionContentMode.CREATING) {
-                    QuestionContentUi.Text("", emptyList())
-                } else {
-                    textList.getOrNull(posItem) ?: QuestionContentUi.Text("", emptyList())
-                }
+
+            val pagerState = rememberPagerState(initialPage = posItem) {
+                if (questionContentMode == QuestionContentMode.CREATING) 1 else textList.size
             }
 
             DisposableEffect(Unit) {
@@ -115,11 +114,22 @@ fun CreateTextRoute(
                 }
             }
 
-            // 2. Inicializamos el borrador con el ítem correcto
-            LaunchedEffect(item, questionContentMode) {
-                viewModel.initTextDraft(item)
-            }
+            // Sync with ViewModel when page changes
+            LaunchedEffect(pagerState.currentPage) {
+                if (questionContentMode == QuestionContentMode.EDITING) {
+                    viewModel.updatePosContent(pagerState.currentPage)
+                }
 
+                val itemAtPage = if (questionContentMode == QuestionContentMode.CREATING) {
+                    QuestionContentUi.Text("", emptyList())
+                } else {
+                    textList.getOrNull(pagerState.currentPage) ?: QuestionContentUi.Text(
+                        "",
+                        emptyList()
+                    )
+                }
+                viewModel.initTextDraft(itemAtPage)
+            }
 
             val colorInitial = MaterialTheme.colorScheme.onSurface
             val colorSelected = state.colorType.toInt(isDark)
@@ -130,44 +140,69 @@ fun CreateTextRoute(
 
             val textValueState by viewModel.draftTextValue.collectAsStateWithLifecycle()
 
-            // 3. Si textValueState es null (porque DisposableEffect o clearTextDraft lo limpiaron), usa el item
-            val textValue = textValueState ?: remember(item) {
-                TextFieldValue(annotatedString = item.toAnnotatedString())
-            }
-
             LaunchedEffect(Unit) {
                 viewModel.updateItemTriger.collect {
                     onSaveText()
                 }
             }
 
-            CreateTextScreen(
-                guideContext = state.guideContext,
-                colorInitial = colorInitial,
-                selectedColor = selectedColor,
-                textValue = textValue,
-                showDialog = state.showDialogColor,
-                onSaveText = { text, colors ->
-                    viewModel.addTextContent(
-                        textWithLabels = text,
-                        listSpans = colors,
-                        questionContentMode
+            Scaffold(
+                modifier = Modifier.fillMaxSize()
+            ) { padding ->
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding),
+                    userScrollEnabled = questionContentMode == QuestionContentMode.EDITING
+                ) { page ->
+                    val itemAtPage = remember(textList, page, questionContentMode) {
+                        if (questionContentMode == QuestionContentMode.CREATING) {
+                            QuestionContentUi.Text("", emptyList())
+                        } else {
+                            textList.getOrNull(page) ?: QuestionContentUi.Text("", emptyList())
+                        }
+                    }
+
+                    val textValueAtPage = if (page == pagerState.currentPage) {
+                        textValueState ?: remember(itemAtPage) {
+                            TextFieldValue(annotatedString = itemAtPage.toAnnotatedString())
+                        }
+                    } else {
+                        remember(itemAtPage) {
+                            TextFieldValue(annotatedString = itemAtPage.toAnnotatedString())
+                        }
+                    }
+
+                    TextEditorContent(
+                        guideContext = state.guideContext,
+                        colorInitial = colorInitial,
+                        selectedColor = selectedColor,
+                        textValue = textValueAtPage,
+                        showDialog = state.showDialogColor,
+                        onSaveText = { text, colors ->
+                            viewModel.addTextContent(
+                                textWithLabels = text,
+                                listSpans = colors,
+                                questionContentMode
+                            )
+                        },
+                        onClearColorClick = {
+                            viewModel.clearTextDraft()
+                        },
+                        onShowColorDialog = viewModel::showDialogSelectColor,
+                        onChangeTextValue = { textFieldValue ->
+                            viewModel.onDraftTextChange(newValue = textFieldValue)
+                        },
+                        onDissmissDialog = viewModel::onDismissDialogSelectColor,
+                        onColorSelected = { actualColor ->
+                            viewModel.onChangeColor(actualColor = actualColor)
+                        },
+                        onDefaultColor = viewModel::onDefaultcolor,
+                        onBackNav = onBackNav
                     )
-                },
-                onClearColorClick = {
-                    viewModel.clearTextDraft()
-                },
-                onShowColorDialog = viewModel::showDialogSelectColor,
-                onChangeTextValue = { textFieldValue ->
-                    viewModel.onDraftTextChange(newValue = textFieldValue)
-                },
-                onDissmissDialog = viewModel::onDismissDialogSelectColor,
-                onColorSelected = { actualColor ->
-                    viewModel.onChangeColor(actualColor = actualColor)
-                },
-                onDefaultColor = viewModel::onDefaultcolor,
-                onBackNav = onBackNav
-            )
+                }
+            }
         }
     }
 }
@@ -192,74 +227,108 @@ fun CreateTextScreen(
     Scaffold(
         modifier = Modifier.fillMaxSize()
     ) { padding ->
-        ElevatedCard(
+        Box(modifier = Modifier.padding(padding)) {
+            TextEditorContent(
+                guideContext = guideContext,
+                onSaveText = onSaveText,
+                colorInitial = colorInitial,
+                selectedColor = selectedColor,
+                textValue = textValue,
+                showDialog = showDialog,
+                onClearColorClick = onClearColorClick,
+                onShowColorDialog = onShowColorDialog,
+                onChangeTextValue = onChangeTextValue,
+                onDissmissDialog = onDissmissDialog,
+                onColorSelected = onColorSelected,
+                onDefaultColor = onDefaultColor,
+                onBackNav = onBackNav
+            )
+        }
+    }
+}
+
+@Composable
+fun TextEditorContent(
+    guideContext: GuideContext,
+    onSaveText: (String, List<ColorRangeUi>) -> Unit,
+    colorInitial: Color,
+    selectedColor: Color,
+    textValue: TextFieldValue,
+    showDialog: Boolean,
+    onClearColorClick: () -> Unit,
+    onShowColorDialog: () -> Unit,
+    onChangeTextValue: (actualText: TextFieldValue) -> Unit,
+    onDissmissDialog: () -> Unit,
+    onColorSelected: (Int) -> Unit,
+    onDefaultColor: () -> Unit,
+    onBackNav: () -> Unit
+) {
+    ElevatedCard(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        shape = RoundedCornerShape(42.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = cardStepBackground
+        ),
+        elevation = CardDefaults.elevatedCardElevation(
+            defaultElevation = 8.dp
+        )
+    ) {
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp),
-            shape = RoundedCornerShape(42.dp),
-            colors = CardDefaults.elevatedCardColors(
-                containerColor = cardStepBackground
-            ),
-            elevation = CardDefaults.elevatedCardElevation(
-                defaultElevation = 8.dp
-            )
+                .padding(bottom = 16.dp)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = 16.dp)
-            ) {
-                OptionsCreateText(
-                    guideContext = guideContext,
-                    textValue = textValue.annotatedString,
-                    selectedColor = selectedColor,
-                    onClearColorClick = onClearColorClick,
-                    onShowColorDialog = onShowColorDialog,
-                    onSaveTextClick = {
-                        saveCurrentQuestion(
-                            textFieldValue = textValue,
-                            onSaveContent = { text, colors -> onSaveText(text, colors) }
-                        )
-                    },
-                    onBackNav = onBackNav
-                )
-                CustomBoxCreateText(
-                    modifier = Modifier.padding(20.dp),
-                    textValue = textValue,
-                    hint = textValue.text.isNotEmpty(),
-                    readOnly = guideContext is GuideContext.Browsing,
-                    selectedColor = selectedColor,
-                    onTextValueChange = { actualText ->
-                        val newAnnotatedString = updateAnnotatedStringWithSpans(
-                            oldAnnotatedString = textValue.annotatedString,
-                            newTextFieldValue = actualText,
-                            selectedColor = selectedColor,
-                            colorInitial = colorInitial
-                        )
+            OptionsCreateText(
+                guideContext = guideContext,
+                textValue = textValue.annotatedString,
+                selectedColor = selectedColor,
+                onClearColorClick = onClearColorClick,
+                onShowColorDialog = onShowColorDialog,
+                onSaveTextClick = {
+                    saveCurrentQuestion(
+                        textFieldValue = textValue,
+                        onSaveContent = { text, colors -> onSaveText(text, colors) }
+                    )
+                },
+                onBackNav = onBackNav
+            )
+            CustomBoxCreateText(
+                modifier = Modifier.padding(20.dp),
+                textValue = textValue,
+                hint = textValue.text.isNotEmpty(),
+                readOnly = guideContext is GuideContext.Browsing,
+                selectedColor = selectedColor,
+                onTextValueChange = { actualText ->
+                    val newAnnotatedString = updateAnnotatedStringWithSpans(
+                        oldAnnotatedString = textValue.annotatedString,
+                        newTextFieldValue = actualText,
+                        selectedColor = selectedColor,
+                        colorInitial = colorInitial
+                    )
 
-                        val response = actualText.copy(
-                            annotatedString = newAnnotatedString,
-                            composition = null
-                        )
+                    val response = actualText.copy(
+                        annotatedString = newAnnotatedString,
+                        composition = null
+                    )
 
-                        onChangeTextValue(response)
-                    }
-                )
-            }
+                    onChangeTextValue(response)
+                }
+            )
+        }
 
-            if (showDialog) {
-                ColorPickerDialog(
-                    colorInitial = colorInitial,
-                    onDismissRequest = onDissmissDialog,
-                    onColorSelected = { colorActual ->
-                        onColorSelected(colorActual)
-                    },
-                    onDefaultClick = {
-                        onDefaultColor()
-                    }
-                )
-            }
+        if (showDialog) {
+            ColorPickerDialog(
+                colorInitial = colorInitial,
+                onDismissRequest = onDissmissDialog,
+                onColorSelected = { colorActual ->
+                    onColorSelected(colorActual)
+                },
+                onDefaultClick = {
+                    onDefaultColor()
+                }
+            )
         }
     }
 }

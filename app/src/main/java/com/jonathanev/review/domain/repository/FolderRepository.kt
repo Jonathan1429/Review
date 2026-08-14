@@ -9,4 +9,9 @@ interface FolderRepository {
     fun getFolders(): Flow<List<FolderDomainModel>>
     suspend fun deleteFolder(): Boolean
     suspend fun createFolder(data: FolderScreenInfoDomain): Boolean
+    suspend fun renameFolder(
+        oldName: String,
+        newName: String,
+        data: FolderScreenInfoDomain
+    ): Boolean
 }

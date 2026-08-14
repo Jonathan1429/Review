@@ -9,11 +9,16 @@ import com.jonathanev.review.domain.model.GuidePath
 import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.provider.FilePathsProvider
 import com.jonathanev.review.domain.repository.NavigationPathRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -23,6 +28,8 @@ class NavigationPathRepositoryImpl @Inject constructor(
     private val filePathsProvider: FilePathsProvider,
     private val preferencesDataStore: DataStore<Preferences>
 ) : NavigationPathRepository {
+
+    private val _lastModifiedFolder = MutableStateFlow<String?>(null)
 
     companion object {
         private val KEY_PATH = stringPreferencesKey("relative_path")
@@ -53,16 +60,25 @@ class NavigationPathRepositoryImpl @Inject constructor(
 
     override suspend fun next(fileName: String): Result<Unit> = runCatching {
         val sanitizedPath = fileName.trim()
-        preferencesDataStore.edit { preferences ->
-            preferences[KEY_PATH] = sanitizedPath
+
+        withContext(Dispatchers.IO + NonCancellable) {
+            preferencesDataStore.edit { preferences ->
+                preferences[KEY_PATH] = sanitizedPath
+            }
         }
-        Unit
     }
 
     override suspend fun reset(): Result<Unit> = runCatching {
-        preferencesDataStore.edit { preferences ->
-            preferences[KEY_PATH] = ""
+        withContext(Dispatchers.IO + NonCancellable) {
+            preferencesDataStore.edit { preferences ->
+                preferences[KEY_PATH] = ""
+            }
         }
-        Unit
+    }
+
+    override fun getLastModifiedFolderFlow(): Flow<String?> = _lastModifiedFolder.asStateFlow()
+
+    override suspend fun setLastModifiedFolder(folderName: String?) {
+        _lastModifiedFolder.value = folderName
     }
 }

@@ -2,7 +2,9 @@ package com.jonathanev.review.data.repository
 
 import com.jonathanev.review.data.JsonManager
 import com.jonathanev.review.data.mapper.json.toDomain
+import com.jonathanev.review.data.mapper.json.toDto
 import com.jonathanev.review.data.model.AttributesFolderDto
+import com.jonathanev.review.data.model.json.ScreenDataDto
 import com.jonathanev.review.domain.constants.Extensions
 import com.jonathanev.review.domain.factory.DefaultFolderAttributesProvider
 import com.jonathanev.review.domain.model.FolderAttributesDomain
@@ -79,6 +81,36 @@ class FolderRepositoryImpl @Inject constructor(
         val imagesCreated = imagesPath.ensureDirectory()
 
         if (guidesCreated && imagesCreated) {
+            refreshFolders.value = System.currentTimeMillis()
+            true
+        } else {
+            false
+        }
+    }
+
+    override suspend fun renameFolder(
+        oldName: String,
+        newName: String,
+        data: FolderScreenInfoDomain
+    ): Boolean = withContext(Dispatchers.IO) {
+        val rootPath = navigationPathRepository.getRootGuides().value
+        val oldFolder = File(rootPath, oldName)
+        val newFolder = File(rootPath, newName)
+
+        val isRenamed = if (oldName != newName) {
+            oldFolder.renameTo(newFolder)
+        } else {
+            true
+        }
+
+        if (isRenamed) {
+            val screenFile = File(newFolder, "screen.json")
+            val screenDataDto = data.toDto()
+            jsonManager.write(
+                screenFile.path,
+                ScreenDataDto.serializer(),
+                screenDataDto
+            )
             refreshFolders.value = System.currentTimeMillis()
             true
         } else {

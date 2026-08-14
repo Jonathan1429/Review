@@ -10,6 +10,7 @@ import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.provider.FilePathsProvider
 import com.jonathanev.review.domain.repository.DirectoryManager
 import com.jonathanev.review.domain.repository.FilePathResolver
+import com.jonathanev.review.domain.repository.NavigationPathRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -20,6 +21,7 @@ import javax.inject.Inject
 class DirectoryManagerImpl @Inject constructor(
     private val filePathResolver: FilePathResolver,
     private val filePathsProvider: FilePathsProvider,
+    private val navigationPathRepository: NavigationPathRepository
 ) : DirectoryManager {
     override suspend fun createPathImages(
         guideDomainModel: GuideDomainModel,
@@ -54,7 +56,7 @@ class DirectoryManagerImpl @Inject constructor(
     ): Boolean = withContext(Dispatchers.IO) {
         val (oldImagesPath, newImagesPath) = when (imageContext) {
             is ImageContext.MovingImage -> {
-                val old = filePathResolver.mapToOldFolderPathSpecificGuide(
+                val old = filePathResolver.mapToOldFolderPath(
                     guideDomainModel = guideDomainModel,
                     originContext = imageContext,
                     kind = PathKind.IMAGENES
@@ -144,8 +146,7 @@ class DirectoryManagerImpl @Inject constructor(
     override suspend fun createPathGuide(
         guideDomainModel: GuideDomainModel
     ): Boolean = withContext(Dispatchers.IO) {
-        val currentPath = filePathResolver.mapToFolderPathSpecificGuide(
-            guideDomainModel = guideDomainModel,
+        val currentPath = filePathResolver.mapToFolderPath(
             kind = PathKind.GUIAS
         )
 
@@ -157,6 +158,21 @@ class DirectoryManagerImpl @Inject constructor(
             folder.mkdirs()
         }
     }
+
+    override suspend fun renameFolder(oldName: String, newName: String): Boolean =
+        withContext(Dispatchers.IO) {
+            if (oldName == newName) return@withContext true
+
+            val rootPath = navigationPathRepository.getRootGuides().value
+            val oldFolder = File(rootPath, oldName)
+            val newFolder = File(rootPath, newName)
+
+            if (oldFolder.exists() && oldFolder.isDirectory) {
+                oldFolder.renameTo(newFolder)
+            } else {
+                false
+            }
+        }
 
     override fun createFoldersMain(): Boolean {
         val paths = listOf(
@@ -175,7 +191,7 @@ class DirectoryManagerImpl @Inject constructor(
 
     override fun deleteFolderEmpty(context: GuideContext.Moving) {
         val pathGuides = File(
-            filePathResolver.mapToOldFolderPathSpecificGuide(
+            filePathResolver.mapToOldFolderPath(
                 guideDomainModel = context.guide,
                 originContext = context,
                 kind = PathKind.GUIAS
@@ -183,7 +199,7 @@ class DirectoryManagerImpl @Inject constructor(
         )
 
         val pathImages = File(
-            filePathResolver.mapToOldFolderPathSpecificGuide(
+            filePathResolver.mapToOldFolderPath(
                 guideDomainModel = context.guide,
                 originContext = context,
                 kind = PathKind.IMAGENES

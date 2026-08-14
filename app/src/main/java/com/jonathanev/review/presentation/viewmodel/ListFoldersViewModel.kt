@@ -11,9 +11,10 @@ import com.jonathanev.review.domain.NextNavigationUseCase
 import com.jonathanev.review.domain.ObservePathUseCase
 import com.jonathanev.review.domain.ResetNavigationUseCase
 import com.jonathanev.review.domain.model.GuideContext
+import com.jonathanev.review.domain.repository.NavigationPathRepository
 import com.jonathanev.review.domain.result.FolderResultDomain
 import com.jonathanev.review.presentation.event.FolderActionEvent
-import com.jonathanev.review.presentation.event.UIMovingEvent
+import com.jonathanev.review.presentation.event.StateGuideActionEvent
 import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.FileInteractionMode
@@ -23,6 +24,8 @@ import com.jonathanev.review.presentation.state.ActionDialogState
 import com.jonathanev.review.presentation.state.FoldersUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -35,6 +38,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
+import kotlin.time.Duration.Companion.milliseconds
 
 @HiltViewModel
 class ListFoldersViewModel @Inject constructor(
@@ -46,6 +50,7 @@ class ListFoldersViewModel @Inject constructor(
     private val getGuideContextUseCase: GetGuideContextUseCase,
     private val clearGuideMoveUseCase: ClearGuideMoveUseCase,
     private val observePathUseCase: ObservePathUseCase,
+    private val navigationPathRepository: NavigationPathRepository
 ) : ViewModel() {
     @OptIn(ExperimentalCoroutinesApi::class)
     val uiState: StateFlow<FoldersUiState> = observePathUseCase.invoke()
@@ -69,7 +74,7 @@ class ListFoldersViewModel @Inject constructor(
     private val _eventsMessages = MutableSharedFlow<FolderActionEvent>()
     val eventsMessages = _eventsMessages.asSharedFlow()
 
-    private val _eventsMovingFiles = MutableSharedFlow<UIMovingEvent>()
+    private val _eventsMovingFiles = MutableSharedFlow<StateGuideActionEvent>()
     val eventsMovingFiles = _eventsMovingFiles.asSharedFlow()
 
     val interactionMode: StateFlow<FileInteractionMode> = getGuideContextUseCase()
@@ -81,6 +86,31 @@ class ListFoldersViewModel @Inject constructor(
             started = SharingStarted.Eagerly,
             initialValue = FileInteractionMode.Default
         )
+
+    private val _highlightedFolder = MutableStateFlow<String?>(null)
+    val highlightedFolder: StateFlow<String?> = _highlightedFolder.asStateFlow()
+
+    private var highlightJob: Job? = null
+
+    init {
+        viewModelScope.launch {
+            navigationPathRepository.getLastModifiedFolderFlow().collect { folderName ->
+                if (folderName != null) {
+                    setHighlightedFolder(folderName)
+                    navigationPathRepository.setLastModifiedFolder(null)
+                }
+            }
+        }
+    }
+
+    private fun setHighlightedFolder(folderName: String) {
+        _highlightedFolder.value = folderName
+        highlightJob?.cancel()
+        highlightJob = viewModelScope.launch {
+            delay(7000.milliseconds) // 7 segundos
+            _highlightedFolder.value = null
+        }
+    }
 
     fun onCancelMove() {
         viewModelScope.launch {
@@ -130,6 +160,13 @@ class ListFoldersViewModel @Inject constructor(
 
     fun onOpenMenu(folder: FolderUiModel) {
         _dialogState.value = ActionDialogState.OptionsMenu(folder)
+    }
+
+    fun onEditFolder(folder: FolderUiModel) {
+        viewModelScope.launch {
+            onDismissDialog()
+            _eventsMessages.emit(FolderActionEvent.RenameFolder(folder))
+        }
     }
 
     fun onConfirmDelete(folder: FolderUiModel) {

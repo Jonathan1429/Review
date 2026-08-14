@@ -23,12 +23,24 @@ class FilePathResolverService @Inject constructor(
         kind: PathKind
     ) = getFilePathSpecificGuide(guideDomainModel, kind)
 
-    override fun mapToOldFolderPathSpecificGuide(
+    override fun mapToOldGuidePathSpecificGuide(
         guideDomainModel: GuideDomainModel,
         originContext: HasOriginPath,
         kind: PathKind
     ): GuidePath {
-        return getOldFolderPathSpecificGuide(
+        return getOldGuidePathSpecificGuide(
+            guideDomainModel = guideDomainModel,
+            relativeGuidePath = originContext.oldRelativeGuidePath,
+            kind = kind
+        )
+    }
+
+    override fun mapToOldFolderPath(
+        guideDomainModel: GuideDomainModel,
+        originContext: HasOriginPath,
+        kind: PathKind
+    ): GuidePath {
+        return getOldFolderPath(
             guideDomainModel = guideDomainModel,
             relativeGuidePath = originContext.oldRelativeGuidePath,
             kind = kind
@@ -125,7 +137,35 @@ class FilePathResolverService @Inject constructor(
         return GuidePath(path)
     }
 
-    private fun getOldFolderPathSpecificGuide(
+    private fun getOldGuidePathSpecificGuide(
+        guideDomainModel: GuideDomainModel,
+        relativeGuidePath: RelativeGuidePath,
+        kind: PathKind
+    ): GuidePath {
+        val root = when (kind) {
+            PathKind.GUIAS -> navigationPathRepository.getRootGuides()
+            PathKind.IMAGENES -> navigationPathRepository.getRootImages()
+        }
+
+        val basePath = if (relativeGuidePath.value.isBlank()) {
+            root.value
+        } else {
+            filePathsProvider.buildFolder(root.value, relativeGuidePath.value)
+        }
+
+        val finalPath = if (guideDomainModel.version == GuideVersion.V2) {
+            val folderPath = filePathsProvider.buildFolder(basePath, guideDomainModel.nameGuide)
+            val file = FileNamingRules.buildXmlFileName(guideDomainModel.nameGuide)
+            filePathsProvider.buildGuide(folderPath, file)
+        } else {
+            val file = FileNamingRules.buildXmlFileName(guideDomainModel.nameGuide)
+            filePathsProvider.buildGuide(basePath, file)
+        }
+
+        return GuidePath(finalPath)
+    }
+
+    private fun getOldFolderPath(
         guideDomainModel: GuideDomainModel,
         relativeGuidePath: RelativeGuidePath,
         kind: PathKind

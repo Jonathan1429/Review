@@ -32,7 +32,8 @@ fun PreviewQASelectType(
 fun QASelectType(
     typeForSelected: List<QAType>,
     cardType: QAType,
-    onCardTypeClicked: (QAType) -> Unit
+    onCardTypeClicked: (QAType) -> Unit,
+    hasContent: (QAType) -> Boolean = { false }
 ) {
     Row(
         modifier = Modifier
@@ -44,6 +45,7 @@ fun QASelectType(
             QATypeItem(
                 qaTypeItem = item,
                 cardType = cardType,
+                hasContent = hasContent(item),
                 onCardTypeClicked = { cardTypeClicked ->
                     onCardTypeClicked(cardTypeClicked)
                 }

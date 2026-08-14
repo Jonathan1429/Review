@@ -30,7 +30,8 @@ fun PreviewFilterTypeItem(
 fun FilterTypeItem(
     mediaForSelected: List<ContentType>,
     mediaSelected: ContentType,
-    onFilterTypeClicked: (ContentType) -> Unit
+    onFilterTypeClicked: (ContentType) -> Unit,
+    hasContent: (ContentType) -> Boolean = { false }
 ) {
     Row(
         modifier = Modifier
@@ -43,6 +44,7 @@ fun FilterTypeItem(
                 itemContentType = item,
                 iconRes = item.toDrawable(),
                 contentTypeSelected = mediaSelected,
+                hasContent = hasContent(item),
                 onFilterTypeClicked = { filterClicked ->
                     onFilterTypeClicked(filterClicked)
                 }

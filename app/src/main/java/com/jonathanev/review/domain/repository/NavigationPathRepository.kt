@@ -11,4 +11,7 @@ interface NavigationPathRepository {
     fun getRootImages(): GuidePath
     suspend fun next(fileName: String): Result<Unit>
     suspend fun reset(): Result<Unit>
+
+    fun getLastModifiedFolderFlow(): Flow<String?>
+    suspend fun setLastModifiedFolder(folderName: String?)
 }
