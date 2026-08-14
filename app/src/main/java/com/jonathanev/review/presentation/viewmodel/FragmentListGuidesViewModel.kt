@@ -31,6 +31,8 @@ import com.jonathanev.review.presentation.state.ActionDialogState
 import com.jonathanev.review.presentation.state.GuidesUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -44,6 +46,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
+import kotlin.time.Duration.Companion.milliseconds
 
 @HiltViewModel
 class FragmentListGuidesViewModel @Inject constructor(
@@ -94,6 +97,36 @@ class FragmentListGuidesViewModel @Inject constructor(
             started = SharingStarted.Eagerly,
             initialValue = FileInteractionMode.Default
         )
+
+    private val _highlightedGuide = MutableStateFlow<GuideUiModel?>(null)
+    val highlightedGuide: StateFlow<GuideUiModel?> = _highlightedGuide.asStateFlow()
+
+    private var highlightJob: Job? = null
+
+    init {
+        viewModelScope.launch {
+            getGuideContextUseCase().collect { context ->
+                val guide = when (context) {
+                    is GuideContext.Moving -> context.guide.toUi()
+                    is GuideContext.Editing -> context.guide.toUi()
+                    is GuideContext.Creating -> context.guide.toUi()
+                    else -> null
+                }
+
+                if (guide != null && guide != _highlightedGuide.value) {
+                    _highlightedGuide.value = guide
+                    highlightJob?.cancel()
+                    highlightJob = viewModelScope.launch {
+                        delay(7000.milliseconds)
+                        _highlightedGuide.value = null
+                    }
+                } else if (guide == null) {
+                    _highlightedGuide.value = null
+                    highlightJob?.cancel()
+                }
+            }
+        }
+    }
 
     fun onCancelMove() {
         viewModelScope.launch {

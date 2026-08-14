@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
@@ -61,6 +62,7 @@ fun PreviewMovingGuide(
         ListGuidesScreen(
             guides = data.listStudyGuides,
             fileInteractionMode = data.fileInteractionMode,
+            highlightedGuide = data.listStudyGuides.firstOrNull(),
             onAddGuideClick = { },
             onItemClick = { },
             onMoveCancelGuideClick = { },
@@ -81,6 +83,7 @@ fun ListGuidesRoute(
 ) {
     val context = LocalContext.current
     val interactionMode by viewModel.interactionMode.collectAsStateWithLifecycle()
+    val highlightedGuide by viewModel.highlightedGuide.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val dialogState by viewModel.dialogState.collectAsStateWithLifecycle()
 
@@ -91,8 +94,6 @@ fun ListGuidesRoute(
     }
 
     LaunchedEffect(Unit) {
-        viewModel.clearActiveGuide()
-
         viewModel.navGuideActionEvent.collect { event ->
             when (event) {
                 NavGuideActionEvent.OpenNavGuide -> {
@@ -143,6 +144,7 @@ fun ListGuidesRoute(
         is GuidesUiState.Success -> {
             ListGuidesScreen(
                 guides = state.guides,
+                highlightedGuide = highlightedGuide,
                 onAddGuideClick = onAddGuideClick,
                 fileInteractionMode = interactionMode,
                 onItemClick = { posGuide ->
@@ -232,12 +234,24 @@ fun ListGuidesRoute(
 fun ListGuidesScreen(
     guides: List<GuideUiModel>,
     fileInteractionMode: FileInteractionMode,
+    highlightedGuide: GuideUiModel? = null,
     onAddGuideClick: () -> Unit,
     onItemClick: (Int) -> Unit,
     onMoveCancelGuideClick: () -> Unit,
     onMoveSuccessGuideClick: () -> Unit,
     onErrorProcess: () -> Unit
 ) {
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(highlightedGuide) {
+        if (highlightedGuide != null) {
+            val index = guides.indexOfFirst { it == highlightedGuide }
+            if (index != -1) {
+                listState.animateScrollToItem(index)
+            }
+        }
+    }
+
     Scaffold(
         contentWindowInsets = if (fileInteractionMode == FileInteractionMode.MovingItem) {
             androidx.compose.material3.ScaffoldDefaults.contentWindowInsets
@@ -301,11 +315,13 @@ fun ListGuidesScreen(
                 modifier = Modifier.fillMaxSize()
             ) {
                 LazyColumn(
+                    state = listState,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     itemsIndexed(guides) { index, guide ->
                         ItemGuide(
                             guide = guide,
+                            isHighlighted = guide == highlightedGuide,
                             onClick = {
                                 if (fileInteractionMode == FileInteractionMode.MovingItem) {
                                     onErrorProcess()
