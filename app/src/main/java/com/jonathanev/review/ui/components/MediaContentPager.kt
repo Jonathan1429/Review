@@ -141,49 +141,58 @@ fun MediaContentPager(
                 state = pagerState,
                 modifier = Modifier.fillMaxSize()
             ) { page ->
-                // 2. Obtenemos el elemento específico de cada página
-                when (val assetInPage = assets.getOrNull(page)) {
-                    is QuestionContentUi.Image -> {
-                        CustomBoxCreateImage(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .singleClick(onClick = {
-                                    if (guideContext is GuideContext.Browsing && currentAsset != null) {
-                                        onOpenAssetClick(currentAsset, pagerState.currentPage)
-                                    }
-                                }),
-                            uriImage = assetInPage.uri
-                        )
-                    }
+                val assetInPage = assets.getOrNull(page)
+                Box(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    // Contenido (Imagen o Texto)
+                    when (assetInPage) {
+                        is QuestionContentUi.Image -> {
+                            CustomBoxCreateImage(
+                                uriImage = assetInPage.uri
+                            )
+                        }
 
-                    is QuestionContentUi.Text -> {
-                        val textFieldValueWrapper = TextFieldValue(text = assetInPage.text)
+                        is QuestionContentUi.Text -> {
+                            val textFieldValueWrapper = TextFieldValue(text = assetInPage.text)
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(
+                                        top = 72.dp,
+                                        start = 20.dp,
+                                        end = 20.dp,
+                                        bottom = 20.dp
+                                    )
+                            ) {
+                                CustomBoxCreateText(
+                                    readOnly = true,
+                                    textValue = textFieldValueWrapper,
+                                    hint = false,
+                                    onTextValueChange = {},
+                                    selectedColor = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        }
 
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(top = 72.dp, start = 20.dp, end = 20.dp, bottom = 20.dp)
-                        ) {
-                            CustomBoxCreateText(
-                                Modifier.singleClick(onClick = {
-                                    if (guideContext is GuideContext.Browsing && currentAsset != null) {
-                                        onOpenAssetClick(currentAsset, pagerState.currentPage)
-                                    }
-                                }),
-                                readOnly = true,
-                                textValue = textFieldValueWrapper,
-                                hint = false,
-                                onTextValueChange = {},
-                                selectedColor = MaterialTheme.colorScheme.onSurface
+                        null, QuestionContentUi.None -> {
+                            EmptyStateView(
+                                icon = painterResource(R.drawable.ic_empty_notes),
+                                title = "Sin contenido",
+                                subtitle = "No se pudo cargar el contenido para mostrar"
                             )
                         }
                     }
 
-                    null, QuestionContentUi.None -> {
-                        EmptyStateView(
-                            icon = painterResource(R.drawable.ic_empty_notes),
-                            title = "Sin contenido",
-                            subtitle = "No se pudo cargar el contenido para mostrar"
+                    // Capa invisible para detectar el clic solo en modo Browsing (Review)
+                    // Esto bloquea gestos internos como zoom o selección de texto en este componente
+                    if (guideContext is GuideContext.Browsing && assetInPage != null) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .singleClick {
+                                    onOpenAssetClick(assetInPage, page)
+                                }
                         )
                     }
                 }
