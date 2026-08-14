@@ -107,7 +107,7 @@ class ListFoldersViewModel @Inject constructor(
         _highlightedFolder.value = folderName
         highlightJob?.cancel()
         highlightJob = viewModelScope.launch {
-            delay(7000.milliseconds)
+            delay(7000.milliseconds) // 7 segundos
             _highlightedFolder.value = null
         }
     }
