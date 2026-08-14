@@ -67,7 +67,8 @@ fun WithoutFilesScreenPreview(
 fun WithoutFilesRoute(
     viewModel: FragmentWithoutFilesViewModel,
     onAddGuideClick: () -> Unit,
-    onNavListGuides: () -> Unit
+    onNavListGuides: () -> Unit,
+    onBackNav: () -> Unit
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -97,6 +98,7 @@ fun WithoutFilesRoute(
 
     BackHandler {
         viewModel.resetNavigationPath()
+        onBackNav()
     }
 
     WithoutFilesScreen(

@@ -246,6 +246,9 @@ fun BasicNavigation() {
                         if (backStack.isNotEmpty()) {
                             backStack[backStack.lastIndex] = AppRoutes.ListGuidesScreen
                         }
+                    },
+                    onBackNav = {
+                        backStack.removeLastOrNull()
                     }
                 )
             }
