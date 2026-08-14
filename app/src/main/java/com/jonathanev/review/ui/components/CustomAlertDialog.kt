@@ -78,6 +78,7 @@ fun CustomAlertDialogContent(
             modifier = Modifier.padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Imagen de alerta
             WarningIconCircle()
 
             Spacer(modifier = Modifier.height(16.dp))
