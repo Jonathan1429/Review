@@ -185,6 +185,7 @@ fun CreateImageScreen(
             }
         }
     ) { padding ->
+        // Contenido de la pantalla
         Box(
             modifier = Modifier
                 .fillMaxSize()
