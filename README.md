@@ -38,19 +38,19 @@ Funciona como un híbrido entre un bloc de notas de alto nivel y un sistema de r
 ## 📱 Vista de la Aplicación
 
 <p align="left">
-  <img src="assets/readme/Samsung Galaxy Tab S7 Screenshot 1.png" width="250"/>
-  <img src="assets/readme/Samsung Galaxy Tab S7 Screenshot 2.png" width="250"/>
-  <img src="assets/readme/Samsung Galaxy Tab S7 Screenshot 3.png" width="250"/>
+  <img src="assets/readme/Samsung Galaxy S21 Ultra Screenshot 1.png" width="250"/>
+  <img src="assets/readme/Samsung Galaxy S21 Ultra Screenshot 2.png" width="250"/>
+  <img src="assets/readme/Samsung Galaxy S21 Ultra Screenshot 3.png" width="250"/>
 </p>
 
 <p align="left">
-  <img src="assets/readme/Samsung Galaxy Tab S7 Screenshot 4.png" width="250"/>
-  <img src="assets/readme/Samsung Galaxy Tab S7 Screenshot 5.png" width="250"/>
-  <img src="assets/readme/Samsung Galaxy Tab S7 Screenshot 6.png" width="250"/>
+  <img src="assets/readme/Samsung Galaxy S21 Ultra Screenshot 4.png" width="250"/>
+  <img src="assets/readme/Samsung Galaxy S21 Ultra Screenshot 5.png" width="250"/>
+  <img src="assets/readme/Samsung Galaxy S21 Ultra Screenshot 6.png" width="250"/>
 </p>
 
 <p align="left">
-   <img src="assets/readme/Samsung Galaxy Tab S7 Screenshot 7.png" width="250"/>
+   <img src="assets/readme/Samsung Galaxy S21 Ultra Screenshot 7.png" width="250"/>
 </p>
 
 ---
