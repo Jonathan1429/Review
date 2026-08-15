@@ -49,10 +49,6 @@ Funciona como un híbrido entre un bloc de notas de alto nivel y un sistema de r
   <img src="assets/readme/Samsung Galaxy S21 Ultra Screenshot 6.png" width="250"/>
 </p>
 
-<p align="left">
-   <img src="assets/readme/Samsung Galaxy S21 Ultra Screenshot 7.png" width="250"/>
-</p>
-
 ---
 
 ## 🏗️ Arquitectura y Diseño
