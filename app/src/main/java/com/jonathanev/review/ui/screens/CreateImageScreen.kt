@@ -26,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -206,16 +207,9 @@ fun CreateImageScreen(
                     modifier = Modifier.fillMaxSize()
                 ) {
                     CustomBoxCreateImage(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .then(
-                                if (guideContext !is GuideContext.Browsing) {
-                                    Modifier
-                                } else {
-                                    Modifier.padding(20.dp)
-                                }
-                            ),
-                        uriImage = uriImage
+                        modifier = Modifier.fillMaxSize(),
+                        uriImage = uriImage,
+                        contentScale = ContentScale.Crop
                     )
 
                     OptionsCreateImage(
