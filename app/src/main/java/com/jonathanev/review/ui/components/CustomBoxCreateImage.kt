@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import coil.request.ImageRequest
 import com.jonathanev.review.R
@@ -15,7 +16,8 @@ import java.io.File
 @Composable
 fun CustomBoxCreateImage(
     modifier: Modifier = Modifier,
-    uriImage: String
+    uriImage: String,
+    contentScale: ContentScale = ContentScale.Fit
 ) {
     val context = LocalContext.current
 
@@ -37,7 +39,7 @@ fun CustomBoxCreateImage(
                 .build(),
             contentDescription = "Vista previa de la imagen",
             modifier = modifier.fillMaxSize(),
-            contentScale = androidx.compose.ui.layout.ContentScale.Fit
+            contentScale = contentScale
         )
     }
 }

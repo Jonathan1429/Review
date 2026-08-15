@@ -257,3 +257,97 @@ tasks.withType(Test).configureEach { testTask ->
         testTask.exclude("**/*ScreenshotTest*")
     }
 }
+
+def getDockerPath() {
+    def userHome = System.getProperty("user.home")
+
+    def paths = [
+            "/usr/local/bin/docker",
+            "/opt/homebrew/bin/docker",
+            "${userHome}/.docker/bin/docker",
+            "/Applications/Docker.app/Contents/Resources/bin/docker",
+            "/usr/bin/docker"
+    ]
+
+    for (String path : paths) {
+        if (file(path).exists()) {
+            return path
+        }
+    }
+
+    return 'docker'
+}
+
+tasks.register('verifyRoborazziDocker', Exec) {
+    group = 'verification'
+    description = 'Ejecuta verifyRoborazziDebug dentro de un contenedor Docker Linux x86_64'
+
+    def rootDirFile = rootDir.absolutePath
+    def userHome = System.getProperty("user.home")
+    def macSdkPath = "${userHome}/Library/Android/sdk"
+    def gradleDistribution =
+            "${userHome}/.gradle/wrapper/dists/gradle-8.11.1-bin/manual/gradle-8.11.1"
+
+    executable(getDockerPath())
+
+    args(
+            'run',
+            '--rm',
+            '--platform', 'linux/amd64',
+
+            '-v', "$rootDirFile:/project",
+            '-v', "$macSdkPath:/sdk:ro",
+            '-v', "$gradleDistribution:/opt/gradle:ro",
+
+            '-v', 'roborazzi-gradle-cache:/gradle-cache',
+
+            '-e', 'ANDROID_HOME=/sdk',
+            '-e', 'ANDROID_SDK_ROOT=/sdk',
+            '-e', 'GRADLE_USER_HOME=/gradle-cache',
+
+            '-w', '/project',
+
+            'eclipse-temurin:17-jdk',
+
+            '/opt/gradle/bin/gradle',
+            ':app:verifyRoborazziDebug',
+            '--no-daemon'
+    )
+}
+
+tasks.register('recordRoborazziDocker', Exec) {
+    group = 'verification'
+    description = 'Ejecuta recordRoborazziDebug dentro de un contenedor Docker Linux x86_64'
+
+    def rootDirFile = rootDir.absolutePath
+    def userHome = System.getProperty("user.home")
+    def macSdkPath = "${userHome}/Library/Android/sdk"
+    def gradleDistribution =
+            "${userHome}/.gradle/wrapper/dists/gradle-8.11.1-bin/manual/gradle-8.11.1"
+
+    executable(getDockerPath())
+
+    args(
+            'run',
+            '--rm',
+            '--platform', 'linux/amd64',
+
+            '-v', "$rootDirFile:/project",
+            '-v', "$macSdkPath:/sdk:ro",
+            '-v', "$gradleDistribution:/opt/gradle:ro",
+
+            '-v', 'roborazzi-gradle-cache:/gradle-cache',
+
+            '-e', 'ANDROID_HOME=/sdk',
+            '-e', 'ANDROID_SDK_ROOT=/sdk',
+            '-e', 'GRADLE_USER_HOME=/gradle-cache',
+
+            '-w', '/project',
+
+            'eclipse-temurin:17-jdk',
+
+            '/opt/gradle/bin/gradle',
+            ':app:recordRoborazziDebug',
+            '--no-daemon'
+    )
+}
