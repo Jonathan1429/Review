@@ -1,17 +1,22 @@
 package com.jonathanev.review.presentation.mapper
 
-import com.jonathanev.review.domain.model.PreviewQuestionDomain
-import com.jonathanev.review.presentation.model.PreviewQuestionUi
 import com.jonathanev.review.domain.model.ColorRangeDomain
-import com.jonathanev.review.presentation.model.ColorRangeUi
+import com.jonathanev.review.domain.model.PreviewQuestionDomain
 import com.jonathanev.review.domain.model.QuestionContentDomain
-import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.domain.model.QuestionItemDomain
+import com.jonathanev.review.presentation.model.ColorRangeUi
+import com.jonathanev.review.presentation.model.PreviewQuestionUi
+import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.presentation.model.QuestionItemUi
+import com.jonathanev.review.domain.model.RelativeGuidePath as RelativeGuidePathDomain
+import com.jonathanev.review.domain.model.SaveGuideMode as SaveGuideModeDomain
+import com.jonathanev.review.presentation.model.RelativeGuidePath as RelativeGuidePathUI
+import com.jonathanev.review.presentation.model.SaveGuideMode as SaveGuideModeUI
 
 fun PreviewQuestionDomain.toUi(): PreviewQuestionUi {
     return PreviewQuestionUi(
-        this.question.toUi(),
+        question = this.question.toUi(),
+        noTexts = this.noTexts.toString(),
         noImages = this.noImages.toString()
     )
 }
@@ -71,4 +76,19 @@ fun ColorRangeDomain.toUi(): ColorRangeUi {
 
 fun ColorRangeUi.toDomain(): ColorRangeDomain {
     return ColorRangeDomain(start = start, end = end, color = color)
+}
+
+fun RelativeGuidePathUI.toDomain(): RelativeGuidePathDomain {
+    return RelativeGuidePathDomain(this.value)
+}
+
+fun SaveGuideModeUI.toDomain(): SaveGuideModeDomain {
+    return when (this) {
+        SaveGuideModeUI.Create -> SaveGuideModeDomain.Create
+        SaveGuideModeUI.Update -> SaveGuideModeDomain.Update
+    }
+}
+
+fun RelativeGuidePathDomain.toUI(): RelativeGuidePathUI {
+    return RelativeGuidePathUI(this.value)
 }

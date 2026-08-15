@@ -7,7 +7,7 @@ import javax.inject.Inject
 class SaveMetadataUseCase @Inject constructor(
     private val metadataRepository: MetadataRepository,
 ) {
-    operator fun invoke(data: FolderScreenInfoDomain) {
+    suspend operator fun invoke(data: FolderScreenInfoDomain) {
         metadataRepository.saveMetadata(data)
     }
 }

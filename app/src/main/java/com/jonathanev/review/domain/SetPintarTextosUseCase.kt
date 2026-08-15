@@ -8,12 +8,11 @@ class SetPintarTextosUseCase @Inject constructor(
     private val colorRangeParser: ColorRangeParser,
 ) {
     operator fun invoke(
-        item: QuestionContentDomain,
-        ruta: String,
+        item: QuestionContentDomain
     ): QuestionContentDomain {
         return when(item){
             is QuestionContentDomain.Image -> {
-                QuestionContentDomain.Image(ruta, item.nameFile)
+                QuestionContentDomain.Image(item.uri, item.nameFile)
             }
             is QuestionContentDomain.Text -> {
                 colorRangeParser.invoke(item.text)

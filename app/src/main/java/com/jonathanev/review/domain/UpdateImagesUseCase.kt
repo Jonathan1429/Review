@@ -1,26 +1,28 @@
 package com.jonathanev.review.domain
 
+import com.jonathanev.review.domain.constants.Constants
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuideVersion
-import com.jonathanev.review.domain.model.ImageSource
+import com.jonathanev.review.domain.model.ImageContext
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
-import com.jonathanev.review.domain.model.RelativeGuidePath
+import com.jonathanev.review.domain.model.SaveGuideMode
 import com.jonathanev.review.domain.repository.DirectoryManager
 import com.jonathanev.review.domain.repository.ImagesRepository
 import javax.inject.Inject
 
 class UpdateImagesUseCase @Inject constructor(
     private val directoryManager: DirectoryManager,
-    private val imagesRepository: ImagesRepository,
+    private val imagesRepository: ImagesRepository
 ) {
-    operator fun invoke(
+    suspend operator fun invoke(
         guideDomain: GuideDomainModel,
         preguntasProcesadas: List<QuestionItemDomain>,
         respuestasProcesadas: List<QuestionItemDomain>,
-        isNewFile: Boolean,
-        relativeGuidePath: RelativeGuidePath
+        saveGuideMode: SaveGuideMode
     ): Boolean {
+        val isNewFile = saveGuideMode == SaveGuideMode.Create
+
         // Preparar la carpeta para las imagenes.
         val pathImages = directoryManager.createPathImages(
             guideDomainModel = GuideDomainModel(
@@ -28,8 +30,7 @@ class UpdateImagesUseCase @Inject constructor(
                 nameGuide = guideDomain.nameGuide,
                 description = guideDomain.description
             ),
-            isNewFile = isNewFile,
-            relativePath = relativeGuidePath
+            isNewFile = isNewFile
         )
         if (!pathImages) return false
 
@@ -41,8 +42,8 @@ class UpdateImagesUseCase @Inject constructor(
             val isSuccessMoveImages =
                 directoryManager.moveImages(
                     guideDomainModel = guideDomain,
-                    imageSource = ImageSource.Save(relativeGuidePath),
-                    //ImageSource.Save(relativeGuidePath),
+                    //imageContext = ImageContext.Update,
+                    imageContext = ImageContext.Save,
                     images = listImages
                 )
             if (!isSuccessMoveImages) return false
@@ -53,22 +54,28 @@ class UpdateImagesUseCase @Inject constructor(
                 version = GuideVersion.V2,
                 nameGuide = guideDomain.nameGuide,
                 description = guideDomain.description
-            ), relativeGuidePath
+            )
         )
 
         val addImages =
-            listImages.filter { it.nameFile !in imagesInDevice && it.uri.isNotEmpty() }
+            listImages.filter {
+                it.nameFile !in imagesInDevice &&
+                        it.uri.isNotEmpty() &&
+                        it.uri != Constants.IMAGE_CORRUPT
+            }
 
         addImages.forEach { image ->
-            imagesRepository.save(image, guideDomain, relativeGuidePath)
+            imagesRepository.save(image, guideDomain)
         }
 
         // Borrar imagenes que se encuentren en el dispositivo y no en el archivo
         directoryManager.deleteLeftoverImagesInDevice(
-            guideDomain.nameGuide,
-            listImages,
-            relativeGuidePath
+            guideDomain,
+            listImages
         )
+
+        // Borra imagenes de la ruta cache
+        imagesRepository.clearTempImages()
 
         return true
     }

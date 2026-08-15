@@ -2,15 +2,17 @@ package com.jonathanev.review.domain
 
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuideVersion
-import com.jonathanev.review.domain.model.ImageSource
+import com.jonathanev.review.domain.model.ImageContext
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
 import com.jonathanev.review.domain.model.RelativeGuidePath
+import com.jonathanev.review.domain.model.SaveGuideMode
 import com.jonathanev.review.domain.repository.DirectoryManager
 import com.jonathanev.review.domain.repository.ImagesRepository
-import io.mockk.every
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
-import io.mockk.verify
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -31,16 +33,15 @@ class UpdateImagesUseCaseTest {
     }
 
     @Test
-    fun error_creating_the_guide() {
+    fun error_creating_the_guide() = runTest {
         val guideDomain = GuideDomainModel(GuideVersion.V2, "Prueba", "Descripcion")
         val image = QuestionContentDomain.Image("uri", "1.png")
         val question = QuestionItemDomain(listOf(image))
 
-        every {
+        coEvery {
             directoryManager.createPathImages(
                 guideDomain,
-                true,
-                relativeGuidePath
+                true
             )
         } returns false
 
@@ -48,35 +49,33 @@ class UpdateImagesUseCaseTest {
             guideDomain = guideDomain,
             preguntasProcesadas = listOf(question),
             respuestasProcesadas = emptyList(),
-            isNewFile = true,
-            relativeGuidePath = relativeGuidePath
+            saveGuideMode = SaveGuideMode.Create
         )
 
-        verify { directoryManager.createPathImages(guideDomain, true, relativeGuidePath) }
+        coVerify { directoryManager.createPathImages(guideDomain, true) }
         assertFalse(response)
     }
 
     @Test
-    fun error_relocating_existing_guide_images() {
+    fun error_relocating_existing_guide_images() = runTest {
         val image = QuestionContentDomain.Image("uri", "1.png")
         val guideDomain = GuideDomainModel(GuideVersion.V1, "Prueba", "Descripcion")
         val question = QuestionItemDomain(listOf(image))
 
 
-        every {
+        coEvery {
             directoryManager.createPathImages(
                 guideDomainModel = GuideDomainModel(
                     version = GuideVersion.V2,
                     nameGuide = "Prueba",
                     description = "Descripcion"
                 ),
-                isNewFile = false,
-                relativePath = relativeGuidePath
+                isNewFile = false
             )
         } returns true
-        every {
+        coEvery {
             directoryManager.moveImages(
-                guideDomain, ImageSource.Save(relativeGuidePath), listOf(image)
+                guideDomain, ImageContext.Save, listOf(image)
             )
         } returns false
 
@@ -84,25 +83,23 @@ class UpdateImagesUseCaseTest {
             guideDomain = guideDomain,
             preguntasProcesadas = listOf(question),
             respuestasProcesadas = emptyList(),
-            isNewFile = false,
-            relativeGuidePath = relativeGuidePath
+            saveGuideMode = SaveGuideMode.Update
         )
 
-        verify {
+        coVerify {
             directoryManager.createPathImages(
                 guideDomainModel = GuideDomainModel(
                     version = GuideVersion.V2,
                     nameGuide = "Prueba",
                     description = "Descripcion"
                 ),
-                isNewFile = false,
-                relativePath = relativeGuidePath
+                isNewFile = false
             )
         }
-        verify {
+        coVerify {
             directoryManager.moveImages(
                 guideDomain,
-                ImageSource.Save(relativeGuidePath),
+                ImageContext.Save,
                 listOf(image)
             )
         }
@@ -110,25 +107,24 @@ class UpdateImagesUseCaseTest {
     }
 
     @Test
-    fun successful_process_with_new_file() {
+    fun successful_process_with_new_file() = runTest {
         val image = QuestionContentDomain.Image("uri", "1.png")
         val guideDomain = GuideDomainModel(GuideVersion.V1, "Prueba", "Descripcion")
 
         val question = QuestionItemDomain(listOf(image))
-        every {
+        coEvery {
             directoryManager.createPathImages(
                 GuideDomainModel(GuideVersion.V2, "Prueba", "Descripcion"),
-                true,
-                relativeGuidePath
+                true
             )
         } returns true
-        every {
+        coEvery {
             directoryManager.getImagesInDevice(
                 GuideDomainModel(
                     version = GuideVersion.V2,
                     nameGuide = "Prueba",
                     description = "Descripcion"
-                ), relativeGuidePath
+                )
             )
         } returns setOf("2.png")
 
@@ -136,41 +132,40 @@ class UpdateImagesUseCaseTest {
             guideDomain = guideDomain,
             preguntasProcesadas = listOf(question),
             respuestasProcesadas = emptyList(),
-            isNewFile = true,
-            relativeGuidePath = relativeGuidePath
+            saveGuideMode = SaveGuideMode.Create,
         )
 
-        verify {
+        coVerify {
             directoryManager.createPathImages(
-                GuideDomainModel(
-                    GuideVersion.V2,
-                    "Prueba",
-                    "Descripcion"
-                ), true, relativeGuidePath
+                guideDomainModel = GuideDomainModel(
+                    version = GuideVersion.V2,
+                    nameGuide = "Prueba",
+                    description = "Descripcion"
+                ),
+                isNewFile = true
             )
         }
-        verify {
+        coVerify {
             directoryManager.getImagesInDevice(
                 GuideDomainModel(
                     version = GuideVersion.V2,
                     nameGuide = "Prueba",
                     description = "Descripcion"
-                ), relativeGuidePath
+                )
             )
         }
-        verify { imagesRepository.save(image, guideDomain, relativeGuidePath) }
-        verify {
+        coVerify { imagesRepository.save(image, guideDomain) }
+        coVerify {
             directoryManager.deleteLeftoverImagesInDevice(
-                guideDomain.nameGuide,
-                listOf(image),
-                relativeGuidePath
+                guideDomainModel = guideDomain,
+                listImages = listOf(image)
             )
         }
         assertTrue(response)
     }
 
     @Test
-    fun successful_process_with_old_file() {
+    fun successful_process_with_old_file() = runTest {
         val guideDomain = GuideDomainModel(GuideVersion.V1, "Prueba", "Descripcion")
         val image1 = QuestionContentDomain.Image("uri", "1.png")
         val image2 = QuestionContentDomain.Image("uri", "2.png")
@@ -178,26 +173,24 @@ class UpdateImagesUseCaseTest {
         val images = listOf(image1, image2, image3)
 
         val question = QuestionItemDomain(images)
-        every {
+        coEvery {
             directoryManager.createPathImages(
                 guideDomainModel = GuideDomainModel(GuideVersion.V2, "Prueba", "Descripcion"),
-                isNewFile = false,
-                relativePath = relativeGuidePath
+                isNewFile = false
             )
         } returns true
-        every {
+        coEvery {
             directoryManager.moveImages(
-                guideDomain, ImageSource.Save(relativeGuidePath), images
+                guideDomain, ImageContext.Save, images
             )
         } returns true
-        every {
+        coEvery {
             directoryManager.getImagesInDevice(
                 GuideDomainModel(
                     version = GuideVersion.V2,
                     nameGuide = "Prueba",
                     description = "Descripcion"
-                ),
-                relativeGuidePath
+                )
             )
         } returns setOf("2.png")
 
@@ -205,41 +198,39 @@ class UpdateImagesUseCaseTest {
             guideDomain = guideDomain,
             preguntasProcesadas = listOf(question),
             respuestasProcesadas = emptyList(),
-            isNewFile = false,
-            relativeGuidePath = relativeGuidePath
+            saveGuideMode = SaveGuideMode.Update,
         )
 
-        verify {
+        coVerify {
             directoryManager.createPathImages(
-                GuideDomainModel(
-                    GuideVersion.V2,
-                    "Prueba",
-                    "Descripcion"
-                ), false, relativeGuidePath
+                guideDomainModel = GuideDomainModel(
+                    version = GuideVersion.V2,
+                    nameGuide = "Prueba",
+                    description = "Descripcion"
+                ),
+                isNewFile = false
             )
         }
-        verify {
+        coVerify {
             directoryManager.getImagesInDevice(
                 GuideDomainModel(
                     version = GuideVersion.V2,
                     nameGuide = "Prueba",
                     description = "Descripcion"
-                ),
-                relativeGuidePath
+                )
             )
         }
-        verify(exactly = 1) {
-            imagesRepository.save(image1, guideDomain, relativeGuidePath)
+        coVerify(exactly = 1) {
+            imagesRepository.save(image1, guideDomain)
         }
-        verify(exactly = 0) {
-            imagesRepository.save(image2, guideDomain, relativeGuidePath)
-            imagesRepository.save(image3, guideDomain, relativeGuidePath)
+        coVerify(exactly = 0) {
+            imagesRepository.save(image2, guideDomain)
+            imagesRepository.save(image3, guideDomain)
         }
-        verify {
+        coVerify {
             directoryManager.deleteLeftoverImagesInDevice(
-                guideDomain.nameGuide,
-                images,
-                relativeGuidePath
+                guideDomainModel = guideDomain,
+                listImages = images
             )
         }
 

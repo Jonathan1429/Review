@@ -4,5 +4,5 @@ data class MigrationResult(
     val movedFiles: List<String>,
     val failedFiles: List<String>
 ) {
-    val hasSuccess: Boolean get() = movedFiles.isNotEmpty()
+    val hasSuccess: Boolean get() = failedFiles.isEmpty()
 }

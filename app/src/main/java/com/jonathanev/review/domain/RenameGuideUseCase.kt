@@ -7,12 +7,13 @@ import com.jonathanev.review.domain.model.GuideRenameContext
 import com.jonathanev.review.domain.model.OptionalAttrGuide
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
-import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.model.RequiredAttrGuide
 import com.jonathanev.review.domain.repository.DirectoryManager
 import com.jonathanev.review.domain.repository.GuiaRepository
 import com.jonathanev.review.domain.repository.ImagesRepository
+import com.jonathanev.review.domain.repository.NavigationPathRepository
 import com.jonathanev.review.domain.result.GetGuideResult
+import com.jonathanev.review.domain.result.GuideResource
 import com.jonathanev.review.domain.result.RenamedGuideResult
 import javax.inject.Inject
 
@@ -21,18 +22,17 @@ class RenameGuideUseCase @Inject constructor(
     private val guideQuestionExtractor: GuideQuestionExtractor,
     private val imagesRepository: ImagesRepository,
     private val directoryManager: DirectoryManager,
+    private val navigationPathRepository: NavigationPathRepository
 ) {
-    operator fun invoke(
-        guide: GuideDomainModel,
-        relativeGuidePath: RelativeGuidePath,
-        newName: String,
-        description: String
+    suspend operator fun invoke(
+        oldGuide: GuideDomainModel,
+        newGuide: GuideDomainModel
     ): RenamedGuideResult {
-        return when (val result = guiaRepository.getXMLGuide(guide, relativeGuidePath)) {
+        return when (val result = guiaRepository.getXMLGuide(oldGuide)) {
             is GetGuideResult.Success -> {
                 val (questions, answers) = guideQuestionExtractor.map(result)
 
-                val isPathExist = directoryManager.createPathGuide(relativeGuidePath, newName)
+                val isPathExist = directoryManager.createPathGuide(newGuide)
                 if (!isPathExist) {
                     return RenamedGuideResult.GuidePathError
                 }
@@ -41,24 +41,21 @@ class RenameGuideUseCase @Inject constructor(
                     preguntas = questions,
                     respuestas = answers,
                     guideContext = GuideContext.Rename(
-                        guide = guide,
-                        relativeGuidePath = relativeGuidePath,
-                        name = RequiredAttrGuide(newName),
-                        description = OptionalAttrGuide(description)
+                        guide = oldGuide,
+                        name = RequiredAttrGuide(newGuide.nameGuide),
+                        description = OptionalAttrGuide(newGuide.description)
                     )
                 )
 
-                if (!isRenamed) {
-                    //navigationPathRepository.reset()
+                if (isRenamed is GuideResource.Error) {
                     return RenamedGuideResult.RenamedError
                 }
 
                 val images = extractImages(questions, answers)
 
                 val isSuccess = imagesRepository.moveImages(
-                    images,
-                    GuideRenameContext(result.guideDomainModel, newName),
-                    relativeGuidePath
+                    images = images,
+                    guideRenameContext = GuideRenameContext(result.guideDomainModel, newGuide)
                 )
 
                 //navigationPathRepository.reset()
@@ -67,7 +64,7 @@ class RenameGuideUseCase @Inject constructor(
                 }
 
 
-                return RenamedGuideResult.Success
+                RenamedGuideResult.Success
             }
 
             GetGuideResult.NotFound -> RenamedGuideResult.NotFound

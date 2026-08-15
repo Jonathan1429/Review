@@ -2,12 +2,14 @@ package com.jonathanev.review.domain
 
 import com.jonathanev.review.data.storage.StorageFolders
 import com.jonathanev.review.domain.result.ValidateCreateFileResult
-import com.jonathanev.review.presentation.state.CreatingFileUiState
+import com.jonathanev.review.presentation.model.FileFormMode
 import javax.inject.Inject
 
 class ValidateCreateFileUseCase @Inject constructor() {
-    operator fun invoke(name: String, description: String): ValidateCreateFileResult {
-        val invalidChars = listOf("/", ".")
+    operator fun invoke(name: String, description: String, mode: FileFormMode): ValidateCreateFileResult {
+        val cleanName = name.trim()
+        val cleanDescription = description.trim()
+
         val invalidNames = listOf(
             StorageFolders.DATASTORE,
             StorageFolders.GUIAS,
@@ -16,13 +18,21 @@ class ValidateCreateFileUseCase @Inject constructor() {
             StorageFolders.PRINCIPAL
         )
 
+        val validNameRegex = Regex("^[a-zA-Z0-9 áéíóúÁÉÍÓÚñÑ_-]+$")
+
         val message = when {
-            name.isBlank() -> "Debes tener un nombre de archivo"
+            cleanName.isBlank() -> {
+                if (mode is FileFormMode.CreatingFolder || mode is FileFormMode.RenameFolder) {
+                    "Debes tener un nombre de carpeta"
+                } else {
+                    "Debes tener un nombre de archivo"
+                }
+            }
 
-            invalidChars.any { char -> name.contains(char) } ->
-                "No puede haber caracteres como / o . en el nombre"
+            !cleanName.matches(validNameRegex) ->
+                "Solo se permiten letras, números, espacios y guiones"
 
-            invalidNames.any { nameFile -> name.equals(nameFile, ignoreCase = true) } ->
+            invalidNames.any { nameFile -> cleanName.equals(nameFile, ignoreCase = true) } ->
                 "Ese nombre no está permitido"
 
             else -> ""
@@ -31,7 +41,7 @@ class ValidateCreateFileUseCase @Inject constructor() {
         return if (message.isNotEmpty()) {
             ValidateCreateFileResult.Error(message)
         } else {
-            ValidateCreateFileResult.Success(name, description)
+            ValidateCreateFileResult.Success(cleanName, cleanDescription)
         }
     }
 }

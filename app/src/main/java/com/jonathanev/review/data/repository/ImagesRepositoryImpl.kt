@@ -4,80 +4,157 @@ import android.content.Context
 import android.util.Log
 import androidx.core.net.toUri
 import com.jonathanev.review.data.storage.StorageFolders
+import com.jonathanev.review.domain.constants.Constants
 import com.jonathanev.review.domain.constants.Extensions
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuideRenameContext
 import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.PathKind
 import com.jonathanev.review.domain.model.QuestionContentDomain
-import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.provider.FilePathsProvider
+import com.jonathanev.review.domain.repository.FilePathResolver
 import com.jonathanev.review.domain.repository.ImagesRepository
 import com.jonathanev.review.domain.service.FileNamingRules
-import com.jonathanev.review.domain.service.FilePathResolverService
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 import javax.inject.Inject
 
 class ImagesRepositoryImpl @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val filePathsProvider: FilePathsProvider,
-    private val filePathResolverService: FilePathResolverService
+    private val filePathResolver: FilePathResolver
 ) : ImagesRepository {
-    override fun save(
+    override suspend fun save(
         image: QuestionContentDomain.Image,
-        guide: GuideDomainModel,
-        relativeGuidePath: RelativeGuidePath
-    ) {
-        val relativeGuidePath =
-            filePathResolverService.mapToJoinRelativePath(relativeGuidePath, guide.nameGuide)
-        val currentPath =
-            filePathResolverService.mapToFolderPath(relativeGuidePath, PathKind.IMAGENES).value
-        val uri = image.uri.toUri()
-        val fileName = image.nameFile
-        val outputFile = File(currentPath, fileName)
+        guide: GuideDomainModel
+    ): Unit = withContext(Dispatchers.IO) {
+        if (image.uri == Constants.IMAGE_CORRUPT) return@withContext
 
-        context.contentResolver.openInputStream(uri)?.use { input ->
-            outputFile.outputStream().use { output ->
-                input.copyTo(output)
+        try {
+            val currentPath = File(
+                filePathResolver.mapToFolderPathSpecificGuide(
+                    guideDomainModel = guide,
+                    kind = PathKind.IMAGENES
+                ).value
+            )
+
+            // Asegurar que el directorio de imágenes exista antes de escribir
+            if (!currentPath.exists()) {
+                currentPath.mkdirs()
             }
-        } ?: throw IllegalStateException("No se pudo abrir imagen")
+
+            val uri = image.uri.toUri()
+            val outputFile = File(currentPath, image.nameFile)
+
+            // Manejo seguro de streams
+            val inputStream = if (image.uri.startsWith("/")) {
+                File(image.uri).inputStream()
+            } else {
+                context.contentResolver.openInputStream(uri)
+            }
+
+            inputStream?.use { input ->
+                outputFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            } ?: Log.e("ImagesRepositoryImpl", "No se pudo abrir el stream de la imagen")
+
+        } catch (e: Exception) {
+            Log.e(
+                "ImagesRepositoryImpl",
+                "Error al guardar la imagen ${image.nameFile}: ${e.message}"
+            )
+        }
     }
 
-    override fun moveUnassignedImages(movedFiles: List<String>) {
-        val currentPathImages = File(context.filesDir, StorageFolders.IMAGENES)
-        val images = currentPathImages.listFiles()
-            ?.filter { it.isFile && it.extension == Extensions.PNG_EXTENSION }
-            ?: emptyList()
+    override suspend fun saveTempImage(uriString: String): String = withContext(Dispatchers.IO) {
+        if (uriString == Constants.IMAGE_CORRUPT) return@withContext uriString
 
-        if (images.isNotEmpty()) {
-            val pathImageOtros = File(currentPathImages, StorageFolders.OTROS)
-            val isFolderReady = pathImageOtros.exists() || pathImageOtros.mkdirs()
+        try {
+            val uri = uriString.toUri()
+            val tempFile = File(context.cacheDir, "temp_img_${System.currentTimeMillis()}.jpg")
 
-            if (!isFolderReady) {
-                Log.e("MIGRATION", "No se pudo preparar la carpeta de destino Otros.")
-                return
+            val inputStream = if (uriString.startsWith("/")) {
+                File(uriString).inputStream()
+            } else {
+                context.contentResolver.openInputStream(uri)
             }
 
-            // Mover cada archivo imagen
-            images.forEach { file ->
-                val newPath = File(pathImageOtros, file.name)
-                file.renameTo(newPath)
+            inputStream?.use { input ->
+                tempFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            } ?: return@withContext uriString
+
+            tempFile.toUri().toString()
+        } catch (e: Exception) {
+            Log.e("ImagesRepositoryImpl", "Error al guardar imagen temporal: ${e.message}")
+            uriString
+        }
+    }
+
+    override suspend fun clearTempImages() {
+        withContext(Dispatchers.IO) {
+            val cacheFolder = context.cacheDir
+            val files = cacheFolder.listFiles() ?: return@withContext
+
+            files.forEach { file ->
+                if (file.name.startsWith("temp_img_")) {
+                    file.delete()
+                }
             }
         }
     }
 
-    override fun deleteImages(
+    override suspend fun moveUnassignedImages(
+        movedFiles: List<String>
+    ) = withContext(Dispatchers.IO) {
+        val currentPathImages = File(context.filesDir, StorageFolders.IMAGENES)
+
+        if (!currentPathImages.exists() || !currentPathImages.isDirectory) return@withContext
+
+        val movedFilesSet = movedFiles.toSet()
+
+        val unassignedImages = currentPathImages.listFiles()?.filter { file ->
+            file.isFile &&
+                    file.extension.equals(Extensions.PNG_EXTENSION, ignoreCase = true) &&
+                    file.name !in movedFilesSet
+        } ?: emptyList()
+
+        if (unassignedImages.isEmpty()) return@withContext
+
+        val pathImageOtros = File(currentPathImages, StorageFolders.OTROS)
+        if (!pathImageOtros.exists() && !pathImageOtros.mkdirs()) {
+            Log.e("MIGRATION", "No se pudo preparar la carpeta de destino Otros.")
+            return@withContext
+        }
+
+        unassignedImages.forEach { file ->
+            val targetFile = File(pathImageOtros, file.name)
+            try {
+                Files.move(
+                    file.toPath(),
+                    targetFile.toPath(),
+                    StandardCopyOption.REPLACE_EXISTING
+                )
+            } catch (e: Exception) {
+                Log.e("MIGRATION", "Error al mover archivo no asignado: ${file.name}", e)
+            }
+        }
+    }
+
+    override suspend fun deleteImages(
         guide: GuideDomainModel,
         images: List<QuestionContentDomain.Image>,
-        relativeGuidePath: RelativeGuidePath
     ): Boolean {
 
         if (guide.version == GuideVersion.V1) {
-            val basePathImages = filePathResolverService.mapToFolderPath(
-                relativeGuidePath,
-                PathKind.IMAGENES
-            ).value
+            val basePathImages =
+                filePathResolver.mapToFolderPathSpecificGuide(guide, PathKind.IMAGENES).value
 
             images.forEach { image ->
                 val noImage = File(image.uri.substringAfterLast("/")).nameWithoutExtension
@@ -91,45 +168,32 @@ class ImagesRepositoryImpl @Inject constructor(
 
             return true
         } else {
-            val relativeGuidePath =
-                filePathResolverService.mapToJoinRelativePath(relativeGuidePath, guide.nameGuide)
-            val basePathImages = File(
-                filePathResolverService.mapToFolderPath(
-                    relativeGuidePath,
-                    PathKind.IMAGENES
-                ).value
-            )
+            val basePathImages =
+                File(filePathResolver.mapToFolderPathSpecificGuide(guide, PathKind.IMAGENES).value)
 
             return basePathImages.deleteRecursively()
         }
     }
 
-    override fun moveImages(
+    override suspend fun moveImages(
         images: List<QuestionContentDomain.Image>,
-        guideRenameContext: GuideRenameContext,
-        relativeGuidePath: RelativeGuidePath
+        guideRenameContext: GuideRenameContext
     ): Boolean {
-        val oldRelativeGuidePath = filePathResolverService.mapToJoinRelativePath(
-            relativeGuidePath,
-            guideRenameContext.oldGuide.nameGuide
-        )
-        val oldFolderImages = File(
-            filePathResolverService.mapToFolderPath(
-                oldRelativeGuidePath,
-                PathKind.IMAGENES
-            ).value
-        )
+        val oldFolderImages =
+            File(
+                filePathResolver.mapToFolderPathSpecificGuide(
+                    guideDomainModel = guideRenameContext.oldGuide,
+                    kind = PathKind.IMAGENES
+                ).value
+            )
 
-        val relativeGuidePath = filePathResolverService.mapToJoinRelativePath(
-            relativeGuidePath,
-            guideRenameContext.newName
-        )
-        val newPathImages = File(
-            filePathResolverService.mapToFolderPath(
-                relativeGuidePath,
-                PathKind.IMAGENES
-            ).value
-        )
+        val newPathImages =
+            File(
+                filePathResolver.mapToFolderPathSpecificGuide(
+                    guideDomainModel = guideRenameContext.newGuide,
+                    kind = PathKind.IMAGENES
+                ).value
+            )
 
         // Renamed folder
         if (guideRenameContext.oldGuide.version == GuideVersion.V2) {

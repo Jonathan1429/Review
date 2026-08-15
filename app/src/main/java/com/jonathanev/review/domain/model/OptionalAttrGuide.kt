@@ -1,4 +1,8 @@
 package com.jonathanev.review.domain.model
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
 @JvmInline
-value class OptionalAttrGuide(val value: String)
+@Parcelize
+value class OptionalAttrGuide(val value: String) : Parcelable

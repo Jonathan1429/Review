@@ -1,34 +1,52 @@
 package com.jonathanev.review.presentation.viewmodel
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jonathanev.review.domain.ClearActiveGuideUseCase
+import com.jonathanev.review.domain.ClearGuideMoveUseCase
 import com.jonathanev.review.domain.DeleteGuideUseCase
-import com.jonathanev.review.domain.GetGuideMoveUseCase
+import com.jonathanev.review.domain.GetGuideContextUseCase
 import com.jonathanev.review.domain.GetGuidePosicionUseCase
 import com.jonathanev.review.domain.GetGuideXmlDataUseCase
 import com.jonathanev.review.domain.LoadGuidesUseCase
 import com.jonathanev.review.domain.MoveGuideUseCase
+import com.jonathanev.review.domain.ObservePathUseCase
+import com.jonathanev.review.domain.ResetNavigationUseCase
+import com.jonathanev.review.domain.SetActiveGuideUseCase
 import com.jonathanev.review.domain.SetContextMoveUseCase
 import com.jonathanev.review.domain.model.GuideContext
-import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.result.DeleteGuideResult
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.domain.result.GuideResultDomain
 import com.jonathanev.review.domain.result.MoveGuideResponse
-import com.jonathanev.review.presentation.event.GuideActionEvent
-import com.jonathanev.review.presentation.event.UIMovingEvent
+import com.jonathanev.review.presentation.event.NavGuideActionEvent
+import com.jonathanev.review.presentation.event.StateGuideActionEvent
+import com.jonathanev.review.presentation.mapper.toDomain
+import com.jonathanev.review.presentation.mapper.toUi
+import com.jonathanev.review.presentation.model.FileInteractionMode
 import com.jonathanev.review.presentation.model.GuideResultUi
 import com.jonathanev.review.presentation.model.GuideUiModel
-import com.jonathanev.review.presentation.mapper.toUi
-import com.jonathanev.review.presentation.model.QuestionItemUi
+import com.jonathanev.review.presentation.state.ActionDialogState
+import com.jonathanev.review.presentation.state.GuidesUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
+import kotlin.time.Duration.Companion.milliseconds
 
 @HiltViewModel
 class FragmentListGuidesViewModel @Inject constructor(
@@ -36,140 +54,302 @@ class FragmentListGuidesViewModel @Inject constructor(
     private val getGuidePosicionUseCase: GetGuidePosicionUseCase,
     private val deleteGuideUseCase: DeleteGuideUseCase,
     private val setContextMoveUseCase: SetContextMoveUseCase,
-    private val getGuideMoveUseCase: GetGuideMoveUseCase,
+    private val getGuideContextUseCase: GetGuideContextUseCase,
     private val getGuideXmlDataUseCase: GetGuideXmlDataUseCase,
     private val moveGuideUseCase: MoveGuideUseCase,
+    private val resetNavigationUseCase: ResetNavigationUseCase,
+    private val setActiveGuideUseCase: SetActiveGuideUseCase,
+    private val clearActiveGuideUseCase: ClearActiveGuideUseCase,
+    private val clearGuideMoveUseCase: ClearGuideMoveUseCase,
+    observePathUseCase: ObservePathUseCase
 ) : ViewModel() {
-    private var cachedGuides: List<GuideDomainModel> = emptyList()
-    private var selectedGuideDomain: GuideDomainModel? = null
-
-    private val _guides = MutableLiveData<List<GuideUiModel>>()
-    val guides: LiveData<List<GuideUiModel>> = _guides
-
-    private val _eventsMessages = MutableSharedFlow<GuideActionEvent>()
-    val eventsMessages = _eventsMessages.asSharedFlow()
-
-    private val _eventsMovingFiles = MutableSharedFlow<UIMovingEvent>()
-    val eventsMovingFiles = _eventsMovingFiles.asSharedFlow()
-
-    private var _preguntas: MutableList<QuestionItemUi> = mutableListOf()
-    val preguntas: List<QuestionItemUi> get() = _preguntas
-
-    private var _respuestas: MutableList<QuestionItemUi> = mutableListOf()
-    val respuestas: List<QuestionItemUi> get() = _respuestas
-
-    fun getAllGuides(relativeGuidePath: RelativeGuidePath) {
-        cachedGuides = loadGuidesUseCase.invoke(relativeGuidePath)
-        val guidesUi = cachedGuides.map { guide -> guide.toUi() }
-        _guides.postValue(guidesUi)
-    }
-
-    fun getGuideSelected(position: Int): GuideResultUi {
-        return when (val result = getGuidePosicionUseCase.invoke(position, cachedGuides)) {
-            GuideResultDomain.Error -> result.toUi()
-            is GuideResultDomain.Success -> {
-                selectedGuideDomain = result.guideDomainModel
-                result.toUi()
-            }
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val uiState: StateFlow<GuidesUiState> = observePathUseCase.invoke()
+        .flatMapLatest { _ ->
+            loadGuidesUseCase.invoke()
         }
-    }
-
-    fun deleteGuide(nameGuide: String, relativeGuidePath: RelativeGuidePath) {
-        val guideDomainModel = cachedGuides.find { it.nameGuide == nameGuide }
-        if (guideDomainModel == null) {
-            emitMessage(GuideActionEvent.ShowMessage("No se ha encontrado la guia"))
-            return
+        .map { list ->
+            if (list.isEmpty()) GuidesUiState.Empty
+            else GuidesUiState.Success(list.map { it.toUi() })
         }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = GuidesUiState.Loading
+        )
 
-        val response = deleteGuideUseCase.invoke(guideDomainModel, relativeGuidePath)
-        when (response) {
-            DeleteGuideResult.DeleteSuccess -> {
-                emitMessage(GuideActionEvent.Success("Guia borrada exitosamente"))
-            }
-            DeleteGuideResult.ErrorGuide -> emitMessage(GuideActionEvent.ShowMessage("Hubo un error al borrar la guia"))
-            DeleteGuideResult.ErrorImage ->
-                emitMessage(GuideActionEvent.ShowMessage("Hubo inconvenientes en el borrado completo de archivos"))
-            else -> emitMessage(GuideActionEvent.ShowMessage("Ocurrió un error al eliminar la guia"))
+    private val _dialogState =
+        MutableStateFlow<ActionDialogState<GuideUiModel>>(ActionDialogState.Hidden)
+    val dialogState: StateFlow<ActionDialogState<GuideUiModel>> = _dialogState.asStateFlow()
+
+    private val _navGuideActionEvent = MutableSharedFlow<NavGuideActionEvent>()
+    val navGuideActionEvent = _navGuideActionEvent.asSharedFlow()
+
+    private val _stateGuideActionEvent = MutableSharedFlow<StateGuideActionEvent>()
+    val stateGuideActionEvent = _stateGuideActionEvent.asSharedFlow()
+
+    val interactionMode: StateFlow<FileInteractionMode> = getGuideContextUseCase()
+        .map { activeMoving ->
+            if (activeMoving is GuideContext.Moving) FileInteractionMode.MovingItem else FileInteractionMode.Default
         }
-    }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = FileInteractionMode.Default
+        )
 
-    private fun emitMessage(guideActionEvent: GuideActionEvent) {
+    private val _highlightedGuide = MutableStateFlow<GuideUiModel?>(null)
+    val highlightedGuide: StateFlow<GuideUiModel?> = _highlightedGuide.asStateFlow()
+
+    private var highlightJob: Job? = null
+
+    init {
         viewModelScope.launch {
-            _eventsMessages.emit(guideActionEvent)
-        }
-    }
-
-    fun movingGuide(relativeGuidePath: RelativeGuidePath) {
-        when (val context = getGuideMoveUseCase.invoke()) {
-            is GuideContext.Moving -> {
-                val guideDomainModel = cachedGuides.find { it.nameGuide == context.guide.nameGuide }
-
-                if (guideDomainModel != null) {
-                    viewModelScope.launch {
-                        _eventsMovingFiles.emit(UIMovingEvent.ExistFile)
-                    }
-                    return
+            getGuideContextUseCase().collect { context ->
+                val guide = when (context) {
+                    is GuideContext.Moving -> context.guide.toUi()
+                    is GuideContext.Editing -> context.guide.toUi()
+                    is GuideContext.Creating -> context.guide.toUi()
+                    else -> null
                 }
 
-                onContinueProcess(true, relativeGuidePath)
+                if (guide != null && guide != _highlightedGuide.value) {
+                    _highlightedGuide.value = guide
+                    highlightJob?.cancel()
+                    highlightJob = viewModelScope.launch {
+                        delay(7000.milliseconds)
+                        _highlightedGuide.value = null
+                    }
+                } else if (guide == null) {
+                    _highlightedGuide.value = null
+                    highlightJob?.cancel()
+                }
             }
-
-            else -> eventMovingFile("Error inesperado")
         }
     }
 
-    fun onContinueProcess(confirmed: Boolean, relativeGuidePath: RelativeGuidePath) {
-        if (!confirmed) return
+    fun onCancelMove() {
+        viewModelScope.launch {
+            try {
+                clearGuideMoveUseCase.invoke()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                e.printStackTrace()
+                emitMessage(
+                    StateGuideActionEvent.ShowMessage(
+                        e.message ?: "Ocurrió un error inesperado"
+                    )
+                )
+            }
+        }
+    }
 
-        when (val context = getGuideMoveUseCase.invoke()) {
-            is GuideContext.Moving -> {
-                when (val guideData = getGuideXmlDataUseCase.invoke(context)) {
-                    is GetGuideResult.Success -> {
+    fun getGuideSelected(guides: List<GuideUiModel>, position: Int): GuideResultUi {
+        return when (val result =
+            getGuidePosicionUseCase.invoke(position, guides.map { it.toDomain() })) {
+            GuideResultDomain.Error -> result.toUi()
+            is GuideResultDomain.Success -> result.toUi()
+        }
+    }
 
-                        val response = moveGuideUseCase.invoke(guideData, context, relativeGuidePath)
-                        when (response) {
-                            MoveGuideResponse.ErrorMovingGuide ->
-                                eventMovingFile("Error al intentar mover la guia")
+    private fun emitNavigation(navGuideActionEvent: NavGuideActionEvent) {
+        viewModelScope.launch {
+            _navGuideActionEvent.emit(navGuideActionEvent)
+        }
+    }
 
-                            MoveGuideResponse.ErrorMovingImages ->
-                                eventMovingFile("Error al intentar mover imagenes")
+    private fun emitMessage(stateGuideActionEvent: StateGuideActionEvent) {
+        viewModelScope.launch {
+            _stateGuideActionEvent.emit(stateGuideActionEvent)
+        }
+    }
 
-                            MoveGuideResponse.ErrorPathGuide ->
-                                eventMovingFile("No existe la ruta para mover la guia")
+    fun movingGuide(guides: List<GuideUiModel>) {
+        viewModelScope.launch {
+            when (val context = getGuideContextUseCase.invoke().firstOrNull()) {
+                is GuideContext.Moving -> {
+                    val isExistGuide = guides.any { it.nameGuide == context.guide.nameGuide }
 
-                            MoveGuideResponse.ErrorPathImages ->
-                                eventMovingFile("No existe una ruta para guardar las imagenes")
+                    if (isExistGuide) {
+                        emitMessage(StateGuideActionEvent.ExistFile)
+                        return@launch
+                    }
 
-                            MoveGuideResponse.Success ->{
-                                eventMovingFile("Guia movida exitosamente")
+                    onContinueProcess(true)
+                }
+
+                else -> emitMessage(StateGuideActionEvent.ShowMessage("Error inesperado"))
+            }
+        }
+    }
+
+    fun onContinueProcess(confirmed: Boolean) {
+        viewModelScope.launch {
+            try {
+                if (!confirmed) return@launch
+
+                when (val context = getGuideContextUseCase.invoke().firstOrNull()) {
+                    is GuideContext.Moving -> {
+                        when (val guideData = getGuideXmlDataUseCase.invoke(context)) {
+                            is GetGuideResult.Success -> {
+                                val response =
+                                    moveGuideUseCase.invoke(guideData, context)
+                                when (response) {
+                                    MoveGuideResponse.ErrorMovingGuide ->
+                                        emitMessage(StateGuideActionEvent.ShowMessage("Error al intentar mover la guia"))
+
+                                    MoveGuideResponse.ErrorMovingImages ->
+                                        emitMessage(StateGuideActionEvent.ShowMessage("Error al intentar mover imagenes"))
+
+                                    MoveGuideResponse.ErrorPathGuide ->
+                                        emitMessage(StateGuideActionEvent.ShowMessage("No existe la ruta para mover la guia"))
+
+                                    MoveGuideResponse.ErrorPathImages ->
+                                        emitMessage(StateGuideActionEvent.ShowMessage("No existe una ruta para guardar las imagenes"))
+
+                                    MoveGuideResponse.Success -> {
+                                        emitMessage(StateGuideActionEvent.ShowMessage("Guia movida exitosamente"))
+                                    }
+                                }
                             }
+
+                            GetGuideResult.InvalidFormat ->
+                                emitMessage(StateGuideActionEvent.ShowMessage("La guia está dañada"))
+
+                            GetGuideResult.NotFound ->
+                                emitMessage(StateGuideActionEvent.ShowMessage("No se ha encontrado la guia"))
+
+                            GetGuideResult.UnknownError ->
+                                emitMessage(StateGuideActionEvent.ShowMessage("Guia movida exitosamente"))
                         }
                     }
 
-                    GetGuideResult.InvalidFormat -> eventMovingFile("La guia está dañada")
-
-                    GetGuideResult.NotFound -> eventMovingFile("No se ha encontrado la guia")
-
-                    GetGuideResult.UnknownError -> eventMovingFile("Error desconocido")
+                    else ->
+                        emitMessage(StateGuideActionEvent.ShowMessage("Error inesperado"))
                 }
+            } finally {
+                clearGuideMoveUseCase.invoke()
             }
-
-            else -> eventMovingFile("Error inesperado")
         }
     }
 
-    private fun eventMovingFile(message: String) {
+    fun setContextMoving(guide: GuideUiModel) {
         viewModelScope.launch {
-            _eventsMovingFiles.emit(UIMovingEvent.ShowMessage(message))
+            try {
+                val guideDomainModel = guide.toDomain()
+                val guideContext = GuideContext.Moving(
+                    guide = guideDomainModel,
+                    oldRelativeGuidePath = RelativeGuidePath("")
+                )
+                setContextMoveUseCase.invoke(guideContext)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                e.printStackTrace()
+                emitMessage(
+                    StateGuideActionEvent.ShowMessage(
+                        e.message ?: "Ocurrió un error inesperado"
+                    )
+                )
+            } finally {
+                resetNavigationUseCase.invoke()
+            }
         }
     }
 
-    fun moveFileCancel() {
-        eventMovingFile("Se ha cancelado la acción")
+    fun setActiveGuide(guideUIModel: GuideUiModel) {
+        viewModelScope.launch {
+            try {
+                setActiveGuideUseCase.invoke(guideUIModel.toDomain())
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                e.printStackTrace()
+                emitMessage(
+                    StateGuideActionEvent.ShowMessage(
+                        e.message ?: "Ocurrió un error inesperado"
+                    )
+                )
+            }
+        }
     }
 
-    fun setContext(relativeGuidePath: RelativeGuidePath) {
-        val guide = selectedGuideDomain ?: return
-        setContextMoveUseCase.invoke(guide, relativeGuidePath)
+    fun clearActiveGuide() {
+        viewModelScope.launch {
+            try {
+                clearActiveGuideUseCase.invoke()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                e.printStackTrace()
+                emitMessage(
+                    StateGuideActionEvent.ShowMessage(
+                        e.message ?: "Ocurrió un error inesperado"
+                    )
+                )
+            }
+        }
     }
+
+    fun onOpenMenu(guide: GuideUiModel) {
+        _dialogState.value = ActionDialogState.OptionsMenu(guide)
+    }
+
+    fun onRequestDelete(guide: GuideUiModel) {
+        _dialogState.value = ActionDialogState.ConfirmDelete(guide)
+    }
+
+    fun onDismissDialog() {
+        _dialogState.value = ActionDialogState.Hidden
+    }
+
+    fun onConfirmDelete(guide: GuideUiModel) {
+        viewModelScope.launch {
+            onDismissDialog()
+            val guideDomainModel = guide.toDomain()
+            val response = deleteGuideUseCase.invoke(guideDomainModel)
+            when (response) {
+                DeleteGuideResult.DeleteSuccess -> {
+                    emitMessage(StateGuideActionEvent.GuideDeleteSuccess)
+                }
+
+                DeleteGuideResult.ErrorGuide -> emitMessage(StateGuideActionEvent.ShowMessage("Hubo un error al borrar la guia"))
+                DeleteGuideResult.ErrorImage ->
+                    emitMessage(StateGuideActionEvent.ShowMessage("Hubo inconvenientes en el borrado completo de archivos"))
+
+                else -> emitMessage(StateGuideActionEvent.ShowMessage("Ocurrió un error al eliminar la guia"))
+            }
+        }
+    }
+
+    fun onOpenGuide(guideUIModel: GuideUiModel) {
+        onDismissDialog()
+        setActiveGuide(guideUIModel)
+        emitNavigation(NavGuideActionEvent.OpenNavGuide)
+    }
+
+    fun onRenameGuide(guideUIModel: GuideUiModel) {
+        onDismissDialog()
+        emitNavigation(NavGuideActionEvent.RenameNavGuide(guideUIModel))
+    }
+
+    fun onMoveGuide(guideUIModel: GuideUiModel) {
+        onDismissDialog()
+        setContextMoving(guideUIModel)
+        emitNavigation(NavGuideActionEvent.MoveNavGuide)
+    }
+
+    /*fun resetNavigationPath() {
+        viewModelScope.launch {
+            try {
+                resetNavigationUseCase.invoke()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                e.printStackTrace()
+                emitMessage(GuideActionEvent.ShowMessage(e.message ?: "Ocurrió un error inesperado"))
+            }
+        }
+    }*/
 }

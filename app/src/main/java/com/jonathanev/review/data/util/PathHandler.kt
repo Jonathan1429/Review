@@ -22,17 +22,26 @@ class PathHandler @Inject constructor() {
         return resultado.toString()
     }
 
-    fun getSubstringPath(path: String, decoded: String = "", version: GuideVersion, nameFile: String = ""): String{
-        var newPath = path
+    fun getSubstringPath(
+        path: String,
+        decoded: String = "",
+        version: GuideVersion,
+        nameFile: String = ""
+    ): String {
+        var newPath = path.replace("\\", "/")
+        val newDecoded = decoded.replace("\\", "/")
+        val separator = "/"
+
         newPath = if (version == GuideVersion.V1) {
-            newPath = path.substringAfter("/")
+            //newPath = newPath.substringAfter(separator)
             newPath = newPath.replace(StorageFolders.GUIAS, StorageFolders.IMAGENES)
-            newPath = newPath.substringBeforeLast("/")
-            val image = decoded.substringAfterLast("/")
-            "$newPath/$image"
+            newPath = newPath.substringBeforeLast(separator)
+            val image = newDecoded.substringAfterLast(separator)
+            "$newPath$separator$image"
         } else {
             newPath = newPath.replace(StorageFolders.GUIAS, StorageFolders.IMAGENES)
-            "$newPath/$nameFile"
+            newPath = newPath.substringBeforeLast(separator)
+            "$newPath$separator$nameFile"
         }
 
         return newPath

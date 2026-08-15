@@ -20,10 +20,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.jonathanev.review.R
 import com.jonathanev.review.databinding.FragmentListGuidesBinding
-import com.jonathanev.review.domain.model.RelativeGuidePath
-import com.jonathanev.review.presentation.event.GuideActionEvent
-import com.jonathanev.review.presentation.event.UIMovingEvent
-import com.jonathanev.review.presentation.model.GuideResultUi
 import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.presentation.viewmodel.FragmentListGuidesViewModel
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
@@ -64,11 +60,12 @@ class FragmentListGuides : Fragment() {
 
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.eventsMovingFiles.collect { event ->
+                /*viewModel.eventsMovingFiles.collect { event ->
                     when (event) {
                         UIMovingEvent.ExistFile -> {
                             alertDialog { confirmed ->
-                                val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
+                                val relativeGuidePath =
+                                    RelativeGuidePath(navStateViewModel.guidesPath.value)
                                 viewModel.onContinueProcess(confirmed, relativeGuidePath)
 
                                 if (!confirmed) {
@@ -101,7 +98,7 @@ class FragmentListGuides : Fragment() {
                             )
                         }
                     }
-                }
+                }*/
             }
         }
 
@@ -111,7 +108,7 @@ class FragmentListGuides : Fragment() {
                     viewModelToolbar.onCancel.collect {
                         viewModelToolbar.initButtons()
                         navStateViewModel.setMainPath()
-                        viewModel.moveFileCancel()
+                        //viewModel.moveFileCancel()
 
                         findNavController().navigate(
                             R.id.action_to_content_graph,
@@ -125,8 +122,8 @@ class FragmentListGuides : Fragment() {
 
                 launch {
                     viewModelToolbar.onSuccess.collect {
-                        val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
-                        viewModel.movingGuide(relativeGuidePath)
+                        //val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
+                        //viewModel.movingGuide(relativeGuidePath)
                         /*viewModelToolbar.initButtons()
                         navStateViewModel.setMainPath()
                         findNavController().navigate(
@@ -141,15 +138,15 @@ class FragmentListGuides : Fragment() {
             }
         }
 
-        lifecycleScope.launch {
+        /*lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.eventsMessages.collect { event ->
-                    when (event) {
+                    /*when (event) {
                         is GuideActionEvent.ShowMessage -> {
                             showToast(event.text)
                         }
 
-                        is GuideActionEvent.Success -> {
+                        is GuideActionEvent.GuideDeleteSuccess -> {
                             navStateViewModel.setMainPath()
                             showToast(event.text)
 
@@ -161,16 +158,16 @@ class FragmentListGuides : Fragment() {
                                     .build()
                             )
                         }
-                    }
+                    }*/
                 }
             }
-        }
+        }*/
 
         requireActivity().onBackPressedDispatcher.addCallback(
             viewLifecycleOwner,
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
-                    navStateViewModel.back()
+                    //navStateViewModel.back()
 
                     findNavController().popBackStack(
                         R.id.fragmentListFolders,
@@ -180,9 +177,9 @@ class FragmentListGuides : Fragment() {
             }
         )
 
-        viewModel.guides.observe(viewLifecycleOwner) { guides ->
+        /*viewModel.guides.observe(viewLifecycleOwner) { guides ->
             adaptListGuides.submitList(guides)
-        }
+        }*/
     }
 
     private fun initListeners(mode: FolderAction) {
@@ -218,8 +215,8 @@ class FragmentListGuides : Fragment() {
         binding.lvGuiasEstudioNew.setHasFixedSize(true)
         binding.lvGuiasEstudioNew.adapter = adaptListGuides
 
-        val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
-        viewModel.getAllGuides(relativeGuidePath)
+        //val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
+        //viewModel.getAllGuides(relativeGuidePath)
     }
 
     private fun showGuideOptions(position: Int, mode: FolderAction) {
@@ -232,7 +229,7 @@ class FragmentListGuides : Fragment() {
             return
         }
 
-        when (val guideResult = viewModel.getGuideSelected(position)) {
+        /*when (val guideResult = viewModel.getGuideSelected(state.guides, position)) {
             is GuideResultUi.Error -> showToast("No se encontró la guia en la posición $position")
 
             is GuideResultUi.Success -> {
@@ -270,22 +267,22 @@ class FragmentListGuides : Fragment() {
                                             " guia?"
                                 )
                                 .setPositiveButton("Si") { _, _ ->
-                                    val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
-                                    viewModel.deleteGuide(guideResult.guideUiModel.nameGuide, relativeGuidePath)
+                                    //val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
+                                    //viewModel.deleteGuide(guideResult.guideUiModel.nameGuide, relativeGuidePath)
                                 }
                                 .setNegativeButton("Cancelar") { _, _ -> dialog.dismiss() }
                                 .create().show()
 
                         2 -> {
-                            findNavController().navigate(
+                            /*findNavController().navigate(
                                 R.id.action_to_create_graph,
                                 bundleOf("mode" to FolderAction.RenamingFile(guideResult.guideUiModel.nameGuide))
-                            )
+                            )*/
                         }
 
                         3 -> {
-                            val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
-                            viewModel.setContext(relativeGuidePath)
+                            //val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
+                            //viewModel.setContext(relativeGuidePath)
                             navStateViewModel.setMainPath()
                             findNavController().navigate(
                                 R.id.action_to_content_graph,
@@ -307,7 +304,7 @@ class FragmentListGuides : Fragment() {
                 }
                 builder.create().show()
             }
-        }
+        }*/
     }
 
     private fun alertDialog(onResult: (Boolean) -> Unit) {

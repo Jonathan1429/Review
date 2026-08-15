@@ -1,31 +1,47 @@
 package com.jonathanev.review.domain.repository
 
-import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuidePath
+import com.jonathanev.review.domain.model.HasOriginPath
 import com.jonathanev.review.domain.model.PathKind
 import com.jonathanev.review.domain.model.RelativeGuidePath
 
 interface FilePathResolver {
-    fun mapToFilePathSpecificGuide(
+    suspend fun mapToFilePathSpecificGuide(
         guideDomainModel: GuideDomainModel,
-        relativeGuidePath: RelativeGuidePath,
         kind: PathKind
     ): GuidePath
 
-    fun mapToJoinRelativePath(
-        relativeGuidePath: RelativeGuidePath,
-        nameFolder: String
-    ): RelativeGuidePath
+    fun mapToOldGuidePathSpecificGuide(
+        guideDomainModel: GuideDomainModel,
+        originContext: HasOriginPath,
+        kind: PathKind
+    ): GuidePath
 
-    fun mapToFolderPath(
-        relativeGuidePath: RelativeGuidePath,
+    fun mapToOldFolderPath(
+        guideDomainModel: GuideDomainModel,
+        originContext: HasOriginPath,
+        kind: PathKind
+    ): GuidePath
+
+    suspend fun mapToFolderPathSpecificGuide(
+        guideDomainModel: GuideDomainModel,
+        kind: PathKind
+    ): GuidePath
+
+    suspend fun mapToFolderPath(
         kind: PathKind
     ): GuidePath
 
     //fun renamePathGuidesV2(guideContext: GuideContext.Rename): String
 
     fun getPathGuidesV2(
+        guideDomainModel: GuideDomainModel,
+        kind: PathKind,
+        relativeGuidePath: RelativeGuidePath
+    ): String
+
+    fun getPathGuidesV1(
         guideDomainModel: GuideDomainModel,
         kind: PathKind,
         relativeGuidePath: RelativeGuidePath

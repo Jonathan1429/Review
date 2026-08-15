@@ -11,7 +11,7 @@ import com.jonathanev.review.presentation.model.ActionGuide
 import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.R
 
-class CreateEntryFragment : Fragment(R.layout.fragment_fragments_content) {
+class CreateEntryFragment : Fragment(R.layout.fragment_compose_container) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 

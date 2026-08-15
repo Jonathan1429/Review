@@ -1,38 +1,39 @@
 package com.jonathanev.review.ui.main
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.os.bundleOf
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import com.jonathanev.review.presentation.model.FolderAction
 import com.jonathanev.review.R
-import com.jonathanev.review.databinding.FragmentMainActivityBinding
+import com.jonathanev.review.presentation.model.FolderAction
+import com.jonathanev.review.ui.screens.WithoutFoldersScreen
+import com.jonathanev.review.ui.theme.ReviewTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class FragmentMain : Fragment() {
-    private var _binding: FragmentMainActivityBinding? = null
-    private val binding get() = _binding!!
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentMainActivityBinding.inflate(inflater, container, false)
-        return binding.root
-    }
-
+class FragmentMain : Fragment(R.layout.fragment_compose_container) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.btnCrearCarpeta.setOnClickListener {
-            findNavController().navigate(
-                R.id.action_to_create_graph,
-                bundleOf("mode" to FolderAction.CreatingFolder)
-            )
+        val composeView = view.findViewById<ComposeView>(R.id.composeView)
+
+        // Termina el ciclo de vida correctamente en Compose
+        composeView.setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+
+        composeView.setContent {
+            ReviewTheme {
+                WithoutFoldersScreen(
+                    onNavCreateFilesProperties = {
+                        findNavController().navigate(
+                            R.id.action_to_create_graph,
+                            bundleOf("mode" to FolderAction.CreatingFolder)
+                        )
+                    }
+                )
+            }
         }
     }
 }

@@ -3,26 +3,24 @@ package com.jonathanev.review.domain.repository
 import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.GuideRenameContext
 import com.jonathanev.review.domain.model.QuestionContentDomain
-import com.jonathanev.review.domain.model.RelativeGuidePath
 
 interface ImagesRepository {
-    fun save(
+    suspend fun save(
         image: QuestionContentDomain.Image,
-        guide: GuideDomainModel,
-        relativeGuidePath: RelativeGuidePath
+        guide: GuideDomainModel
     )
 
-    fun moveImages(
+    suspend fun saveTempImage(uriString: String): String
+    suspend fun clearTempImages()
+    suspend fun moveImages(
         images: List<QuestionContentDomain.Image>,
-        guideRenameContext: GuideRenameContext,
-        relativeGuidePath: RelativeGuidePath
+        guideRenameContext: GuideRenameContext
     ): Boolean
 
-    fun deleteImages(
+    suspend fun deleteImages(
         guide: GuideDomainModel,
         images: List<QuestionContentDomain.Image>,
-        relativeGuidePath: RelativeGuidePath
     ): Boolean
 
-    fun moveUnassignedImages(movedFiles: List<String>)
+    suspend fun moveUnassignedImages(movedFiles: List<String>)
 }

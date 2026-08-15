@@ -1,0 +1,55 @@
+package com.jonathanev.review.ui.components
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.unit.dp
+import com.jonathanev.review.ui.model.QAType
+import com.jonathanev.review.ui.preview.ComponentsPreviews
+import com.jonathanev.review.ui.preview.providers.QASelectTypeProv
+import com.jonathanev.review.ui.preview.providers.QASelectTypeProvider
+import com.jonathanev.review.ui.theme.ReviewTheme
+
+@ComponentsPreviews
+@Composable
+fun PreviewQASelectType(
+    @PreviewParameter(QASelectTypeProvider::class) data: QASelectTypeProv
+) {
+    ReviewTheme {
+        QASelectType(
+            typeForSelected = data.typesForSelect,
+            cardType = data.typeSelected,
+            onCardTypeClicked = {}
+        )
+    }
+}
+
+@Composable
+fun QASelectType(
+    typeForSelected: List<QAType>,
+    cardType: QAType,
+    onCardTypeClicked: (QAType) -> Unit,
+    hasContent: (QAType) -> Boolean = { false }
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 24.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        typeForSelected.forEach { item ->
+            QATypeItem(
+                qaTypeItem = item,
+                cardType = cardType,
+                hasContent = hasContent(item),
+                onCardTypeClicked = { cardTypeClicked ->
+                    onCardTypeClicked(cardTypeClicked)
+                }
+            )
+        }
+    }
+}

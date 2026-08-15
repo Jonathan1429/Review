@@ -2,31 +2,30 @@ package com.jonathanev.review.domain.repository
 
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.domain.model.GuideDomainModel
-import com.jonathanev.review.domain.model.ImageSource
+import com.jonathanev.review.domain.model.ImageContext
 import com.jonathanev.review.domain.model.QuestionContentDomain
-import com.jonathanev.review.domain.model.RelativeGuidePath
 
 interface DirectoryManager {
-    fun createPathImages(
+    suspend fun createPathImages(
         guideDomainModel: GuideDomainModel,
-        isNewFile: Boolean,
-        relativePath: RelativeGuidePath
+        isNewFile: Boolean
     ): Boolean
-    fun moveImages(
+
+    suspend fun moveImages(
         guideDomainModel: GuideDomainModel,
-        imageSource: ImageSource,
+        imageContext: ImageContext,
         images: List<QuestionContentDomain.Image>
     ): Boolean
 
-    fun getImagesInDevice(guideDomain: GuideDomainModel, relativeGuidePath: RelativeGuidePath): Set<String>
-    fun deleteLeftoverImagesInDevice(
-        nameGuide: String,
-        listImages: List<QuestionContentDomain.Image>,
-        relativeGuidePath: RelativeGuidePath
+    suspend fun getImagesInDevice(guideDomain: GuideDomainModel): Set<String>
+    suspend fun deleteLeftoverImagesInDevice(
+        guideDomainModel: GuideDomainModel,
+        listImages: List<QuestionContentDomain.Image>
     )
 
     fun existPath(path: String): Boolean
-    fun createPathGuide(relativeGuidePath: RelativeGuidePath, nameGuide: String): Boolean
+    suspend fun createPathGuide(guideDomainModel: GuideDomainModel): Boolean
+    suspend fun renameFolder(oldName: String, newName: String): Boolean
     fun deleteFolderEmpty(context: GuideContext.Moving)
     fun createFoldersMain(): Boolean
 }

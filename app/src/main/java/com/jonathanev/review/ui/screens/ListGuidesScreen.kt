@@ -1,0 +1,350 @@
+package com.jonathanev.review.ui.screens
+
+import android.content.Context
+import android.widget.Toast
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.jonathanev.review.R
+import com.jonathanev.review.presentation.event.NavGuideActionEvent
+import com.jonathanev.review.presentation.event.StateGuideActionEvent
+import com.jonathanev.review.presentation.model.FileInteractionMode
+import com.jonathanev.review.presentation.model.GuideMenuOption
+import com.jonathanev.review.presentation.model.GuideResultUi
+import com.jonathanev.review.presentation.model.GuideUiModel
+import com.jonathanev.review.presentation.state.ActionDialogState
+import com.jonathanev.review.presentation.state.GuidesUiState
+import com.jonathanev.review.presentation.viewmodel.FragmentListGuidesViewModel
+import com.jonathanev.review.ui.components.DialogConfirmDelete
+import com.jonathanev.review.ui.components.DialogOptionsMenu
+import com.jonathanev.review.ui.components.ItemGuide
+import com.jonathanev.review.ui.components.singleClick
+import com.jonathanev.review.ui.preview.DevicePreviews
+import com.jonathanev.review.ui.preview.providers.StudyGuidesProv
+import com.jonathanev.review.ui.preview.providers.StudyGuidesProvider
+import com.jonathanev.review.ui.theme.ReviewTheme
+
+@DevicePreviews
+@Composable
+fun PreviewMovingGuide(
+    @PreviewParameter(StudyGuidesProvider::class) data: StudyGuidesProv
+) {
+    ReviewTheme {
+        ListGuidesScreen(
+            guides = data.listStudyGuides,
+            fileInteractionMode = data.fileInteractionMode,
+            highlightedGuide = data.listStudyGuides.firstOrNull(),
+            onAddGuideClick = { },
+            onItemClick = { },
+            onMoveCancelGuideClick = { },
+            onMoveSuccessGuideClick = { },
+            onErrorProcess = {}
+        )
+    }
+}
+
+@Composable
+fun ListGuidesRoute(
+    viewModel: FragmentListGuidesViewModel,
+    onAddGuideClick: () -> Unit,
+    onOpenGuideClick: () -> Unit,
+    onRenameGuideClick: (GuideUiModel) -> Unit,
+    onMoveGuideClick: () -> Unit,
+    onNavWithoutGuides: () -> Unit
+) {
+    val context = LocalContext.current
+    val interactionMode by viewModel.interactionMode.collectAsStateWithLifecycle()
+    val highlightedGuide by viewModel.highlightedGuide.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val dialogState by viewModel.dialogState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(uiState) {
+        if (uiState is GuidesUiState.Empty) {
+            onNavWithoutGuides()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.navGuideActionEvent.collect { event ->
+            when (event) {
+                NavGuideActionEvent.OpenNavGuide -> {
+                    onOpenGuideClick()
+                }
+
+                is NavGuideActionEvent.RenameNavGuide -> {
+                    onRenameGuideClick(event.guideUiModel)
+                }
+
+                NavGuideActionEvent.MoveNavGuide -> {
+                    onMoveGuideClick()
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.stateGuideActionEvent.collect { event ->
+            when (event) {
+                StateGuideActionEvent.ExistFile -> {
+                    showToast("Ya existe un archivo con el mismo nombre", context)
+                }
+
+                StateGuideActionEvent.GuideDeleteSuccess ->
+                    showToast("Se ha borrado exitosamente la guia", context)
+
+                is StateGuideActionEvent.ShowMessage ->
+                    showToast(event.text, context)
+            }
+        }
+    }
+
+    when (val state = uiState) {
+        is GuidesUiState.Loading -> {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+
+        is GuidesUiState.Empty -> {
+            Box(modifier = Modifier.fillMaxSize())
+        }
+
+        is GuidesUiState.Success -> {
+            ListGuidesScreen(
+                guides = state.guides,
+                highlightedGuide = highlightedGuide,
+                onAddGuideClick = onAddGuideClick,
+                fileInteractionMode = interactionMode,
+                onItemClick = { posGuide ->
+                    when (val result = viewModel.getGuideSelected(state.guides, posGuide)) {
+                        GuideResultUi.Error -> {
+                            Toast.makeText(
+                                /* context = */ context,
+                                /* text = */
+                                "No se pudo encontrar la guia en la posición $posGuide",
+                                /* duration = */
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+
+                        is GuideResultUi.Success -> {
+                            viewModel.onOpenMenu(result.guideUiModel)
+                        }
+                    }
+                },
+                onMoveCancelGuideClick = {
+                    viewModel.onCancelMove()
+                },
+                onMoveSuccessGuideClick = {
+                    viewModel.movingGuide(state.guides)
+                },
+                onErrorProcess = {
+                    Toast.makeText(
+                        /* context = */ context,
+                        /* text = */ "Debes mover la guia antes de hacer otra accion",
+                        /* duration = */ Toast.LENGTH_SHORT
+                    ).show()
+                }
+            )
+
+            when (val state = dialogState) {
+                is ActionDialogState.ConfirmDelete<GuideUiModel> -> {
+                    DialogConfirmDelete(
+                        description = "¿Estás seguro que deseas eliminar la guia?",
+                        onDeleteItemClick = {
+                            viewModel.onConfirmDelete(state.item)
+                        },
+                        onCloseDialog = {
+                            viewModel.onDismissDialog()
+                        }
+                    )
+                }
+
+                ActionDialogState.Hidden -> {
+                    /* No se renderiza ningún diálogo */
+                }
+
+                is ActionDialogState.OptionsMenu<GuideUiModel> -> {
+                    DialogOptionsMenu(
+                        options = GuideMenuOption.entries,
+                        optionTitle = { it.title },
+                        onOptionSelected = { option ->
+                            when (option) {
+                                GuideMenuOption.OPEN -> {
+                                    viewModel.onOpenGuide(guideUIModel = state.item)
+                                }
+
+                                GuideMenuOption.RENAME -> {
+                                    viewModel.onRenameGuide(guideUIModel = state.item)
+                                }
+
+                                GuideMenuOption.MOVE -> {
+                                    viewModel.onMoveGuide(guideUIModel = state.item)
+                                }
+
+                                GuideMenuOption.DELETE -> {
+                                    viewModel.onRequestDelete(state.item)
+                                }
+                            }
+                        },
+                        onCloseDialog = {
+                            viewModel.onDismissDialog()
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ListGuidesScreen(
+    guides: List<GuideUiModel>,
+    fileInteractionMode: FileInteractionMode,
+    highlightedGuide: GuideUiModel? = null,
+    onAddGuideClick: () -> Unit,
+    onItemClick: (Int) -> Unit,
+    onMoveCancelGuideClick: () -> Unit,
+    onMoveSuccessGuideClick: () -> Unit,
+    onErrorProcess: () -> Unit
+) {
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(highlightedGuide) {
+        if (highlightedGuide != null) {
+            val index = guides.indexOfFirst { it == highlightedGuide }
+            if (index != -1) {
+                listState.animateScrollToItem(index)
+            }
+        }
+    }
+
+    Scaffold(
+        contentWindowInsets = if (fileInteractionMode == FileInteractionMode.MovingItem) {
+            androidx.compose.material3.ScaffoldDefaults.contentWindowInsets
+        } else {
+            androidx.compose.foundation.layout.WindowInsets.safeDrawing
+        },
+        topBar = {
+            if (fileInteractionMode == FileInteractionMode.MovingItem) {
+                CenterAlignedTopAppBar(
+                    title = {
+                        Text(stringResource(R.string.lblMoving))
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = singleClick { onMoveCancelGuideClick() }) {
+                            Icon(
+                                painterResource(R.drawable.ic_cancel),
+                                contentDescription = "Cancelar"
+                            )
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = singleClick { onMoveSuccessGuideClick() }) {
+                            Icon(
+                                painterResource(R.drawable.ic_success),
+                                contentDescription = "Aceptar"
+                            )
+                        }
+                    }
+                )
+            }
+        },
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                onClick = singleClick { onAddGuideClick() },
+                containerColor = MaterialTheme.colorScheme.primary,
+                shape = RoundedCornerShape(16.dp),
+                icon = {
+                    Icon(
+                        painter = painterResource(R.drawable.plus),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
+                },
+                text = {
+                    Text(
+                        stringResource(R.string.btnAddGuide),
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+            )
+        }
+    ) { padding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(vertical = 16.dp, horizontal = 16.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    itemsIndexed(guides) { index, guide ->
+                        ItemGuide(
+                            guide = guide,
+                            isHighlighted = guide == highlightedGuide,
+                            onClick = {
+                                if (fileInteractionMode == FileInteractionMode.MovingItem) {
+                                    onErrorProcess()
+                                } else {
+                                    onItemClick(index)
+                                }
+                            }
+                        )
+
+                        if (index < guides.lastIndex) {
+                            HorizontalDivider(
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+                                thickness = 1.dp,
+                                modifier = Modifier.padding(vertical = 4.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun showToast(text: String, context: Context) {
+    Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
+}

@@ -1,5 +1,6 @@
 package com.jonathanev.review.ui.fragment
 
+//import com.jonathanev.review.ui.model.ScreenDataNav
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -7,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
@@ -23,17 +23,12 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.jonathanev.review.R
 import com.jonathanev.review.databinding.FragmentCreateFileBinding
-import com.jonathanev.review.domain.model.QAType
-import com.jonathanev.review.domain.model.RelativeGuidePath
-import com.jonathanev.review.domain.model.SaveGuideMode
-import com.jonathanev.review.presentation.event.CreateGuideEvent
 import com.jonathanev.review.presentation.model.ActionGuide
 import com.jonathanev.review.presentation.viewmodel.MainActivityViewModel
 import com.jonathanev.review.presentation.viewmodel.MainToolbarViewModel
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.ui.adapter.ListCreateImagesAdapter
 import com.jonathanev.review.ui.adapter.ListCreateTextsAdapter
-import com.jonathanev.review.ui.model.ScreenDataNav
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -47,7 +42,7 @@ class FragmentCreateFile : Fragment() {
 
     private lateinit var adaptListCreateTexts: ListCreateTextsAdapter
     private lateinit var adaptListCreateImages: ListCreateImagesAdapter
-    private lateinit var screenDataNav: ScreenDataNav
+    //private lateinit var screenDataNav: ScreenDataNav
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -67,13 +62,13 @@ class FragmentCreateFile : Fragment() {
             requireArguments(), "actionGuide", ActionGuide::class.java
         ) ?: ActionGuide.NONE
 
-        screenDataNav = BundleCompat.getParcelable(
+        /*screenDataNav = BundleCompat.getParcelable(
             requireArguments(), "screenData", ScreenDataNav::class.java
-        ) ?: ScreenDataNav("", "", R.drawable.ic_anchor_solid_full, R.color.black)
+        ) ?: ScreenDataNav("", "", R.drawable.ic_anchor_solid_full, R.color.black)*/
 
         val callback = object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                viewModel.initUIState()
+                //viewModel.initUIState()
                 findNavController().popBackStack()
             }
         }
@@ -88,8 +83,8 @@ class FragmentCreateFile : Fragment() {
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.createGuideEvent.collect { createGuideEvent ->
-                    when (createGuideEvent) {
-                        CreateGuideEvent.AddMoreQuestions -> {
+                    /*when (createGuideEvent) {
+                        /*CreateGuideEvent.AddMoreQuestions -> {
                             AlertDialog.Builder(requireContext())
                                 .setTitle("¡Atención!")
                                 .setMessage("Ya no hay mas preguntas, ¿quieres agregar mas?")
@@ -106,13 +101,12 @@ class FragmentCreateFile : Fragment() {
                                 }.setOnCancelListener {
 
                                 }.create().show()
-                        }
+                        }*/
 
-                        CreateGuideEvent.ErrorGuideCreated -> showToast("No se pudo crear la guia")
-                        CreateGuideEvent.NotQuestionBefore -> showToast("Ya no hay preguntas anteriores")
+                        //CreateGuideEvent.NotQuestionBefore -> showToast("Ya no hay preguntas anteriores")
                         CreateGuideEvent.WithoutText -> showToast("Debes tener al menos un texto")
                         CreateGuideEvent.WithoutTextQA -> showToast("Debes tener al menos un texto en pregunta/respuesta")
-                        is CreateGuideEvent.ShowMessage -> {
+                        is CreateGuideEvent.ErrorGuideCreated -> {
                             showToast(createGuideEvent.text)
                             navStateViewModel.setMainPath()
 
@@ -137,7 +131,7 @@ class FragmentCreateFile : Fragment() {
                                     .build()
                             )
                         }
-                    }
+                    }*/
                 }
             }
         }
@@ -145,11 +139,11 @@ class FragmentCreateFile : Fragment() {
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { uiState ->
-                    binding.lblPregResp.text =
+                    /*binding.lblPregResp.text =
                         if (uiState.qAType == QAType.QUESTION)
                             getString(R.string.etPregunta)
                         else
-                            getString(R.string.etRespuesta)
+                            getString(R.string.etRespuesta)*/
                 }
             }
         }
@@ -196,11 +190,11 @@ class FragmentCreateFile : Fragment() {
         binding.recyclerImagenes.setHasFixedSize(true)
         binding.recyclerImagenes.adapter = adaptListCreateImages
 
-        val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
+        //val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
         when (actionGuide) {
-            ActionGuide.CREATE -> Log.i("Crear", "Se está creando un archivo")
+            is ActionGuide.CREATE -> Log.i("Crear", "Se está creando un archivo")
             is ActionGuide.EDIT -> {
-                viewModel.getObtenerDatosXML(actionGuide.posGuide, actionGuide.nameGuide, relativeGuidePath)
+                //viewModel.getObtenerDatosXML(actionGuide.noQuestion, actionGuide.nameGuide, relativeGuidePath)
             }
 
             ActionGuide.NONE -> {
@@ -226,7 +220,7 @@ class FragmentCreateFile : Fragment() {
     }
 
     private fun goEditImage(position: Int) {
-        viewModel.setEditingMode(true, position)
+        //viewModel.setEditingMode(true, position)
 
         findNavController().navigate(
             R.id.action_to_images,
@@ -235,7 +229,7 @@ class FragmentCreateFile : Fragment() {
     }
 
     private fun goEditText(position: Int) {
-        viewModel.setEditingMode(true, position)
+        //viewModel.setEditingMode(true, position)
 
         findNavController().navigate(
             R.id.action_to_text,
@@ -262,7 +256,7 @@ class FragmentCreateFile : Fragment() {
         }
 
         binding.btnPregResp.setOnClickListener {
-            viewModel.rollPregResp()
+            //viewModel.onCardTypeChanged(typeClicked)
         }
 
         binding.btnPrevious.setOnClickListener {
@@ -285,9 +279,9 @@ class FragmentCreateFile : Fragment() {
         }
 
         binding.btnSaveGuide.setOnClickListener {
-            val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
+            //val relativeGuidePath = RelativeGuidePath(navStateViewModel.guidesPath.value)
 
-            when (actionGuide) {
+            /*when (actionGuide) {
                 ActionGuide.CREATE -> viewModel.saveGuide(
                     nameGuide = screenDataNav.name,
                     description = screenDataNav.description,
@@ -305,7 +299,7 @@ class FragmentCreateFile : Fragment() {
                 }
 
                 ActionGuide.NONE -> Log.e("Error:", "NO se pudo guardar la guia")
-            }
+            }*/
         }
     }
 

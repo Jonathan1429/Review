@@ -6,11 +6,14 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 sealed class QuestionContentUi : Parcelable {
     @Parcelize
-    data object None : QuestionContentUi()
+    data object None : QuestionContentUi(), Parcelable
+
     @Parcelize
-    data class Text(val text: String, val colorRanges: List<ColorRangeUi>) : QuestionContentUi()
+    data class Text(val text: String, val colorRanges: List<ColorRangeUi>) : QuestionContentUi(),
+        Parcelable
+
     @Parcelize
-    data class Image(val uri: String, val nameFile: String) : QuestionContentUi()
+    data class Image(val uri: String, val nameFile: String) : QuestionContentUi(), Parcelable
 }
 
 @Parcelize

@@ -1,17 +1,19 @@
 package com.jonathanev.review.di
 
 import com.jonathanev.review.data.filesystem.GuiaRepositoryImpl
-import com.jonathanev.review.data.filesystem.GuideMoveRepositoryImpl
+import com.jonathanev.review.data.filesystem.GuideContextRepositoryImpl
 import com.jonathanev.review.data.infraestructure.AndroidXmlSerializerFactory
 import com.jonathanev.review.data.infraestructure.RealFileOutputStreamFactory
+import com.jonathanev.review.data.repository.ActiveGuideRepositoryImpl
 import com.jonathanev.review.data.repository.FolderRepositoryImpl
 import com.jonathanev.review.data.repository.ImagesRepositoryImpl
 import com.jonathanev.review.data.repository.NavigationPathRepositoryImpl
+import com.jonathanev.review.domain.repository.ActiveGuideRepository
 import com.jonathanev.review.domain.repository.FileOutputStreamFactory
 import com.jonathanev.review.domain.repository.FilePathResolver
 import com.jonathanev.review.domain.repository.FolderRepository
 import com.jonathanev.review.domain.repository.GuiaRepository
-import com.jonathanev.review.domain.repository.GuideMoveRepository
+import com.jonathanev.review.domain.repository.GuideContextRepository
 import com.jonathanev.review.domain.repository.ImagesRepository
 import com.jonathanev.review.domain.repository.NavigationPathRepository
 import com.jonathanev.review.domain.repository.XmlSerializerFactory
@@ -31,8 +33,8 @@ abstract class RepositoryModule {
 
     @Binds
     abstract fun bindGuideMoveRepository(
-        impl: GuideMoveRepositoryImpl
-    ): GuideMoveRepository
+        impl: GuideContextRepositoryImpl
+    ): GuideContextRepository
 
     @Binds
     abstract fun bindNavigationRepository(
@@ -63,4 +65,9 @@ abstract class RepositoryModule {
     abstract fun bindFilePathResolver(
         impl: FilePathResolverService
     ): FilePathResolver
+
+    @Binds
+    abstract fun bindActiveGuideRepository(
+        impl: ActiveGuideRepositoryImpl
+    ): ActiveGuideRepository
 }

@@ -1,0 +1,113 @@
+package com.jonathanev.review.ui.components
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import com.github.skydoves.colorpicker.compose.ColorPickerController
+import com.github.skydoves.colorpicker.compose.HsvColorPicker
+import com.github.skydoves.colorpicker.compose.rememberColorPickerController
+import com.jonathanev.review.ui.preview.ComponentsPreviews
+import com.jonathanev.review.ui.theme.ReviewTheme
+
+@ComponentsPreviews
+@Composable
+fun PreviewColorPickerDialog() {
+    ReviewTheme {
+        val controller = rememberColorPickerController()
+
+        ColorPickerDialogContent(
+            controller = controller,
+            colorInitial = MaterialTheme.colorScheme.onSurface,
+            onColorSelected = {},
+            onDefaultClick = {},
+            onDismissRequest = {}
+        )
+    }
+}
+
+@Composable
+fun ColorPickerDialog(
+    colorInitial: Color,
+    onDismissRequest: () -> Unit,
+    onColorSelected: (Int) -> Unit,
+    onDefaultClick: () -> Unit
+) {
+    val controller = rememberColorPickerController()
+
+    Dialog(onDismissRequest = onDismissRequest) {
+        ColorPickerDialogContent(
+            controller,
+            colorInitial,
+            onColorSelected,
+            onDefaultClick,
+            onDismissRequest
+        )
+    }
+}
+
+@Composable
+fun ColorPickerDialogContent(
+    controller: ColorPickerController,
+    colorInitial: Color,
+    onColorSelected: (Int) -> Unit,
+    onDefaultClick: () -> Unit,
+    onDismissRequest: () -> Unit
+) {
+    Card(
+        modifier = Modifier.size(320.dp, 350.dp),
+        shape = MaterialTheme.shapes.medium
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            HsvColorPicker(
+                modifier = Modifier.size(200.dp),
+                controller = controller,
+                initialColor = colorInitial,
+                onColorChanged = { colorEnvelope ->
+                    onColorSelected(colorEnvelope.color.toArgb())
+                }
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Button(
+                    onClick = singleClick { onDismissRequest() }
+                ) {
+                    Text(text = "Continuar")
+                }
+
+                OutlinedButton(
+                    onClick = singleClick { onDefaultClick() }
+                ) {
+                    Text(
+                        text = "Default",
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+        }
+    }
+}

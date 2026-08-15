@@ -6,14 +6,14 @@ import com.jonathanev.review.domain.model.GuideVersion
 import com.jonathanev.review.domain.model.QAItemDomain
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
-import com.jonathanev.review.domain.model.RelativeGuidePath
 import com.jonathanev.review.domain.repository.GuiaRepository
 import com.jonathanev.review.domain.repository.ImagesRepository
 import com.jonathanev.review.domain.result.DeleteGuideResult
 import com.jonathanev.review.domain.result.GetGuideResult
-import io.mockk.every
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
-import io.mockk.verify
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -23,13 +23,11 @@ class DeleteGuideUseCaseTest {
     private val imagesRepository = mockk<ImagesRepository>()
     private lateinit var deleteGuideUseCase: DeleteGuideUseCase
     private lateinit var guideDomainModel: GuideDomainModel
-    private var relativeGuidePath = RelativeGuidePath("init")
     private lateinit var qaItemDomain: QAItemDomain
 
     @Before
     fun setUp() {
         guideDomainModel = GuideDomainModel(GuideVersion.V2, "Guia a eliminar", "")
-        relativeGuidePath = RelativeGuidePath("Kotlin")
         qaItemDomain = QAItemDomain(
             question = QuestionItemDomain(
                 listOf(
@@ -48,140 +46,101 @@ class DeleteGuideUseCaseTest {
     }
 
     @Test
-    fun if_the_xml_is_not_read_correctly_it_returns_an_error() {
-        every {
-            guiaRepository.getXMLGuide(
-                guideDomainModel,
-                relativeGuidePath
-            )
+    fun if_the_xml_is_not_read_correctly_it_returns_an_error() = runTest {
+        coEvery {
+            guiaRepository.getXMLGuide(guideDomainModel)
         } returns GetGuideResult.NotFound
 
-        val response = deleteGuideUseCase.invoke(guideDomainModel, relativeGuidePath)
+        val response = deleteGuideUseCase.invoke(guideDomainModel)
 
         assertEquals(DeleteGuideResult.Error, response)
     }
 
     @Test
-    fun error_deleting_the_guide() {
-        every {
-            guiaRepository.getXMLGuide(
-                guideDomainModel,
-                relativeGuidePath
-            )
+    fun error_deleting_the_guide() = runTest {
+        coEvery {
+            guiaRepository.getXMLGuide(guideDomainModel)
         } returns GetGuideResult.Success(guideDomainModel, listOf(qaItemDomain))
 
-        every {
+        coEvery {
             guiaRepository.deleteGuide(
-                GuideContext.DeleteGuide(
-                    guideDomainModel,
-                    relativeGuidePath
-                )
+                GuideContext.DeleteGuide(guideDomainModel)
             )
         } returns false
 
-        val response = deleteGuideUseCase.invoke(guideDomainModel, relativeGuidePath)
+        val response = deleteGuideUseCase.invoke(guideDomainModel)
 
-        verify {
-            guiaRepository.getXMLGuide(
-                guideDomainModel,
-                relativeGuidePath
-            )
+        coVerify {
+            guiaRepository.getXMLGuide(guideDomainModel)
         }
 
         assertEquals(DeleteGuideResult.ErrorGuide, response)
     }
 
     @Test
-    fun error_deleting_the_images() {
-        every {
-            guiaRepository.getXMLGuide(
-                guideDomainModel,
-                relativeGuidePath
-            )
+    fun error_deleting_the_images() = runTest {
+        coEvery {
+            guiaRepository.getXMLGuide(guideDomainModel)
         } returns GetGuideResult.Success(guideDomainModel, listOf(qaItemDomain))
 
-        every {
+        coEvery {
             guiaRepository.deleteGuide(
-                GuideContext.DeleteGuide(
-                    guideDomainModel,
-                    relativeGuidePath
-                )
+                GuideContext.DeleteGuide(guideDomainModel)
             )
         } returns true
 
-        every {
+        coEvery {
             imagesRepository.deleteImages(
-                guideDomainModel,
-                emptyList(),
-                relativeGuidePath
+                guide = guideDomainModel,
+                images = emptyList()
             )
         } returns false
 
-        val response = deleteGuideUseCase.invoke(guideDomainModel, relativeGuidePath)
+        val response = deleteGuideUseCase.invoke(guideDomainModel)
 
-        verify {
-            guiaRepository.getXMLGuide(
-                guideDomainModel,
-                relativeGuidePath
-            )
+        coVerify {
+            guiaRepository.getXMLGuide(guideDomainModel)
         }
-        verify {
+        coVerify {
             guiaRepository.deleteGuide(
-                GuideContext.DeleteGuide(
-                    guideDomainModel,
-                    relativeGuidePath
-                )
+                GuideContext.DeleteGuide(guideDomainModel)
             )
         }
 
-        verify { imagesRepository.deleteImages(guideDomainModel, emptyList(), relativeGuidePath) }
+        coVerify { imagesRepository.deleteImages(guideDomainModel, emptyList()) }
         assertEquals(DeleteGuideResult.ErrorImage, response)
     }
 
     @Test
-    fun success_deliting_the_guide() {
-        every {
-            guiaRepository.getXMLGuide(
-                guideDomainModel,
-                relativeGuidePath
-            )
+    fun success_deliting_the_guide() = runTest {
+        coEvery {
+            guiaRepository.getXMLGuide(guideDomainModel)
         } returns GetGuideResult.Success(guideDomainModel, listOf(qaItemDomain))
 
-        every {
+        coEvery {
             guiaRepository.deleteGuide(
-                GuideContext.DeleteGuide(
-                    guideDomainModel,
-                    relativeGuidePath
-                )
+                GuideContext.DeleteGuide(guideDomainModel)
             )
         } returns true
 
-        every {
+        coEvery {
             imagesRepository.deleteImages(
-                guideDomainModel,
-                emptyList(),
-                relativeGuidePath
+                guide = guideDomainModel,
+                images = emptyList()
             )
         } returns true
 
-        val response = deleteGuideUseCase.invoke(guideDomainModel, relativeGuidePath)
+        val response = deleteGuideUseCase.invoke(guideDomainModel)
 
-        verify {
-            guiaRepository.getXMLGuide(
-                guideDomainModel,
-                relativeGuidePath
-            )
+        coVerify {
+            guiaRepository.getXMLGuide(guideDomainModel)
         }
-        verify {
+        coVerify {
             guiaRepository.deleteGuide(
-                GuideContext.DeleteGuide(
-                    guideDomainModel,
-                    relativeGuidePath
-                )
+                GuideContext.DeleteGuide(guideDomainModel)
             )
         }
-
-        verify { imagesRepository.deleteImages(guideDomainModel, emptyList(), relativeGuidePath) }
+        coVerify { imagesRepository.deleteImages(guide = guideDomainModel, images = emptyList()) }
         assertEquals(DeleteGuideResult.DeleteSuccess, response)
     }
 }
