@@ -1,9 +1,11 @@
 package com.jonathanev.review.ui.components
 
+import android.widget.Toast
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,9 +41,13 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.jonathanev.review.R
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.ui.preview.ComponentsPreviews
@@ -111,6 +117,8 @@ fun StepNavigationCarousel(
         lazyListState = lazyListState,
         scrollThreshold = 120.dp,
         onMove = { from, to ->
+            if (guideContext is GuideContext.Browsing) return@rememberReorderableLazyListState
+
             if (initialDragIndex == null) {
                 initialDragIndex = from.index
             }
@@ -205,24 +213,42 @@ fun StepNavigationCarousel(
                             )
                             .clip(RoundedCornerShape(12.dp))
                             .background(cardStepBackground)
-                            .longPressDraggableHandle(
-                                onDragStopped = {
-                                    val start = initialDragIndex
-                                    val end = currentDragIndex
-                                    if (start != null && end != null && start != end) {
-                                        onMoveItem(start, end)
+                            .then(
+                                if (guideContext is GuideContext.Browsing) {
+                                    val context = LocalContext.current
+                                    val msg = stringResource(R.string.msg_read_only_reorder)
+                                    Modifier.pointerInput(Unit) {
+                                        detectTapGestures(
+                                            onTap = {
+                                                scope.launch {
+                                                    pagerState.animateScrollToPage(index)
+                                                }
+                                            },
+                                            onLongPress = {
+                                                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                                            }
+                                        )
                                     }
-                                    initialDragIndex = null
-                                    currentDragIndex = null
+                                } else {
+                                    Modifier
+                                        .longPressDraggableHandle(
+                                            onDragStopped = {
+                                                val start = initialDragIndex
+                                                val end = currentDragIndex
+                                                if (start != null && end != null && start != end) {
+                                                    onMoveItem(start, end)
+                                                }
+                                                initialDragIndex = null
+                                                currentDragIndex = null
+                                            }
+                                        )
+                                        .singleClick(onClick = {
+                                            scope.launch {
+                                                pagerState.animateScrollToPage(index)
+                                            }
+                                        })
                                 }
-                            )
-                            .singleClick(onClick = {
-                                scope.launch {
-                                    pagerState.animateScrollToPage(
-                                        index
-                                    )
-                                }
-                            }),
+                            ),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(

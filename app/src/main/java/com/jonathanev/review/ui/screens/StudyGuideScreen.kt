@@ -264,7 +264,9 @@ fun FillingGuideRoute(
                     viewModel.updatePosContent(position)
                 },
                 onDismissRequest = viewModel::onDismissDialogDeleteQuestion,
-                onMoveItem = { from, to -> viewModel.onMoveItem(from, to) },
+                onMoveItem = { from, to ->
+                    viewModel.onMoveItem(from, to)
+                },
                 onEditGuideClick = viewModel::switchToEditMode,
                 hasContentQA = { type ->
                     val question = state.preguntas.getOrNull(state.contadorPregunta)
