@@ -35,6 +35,7 @@ sealed interface AppRoutes : NavKey {
         val posItem: Int
     ) : AppRoutes
 
+    @Serializable
     data class CreateTextScreen(
         val questionContentMode: QuestionContentMode,
         val posItem: Int
