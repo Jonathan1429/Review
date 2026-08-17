@@ -98,34 +98,35 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 .distinctUntilChanged()
                 .flowOn(Dispatchers.IO)
                 .collect { (context, state) ->
+                    // 1. Si no hay contexto aún, NO emitimos Error. Simplemente esperamos en Loading.
                     if (context == null) {
-                        if (state !is GuideScreenUiState.Error) updateState(GuideScreenUiState.Error)
                         return@collect
                     }
 
-                    // Extraemos la guía y la posición solicitada
+                    // 2. Extraemos la guía y la posición solicitada
                     val (guide, targetPosition) = when (context) {
                         is GuideContext.Browsing -> context.guide to context.position
                         is GuideContext.Editing -> context.guide to context.position
                         is GuideContext.Creating -> context.guide to 0
                         else -> {
+                            // Solo si el contexto es explícitamente inválido, pasamos a Error
                             if (state !is GuideScreenUiState.Error) updateState(GuideScreenUiState.Error)
                             return@collect
                         }
                     }
 
-                    // 1. Si ya tenemos Success y el contexto coincide, NO cargamos (protege cambios en memoria)
+                    // 3. Si ya tenemos Success y el contexto coincide, NO cargamos (protege cambios en memoria)
                     if (state is GuideScreenUiState.Success && state.guideContext == context) {
                         return@collect
                     }
 
-                    // 2. Si el contexto cambió pero el estado sigue siendo Success del contexto anterior, forzamos Loading
+                    // 4. Si el contexto cambió pero el estado sigue siendo Success del contexto anterior, forzamos Loading
                     if (state is GuideScreenUiState.Success && state.guideContext != context) {
                         updateState(GuideScreenUiState.Loading)
                         return@collect // La siguiente emisión del combine manejará la carga
                     }
 
-                    // 3. Si el estado es Loading (por defecto o tras Discard), procedemos a cargar
+                    // 5. Si el estado es Loading (arranque o tras Discard), procedemos a cargar
                     if (state is GuideScreenUiState.Loading) {
                         if (context is GuideContext.Creating) {
                             updateState(
