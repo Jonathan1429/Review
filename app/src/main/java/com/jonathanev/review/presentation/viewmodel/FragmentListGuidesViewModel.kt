@@ -3,7 +3,7 @@ package com.jonathanev.review.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.domain.ClearActiveGuideUseCase
-import com.jonathanev.review.domain.ClearGuideMoveUseCase
+import com.jonathanev.review.domain.ClearContextUseCase
 import com.jonathanev.review.domain.DeleteGuideUseCase
 import com.jonathanev.review.domain.GetGuideContextUseCase
 import com.jonathanev.review.domain.GetGuidePosicionUseCase
@@ -31,7 +31,6 @@ import com.jonathanev.review.presentation.state.ActionDialogState
 import com.jonathanev.review.presentation.state.GuidesUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -60,7 +59,7 @@ class FragmentListGuidesViewModel @Inject constructor(
     private val resetNavigationUseCase: ResetNavigationUseCase,
     private val setActiveGuideUseCase: SetActiveGuideUseCase,
     private val clearActiveGuideUseCase: ClearActiveGuideUseCase,
-    private val clearGuideMoveUseCase: ClearGuideMoveUseCase,
+    private val clearContextUseCase: ClearContextUseCase,
     observePathUseCase: ObservePathUseCase
 ) : ViewModel() {
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -101,37 +100,38 @@ class FragmentListGuidesViewModel @Inject constructor(
     private val _highlightedGuide = MutableStateFlow<GuideUiModel?>(null)
     val highlightedGuide: StateFlow<GuideUiModel?> = _highlightedGuide.asStateFlow()
 
-    private var highlightJob: Job? = null
-
     init {
         viewModelScope.launch {
             getGuideContextUseCase().collect { context ->
-                val guide = when (context) {
-                    is GuideContext.Moving -> context.guide.toUi()
-                    is GuideContext.Editing -> context.guide.toUi()
-                    is GuideContext.Creating -> context.guide.toUi()
-                    else -> null
-                }
-
-                if (guide != null && guide != _highlightedGuide.value) {
-                    _highlightedGuide.value = guide
-                    highlightJob?.cancel()
-                    highlightJob = viewModelScope.launch {
-                        delay(7000.milliseconds)
-                        _highlightedGuide.value = null
+                when (context) {
+                    is GuideContext.Creating -> {
+                        triggerHighlight(context.guide.toUi())
+                        clearContextUseCase.invoke()
                     }
-                } else if (guide == null) {
-                    _highlightedGuide.value = null
-                    highlightJob?.cancel()
+
+                    is GuideContext.Rename -> {
+                        triggerHighlight(context.guide.toUi())
+                        clearContextUseCase.invoke()
+                    }
+
+                    else -> Unit
                 }
             }
         }
     }
 
+    private fun triggerHighlight(guide: GuideUiModel) {
+        _highlightedGuide.value = guide
+    }
+
+    fun onHighlightConsumed() {
+        _highlightedGuide.value = null
+    }
+
     fun onCancelMove() {
         viewModelScope.launch {
             try {
-                clearGuideMoveUseCase.invoke()
+                clearContextUseCase.invoke()
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -210,6 +210,7 @@ class FragmentListGuidesViewModel @Inject constructor(
 
                                     MoveGuideResponse.Success -> {
                                         emitMessage(StateGuideActionEvent.ShowMessage("Guia movida exitosamente"))
+                                        triggerHighlight(context.guide.toUi())
                                     }
                                 }
                             }
@@ -229,7 +230,7 @@ class FragmentListGuidesViewModel @Inject constructor(
                         emitMessage(StateGuideActionEvent.ShowMessage("Error inesperado"))
                 }
             } finally {
-                clearGuideMoveUseCase.invoke()
+                clearContextUseCase.invoke()
             }
         }
     }

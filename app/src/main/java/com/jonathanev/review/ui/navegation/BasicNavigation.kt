@@ -264,8 +264,9 @@ fun BasicNavigation() {
                         backStack.removeLastOrNull()
                     },
                     onNavFillingGuide = {
-                        backStack.removeLastOrNull()
-                        backStack.add(AppRoutes.StudyGuideScreen)
+                        if (backStack.isNotEmpty()) {
+                            backStack[backStack.lastIndex] = AppRoutes.StudyGuideScreen
+                        }
                     },
                     onCreateFolder = {
                         backStack.removeLastOrNull()

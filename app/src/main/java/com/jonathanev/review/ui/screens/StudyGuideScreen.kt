@@ -132,6 +132,7 @@ fun StudyGuideRoute(
         if (viewModel.isEditingOrCreating() && viewModel.hasChangesInGuide()) {
             showExitDialog = true
         } else {
+            viewModel.cleanContext()
             viewModel.onDiscardGuide()
             onCloseGuide()
         }
@@ -148,6 +149,7 @@ fun StudyGuideRoute(
                     onClick = {
                         showExitDialog = false
                         viewModel.onDiscardGuide()
+                        viewModel.cleanContext()
                         onCloseGuide()
                     }
                 ) {

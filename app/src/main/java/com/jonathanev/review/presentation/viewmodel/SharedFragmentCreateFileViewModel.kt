@@ -1,10 +1,13 @@
 package com.jonathanev.review.presentation.viewmodel
 
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jonathanev.review.domain.ClearContextUseCase
 import com.jonathanev.review.domain.GetActiveGuideUseCase
 import com.jonathanev.review.domain.GetGuideContextUseCase
 import com.jonathanev.review.domain.GetGuideXmlDataUseCase
@@ -33,8 +36,6 @@ import com.jonathanev.review.presentation.model.QuestionItemUi
 import com.jonathanev.review.presentation.model.SaveGuideMode
 import com.jonathanev.review.presentation.state.GuideScreenUiState
 import com.jonathanev.review.ui.model.ContentType
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import com.jonathanev.review.ui.screens.toAnnotatedString
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -63,7 +64,8 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     private val getGuideContextUseCase: GetGuideContextUseCase,
     private val setContextEditUseCase: SetContextEditUseCase,
     private val saveTempImageUseCase: SaveTempImageUseCase,
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    private val clearGuideContextUseCase: ClearContextUseCase
 ) : ViewModel() {
     private companion object {
         const val KEY_GUIDE_STATE = "key_guide_ui_state"
@@ -237,11 +239,11 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         savedStateHandle.getStateFlow(KEY_DRAFT_SELECTION_START, 0),
         savedStateHandle.getStateFlow(KEY_DRAFT_SELECTION_END, 0)
     ) { textUi, start, end ->
-        textUi?.toAnnotatedString()?.let { 
+        textUi?.toAnnotatedString()?.let {
             TextFieldValue(
                 annotatedString = it,
                 selection = TextRange(start, end)
-            ) 
+            )
         }
     }.stateIn(
         scope = viewModelScope,
@@ -251,7 +253,8 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
     fun initTextDraft(initialContent: QuestionContentUi.Text, isEditing: Boolean) {
         if (savedStateHandle.get<QuestionContentUi.Text?>(KEY_DRAFT_TEXT) == null) {
-            val contentToSet = if (isEditing) initialContent else QuestionContentUi.Text("", emptyList())
+            val contentToSet =
+                if (isEditing) initialContent else QuestionContentUi.Text("", emptyList())
             savedStateHandle[KEY_DRAFT_TEXT] = contentToSet
             savedStateHandle[KEY_DRAFT_SELECTION_START] = contentToSet.text.length
             savedStateHandle[KEY_DRAFT_SELECTION_END] = contentToSet.text.length
@@ -559,6 +562,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
     fun saveGuide() {
         clearTextDraft()
+
         viewModelScope.launch {
             val currentState = uiState.value as? GuideScreenUiState.Success ?: return@launch
 
@@ -743,6 +747,11 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         updateState(GuideScreenUiState.Loading)
     }
 
+    fun cleanContext() {
+        viewModelScope.launch {
+            clearGuideContextUseCase.invoke()
+        }
+    }
 
     fun restartGuide() {
         updateSuccessState { state ->
@@ -844,14 +853,15 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
     fun hasChangesInGuide(): Boolean {
         val state = uiState.value as? GuideScreenUiState.Success ?: return false
-        
+
         return when (state.guideContext) {
             is GuideContext.Creating -> {
                 // Hay cambios si hay más de una pregunta o si la primera tiene algo
-                state.preguntas.size > 1 || 
-                state.preguntas.firstOrNull()?.content?.isNotEmpty() == true ||
-                state.respuestas.firstOrNull()?.content?.isNotEmpty() == true
+                state.preguntas.size > 1 ||
+                        state.preguntas.firstOrNull()?.content?.isNotEmpty() == true ||
+                        state.respuestas.firstOrNull()?.content?.isNotEmpty() == true
             }
+
             is GuideContext.Editing -> {
                 // Comparamos con la lista original cargada
                 val currentQuestions = state.preguntas
@@ -860,8 +870,9 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 val originalAnswers = state.originalAnswers
 
                 (originalQuestions != null && currentQuestions != originalQuestions) ||
-                (originalAnswers != null && currentAnswers != originalAnswers)
+                        (originalAnswers != null && currentAnswers != originalAnswers)
             }
+
             else -> false
         }
     }

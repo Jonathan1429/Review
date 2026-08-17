@@ -3,7 +3,7 @@ package com.jonathanev.review.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.domain.ClearActiveGuideUseCase
-import com.jonathanev.review.domain.ClearGuideMoveUseCase
+import com.jonathanev.review.domain.ClearContextUseCase
 import com.jonathanev.review.domain.GetFoldersWithNumGuidesUseCase
 import com.jonathanev.review.domain.InitializeGuideStorageUseCase
 import com.jonathanev.review.domain.NextNavigationUseCase
@@ -32,7 +32,7 @@ class MainActivityViewModel @Inject constructor(
     private val resetNavigationUseCase: ResetNavigationUseCase,
     private val nextNavigationUseCase: NextNavigationUseCase,
     private val clearActiveGuideUseCase: ClearActiveGuideUseCase,
-    private val clearGuideMoveUseCase: ClearGuideMoveUseCase
+    private val clearContextUseCase: ClearContextUseCase
 ) : ViewModel() {
     val uiState: StateFlow<FoldersUiState> = getFoldersWithNumGuidesUseCase.invoke()
         //.take(1)
@@ -60,7 +60,7 @@ class MainActivityViewModel @Inject constructor(
             try {
                 resetNavigationUseCase.invoke()
                 clearActiveGuideUseCase.invoke()
-                clearGuideMoveUseCase.invoke()
+                clearContextUseCase.invoke()
             } catch (e: Exception) {
                 e.printStackTrace()
             }

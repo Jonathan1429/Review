@@ -2,7 +2,7 @@ package com.jonathanev.review.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jonathanev.review.domain.ClearGuideMoveUseCase
+import com.jonathanev.review.domain.ClearContextUseCase
 import com.jonathanev.review.domain.DeleteFolderUseCase
 import com.jonathanev.review.domain.GetFolderPosicionUseCase
 import com.jonathanev.review.domain.GetFoldersWithNumGuidesUseCase
@@ -48,7 +48,7 @@ class ListFoldersViewModel @Inject constructor(
     private val nextNavigationUseCase: NextNavigationUseCase,
     private val resetNavigationUseCase: ResetNavigationUseCase,
     private val getGuideContextUseCase: GetGuideContextUseCase,
-    private val clearGuideMoveUseCase: ClearGuideMoveUseCase,
+    private val clearContextUseCase: ClearContextUseCase,
     private val observePathUseCase: ObservePathUseCase,
     private val navigationPathRepository: NavigationPathRepository
 ) : ViewModel() {
@@ -114,7 +114,7 @@ class ListFoldersViewModel @Inject constructor(
 
     fun onCancelMove() {
         viewModelScope.launch {
-            clearGuideMoveUseCase.invoke()
+            clearContextUseCase.invoke()
         }
     }
 

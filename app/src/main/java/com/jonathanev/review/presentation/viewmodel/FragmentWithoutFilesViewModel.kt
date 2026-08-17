@@ -2,7 +2,7 @@ package com.jonathanev.review.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jonathanev.review.domain.ClearGuideMoveUseCase
+import com.jonathanev.review.domain.ClearContextUseCase
 import com.jonathanev.review.domain.GetGuideContextUseCase
 import com.jonathanev.review.domain.GetGuideXmlDataUseCase
 import com.jonathanev.review.domain.LoadGuidesUseCase
@@ -36,7 +36,7 @@ class FragmentWithoutFilesViewModel @Inject constructor(
     private val getGuideContextUseCase: GetGuideContextUseCase,
     private val getGuideXmlDataUseCase: GetGuideXmlDataUseCase,
     loadGuidesUseCase: LoadGuidesUseCase,
-    private val clearGuideMoveUseCase: ClearGuideMoveUseCase,
+    private val clearContextUseCase: ClearContextUseCase,
     private val resetNavigationUseCase: ResetNavigationUseCase,
     observePathUseCase: ObservePathUseCase
 ) : ViewModel() {
@@ -71,7 +71,7 @@ class FragmentWithoutFilesViewModel @Inject constructor(
     fun onCancelMove() {
         viewModelScope.launch {
             try {
-                clearGuideMoveUseCase.invoke()
+                clearContextUseCase.invoke()
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -126,7 +126,7 @@ class FragmentWithoutFilesViewModel @Inject constructor(
                     else -> eventMovingFile("Error inesperado")
                 }
             } finally {
-                clearGuideMoveUseCase.invoke()
+                clearContextUseCase.invoke()
             }
         }
     }
