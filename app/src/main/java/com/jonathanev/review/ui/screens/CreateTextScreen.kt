@@ -149,7 +149,36 @@ fun CreateTextRoute(
             }
 
             val onBackAction = {
-                viewModel.onBackFromEditor()
+                val currentText = textValueState?.text ?: ""
+                val itemAtPage = if (questionContentMode == QuestionContentMode.CREATING) {
+                    QuestionContentUi.Text("", emptyList())
+                } else {
+                    textList.getOrNull(pagerState.currentPage) ?: QuestionContentUi.Text("", emptyList())
+                }
+
+                val currentDraft = textValueState?.let {
+                    QuestionContentUi.Text(
+                        text = it.text,
+                        colorRanges = it.annotatedString.spanStyles.mapNotNull { span ->
+                            if (span.item.color != Color.Unspecified) {
+                                ColorRangeUi(span.start, span.end, span.item.color.toArgb())
+                            } else null
+                        }
+                    )
+                }
+
+                val hasChanges = if (questionContentMode == QuestionContentMode.CREATING) {
+                    currentText.isNotEmpty()
+                } else {
+                    currentDraft != null && (currentDraft.text != itemAtPage.text || currentDraft.colorRanges != itemAtPage.colorRanges)
+                }
+
+                if (hasChanges) {
+                    viewModel.onBackFromEditor()
+                } else {
+                    viewModel.clearTextDraft()
+                    onBackNav()
+                }
             }
 
             BackHandler(onBack = onBackAction)
