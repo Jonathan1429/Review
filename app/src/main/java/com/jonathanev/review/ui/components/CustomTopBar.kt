@@ -14,6 +14,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -48,7 +49,9 @@ fun CustomTopBar(
     guideContext: GuideContext,
     onDeleteQuestionClick: () -> Unit,
     onBackQuestionClick: () -> Unit,
-    onNextQuestionClick: () -> Unit
+    onNextQuestionClick: () -> Unit,
+    onActualQuestionPositioned: (Offset) -> Unit = {},
+    onTotalQuestionsPositioned: (Offset) -> Unit = {}
 ) {
     Row(
         modifier = Modifier
@@ -61,7 +64,9 @@ fun CustomTopBar(
             actualQuestion = actualQuestion,
             totalQuestions = totalQuestions,
             onBackQuestionClick = onBackQuestionClick,
-            onNextQuestionClick = onNextQuestionClick
+            onNextQuestionClick = onNextQuestionClick,
+            onActualQuestionPositioned = onActualQuestionPositioned,
+            onTotalQuestionsPositioned = onTotalQuestionsPositioned
         )
         Spacer(modifier = Modifier.width(5.dp))
         if (guideContext !is GuideContext.Browsing) {
