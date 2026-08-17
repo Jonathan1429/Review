@@ -27,7 +27,7 @@ sealed interface AppRoutes : NavKey {
     data class CreateFilesPropertiesScreen(val fileFormMode: FileFormMode): AppRoutes
 
     @Serializable
-    data object FillingGuideScreen : AppRoutes
+    data object StudyGuideScreen : AppRoutes
 
     @Serializable
     data class CreateImageScreen(
@@ -35,6 +35,7 @@ sealed interface AppRoutes : NavKey {
         val posItem: Int
     ) : AppRoutes
 
+    @Serializable
     data class CreateTextScreen(
         val questionContentMode: QuestionContentMode,
         val posItem: Int

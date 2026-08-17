@@ -2,6 +2,7 @@ package com.jonathanev.review.ui.screens
 
 import android.content.Context
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -17,6 +18,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -25,6 +27,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -33,8 +36,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
@@ -43,6 +50,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -107,7 +115,7 @@ fun PreviewStudyGuideScreen(
 }
 
 @Composable
-fun FillingGuideRoute(
+fun StudyGuideRoute(
     viewModel: SharedFragmentCreateFileViewModel,
     onOpenAssetClick: (QuestionContentUi, posItem: Int) -> Unit,
     onAddAssetClick: (ContentType, posItem: Int) -> Unit,
@@ -117,6 +125,44 @@ fun FillingGuideRoute(
     val context = LocalContext.current
     val typeForSelected = listOf(QAType.QUESTION, QAType.ANSWER)
     val mediaForSelected = listOf(ContentType.TEXT, ContentType.IMAGE)
+    var showExitDialog by remember { mutableStateOf(false) }
+
+    // INTERCEPTA EL BOTÓN/GESTO "ATRÁS" DEL SISTEMA
+    BackHandler {
+        if (viewModel.isEditingOrCreating() && viewModel.hasChangesInGuide()) {
+            showExitDialog = true
+        } else {
+            viewModel.cleanContext()
+            viewModel.onDiscardGuide()
+            onCloseGuide()
+        }
+    }
+
+    // DIÁLOGO DE CONFIRMACIÓN AL DAR ATRÁS EN MODO CREACIÓN/EDICIÓN
+    if (showExitDialog) {
+        AlertDialog(
+            onDismissRequest = { showExitDialog = false },
+            title = { Text(text = "¿Descartar cambios?") },
+            text = { Text(text = "Si sales ahora, se perderán las modificaciones.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showExitDialog = false
+                        viewModel.onDiscardGuide()
+                        viewModel.cleanContext()
+                        onCloseGuide()
+                    }
+                ) {
+                    Text(text = "Descartar", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showExitDialog = false }) {
+                    Text(text = "Seguir editando", color = MaterialTheme.colorScheme.onSurface)
+                }
+            }
+        )
+    }
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -252,19 +298,18 @@ fun FillingGuideRoute(
                 onAddQuestion = viewModel::addNextQuestion,
                 onCloseGuide = {
                     when (state.guideContext) {
-                        is GuideContext.Browsing -> viewModel.onCloseGuide()
                         is GuideContext.Creating -> viewModel.saveGuide()
-                        is GuideContext.DeleteGuide -> viewModel.onCloseGuide()
                         is GuideContext.Editing -> viewModel.saveGuide()
-                        is GuideContext.Moving -> viewModel.onCloseGuide()
-                        is GuideContext.Rename -> viewModel.onCloseGuide()
+                        else -> onCloseGuide()
                     }
                 },
                 onCurrentPosContent = { position ->
                     viewModel.updatePosContent(position)
                 },
                 onDismissRequest = viewModel::onDismissDialogDeleteQuestion,
-                onMoveItem = { from, to -> viewModel.onMoveItem(from, to) },
+                onMoveItem = { from, to ->
+                    viewModel.onMoveItem(from, to)
+                },
                 onEditGuideClick = viewModel::switchToEditMode,
                 hasContentQA = { type ->
                     val question = state.preguntas.getOrNull(state.contadorPregunta)
@@ -330,6 +375,10 @@ fun FillingGuideScreen(
     var showPlusOneAnimation by remember { mutableStateOf(false) }
     var isAnimating by remember { mutableStateOf(false) }
 
+    var actualQuestionOffset by remember { mutableStateOf(Offset.Zero) }
+    var totalQuestionsOffset by remember { mutableStateOf(Offset.Zero) }
+    var containerOffset by remember { mutableStateOf(Offset.Zero) }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         contentWindowInsets = androidx.compose.foundation.layout.WindowInsets.safeDrawing,
@@ -347,7 +396,13 @@ fun FillingGuideScreen(
             )
         }
     ) { padding ->
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .onGloballyPositioned {
+                    containerOffset = it.positionInWindow()
+                }
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -360,7 +415,9 @@ fun FillingGuideScreen(
                     guideContext = guideContext,
                     onDeleteQuestionClick = onDeleteQuestionClick,
                     onBackQuestionClick = onBackQuestionClick,
-                    onNextQuestionClick = onNextQuestionClick
+                    onNextQuestionClick = onNextQuestionClick,
+                    onActualQuestionPositioned = { actualQuestionOffset = it },
+                    onTotalQuestionsPositioned = { totalQuestionsOffset = it }
                 )
                 QASelectType(
                     typeForSelected = typeForSelected,
@@ -402,6 +459,8 @@ fun FillingGuideScreen(
 
             PlusOneAnimation(
                 visible = showPlusOneAnimation,
+                targetActual = actualQuestionOffset - containerOffset,
+                targetTotal = totalQuestionsOffset - containerOffset,
                 onAnimationFinish = {
                     showPlusOneAnimation = false
                     onAddQuestion()
@@ -549,6 +608,8 @@ private fun NewQuestionIcon(modifier: Modifier = Modifier) {
 @Composable
 private fun PlusOneAnimation(
     visible: Boolean,
+    targetActual: Offset,
+    targetTotal: Offset,
     onAnimationFinish: () -> Unit
 ) {
     if (!visible) return
@@ -564,13 +625,11 @@ private fun PlusOneAnimation(
     var showPulse by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        // Fase de convergencia: los dos +1 viajan al centro
         animProgress.animateTo(
             targetValue = 1f,
             animationSpec = tween(durationMillis = 800)
         )
 
-        // Fase de impacto: pequeño estallido en el destino
         showPulse = true
         pulseScale.animateTo(
             targetValue = 2f,
@@ -579,12 +638,10 @@ private fun PlusOneAnimation(
         onAnimationFinish()
     }
 
-    val endY = screenHeight * 0.08f
-
-    // Ajuste fino para terminar debajo de cada número
-    // Estimamos que el primer número está unos 40px a la izquierda del centro y el segundo 40px a la derecha
-    val targetActualX = screenWidth * 0.5f - 45f
-    val targetTotalX = screenWidth * 0.5f + 45f
+    // Distancia vertical debajo del número
+    val verticalGap = with(density) { 25.dp.toPx() }
+    val finalActual = targetActual + Offset(0f, verticalGap)
+    val finalTotal = targetTotal + Offset(0f, verticalGap)
 
     val alpha = if (animProgress.value < 0.8f) {
         (animProgress.value / 0.2f).coerceAtMost(1f)
@@ -597,66 +654,82 @@ private fun PlusOneAnimation(
             val startX = screenWidth * 0.85f
             val startY = screenHeight * 0.85f
 
-            // +1 "Actual" (Hacia el primer número)
-            val currentActualX = startX + (targetActualX - startX) * animProgress.value
-            val currentActualY = startY + (endY - startY) * animProgress.value
-
-            Text(
-                text = "+1",
-                color = MaterialTheme.colorScheme.primary,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Black,
-                modifier = Modifier
-                    .offset {
-                        IntOffset(
-                            currentActualX.roundToInt(),
-                            currentActualY.roundToInt() + 60
-                        )
-                    }
-                    .graphicsLayer(
-                        alpha = alpha,
-                        scaleX = 0.6f + animProgress.value * 0.4f,
-                        scaleY = 0.6f + animProgress.value * 0.4f,
-                        rotationZ = -20f * (1f - animProgress.value)
-                    )
+            // +1 "Actual"
+            MovingPlusOne(
+                startX = startX,
+                startY = startY,
+                endX = finalActual.x,
+                endY = finalActual.y,
+                progress = animProgress.value,
+                alpha = alpha,
+                rotation = -20f * (1f - animProgress.value)
             )
 
-            // +1 "Total" (Hacia el segundo número)
-            val currentTotalX = startX + (targetTotalX - startX) * animProgress.value
-            val currentTotalY = startY + (endY - startY) * animProgress.value
-
-            Text(
-                text = "+1",
-                color = MaterialTheme.colorScheme.primary,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Black,
-                modifier = Modifier
-                    .offset {
-                        IntOffset(
-                            currentTotalX.roundToInt(),
-                            currentTotalY.roundToInt() + 60
-                        )
-                    }
-                    .graphicsLayer(
-                        alpha = alpha,
-                        scaleX = 0.6f + animProgress.value * 0.4f,
-                        scaleY = 0.6f + animProgress.value * 0.4f,
-                        rotationZ = 20f * (1f - animProgress.value)
-                    )
+            // +1 "Total"
+            MovingPlusOne(
+                startX = startX,
+                startY = startY,
+                endX = finalTotal.x,
+                endY = finalTotal.y,
+                progress = animProgress.value,
+                alpha = alpha,
+                rotation = 20f * (1f - animProgress.value)
             )
         } else {
-            // Animación de impacto doble debajo de los números
-            ImpactText(x = targetActualX, y = endY + 60, scale = pulseScale.value)
-            ImpactText(x = targetTotalX, y = endY + 60, scale = pulseScale.value)
+            ImpactText(x = finalActual.x, y = finalActual.y, scale = pulseScale.value)
+            ImpactText(x = finalTotal.x, y = finalTotal.y, scale = pulseScale.value)
         }
     }
 }
 
 @Composable
+private fun MovingPlusOne(
+    startX: Float,
+    startY: Float,
+    endX: Float,
+    endY: Float,
+    progress: Float,
+    alpha: Float,
+    rotation: Float
+) {
+    val currentX = startX + (endX - startX) * progress
+    val currentY = startY + (endY - startY) * progress
+    var size by remember { mutableStateOf(IntSize.Zero) }
+
+    Text(
+        text = "+1",
+        color = MaterialTheme.colorScheme.primary,
+        fontSize = 24.sp,
+        fontWeight = FontWeight.Black,
+        modifier = Modifier
+            .onSizeChanged { size = it }
+            .offset {
+                IntOffset(
+                    (currentX - size.width / 2).roundToInt(),
+                    (currentY - size.height / 2).roundToInt()
+                )
+            }
+            .graphicsLayer(
+                alpha = alpha,
+                scaleX = 0.6f + progress * 0.4f,
+                scaleY = 0.6f + progress * 0.4f,
+                rotationZ = rotation
+            )
+    )
+}
+
+@Composable
 private fun ImpactText(x: Float, y: Float, scale: Float) {
+    var size by remember { mutableStateOf(IntSize.Zero) }
     Box(
         modifier = Modifier
-            .offset { IntOffset(x.roundToInt(), y.roundToInt()) }
+            .onSizeChanged { size = it }
+            .offset {
+                IntOffset(
+                    (x - size.width / 2).roundToInt(),
+                    (y - size.height / 2).roundToInt()
+                )
+            }
             .graphicsLayer(
                 scaleX = scale,
                 scaleY = scale,

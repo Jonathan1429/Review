@@ -1,9 +1,11 @@
 package com.jonathanev.review.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -14,7 +16,6 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -24,14 +25,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.jonathanev.review.R
 import com.jonathanev.review.domain.model.GuideContext
+import com.jonathanev.review.presentation.event.CreateGuideEvent
 import com.jonathanev.review.presentation.model.ColorRangeUi
 import com.jonathanev.review.presentation.model.QuestionContentMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
@@ -39,6 +44,7 @@ import com.jonathanev.review.presentation.model.SpanPalabraModel
 import com.jonathanev.review.presentation.state.GuideScreenUiState
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.ui.components.ColorPickerDialog
+import com.jonathanev.review.ui.components.CustomAlertDialog
 import com.jonathanev.review.ui.components.CustomBoxCreateText
 import com.jonathanev.review.ui.components.ErrorComponent
 import com.jonathanev.review.ui.components.OptionsCreateText
@@ -108,12 +114,6 @@ fun CreateTextRoute(
                 if (questionContentMode == QuestionContentMode.CREATING) 1 else textList.size
             }
 
-            DisposableEffect(Unit) {
-                onDispose {
-                    viewModel.clearTextDraft()
-                }
-            }
-
             // Sync with ViewModel when page changes
             LaunchedEffect(pagerState.currentPage) {
                 if (questionContentMode == QuestionContentMode.EDITING) {
@@ -128,7 +128,10 @@ fun CreateTextRoute(
                         emptyList()
                     )
                 }
-                viewModel.initTextDraft(itemAtPage)
+                viewModel.initTextDraft(
+                    initialContent = itemAtPage,
+                    isEditing = questionContentMode == QuestionContentMode.EDITING
+                )
             }
 
             val colorInitial = MaterialTheme.colorScheme.onSurface
@@ -141,10 +144,45 @@ fun CreateTextRoute(
             val textValueState by viewModel.draftTextValue.collectAsStateWithLifecycle()
 
             LaunchedEffect(Unit) {
-                viewModel.updateItemTriger.collect {
+                viewModel.updateItemTrigger.collect {
                     onSaveText()
                 }
             }
+
+            val onBackAction = {
+                val currentText = textValueState?.text ?: ""
+                val itemAtPage = if (questionContentMode == QuestionContentMode.CREATING) {
+                    QuestionContentUi.Text("", emptyList())
+                } else {
+                    textList.getOrNull(pagerState.currentPage) ?: QuestionContentUi.Text("", emptyList())
+                }
+
+                val currentDraft = textValueState?.let {
+                    QuestionContentUi.Text(
+                        text = it.text,
+                        colorRanges = it.annotatedString.spanStyles.mapNotNull { span ->
+                            if (span.item.color != Color.Unspecified) {
+                                ColorRangeUi(span.start, span.end, span.item.color.toArgb())
+                            } else null
+                        }
+                    )
+                }
+
+                val hasChanges = if (questionContentMode == QuestionContentMode.CREATING) {
+                    currentText.isNotEmpty()
+                } else {
+                    currentDraft != null && (currentDraft.text != itemAtPage.text || currentDraft.colorRanges != itemAtPage.colorRanges)
+                }
+
+                if (hasChanges) {
+                    viewModel.onBackFromEditor()
+                } else {
+                    viewModel.clearTextDraft()
+                    onBackNav()
+                }
+            }
+
+            BackHandler(onBack = onBackAction)
 
             Scaffold(
                 modifier = Modifier.fillMaxSize()
@@ -153,7 +191,8 @@ fun CreateTextRoute(
                     state = pagerState,
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(padding),
+                        .padding(padding)
+                        .imePadding(),
                     userScrollEnabled = questionContentMode == QuestionContentMode.EDITING
                 ) { page ->
                     val itemAtPage = remember(textList, page, questionContentMode) {
@@ -184,11 +223,11 @@ fun CreateTextRoute(
                             viewModel.addTextContent(
                                 textWithLabels = text,
                                 listSpans = colors,
-                                questionContentMode
+                                questionContentMode = questionContentMode
                             )
                         },
                         onClearColorClick = {
-                            viewModel.clearTextDraft()
+                            viewModel.clearColorsFromDraft()
                         },
                         onShowColorDialog = viewModel::showDialogSelectColor,
                         onChangeTextValue = { textFieldValue ->
@@ -199,7 +238,21 @@ fun CreateTextRoute(
                             viewModel.onChangeColor(actualColor = actualColor)
                         },
                         onDefaultColor = viewModel::onDefaultcolor,
-                        onBackNav = onBackNav
+                        onBackNav = onBackAction
+                    )
+                }
+            }
+
+            if (state.showDialogDiscardDraft) {
+                Dialog(onDismissRequest = viewModel::onDismissDiscardDraft) {
+                    CustomAlertDialog(
+                        title = stringResource(R.string.lblDiscardChangesTitle),
+                        message = stringResource(R.string.lblDiscardChangesMessage),
+                        onDismissRequest = viewModel::onDismissDiscardDraft,
+                        onConfirm = {
+                            viewModel.onConfirmDiscardDraft()
+                            onBackNav()
+                        }
                     )
                 }
             }
@@ -227,7 +280,11 @@ fun CreateTextScreen(
     Scaffold(
         modifier = Modifier.fillMaxSize()
     ) { padding ->
-        Box(modifier = Modifier.padding(padding)) {
+        Box(
+            modifier = Modifier
+                .padding(padding)
+                .imePadding()
+        ) {
             TextEditorContent(
                 guideContext = guideContext,
                 onSaveText = onSaveText,
@@ -283,7 +340,6 @@ fun TextEditorContent(
             OptionsCreateText(
                 guideContext = guideContext,
                 textValue = textValue.annotatedString,
-                selectedColor = selectedColor,
                 onClearColorClick = onClearColorClick,
                 onShowColorDialog = onShowColorDialog,
                 onSaveTextClick = {

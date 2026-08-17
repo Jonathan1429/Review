@@ -25,6 +25,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -52,6 +55,8 @@ import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.StudyGuidesProv
 import com.jonathanev.review.ui.preview.providers.StudyGuidesProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 @DevicePreviews
 @Composable
@@ -83,9 +88,21 @@ fun ListGuidesRoute(
 ) {
     val context = LocalContext.current
     val interactionMode by viewModel.interactionMode.collectAsStateWithLifecycle()
-    val highlightedGuide by viewModel.highlightedGuide.collectAsStateWithLifecycle()
+    val highlightRequest by viewModel.highlightedGuide.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val dialogState by viewModel.dialogState.collectAsStateWithLifecycle()
+
+    var highlightedGuideState by remember { mutableStateOf<GuideUiModel?>(null) }
+
+    LaunchedEffect(highlightRequest, uiState) {
+        val guide = highlightRequest ?: return@LaunchedEffect
+        if (uiState is GuidesUiState.Success) {
+            highlightedGuideState = guide
+            viewModel.onHighlightConsumed()
+            delay(3000.milliseconds)
+            highlightedGuideState = null
+        }
+    }
 
     LaunchedEffect(uiState) {
         if (uiState is GuidesUiState.Empty) {
@@ -144,7 +161,7 @@ fun ListGuidesRoute(
         is GuidesUiState.Success -> {
             ListGuidesScreen(
                 guides = state.guides,
-                highlightedGuide = highlightedGuide,
+                highlightedGuide = highlightedGuideState,
                 onAddGuideClick = onAddGuideClick,
                 fileInteractionMode = interactionMode,
                 onItemClick = { posGuide ->

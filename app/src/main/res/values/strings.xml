@@ -95,4 +95,9 @@
     <string name="lblTitleRepeatGuide">¿Reiniciar guia?</string>
     <string name="lblDescriptionRepeatGuide">¿Quieres comenzar nuevamente la guia en la pregunta 1?</string>
     <string name="lblCloseGuide">Cerrar guia</string>
+    <string name="msg_read_only_reorder">No puedes reordenar en modo lectura. Debes estar editando la guía.</string>
+
+    <!-- Discard Changes Dialog -->
+    <string name="lblDiscardChangesTitle">¿Descartar cambios?</string>
+    <string name="lblDiscardChangesMessage">Tienes cambios sin guardar en el editor. Si sales ahora, se perderán.</string>
 </resources>

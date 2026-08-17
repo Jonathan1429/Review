@@ -184,9 +184,9 @@ fun MediaContentPager(
                         }
                     }
 
-                    // Capa invisible para detectar el clic solo en modo Browsing (Review)
-                    // Esto bloquea gestos internos como zoom o selección de texto en este componente
-                    if (guideContext is GuideContext.Browsing && assetInPage != null) {
+                    // Capa invisible para detectar el clic en cualquier modo (Review, Editing, Creating)
+                    // Esto permite abrir el editor o visor a pantalla completa al tocar el contenido
+                    if (assetInPage != null) {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()

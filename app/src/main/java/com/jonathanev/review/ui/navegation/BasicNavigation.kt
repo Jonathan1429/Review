@@ -3,7 +3,6 @@ package com.jonathanev.review.ui.navegation
 import android.app.Activity
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
@@ -12,7 +11,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -21,11 +19,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.HasDefaultViewModelProviderFactory
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelStore
-import androidx.lifecycle.ViewModelStoreOwner
-import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
@@ -46,7 +39,7 @@ import com.jonathanev.review.ui.model.ContentType
 import com.jonathanev.review.ui.screens.CreateFilesPropertiesRoute
 import com.jonathanev.review.ui.screens.CreateImageRoute
 import com.jonathanev.review.ui.screens.CreateTextRoute
-import com.jonathanev.review.ui.screens.FillingGuideRoute
+import com.jonathanev.review.ui.screens.StudyGuideRoute
 import com.jonathanev.review.ui.screens.GuidesEntryRoute
 import com.jonathanev.review.ui.screens.ListFoldersRoute
 import com.jonathanev.review.ui.screens.ListGuidesRoute
@@ -58,38 +51,11 @@ import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
-fun rememberScopedViewModelStoreOwner(key: Any?): ViewModelStoreOwner? {
-    if (key == null) return null
-
-    val activityOwner = LocalActivity.current as? HasDefaultViewModelProviderFactory
-    val defaultFactory = activityOwner?.defaultViewModelProviderFactory
-    val defaultExtras = activityOwner?.defaultViewModelCreationExtras ?: CreationExtras.Empty
-
-    val owner = remember(key) {
-        val store = ViewModelStore()
-        object : ViewModelStoreOwner, HasDefaultViewModelProviderFactory {
-            override val viewModelStore: ViewModelStore = store
-            override val defaultViewModelProviderFactory: ViewModelProvider.Factory =
-                defaultFactory ?: ViewModelProvider.NewInstanceFactory()
-            override val defaultViewModelCreationExtras: CreationExtras = defaultExtras
-        }
-    }
-
-    DisposableEffect(key) {
-        onDispose {
-            owner.viewModelStore.clear()
-        }
-    }
-    return owner
-}
-
-@Composable
 fun BasicNavigation() {
     val backStack = rememberNavBackStack(AppRoutes.MainScreen)
-
     val context = LocalContext.current
 
-    // Estado y efecto para el aviso de doble toque
+    // Estado y efecto para el aviso de doble toque para salir
     var showExitWarning by remember { mutableStateOf(false) }
 
     BackHandler(enabled = backStack.size == 1) {
@@ -108,24 +74,22 @@ fun BasicNavigation() {
         }
     }
 
-    // 1. Buscamos si la pantalla ancla está viva en el backStack
-    val fillingGuideRoute = backStack.firstOrNull { it is AppRoutes.FillingGuideScreen }
+    // ViewModel compartido para el flujo de creación/edición de guía
+    val viewModelSharedCreateFile: SharedFragmentCreateFileViewModel = hiltViewModel()
 
-// 2. Creamos el Owner condicionado
-    val scopedOwner = rememberScopedViewModelStoreOwner(key = fillingGuideRoute)
-
-// 3. Obtenemos el ViewModel solo si el Owner existe
-    val viewModelSharedCreateFile: SharedFragmentCreateFileViewModel? = scopedOwner?.let { owner ->
-        hiltViewModel(viewModelStoreOwner = owner)
+    // Detectamos si el usuario se encuentra dentro de alguna pantalla del flujo compartido
+    val isSharedFlowActive = backStack.any { route ->
+        route is AppRoutes.StudyGuideScreen ||
+                route is AppRoutes.CreateImageScreen ||
+                route is AppRoutes.CreateTextScreen
     }
 
-    /*backStack.forEachIndexed { index, key ->
-        //Log.i("BACKSTACK", "[$index]: $key")
-        println("BACKSTACK [$index]: $key")
+    // Al salir completamente del flujo, limpiamos el estado retenido en el ViewModel
+    LaunchedEffect(isSharedFlowActive) {
+        if (!isSharedFlowActive) {
+            viewModelSharedCreateFile.onDiscardGuide()
+        }
     }
-
-    //Log.i("BACKSTACK", "========================================")
-    println("BACKSTACK: ========================================")*/
 
     NavDisplay(
         backStack = backStack,
@@ -300,8 +264,9 @@ fun BasicNavigation() {
                         backStack.removeLastOrNull()
                     },
                     onNavFillingGuide = {
-                        backStack.removeLastOrNull()
-                        backStack.add(AppRoutes.FillingGuideScreen)
+                        if (backStack.isNotEmpty()) {
+                            backStack[backStack.lastIndex] = AppRoutes.StudyGuideScreen
+                        }
                     },
                     onCreateFolder = {
                         backStack.removeLastOrNull()
@@ -309,12 +274,9 @@ fun BasicNavigation() {
                 )
             }
 
-            entry<AppRoutes.FillingGuideScreen> {
-                val context = LocalContext.current
-                val viewModel = viewModelSharedCreateFile ?: return@entry
-
-                FillingGuideRoute(
-                    viewModel = viewModel,
+            entry<AppRoutes.StudyGuideScreen> {
+                StudyGuideRoute(
+                    viewModel = viewModelSharedCreateFile,
                     onOpenAssetClick = { typeContent, posItem ->
                         when (typeContent) {
                             is QuestionContentUi.Image -> {
@@ -379,22 +341,18 @@ fun BasicNavigation() {
             }
 
             entry<AppRoutes.CreateImageScreen> { values ->
-                val viewModel = viewModelSharedCreateFile ?: return@entry
-
                 CreateImageRoute(
                     questionContentMode = values.questionContentMode,
                     posItem = values.posItem,
-                    viewModel = viewModel,
+                    viewModel = viewModelSharedCreateFile,
                     onBackNav = { backStack.removeLastOrNull() }
                 )
             }
 
             entry<AppRoutes.CreateTextScreen> { values ->
-                val viewModel = viewModelSharedCreateFile ?: return@entry
-
                 CreateTextRoute(
                     questionContentMode = values.questionContentMode,
-                    viewModel = viewModel,
+                    viewModel = viewModelSharedCreateFile,
                     posItem = values.posItem,
                     onSaveText = { backStack.removeLastOrNull() },
                     onBackNav = { backStack.removeLastOrNull() }
@@ -407,10 +365,10 @@ fun BasicNavigation() {
                 PreviewQuestionsRoute(
                     viewModel = viewModel,
                     onEditingGuideClick = {
-                        backStack.add(AppRoutes.FillingGuideScreen)
+                        backStack.add(AppRoutes.StudyGuideScreen)
                     },
                     onPlayGuideClick = {
-                        backStack.add(AppRoutes.FillingGuideScreen)
+                        backStack.add(AppRoutes.StudyGuideScreen)
                     },
                     onBackNav = {
                         backStack.removeLastOrNull()

@@ -8,8 +8,12 @@ import com.jonathanev.review.ui.model.ContentType
 import com.jonathanev.review.ui.model.QAType
 import kotlinx.parcelize.Parcelize
 
-sealed interface GuideScreenUiState {
+@Parcelize
+sealed interface GuideScreenUiState : Parcelable {
+    @Parcelize
     data object Loading : GuideScreenUiState
+
+    @Parcelize
     data object Error : GuideScreenUiState
 
     @Parcelize
@@ -26,6 +30,9 @@ sealed interface GuideScreenUiState {
         val colorType: ColorType = ColorType.Default,
         val showDialogDeleteQuestion: Boolean = false,
         val showDialogRepeatGuide: Boolean = false,
-        val showDialogColor: Boolean = false
-    ) : GuideScreenUiState, Parcelable
+        val showDialogColor: Boolean = false,
+        val showDialogDiscardDraft: Boolean = false,
+        val originalQuestions: List<QuestionItemUi>? = null,
+        val originalAnswers: List<QuestionItemUi>? = null
+    ) : GuideScreenUiState
 }

@@ -45,6 +45,8 @@ import com.jonathanev.review.ui.preview.providers.CreateImageContentProv
 import com.jonathanev.review.ui.preview.providers.CreateImageContentProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.cardStepBackground
+import me.saket.telephoto.zoomable.rememberZoomableImageState
+import me.saket.telephoto.zoomable.rememberZoomableState
 
 @DevicePreviews
 @Composable
@@ -119,7 +121,20 @@ fun CreateImageRoute(
             HorizontalPager(
                 state = pagerState,
                 modifier = Modifier.fillMaxSize(),
-                userScrollEnabled = questionContentMode == QuestionContentMode.EDITING
+                userScrollEnabled = questionContentMode == QuestionContentMode.EDITING,
+                beyondViewportPageCount = 1,
+                key = { page ->
+                    when (questionContentMode) {
+                        QuestionContentMode.CREATING -> newlyPickedUri ?: "creating"
+                        QuestionContentMode.EDITING -> {
+                            if (page == pagerState.currentPage && newlyPickedUri != null) {
+                                newlyPickedUri!!
+                            } else {
+                                imageList.getOrNull(page)?.uri ?: page
+                            }
+                        }
+                    }
+                }
             ) { page ->
                 val uriImage = when (questionContentMode) {
                     QuestionContentMode.CREATING -> {
@@ -166,6 +181,10 @@ fun CreateImageScreen(
     imageUploaded: () -> Unit,
     onBackNav: () -> Unit
 ) {
+    val zoomableState = rememberZoomableImageState(
+        rememberZoomableState()
+    )
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         floatingActionButton = {
@@ -210,7 +229,8 @@ fun CreateImageScreen(
                     CustomBoxCreateImage(
                         modifier = Modifier.fillMaxSize(),
                         uriImage = uriImage,
-                        contentScale = ContentScale.Crop
+                        contentScale = ContentScale.Fit,
+                        state = zoomableState
                     )
 
                     OptionsCreateImage(
