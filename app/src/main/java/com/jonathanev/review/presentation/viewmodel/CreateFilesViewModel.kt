@@ -394,8 +394,13 @@ class CreateFilesViewModel @Inject constructor(
                 try {
                     val guideDomainModel =
                         GuideDomainModel(GuideVersion.V2, state.name, state.description)
-                    setActiveGuideUseCase.invoke(guideDomainModel)
+
+                    // Cambiamos el orden: Primero el contexto y luego la guía activa.
+                    // Esto ayuda a que el ViewModel compartido vea el contexto de creación
+                    // antes de intentar cargar la guía como si fuera para navegación normal.
                     setContextCreateUseCase.invoke(GuideContext.Creating(guideDomainModel))
+                    setActiveGuideUseCase.invoke(guideDomainModel)
+
                     emitEvent(CreateFile)
                 } catch (e: CancellationException) {
                     throw e

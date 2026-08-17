@@ -16,7 +16,6 @@ import com.jonathanev.review.domain.SetContentUseCase
 import com.jonathanev.review.domain.SetContextEditUseCase
 import com.jonathanev.review.domain.SetCrearXmlUseCase
 import com.jonathanev.review.domain.model.GuideContext
-import com.jonathanev.review.domain.model.GuideDomainModel
 import com.jonathanev.review.domain.model.QuestionContentDomain
 import com.jonathanev.review.domain.model.QuestionItemDomain
 import com.jonathanev.review.domain.repository.UserPreferencesRepository
@@ -46,7 +45,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -126,10 +124,15 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                         return@collect
                     }
 
-                    // 4. Si el contexto cambió pero el estado sigue siendo Success del contexto anterior, forzamos Loading
-                    if (state is GuideScreenUiState.Success && state.guideContext != context) {
+                    val contextChanged = when (state) {
+                        is GuideScreenUiState.Success -> state.guideContext != context
+                        is GuideScreenUiState.Error -> true
+                        else -> false
+                    }
+
+                    if (contextChanged) {
                         updateState(GuideScreenUiState.Loading)
-                        return@collect // La siguiente emisión del combine manejará la carga
+                        return@collect
                     }
 
                     // 5. Si el estado es Loading (arranque o tras Discard), procedemos a cargar
@@ -292,38 +295,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     }
 
     fun retryLoad() {
-        viewModelScope.launch(Dispatchers.IO) {
-            val guide = getActiveGuideUseCase.invoke().firstOrNull()
-            if (guide == null) {
-                updateState(GuideScreenUiState.Error)
-                return@launch
-            }
-            fetchAndEmitGuideXml(guide)
-        }
-    }
-
-    private suspend fun fetchAndEmitGuideXml(guide: GuideDomainModel) {
         updateState(GuideScreenUiState.Loading)
-        val context = GuideContext.Browsing(guide = guide, position = 0)
-
-        when (val result = getGuideXmlDataUseCase.invoke(context = context)) {
-            is GetGuideResult.Success -> {
-                val questions = result.list.map { it.question.toUi() }
-                val answers = result.list.map { it.answer.toUi() }
-
-                updateState(
-                    GuideScreenUiState.Success(
-                        fileName = guide.nameGuide,
-                        description = guide.description,
-                        preguntas = questions.ifEmpty { listOf(QuestionItemUi(content = emptyList())) },
-                        respuestas = answers.ifEmpty { listOf(QuestionItemUi(content = emptyList())) },
-                        guideContext = context
-                    )
-                )
-            }
-
-            else -> updateState(GuideScreenUiState.Error)
-        }
     }
 
     fun updatePosContent(currentPos: Int) {
