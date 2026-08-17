@@ -5,6 +5,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -190,7 +191,8 @@ fun CreateTextRoute(
                     state = pagerState,
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(padding),
+                        .padding(padding)
+                        .imePadding(),
                     userScrollEnabled = questionContentMode == QuestionContentMode.EDITING
                 ) { page ->
                     val itemAtPage = remember(textList, page, questionContentMode) {
@@ -278,7 +280,11 @@ fun CreateTextScreen(
     Scaffold(
         modifier = Modifier.fillMaxSize()
     ) { padding ->
-        Box(modifier = Modifier.padding(padding)) {
+        Box(
+            modifier = Modifier
+                .padding(padding)
+                .imePadding()
+        ) {
             TextEditorContent(
                 guideContext = guideContext,
                 onSaveText = onSaveText,
