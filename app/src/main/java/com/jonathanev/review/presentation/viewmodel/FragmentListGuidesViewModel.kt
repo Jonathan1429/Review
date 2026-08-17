@@ -103,18 +103,16 @@ class FragmentListGuidesViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             getGuideContextUseCase().collect { context ->
-                when (context) {
-                    is GuideContext.Creating -> {
-                        triggerHighlight(context.guide.toUi())
-                        clearContextUseCase.invoke()
-                    }
+                val guide = when (context) {
+                    is GuideContext.Creating -> context.guide.toUi()
+                    is GuideContext.Rename -> context.guide.toUi()
+                    else -> null
+                }
 
-                    is GuideContext.Rename -> {
-                        triggerHighlight(context.guide.toUi())
-                        clearContextUseCase.invoke()
-                    }
-
-                    else -> Unit
+                if (guide != null && guide != _highlightedGuide.value) {
+                    triggerHighlight(guide)
+                } else if (guide == null) {
+                    _highlightedGuide.value = null
                 }
             }
         }
@@ -126,6 +124,13 @@ class FragmentListGuidesViewModel @Inject constructor(
 
     fun onHighlightConsumed() {
         _highlightedGuide.value = null
+        viewModelScope.launch {
+            try {
+                clearContextUseCase.invoke()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
     fun onCancelMove() {
@@ -196,17 +201,25 @@ class FragmentListGuidesViewModel @Inject constructor(
                                 val response =
                                     moveGuideUseCase.invoke(guideData, context)
                                 when (response) {
-                                    MoveGuideResponse.ErrorMovingGuide ->
+                                    MoveGuideResponse.ErrorMovingGuide -> {
                                         emitMessage(StateGuideActionEvent.ShowMessage("Error al intentar mover la guia"))
+                                        clearContextUseCase.invoke()
+                                    }
 
-                                    MoveGuideResponse.ErrorMovingImages ->
+                                    MoveGuideResponse.ErrorMovingImages -> {
                                         emitMessage(StateGuideActionEvent.ShowMessage("Error al intentar mover imagenes"))
+                                        clearContextUseCase.invoke()
+                                    }
 
-                                    MoveGuideResponse.ErrorPathGuide ->
+                                    MoveGuideResponse.ErrorPathGuide -> {
                                         emitMessage(StateGuideActionEvent.ShowMessage("No existe la ruta para mover la guia"))
+                                        clearContextUseCase.invoke()
+                                    }
 
-                                    MoveGuideResponse.ErrorPathImages ->
+                                    MoveGuideResponse.ErrorPathImages -> {
                                         emitMessage(StateGuideActionEvent.ShowMessage("No existe una ruta para guardar las imagenes"))
+                                        clearContextUseCase.invoke()
+                                    }
 
                                     MoveGuideResponse.Success -> {
                                         emitMessage(StateGuideActionEvent.ShowMessage("Guia movida exitosamente"))
@@ -215,21 +228,31 @@ class FragmentListGuidesViewModel @Inject constructor(
                                 }
                             }
 
-                            GetGuideResult.InvalidFormat ->
+                            GetGuideResult.InvalidFormat -> {
                                 emitMessage(StateGuideActionEvent.ShowMessage("La guia está dañada"))
+                                clearContextUseCase.invoke()
+                            }
 
-                            GetGuideResult.NotFound ->
+                            GetGuideResult.NotFound -> {
                                 emitMessage(StateGuideActionEvent.ShowMessage("No se ha encontrado la guia"))
+                                clearContextUseCase.invoke()
+                            }
 
-                            GetGuideResult.UnknownError ->
+                            GetGuideResult.UnknownError -> {
                                 emitMessage(StateGuideActionEvent.ShowMessage("Guia movida exitosamente"))
+                                clearContextUseCase.invoke()
+                            }
                         }
                     }
 
-                    else ->
+                    else -> {
                         emitMessage(StateGuideActionEvent.ShowMessage("Error inesperado"))
+                        clearContextUseCase.invoke()
+                    }
                 }
-            } finally {
+            } catch (e: Exception) {
+                e.printStackTrace()
+                emitMessage(StateGuideActionEvent.ShowMessage("Error inesperado"))
                 clearContextUseCase.invoke()
             }
         }
