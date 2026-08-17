@@ -225,7 +225,7 @@ fun CreateTextRoute(
                             )
                         },
                         onClearColorClick = {
-                            viewModel.clearTextDraft()
+                            viewModel.clearColorsFromDraft()
                         },
                         onShowColorDialog = viewModel::showDialogSelectColor,
                         onChangeTextValue = { textFieldValue ->
@@ -334,7 +334,6 @@ fun TextEditorContent(
             OptionsCreateText(
                 guideContext = guideContext,
                 textValue = textValue.annotatedString,
-                selectedColor = selectedColor,
                 onClearColorClick = onClearColorClick,
                 onShowColorDialog = onShowColorDialog,
                 onSaveTextClick = {

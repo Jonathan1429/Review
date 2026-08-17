@@ -31,7 +31,6 @@ fun PreviewOptionsCreateText(
     ReviewTheme {
         OptionsCreateText(
             textValue = data.text,
-            selectedColor = data.color,
             guideContext = data.guideContext,
             onClearColorClick = {},
             onShowColorDialog = {},
@@ -44,7 +43,6 @@ fun PreviewOptionsCreateText(
 @Composable
 fun OptionsCreateText(
     textValue: AnnotatedString,
-    selectedColor: Color,
     guideContext: GuideContext,
     onClearColorClick: () -> Unit,
     onShowColorDialog: () -> Unit,

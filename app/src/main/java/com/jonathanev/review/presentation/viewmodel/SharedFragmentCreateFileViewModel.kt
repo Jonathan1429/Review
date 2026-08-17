@@ -281,6 +281,13 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         savedStateHandle[KEY_DRAFT_SELECTION_END] = 0
     }
 
+    fun clearColorsFromDraft() {
+        val currentDraft = savedStateHandle.get<QuestionContentUi.Text?>(KEY_DRAFT_TEXT)
+        if (currentDraft != null) {
+            savedStateHandle[KEY_DRAFT_TEXT] = currentDraft.copy(colorRanges = emptyList())
+        }
+    }
+
     fun retryLoad() {
         viewModelScope.launch(Dispatchers.IO) {
             val guide = getActiveGuideUseCase.invoke().firstOrNull()
