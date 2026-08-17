@@ -27,7 +27,7 @@ sealed interface AppRoutes : NavKey {
     data class CreateFilesPropertiesScreen(val fileFormMode: FileFormMode): AppRoutes
 
     @Serializable
-    data object FillingGuideScreen : AppRoutes
+    data object StudyGuideScreen : AppRoutes
 
     @Serializable
     data class CreateImageScreen(

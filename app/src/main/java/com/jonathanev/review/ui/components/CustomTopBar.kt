@@ -77,7 +77,7 @@ fun CustomTopBar(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    modifier = Modifier.size(16.dp),
+                    modifier = Modifier.size(30.dp),
                     painter = painterResource(R.drawable.ic_trash),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurface

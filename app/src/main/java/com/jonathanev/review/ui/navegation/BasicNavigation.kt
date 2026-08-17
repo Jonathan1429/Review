@@ -3,7 +3,6 @@ package com.jonathanev.review.ui.navegation
 import android.app.Activity
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
@@ -12,22 +11,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.HasDefaultViewModelProviderFactory
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelStore
-import androidx.lifecycle.ViewModelStoreOwner
-import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
@@ -48,7 +39,7 @@ import com.jonathanev.review.ui.model.ContentType
 import com.jonathanev.review.ui.screens.CreateFilesPropertiesRoute
 import com.jonathanev.review.ui.screens.CreateImageRoute
 import com.jonathanev.review.ui.screens.CreateTextRoute
-import com.jonathanev.review.ui.screens.FillingGuideRoute
+import com.jonathanev.review.ui.screens.StudyGuideRoute
 import com.jonathanev.review.ui.screens.GuidesEntryRoute
 import com.jonathanev.review.ui.screens.ListFoldersRoute
 import com.jonathanev.review.ui.screens.ListGuidesRoute
@@ -88,7 +79,7 @@ fun BasicNavigation() {
 
     // Detectamos si el usuario se encuentra dentro de alguna pantalla del flujo compartido
     val isSharedFlowActive = backStack.any { route ->
-        route is AppRoutes.FillingGuideScreen ||
+        route is AppRoutes.StudyGuideScreen ||
                 route is AppRoutes.CreateImageScreen ||
                 route is AppRoutes.CreateTextScreen
     }
@@ -274,7 +265,7 @@ fun BasicNavigation() {
                     },
                     onNavFillingGuide = {
                         backStack.removeLastOrNull()
-                        backStack.add(AppRoutes.FillingGuideScreen)
+                        backStack.add(AppRoutes.StudyGuideScreen)
                     },
                     onCreateFolder = {
                         backStack.removeLastOrNull()
@@ -282,8 +273,8 @@ fun BasicNavigation() {
                 )
             }
 
-            entry<AppRoutes.FillingGuideScreen> {
-                FillingGuideRoute(
+            entry<AppRoutes.StudyGuideScreen> {
+                StudyGuideRoute(
                     viewModel = viewModelSharedCreateFile,
                     onOpenAssetClick = { typeContent, posItem ->
                         when (typeContent) {
@@ -373,10 +364,10 @@ fun BasicNavigation() {
                 PreviewQuestionsRoute(
                     viewModel = viewModel,
                     onEditingGuideClick = {
-                        backStack.add(AppRoutes.FillingGuideScreen)
+                        backStack.add(AppRoutes.StudyGuideScreen)
                     },
                     onPlayGuideClick = {
-                        backStack.add(AppRoutes.FillingGuideScreen)
+                        backStack.add(AppRoutes.StudyGuideScreen)
                     },
                     onBackNav = {
                         backStack.removeLastOrNull()

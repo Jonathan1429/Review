@@ -115,7 +115,7 @@ fun PreviewStudyGuideScreen(
 }
 
 @Composable
-fun FillingGuideRoute(
+fun StudyGuideRoute(
     viewModel: SharedFragmentCreateFileViewModel,
     onOpenAssetClick: (QuestionContentUi, posItem: Int) -> Unit,
     onAddAssetClick: (ContentType, posItem: Int) -> Unit,
