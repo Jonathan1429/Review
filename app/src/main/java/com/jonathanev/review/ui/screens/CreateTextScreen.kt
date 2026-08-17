@@ -14,7 +14,6 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -108,12 +107,6 @@ fun CreateTextRoute(
                 if (questionContentMode == QuestionContentMode.CREATING) 1 else textList.size
             }
 
-            DisposableEffect(Unit) {
-                onDispose {
-                    viewModel.clearTextDraft()
-                }
-            }
-
             // Sync with ViewModel when page changes
             LaunchedEffect(pagerState.currentPage) {
                 if (questionContentMode == QuestionContentMode.EDITING) {
@@ -128,7 +121,10 @@ fun CreateTextRoute(
                         emptyList()
                     )
                 }
-                viewModel.initTextDraft(itemAtPage)
+                viewModel.initTextDraft(
+                    initialContent = itemAtPage,
+                    isEditing = questionContentMode == QuestionContentMode.EDITING
+                )
             }
 
             val colorInitial = MaterialTheme.colorScheme.onSurface

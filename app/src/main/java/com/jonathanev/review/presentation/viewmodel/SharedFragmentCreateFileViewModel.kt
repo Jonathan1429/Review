@@ -1,5 +1,6 @@
 package com.jonathanev.review.presentation.viewmodel
 
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -32,15 +33,15 @@ import com.jonathanev.review.presentation.model.QuestionItemUi
 import com.jonathanev.review.presentation.model.SaveGuideMode
 import com.jonathanev.review.presentation.state.GuideScreenUiState
 import com.jonathanev.review.ui.model.ContentType
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import com.jonathanev.review.ui.screens.toAnnotatedString
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
@@ -66,6 +67,9 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 ) : ViewModel() {
     private companion object {
         const val KEY_GUIDE_STATE = "key_guide_ui_state"
+        const val KEY_DRAFT_TEXT = "key_draft_text"
+        const val KEY_DRAFT_SELECTION_START = "key_draft_selection_start"
+        const val KEY_DRAFT_SELECTION_END = "key_draft_selection_end"
     }
 
     // La UI reacciona directamente a los cambios en SavedStateHandle
@@ -226,20 +230,53 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
-    private val _draftTextValue = MutableStateFlow<TextFieldValue?>(null)
-    val draftTextValue: StateFlow<TextFieldValue?> = _draftTextValue.asStateFlow()
+    val draftTextValue: StateFlow<TextFieldValue?> = combine(
+        savedStateHandle.getStateFlow<QuestionContentUi.Text?>(KEY_DRAFT_TEXT, null),
+        savedStateHandle.getStateFlow(KEY_DRAFT_SELECTION_START, 0),
+        savedStateHandle.getStateFlow(KEY_DRAFT_SELECTION_END, 0)
+    ) { textUi, start, end ->
+        textUi?.toAnnotatedString()?.let { 
+            TextFieldValue(
+                annotatedString = it,
+                selection = TextRange(start, end)
+            ) 
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = null
+    )
 
-    fun initTextDraft(initialContent: QuestionContentUi.Text) {
-        _draftTextValue.value =
-            TextFieldValue(annotatedString = initialContent.toAnnotatedString())
+    fun initTextDraft(initialContent: QuestionContentUi.Text, isEditing: Boolean) {
+        if (savedStateHandle.get<QuestionContentUi.Text?>(KEY_DRAFT_TEXT) == null) {
+            val contentToSet = if (isEditing) initialContent else QuestionContentUi.Text("", emptyList())
+            savedStateHandle[KEY_DRAFT_TEXT] = contentToSet
+            savedStateHandle[KEY_DRAFT_SELECTION_START] = contentToSet.text.length
+            savedStateHandle[KEY_DRAFT_SELECTION_END] = contentToSet.text.length
+        }
     }
 
     fun onDraftTextChange(newValue: TextFieldValue) {
-        _draftTextValue.value = newValue
+        val currentDraft = savedStateHandle.get<QuestionContentUi.Text?>(KEY_DRAFT_TEXT)
+        val updatedDraft = QuestionContentUi.Text(
+            text = newValue.text,
+            colorRanges = newValue.annotatedString.spanStyles.mapNotNull { span ->
+                if (span.item.color != Color.Unspecified) {
+                    ColorRangeUi(span.start, span.end, span.item.color.toArgb())
+                } else null
+            }
+        )
+        if (currentDraft != updatedDraft) {
+            savedStateHandle[KEY_DRAFT_TEXT] = updatedDraft
+        }
+        savedStateHandle[KEY_DRAFT_SELECTION_START] = newValue.selection.start
+        savedStateHandle[KEY_DRAFT_SELECTION_END] = newValue.selection.end
     }
 
     fun clearTextDraft() {
-        _draftTextValue.value = null
+        savedStateHandle[KEY_DRAFT_TEXT] = null
+        savedStateHandle[KEY_DRAFT_SELECTION_START] = 0
+        savedStateHandle[KEY_DRAFT_SELECTION_END] = 0
     }
 
     fun retryLoad() {
@@ -512,6 +549,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     }
 
     fun saveGuide() {
+        clearTextDraft()
         viewModelScope.launch {
             val currentState = uiState.value as? GuideScreenUiState.Success ?: return@launch
 
@@ -691,6 +729,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     }
 
     fun onDiscardGuide() {
+        clearTextDraft()
         // Al asignar Loading, forzamos a que el collect del combine re-ejecute la lógica de carga.
         updateState(GuideScreenUiState.Loading)
     }
