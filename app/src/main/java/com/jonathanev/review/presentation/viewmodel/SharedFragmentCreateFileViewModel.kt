@@ -177,7 +177,9 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                                                 )
                                             },
                                             contadorPregunta = initialContador,
-                                            guideContext = context
+                                            guideContext = context,
+                                            originalQuestions = finalQuestions,
+                                            originalAnswers = finalAnswers
                                         )
                                     )
                                 }
@@ -831,5 +833,29 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                     state.guideContext is GuideContext.Editing
         }
         return false
+    }
+
+    fun hasChangesInGuide(): Boolean {
+        val state = uiState.value as? GuideScreenUiState.Success ?: return false
+        
+        return when (state.guideContext) {
+            is GuideContext.Creating -> {
+                // Hay cambios si hay más de una pregunta o si la primera tiene algo
+                state.preguntas.size > 1 || 
+                state.preguntas.firstOrNull()?.content?.isNotEmpty() == true ||
+                state.respuestas.firstOrNull()?.content?.isNotEmpty() == true
+            }
+            is GuideContext.Editing -> {
+                // Comparamos con la lista original cargada
+                val currentQuestions = state.preguntas
+                val currentAnswers = state.respuestas
+                val originalQuestions = state.originalQuestions
+                val originalAnswers = state.originalAnswers
+
+                (originalQuestions != null && currentQuestions != originalQuestions) ||
+                (originalAnswers != null && currentAnswers != originalAnswers)
+            }
+            else -> false
+        }
     }
 }

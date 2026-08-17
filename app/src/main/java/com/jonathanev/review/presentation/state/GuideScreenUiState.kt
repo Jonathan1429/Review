@@ -31,6 +31,8 @@ sealed interface GuideScreenUiState : Parcelable {
         val showDialogDeleteQuestion: Boolean = false,
         val showDialogRepeatGuide: Boolean = false,
         val showDialogColor: Boolean = false,
-        val showDialogDiscardDraft: Boolean = false
+        val showDialogDiscardDraft: Boolean = false,
+        val originalQuestions: List<QuestionItemUi>? = null,
+        val originalAnswers: List<QuestionItemUi>? = null
     ) : GuideScreenUiState
 }

@@ -129,7 +129,7 @@ fun FillingGuideRoute(
 
     // INTERCEPTA EL BOTÓN/GESTO "ATRÁS" DEL SISTEMA
     BackHandler {
-        if (viewModel.isEditingOrCreating()) {
+        if (viewModel.isEditingOrCreating() && viewModel.hasChangesInGuide()) {
             showExitDialog = true
         } else {
             viewModel.onDiscardGuide()
