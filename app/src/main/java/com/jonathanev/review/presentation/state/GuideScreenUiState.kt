@@ -30,6 +30,7 @@ sealed interface GuideScreenUiState : Parcelable {
         val colorType: ColorType = ColorType.Default,
         val showDialogDeleteQuestion: Boolean = false,
         val showDialogRepeatGuide: Boolean = false,
-        val showDialogColor: Boolean = false
+        val showDialogColor: Boolean = false,
+        val showDialogDiscardDraft: Boolean = false
     ) : GuideScreenUiState
 }

@@ -193,8 +193,8 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     private val _createGuideEvent = MutableSharedFlow<CreateGuideEvent>()
     val createGuideEvent = _createGuideEvent.asSharedFlow()
 
-    private val _updateItemTriger = MutableSharedFlow<Unit>()
-    val updateItemTriger = _updateItemTriger.asSharedFlow()
+    private val _updateItemTrigger = MutableSharedFlow<Unit>()
+    val updateItemTrigger = _updateItemTrigger.asSharedFlow()
 
     val imageList: StateFlow<List<QuestionContentUi.Image>> = uiState
         .map { state ->
@@ -362,7 +362,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            _updateItemTriger.emit(Unit)
+            _updateItemTrigger.emit(Unit)
         }
         clearTextDraft()
     }
@@ -744,6 +744,19 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 showDialogRepeatGuide = false
             )
         }
+    }
+
+    fun onBackFromEditor() {
+        updateSuccessState { it.copy(showDialogDiscardDraft = true) }
+    }
+
+    fun onConfirmDiscardDraft() {
+        clearTextDraft()
+        updateSuccessState { it.copy(showDialogDiscardDraft = false) }
+    }
+
+    fun onDismissDiscardDraft() {
+        updateSuccessState { it.copy(showDialogDiscardDraft = false) }
     }
 
     fun switchToEditMode() {

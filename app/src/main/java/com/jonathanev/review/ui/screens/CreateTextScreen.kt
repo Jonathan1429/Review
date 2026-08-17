@@ -1,5 +1,6 @@
 package com.jonathanev.review.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,14 +24,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.jonathanev.review.R
 import com.jonathanev.review.domain.model.GuideContext
+import com.jonathanev.review.presentation.event.CreateGuideEvent
 import com.jonathanev.review.presentation.model.ColorRangeUi
 import com.jonathanev.review.presentation.model.QuestionContentMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
@@ -38,6 +43,7 @@ import com.jonathanev.review.presentation.model.SpanPalabraModel
 import com.jonathanev.review.presentation.state.GuideScreenUiState
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.ui.components.ColorPickerDialog
+import com.jonathanev.review.ui.components.CustomAlertDialog
 import com.jonathanev.review.ui.components.CustomBoxCreateText
 import com.jonathanev.review.ui.components.ErrorComponent
 import com.jonathanev.review.ui.components.OptionsCreateText
@@ -137,10 +143,16 @@ fun CreateTextRoute(
             val textValueState by viewModel.draftTextValue.collectAsStateWithLifecycle()
 
             LaunchedEffect(Unit) {
-                viewModel.updateItemTriger.collect {
+                viewModel.updateItemTrigger.collect {
                     onSaveText()
                 }
             }
+
+            val onBackAction = {
+                viewModel.onBackFromEditor()
+            }
+
+            BackHandler(onBack = onBackAction)
 
             Scaffold(
                 modifier = Modifier.fillMaxSize()
@@ -180,7 +192,7 @@ fun CreateTextRoute(
                             viewModel.addTextContent(
                                 textWithLabels = text,
                                 listSpans = colors,
-                                questionContentMode
+                                questionContentMode = questionContentMode
                             )
                         },
                         onClearColorClick = {
@@ -195,7 +207,21 @@ fun CreateTextRoute(
                             viewModel.onChangeColor(actualColor = actualColor)
                         },
                         onDefaultColor = viewModel::onDefaultcolor,
-                        onBackNav = onBackNav
+                        onBackNav = onBackAction
+                    )
+                }
+            }
+
+            if (state.showDialogDiscardDraft) {
+                Dialog(onDismissRequest = viewModel::onDismissDiscardDraft) {
+                    CustomAlertDialog(
+                        title = stringResource(R.string.lblDiscardChangesTitle),
+                        message = stringResource(R.string.lblDiscardChangesMessage),
+                        onDismissRequest = viewModel::onDismissDiscardDraft,
+                        onConfirm = {
+                            viewModel.onConfirmDiscardDraft()
+                            onBackNav()
+                        }
                     )
                 }
             }
