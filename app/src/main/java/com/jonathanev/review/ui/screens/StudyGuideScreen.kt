@@ -2,6 +2,7 @@ package com.jonathanev.review.ui.screens
 
 import android.content.Context
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -17,6 +18,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -25,6 +27,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -117,6 +120,42 @@ fun FillingGuideRoute(
     val context = LocalContext.current
     val typeForSelected = listOf(QAType.QUESTION, QAType.ANSWER)
     val mediaForSelected = listOf(ContentType.TEXT, ContentType.IMAGE)
+    var showExitDialog by remember { mutableStateOf(false) }
+
+    // INTERCEPTA EL BOTÓN/GESTO "ATRÁS" DEL SISTEMA
+    BackHandler {
+        if (viewModel.isEditingOrCreating()) {
+            showExitDialog = true
+        } else {
+            viewModel.onDiscardGuide()
+            onCloseGuide()
+        }
+    }
+
+    // DIÁLOGO DE CONFIRMACIÓN AL DAR ATRÁS EN MODO CREACIÓN/EDICIÓN
+    if (showExitDialog) {
+        AlertDialog(
+            onDismissRequest = { showExitDialog = false },
+            title = { Text(text = "¿Descartar cambios?") },
+            text = { Text(text = "Si sales ahora, se perderán las modificaciones.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showExitDialog = false
+                        viewModel.onDiscardGuide()
+                        onCloseGuide()
+                    }
+                ) {
+                    Text(text = "Descartar", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showExitDialog = false }) {
+                    Text(text = "Seguir editando", color = MaterialTheme.colorScheme.onSurface)
+                }
+            }
+        )
+    }
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -252,12 +291,9 @@ fun FillingGuideRoute(
                 onAddQuestion = viewModel::addNextQuestion,
                 onCloseGuide = {
                     when (state.guideContext) {
-                        is GuideContext.Browsing -> viewModel.onCloseGuide()
                         is GuideContext.Creating -> viewModel.saveGuide()
-                        is GuideContext.DeleteGuide -> viewModel.onCloseGuide()
                         is GuideContext.Editing -> viewModel.saveGuide()
-                        is GuideContext.Moving -> viewModel.onCloseGuide()
-                        is GuideContext.Rename -> viewModel.onCloseGuide()
+                        else -> onCloseGuide()
                     }
                 },
                 onCurrentPosContent = { position ->
