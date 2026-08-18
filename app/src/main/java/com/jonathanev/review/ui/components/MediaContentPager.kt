@@ -159,8 +159,7 @@ fun MediaContentPager(
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(
-                                        top = 72.dp,
-                                        start = 20.dp,
+                                        top = 58.dp,
                                         end = 20.dp,
                                         bottom = 20.dp
                                     )
