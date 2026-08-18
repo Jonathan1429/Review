@@ -1,10 +1,14 @@
 package com.jonathanev.review.ui.components
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
@@ -18,8 +22,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
@@ -32,9 +39,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jonathanev.review.R
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CustomBoxCreateText(
     modifier: Modifier = Modifier,
@@ -45,47 +53,52 @@ fun CustomBoxCreateText(
     selectedColor: Color
 ) {
     val hintText = if (hint) stringResource(R.string.lblCuestionario) else ""
-    val bringIntoViewRequester = remember { BringIntoViewRequester() }
     val scrollState = rememberScrollState()
+    val focusRequester = remember { FocusRequester() }
+    val bringIntoViewRequester = remember { BringIntoViewRequester() }
+    val interactionSource = remember { MutableInteractionSource() }
+
     var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
 
-    val isImeVisible = WindowInsets.isImeVisible
     val density = LocalDensity.current
-    val extraBottomMarginPx = remember(density) { with(density) { 16.dp.toPx() } }
+    // Margen inferior adicional para que el cursor no quede al borde del teclado
+    val extraBottomMarginPx = remember(density) { with(density) { 32.dp.toPx() } }
 
-    suspend fun bringCursorIntoView() {
-        textLayoutResult?.let { layoutResult ->
+    // Función para asegurar que el cursor siempre esté dentro del campo visible
+    LaunchedEffect(textValue.selection, textValue.text, scrollState.maxValue) {
+        textLayoutResult?.let { layout ->
             val cursorOffset = textValue.selection.start
-            if (cursorOffset in 0..layoutResult.layoutInput.text.length) {
-                val cursorRect = layoutResult.getCursorRect(cursorOffset)
-                val inflatedRect = Rect(
+            if (cursorOffset in 0..layout.layoutInput.text.length) {
+                val cursorRect = layout.getCursorRect(cursorOffset)
+                val targetRect = Rect(
                     left = cursorRect.left,
                     top = cursorRect.top,
                     right = cursorRect.right,
                     bottom = cursorRect.bottom + extraBottomMarginPx
                 )
-                bringIntoViewRequester.bringIntoView(inflatedRect)
+                bringIntoViewRequester.bringIntoView(targetRect)
             }
         }
-    }
-
-    LaunchedEffect(textValue.selection, textLayoutResult, isImeVisible) {
-        if (isImeVisible) {
-            delay(100.milliseconds)
-        }
-        bringCursorIntoView()
     }
 
     Box(
         modifier = modifier
             .fillMaxSize()
+            .imePadding()
             .verticalScroll(scrollState)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null
+            ) {
+                focusRequester.requestFocus()
+            }
     ) {
         BasicTextField(
             value = textValue,
             onValueChange = onTextValueChange,
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
+                .focusRequester(focusRequester)
                 .bringIntoViewRequester(bringIntoViewRequester),
             readOnly = readOnly,
             cursorBrush = SolidColor(selectedColor),
@@ -97,7 +110,9 @@ fun CustomBoxCreateText(
                 textLayoutResult = layoutResult
             },
             decorationBox = { innerTextField ->
-                Box(modifier = Modifier.fillMaxSize()) {
+                Box(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     if (textValue.text.isEmpty()) {
                         Text(
                             text = hintText,
