@@ -100,9 +100,11 @@ fun MediaContentPager(
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-    LaunchedEffect(pagerState.currentPage, assets.size) {
-        if (assets.isNotEmpty() && pagerState.currentPage in assets.indices) {
-            onCurrentPosContent(pagerState.currentPage)
+    LaunchedEffect(pagerState) {
+        androidx.compose.runtime.snapshotFlow { pagerState.currentPage }.collect { page ->
+            if (assets.isNotEmpty() && page in assets.indices) {
+                onCurrentPosContent(page)
+            }
         }
     }
 
@@ -139,7 +141,15 @@ fun MediaContentPager(
 
             HorizontalPager(
                 state = pagerState,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
+                key = { page ->
+                    val asset = assets.getOrNull(page)
+                    when (asset) {
+                        is QuestionContentUi.Image -> "img_${asset.uri}"
+                        is QuestionContentUi.Text -> "txt_${asset.text.hashCode()}_${asset.colorRanges.hashCode()}"
+                        else -> "none_$page"
+                    }
+                }
             ) { page ->
                 val assetInPage = assets.getOrNull(page)
                 Box(

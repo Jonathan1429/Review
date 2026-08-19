@@ -61,17 +61,19 @@ fun CustomBoxCreateText(
 
     // Función para asegurar que el cursor siempre esté dentro del campo visible
     LaunchedEffect(textValue.selection, textValue.text, scrollState.maxValue) {
-        textLayoutResult?.let { layout ->
-            val cursorOffset = textValue.selection.start
-            if (cursorOffset in 0..layout.layoutInput.text.length) {
-                val cursorRect = layout.getCursorRect(cursorOffset)
-                val targetRect = Rect(
-                    left = cursorRect.left,
-                    top = cursorRect.top,
-                    right = cursorRect.right,
-                    bottom = cursorRect.bottom + extraBottomMarginPx
-                )
-                bringIntoViewRequester.bringIntoView(targetRect)
+        if (!readOnly) {
+            textLayoutResult?.let { layout ->
+                val cursorOffset = textValue.selection.start
+                if (cursorOffset in 0..layout.layoutInput.text.length) {
+                    val cursorRect = layout.getCursorRect(cursorOffset)
+                    val targetRect = Rect(
+                        left = cursorRect.left,
+                        top = cursorRect.top,
+                        right = cursorRect.right,
+                        bottom = cursorRect.bottom + extraBottomMarginPx
+                    )
+                    bringIntoViewRequester.bringIntoView(targetRect)
+                }
             }
         }
     }
@@ -79,13 +81,17 @@ fun CustomBoxCreateText(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null
-            ) {
-                focusRequester.requestFocus()
-                keyboardController?.show()
-            }
+            .then(
+                if (!readOnly) {
+                    Modifier.clickable(
+                        interactionSource = interactionSource,
+                        indication = null
+                    ) {
+                        focusRequester.requestFocus()
+                        keyboardController?.show()
+                    }
+                } else Modifier
+            )
             .verticalScroll(scrollState)
             .padding(20.dp)
     ) {

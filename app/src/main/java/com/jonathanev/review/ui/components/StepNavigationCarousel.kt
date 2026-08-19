@@ -176,11 +176,21 @@ fun StepNavigationCarousel(
         ) {
             itemsIndexed(
                 items = items,
-                key = { _, item -> System.identityHashCode(item) }
+                key = { index, item ->
+                    when (item) {
+                        is QuestionContentUi.Image -> "img_${item.uri}"
+                        is QuestionContentUi.Text -> "txt_${item.text.hashCode()}_$index"
+                        else -> "item_$index"
+                    }
+                }
             ) { index, item ->
                 ReorderableItem(
                     state = reorderableLazyRowState,
-                    key = System.identityHashCode(item)
+                    key = when (item) {
+                        is QuestionContentUi.Image -> "img_${item.uri}"
+                        is QuestionContentUi.Text -> "txt_${item.text.hashCode()}_$index"
+                        else -> "item_$index"
+                    }
                 ) { isDragging ->
                     val elevation by animateDpAsState(
                         targetValue = if (isDragging) 12.dp else 0.dp,
