@@ -145,8 +145,8 @@ fun MediaContentPager(
                 key = { page ->
                     val asset = assets.getOrNull(page)
                     when (asset) {
-                        is QuestionContentUi.Image -> "img_${asset.uri}"
-                        is QuestionContentUi.Text -> "txt_${asset.text.hashCode()}_${asset.colorRanges.hashCode()}"
+                        is QuestionContentUi.Image -> "img_${asset.uri}_${asset.nameFile}_$page"
+                        is QuestionContentUi.Text -> "txt_${asset.text.hashCode()}_${asset.colorRanges.hashCode()}_$page"
                         else -> "none_$page"
                     }
                 }

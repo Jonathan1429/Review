@@ -178,7 +178,7 @@ fun StepNavigationCarousel(
                 items = items,
                 key = { index, item ->
                     when (item) {
-                        is QuestionContentUi.Image -> "img_${item.uri}"
+                        is QuestionContentUi.Image -> "img_${item.uri}_${item.nameFile}_$index"
                         is QuestionContentUi.Text -> "txt_${item.text.hashCode()}_$index"
                         else -> "item_$index"
                     }
@@ -187,7 +187,7 @@ fun StepNavigationCarousel(
                 ReorderableItem(
                     state = reorderableLazyRowState,
                     key = when (item) {
-                        is QuestionContentUi.Image -> "img_${item.uri}"
+                        is QuestionContentUi.Image -> "img_${item.uri}_${item.nameFile}_$index"
                         is QuestionContentUi.Text -> "txt_${item.text.hashCode()}_$index"
                         else -> "item_$index"
                     }
