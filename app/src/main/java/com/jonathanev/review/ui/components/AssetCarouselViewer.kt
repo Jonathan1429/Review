@@ -82,10 +82,10 @@ fun AssetCarouselViewer(
         pageCount = { assets.size }
     )
 
-    LaunchedEffect(currentPosContent, assets.size) {
+    LaunchedEffect(currentPosContent) {
         if (assets.isNotEmpty() && currentPosContent in assets.indices) {
-            if (pagerState.currentPage != currentPosContent) {
-                pagerState.scrollToPage(currentPosContent)
+            if (pagerState.currentPage != currentPosContent && !pagerState.isScrollInProgress) {
+                pagerState.animateScrollToPage(currentPosContent)
             }
         }
     }

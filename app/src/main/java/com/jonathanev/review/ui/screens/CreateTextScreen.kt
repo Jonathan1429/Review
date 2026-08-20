@@ -120,6 +120,9 @@ fun CreateTextRoute(
                 if (questionContentMode == QuestionContentMode.EDITING) {
                     viewModel.updatePosContent(pagerState.currentPage)
                 }
+                
+                // Clear draft before initializing for new page to avoid showing old draft
+                viewModel.clearTextDraft()
 
                 val itemAtPage = if (questionContentMode == QuestionContentMode.CREATING) {
                     QuestionContentUi.Text("", emptyList())
@@ -193,7 +196,19 @@ fun CreateTextRoute(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(padding),
-                    userScrollEnabled = questionContentMode == QuestionContentMode.EDITING
+                    userScrollEnabled = questionContentMode == QuestionContentMode.EDITING,
+                    beyondViewportPageCount = 1,
+                    key = { page ->
+                        val item = if (questionContentMode == QuestionContentMode.CREATING) {
+                            null
+                        } else {
+                            textList.getOrNull(page)
+                        }
+                        when (item) {
+                            is QuestionContentUi.Text -> "txt_${item.text.hashCode()}_$page"
+                            else -> "page_$page"
+                        }
+                    }
                 ) { page ->
                     val itemAtPage = remember(textList, page, questionContentMode) {
                         if (questionContentMode == QuestionContentMode.CREATING) {
