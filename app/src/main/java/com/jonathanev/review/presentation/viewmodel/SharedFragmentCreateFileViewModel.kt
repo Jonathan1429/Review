@@ -36,7 +36,6 @@ import com.jonathanev.review.presentation.model.SaveGuideMode
 import com.jonathanev.review.presentation.state.GuideScreenUiState
 import com.jonathanev.review.ui.model.ContentType
 import com.jonathanev.review.ui.screens.toAnnotatedString
-import com.jonathanev.review.ui.util.IdGenerator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
