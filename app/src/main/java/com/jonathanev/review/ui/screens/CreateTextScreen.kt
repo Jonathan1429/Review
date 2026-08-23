@@ -22,12 +22,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -58,6 +63,7 @@ import com.jonathanev.review.ui.preview.providers.CreateTextScreenProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.cardStepBackground
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
 
 @DevicePreviews
 @Composable
@@ -113,12 +119,16 @@ fun CreateTextRoute(
         is GuideScreenUiState.Success -> {
             val textList by viewModel.textList.collectAsStateWithLifecycle()
             val isDark = isSystemInDarkTheme()
+            val coroutineScope = rememberCoroutineScope()
 
             val pagerState = rememberPagerState(initialPage = posItem) {
                 if (questionContentMode == QuestionContentMode.CREATING) 1 else textList.size
             }
 
-            // Guardamos la última página vista en un remember Saveable para saber si la página REALMENTE cambió
+            // Variable para recordar la página objetivo si la intención de descarte vino de un Swipe
+            var pendingTargetPage by remember { mutableStateOf<Int?>(null) }
+
+            // Guardamos la última página vista en un rememberSaveable para saber si la página REALMENTE cambió
             var previousPage by rememberSaveable { mutableIntStateOf(pagerState.currentPage) }
 
             LaunchedEffect(pagerState.currentPage) {
@@ -127,7 +137,6 @@ fun CreateTextRoute(
                 }
 
                 // SOLO limpiamos e inicializamos el borrador si el usuario CAMBIÓ de página físicamente.
-                // Si la pantalla se está recreando por Process Death en la misma página, NO borramos el borrador.
                 if (previousPage != pagerState.currentPage) {
                     viewModel.clearTextDraft()
                     previousPage = pagerState.currentPage
@@ -160,7 +169,7 @@ fun CreateTextRoute(
                 }
             }
 
-            val onBackAction = {
+            val checkHasChanges: () -> Boolean = {
                 val currentText = textValueState?.text ?: ""
                 val itemAtPage = if (questionContentMode == QuestionContentMode.CREATING) {
                     QuestionContentUi.Text("", emptyList())
@@ -179,13 +188,45 @@ fun CreateTextRoute(
                     )
                 }
 
-                val hasChanges = if (questionContentMode == QuestionContentMode.CREATING) {
+                if (questionContentMode == QuestionContentMode.CREATING) {
                     currentText.isNotEmpty()
                 } else {
-                    currentDraft != null && (currentDraft.text != itemAtPage.text || currentDraft.colorRanges != itemAtPage.colorRanges)
+                    currentDraft != null && (
+                            currentDraft.text != itemAtPage.text ||
+                                    currentDraft.colorRanges != itemAtPage.colorRanges
+                            )
                 }
+            }
 
-                if (hasChanges) {
+            // Detectamos hacia qué página se intenta deslizar
+            val nestedScrollConnection = remember(pagerState, textValueState) {
+                object : NestedScrollConnection {
+                    override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                        if (source == NestedScrollSource.UserInput && kotlin.math.abs(available.x) > 0f) {
+                            if (checkHasChanges()) {
+                                // Calculamos si el swipe fue a la izquierda o a la derecha
+                                val targetPage = if (available.x < 0f) {
+                                    (pagerState.currentPage + 1).coerceAtMost(pagerState.pageCount - 1)
+                                } else {
+                                    (pagerState.currentPage - 1).coerceAtLeast(0)
+                                }
+
+                                // Si la página destino es diferente a la actual, guardamos la intención y bloqueamos
+                                if (targetPage != pagerState.currentPage) {
+                                    pendingTargetPage = targetPage
+                                    viewModel.onBackFromEditor()
+                                    return Offset(available.x, 0f)
+                                }
+                            }
+                        }
+                        return Offset.Zero
+                    }
+                }
+            }
+
+            val onBackAction = {
+                if (checkHasChanges()) {
+                    pendingTargetPage = null // Marcamos que la intención es SALIR de la pantalla
                     viewModel.onBackFromEditor()
                 } else {
                     viewModel.clearTextDraft()
@@ -202,7 +243,8 @@ fun CreateTextRoute(
                     state = pagerState,
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(padding),
+                        .padding(padding)
+                        .nestedScroll(nestedScrollConnection),
                     userScrollEnabled = questionContentMode == QuestionContentMode.EDITING,
                     beyondViewportPageCount = 1,
                     key = { page ->
@@ -225,7 +267,6 @@ fun CreateTextRoute(
                         }
                     }
 
-                    // Se vincula con el borrador global del ViewModel
                     val textValueAtPage = if (page == pagerState.currentPage) {
                         textValueState ?: remember(itemAtPage) {
                             TextFieldValue(annotatedString = itemAtPage.toAnnotatedString())
@@ -254,7 +295,6 @@ fun CreateTextRoute(
                         },
                         onShowColorDialog = viewModel::showDialogSelectColor,
                         onChangeTextValue = { updatedTextFieldValue ->
-                            // Interceptamos para actualizar los estilos de color activos antes de guardar en borrador
                             val newAnnotatedString = updateAnnotatedStringWithSpans(
                                 oldAnnotatedString = textValueAtPage.annotatedString,
                                 newTextFieldValue = updatedTextFieldValue,
@@ -280,14 +320,31 @@ fun CreateTextRoute(
             }
 
             if (state.showDialogDiscardDraft) {
-                Dialog(onDismissRequest = viewModel::onDismissDiscardDraft) {
+                Dialog(onDismissRequest = {
+                    pendingTargetPage = null
+                    viewModel.onDismissDiscardDraft()
+                }) {
                     CustomAlertDialog(
                         title = stringResource(R.string.lblDiscardChangesTitle),
                         message = stringResource(R.string.lblDiscardChangesMessage),
-                        onDismissRequest = viewModel::onDismissDiscardDraft,
+                        onDismissRequest = {
+                            pendingTargetPage = null
+                            viewModel.onDismissDiscardDraft()
+                        },
                         onConfirm = {
                             viewModel.onConfirmDiscardDraft()
-                            onBackNav()
+
+                            val target = pendingTargetPage
+                            if (target != null) {
+                                // Vino de un Swipe: desplazamos el pager a la página destino
+                                coroutineScope.launch {
+                                    pagerState.animateScrollToPage(target)
+                                }
+                                pendingTargetPage = null
+                            } else {
+                                // Vino del botón Atrás: salimos de la vista
+                                onBackNav()
+                            }
                         }
                     )
                 }
