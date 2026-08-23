@@ -2,6 +2,7 @@ package com.jonathanev.review.ui.screens
 
 import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +18,9 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -36,6 +40,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -65,8 +70,8 @@ import com.jonathanev.review.ui.preview.providers.CreateTextScreenProv
 import com.jonathanev.review.ui.preview.providers.CreateTextScreenProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.cardStepBackground
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 
 @DevicePreviews
 @Composable
@@ -124,6 +129,9 @@ fun CreateTextRoute(
             val isDark = isSystemInDarkTheme()
             val coroutineScope = rememberCoroutineScope()
 
+            // Controladores para la notificación de aviso al arrastrar
+            val snackbarHostState = remember { SnackbarHostState() }
+
             val pagerState = rememberPagerState(initialPage = posItem) {
                 if (questionContentMode == QuestionContentMode.CREATING) 1 else textList.size
             }
@@ -145,7 +153,6 @@ fun CreateTextRoute(
             }
 
             // 1. Escuchamos cambios de página en el Pager
-            // Escuchamos el cambio de página confirmado (settledPage o currentPage)
             LaunchedEffect(pagerState) {
                 snapshotFlow { pagerState.currentPage }.collect { page ->
                     Log.d("PAGER_DEBUG", "Nueva página seleccionada en Pager: $page")
@@ -220,11 +227,11 @@ fun CreateTextRoute(
                 hasChanges
             }
 
-            // Interceptor de Swipe con Logs
+            // Interceptor de Swipe con Logs para modo EDICIÓN
             val nestedScrollConnection = remember(pagerState, textValueState) {
                 object : NestedScrollConnection {
                     override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                        if (source == NestedScrollSource.UserInput && kotlin.math.abs(available.x) > 0f) {
+                        if (source == NestedScrollSource.UserInput && abs(available.x) > 0f) {
                             Log.d("PAGER_DEBUG", "Gesto Swipe detectado | dx: ${available.x}")
 
                             if (checkHasChanges()) {
@@ -252,7 +259,6 @@ fun CreateTextRoute(
             val onBackAction = {
                 Log.d("PAGER_DEBUG", "onBackAction ejecutado en página actual: ${pagerState.currentPage}")
 
-                // 1. FORZAMOS la sincronización de la posición actual en el ViewModel antes de salir
                 if (questionContentMode == QuestionContentMode.EDITING) {
                     viewModel.updatePosContent(pagerState.currentPage)
                 }
@@ -264,7 +270,7 @@ fun CreateTextRoute(
                 } else {
                     Log.d("PAGER_DEBUG", "Acción Atrás ejecutada sin cambios. Salida normal a posición ${pagerState.currentPage}.")
                     viewModel.clearTextDraft()
-                    onBackNav() // 2. Navegamos hacia atrás solo después de haber actualizado la posición en el ViewModel
+                    onBackNav()
                 }
             }
 
@@ -273,83 +279,114 @@ fun CreateTextRoute(
             Scaffold(
                 modifier = Modifier.fillMaxSize()
             ) { padding ->
-                HorizontalPager(
-                    state = pagerState,
+                Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(padding)
-                        .nestedScroll(nestedScrollConnection),
-                    userScrollEnabled = questionContentMode == QuestionContentMode.EDITING,
-                    beyondViewportPageCount = 1,
-                    key = { page ->
-                        val item = if (questionContentMode == QuestionContentMode.CREATING) {
-                            null
+                ) {
+                    HorizontalPager(
+                        state = pagerState,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .nestedScroll(nestedScrollConnection)
+                            .then(
+                                // Si está en modo CREATING, interceptamos el arrastre para avisar al usuario
+                                if (questionContentMode == QuestionContentMode.CREATING) {
+                                    Modifier.pointerInput(Unit) {
+                                        detectHorizontalDragGestures { _, dragAmount ->
+                                            if (abs(dragAmount) > 10f) {
+                                                coroutineScope.launch {
+                                                    snackbarHostState.currentSnackbarData?.dismiss()
+                                                    snackbarHostState.showSnackbar(
+                                                        message = "El desplazamiento solo está disponible al editar elementos guardados",
+                                                        duration = SnackbarDuration.Short
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                } else Modifier
+                            ),
+                        userScrollEnabled = questionContentMode == QuestionContentMode.EDITING,
+                        beyondViewportPageCount = 1,
+                        key = { page ->
+                            val item = if (questionContentMode == QuestionContentMode.CREATING) {
+                                null
+                            } else {
+                                textList.getOrNull(page)
+                            }
+                            when (item) {
+                                is QuestionContentUi.Text -> "txt_${item.text.hashCode()}_$page"
+                                else -> "page_$page"
+                            }
+                        }
+                    ) { page ->
+                        val itemAtPage = remember(textList, page, questionContentMode) {
+                            if (questionContentMode == QuestionContentMode.CREATING) {
+                                QuestionContentUi.Text("", emptyList())
+                            } else {
+                                textList.getOrNull(page) ?: QuestionContentUi.Text("", emptyList())
+                            }
+                        }
+
+                        val textValueAtPage = if (page == pagerState.currentPage) {
+                            textValueState ?: remember(itemAtPage) {
+                                TextFieldValue(annotatedString = itemAtPage.toAnnotatedString())
+                            }
                         } else {
-                            textList.getOrNull(page)
+                            remember(itemAtPage) {
+                                TextFieldValue(annotatedString = itemAtPage.toAnnotatedString())
+                            }
                         }
-                        when (item) {
-                            is QuestionContentUi.Text -> "txt_${item.text.hashCode()}_$page"
-                            else -> "page_$page"
-                        }
+
+                        TextEditorContent(
+                            guideContext = state.guideContext,
+                            colorInitial = colorInitial,
+                            selectedColor = selectedColor,
+                            textValue = textValueAtPage,
+                            showDialog = state.showDialogColor,
+                            onSaveText = { text, colors ->
+                                Log.d("PAGER_DEBUG", "onSaveText ejecutado en página: ${pagerState.currentPage}")
+                                viewModel.addTextContent(
+                                    textWithLabels = text,
+                                    listSpans = colors,
+                                    questionContentMode = questionContentMode
+                                )
+                            },
+                            onClearColorClick = {
+                                viewModel.clearColorsFromDraft()
+                            },
+                            onShowColorDialog = viewModel::showDialogSelectColor,
+                            onChangeTextValue = { updatedTextFieldValue ->
+                                val newAnnotatedString = updateAnnotatedStringWithSpans(
+                                    oldAnnotatedString = textValueAtPage.annotatedString,
+                                    newTextFieldValue = updatedTextFieldValue,
+                                    selectedColor = selectedColor,
+                                    colorInitial = colorInitial
+                                )
+
+                                val finalValue = updatedTextFieldValue.copy(
+                                    annotatedString = newAnnotatedString,
+                                    composition = null
+                                )
+
+                                viewModel.onDraftTextChange(newValue = finalValue)
+                            },
+                            onDissmissDialog = viewModel::onDismissDialogSelectColor,
+                            onColorSelected = { actualColor ->
+                                viewModel.onChangeColor(actualColor = actualColor)
+                            },
+                            onDefaultColor = viewModel::onDefaultcolor,
+                            onBackNav = onBackAction
+                        )
                     }
-                ) { page ->
-                    val itemAtPage = remember(textList, page, questionContentMode) {
-                        if (questionContentMode == QuestionContentMode.CREATING) {
-                            QuestionContentUi.Text("", emptyList())
-                        } else {
-                            textList.getOrNull(page) ?: QuestionContentUi.Text("", emptyList())
-                        }
-                    }
 
-                    val textValueAtPage = if (page == pagerState.currentPage) {
-                        textValueState ?: remember(itemAtPage) {
-                            TextFieldValue(annotatedString = itemAtPage.toAnnotatedString())
-                        }
-                    } else {
-                        remember(itemAtPage) {
-                            TextFieldValue(annotatedString = itemAtPage.toAnnotatedString())
-                        }
-                    }
-
-                    TextEditorContent(
-                        guideContext = state.guideContext,
-                        colorInitial = colorInitial,
-                        selectedColor = selectedColor,
-                        textValue = textValueAtPage,
-                        showDialog = state.showDialogColor,
-                        onSaveText = { text, colors ->
-                            Log.d("PAGER_DEBUG", "onSaveText ejecutado en página: ${pagerState.currentPage}")
-                            viewModel.addTextContent(
-                                textWithLabels = text,
-                                listSpans = colors,
-                                questionContentMode = questionContentMode
-                            )
-                        },
-                        onClearColorClick = {
-                            viewModel.clearColorsFromDraft()
-                        },
-                        onShowColorDialog = viewModel::showDialogSelectColor,
-                        onChangeTextValue = { updatedTextFieldValue ->
-                            val newAnnotatedString = updateAnnotatedStringWithSpans(
-                                oldAnnotatedString = textValueAtPage.annotatedString,
-                                newTextFieldValue = updatedTextFieldValue,
-                                selectedColor = selectedColor,
-                                colorInitial = colorInitial
-                            )
-
-                            val finalValue = updatedTextFieldValue.copy(
-                                annotatedString = newAnnotatedString,
-                                composition = null
-                            )
-
-                            viewModel.onDraftTextChange(newValue = finalValue)
-                        },
-                        onDissmissDialog = viewModel::onDismissDialogSelectColor,
-                        onColorSelected = { actualColor ->
-                            viewModel.onChangeColor(actualColor = actualColor)
-                        },
-                        onDefaultColor = viewModel::onDefaultcolor,
-                        onBackNav = onBackAction
+                    // Componente flotante que muestra el mensaje de aviso en la parte inferior
+                    SnackbarHost(
+                        hostState = snackbarHostState,
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(bottom = 32.dp, start = 16.dp, end = 16.dp)
                     )
                 }
             }
@@ -458,7 +495,7 @@ fun TextEditorContent(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
-            .imePadding(), // Reduce la tarjeta al nivel del teclado
+            .imePadding(),
         shape = RoundedCornerShape(42.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = cardStepBackground
