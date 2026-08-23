@@ -1,5 +1,7 @@
 package com.jonathanev.review.presentation.viewmodel
 
+import android.net.Uri
+import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.TextRange
@@ -49,8 +51,10 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.io.File
 import javax.inject.Inject
 import com.jonathanev.review.ui.model.QAType as QATypeUI
+import androidx.core.net.toUri
 
 @HiltViewModel
 class SharedFragmentCreateFileViewModel @Inject constructor(
@@ -237,6 +241,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
+    private var currentImageDraftUri: String? = null
     val draftTextValue: StateFlow<TextFieldValue?> = combine(
         savedStateHandle.getStateFlow<QuestionContentUi.Text?>(KEY_DRAFT_TEXT, null),
         savedStateHandle.getStateFlow(KEY_DRAFT_SELECTION_START, 0),
@@ -354,7 +359,14 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         clearTextDraft()
     }
 
-    fun addImageContent(uri: String, questionContentMode: QuestionContentMode) {
+    fun addImageContent(uri: String) {
+        viewModelScope.launch {
+            val tempUri = saveTempImageUseCase(uri)
+            currentImageDraftUri = tempUri
+        }
+    }
+
+    fun confirmSaveImage(uri: String, questionContentMode: QuestionContentMode) {
         viewModelScope.launch {
             val tempUri = saveTempImageUseCase(uri)
             val newContent = QuestionContentUi.Image(uri = tempUri, nameFile = "")
@@ -751,6 +763,18 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     fun onConfirmDiscardDraft() {
         clearTextDraft()
         updateSuccessState { it.copy(showDialogDiscardDraft = false) }
+
+        currentImageDraftUri?.let { uriString ->
+            try {
+                val file = File(uriString.toUri().path ?: "")
+                if (file.exists()) {
+                    file.delete()
+                }
+            } catch (e: Exception) {
+                Log.e("ViewModel", "Error al eliminar borrador: ${e.message}")
+            }
+        }
+        currentImageDraftUri = null
     }
 
     fun onDismissDiscardDraft() {

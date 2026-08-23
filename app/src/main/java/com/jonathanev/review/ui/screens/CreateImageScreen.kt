@@ -1,5 +1,6 @@
 package com.jonathanev.review.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -28,14 +29,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jonathanev.review.R
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.presentation.model.QuestionContentMode
 import com.jonathanev.review.presentation.state.GuideScreenUiState
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
+import com.jonathanev.review.ui.components.CustomAlertDialog
 import com.jonathanev.review.ui.components.CustomBoxCreateImage
 import com.jonathanev.review.ui.components.ErrorComponent
 import com.jonathanev.review.ui.components.OptionsCreateImage
@@ -98,7 +102,25 @@ fun CreateImageRoute(
                 if (questionContentMode == QuestionContentMode.CREATING) 1 else imageList.size
             }
 
-            // Sync with ViewModel when page changes
+            // Acción centralizada para interceptar el regreso/salida
+            val onBackAction = {
+                // 1. Sincronizamos la posición actual antes de cualquier validación
+                if (questionContentMode == QuestionContentMode.EDITING) {
+                    viewModel.updatePosContent(pagerState.currentPage)
+                }
+
+                // 2. Si seleccionó una imagen nueva y no la ha guardado, mostramos el diálogo
+                if (newlyPickedUri != null) {
+                    viewModel.onBackFromEditor()
+                } else {
+                    onBackNav()
+                }
+            }
+
+            // Interceptamos la tecla o gesto físico de ir atrás
+            BackHandler(onBack = onBackAction)
+
+            // Sincronizar posición con el ViewModel al cambiar de página en el Pager
             LaunchedEffect(pagerState.currentPage) {
                 if (questionContentMode == QuestionContentMode.EDITING) {
                     viewModel.updatePosContent(pagerState.currentPage)
@@ -112,8 +134,7 @@ fun CreateImageRoute(
                     newlyPickedUri = selectedUri.toString()
 
                     viewModel.addImageContent(
-                        uri = selectedUri.toString(),
-                        questionContentMode = questionContentMode
+                        uri = selectedUri.toString()
                     )
                 }
             }
@@ -159,15 +180,36 @@ fun CreateImageRoute(
                         )
                     },
                     imageUploaded = {
+                        viewModel.confirmSaveImage(uriImage, questionContentMode)
                         onBackNav()
                     },
-                    onBackNav = onBackNav
+                    onBackNav = onBackAction // Pasamos onBackAction para controlar también el botón superior de la topbar
                 )
             }
 
-            // Reset newlyPickedUri when navigating away from a page or when list updates
+            // Limpiamos la imagen temporal si cambia la página del pager
             LaunchedEffect(pagerState.currentPage) {
                 newlyPickedUri = null
+            }
+
+            // Diálogo de confirmación para descartar cambios
+            if (state.showDialogDiscardDraft) {
+                Dialog(onDismissRequest = {
+                    viewModel.onDismissDiscardDraft()
+                }) {
+                    CustomAlertDialog(
+                        title = stringResource(R.string.lblDiscardChangesTitle),
+                        message = stringResource(R.string.lblDiscardChangesMessage),
+                        onDismissRequest = {
+                            viewModel.onDismissDiscardDraft()
+                        },
+                        onConfirm = {
+                            viewModel.onConfirmDiscardDraft()
+                            newlyPickedUri = null // Limpiamos la selección no guardada
+                            onBackNav()           // Salimos de la pantalla
+                        }
+                    )
+                }
             }
         }
     }
