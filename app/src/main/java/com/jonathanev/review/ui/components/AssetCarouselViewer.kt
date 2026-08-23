@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -77,15 +78,26 @@ fun AssetCarouselViewer(
     val maxIndex = (assets.size - 1).coerceAtLeast(0)
     val safeInitialPage = currentPosContent.coerceIn(0, maxIndex)
 
+    // Forzamos al PagerState a recrearse si la lista o la posición inicial de entrada cambian de raíz
     val pagerState = rememberPagerState(
         initialPage = safeInitialPage,
         pageCount = { assets.size }
     )
 
+    // Sincronización desde el ViewModel hacia el PagerState de la lista principal
     LaunchedEffect(currentPosContent) {
         if (assets.isNotEmpty() && currentPosContent in assets.indices) {
             if (pagerState.currentPage != currentPosContent && !pagerState.isScrollInProgress) {
-                pagerState.animateScrollToPage(currentPosContent)
+                pagerState.scrollToPage(currentPosContent) // Usa scrollToPage para sincronización inmediata al volver
+            }
+        }
+    }
+
+    // Escuchar cambios del usuario en el carrusel principal SOLO cuando la página esté asentada (settledPage)
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.settledPage }.collect { settledPage ->
+            if (settledPage in assets.indices && !pagerState.isScrollInProgress) {
+                onCurrentPosContent(settledPage)
             }
         }
     }
@@ -103,12 +115,9 @@ fun AssetCarouselViewer(
             guideContext = guideContext,
             onOpenAssetClick = { typeContent, posItem -> onOpenAssetClick(typeContent, posItem) },
             onDeleteAssetClick = { typeContent, positionItem ->
-                onDeleteItemClick(
-                    typeContent,
-                    positionItem
-                )
+                onDeleteItemClick(typeContent, positionItem)
             },
-            onCurrentPosContent = { position -> onCurrentPosContent(position) }
+            onCurrentPosContent = { /* Dejar vacío: ahora lo gestiona snapshotFlow { pagerState.settledPage } */ }
         )
         Spacer(modifier = Modifier.height(24.dp))
         StepNavigationCarousel(

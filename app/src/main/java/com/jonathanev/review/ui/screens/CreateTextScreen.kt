@@ -1,5 +1,6 @@
 package com.jonathanev.review.ui.screens
 
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -18,6 +19,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -25,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -125,33 +128,49 @@ fun CreateTextRoute(
                 if (questionContentMode == QuestionContentMode.CREATING) 1 else textList.size
             }
 
-            // Variable para recordar la página objetivo si la intención de descarte vino de un Swipe
             var pendingTargetPage by remember { mutableStateOf<Int?>(null) }
-
-            // Guardamos la última página vista en un rememberSaveable para saber si la página REALMENTE cambió
             var previousPage by rememberSaveable { mutableIntStateOf(pagerState.currentPage) }
 
-            LaunchedEffect(pagerState.currentPage) {
-                if (questionContentMode == QuestionContentMode.EDITING) {
-                    viewModel.updatePosContent(pagerState.currentPage)
-                }
+            // Log de control para ver recomposiciones de la vista
+            SideEffect {
+                Log.d("PAGER_DEBUG", "Recomposición Success | currentPage: ${pagerState.currentPage}, settledPage: ${pagerState.settledPage}")
+            }
 
-                // SOLO limpiamos e inicializamos el borrador si el usuario CAMBIÓ de página físicamente.
-                if (previousPage != pagerState.currentPage) {
-                    viewModel.clearTextDraft()
-                    previousPage = pagerState.currentPage
+            // Sincroniza el pagerState cuando la pantalla recibe un posItem actualizado
+            LaunchedEffect(posItem) {
+                if (pagerState.currentPage != posItem && posItem in 0 until pagerState.pageCount) {
+                    Log.d("PAGER_DEBUG", "Sincronizando pagerState.scrollToPage($posItem)")
+                    pagerState.scrollToPage(posItem)
                 }
+            }
 
-                val itemAtPage = if (questionContentMode == QuestionContentMode.CREATING) {
-                    QuestionContentUi.Text("", emptyList())
-                } else {
-                    textList.getOrNull(pagerState.currentPage) ?: QuestionContentUi.Text("", emptyList())
+            // 1. Escuchamos cambios de página en el Pager
+            // Escuchamos el cambio de página confirmado (settledPage o currentPage)
+            LaunchedEffect(pagerState) {
+                snapshotFlow { pagerState.currentPage }.collect { page ->
+                    Log.d("PAGER_DEBUG", "Nueva página seleccionada en Pager: $page")
+
+                    if (questionContentMode == QuestionContentMode.EDITING) {
+                        viewModel.updatePosContent(page)
+                    }
+
+                    if (previousPage != page) {
+                        Log.d("PAGER_DEBUG", "Página cambió de $previousPage a $page. Limpiando borrador.")
+                        viewModel.clearTextDraft()
+                        previousPage = page
+                    }
+
+                    val itemAtPage = if (questionContentMode == QuestionContentMode.CREATING) {
+                        QuestionContentUi.Text("", emptyList())
+                    } else {
+                        textList.getOrNull(page) ?: QuestionContentUi.Text("", emptyList())
+                    }
+
+                    viewModel.initTextDraft(
+                        initialContent = itemAtPage,
+                        isEditing = questionContentMode == QuestionContentMode.EDITING
+                    )
                 }
-
-                viewModel.initTextDraft(
-                    initialContent = itemAtPage,
-                    isEditing = questionContentMode == QuestionContentMode.EDITING
-                )
             }
 
             val colorInitial = MaterialTheme.colorScheme.onSurface
@@ -188,7 +207,7 @@ fun CreateTextRoute(
                     )
                 }
 
-                if (questionContentMode == QuestionContentMode.CREATING) {
+                val hasChanges = if (questionContentMode == QuestionContentMode.CREATING) {
                     currentText.isNotEmpty()
                 } else {
                     currentDraft != null && (
@@ -196,24 +215,30 @@ fun CreateTextRoute(
                                     currentDraft.colorRanges != itemAtPage.colorRanges
                             )
                 }
+
+                Log.d("PAGER_DEBUG", "checkHasChanges() -> $hasChanges | Texto draft: '${currentDraft?.text}' vs original: '${itemAtPage.text}'")
+                hasChanges
             }
 
-            // Detectamos hacia qué página se intenta deslizar
+            // Interceptor de Swipe con Logs
             val nestedScrollConnection = remember(pagerState, textValueState) {
                 object : NestedScrollConnection {
                     override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
                         if (source == NestedScrollSource.UserInput && kotlin.math.abs(available.x) > 0f) {
+                            Log.d("PAGER_DEBUG", "Gesto Swipe detectado | dx: ${available.x}")
+
                             if (checkHasChanges()) {
-                                // Calculamos si el swipe fue a la izquierda o a la derecha
                                 val targetPage = if (available.x < 0f) {
                                     (pagerState.currentPage + 1).coerceAtMost(pagerState.pageCount - 1)
                                 } else {
                                     (pagerState.currentPage - 1).coerceAtLeast(0)
                                 }
 
-                                // Si la página destino es diferente a la actual, guardamos la intención y bloqueamos
+                                Log.d("PAGER_DEBUG", "Swipe Bloqueado por cambios. currentPage: ${pagerState.currentPage} -> targetPage calculada: $targetPage")
+
                                 if (targetPage != pagerState.currentPage) {
                                     pendingTargetPage = targetPage
+                                    Log.d("PAGER_DEBUG", "Mostrando diálogo de descarte. pendingTargetPage fijada en: $targetPage")
                                     viewModel.onBackFromEditor()
                                     return Offset(available.x, 0f)
                                 }
@@ -225,12 +250,21 @@ fun CreateTextRoute(
             }
 
             val onBackAction = {
+                Log.d("PAGER_DEBUG", "onBackAction ejecutado en página actual: ${pagerState.currentPage}")
+
+                // 1. FORZAMOS la sincronización de la posición actual en el ViewModel antes de salir
+                if (questionContentMode == QuestionContentMode.EDITING) {
+                    viewModel.updatePosContent(pagerState.currentPage)
+                }
+
                 if (checkHasChanges()) {
-                    pendingTargetPage = null // Marcamos que la intención es SALIR de la pantalla
+                    pendingTargetPage = null
+                    Log.d("PAGER_DEBUG", "Acción Atrás bloqueada por cambios. Mostrando diálogo.")
                     viewModel.onBackFromEditor()
                 } else {
+                    Log.d("PAGER_DEBUG", "Acción Atrás ejecutada sin cambios. Salida normal a posición ${pagerState.currentPage}.")
                     viewModel.clearTextDraft()
-                    onBackNav()
+                    onBackNav() // 2. Navegamos hacia atrás solo después de haber actualizado la posición en el ViewModel
                 }
             }
 
@@ -284,6 +318,7 @@ fun CreateTextRoute(
                         textValue = textValueAtPage,
                         showDialog = state.showDialogColor,
                         onSaveText = { text, colors ->
+                            Log.d("PAGER_DEBUG", "onSaveText ejecutado en página: ${pagerState.currentPage}")
                             viewModel.addTextContent(
                                 textWithLabels = text,
                                 listSpans = colors,
@@ -321,6 +356,7 @@ fun CreateTextRoute(
 
             if (state.showDialogDiscardDraft) {
                 Dialog(onDismissRequest = {
+                    Log.d("PAGER_DEBUG", "Diálogo descartado sin confirmar")
                     pendingTargetPage = null
                     viewModel.onDismissDiscardDraft()
                 }) {
@@ -328,21 +364,27 @@ fun CreateTextRoute(
                         title = stringResource(R.string.lblDiscardChangesTitle),
                         message = stringResource(R.string.lblDiscardChangesMessage),
                         onDismissRequest = {
+                            Log.d("PAGER_DEBUG", "Diálogo descartado sin confirmar")
                             pendingTargetPage = null
                             viewModel.onDismissDiscardDraft()
                         },
                         onConfirm = {
+                            Log.d("PAGER_DEBUG", "Diálogo CONFIRMADO. pendingTargetPage: $pendingTargetPage")
                             viewModel.onConfirmDiscardDraft()
 
                             val target = pendingTargetPage
                             if (target != null) {
-                                // Vino de un Swipe: desplazamos el pager a la página destino
+                                Log.d("PAGER_DEBUG", "Iniciando scroll animado hacia target: $target")
+                                if (questionContentMode == QuestionContentMode.EDITING) {
+                                    Log.d("PAGER_DEBUG", "Forzando viewModel.updatePosContent($target)")
+                                    viewModel.updatePosContent(target)
+                                }
                                 coroutineScope.launch {
                                     pagerState.animateScrollToPage(target)
                                 }
                                 pendingTargetPage = null
                             } else {
-                                // Vino del botón Atrás: salimos de la vista
+                                Log.d("PAGER_DEBUG", "Saliendo de la pantalla vía onBackNav()")
                                 onBackNav()
                             }
                         }
