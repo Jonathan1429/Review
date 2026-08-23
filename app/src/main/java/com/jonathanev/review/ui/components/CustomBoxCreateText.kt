@@ -26,6 +26,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
@@ -49,49 +50,19 @@ fun CustomBoxCreateText(
     val hintText = if (hint) stringResource(R.string.lblCuestionario) else ""
     val scrollState = rememberScrollState()
     val focusRequester = remember { FocusRequester() }
-    val bringIntoViewRequester = remember { BringIntoViewRequester() }
-    val interactionSource = remember { MutableInteractionSource() }
     val keyboardController = LocalSoftwareKeyboardController.current
-
-    var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
-
-    val density = LocalDensity.current
-    // Margen inferior adicional para que el cursor no quede al borde del teclado
-    val extraBottomMarginPx = remember(density) { with(density) { 32.dp.toPx() } }
-
-    // Función para asegurar que el cursor siempre esté dentro del campo visible
-    LaunchedEffect(textValue.selection, textValue.text, scrollState.maxValue) {
-        if (!readOnly) {
-            textLayoutResult?.let { layout ->
-                val cursorOffset = textValue.selection.start
-                if (cursorOffset in 0..layout.layoutInput.text.length) {
-                    val cursorRect = layout.getCursorRect(cursorOffset)
-                    val targetRect = Rect(
-                        left = cursorRect.left,
-                        top = cursorRect.top,
-                        right = cursorRect.right,
-                        bottom = cursorRect.bottom + extraBottomMarginPx
-                    )
-                    bringIntoViewRequester.bringIntoView(targetRect)
-                }
-            }
-        }
-    }
 
     Box(
         modifier = modifier
             .fillMaxSize()
-            .then(
-                if (!readOnly) {
-                    Modifier.clickable(
-                        interactionSource = interactionSource,
-                        indication = null
-                    ) {
-                        focusRequester.requestFocus()
-                        keyboardController?.show()
+            .pointerInput(Unit) {
+                awaitPointerEventScope {
+                    while (true) {
+                        val event = awaitPointerEvent()
+                        val type = event.type
                     }
-                } else Modifier
-            )
+                }
+            }
             .verticalScroll(scrollState)
             .padding(20.dp)
     ) {
@@ -100,20 +71,25 @@ fun CustomBoxCreateText(
             onValueChange = onTextValueChange,
             modifier = Modifier
                 .fillMaxWidth()
-                .focusRequester(focusRequester)
-                .bringIntoViewRequester(bringIntoViewRequester),
+                .focusRequester(focusRequester),
             readOnly = readOnly,
             cursorBrush = SolidColor(selectedColor),
             textStyle = TextStyle(
                 fontSize = 18.sp,
                 color = MaterialTheme.colorScheme.onSurface
             ),
-            onTextLayout = { layoutResult ->
-                textLayoutResult = layoutResult
-            },
             decorationBox = { innerTextField ->
                 Box(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            enabled = !readOnly
+                        ) {
+                            focusRequester.requestFocus()
+                            keyboardController?.show()
+                        }
                 ) {
                     if (textValue.text.isEmpty()) {
                         Text(
