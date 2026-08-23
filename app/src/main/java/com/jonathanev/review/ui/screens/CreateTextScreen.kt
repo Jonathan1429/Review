@@ -28,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -249,8 +250,7 @@ fun CreateTextRoute(
                         onShowColorDialog =
                             viewModel::showDialogSelectColor,
 
-                        onChangeTextValue = {
-                                updatedTextFieldValue ->
+                        onChangeTextValue = { updatedTextFieldValue ->
 
                             localTextFieldValue =
                                 updatedTextFieldValue
@@ -391,7 +391,8 @@ fun TextEditorContent(
             CustomBoxCreateText(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f),
+                    .weight(1f)
+                    .testTag("create_text_input"),
                 textValue = textValue,
                 hint = textValue.text.isNotEmpty(),
                 readOnly = guideContext is GuideContext.Browsing,

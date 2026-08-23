@@ -84,6 +84,29 @@ class StudyGuideScreenProvider : PreviewParameterProvider<StudyGuideScreenProv> 
                 guideContext = GuideContext.Creating(guideDomainModel),
                 showDialogDeleteQuestion = false,
                 showDialogRepeatGuide = true
+            ),
+            StudyGuideScreenProv(
+                typeSelected = QAType.QUESTION,
+                typeForSelected = listOf(QAType.QUESTION, QAType.ANSWER),
+                mediaSelected = ContentType.TEXT,
+                mediaForSelected = listOf(ContentType.TEXT, ContentType.IMAGE),
+                actualQuestion = 1,
+                totalQuestions = 1,
+                listTypeMedia = emptyList(), // <--- Lista vacía para probar estado sin elementos
+                guideContext = GuideContext.Creating(guideDomainModel),
+                showDialogDeleteQuestion = false,
+                showDialogRepeatGuide = false
             )
         )
+
+    override fun getDisplayName(index: Int): String {
+        return when (index) {
+            0 -> "creating_mode"
+            1 -> "browsing_mode"
+            2 -> "dialog_delete_question"
+            3 -> "dialog_repeat_guide"
+            4 -> "empty_media_list"
+            else -> "item_$index"
+        }
+    }
 }
