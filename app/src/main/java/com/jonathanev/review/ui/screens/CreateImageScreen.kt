@@ -104,12 +104,10 @@ fun CreateImageRoute(
 
             // Acción centralizada para interceptar el regreso/salida
             val onBackAction = {
-                // 1. Sincronizamos la posición actual antes de cualquier validación
                 if (questionContentMode == QuestionContentMode.EDITING) {
                     viewModel.updatePosContent(pagerState.currentPage)
                 }
 
-                // 2. Si seleccionó una imagen nueva y no la ha guardado, mostramos el diálogo
                 if (newlyPickedUri != null) {
                     viewModel.onBackFromEditor()
                 } else {
@@ -117,10 +115,9 @@ fun CreateImageRoute(
                 }
             }
 
-            // Interceptamos la tecla o gesto físico de ir atrás
             BackHandler(onBack = onBackAction)
 
-            // Sincronizar posición con el ViewModel al cambiar de página en el Pager
+            // Sincronizar posición con el ViewModel en modo EDICIÓN
             LaunchedEffect(pagerState.currentPage) {
                 if (questionContentMode == QuestionContentMode.EDITING) {
                     viewModel.updatePosContent(pagerState.currentPage)
@@ -132,10 +129,7 @@ fun CreateImageRoute(
             ) { uri ->
                 uri?.let { selectedUri ->
                     newlyPickedUri = selectedUri.toString()
-
-                    viewModel.addImageContent(
-                        uri = selectedUri.toString()
-                    )
+                    viewModel.addImageContent(uri = selectedUri.toString())
                 }
             }
 
@@ -180,16 +174,22 @@ fun CreateImageRoute(
                         )
                     },
                     imageUploaded = {
-                        viewModel.confirmSaveImage(uriImage, questionContentMode)
+                        val targetPage = if (questionContentMode == QuestionContentMode.CREATING) {
+                            posItem
+                        } else {
+                            pagerState.currentPage
+                        }
+
+                        viewModel.confirmSaveImage(
+                            uri = uriImage,
+                            currentPage = targetPage,
+                            questionContentMode = questionContentMode
+                        )
+                        newlyPickedUri = null
                         onBackNav()
                     },
-                    onBackNav = onBackAction // Pasamos onBackAction para controlar también el botón superior de la topbar
+                    onBackNav = onBackAction
                 )
-            }
-
-            // Limpiamos la imagen temporal si cambia la página del pager
-            LaunchedEffect(pagerState.currentPage) {
-                newlyPickedUri = null
             }
 
             // Diálogo de confirmación para descartar cambios
@@ -205,8 +205,8 @@ fun CreateImageRoute(
                         },
                         onConfirm = {
                             viewModel.onConfirmDiscardDraft()
-                            newlyPickedUri = null // Limpiamos la selección no guardada
-                            onBackNav()           // Salimos de la pantalla
+                            newlyPickedUri = null
+                            onBackNav()
                         }
                     )
                 }

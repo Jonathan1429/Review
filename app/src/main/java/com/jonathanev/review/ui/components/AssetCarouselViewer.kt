@@ -12,6 +12,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -78,28 +79,29 @@ fun AssetCarouselViewer(
     val maxIndex = (assets.size - 1).coerceAtLeast(0)
     val safeInitialPage = currentPosContent.coerceIn(0, maxIndex)
 
-    // Forzamos al PagerState a recrearse si la lista o la posición inicial de entrada cambian de raíz
     val pagerState = rememberPagerState(
         initialPage = safeInitialPage,
         pageCount = { assets.size }
     )
 
-    // Sincronización desde el ViewModel hacia el PagerState de la lista principal
-    LaunchedEffect(currentPosContent) {
+    // Forzar scroll en cuanto el ViewModel entregue la lista actualizada y la nueva posición objetivo
+    LaunchedEffect(currentPosContent, assets.size) {
         if (assets.isNotEmpty() && currentPosContent in assets.indices) {
-            if (pagerState.currentPage != currentPosContent && !pagerState.isScrollInProgress) {
-                pagerState.scrollToPage(currentPosContent) // Usa scrollToPage para sincronización inmediata al volver
-            }
+            pagerState.scrollToPage(currentPosContent)
         }
     }
 
-    // Escuchar cambios del usuario en el carrusel principal SOLO cuando la página esté asentada (settledPage)
     LaunchedEffect(pagerState) {
-        snapshotFlow { pagerState.settledPage }.collect { settledPage ->
-            if (settledPage in assets.indices && !pagerState.isScrollInProgress) {
-                onCurrentPosContent(settledPage)
+        snapshotFlow { pagerState.settledPage }
+            .collect { settledPage ->
+                // 🛡️ Ignoramos si el Pager está asentado en 0 pero la posición real esperada es otra
+                // y la página está en proceso de scroll o inicialización.
+                if (settledPage in assets.indices && !pagerState.isScrollInProgress) {
+                    if (settledPage != currentPosContent) {
+                        onCurrentPosContent(settledPage)
+                    }
+                }
             }
-        }
     }
 
     Column(
@@ -116,8 +118,7 @@ fun AssetCarouselViewer(
             onOpenAssetClick = { typeContent, posItem -> onOpenAssetClick(typeContent, posItem) },
             onDeleteAssetClick = { typeContent, positionItem ->
                 onDeleteItemClick(typeContent, positionItem)
-            },
-            onCurrentPosContent = { /* Dejar vacío: ahora lo gestiona snapshotFlow { pagerState.settledPage } */ }
+            }
         )
         Spacer(modifier = Modifier.height(24.dp))
         StepNavigationCarousel(

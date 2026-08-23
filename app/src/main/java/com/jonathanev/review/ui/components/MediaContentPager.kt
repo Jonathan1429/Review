@@ -79,7 +79,6 @@ fun PreviewMediaContentPager(
                 guideContext = data.guideContext,
                 onOpenAssetClick = { _, _ -> },
                 onDeleteAssetClick = { _, _ -> },
-                onCurrentPosContent = {},
             )
         }
     }
@@ -93,20 +92,11 @@ fun MediaContentPager(
     guideContext: GuideContext,
     onOpenAssetClick: (typeContent: QuestionContentUi, posItem: Int) -> Unit,
     onDeleteAssetClick: (typeContent: QuestionContentUi, posItem: Int) -> Unit,
-    onCurrentPosContent: (Int) -> Unit,
 ) {
     val resourceSelected =
         if (mediaForSelected == ContentType.TEXT) R.string.lblText else R.string.lblImage
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-
-    LaunchedEffect(pagerState) {
-        androidx.compose.runtime.snapshotFlow { pagerState.currentPage }.collect { page ->
-            if (assets.isNotEmpty() && page in assets.indices) {
-                onCurrentPosContent(page)
-            }
-        }
-    }
 
     Box(
         modifier = Modifier
