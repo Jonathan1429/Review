@@ -20,8 +20,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,7 +39,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jonathanev.review.R
 import com.jonathanev.review.domain.model.GuideContext
-import com.jonathanev.review.presentation.event.CreateGuideEvent
 import com.jonathanev.review.presentation.model.ColorRangeUi
 import com.jonathanev.review.presentation.model.QuestionContentMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
@@ -55,6 +56,7 @@ import com.jonathanev.review.ui.preview.providers.CreateTextScreenProv
 import com.jonathanev.review.ui.preview.providers.CreateTextScreenProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.cardStepBackground
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 @DevicePreviews
 @Composable
@@ -112,37 +114,31 @@ fun CreateTextRoute(
             val isDark = isSystemInDarkTheme()
 
             val pagerState = rememberPagerState(initialPage = posItem) {
-                if (questionContentMode == QuestionContentMode.CREATING) 1 else textList.size
+                if (questionContentMode == QuestionContentMode.CREATING) {
+                    1
+                } else {
+                    textList.size
+                }
             }
 
-            // Sync with ViewModel when page changes
-            LaunchedEffect(pagerState.currentPage) {
-                if (questionContentMode == QuestionContentMode.EDITING) {
-                    viewModel.updatePosContent(pagerState.currentPage)
-                }
-                
-                // Clear draft before initializing for new page to avoid showing old draft
-                viewModel.clearTextDraft()
-
-                val itemAtPage = if (questionContentMode == QuestionContentMode.CREATING) {
-                    QuestionContentUi.Text("", emptyList())
-                } else {
-                    textList.getOrNull(pagerState.currentPage) ?: QuestionContentUi.Text(
-                        "",
-                        emptyList()
+            LaunchedEffect(pagerState.currentPage, questionContentMode) {
+                if (
+                    questionContentMode == QuestionContentMode.EDITING &&
+                    textList.isNotEmpty()
+                ) {
+                    viewModel.updatePosContent(
+                        pagerState.currentPage
                     )
                 }
-                viewModel.initTextDraft(
-                    initialContent = itemAtPage,
-                    isEditing = questionContentMode == QuestionContentMode.EDITING
-                )
             }
 
             val colorInitial = MaterialTheme.colorScheme.onSurface
             val colorSelected = state.colorType.toInt(isDark)
+
             var selectedColorInt by remember(colorSelected) {
                 mutableIntStateOf(colorSelected)
             }
+
             val selectedColor = Color(selectedColorInt)
 
             val textValueState by viewModel.draftTextValue.collectAsStateWithLifecycle()
@@ -158,7 +154,10 @@ fun CreateTextRoute(
                 val itemAtPage = if (questionContentMode == QuestionContentMode.CREATING) {
                     QuestionContentUi.Text("", emptyList())
                 } else {
-                    textList.getOrNull(pagerState.currentPage) ?: QuestionContentUi.Text("", emptyList())
+                    textList.getOrNull(pagerState.currentPage) ?: QuestionContentUi.Text(
+                        "",
+                        emptyList()
+                    )
                 }
 
                 val currentDraft = textValueState?.let {
@@ -196,44 +195,45 @@ fun CreateTextRoute(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(padding),
-                    userScrollEnabled = questionContentMode == QuestionContentMode.EDITING,
-                    beyondViewportPageCount = 1,
+                    userScrollEnabled =
+                        questionContentMode == QuestionContentMode.EDITING,
+                    beyondViewportPageCount = 0,
                     key = { page ->
-                        val item = if (questionContentMode == QuestionContentMode.CREATING) {
-                            null
+
+                        val item = textList.getOrNull(page)
+
+                        if (item != null) {
+                            "text_${item.text.hashCode()}_${item.colorRanges.hashCode()}_$page"
                         } else {
-                            textList.getOrNull(page)
-                        }
-                        when (item) {
-                            is QuestionContentUi.Text -> "txt_${item.text.hashCode()}_$page"
-                            else -> "page_$page"
+                            "text_empty_$page"
                         }
                     }
                 ) { page ->
-                    val itemAtPage = remember(textList, page, questionContentMode) {
+
+                    val itemAtPage =
                         if (questionContentMode == QuestionContentMode.CREATING) {
                             QuestionContentUi.Text("", emptyList())
                         } else {
-                            textList.getOrNull(page) ?: QuestionContentUi.Text("", emptyList())
+                            textList.getOrNull(page)
+                                ?: QuestionContentUi.Text("", emptyList())
                         }
-                    }
 
-                    val textValueAtPage = if (page == pagerState.currentPage) {
-                        textValueState ?: remember(itemAtPage) {
-                            TextFieldValue(annotatedString = itemAtPage.toAnnotatedString())
-                        }
-                    } else {
-                        remember(itemAtPage) {
-                            TextFieldValue(annotatedString = itemAtPage.toAnnotatedString())
-                        }
+                    var localTextFieldValue by remember(itemAtPage) {
+                        mutableStateOf(
+                            TextFieldValue(
+                                annotatedString =
+                                    itemAtPage.toAnnotatedString()
+                            )
+                        )
                     }
 
                     TextEditorContent(
                         guideContext = state.guideContext,
                         colorInitial = colorInitial,
                         selectedColor = selectedColor,
-                        textValue = textValueAtPage,
+                        textValue = localTextFieldValue,
                         showDialog = state.showDialogColor,
+
                         onSaveText = { text, colors ->
                             viewModel.addTextContent(
                                 textWithLabels = text,
@@ -241,29 +241,52 @@ fun CreateTextRoute(
                                 questionContentMode = questionContentMode
                             )
                         },
+
                         onClearColorClick = {
                             viewModel.clearColorsFromDraft()
                         },
-                        onShowColorDialog = viewModel::showDialogSelectColor,
-                        onChangeTextValue = { textFieldValue ->
-                            viewModel.onDraftTextChange(newValue = textFieldValue)
+
+                        onShowColorDialog =
+                            viewModel::showDialogSelectColor,
+
+                        onChangeTextValue = {
+                                updatedTextFieldValue ->
+
+                            localTextFieldValue =
+                                updatedTextFieldValue
                         },
-                        onDissmissDialog = viewModel::onDismissDialogSelectColor,
+
+                        onDissmissDialog =
+                            viewModel::onDismissDialogSelectColor,
+
                         onColorSelected = { actualColor ->
-                            viewModel.onChangeColor(actualColor = actualColor)
+                            viewModel.onChangeColor(
+                                actualColor = actualColor
+                            )
                         },
-                        onDefaultColor = viewModel::onDefaultcolor,
+
+                        onDefaultColor =
+                            viewModel::onDefaultcolor,
+
                         onBackNav = onBackAction
                     )
                 }
             }
 
             if (state.showDialogDiscardDraft) {
-                Dialog(onDismissRequest = viewModel::onDismissDiscardDraft) {
+                Dialog(
+                    onDismissRequest =
+                        viewModel::onDismissDiscardDraft
+                ) {
                     CustomAlertDialog(
-                        title = stringResource(R.string.lblDiscardChangesTitle),
-                        message = stringResource(R.string.lblDiscardChangesMessage),
-                        onDismissRequest = viewModel::onDismissDiscardDraft,
+                        title = stringResource(
+                            R.string.lblDiscardChangesTitle
+                        ),
+                        message = stringResource(
+                            R.string.lblDiscardChangesMessage
+                        ),
+                        onDismissRequest =
+                            viewModel::onDismissDiscardDraft,
                         onConfirm = {
                             viewModel.onConfirmDiscardDraft()
                             onBackNav()
