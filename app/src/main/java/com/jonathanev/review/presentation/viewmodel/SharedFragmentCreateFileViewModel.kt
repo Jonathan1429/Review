@@ -1,5 +1,7 @@
 package com.jonathanev.review.presentation.viewmodel
 
+import android.net.Uri
+import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.TextRange
@@ -49,8 +51,10 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.io.File
 import javax.inject.Inject
 import com.jonathanev.review.ui.model.QAType as QATypeUI
+import androidx.core.net.toUri
 
 @HiltViewModel
 class SharedFragmentCreateFileViewModel @Inject constructor(
@@ -237,6 +241,8 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             initialValue = emptyList()
         )
 
+    private var currentImageDraftUri: String? = null
+    private var isSavingContent = false
     val draftTextValue: StateFlow<TextFieldValue?> = combine(
         savedStateHandle.getStateFlow<QuestionContentUi.Text?>(KEY_DRAFT_TEXT, null),
         savedStateHandle.getStateFlow(KEY_DRAFT_SELECTION_START, 0),
@@ -299,8 +305,16 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     }
 
     fun updatePosContent(currentPos: Int) {
+        if (isSavingContent) {
+            isSavingContent = false
+            return
+        }
+
         updateSuccessState { state ->
-            state.copy(contadorContenido = currentPos)
+            state.copy(
+                posContenidoTexto = if (state.mediaSelected == ContentType.TEXT) currentPos else state.posContenidoTexto,
+                posContenidoImagen = if (state.mediaSelected == ContentType.IMAGE) currentPos else state.posContenidoImagen
+            )
         }
     }
 
@@ -316,12 +330,13 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         listSpans: List<ColorRangeUi>,
         questionContentMode: QuestionContentMode
     ) {
+        isSavingContent = true
         val newContent = QuestionContentUi.Text(textWithLabels, listSpans)
 
         updateSuccessState { state ->
             val currentPosContent = when (questionContentMode) {
-                QuestionContentMode.CREATING -> state.contadorContenido + 1
-                QuestionContentMode.EDITING -> state.contadorContenido
+                QuestionContentMode.CREATING -> state.posContenidoTexto + 1
+                QuestionContentMode.EDITING -> state.posContenidoTexto
             }
             val isQuestion = state.qAType == QATypeUI.QUESTION
             val sourceListUi = if (isQuestion) state.preguntas else state.respuestas
@@ -341,7 +356,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             state.copy(
                 preguntas = if (isQuestion) updatedList else state.preguntas,
                 respuestas = if (!isQuestion) updatedList else state.respuestas,
-                contadorContenido = currentPosContent
+                posContenidoTexto = currentPosContent
             )
         }
 
@@ -351,16 +366,29 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         clearTextDraft()
     }
 
-    fun addImageContent(uri: String, questionContentMode: QuestionContentMode) {
+    fun addImageContent(uri: String) {
         viewModelScope.launch {
             val tempUri = saveTempImageUseCase(uri)
+            currentImageDraftUri = tempUri
+        }
+    }
+
+    fun confirmSaveImage(
+        uri: String,
+        currentPage: Int,
+        questionContentMode: QuestionContentMode
+    ) {
+        viewModelScope.launch {
+            val tempUri = saveTempImageUseCase(uri)
+            isSavingContent = true
             val newContent = QuestionContentUi.Image(uri = tempUri, nameFile = "")
 
             updateSuccessState { state ->
-                val currentPosContent = when (questionContentMode) {
-                    QuestionContentMode.CREATING -> state.contadorContenido + 1
-                    QuestionContentMode.EDITING -> state.contadorContenido
+                val targetPosContent = when (questionContentMode) {
+                    QuestionContentMode.CREATING -> currentPage + 1
+                    QuestionContentMode.EDITING -> currentPage
                 }
+
                 val isQuestion = state.qAType == QATypeUI.QUESTION
                 val sourceListUi = if (isQuestion) state.preguntas else state.respuestas
                 val currentQuestionUi = sourceListUi.getOrNull(state.contadorPregunta)
@@ -374,7 +402,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                         newContent = newContent.toDomain(),
                         sourceList = sourceListDomain,
                         contadorPregunta = state.contadorPregunta,
-                        contadorContenido = currentPosContent,
+                        contadorContenido = targetPosContent,
                         isEditingMode = questionContentMode == QuestionContentMode.EDITING,
                         filterType = QuestionContentDomain.Image::class.java
                     )
@@ -385,7 +413,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 state.copy(
                     preguntas = if (isQuestion) updatedList else state.preguntas,
                     respuestas = if (!isQuestion) updatedList else state.respuestas,
-                    contadorContenido = currentPosContent
+                    posContenidoImagen = targetPosContent
                 )
             }
         }
@@ -407,7 +435,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             state.copy(
                 preguntas = if (isQuestion) updatedListToUi else state.preguntas,
                 respuestas = if (!isQuestion) updatedListToUi else state.respuestas,
-                contadorContenido = position - 1
+                posContenidoImagen = position - 1
             )
         }
     }
@@ -429,7 +457,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             state.copy(
                 preguntas = if (isQuestion) updatedListToUi else state.preguntas,
                 respuestas = if (!isQuestion) updatedListToUi else state.respuestas,
-                contadorContenido = position - 1
+                posContenidoTexto = position - 1
             )
         }
     }
@@ -475,7 +503,8 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             state.copy(
                 contadorPregunta = nuevoContadorPregunta,
                 qAType = QATypeUI.QUESTION,
-                contadorContenido = nuevoContadorContenido
+                posContenidoTexto = if (state.mediaSelected == ContentType.TEXT) nuevoContadorContenido else state.posContenidoTexto,
+                posContenidoImagen = if (state.mediaSelected == ContentType.IMAGE) nuevoContadorContenido else state.posContenidoImagen
             )
         }
     }
@@ -496,7 +525,8 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             state.copy(
                 contadorPregunta = nuevoContadorPregunta,
                 qAType = QATypeUI.QUESTION,
-                contadorContenido = nuevoContadorContenido
+                posContenidoTexto = if (state.mediaSelected == ContentType.TEXT) nuevoContadorContenido else state.posContenidoTexto,
+                posContenidoImagen = if (state.mediaSelected == ContentType.IMAGE) nuevoContadorContenido else state.posContenidoImagen
             )
         }
     }
@@ -517,7 +547,8 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 qAType = QATypeUI.QUESTION,
                 mediaSelected = ContentType.TEXT,
                 contadorPregunta = safeIndex,
-                contadorContenido = -1
+                posContenidoTexto = -1,
+                posContenidoImagen = -1
             )
         }
     }
@@ -598,7 +629,8 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                     preguntas = listOf(QuestionItemUi(content = emptyList())),
                     respuestas = listOf(QuestionItemUi(content = emptyList())),
                     contadorPregunta = 0,
-                    contadorContenido = -1,
+                    posContenidoTexto = -1,
+                    posContenidoImagen = -1,
                     qAType = QATypeUI.QUESTION,
                     mediaSelected = ContentType.TEXT,
                     showDialogDeleteQuestion = false,
@@ -617,7 +649,8 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                     preguntas = newPreguntas,
                     respuestas = newRespuestas,
                     contadorPregunta = newIndex,
-                    contadorContenido = nuevoContadorContenido,
+                    posContenidoTexto = nuevoContadorContenido,
+                    posContenidoImagen = nuevoContadorContenido
                 )
             }
         }
@@ -743,6 +776,18 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     fun onConfirmDiscardDraft() {
         clearTextDraft()
         updateSuccessState { it.copy(showDialogDiscardDraft = false) }
+
+        currentImageDraftUri?.let { uriString ->
+            try {
+                val file = File(uriString.toUri().path ?: "")
+                if (file.exists()) {
+                    file.delete()
+                }
+            } catch (e: Exception) {
+                Log.e("ViewModel", "Error al eliminar borrador: ${e.message}")
+            }
+        }
+        currentImageDraftUri = null
     }
 
     fun onDismissDiscardDraft() {
@@ -803,12 +848,14 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             if (isQuestion) {
                 state.copy(
                     preguntas = updatedList,
-                    contadorContenido = to
+                    posContenidoTexto = if (state.mediaSelected == ContentType.TEXT) to else state.posContenidoTexto,
+                    posContenidoImagen = if (state.mediaSelected == ContentType.IMAGE) to else state.posContenidoImagen
                 )
             } else {
                 state.copy(
                     respuestas = updatedList,
-                    contadorContenido = to
+                    posContenidoTexto = if (state.mediaSelected == ContentType.TEXT) to else state.posContenidoTexto,
+                    posContenidoImagen = if (state.mediaSelected == ContentType.IMAGE) to else state.posContenidoImagen
                 )
             }
         }

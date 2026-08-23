@@ -186,7 +186,11 @@ fun StudyGuideRoute(
         is GuideScreenUiState.Success -> {
             val cardType = state.qAType
             val mediaSelected = state.mediaSelected
-            val currentPosContent = state.contadorContenido
+            val currentPosContent = if (state.mediaSelected == ContentType.TEXT) {
+                state.posContenidoTexto
+            } else {
+                state.posContenidoImagen
+            }
 
             val totalQuestions = state.preguntas.size
             val actualQuestion = state.contadorPregunta + 1

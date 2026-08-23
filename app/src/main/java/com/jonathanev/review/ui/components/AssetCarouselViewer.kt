@@ -12,7 +12,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -82,12 +84,24 @@ fun AssetCarouselViewer(
         pageCount = { assets.size }
     )
 
-    LaunchedEffect(currentPosContent) {
+    // Forzar scroll en cuanto el ViewModel entregue la lista actualizada y la nueva posición objetivo
+    LaunchedEffect(currentPosContent, assets.size) {
         if (assets.isNotEmpty() && currentPosContent in assets.indices) {
-            if (pagerState.currentPage != currentPosContent && !pagerState.isScrollInProgress) {
-                pagerState.animateScrollToPage(currentPosContent)
-            }
+            pagerState.scrollToPage(currentPosContent)
         }
+    }
+
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.settledPage }
+            .collect { settledPage ->
+                // 🛡️ Ignoramos si el Pager está asentado en 0 pero la posición real esperada es otra
+                // y la página está en proceso de scroll o inicialización.
+                if (settledPage in assets.indices && !pagerState.isScrollInProgress) {
+                    if (settledPage != currentPosContent) {
+                        onCurrentPosContent(settledPage)
+                    }
+                }
+            }
     }
 
     Column(
@@ -103,12 +117,8 @@ fun AssetCarouselViewer(
             guideContext = guideContext,
             onOpenAssetClick = { typeContent, posItem -> onOpenAssetClick(typeContent, posItem) },
             onDeleteAssetClick = { typeContent, positionItem ->
-                onDeleteItemClick(
-                    typeContent,
-                    positionItem
-                )
-            },
-            onCurrentPosContent = { position -> onCurrentPosContent(position) }
+                onDeleteItemClick(typeContent, positionItem)
+            }
         )
         Spacer(modifier = Modifier.height(24.dp))
         StepNavigationCarousel(

@@ -163,7 +163,6 @@ class MediaContentPagerScreenshotTest(
                             mediaForSelected = dataState.mediaForSelected,
                             guideContext = dataState.guideContext,
                             onOpenAssetClick = { _, _ -> },
-                            onCurrentPosContent = {},
                             onDeleteAssetClick = { _, _ -> }
                         )
                     }

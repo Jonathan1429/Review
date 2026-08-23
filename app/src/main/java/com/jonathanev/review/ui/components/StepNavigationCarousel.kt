@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -140,11 +141,12 @@ fun StepNavigationCarousel(
                     .size(50.dp)
                     .clip(RoundedCornerShape(16.dp))
                     .background(MaterialTheme.colorScheme.primary)
+                    .testTag("my_add_button")
                     .singleClick(onClick = { onAddAssetClick(pagerState.currentPage) }),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    Icons.Default.Add,
+                    imageVector = Icons.Default.Add,
                     contentDescription = "Agregar item",
                     tint = MaterialTheme.colorScheme.onPrimary
                 )
