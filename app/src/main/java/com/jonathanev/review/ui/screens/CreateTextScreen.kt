@@ -23,7 +23,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -360,7 +359,8 @@ fun TextEditorContent(
     ElevatedCard(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(16.dp)
+            .imePadding(), // Reduce la tarjeta al nivel del teclado
         shape = RoundedCornerShape(42.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = cardStepBackground
@@ -373,7 +373,6 @@ fun TextEditorContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(bottom = 16.dp)
-                .imePadding()
         ) {
             OptionsCreateText(
                 guideContext = guideContext,
