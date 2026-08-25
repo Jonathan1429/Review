@@ -4,6 +4,8 @@ import android.content.Context
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -382,6 +384,7 @@ fun FillingGuideScreen(
     var actualQuestionOffset by remember { mutableStateOf(Offset.Zero) }
     var totalQuestionsOffset by remember { mutableStateOf(Offset.Zero) }
     var containerOffset by remember { mutableStateOf(Offset.Zero) }
+    var fabAddQuestionOffset by remember { mutableStateOf(Offset.Zero) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -395,6 +398,7 @@ fun FillingGuideScreen(
                         showPlusOneAnimation = true
                     }
                 },
+                onAddQuestionPositioned = { fabAddQuestionOffset = it },
                 onCloseGuide = onCloseGuide,
                 onEditGuide = onEditGuideClick
             )
@@ -463,6 +467,7 @@ fun FillingGuideScreen(
 
             PlusOneAnimation(
                 visible = showPlusOneAnimation,
+                startOffset = fabAddQuestionOffset - containerOffset,
                 targetActual = actualQuestionOffset - containerOffset,
                 targetTotal = totalQuestionsOffset - containerOffset,
                 onAnimationFinish = {
@@ -512,6 +517,7 @@ fun FillingGuideScreen(
 private fun FloatingActionButtons(
     guideContext: GuideContext,
     onAddQuestion: () -> Unit,
+    onAddQuestionPositioned: (Offset) -> Unit = {},
     onCloseGuide: () -> Unit,
     onEditGuide: () -> Unit
 ) {
@@ -542,7 +548,11 @@ private fun FloatingActionButtons(
                 containerColor = MaterialTheme.colorScheme.secondary,
                 contentColor = MaterialTheme.colorScheme.onSecondary,
                 shape = CircleShape,
-                modifier = Modifier.size(56.dp)
+                modifier = Modifier
+                    .size(56.dp)
+                    .onGloballyPositioned { coordinates ->
+                        onAddQuestionPositioned(coordinates.positionInWindow())
+                    }
             ) {
                 NewQuestionIcon(modifier = Modifier.padding(8.dp))
             }
@@ -612,72 +622,77 @@ private fun NewQuestionIcon(modifier: Modifier = Modifier) {
 @Composable
 private fun PlusOneAnimation(
     visible: Boolean,
+    startOffset: Offset,
     targetActual: Offset,
     targetTotal: Offset,
     onAnimationFinish: () -> Unit
 ) {
     if (!visible) return
 
-    val configuration = LocalWindowInfo.current.containerSize
     val density = LocalDensity.current
-
-    val screenWidth = with(density) { configuration.width.dp.toPx() }
-    val screenHeight = with(density) { configuration.height.dp.toPx() }
-
     val animProgress = remember { Animatable(0f) }
     val pulseScale = remember { Animatable(1f) }
     var showPulse by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
+        // Travesía suave con desaceleración natural al llegar al objetivo
         animProgress.animateTo(
             targetValue = 1f,
-            animationSpec = tween(durationMillis = 800)
+            animationSpec = tween(
+                durationMillis = 1000,
+                easing = FastOutSlowInEasing
+            )
         )
 
         showPulse = true
         pulseScale.animateTo(
-            targetValue = 2f,
-            animationSpec = tween(durationMillis = 300)
+            targetValue = 1.8f,
+            animationSpec = tween(
+                durationMillis = 250,
+                easing = FastOutLinearInEasing
+            )
         )
         onAnimationFinish()
     }
 
-    // Distancia vertical debajo del número
-    val verticalGap = with(density) { 25.dp.toPx() }
+    // Offset objetivo justo debajo del texto de las preguntas
+    val verticalGap = with(density) { 20.dp.toPx() }
     val finalActual = targetActual + Offset(0f, verticalGap)
     val finalTotal = targetTotal + Offset(0f, verticalGap)
 
-    val alpha = if (animProgress.value < 0.8f) {
-        (animProgress.value / 0.2f).coerceAtMost(1f)
+    // El fade out ocurre solo en el último 15% del recorrido
+    val alpha = if (animProgress.value < 0.85f) {
+        (animProgress.value / 0.15f).coerceAtMost(1f)
     } else {
-        (1f - animProgress.value) / 0.2f
+        (1f - animProgress.value) / 0.15f
     }
 
     Box(Modifier.fillMaxSize()) {
         if (!showPulse) {
-            val startX = screenWidth * 0.85f
-            val startY = screenHeight * 0.85f
+            // Usamos startOffset si está asignado; si no, fallback al lado izquierdo (20% del ancho)
+            val originX = if (startOffset != Offset.Zero) startOffset.x else with(density) { 48.dp.toPx() }
+            val originY = if (startOffset != Offset.Zero) startOffset.y else with(density) { 600.dp.toPx() }
 
-            // +1 "Actual"
+            // +1 dirigiéndose al contador "Actual"
             MovingPlusOne(
-                startX = startX,
-                startY = startY,
+                startX = originX,
+                startY = originY,
                 endX = finalActual.x,
                 endY = finalActual.y,
                 progress = animProgress.value,
                 alpha = alpha,
-                rotation = -20f * (1f - animProgress.value)
+                rotation = -15f * (1f - animProgress.value)
             )
 
-            // +1 "Total"
+            // +1 dirigiéndose al contador "Total"
             MovingPlusOne(
-                startX = startX,
-                startY = startY,
+                startX = originX,
+                startY = originY,
                 endX = finalTotal.x,
                 endY = finalTotal.y,
                 progress = animProgress.value,
                 alpha = alpha,
-                rotation = 20f * (1f - animProgress.value)
+                rotation = 15f * (1f - animProgress.value)
             )
         } else {
             ImpactText(x = finalActual.x, y = finalActual.y, scale = pulseScale.value)
@@ -700,11 +715,18 @@ private fun MovingPlusOne(
     val currentY = startY + (endY - startY) * progress
     var size by remember { mutableStateOf(IntSize.Zero) }
 
+    // Efecto "pop-out": nace pequeño, crece a tamaño normal y luego viaja
+    val scale = if (progress < 0.2f) {
+        (progress / 0.2f) * 1.2f
+    } else {
+        1.2f - ((progress - 0.2f) * 0.2f)
+    }
+
     Text(
         text = "+1",
         color = MaterialTheme.colorScheme.primary,
-        fontSize = 24.sp,
-        fontWeight = FontWeight.Black,
+        fontSize = 28.sp,
+        fontWeight = FontWeight.ExtraBold,
         modifier = Modifier
             .onSizeChanged { size = it }
             .offset {
@@ -715,8 +737,8 @@ private fun MovingPlusOne(
             }
             .graphicsLayer(
                 alpha = alpha,
-                scaleX = 0.6f + progress * 0.4f,
-                scaleY = 0.6f + progress * 0.4f,
+                scaleX = scale,
+                scaleY = scale,
                 rotationZ = rotation
             )
     )
