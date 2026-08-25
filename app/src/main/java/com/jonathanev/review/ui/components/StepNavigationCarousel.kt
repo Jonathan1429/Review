@@ -28,6 +28,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -111,9 +112,15 @@ fun StepNavigationCarousel(
     var currentDragIndex by remember { mutableStateOf<Int?>(null) }
 
     val lazyListState = rememberLazyListState()
-    var items by remember(assets) {
-        mutableStateOf(assets)
+    var items by remember(assets) { mutableStateOf(assets) }
+
+    // Sincronizar items locales si la lista entrante cambia fuera del drag
+    LaunchedEffect(assets) {
+        if (initialDragIndex == null) {
+            items = assets
+        }
     }
+
     val reorderableLazyRowState = rememberReorderableLazyListState(
         lazyListState = lazyListState,
         scrollThreshold = 120.dp,
@@ -178,21 +185,26 @@ fun StepNavigationCarousel(
         ) {
             itemsIndexed(
                 items = items,
-                key = { index, item ->
+                // FIX 1: La clave DEBE ser estable y no depender del parámetro index
+                key = { _, item ->
                     when (item) {
-                        is QuestionContentUi.Image -> "img_${item.uri}_${item.nameFile}_$index"
-                        is QuestionContentUi.Text -> "txt_${item.text.hashCode()}_$index"
-                        else -> "item_$index"
+                        is QuestionContentUi.Image -> "img_${item.uri}_${item.nameFile}"
+                        is QuestionContentUi.Text -> "txt_${item.text.hashCode()}"
+                        else -> "item_${item.hashCode()}"
                     }
                 }
             ) { index, item ->
+                val itemKey = remember(item) {
+                    when (item) {
+                        is QuestionContentUi.Image -> "img_${item.uri}_${item.nameFile}"
+                        is QuestionContentUi.Text -> "txt_${item.text.hashCode()}"
+                        else -> "item_${item.hashCode()}"
+                    }
+                }
+
                 ReorderableItem(
                     state = reorderableLazyRowState,
-                    key = when (item) {
-                        is QuestionContentUi.Image -> "img_${item.uri}_${item.nameFile}_$index"
-                        is QuestionContentUi.Text -> "txt_${item.text.hashCode()}_$index"
-                        else -> "item_$index"
-                    }
+                    key = itemKey
                 ) { isDragging ->
                     val elevation by animateDpAsState(
                         targetValue = if (isDragging) 12.dp else 0.dp,
@@ -242,6 +254,7 @@ fun StepNavigationCarousel(
                                         )
                                     }
                                 } else {
+                                    // FIX 2: Usar detectTapGestures unificado para evitar conflictos de PointerInput entre Click y Drag Handle
                                     Modifier
                                         .longPressDraggableHandle(
                                             onDragStopped = {
@@ -254,11 +267,15 @@ fun StepNavigationCarousel(
                                                 currentDragIndex = null
                                             }
                                         )
-                                        .singleClick(onClick = {
-                                            scope.launch {
-                                                pagerState.animateScrollToPage(index)
-                                            }
-                                        })
+                                        .pointerInput(index) {
+                                            detectTapGestures(
+                                                onTap = {
+                                                    scope.launch {
+                                                        pagerState.animateScrollToPage(index)
+                                                    }
+                                                }
+                                            )
+                                        }
                                 }
                             ),
                         contentAlignment = Alignment.Center

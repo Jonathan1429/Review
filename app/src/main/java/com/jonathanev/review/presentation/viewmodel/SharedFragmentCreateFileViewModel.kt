@@ -820,13 +820,17 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
             val currentTarget = list.getOrNull(state.contadorPregunta)
 
             val fullContent = currentTarget?.content?.toMutableList()
-            if (fullContent == null) {
+            if (fullContent.isNullOrEmpty()) {
                 sendNotification(CreateGuideEvent.ErrorMoveContent)
                 return@updateSuccessState state
             }
 
+            // 1. Filtrar dinámicamente los índices reales según el tipo activo (Texto o Imagen)
             val filteredContentIndices = fullContent.indices.filter { index ->
-                fullContent[index] is QuestionContentUi.Image
+                when (state.mediaSelected) {
+                    ContentType.IMAGE -> fullContent[index] is QuestionContentUi.Image
+                    ContentType.TEXT -> fullContent[index] is QuestionContentUi.Text
+                }
             }
 
             if (from !in filteredContentIndices.indices || to !in filteredContentIndices.indices) {
