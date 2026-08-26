@@ -7,10 +7,13 @@ import com.jonathanev.review.domain.GetGuideXmlDataUseCase
 import com.jonathanev.review.domain.GetPreviewQuestionsUseCase
 import com.jonathanev.review.domain.SetContextEditUseCase
 import com.jonathanev.review.domain.SetContextPlayUseCase
+import com.jonathanev.review.domain.SetCrearXmlUseCase
 import com.jonathanev.review.domain.model.GuideContext
+import com.jonathanev.review.domain.model.SaveGuideMode
 import com.jonathanev.review.domain.repository.GuiaRepository
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.presentation.event.PreviewGuideEvent
+import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.ActiveGuideUIState
 import com.jonathanev.review.presentation.state.PreviewQuestionStateUi
@@ -34,7 +37,7 @@ class PreviewViewModel @Inject constructor(
     private val getActiveGuideUseCase: GetActiveGuideUseCase,
     private val setContextEditUseCase: SetContextEditUseCase,
     private val setContextPlayUseCase: SetContextPlayUseCase,
-    private val guiaRepository: GuiaRepository
+    private val setCrearXmlUseCase: SetCrearXmlUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
@@ -69,7 +72,7 @@ class PreviewViewModel @Inject constructor(
             val context = GuideContext.Browsing(guide = activeGuideDomain, -1)
             when (val result = getGuideXmlDataUseCase.invoke(context = context)) {
                 is GetGuideResult.Success -> {
-                    val previewQuestions = getPreviewQuestionsUseCase(result.list).map { it.toUi() }
+                    val previewQuestions = getPreviewQuestionsUseCase.invoke(result.list).map { it.toUi() }
                     _uiState.update {
                         it.copy(
                             activeGuide = ActiveGuideUIState.Success(activeGuideDomain.toUi()),
@@ -141,10 +144,11 @@ class PreviewViewModel @Inject constructor(
                         val domainItem = domainList.removeAt(from)
                         domainList.add(to, domainItem)
 
-                        guiaRepository.saveGuide(
+                        setCrearXmlUseCase.invoke(
                             guideDomainModel = activeGuide,
                             preguntas = domainList.map { it.question },
-                            respuestas = domainList.map { it.answer }
+                            respuestas = domainList.map { it.answer },
+                            saveGuideMode = SaveGuideMode.Update
                         )
                     }
                 }

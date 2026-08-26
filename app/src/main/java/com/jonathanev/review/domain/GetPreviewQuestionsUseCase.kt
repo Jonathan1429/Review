@@ -27,10 +27,7 @@ class GetPreviewQuestionsUseCase @Inject constructor(
                         totalTextsPregunta++
 
                         if (primerTextoPregunta == null) {
-                            primerTextoPregunta = QuestionContentDomain.Text(
-                                result.text,
-                                result.colorRangeDomains
-                            )
+                            primerTextoPregunta = result
                         }
                     }
                 }
