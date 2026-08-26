@@ -348,9 +348,30 @@ class FragmentListGuidesViewModel @Inject constructor(
     }
 
     fun onOpenGuide(guideUIModel: GuideUiModel) {
-        onDismissDialog()
-        setActiveGuide(guideUIModel)
-        emitNavigation(NavGuideActionEvent.OpenNavGuide)
+        viewModelScope.launch {
+            try {
+                onDismissDialog()
+
+                setActiveGuideUseCase.invoke(
+                    guideUIModel.toDomain()
+                )
+
+                emitNavigation(
+                    NavGuideActionEvent.OpenNavGuide
+                )
+
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                e.printStackTrace()
+
+                emitMessage(
+                    StateGuideActionEvent.ShowMessage(
+                        e.message ?: "Ocurrió un error inesperado"
+                    )
+                )
+            }
+        }
     }
 
     fun onRenameGuide(guideUIModel: GuideUiModel) {

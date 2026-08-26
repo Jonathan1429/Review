@@ -147,6 +147,7 @@ class GuideContextRepositoryImpl @Inject constructor(
             preferences.remove(KEY_NAME)
             preferences.remove(KEY_DESCRIPTION)
             preferences.remove(KEY_OLD_RELATIVE_PATH)
+            preferences.remove(KEY_POSITION)
         }
     }
 }
