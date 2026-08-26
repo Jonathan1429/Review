@@ -12,7 +12,7 @@ import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.dp
 import com.github.takahirom.roborazzi.RobolectricDeviceQualifiers
-import com.jonathanev.review.presentation.state.`PreviewQuestionStateUi(`
+import com.jonathanev.review.presentation.state.PreviewQuestionStateUi
 import com.jonathanev.review.ui.preview.providers.PreviewQuestionsProvider
 import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.utils.captureTestOutput
@@ -34,7 +34,7 @@ import org.robolectric.annotation.GraphicsMode
 class PreviewQuestionsScreenshotTest(
     private val variantName: String,
     private val themeQualifier: String,
-    private val data: `PreviewQuestionStateUi(`
+    private val data: PreviewQuestionStateUi
 ) {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
