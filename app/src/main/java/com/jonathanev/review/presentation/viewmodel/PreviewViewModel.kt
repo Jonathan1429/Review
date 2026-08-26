@@ -9,16 +9,18 @@ import com.jonathanev.review.domain.SetContextEditUseCase
 import com.jonathanev.review.domain.SetContextPlayUseCase
 import com.jonathanev.review.domain.SetCrearXmlUseCase
 import com.jonathanev.review.domain.model.GuideContext
+import com.jonathanev.review.domain.model.QAItemDomain
 import com.jonathanev.review.domain.model.SaveGuideMode
-import com.jonathanev.review.domain.repository.GuiaRepository
+import com.jonathanev.review.domain.model.SavingStatus
 import com.jonathanev.review.domain.result.GetGuideResult
 import com.jonathanev.review.presentation.event.PreviewGuideEvent
-import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.ActiveGuideUIState
 import com.jonathanev.review.presentation.state.PreviewQuestionStateUi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,6 +31,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
+import kotlin.time.Duration.Companion.milliseconds
 
 @HiltViewModel
 class PreviewViewModel @Inject constructor(
@@ -59,6 +62,9 @@ class PreviewViewModel @Inject constructor(
         loadInitialData()
     }
 
+    // Variable a nivel de ViewModel
+    private var domainListMemory: MutableList<QAItemDomain> = mutableListOf()
+
     private fun loadInitialData() {
         viewModelScope.launch(Dispatchers.IO) {
             _uiState.update { it.copy(activeGuide = ActiveGuideUIState.Loading) }
@@ -72,6 +78,8 @@ class PreviewViewModel @Inject constructor(
             val context = GuideContext.Browsing(guide = activeGuideDomain, -1)
             when (val result = getGuideXmlDataUseCase.invoke(context = context)) {
                 is GetGuideResult.Success -> {
+                    domainListMemory = result.list.toMutableList()
+
                     val previewQuestions = getPreviewQuestionsUseCase.invoke(result.list).map { it.toUi() }
                     _uiState.update {
                         it.copy(
@@ -80,7 +88,6 @@ class PreviewViewModel @Inject constructor(
                         )
                     }
                 }
-
                 else -> _uiState.update { it.copy(activeGuide = ActiveGuideUIState.Error) }
             }
         }
@@ -122,40 +129,55 @@ class PreviewViewModel @Inject constructor(
         }
     }
 
+    private var saveJob: Job? = null
+
     fun moveQuestion(from: Int, to: Int) {
         val currentPreviewList = _uiState.value.previewState.toMutableList()
         if (from !in currentPreviewList.indices || to !in currentPreviewList.indices) return
 
-        // 1. Actualización inmediata de la UI (Optimistic UI update)
+        // 1. Reordenamiento inmediato en UI
         val item = currentPreviewList.removeAt(from)
         currentPreviewList.add(to, item)
-        _uiState.update { it.copy(previewState = currentPreviewList) }
 
-        // 2. Persistencia en segundo plano
-        viewModelScope.launch(Dispatchers.IO) {
+        // 2. Reordenamiento inmediato en la lista en MEMORIA
+        if (from in domainListMemory.indices && to in domainListMemory.indices) {
+            val domainItem = domainListMemory.removeAt(from)
+            domainListMemory.add(to, domainItem)
+        }
+
+        _uiState.update {
+            it.copy(
+                previewState = currentPreviewList,
+                savingStatus = SavingStatus.SAVING
+            )
+        }
+
+        // 3. Cancelar el guardado previo si sigue moviendo cosas rápido
+        saveJob?.cancel()
+
+        // 4. Guardar en segundo plano la lista acumulada tras 600ms sin movimientos
+        saveJob = viewModelScope.launch(Dispatchers.IO) {
+            delay(600.milliseconds)
+
             try {
                 val activeGuide = getActiveGuideUseCase.invoke().firstOrNull() ?: return@launch
-                val context = GuideContext.Browsing(guide = activeGuide, -1)
-                val result = getGuideXmlDataUseCase.invoke(context = context)
 
-                if (result is GetGuideResult.Success) {
-                    val domainList = result.list.toMutableList()
-                    if (from in domainList.indices && to in domainList.indices) {
-                        val domainItem = domainList.removeAt(from)
-                        domainList.add(to, domainItem)
+                setCrearXmlUseCase.invoke(
+                    guideDomainModel = activeGuide,
+                    preguntas = domainListMemory.map { it.question },
+                    respuestas = domainListMemory.map { it.answer },
+                    saveGuideMode = SaveGuideMode.Update
+                )
 
-                        setCrearXmlUseCase.invoke(
-                            guideDomainModel = activeGuide,
-                            preguntas = domainList.map { it.question },
-                            respuestas = domainList.map { it.answer },
-                            saveGuideMode = SaveGuideMode.Update
-                        )
-                    }
-                }
+                _uiState.update { it.copy(savingStatus = SavingStatus.SAVED) }
+                delay(1200.milliseconds)
+                _uiState.update { it.copy(savingStatus = SavingStatus.IDLE) }
+
             } catch (e: Exception) {
+                if (e is CancellationException) throw e
+
                 e.printStackTrace()
-                // Opcional: revertir UI si falla el guardado
-                loadInitialData()
+                _uiState.update { it.copy(savingStatus = SavingStatus.ERROR) }
             }
         }
     }

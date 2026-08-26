@@ -1,14 +1,21 @@
 package com.jonathanev.review.ui.screens
 
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -19,7 +26,9 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -39,6 +48,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jonathanev.review.R
+import com.jonathanev.review.domain.model.SavingStatus
 import com.jonathanev.review.presentation.event.PreviewGuideEvent
 import com.jonathanev.review.presentation.model.ActiveGuideUIState
 import com.jonathanev.review.presentation.state.PreviewQuestionStateUi
@@ -129,7 +139,7 @@ fun PreviewQuestionsRoute(
 
         is ActiveGuideUIState.Success -> {
             PreviewQuestionsScreen(
-                previewQuestions = uiState,
+                uiState = uiState,
                 onEditingGuideClick = { position -> viewModel.editingGuide(position = position) },
                 onPlayGuideClick = { position -> viewModel.reviewGuide(position = position) },
                 onCreateQuestionClick = { position -> viewModel.editingGuide(position = position) },
@@ -142,7 +152,7 @@ fun PreviewQuestionsRoute(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PreviewQuestionsScreen(
-    previewQuestions: PreviewQuestionStateUi,
+    uiState: PreviewQuestionStateUi,
     onEditingGuideClick: (Int) -> Unit,
     onPlayGuideClick: (Int) -> Unit,
     onCreateQuestionClick: (Int) -> Unit,
@@ -151,8 +161,8 @@ fun PreviewQuestionsScreen(
     val lazyListState = rememberLazyListState()
 
     // Items del previewState
-    var items by remember(previewQuestions.previewState) {
-        mutableStateOf(previewQuestions.previewState)
+    var items by remember(uiState.previewState) {
+        mutableStateOf(uiState.previewState)
     }
 
     var initialDragIndex by remember { mutableStateOf<Int?>(null) }
@@ -176,7 +186,7 @@ fun PreviewQuestionsScreen(
     Scaffold(
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                onClick = singleClick { onCreateQuestionClick(previewQuestions.previewState.size) },
+                onClick = singleClick { onCreateQuestionClick(uiState.previewState.size) },
                 containerColor = MaterialTheme.colorScheme.primary,
                 shape = RoundedCornerShape(16.dp),
                 icon = {
@@ -196,7 +206,7 @@ fun PreviewQuestionsScreen(
             )
         }
     ) { paddingValues ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
@@ -258,6 +268,56 @@ fun PreviewQuestionsScreen(
                                 onEditingGuideClick = { onEditingGuideClick(index) },
                                 onPlayGuideClick = { onPlayGuideClick(index) }
                             )
+                        }
+                    }
+                }
+            }
+
+            // Indicador flotante de guardado arriba a la derecha
+            AnimatedVisibility(
+                visible = uiState.savingStatus != SavingStatus.IDLE,
+                enter = fadeIn() + slideInVertically(),
+                exit = fadeOut() + slideOutVertically(),
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(16.dp)
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(20.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    shadowElevation = 4.dp
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        when (uiState.savingStatus) {
+                            SavingStatus.SAVING -> {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(14.dp),
+                                    strokeWidth = 2.dp
+                                )
+                                Text(
+                                    text = "Guardando...",
+                                    style = MaterialTheme.typography.labelSmall
+                                )
+                            }
+                            SavingStatus.SAVED -> {
+                                Text(
+                                    text = "Guardado",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = Color(0xFF4CAF50)
+                                )
+                            }
+                            SavingStatus.ERROR -> {
+                                Text(
+                                    text = "Error al guardar",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                            SavingStatus.IDLE -> {}
                         }
                     }
                 }
