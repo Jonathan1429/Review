@@ -218,13 +218,13 @@ fun PreviewQuestionsScreen(
             ) {
                 itemsIndexed(
                     items = items,
-                    key = { _, question -> System.identityHashCode(question) }
+                    key = { _, question -> question.id }
                 ) { index, question ->
                     val cardShape = RoundedCornerShape(16.dp)
 
                     ReorderableItem(
                         state = reorderableLazyColumnState,
-                        key = System.identityHashCode(question)
+                        key = question.id
                     ) { isDragging ->
                         val elevation by animateDpAsState(
                             targetValue = if (isDragging) 12.dp else 0.dp,

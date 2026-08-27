@@ -8,6 +8,7 @@ import com.jonathanev.review.presentation.model.ColorRangeUi
 import com.jonathanev.review.presentation.model.PreviewQuestionUi
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.presentation.model.QuestionItemUi
+import java.util.UUID
 import com.jonathanev.review.domain.model.RelativeGuidePath as RelativeGuidePathDomain
 import com.jonathanev.review.domain.model.SaveGuideMode as SaveGuideModeDomain
 import com.jonathanev.review.presentation.model.RelativeGuidePath as RelativeGuidePathUI
@@ -15,6 +16,7 @@ import com.jonathanev.review.presentation.model.SaveGuideMode as SaveGuideModeUI
 
 fun PreviewQuestionDomain.toUi(): PreviewQuestionUi {
     return PreviewQuestionUi(
+        id = UUID.randomUUID().toString(),
         question = this.question.toUi(),
         noTexts = this.noTexts.toString(),
         noImages = this.noImages.toString()

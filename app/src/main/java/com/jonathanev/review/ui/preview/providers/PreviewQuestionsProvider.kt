@@ -12,11 +12,13 @@ class PreviewQuestionsProvider() : PreviewParameterProvider<PreviewQuestionState
             PreviewQuestionStateUi(
                 previewState = listOf(
                     PreviewQuestionUi(
+                        id = "1",
                         question = QuestionContentUi.Text("¿Como se crea un test unitario?", emptyList()),
                         noTexts = "2",
                         noImages = "3"
                     ),
                     PreviewQuestionUi(
+                        id = "2",
                         question = QuestionContentUi.Text("¿Que significa una variable mutable?", emptyList()),
                         noTexts = "2",
                         noImages = "4"
