@@ -37,6 +37,9 @@ key.properties
 # Gradle distribution used locally by Docker
 docker/roborazzi/*.zip
 
+# Ignorar servicios de Google - Firebase
+**/google-services.json
+
 # Para que Git los ignore de verdad necesitas sacarlos del índice pero mantenerlos en tu máquina
 # (Se aplica el siguiente código en gitBash).
 # git rm --cached .idea/deploymentTargetSelector.xml
