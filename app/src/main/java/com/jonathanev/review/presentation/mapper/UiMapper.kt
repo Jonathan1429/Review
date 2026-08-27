@@ -94,3 +94,10 @@ fun SaveGuideModeUI.toDomain(): SaveGuideModeDomain {
 fun RelativeGuidePathDomain.toUI(): RelativeGuidePathUI {
     return RelativeGuidePathUI(this.value)
 }
+
+val QuestionContentUi.stableKey: String
+    get() = when (this) {
+        is QuestionContentUi.Text -> this.id
+        is QuestionContentUi.Image -> this.id
+        QuestionContentUi.None -> "none_key"
+    }

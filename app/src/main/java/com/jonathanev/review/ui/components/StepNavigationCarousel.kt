@@ -51,7 +51,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jonathanev.review.R
 import com.jonathanev.review.domain.model.GuideContext
+import com.jonathanev.review.presentation.mapper.stableKey
 import com.jonathanev.review.presentation.model.QuestionContentUi
+import com.jonathanev.review.presentation.model.ReorderableContentUi
 import com.jonathanev.review.ui.preview.ComponentsPreviews
 import com.jonathanev.review.ui.preview.providers.StepNavigationCarouselProv
 import com.jonathanev.review.ui.preview.providers.StepNavigationCarouselProviders
@@ -64,6 +66,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
+import java.util.UUID
 
 @ComponentsPreviews
 @Composable
@@ -185,26 +188,11 @@ fun StepNavigationCarousel(
         ) {
             itemsIndexed(
                 items = items,
-                // FIX 1: La clave DEBE ser estable y no depender del parámetro index
-                key = { _, item ->
-                    when (item) {
-                        is QuestionContentUi.Image -> "img_${item.uri}_${item.nameFile}"
-                        is QuestionContentUi.Text -> "txt_${item.text.hashCode()}"
-                        else -> "item_${item.hashCode()}"
-                    }
-                }
+                key = { _, item -> item.stableKey }
             ) { index, item ->
-                val itemKey = remember(item) {
-                    when (item) {
-                        is QuestionContentUi.Image -> "img_${item.uri}_${item.nameFile}"
-                        is QuestionContentUi.Text -> "txt_${item.text.hashCode()}"
-                        else -> "item_${item.hashCode()}"
-                    }
-                }
-
                 ReorderableItem(
                     state = reorderableLazyRowState,
-                    key = itemKey
+                    key = item.stableKey
                 ) { isDragging ->
                     val elevation by animateDpAsState(
                         targetValue = if (isDragging) 12.dp else 0.dp,
@@ -254,7 +242,6 @@ fun StepNavigationCarousel(
                                         )
                                     }
                                 } else {
-                                    // FIX 2: Usar detectTapGestures unificado para evitar conflictos de PointerInput entre Click y Drag Handle
                                     Modifier
                                         .longPressDraggableHandle(
                                             onDragStopped = {

@@ -2,6 +2,7 @@ package com.jonathanev.review.presentation.model
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import java.util.UUID
 
 @Parcelize
 sealed class QuestionContentUi : Parcelable {
@@ -9,11 +10,18 @@ sealed class QuestionContentUi : Parcelable {
     data object None : QuestionContentUi(), Parcelable
 
     @Parcelize
-    data class Text(val text: String, val colorRanges: List<ColorRangeUi>) : QuestionContentUi(),
-        Parcelable
+    data class Text(
+        val text: String,
+        val colorRanges: List<ColorRangeUi>,
+        val id: String = UUID.randomUUID().toString()
+    ) : QuestionContentUi(), Parcelable
 
     @Parcelize
-    data class Image(val uri: String, val nameFile: String) : QuestionContentUi(), Parcelable
+    data class Image(
+        val uri: String,
+        val nameFile: String,
+        val id: String = UUID.randomUUID().toString()
+    ) : QuestionContentUi(), Parcelable
 }
 
 @Parcelize
