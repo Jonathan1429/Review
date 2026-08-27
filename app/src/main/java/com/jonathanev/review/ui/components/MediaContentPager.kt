@@ -42,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jonathanev.review.R
 import com.jonathanev.review.domain.model.GuideContext
+import com.jonathanev.review.presentation.mapper.stableKey
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.ui.model.ContentType
 import com.jonathanev.review.ui.preview.ComponentsPreviews
@@ -133,12 +134,9 @@ fun MediaContentPager(
                 state = pagerState,
                 modifier = Modifier.fillMaxSize(),
                 key = { page ->
-                    val asset = assets.getOrNull(page)
-                    when (asset) {
-                        is QuestionContentUi.Image -> "img_${asset.uri}_${asset.nameFile}_$page"
-                        is QuestionContentUi.Text -> "txt_${asset.text.hashCode()}_${asset.colorRanges.hashCode()}_$page"
-                        else -> "none_$page"
-                    }
+                    // 🟢 Usar la clave única del item en esa posición.
+                    // Evita que la página 0 recicle el contenido de la página 1 tras un swap.
+                    assets.getOrNull(page)?.stableKey ?: page
                 }
             ) { page ->
                 val assetInPage = assets.getOrNull(page)

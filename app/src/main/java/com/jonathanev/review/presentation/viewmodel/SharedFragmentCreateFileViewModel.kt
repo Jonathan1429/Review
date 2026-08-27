@@ -55,6 +55,7 @@ import java.io.File
 import javax.inject.Inject
 import com.jonathanev.review.ui.model.QAType as QATypeUI
 import androidx.core.net.toUri
+import kotlinx.coroutines.flow.firstOrNull
 
 @HiltViewModel
 class SharedFragmentCreateFileViewModel @Inject constructor(
@@ -82,122 +83,111 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         GuideScreenUiState.Loading
     )
 
+    private val TAG = "GuideScreenDebug"
+
     private fun updateState(newState: GuideScreenUiState) {
+        Log.d(TAG, "🔄 updateState: pasando a state -> ${newState::class.simpleName}")
         savedStateHandle[KEY_GUIDE_STATE] = newState
     }
 
     init {
+        Log.d(TAG, "🚀 ViewModel init: observando contexto...")
         observeGuideContext()
     }
 
     private fun observeGuideContext() {
         viewModelScope.launch {
-            // CRÍTICO: Combinamos con uiState para reaccionar cuando el estado vuelve a ser Loading (tras Discard)
             combine(
                 getActiveGuideUseCase.invoke(),
-                getGuideContextUseCase.invoke(),
-                uiState
-            ) { activeGuideDomain, moveContext, state ->
-                val context = moveContext ?: activeGuideDomain?.let {
+                getGuideContextUseCase.invoke()
+            ) { activeGuideDomain, moveContext ->
+                moveContext ?: activeGuideDomain?.let {
                     GuideContext.Browsing(guide = it, position = 0)
                 }
-                context to state
             }
-                .distinctUntilChanged()
                 .flowOn(Dispatchers.IO)
-                .collect { (context, state) ->
-                    // 1. Si no hay contexto aún, NO emitimos Error. Simplemente esperamos en Loading.
-                    if (context == null) {
-                        return@collect
-                    }
-
-                    // 2. Extraemos la guía y la posición solicitada
-                    val (guide, targetPosition) = when (context) {
-                        is GuideContext.Browsing -> context.guide to context.position
-                        is GuideContext.Editing -> context.guide to context.position
-                        is GuideContext.Creating -> context.guide to 0
-                        else -> {
-                            // Solo si el contexto es explícitamente inválido, pasamos a Error
-                            if (state !is GuideScreenUiState.Error) updateState(GuideScreenUiState.Error)
-                            return@collect
-                        }
-                    }
-
-                    // 3. Si ya tenemos Success y el contexto coincide, NO cargamos (protege cambios en memoria)
-                    if (state is GuideScreenUiState.Success && state.guideContext == context) {
-                        return@collect
-                    }
-
-                    val contextChanged = when (state) {
-                        is GuideScreenUiState.Success -> state.guideContext != context
-                        is GuideScreenUiState.Error -> true
-                        else -> false
-                    }
-
-                    if (contextChanged) {
-                        updateState(GuideScreenUiState.Loading)
-                        return@collect
-                    }
-
-                    // 5. Si el estado es Loading (arranque o tras Discard), procedemos a cargar
-                    if (state is GuideScreenUiState.Loading) {
-                        if (context is GuideContext.Creating) {
-                            updateState(
-                                GuideScreenUiState.Success(
-                                    fileName = guide.nameGuide,
-                                    description = guide.description,
-                                    preguntas = listOf(QuestionItemUi(content = emptyList())),
-                                    respuestas = listOf(QuestionItemUi(content = emptyList())),
-                                    guideContext = context
-                                )
-                            )
-                        } else {
-                            // Carga desde XML
-                            when (val result = getGuideXmlDataUseCase.invoke(context = context)) {
-                                is GetGuideResult.Success -> {
-                                    val questions = result.list.map { it.question.toUi() }
-                                    val answers = result.list.map { it.answer.toUi() }
-
-                                    val isAddingAtEnd = targetPosition >= questions.size
-
-                                    val finalQuestions =
-                                        if (isAddingAtEnd) questions + QuestionItemUi(content = emptyList()) else questions
-                                    val finalAnswers =
-                                        if (isAddingAtEnd) answers + QuestionItemUi(content = emptyList()) else answers
-
-                                    val initialContador =
-                                        if (isAddingAtEnd) questions.size else targetPosition.coerceIn(
-                                            0,
-                                            questions.lastIndex.coerceAtLeast(0)
-                                        )
-
-                                    updateState(
-                                        GuideScreenUiState.Success(
-                                            fileName = guide.nameGuide,
-                                            description = guide.description,
-                                            preguntas = finalQuestions.ifEmpty {
-                                                listOf(
-                                                    QuestionItemUi(content = emptyList())
-                                                )
-                                            },
-                                            respuestas = finalAnswers.ifEmpty {
-                                                listOf(
-                                                    QuestionItemUi(content = emptyList())
-                                                )
-                                            },
-                                            contadorPregunta = initialContador,
-                                            guideContext = context,
-                                            originalQuestions = finalQuestions,
-                                            originalAnswers = finalAnswers
-                                        )
-                                    )
-                                }
-
-                                else -> updateState(GuideScreenUiState.Error)
-                            }
-                        }
-                    }
+                .collect { context ->
+                    Log.d(TAG, "📥 collect llamado con contexto: $context")
+                    if (context == null) return@collect
+                    loadDataForContext(context)
                 }
+        }
+    }
+
+    private suspend fun loadDataForContext(context: GuideContext) {
+        Log.d(TAG, "⏳ loadDataForContext INICIO para contexto: $context")
+        updateState(GuideScreenUiState.Loading)
+
+        if (context is GuideContext.Creating) {
+            Log.d(TAG, "✨ Modo Creating detectado, pasando a Success directo")
+            updateState(
+                GuideScreenUiState.Success(
+                    fileName = context.guide.nameGuide,
+                    description = context.guide.description,
+                    preguntas = listOf(QuestionItemUi(content = emptyList())),
+                    respuestas = listOf(QuestionItemUi(content = emptyList())),
+                    guideContext = context
+                )
+            )
+            return
+        }
+
+        val (guide, targetPosition) = when (context) {
+            is GuideContext.Browsing -> context.guide to context.position
+            is GuideContext.Editing -> context.guide to context.position
+            else -> {
+                Log.e(TAG, "❌ Contexto no reconocido en loadDataForContext: $context")
+                updateState(GuideScreenUiState.Error)
+                return
+            }
+        }
+
+        Log.d(TAG, "📖 Iniciando lectura de XML con getGuideXmlDataUseCase...")
+        val result = try {
+            getGuideXmlDataUseCase.invoke(context = context)
+        } catch (e: Exception) {
+            Log.e(TAG, "💥 EXCEPCIÓN leyendo XML en getGuideXmlDataUseCase", e)
+            GuideScreenUiState.Error
+        }
+
+        Log.d(TAG, "📦 Resultado de getGuideXmlDataUseCase: ${result::class.simpleName}")
+
+        when (result) {
+            is GetGuideResult.Success -> {
+                Log.d(TAG, "✅ XML leído correctamente. Preguntas recibidas: ${result.list.size}")
+                val questions = result.list.map { it.question.toUi() }
+                val answers = result.list.map { it.answer.toUi() }
+                val isAddingAtEnd = targetPosition >= questions.size
+
+                val finalQuestions =
+                    if (isAddingAtEnd) questions + QuestionItemUi(content = emptyList()) else questions
+                val finalAnswers =
+                    if (isAddingAtEnd) answers + QuestionItemUi(content = emptyList()) else answers
+                val initialContador =
+                    if (isAddingAtEnd) questions.size else targetPosition.coerceIn(
+                        0,
+                        questions.lastIndex.coerceAtLeast(0)
+                    )
+
+                Log.d(TAG, "🎉 Actualizando a Success en UI")
+                updateState(
+                    GuideScreenUiState.Success(
+                        fileName = guide.nameGuide,
+                        description = guide.description,
+                        preguntas = finalQuestions.ifEmpty { listOf(QuestionItemUi(content = emptyList())) },
+                        respuestas = finalAnswers.ifEmpty { listOf(QuestionItemUi(content = emptyList())) },
+                        contadorPregunta = initialContador,
+                        guideContext = context,
+                        originalQuestions = finalQuestions,
+                        originalAnswers = finalAnswers
+                    )
+                )
+            }
+
+            else -> {
+                Log.e(TAG, "❌ getGuideXmlDataUseCase devolvió Error/Diferente de Success")
+                updateState(GuideScreenUiState.Error)
+            }
         }
     }
 
@@ -301,7 +291,21 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     }
 
     fun retryLoad() {
-        updateState(GuideScreenUiState.Loading)
+        viewModelScope.launch(Dispatchers.IO) {
+            // 1. Obtenemos el contexto actual desde el DataStore/UseCase
+            val activeGuideDomain = getActiveGuideUseCase.invoke().firstOrNull()
+            val moveContext = getGuideContextUseCase.invoke().firstOrNull()
+
+            val context = moveContext ?: activeGuideDomain?.let {
+                GuideContext.Browsing(guide = it, position = 0)
+            }
+
+            if (context != null) {
+                loadDataForContext(context)
+            } else {
+                updateState(GuideScreenUiState.Error)
+            }
+        }
     }
 
     fun updatePosContent(currentPos: Int) {

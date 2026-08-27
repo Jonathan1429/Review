@@ -1,5 +1,6 @@
 package com.jonathanev.review.presentation.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jonathanev.review.domain.GetActiveGuideUseCase
@@ -133,17 +134,29 @@ class PreviewViewModel @Inject constructor(
 
     fun moveQuestion(from: Int, to: Int) {
         val currentPreviewList = _uiState.value.previewState.toMutableList()
-        if (from !in currentPreviewList.indices || to !in currentPreviewList.indices) return
 
-        // 1. Reordenamiento inmediato en UI
-        val item = currentPreviewList.removeAt(from)
-        currentPreviewList.add(to, item)
+        Log.d("ReorderDebug", "🔄 moveQuestion SOLICITADO: from=$from -> to=$to")
 
-        // 2. Reordenamiento inmediato en la lista en MEMORIA
-        if (from in domainListMemory.indices && to in domainListMemory.indices) {
-            val domainItem = domainListMemory.removeAt(from)
-            domainListMemory.add(to, domainItem)
+        // Validar rangos en ambas listas
+        if (from !in currentPreviewList.indices || to !in currentPreviewList.indices ||
+            from !in domainListMemory.indices || to !in domainListMemory.indices
+        ) {
+            Log.e(
+                "ReorderDebug",
+                "❌ Índices fuera de rango: from=$from, to=$to (previewSize=${currentPreviewList.size}, memorySize=${domainListMemory.size})"
+            )
+            return
         }
+
+        // 🟢 1. Reordenar UI aplicando copy() para romper la referencia y forzar actualización en Compose
+        val item = currentPreviewList.removeAt(from)
+        currentPreviewList.add(to, item.copy())
+
+        // 🟢 2. Reordenar Memoria de Dominio
+        val domainItem = domainListMemory.removeAt(from)
+        domainListMemory.add(to, domainItem)
+
+        Log.d("ReorderDebug", "✅ Reordenamiento local exitoso en UI y Memoria")
 
         _uiState.update {
             it.copy(
@@ -152,22 +165,32 @@ class PreviewViewModel @Inject constructor(
             )
         }
 
-        // 3. Cancelar el guardado previo si sigue moviendo cosas rápido
+        // 3. Cancelar debounce anterior
         saveJob?.cancel()
 
-        // 4. Guardar en segundo plano la lista acumulada tras 600ms sin movimientos
+        // 4. Copiar snapshot inmutable para el Hilo IO
+        val snapshotMemory = domainListMemory.toList()
+
         saveJob = viewModelScope.launch(Dispatchers.IO) {
             delay(600.milliseconds)
 
             try {
-                val activeGuide = getActiveGuideUseCase.invoke().firstOrNull() ?: return@launch
+                Log.d("ReorderDebug", "💾 Guardando nuevo orden en XML...")
+                val activeGuide = getActiveGuideUseCase.invoke().firstOrNull() ?: run {
+                    Log.e("ReorderDebug", "❌ getActiveGuideUseCase devolvió null al reordenar")
+                    _uiState.update { it.copy(savingStatus = SavingStatus.ERROR) }
+                    loadInitialData()
+                    return@launch
+                }
 
                 setCrearXmlUseCase.invoke(
                     guideDomainModel = activeGuide,
-                    preguntas = domainListMemory.map { it.question },
-                    respuestas = domainListMemory.map { it.answer },
+                    preguntas = snapshotMemory.map { it.question },
+                    respuestas = snapshotMemory.map { it.answer },
                     saveGuideMode = SaveGuideMode.Update
                 )
+
+                Log.d("ReorderDebug", "🎉 XML guardado correctamente en disco")
 
                 _uiState.update { it.copy(savingStatus = SavingStatus.SAVED) }
                 delay(1200.milliseconds)
@@ -176,7 +199,8 @@ class PreviewViewModel @Inject constructor(
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
 
-                e.printStackTrace()
+                Log.e("ReorderDebug", "💥 Excepción guardando orden (from: $from, to: $to)", e)
+                loadInitialData()
                 _uiState.update { it.copy(savingStatus = SavingStatus.ERROR) }
             }
         }

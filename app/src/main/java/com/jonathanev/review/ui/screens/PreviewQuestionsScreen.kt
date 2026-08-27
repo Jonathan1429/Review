@@ -1,5 +1,6 @@
 package com.jonathanev.review.ui.screens
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateDpAsState
@@ -172,10 +173,6 @@ fun PreviewQuestionsScreen(
         lazyListState = lazyListState,
         scrollThreshold = 120.dp,
         onMove = { from, to ->
-            if (initialDragIndex == null) {
-                initialDragIndex = from.index
-            }
-
             items = items.toMutableList().apply {
                 add(to.index, removeAt(from.index))
             }
@@ -248,11 +245,34 @@ fun PreviewQuestionsScreen(
                                 )
                                 .clip(cardShape)
                                 .longPressDraggableHandle(
+                                    onDragStarted = {
+                                        // 🟢 CAPTURA EXACTA: Fijamos el índice original antes de iniciar el movimiento
+                                        initialDragIndex = index
+                                        currentDragIndex = index
+                                        Log.d(
+                                            "ReorderDebug",
+                                            "START Dragging item AT INDEX: $index (id: ${question.id})"
+                                        )
+                                    },
                                     onDragStopped = {
                                         val start = initialDragIndex
                                         val end = currentDragIndex
+                                        Log.d(
+                                            "ReorderDebug",
+                                            "STOP Dragging -> start: $start, end: $end"
+                                        )
+
                                         if (start != null && end != null && start != end) {
+                                            Log.d(
+                                                "ReorderDebug",
+                                                "🚀 Llamando onMoveQuestion(from=$start, to=$end)"
+                                            )
                                             onMoveQuestion(start, end)
+                                        } else {
+                                            Log.w(
+                                                "ReorderDebug",
+                                                "⚠️ Drag detenido sin cambios de posición"
+                                            )
                                         }
                                         initialDragIndex = null
                                         currentDragIndex = null
