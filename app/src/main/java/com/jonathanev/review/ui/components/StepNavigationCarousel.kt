@@ -53,7 +53,6 @@ import com.jonathanev.review.R
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.presentation.mapper.stableKey
 import com.jonathanev.review.presentation.model.QuestionContentUi
-import com.jonathanev.review.presentation.model.ReorderableContentUi
 import com.jonathanev.review.ui.preview.ComponentsPreviews
 import com.jonathanev.review.ui.preview.providers.StepNavigationCarouselProv
 import com.jonathanev.review.ui.preview.providers.StepNavigationCarouselProviders
