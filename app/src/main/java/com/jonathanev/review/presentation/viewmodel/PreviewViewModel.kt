@@ -101,15 +101,39 @@ class PreviewViewModel @Inject constructor(
         }
     }
 
+    private var isNavigating = false
+
     fun editingGuide(position: Int) {
+        if (isNavigating) return
+        isNavigating = true
+
         viewModelScope.launch {
             try {
-                val activeGuide = getActiveGuideUseCase.invoke().firstOrNull() ?: return@launch
+                saveJob?.let { job ->
+                    if (job.isActive) {
+                        job.join()
+                    }
+                }
+
+                if (_uiState.value.savingStatus == SavingStatus.ERROR) {
+                    isNavigating = false // Liberar si falló el guardado
+                    sendEvent(PreviewGuideEvent.ShowError("No se pudieron guardar los cambios a tiempo"))
+                    return@launch
+                }
+
+                val activeGuide = getActiveGuideUseCase.invoke().firstOrNull() ?: run {
+                    isNavigating = false // Liberar si no se encontró la guía
+                    return@launch
+                }
+
                 setContextEditUseCase.invoke(GuideContext.Editing(activeGuide, position))
                 sendEvent(PreviewGuideEvent.Editing)
+
             } catch (e: CancellationException) {
+                isNavigating = false
                 throw e
             } catch (e: Exception) {
+                isNavigating = false
                 e.printStackTrace()
                 sendEvent(PreviewGuideEvent.ShowError(e.message ?: "Ocurrió un error inesperado"))
             }
@@ -117,18 +141,45 @@ class PreviewViewModel @Inject constructor(
     }
 
     fun reviewGuide(position: Int) {
+        if (isNavigating) return
+        isNavigating = true
+
         viewModelScope.launch {
             try {
-                val activeGuide = getActiveGuideUseCase.invoke().firstOrNull() ?: return@launch
+                saveJob?.let { job ->
+                    if (job.isActive) {
+                        job.join()
+                    }
+                }
+
+                if (_uiState.value.savingStatus == SavingStatus.ERROR) {
+                    isNavigating = false
+                    sendEvent(PreviewGuideEvent.ShowError("No se pudieron guardar los cambios a tiempo"))
+                    return@launch
+                }
+
+                val activeGuide = getActiveGuideUseCase.invoke().firstOrNull() ?: run {
+                    isNavigating = false
+                    return@launch
+                }
+
                 setContextPlayUseCase.invoke(GuideContext.Browsing(activeGuide, position))
                 sendEvent(PreviewGuideEvent.Review)
+
             } catch (e: CancellationException) {
+                isNavigating = false
                 throw e
             } catch (e: Exception) {
+                isNavigating = false
                 e.printStackTrace()
                 sendEvent(PreviewGuideEvent.ShowError(e.message ?: "Ocurrió un error inesperado"))
             }
         }
+    }
+
+    // 🟢 Esta función resetea la bandera únicamente cuando la pantalla vuelve a estar activa/visible
+    fun resetNavigationFlag() {
+        isNavigating = false
     }
 
     private var saveJob: Job? = null

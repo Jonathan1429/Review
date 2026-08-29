@@ -47,6 +47,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jonathanev.review.R
 import com.jonathanev.review.domain.model.SavingStatus
@@ -87,6 +89,10 @@ fun PreviewQuestionsRoute(
 ) {
     val uiState = viewModel.uiState.collectAsStateWithLifecycle().value
     val context = LocalContext.current
+
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        viewModel.resetNavigationFlag()
+    }
 
     LaunchedEffect(uiState.activeGuide) {
         if (uiState.activeGuide is ActiveGuideUIState.Error) {
