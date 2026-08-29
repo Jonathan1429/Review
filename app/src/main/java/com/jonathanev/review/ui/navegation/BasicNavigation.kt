@@ -360,7 +360,7 @@ fun BasicNavigation() {
             }
 
             entry<AppRoutes.PreviewQuestionsScreen> {
-                val viewModel: PreviewViewModel = viewModel()
+                val viewModel: PreviewViewModel = hiltViewModel()
 
                 PreviewQuestionsRoute(
                     viewModel = viewModel,

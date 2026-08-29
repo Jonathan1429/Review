@@ -161,22 +161,11 @@ fun PreviewQuestionsScreen(
 ) {
     val lazyListState = rememberLazyListState()
 
-    // Items del previewState
-    var items by remember(uiState.previewState) {
-        mutableStateOf(uiState.previewState)
-    }
-
-    var initialDragIndex by remember { mutableStateOf<Int?>(null) }
-    var currentDragIndex by remember { mutableStateOf<Int?>(null) }
-
     val reorderableLazyColumnState = rememberReorderableLazyListState(
         lazyListState = lazyListState,
         scrollThreshold = 120.dp,
         onMove = { from, to ->
-            items = items.toMutableList().apply {
-                add(to.index, removeAt(from.index))
-            }
-            currentDragIndex = to.index
+            onMoveQuestion(from.index, to.index)
         }
     )
 
@@ -214,7 +203,7 @@ fun PreviewQuestionsScreen(
                 contentPadding = PaddingValues(top = 16.dp, bottom = 88.dp)
             ) {
                 itemsIndexed(
-                    items = items,
+                    items = uiState.previewState,
                     key = { _, question -> question.id }
                 ) { index, question ->
                     val cardShape = RoundedCornerShape(16.dp)
@@ -244,40 +233,7 @@ fun PreviewQuestionsScreen(
                                     spotColor = Color.Black.copy(alpha = 0.5f)
                                 )
                                 .clip(cardShape)
-                                .longPressDraggableHandle(
-                                    onDragStarted = {
-                                        // 🟢 CAPTURA EXACTA: Fijamos el índice original antes de iniciar el movimiento
-                                        initialDragIndex = index
-                                        currentDragIndex = index
-                                        Log.d(
-                                            "ReorderDebug",
-                                            "START Dragging item AT INDEX: $index (id: ${question.id})"
-                                        )
-                                    },
-                                    onDragStopped = {
-                                        val start = initialDragIndex
-                                        val end = currentDragIndex
-                                        Log.d(
-                                            "ReorderDebug",
-                                            "STOP Dragging -> start: $start, end: $end"
-                                        )
-
-                                        if (start != null && end != null && start != end) {
-                                            Log.d(
-                                                "ReorderDebug",
-                                                "🚀 Llamando onMoveQuestion(from=$start, to=$end)"
-                                            )
-                                            onMoveQuestion(start, end)
-                                        } else {
-                                            Log.w(
-                                                "ReorderDebug",
-                                                "⚠️ Drag detenido sin cambios de posición"
-                                            )
-                                        }
-                                        initialDragIndex = null
-                                        currentDragIndex = null
-                                    }
-                                )
+                                .longPressDraggableHandle()
                         ) {
                             QuestionCard(
                                 modifier = Modifier.fillMaxWidth(),

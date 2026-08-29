@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration.Companion.milliseconds
@@ -133,64 +134,56 @@ class PreviewViewModel @Inject constructor(
     private var saveJob: Job? = null
 
     fun moveQuestion(from: Int, to: Int) {
-        val currentPreviewList = _uiState.value.previewState.toMutableList()
+        if (from == to) return
 
-        Log.d("ReorderDebug", "🔄 moveQuestion SOLICITADO: from=$from -> to=$to")
+        _uiState.update { currentState ->
+            val currentList = currentState.previewState.toMutableList()
 
-        // Validar rangos en ambas listas
-        if (from !in currentPreviewList.indices || to !in currentPreviewList.indices ||
-            from !in domainListMemory.indices || to !in domainListMemory.indices
-        ) {
-            Log.e(
-                "ReorderDebug",
-                "❌ Índices fuera de rango: from=$from, to=$to (previewSize=${currentPreviewList.size}, memorySize=${domainListMemory.size})"
-            )
-            return
-        }
+            if (from !in currentList.indices || to !in currentList.indices ||
+                from !in domainListMemory.indices || to !in domainListMemory.indices
+            ) {
+                return@update currentState
+            }
 
-        // 🟢 1. Reordenar UI aplicando copy() para romper la referencia y forzar actualización en Compose
-        val item = currentPreviewList.removeAt(from)
-        currentPreviewList.add(to, item.copy())
+            // 1. Reordenar listas inmediatas en memoria
+            val itemUi = currentList.removeAt(from)
+            currentList.add(to, itemUi)
 
-        // 🟢 2. Reordenar Memoria de Dominio
-        val domainItem = domainListMemory.removeAt(from)
-        domainListMemory.add(to, domainItem)
+            val itemDomain = domainListMemory.removeAt(from)
+            domainListMemory.add(to, itemDomain)
 
-        Log.d("ReorderDebug", "✅ Reordenamiento local exitoso en UI y Memoria")
-
-        _uiState.update {
-            it.copy(
-                previewState = currentPreviewList,
+            // Actualizar UI instantáneamente
+            currentState.copy(
+                previewState = currentList,
                 savingStatus = SavingStatus.SAVING
             )
         }
 
-        // 3. Cancelar debounce anterior
+        // 2. Cancelar la persistencia anterior (Debounce)
         saveJob?.cancel()
 
-        // 4. Copiar snapshot inmutable para el Hilo IO
-        val snapshotMemory = domainListMemory.toList()
-
-        saveJob = viewModelScope.launch(Dispatchers.IO) {
+        // 3. Programar la persistencia al terminar las ráfagas de movimientos
+        saveJob = viewModelScope.launch {
             delay(600.milliseconds)
 
             try {
-                Log.d("ReorderDebug", "💾 Guardando nuevo orden en XML...")
                 val activeGuide = getActiveGuideUseCase.invoke().firstOrNull() ?: run {
-                    Log.e("ReorderDebug", "❌ getActiveGuideUseCase devolvió null al reordenar")
                     _uiState.update { it.copy(savingStatus = SavingStatus.ERROR) }
                     loadInitialData()
                     return@launch
                 }
 
-                setCrearXmlUseCase.invoke(
-                    guideDomainModel = activeGuide,
-                    preguntas = snapshotMemory.map { it.question },
-                    respuestas = snapshotMemory.map { it.answer },
-                    saveGuideMode = SaveGuideMode.Update
-                )
+                // Snapshot thread-safe de la lista en memoria
+                val snapshotMemory = domainListMemory.toList()
 
-                Log.d("ReorderDebug", "🎉 XML guardado correctamente en disco")
+                withContext(Dispatchers.IO) {
+                    setCrearXmlUseCase.invoke(
+                        guideDomainModel = activeGuide,
+                        preguntas = snapshotMemory.map { it.question },
+                        respuestas = snapshotMemory.map { it.answer },
+                        saveGuideMode = SaveGuideMode.Update
+                    )
+                }
 
                 _uiState.update { it.copy(savingStatus = SavingStatus.SAVED) }
                 delay(1200.milliseconds)
@@ -199,9 +192,8 @@ class PreviewViewModel @Inject constructor(
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
 
-                Log.e("ReorderDebug", "💥 Excepción guardando orden (from: $from, to: $to)", e)
-                loadInitialData()
                 _uiState.update { it.copy(savingStatus = SavingStatus.ERROR) }
+                loadInitialData()
             }
         }
     }
