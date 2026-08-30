@@ -597,8 +597,12 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 UpdateGuideResult.ErrorUpdateGuide ->
                     sendNotification(ErrorGuideCreated("Error al cargar datos de la guia"))
 
-                UpdateGuideResult.ImagesFailed ->
+                UpdateGuideResult.ImagesFailed -> {
+                    // 1. Limpias contexto en DataStore primero
+                    clearGuideContextUseCase.invoke()
+                    // 2. Notificas a la UI para que haga onCloseGuide()
                     sendNotification(SuccessGuideCreated("Guia guardada con imagenes corruptas"))
+                }
 
                 is UpdateGuideResult.SaveFailed -> {
                     when (response.cause) {
@@ -613,14 +617,21 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                     }
                 }
 
-                UpdateGuideResult.Success ->
+                UpdateGuideResult.Success -> {
+                    // 1. Limpias contexto en DataStore (espera síncrona dentro de la corrutina)
+                    clearGuideContextUseCase.invoke()
+                    // 2. Emitir evento para hacer onCloseGuide()
                     sendNotification(SuccessGuideCreated("Guia guardada satisfactoriamente"))
+                }
             }
         }
     }
 
     fun onCloseGuide() {
-        sendNotification(CreateGuideEvent.CloseGuide)
+        viewModelScope.launch {
+            clearGuideContextUseCase.invoke()
+            sendNotification(CreateGuideEvent.CloseGuide)
+        }
     }
 
     fun deleteQuesAns() {
