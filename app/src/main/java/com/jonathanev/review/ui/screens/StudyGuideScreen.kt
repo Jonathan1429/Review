@@ -306,7 +306,7 @@ fun StudyGuideRoute(
                     when (state.guideContext) {
                         is GuideContext.Creating -> viewModel.saveGuide()
                         is GuideContext.Editing -> viewModel.saveGuide()
-                        else -> onCloseGuide()
+                        else -> viewModel.onCloseGuide()
                     }
                 },
                 onCurrentPosContent = { position ->
