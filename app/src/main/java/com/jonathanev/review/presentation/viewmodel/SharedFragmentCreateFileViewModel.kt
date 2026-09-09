@@ -1,6 +1,5 @@
 package com.jonathanev.review.presentation.viewmodel
 
-import android.net.Uri
 import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -31,7 +30,7 @@ import com.jonathanev.review.presentation.mapper.toDomain
 import com.jonathanev.review.presentation.mapper.toUi
 import com.jonathanev.review.presentation.model.ColorRangeUi
 import com.jonathanev.review.presentation.model.ColorType
-import com.jonathanev.review.presentation.model.QuestionContentMode
+import com.jonathanev.review.presentation.model.ScreenMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.presentation.model.QuestionItemUi
 import com.jonathanev.review.presentation.model.SaveGuideMode
@@ -45,7 +44,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
@@ -55,6 +53,7 @@ import java.io.File
 import javax.inject.Inject
 import com.jonathanev.review.ui.model.QAType as QATypeUI
 import androidx.core.net.toUri
+import com.jonathanev.review.presentation.model.QuestionContentMode
 import kotlinx.coroutines.flow.firstOrNull
 
 @HiltViewModel
@@ -73,6 +72,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     private companion object {
         const val KEY_GUIDE_STATE = "key_guide_ui_state"
         const val KEY_DRAFT_TEXT = "key_draft_text"
+        private const val KEY_DRAFT_CONTENT = "draft_content"
         const val KEY_DRAFT_SELECTION_START = "key_draft_selection_start"
         const val KEY_DRAFT_SELECTION_END = "key_draft_selection_end"
     }
@@ -234,35 +234,48 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     private var currentImageDraftUri: String? = null
     private var isSavingContent = false
     val draftTextValue: StateFlow<TextFieldValue?> = combine(
-        savedStateHandle.getStateFlow<QuestionContentUi.Text?>(KEY_DRAFT_TEXT, null),
-        savedStateHandle.getStateFlow(KEY_DRAFT_SELECTION_START, 0),
-        savedStateHandle.getStateFlow(KEY_DRAFT_SELECTION_END, 0)
-    ) { textUi, start, end ->
-        textUi?.toAnnotatedString()?.let {
+        savedStateHandle.getStateFlow<QuestionContentUi.Text?>(KEY_DRAFT_CONTENT, null),
+        savedStateHandle.getStateFlow<Int>(KEY_DRAFT_SELECTION_START, 0),
+        savedStateHandle.getStateFlow<Int>(KEY_DRAFT_SELECTION_END, 0)
+    ) { content, start, end ->
+        if (content == null) {
+            null
+        } else {
+            val textLength = content.text.length
+            val safeStart = start.coerceIn(0, textLength)
+            val safeEnd = end.coerceIn(0, textLength)
+
             TextFieldValue(
-                annotatedString = it,
-                selection = TextRange(start, end)
+                annotatedString = content.toAnnotatedString(),
+                selection = TextRange(safeStart, safeEnd)
             )
         }
     }.stateIn(
         scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
+        started = SharingStarted.Eagerly, // Mantiene el estado activo para evitar resets al recomponer
         initialValue = null
     )
 
+    // 3. Inicializar el borrador guardando directamente en SavedStateHandle
     fun initTextDraft(initialContent: QuestionContentUi.Text, isEditing: Boolean) {
-        if (savedStateHandle.get<QuestionContentUi.Text?>(KEY_DRAFT_TEXT) == null) {
-            val contentToSet =
-                if (isEditing) initialContent else QuestionContentUi.Text("", emptyList())
-            savedStateHandle[KEY_DRAFT_TEXT] = contentToSet
-            savedStateHandle[KEY_DRAFT_SELECTION_START] = contentToSet.text.length
-            savedStateHandle[KEY_DRAFT_SELECTION_END] = contentToSet.text.length
+        val currentContent = savedStateHandle.get<QuestionContentUi.Text?>(KEY_DRAFT_CONTENT)
+
+        // Solo inicializamos si es nulo o si cambió de ítem en el Pager
+        if (currentContent == null || (isEditing && currentContent.id != initialContent.id)) {
+            val textLength = initialContent.text.length
+            savedStateHandle[KEY_DRAFT_CONTENT] = initialContent
+            savedStateHandle[KEY_DRAFT_SELECTION_START] = textLength
+            savedStateHandle[KEY_DRAFT_SELECTION_END] = textLength
         }
     }
 
+    // 4. Cuando el usuario escribe o mueve el cursor en la UI
     fun onDraftTextChange(newValue: TextFieldValue) {
-        val currentDraft = savedStateHandle.get<QuestionContentUi.Text?>(KEY_DRAFT_TEXT)
-        val updatedDraft = QuestionContentUi.Text(
+        val currentContent = savedStateHandle.get<QuestionContentUi.Text?>(KEY_DRAFT_CONTENT)
+
+        // Convertimos el nuevo TextFieldValue a nuestro modelo UI preservando spans
+        val updatedContent = QuestionContentUi.Text(
+            id = currentContent?.id ?: 0.toString(),
             text = newValue.text,
             colorRanges = newValue.annotatedString.spanStyles.mapNotNull { span ->
                 if (span.item.color != Color.Unspecified) {
@@ -270,15 +283,16 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
                 } else null
             }
         )
-        if (currentDraft != updatedDraft) {
-            savedStateHandle[KEY_DRAFT_TEXT] = updatedDraft
-        }
+
+        // Guardamos en SavedStateHandle: actualiza el flujo automáticamente SIN perder la selección
+        savedStateHandle[KEY_DRAFT_CONTENT] = updatedContent
         savedStateHandle[KEY_DRAFT_SELECTION_START] = newValue.selection.start
         savedStateHandle[KEY_DRAFT_SELECTION_END] = newValue.selection.end
     }
 
+    // 5. Para limpiar el borrador al salir
     fun clearTextDraft() {
-        savedStateHandle[KEY_DRAFT_TEXT] = null
+        savedStateHandle[KEY_DRAFT_CONTENT] = null
         savedStateHandle[KEY_DRAFT_SELECTION_START] = 0
         savedStateHandle[KEY_DRAFT_SELECTION_END] = 0
     }
@@ -339,9 +353,10 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
         updateSuccessState { state ->
             val currentPosContent = when (questionContentMode) {
-                QuestionContentMode.CREATING -> state.posContenidoTexto + 1
-                QuestionContentMode.EDITING -> state.posContenidoTexto
+                QuestionContentMode.CREATING -> (state.posContenidoTexto + 1).coerceAtLeast(0)
+                QuestionContentMode.EDITING -> state.posContenidoTexto.coerceAtLeast(0)
             }
+
             val isQuestion = state.qAType == QATypeUI.QUESTION
             val sourceListUi = if (isQuestion) state.preguntas else state.respuestas
             val sourceListDomain = sourceListUi.map { it.toDomain() }

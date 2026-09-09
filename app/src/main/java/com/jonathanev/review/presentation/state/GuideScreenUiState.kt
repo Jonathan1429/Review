@@ -4,6 +4,7 @@ import android.os.Parcelable
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.presentation.model.ColorType
 import com.jonathanev.review.presentation.model.QuestionItemUi
+import com.jonathanev.review.presentation.model.ScreenMode
 import com.jonathanev.review.ui.model.ContentType
 import com.jonathanev.review.ui.model.QAType
 import kotlinx.parcelize.Parcelize
@@ -30,6 +31,7 @@ sealed interface GuideScreenUiState : Parcelable {
         val mediaSelected: ContentType = ContentType.TEXT,
         val guideContext: GuideContext,
         val colorType: ColorType = ColorType.Default,
+        val screenMode: ScreenMode = ScreenMode.VIEWING,
         val showDialogDeleteQuestion: Boolean = false,
         val showDialogRepeatGuide: Boolean = false,
         val showDialogColor: Boolean = false,

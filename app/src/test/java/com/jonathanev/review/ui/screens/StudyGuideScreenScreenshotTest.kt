@@ -113,6 +113,7 @@ class StudyGuideScreenScreenshotTest(
                             onCardTypeClicked = {},
                             onFilterTypeClicked = {},
                             onOpenAssetClick = { _, _ -> },
+                            onEditingAssetClick = { _, _ -> },
                             onDeleteItemClick = { _, _ -> },
                             onAddAssetClick = {},
                             onAddQuestion = {},

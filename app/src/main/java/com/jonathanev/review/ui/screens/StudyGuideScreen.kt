@@ -106,6 +106,7 @@ fun PreviewStudyGuideScreen(
             onCardTypeClicked = {},
             onFilterTypeClicked = {},
             onOpenAssetClick = { _, _ -> },
+            onEditingAssetClick = { _, _ -> },
             onDeleteItemClick = { _, _ -> },
             onAddAssetClick = {},
             onAddQuestion = {},
@@ -120,6 +121,7 @@ fun PreviewStudyGuideScreen(
 fun StudyGuideRoute(
     viewModel: SharedFragmentCreateFileViewModel,
     onOpenAssetClick: (QuestionContentUi, posItem: Int) -> Unit,
+    onEditingAssetClick: (QuestionContentUi, posItem: Int) -> Unit,
     onAddAssetClick: (ContentType, posItem: Int) -> Unit,
     onActionGuideNone: () -> Unit,
     onCloseGuide: () -> Unit
@@ -295,10 +297,16 @@ fun StudyGuideRoute(
                     viewModel.onFilterTypeChanged(filterTypeClicked = filterTypeClicked)
                 },
                 onOpenAssetClick = { typeContent, posItem ->
-                    onOpenAssetClick(
-                        typeContent,
-                        posItem
-                    )
+                    if (typeContent is QuestionContentUi.Text) {
+                        viewModel.updatePosContent(posItem)
+                    }
+                    onOpenAssetClick(typeContent, posItem)
+                },
+                onEditingAssetClick = { typeContent, posItem ->
+                    if (typeContent is QuestionContentUi.Text) {
+                        viewModel.updatePosContent(posItem)
+                    }
+                    onEditingAssetClick(typeContent, posItem)
                 },
                 onAddAssetClick = { posItem -> onAddAssetClick(mediaSelected, posItem) },
                 onAddQuestion = viewModel::addNextQuestion,
@@ -367,6 +375,7 @@ fun FillingGuideScreen(
     onCardTypeClicked: (QAType) -> Unit,
     onFilterTypeClicked: (ContentType) -> Unit,
     onOpenAssetClick: (QuestionContentUi, posItem: Int) -> Unit,
+    onEditingAssetClick: (QuestionContentUi, posItem: Int) -> Unit,
     onDeleteItemClick: (typeContent: QuestionContentUi, positionItem: Int) -> Unit,
     onAddAssetClick: (posItem: Int) -> Unit,
     onAddQuestion: () -> Unit,
@@ -456,6 +465,12 @@ fun FillingGuideScreen(
                     },
                     onOpenAssetClick = { typeContent, posItem ->
                         onOpenAssetClick(
+                            typeContent,
+                            posItem
+                        )
+                    },
+                    onEditingAssetClick = { typeContent, posItem ->
+                        onEditingAssetClick(
                             typeContent,
                             posItem
                         )

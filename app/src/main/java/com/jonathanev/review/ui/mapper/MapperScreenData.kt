@@ -5,6 +5,8 @@ import androidx.compose.ui.graphics.toArgb
 import com.jonathanev.review.R
 import com.jonathanev.review.presentation.model.ColorType
 import com.jonathanev.review.presentation.model.IconType
+import com.jonathanev.review.presentation.model.QuestionContentMode
+import com.jonathanev.review.presentation.model.ScreenMode
 import com.jonathanev.review.ui.model.ContentType
 
 /*fun ScreenDataUi.toNav(): PropertiesGuide = PropertiesGuide(
@@ -59,4 +61,10 @@ fun IconType.toDrawableRes(): Int = when (this) {
 fun ContentType.toDrawable(): Int = when(this){
     ContentType.TEXT -> R.drawable.ic_file
     ContentType.IMAGE -> R.drawable.ic_image
+}
+
+fun ScreenMode.toContentMode(): QuestionContentMode? = when (this) {
+    ScreenMode.CREATING -> QuestionContentMode.CREATING
+    ScreenMode.EDITING -> QuestionContentMode.EDITING
+    ScreenMode.VIEWING -> null // En modo lectura jamás se invoca guardar
 }

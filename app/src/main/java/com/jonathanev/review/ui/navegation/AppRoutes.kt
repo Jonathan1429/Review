@@ -2,7 +2,7 @@ package com.jonathanev.review.ui.navegation
 
 import androidx.navigation3.runtime.NavKey
 import com.jonathanev.review.presentation.model.FileFormMode
-import com.jonathanev.review.presentation.model.QuestionContentMode
+import com.jonathanev.review.presentation.model.ScreenMode
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -31,13 +31,13 @@ sealed interface AppRoutes : NavKey {
 
     @Serializable
     data class CreateImageScreen(
-        val questionContentMode: QuestionContentMode,
+        val screenMode: ScreenMode,
         val posItem: Int
     ) : AppRoutes
 
     @Serializable
     data class CreateTextScreen(
-        val questionContentMode: QuestionContentMode,
+        val screenMode: ScreenMode,
         val posItem: Int
     ) : AppRoutes
     @Serializable
