@@ -145,33 +145,38 @@ fun CreateTextRoute(
                 if (state.screenMode == ScreenMode.CREATING) 1 else textList.size
             }
 
+// Importante agregar la importación si no la tienes:
+// import android.util.Log
+
             var pendingTargetPage by remember { mutableStateOf<Int?>(null) }
-            var lastPageProcessed by remember { mutableIntStateOf(-1) }
 
-            // Sincronización con ViewModel usando el elemento real de la lista
-            LaunchedEffect(pagerState.currentPage, textList) {
-                val page = pagerState.currentPage
-                if (page != lastPageProcessed || textValueState == null) {
-                    lastPageProcessed = page
-                    val itemAtPage = if (state.screenMode == ScreenMode.CREATING) {
-                        QuestionContentUi.Text("", emptyList())
-                    } else {
-                        textList.getOrNull(page) ?: QuestionContentUi.Text("", emptyList())
-                    }
+// LOG 1: Escuchamos el cambio asentado de la página (settledPage)
+            /*LaunchedEffect(pagerState) {
+                snapshotFlow { pagerState.settledPage }
+                    .collect { page ->
+                        Log.d("PAGER_DEBUG", "--------------------------------------------------")
+                        Log.d("PAGER_DEBUG", "1. Page Settled -> Página Activa: $page")
 
-                    // Solo inicializamos borrador si el ítem actual contiene texto válido
-                    if (state.screenMode == ScreenMode.CREATING || itemAtPage.text.isNotEmpty()) {
                         if (state.screenMode == ScreenMode.EDITING) {
+                            Log.d("PAGER_DEBUG", "2. Actualizando posición en ViewModel -> pos: $page")
                             viewModel.updatePosContent(page)
                         }
 
+                        val itemAtPage = if (state.screenMode == ScreenMode.CREATING) {
+                            QuestionContentUi.Text("", emptyList())
+                        } else {
+                            textList.getOrNull(page) ?: QuestionContentUi.Text("", emptyList())
+                        }
+
+                        Log.d("PAGER_DEBUG", "3. Cargando Ítem de textList[$page] -> Texto en Lista: '${itemAtPage.text}'")
+
+                        // Forzamos la inicialización del borrador con el ítem de la página asentada
                         viewModel.initTextDraft(
                             initialContent = itemAtPage,
                             isEditing = state.screenMode == ScreenMode.EDITING
                         )
                     }
-                }
-            }
+            }*/
 
             val colorInitial = MaterialTheme.colorScheme.onSurface
             val colorSelected = state.colorType.toInt(isDark)
@@ -311,15 +316,21 @@ fun CreateTextRoute(
                             }
                         }
 
-                        // PROTECCIÓN CLAVE: Si el borrador del ViewModel está vacío pero el ítem de la lista TIENE contenido,
-                        // priorizamos mostrar el texto de la lista para que la pantalla NUNCA se vacíe.
-                        val currentTextValue = remember(textValueState, itemAtPage, isCurrentPage) {
-                            if (isCurrentPage && textValueState != null && textValueState!!.text.isNotEmpty()) {
-                                textValueState!!
-                            } else {
+                        var localTextFieldValue by remember(itemAtPage) {
+                            mutableStateOf(
                                 androidx.compose.ui.text.input.TextFieldValue(
                                     annotatedString = itemAtPage.toAnnotatedString()
                                 )
+                            )
+                        }
+
+                        // Sincroniza al ViewModel únicamente cuando la página se vuelve la activa
+                        LaunchedEffect(isCurrentPage) {
+                            if (isCurrentPage) {
+                                if (state.screenMode == ScreenMode.EDITING) {
+                                    viewModel.updatePosContent(page)
+                                }
+                                viewModel.onDraftTextChange(localTextFieldValue)
                             }
                         }
 
@@ -327,7 +338,7 @@ fun CreateTextRoute(
                             guideContext = state.guideContext,
                             colorInitial = colorInitial,
                             selectedColor = selectedColor,
-                            textValue = currentTextValue,
+                            textValue = localTextFieldValue, // <-- Usa directamente el estado local
                             showDialog = state.showDialogColor,
                             onSaveText = { text, colors ->
                                 val operationMode = state.screenMode.toContentMode()
@@ -345,7 +356,7 @@ fun CreateTextRoute(
                             onShowColorDialog = viewModel::showDialogSelectColor,
                             onChangeTextValue = { updatedTextFieldValue ->
                                 val newAnnotatedString = updateAnnotatedStringWithSpans(
-                                    oldAnnotatedString = currentTextValue.annotatedString,
+                                    oldAnnotatedString = localTextFieldValue.annotatedString,
                                     newTextFieldValue = updatedTextFieldValue,
                                     selectedColor = selectedColor,
                                     colorInitial = colorInitial
@@ -357,6 +368,7 @@ fun CreateTextRoute(
                                     composition = updatedTextFieldValue.composition
                                 )
 
+                                localTextFieldValue = finalValue
                                 viewModel.onDraftTextChange(newValue = finalValue)
                             },
                             onDissmissDialog = viewModel::onDismissDialogSelectColor,
