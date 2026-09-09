@@ -191,35 +191,60 @@ fun CreateTextRoute(
                 }
             }
 
-            val checkHasChanges: () -> Boolean = {
-                val currentText = textValueState?.text ?: ""
+            val checkHasChanges: (TextFieldValue?) -> Boolean = { currentDraftValue ->
+                val currentText = currentDraftValue?.text ?: ""
+                val currentPage = pagerState.currentPage
+
                 val itemAtPage = if (state.screenMode == ScreenMode.CREATING) {
                     QuestionContentUi.Text("", emptyList())
                 } else {
-                    textList.getOrNull(pagerState.currentPage) ?: QuestionContentUi.Text("", emptyList())
+                    textList.getOrNull(currentPage) ?: QuestionContentUi.Text("", emptyList())
                 }
 
-                when (state.screenMode) {
-                    ScreenMode.CREATING -> currentText.isNotEmpty()
-                    ScreenMode.EDITING -> {
-                        val currentDraft = textValueState?.let {
-                            QuestionContentUi.Text(
-                                text = it.text,
-                                colorRanges = it.annotatedString.spanStyles.mapNotNull { span ->
-                                    if (span.item.color != Color.Unspecified) {
-                                        ColorRangeUi(span.start, span.end, span.item.color.toArgb())
-                                    } else null
-                                }
-                            )
-                        }
-                        currentDraft != null && (
-                                currentDraft.text != itemAtPage.text ||
-                                        currentDraft.colorRanges != itemAtPage.colorRanges
-                                )
+                Log.d("DEBUG_BACK", "=== CHECK HAS CHANGES ===")
+                Log.d("DEBUG_BACK", "Modo actual: ${state.screenMode}")
+                Log.d("DEBUG_BACK", "Página actual: $currentPage")
+                Log.d("DEBUG_BACK", "Texto borrador (UI): '$currentText'")
+                Log.d("DEBUG_BACK", "Texto original (VM): '${itemAtPage.text}'")
+
+                val result = when (state.screenMode) {
+                    ScreenMode.CREATING -> {
+                        val hasText = currentText.trim().isNotEmpty()
+                        Log.d("DEBUG_BACK", "CREATING -> ¿Tiene texto?: $hasText")
+                        hasText
                     }
 
-                    ScreenMode.VIEWING -> false
+                    ScreenMode.EDITING -> {
+                        if (currentDraftValue == null) {
+                            Log.d("DEBUG_BACK", "EDITING -> currentDraftValue es NULL")
+                            false
+                        } else {
+                            val textHasChanged = currentText != itemAtPage.text
+
+                            val currentDraftColors = currentDraftValue.annotatedString.spanStyles.mapNotNull { span ->
+                                val colorInt = span.item.color.toArgb()
+                                if (colorInt != 0 && span.item.color != Color.Unspecified) {
+                                    ColorRangeUi(span.start, span.end, colorInt)
+                                } else null
+                            }
+
+                            val colorsHaveChanged = currentDraftColors != itemAtPage.colorRanges
+
+                            Log.d("DEBUG_BACK", "EDITING -> ¿Cambió texto?: $textHasChanged")
+                            Log.d("DEBUG_BACK", "EDITING -> ¿Cambiaron colores?: $colorsHaveChanged")
+
+                            textHasChanged || colorsHaveChanged
+                        }
+                    }
+
+                    ScreenMode.VIEWING -> {
+                        Log.d("DEBUG_BACK", "VIEWING -> Retorna false")
+                        false
+                    }
                 }
+
+                Log.d("DEBUG_BACK", ">>> RESULTADO FINAL: $result")
+                result
             }
 
             val nestedScrollConnection = remember(pagerState, textValueState, state.screenMode) {
@@ -229,7 +254,7 @@ fun CreateTextRoute(
                         source: NestedScrollSource
                     ): Offset {
                         if (source == NestedScrollSource.UserInput && abs(available.x) > 25f) {
-                            if (checkHasChanges()) {
+                            if (checkHasChanges(textValueState)) {
                                 val targetPage = if (available.x < 0f) {
                                     (pagerState.currentPage + 1).coerceAtMost(pagerState.pageCount - 1)
                                 } else {
@@ -253,7 +278,8 @@ fun CreateTextRoute(
                     viewModel.updatePosContent(pagerState.currentPage)
                 }
 
-                if (checkHasChanges()) {
+                // Usamos textValueState para la verificación global
+                if (checkHasChanges(textValueState)) {
                     pendingTargetPage = null
                     viewModel.onBackFromEditor()
                 } else {
@@ -263,6 +289,7 @@ fun CreateTextRoute(
             }
 
             BackHandler(onBack = onBackAction)
+
 
             Scaffold(
                 modifier = Modifier
@@ -324,7 +351,29 @@ fun CreateTextRoute(
                             )
                         }
 
-                        // Sincroniza al ViewModel únicamente cuando la página se vuelve la activa
+                        // INTERCEPTOR DEL BOTÓN ATRÁS PARA LA PÁGINA ACTIVA
+                        if (isCurrentPage) {
+                            BackHandler {
+                                Log.d("DEBUG_BACK", "!!! BackHandler presionado en página visible: $page !!!")
+
+                                val hasChanges = checkHasChanges(localTextFieldValue)
+
+                                if (state.screenMode == ScreenMode.EDITING) {
+                                    viewModel.updatePosContent(page)
+                                }
+
+                                if (hasChanges) {
+                                    Log.d("DEBUG_BACK", "Llamando a viewModel.onBackFromEditor() para mostrar el diálogo...")
+                                    pendingTargetPage = null
+                                    viewModel.onBackFromEditor()
+                                } else {
+                                    Log.d("DEBUG_BACK", "Sin cambios, ejecutando onBackNav()...")
+                                    viewModel.clearTextDraft()
+                                    onBackNav()
+                                }
+                            }
+                        }
+
                         LaunchedEffect(isCurrentPage) {
                             if (isCurrentPage) {
                                 if (state.screenMode == ScreenMode.EDITING) {

@@ -322,7 +322,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         }
     }
 
-    fun updatePosContent(currentPos: Int) {
+    fun updatePosContent(currentPos: Int, mode: ScreenMode? = null) {
         if (isSavingContent) {
             isSavingContent = false
             return
@@ -331,7 +331,8 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         updateSuccessState { state ->
             state.copy(
                 posContenidoTexto = if (state.mediaSelected == ContentType.TEXT) currentPos else state.posContenidoTexto,
-                posContenidoImagen = if (state.mediaSelected == ContentType.IMAGE) currentPos else state.posContenidoImagen
+                posContenidoImagen = if (state.mediaSelected == ContentType.IMAGE) currentPos else state.posContenidoImagen,
+                screenMode = mode ?: state.screenMode
             )
         }
     }
