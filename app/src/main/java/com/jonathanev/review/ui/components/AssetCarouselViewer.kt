@@ -54,6 +54,7 @@ fun PreviewAssetCarouselViewer(
                     currentPosContent = 0,
                     onAddAssetClick = { },
                     onOpenAssetClick = { _, _ -> },
+                    onEditingAssetClick = { _, _ -> },
                     onDeleteItemClick = { _, _ -> },
                     onCurrentPosContent = {},
                 )
@@ -71,6 +72,7 @@ fun AssetCarouselViewer(
     currentPosContent: Int,
     onAddAssetClick: (posItem: Int) -> Unit,
     onOpenAssetClick: (QuestionContentUi, posItem: Int) -> Unit,
+    onEditingAssetClick: (QuestionContentUi, posItem: Int) -> Unit,
     onDeleteItemClick: (typeContent: QuestionContentUi, positionItem: Int) -> Unit,
     onCurrentPosContent: (Int) -> Unit,
     onMoveItem: (Int, Int) -> Unit = { _, _ -> }
@@ -116,6 +118,7 @@ fun AssetCarouselViewer(
             mediaForSelected = mediaForSelected,
             guideContext = guideContext,
             onOpenAssetClick = { typeContent, posItem -> onOpenAssetClick(typeContent, posItem) },
+            onEditingAssetClick = { typeContent, posItem -> onEditingAssetClick(typeContent, posItem) },
             onDeleteAssetClick = { typeContent, positionItem ->
                 onDeleteItemClick(typeContent, positionItem)
             }

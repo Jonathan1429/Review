@@ -44,7 +44,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jonathanev.review.R
 import com.jonathanev.review.domain.model.GuideContext
-import com.jonathanev.review.presentation.model.QuestionContentMode
+import com.jonathanev.review.presentation.model.ScreenMode
 import com.jonathanev.review.presentation.state.GuideScreenUiState
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.ui.components.CustomAlertDialog
@@ -52,6 +52,7 @@ import com.jonathanev.review.ui.components.CustomBoxCreateImage
 import com.jonathanev.review.ui.components.ErrorComponent
 import com.jonathanev.review.ui.components.OptionsCreateImage
 import com.jonathanev.review.ui.components.singleClick
+import com.jonathanev.review.ui.mapper.toContentMode
 import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.CreateImageContentProv
 import com.jonathanev.review.ui.preview.providers.CreateImageContentProvider
@@ -81,9 +82,7 @@ fun PreviewCreateImageScreen(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CreateImageRoute(
-    posItem: Int,
     viewModel: SharedFragmentCreateFileViewModel,
-    questionContentMode: QuestionContentMode,
     onBackNav: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -113,13 +112,13 @@ fun CreateImageRoute(
             val snackbarHostState = remember { SnackbarHostState() }
             val scope = rememberCoroutineScope()
 
-            val pagerState = rememberPagerState(initialPage = posItem) {
-                if (questionContentMode == QuestionContentMode.CREATING) 1 else imageList.size
+            val pagerState = rememberPagerState(initialPage = state.posContenidoImagen) {
+                if (state.screenMode == ScreenMode.CREATING) 1 else imageList.size
             }
 
             // Acción centralizada para interceptar el regreso/salida
             val onBackAction = {
-                if (questionContentMode == QuestionContentMode.EDITING) {
+                if (state.screenMode == ScreenMode.EDITING) {
                     viewModel.updatePosContent(pagerState.currentPage)
                 }
 
@@ -134,7 +133,7 @@ fun CreateImageRoute(
 
             // Sincronizar posición con el ViewModel en modo EDICIÓN
             LaunchedEffect(pagerState.currentPage) {
-                if (questionContentMode == QuestionContentMode.EDITING) {
+                if (state.screenMode == ScreenMode.EDITING) {
                     viewModel.updatePosContent(pagerState.currentPage)
                 }
             }
@@ -155,7 +154,7 @@ fun CreateImageRoute(
                         .fillMaxSize()
                         .then(
                             // Si está en modo CREATING, interceptamos el arrastre para avisar al usuario
-                            if (questionContentMode == QuestionContentMode.CREATING) {
+                            if (state.screenMode == ScreenMode.CREATING) {
                                 Modifier.pointerInput(Unit) {
                                     detectHorizontalDragGestures { _, dragAmount ->
                                         if (abs(dragAmount) > 10f) {
@@ -171,12 +170,13 @@ fun CreateImageRoute(
                                 }
                             } else Modifier
                         ),
-                    userScrollEnabled = questionContentMode == QuestionContentMode.EDITING,
+                    userScrollEnabled = state.screenMode == ScreenMode.EDITING,
                     beyondViewportPageCount = 1,
                     key = { page ->
-                        when (questionContentMode) {
-                            QuestionContentMode.CREATING -> newlyPickedUri ?: "creating"
-                            QuestionContentMode.EDITING -> {
+                        when (state.screenMode) {
+                            ScreenMode.CREATING -> newlyPickedUri ?: "creating"
+                            ScreenMode.EDITING,
+                            ScreenMode.VIEWING -> {
                                 if (page == pagerState.currentPage && newlyPickedUri != null) {
                                     newlyPickedUri!!
                                 } else {
@@ -186,17 +186,21 @@ fun CreateImageRoute(
                         }
                     }
                 ) { page ->
-                    val uriImage = when (questionContentMode) {
-                        QuestionContentMode.CREATING -> {
+                    val uriImage = when (state.screenMode) {
+                        ScreenMode.CREATING -> {
                             newlyPickedUri ?: ""
                         }
 
-                        QuestionContentMode.EDITING -> {
+                        ScreenMode.EDITING -> {
                             if (page == pagerState.currentPage && newlyPickedUri != null) {
                                 newlyPickedUri!!
                             } else {
                                 imageList.getOrNull(page)?.uri ?: ""
                             }
+                        }
+
+                        ScreenMode.VIEWING -> {
+                            imageList.getOrNull(page)?.uri ?: ""
                         }
                     }
 
@@ -209,17 +213,20 @@ fun CreateImageRoute(
                             )
                         },
                         imageUploaded = {
-                            val targetPage = if (questionContentMode == QuestionContentMode.CREATING) {
-                                posItem
+                            val targetPage = if (state.screenMode == ScreenMode.CREATING) {
+                                state.posContenidoImagen
                             } else {
                                 pagerState.currentPage
                             }
 
-                            viewModel.confirmSaveImage(
-                                uri = uriImage,
-                                currentPage = targetPage,
-                                questionContentMode = questionContentMode
-                            )
+                            val operationMode = state.screenMode.toContentMode()
+                            if (operationMode != null) {
+                                viewModel.confirmSaveImage(
+                                    uri = uriImage,
+                                    currentPage = targetPage,
+                                    questionContentMode = operationMode
+                                )
+                            }
                             newlyPickedUri = null
                             onBackNav()
                         },

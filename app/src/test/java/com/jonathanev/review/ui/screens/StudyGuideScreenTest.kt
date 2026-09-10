@@ -79,6 +79,7 @@ class StudyGuideScreenTest {
                             onCardTypeClicked = {},
                             onFilterTypeClicked = {},
                             onOpenAssetClick = { _, _ -> },
+                            onEditingAssetClick = { _, _ -> },
                             onDeleteItemClick = { _, _ -> },
 
                             // AQUÍ: Al hacer clic en agregar, cambiamos el estado para navegar a CreateText
@@ -174,6 +175,7 @@ class StudyGuideScreenTest {
                             onCardTypeClicked = {},
                             onFilterTypeClicked = {},
                             onOpenAssetClick = { _, _ -> },
+                            onEditingAssetClick = { _, _ -> },
                             onDeleteItemClick = { _, _ -> },
                             onAddAssetClick = {
                                 textValueState = TextFieldValue("")

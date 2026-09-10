@@ -24,7 +24,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.jonathanev.review.presentation.model.FileFormMode
-import com.jonathanev.review.presentation.model.QuestionContentMode
+import com.jonathanev.review.presentation.model.ScreenMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
 import com.jonathanev.review.presentation.viewmodel.CreateFilesViewModel
 import com.jonathanev.review.presentation.viewmodel.FragReviewEntryViewModel
@@ -277,12 +277,12 @@ fun BasicNavigation() {
             entry<AppRoutes.StudyGuideScreen> {
                 StudyGuideRoute(
                     viewModel = viewModelSharedCreateFile,
-                    onOpenAssetClick = { typeContent, posItem ->
+                    onEditingAssetClick = { typeContent, posItem ->
                         when (typeContent) {
                             is QuestionContentUi.Image -> {
                                 backStack.add(
                                     AppRoutes.CreateImageScreen(
-                                        questionContentMode = QuestionContentMode.EDITING,
+                                        screenMode = ScreenMode.EDITING,
                                         posItem = posItem
                                     )
                                 )
@@ -299,7 +299,36 @@ fun BasicNavigation() {
                             is QuestionContentUi.Text -> {
                                 backStack.add(
                                     AppRoutes.CreateTextScreen(
-                                        questionContentMode = QuestionContentMode.EDITING,
+                                        screenMode = ScreenMode.EDITING,
+                                        posItem = posItem
+                                    )
+                                )
+                            }
+                        }
+                    },
+                    onOpenAssetClick = { typeContent, posItem ->
+                        when (typeContent) {
+                            is QuestionContentUi.Image -> {
+                                backStack.add(
+                                    AppRoutes.CreateImageScreen(
+                                        screenMode = ScreenMode.VIEWING,
+                                        posItem = posItem
+                                    )
+                                )
+                            }
+
+                            QuestionContentUi.None -> {
+                                Toast.makeText(
+                                    context,
+                                    "No se puede procesar la solicitud",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+
+                            is QuestionContentUi.Text -> {
+                                backStack.add(
+                                    AppRoutes.CreateTextScreen(
+                                        screenMode = ScreenMode.VIEWING,
                                         posItem = posItem
                                     )
                                 )
@@ -311,7 +340,7 @@ fun BasicNavigation() {
                             ContentType.TEXT ->
                                 backStack.add(
                                     AppRoutes.CreateTextScreen(
-                                        questionContentMode = QuestionContentMode.CREATING,
+                                        screenMode = ScreenMode.CREATING,
                                         posItem = posItem
                                     )
                                 )
@@ -319,7 +348,7 @@ fun BasicNavigation() {
                             ContentType.IMAGE -> {
                                 backStack.add(
                                     AppRoutes.CreateImageScreen(
-                                        questionContentMode = QuestionContentMode.CREATING,
+                                        screenMode = ScreenMode.CREATING,
                                         posItem = posItem
                                     )
                                 )
@@ -342,8 +371,6 @@ fun BasicNavigation() {
 
             entry<AppRoutes.CreateImageScreen> { values ->
                 CreateImageRoute(
-                    questionContentMode = values.questionContentMode,
-                    posItem = values.posItem,
                     viewModel = viewModelSharedCreateFile,
                     onBackNav = { backStack.removeLastOrNull() }
                 )
@@ -351,9 +378,7 @@ fun BasicNavigation() {
 
             entry<AppRoutes.CreateTextScreen> { values ->
                 CreateTextRoute(
-                    questionContentMode = values.questionContentMode,
                     viewModel = viewModelSharedCreateFile,
-                    posItem = values.posItem,
                     onSaveText = { backStack.removeLastOrNull() },
                     onBackNav = { backStack.removeLastOrNull() }
                 )

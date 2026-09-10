@@ -46,7 +46,6 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -61,6 +60,7 @@ import com.jonathanev.review.R
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.presentation.event.CreateGuideEvent
 import com.jonathanev.review.presentation.model.QuestionContentUi
+import com.jonathanev.review.presentation.model.ScreenMode
 import com.jonathanev.review.presentation.state.GuideScreenUiState
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
 import com.jonathanev.review.ui.components.AssetCarouselViewer
@@ -106,6 +106,7 @@ fun PreviewStudyGuideScreen(
             onCardTypeClicked = {},
             onFilterTypeClicked = {},
             onOpenAssetClick = { _, _ -> },
+            onEditingAssetClick = { _, _ -> },
             onDeleteItemClick = { _, _ -> },
             onAddAssetClick = {},
             onAddQuestion = {},
@@ -120,6 +121,7 @@ fun PreviewStudyGuideScreen(
 fun StudyGuideRoute(
     viewModel: SharedFragmentCreateFileViewModel,
     onOpenAssetClick: (QuestionContentUi, posItem: Int) -> Unit,
+    onEditingAssetClick: (QuestionContentUi, posItem: Int) -> Unit,
     onAddAssetClick: (ContentType, posItem: Int) -> Unit,
     onActionGuideNone: () -> Unit,
     onCloseGuide: () -> Unit
@@ -295,12 +297,17 @@ fun StudyGuideRoute(
                     viewModel.onFilterTypeChanged(filterTypeClicked = filterTypeClicked)
                 },
                 onOpenAssetClick = { typeContent, posItem ->
-                    onOpenAssetClick(
-                        typeContent,
-                        posItem
-                    )
+                    viewModel.updatePosContent(posItem, mode = ScreenMode.VIEWING)
+                    onOpenAssetClick(typeContent, posItem)
                 },
-                onAddAssetClick = { posItem -> onAddAssetClick(mediaSelected, posItem) },
+                onEditingAssetClick = { typeContent, posItem ->
+                    viewModel.updatePosContent(posItem, mode = ScreenMode.EDITING)
+                    onEditingAssetClick(typeContent, posItem)
+                },
+                onAddAssetClick = { posItem ->
+                    viewModel.updatePosContent(posItem, mode = ScreenMode.CREATING)
+                    onAddAssetClick(mediaSelected, posItem)
+                },
                 onAddQuestion = viewModel::addNextQuestion,
                 onCloseGuide = {
                     when (state.guideContext) {
@@ -367,6 +374,7 @@ fun FillingGuideScreen(
     onCardTypeClicked: (QAType) -> Unit,
     onFilterTypeClicked: (ContentType) -> Unit,
     onOpenAssetClick: (QuestionContentUi, posItem: Int) -> Unit,
+    onEditingAssetClick: (QuestionContentUi, posItem: Int) -> Unit,
     onDeleteItemClick: (typeContent: QuestionContentUi, positionItem: Int) -> Unit,
     onAddAssetClick: (posItem: Int) -> Unit,
     onAddQuestion: () -> Unit,
@@ -456,6 +464,12 @@ fun FillingGuideScreen(
                     },
                     onOpenAssetClick = { typeContent, posItem ->
                         onOpenAssetClick(
+                            typeContent,
+                            posItem
+                        )
+                    },
+                    onEditingAssetClick = { typeContent, posItem ->
+                        onEditingAssetClick(
                             typeContent,
                             posItem
                         )
@@ -670,8 +684,10 @@ private fun PlusOneAnimation(
     Box(Modifier.fillMaxSize()) {
         if (!showPulse) {
             // Usamos startOffset si está asignado; si no, fallback al lado izquierdo (20% del ancho)
-            val originX = if (startOffset != Offset.Zero) startOffset.x else with(density) { 48.dp.toPx() }
-            val originY = if (startOffset != Offset.Zero) startOffset.y else with(density) { 600.dp.toPx() }
+            val originX =
+                if (startOffset != Offset.Zero) startOffset.x else with(density) { 48.dp.toPx() }
+            val originY =
+                if (startOffset != Offset.Zero) startOffset.y else with(density) { 600.dp.toPx() }
 
             // +1 dirigiéndose al contador "Actual"
             MovingPlusOne(

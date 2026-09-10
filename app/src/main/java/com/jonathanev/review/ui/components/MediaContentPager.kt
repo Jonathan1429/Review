@@ -79,6 +79,7 @@ fun PreviewMediaContentPager(
                 mediaForSelected = data.mediaForSelected,
                 guideContext = data.guideContext,
                 onOpenAssetClick = { _, _ -> },
+                onEditingAssetClick = { _, _ -> },
                 onDeleteAssetClick = { _, _ -> },
             )
         }
@@ -92,6 +93,7 @@ fun MediaContentPager(
     mediaForSelected: ContentType,
     guideContext: GuideContext,
     onOpenAssetClick: (typeContent: QuestionContentUi, posItem: Int) -> Unit,
+    onEditingAssetClick: (typeContent: QuestionContentUi, posItem: Int) -> Unit,
     onDeleteAssetClick: (typeContent: QuestionContentUi, posItem: Int) -> Unit,
 ) {
     val resourceSelected =
@@ -188,7 +190,11 @@ fun MediaContentPager(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .singleClick {
-                                    onOpenAssetClick(assetInPage, page)
+                                    if (guideContext is GuideContext.Browsing){
+                                        onOpenAssetClick(assetInPage, pagerState.currentPage)
+                                    } else  {
+                                        onEditingAssetClick(assetInPage, pagerState.currentPage)
+                                    }
                                 }
                         )
                     }
@@ -243,7 +249,11 @@ fun MediaContentPager(
                             modifier = Modifier
                                 .singleClick(onClick = {
                                     currentAsset?.let { asset ->
-                                        onOpenAssetClick(asset, pagerState.currentPage)
+                                        if (guideContext is GuideContext.Browsing){
+                                            onOpenAssetClick(asset, pagerState.currentPage)
+                                        } else  {
+                                            onEditingAssetClick(asset, pagerState.currentPage)
+                                        }
                                     }
                                 })
                                 .padding(6.dp)

@@ -50,10 +50,10 @@ fun CustomBoxCreateText(
     var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
     var containerHeight by remember { mutableStateOf(0) }
 
-    // Convertimos dps a px para el margen de respiro alrededor del cursor
     val density = LocalDensity.current
     val extraPaddingPx = with(density) { 80.dp.toPx().toInt() }
 
+    // Función suspendida limpia sin bucles
     suspend fun scrollToCursorIfNeeded() {
         val layout = textLayoutResult ?: return
         if (containerHeight <= 0) return
@@ -61,27 +61,24 @@ fun CustomBoxCreateText(
         val cursorOffset = textValue.selection.start
         val line = layout.getLineForOffset(cursorOffset.coerceIn(0, textValue.text.length))
 
-        // Puntos de referencia vertical de la línea actual
         val lineBottom = layout.getLineBottom(line).toInt()
         val lineTop = layout.getLineTop(line).toInt()
 
         val currentScroll = scrollState.value
         val visibleBottom = currentScroll + containerHeight
 
-        // Si la línea (o el salto con Enter) toca o rebasa la zona visible inferior
         if (lineBottom + extraPaddingPx > visibleBottom) {
             val targetScroll = (lineBottom + extraPaddingPx) - containerHeight
-            scrollState.animateScrollTo(targetScroll.coerceAtMost(scrollState.maxValue))
-        }
-        // Si el cursor está por encima del borde superior visible
-        else if (lineTop - extraPaddingPx < currentScroll) {
+            // Usamos scrollTo en lugar de animateScrollTo para evitar animaciones encadenadas en bucle
+            scrollState.scrollTo(targetScroll.coerceAtMost(scrollState.maxValue))
+        } else if (lineTop - extraPaddingPx < currentScroll) {
             val targetScroll = (lineTop - extraPaddingPx).coerceAtLeast(0)
-            scrollState.animateScrollTo(targetScroll)
+            scrollState.scrollTo(targetScroll)
         }
     }
 
-    // Se ejecuta al cambiar el texto/cursor o cuando el tamaño del contenedor cambia (teclado abre/cierra)
-    LaunchedEffect(textValue.selection, containerHeight) {
+    // SOLO se dispara cuando cambia la selección, Y cuando no hay un scroll manual del usuario
+    LaunchedEffect(textValue.selection.start, containerHeight) {
         if (!scrollState.isScrollInProgress) {
             scrollToCursorIfNeeded()
         }
@@ -91,9 +88,7 @@ fun CustomBoxCreateText(
         modifier = modifier
             .fillMaxSize()
             .onSizeChanged { containerHeight = it.height }
-            // 1. Prioridad absoluta al gesto manual de desplazamiento
             .verticalScroll(scrollState)
-            // 2. Toque en zona vacía para enfocar sin interceptar scroll
             .pointerInput(readOnly) {
                 if (!readOnly) {
                     detectTapGestures {

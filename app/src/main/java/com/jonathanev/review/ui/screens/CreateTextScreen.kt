@@ -23,7 +23,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -54,8 +53,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.jonathanev.review.R
 import com.jonathanev.review.domain.model.GuideContext
 import com.jonathanev.review.presentation.model.ColorRangeUi
-import com.jonathanev.review.presentation.model.QuestionContentMode
 import com.jonathanev.review.presentation.model.QuestionContentUi
+import com.jonathanev.review.presentation.model.ScreenMode
 import com.jonathanev.review.presentation.model.SpanPalabraModel
 import com.jonathanev.review.presentation.state.GuideScreenUiState
 import com.jonathanev.review.presentation.viewmodel.SharedFragmentCreateFileViewModel
@@ -64,6 +63,7 @@ import com.jonathanev.review.ui.components.CustomAlertDialog
 import com.jonathanev.review.ui.components.CustomBoxCreateText
 import com.jonathanev.review.ui.components.ErrorComponent
 import com.jonathanev.review.ui.components.OptionsCreateText
+import com.jonathanev.review.ui.mapper.toContentMode
 import com.jonathanev.review.ui.mapper.toInt
 import com.jonathanev.review.ui.preview.DevicePreviews
 import com.jonathanev.review.ui.preview.providers.CreateTextScreenProv
@@ -72,6 +72,8 @@ import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.cardStepBackground
 import kotlinx.coroutines.launch
 import kotlin.math.abs
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 @DevicePreviews
 @Composable
@@ -100,10 +102,8 @@ fun PreviewTextScreen(
 @Composable
 fun CreateTextRoute(
     viewModel: SharedFragmentCreateFileViewModel,
-    posItem: Int,
     onSaveText: () -> Unit,
-    onBackNav: () -> Unit,
-    questionContentMode: QuestionContentMode
+    onBackNav: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -126,68 +126,66 @@ fun CreateTextRoute(
 
         is GuideScreenUiState.Success -> {
             val textList by viewModel.textList.collectAsStateWithLifecycle()
+            val textValueState by viewModel.draftTextValue.collectAsStateWithLifecycle()
+
+            if (state.screenMode != ScreenMode.CREATING && textList.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+                return
+            }
+
             val isDark = isSystemInDarkTheme()
             val coroutineScope = rememberCoroutineScope()
-
-            // Controladores para la notificación de aviso al arrastrar
             val snackbarHostState = remember { SnackbarHostState() }
 
-            val pagerState = rememberPagerState(initialPage = posItem) {
-                if (questionContentMode == QuestionContentMode.CREATING) 1 else textList.size
+            val initialPage = state.posContenidoTexto.coerceIn(0, (textList.size - 1).coerceAtLeast(0))
+            val pagerState = rememberPagerState(initialPage = initialPage) {
+                if (state.screenMode == ScreenMode.CREATING) 1 else textList.size
             }
+
+// Importante agregar la importación si no la tienes:
+// import android.util.Log
 
             var pendingTargetPage by remember { mutableStateOf<Int?>(null) }
-            var previousPage by rememberSaveable { mutableIntStateOf(pagerState.currentPage) }
 
-            // Log de control para ver recomposiciones de la vista
-            SideEffect {
-                Log.d("PAGER_DEBUG", "Recomposición Success | currentPage: ${pagerState.currentPage}, settledPage: ${pagerState.settledPage}")
-            }
+// LOG 1: Escuchamos el cambio asentado de la página (settledPage)
+            /*LaunchedEffect(pagerState) {
+                snapshotFlow { pagerState.settledPage }
+                    .collect { page ->
+                        Log.d("PAGER_DEBUG", "--------------------------------------------------")
+                        Log.d("PAGER_DEBUG", "1. Page Settled -> Página Activa: $page")
 
-            // Sincroniza el pagerState cuando la pantalla recibe un posItem actualizado
-            LaunchedEffect(posItem) {
-                if (pagerState.currentPage != posItem && posItem in 0 until pagerState.pageCount) {
-                    Log.d("PAGER_DEBUG", "Sincronizando pagerState.scrollToPage($posItem)")
-                    pagerState.scrollToPage(posItem)
-                }
-            }
+                        if (state.screenMode == ScreenMode.EDITING) {
+                            Log.d("PAGER_DEBUG", "2. Actualizando posición en ViewModel -> pos: $page")
+                            viewModel.updatePosContent(page)
+                        }
 
-            // 1. Escuchamos cambios de página en el Pager
-            LaunchedEffect(pagerState) {
-                snapshotFlow { pagerState.currentPage }.collect { page ->
-                    Log.d("PAGER_DEBUG", "Nueva página seleccionada en Pager: $page")
+                        val itemAtPage = if (state.screenMode == ScreenMode.CREATING) {
+                            QuestionContentUi.Text("", emptyList())
+                        } else {
+                            textList.getOrNull(page) ?: QuestionContentUi.Text("", emptyList())
+                        }
 
-                    if (questionContentMode == QuestionContentMode.EDITING) {
-                        viewModel.updatePosContent(page)
+                        Log.d("PAGER_DEBUG", "3. Cargando Ítem de textList[$page] -> Texto en Lista: '${itemAtPage.text}'")
+
+                        // Forzamos la inicialización del borrador con el ítem de la página asentada
+                        viewModel.initTextDraft(
+                            initialContent = itemAtPage,
+                            isEditing = state.screenMode == ScreenMode.EDITING
+                        )
                     }
-
-                    if (previousPage != page) {
-                        Log.d("PAGER_DEBUG", "Página cambió de $previousPage a $page. Limpiando borrador.")
-                        viewModel.clearTextDraft()
-                        previousPage = page
-                    }
-
-                    val itemAtPage = if (questionContentMode == QuestionContentMode.CREATING) {
-                        QuestionContentUi.Text("", emptyList())
-                    } else {
-                        textList.getOrNull(page) ?: QuestionContentUi.Text("", emptyList())
-                    }
-
-                    viewModel.initTextDraft(
-                        initialContent = itemAtPage,
-                        isEditing = questionContentMode == QuestionContentMode.EDITING
-                    )
-                }
-            }
+            }*/
 
             val colorInitial = MaterialTheme.colorScheme.onSurface
             val colorSelected = state.colorType.toInt(isDark)
-            var selectedColorInt by remember(colorSelected) {
+            val selectedColorInt by remember(colorSelected) {
                 mutableIntStateOf(colorSelected)
             }
             val selectedColor = Color(selectedColorInt)
-
-            val textValueState by viewModel.draftTextValue.collectAsStateWithLifecycle()
 
             LaunchedEffect(Unit) {
                 viewModel.updateItemTrigger.collect {
@@ -195,59 +193,80 @@ fun CreateTextRoute(
                 }
             }
 
-            val checkHasChanges: () -> Boolean = {
-                val currentText = textValueState?.text ?: ""
-                val itemAtPage = if (questionContentMode == QuestionContentMode.CREATING) {
+            val checkHasChanges: (TextFieldValue?) -> Boolean = { currentDraftValue ->
+                val currentText = currentDraftValue?.text ?: ""
+                val currentPage = pagerState.currentPage
+
+                val itemAtPage = if (state.screenMode == ScreenMode.CREATING) {
                     QuestionContentUi.Text("", emptyList())
                 } else {
-                    textList.getOrNull(pagerState.currentPage) ?: QuestionContentUi.Text("", emptyList())
+                    textList.getOrNull(currentPage) ?: QuestionContentUi.Text("", emptyList())
                 }
 
-                val currentDraft = textValueState?.let {
-                    QuestionContentUi.Text(
-                        text = it.text,
-                        colorRanges = it.annotatedString.spanStyles.mapNotNull { span ->
-                            if (span.item.color != Color.Unspecified) {
-                                ColorRangeUi(span.start, span.end, span.item.color.toArgb())
-                            } else null
+                Log.d("DEBUG_BACK", "=== CHECK HAS CHANGES ===")
+                Log.d("DEBUG_BACK", "Modo actual: ${state.screenMode}")
+                Log.d("DEBUG_BACK", "Página actual: $currentPage")
+                Log.d("DEBUG_BACK", "Texto borrador (UI): '$currentText'")
+                Log.d("DEBUG_BACK", "Texto original (VM): '${itemAtPage.text}'")
+
+                val result = when (state.screenMode) {
+                    ScreenMode.CREATING -> {
+                        val hasText = currentText.trim().isNotEmpty()
+                        Log.d("DEBUG_BACK", "CREATING -> ¿Tiene texto?: $hasText")
+                        hasText
+                    }
+
+                    ScreenMode.EDITING -> {
+                        if (currentDraftValue == null) {
+                            Log.d("DEBUG_BACK", "EDITING -> currentDraftValue es NULL")
+                            false
+                        } else {
+                            val textHasChanged = currentText != itemAtPage.text
+
+                            val currentDraftColors = currentDraftValue.annotatedString.spanStyles.mapNotNull { span ->
+                                val colorInt = span.item.color.toArgb()
+                                if (colorInt != 0 && span.item.color != Color.Unspecified) {
+                                    ColorRangeUi(span.start, span.end, colorInt)
+                                } else null
+                            }
+
+                            val colorsHaveChanged = currentDraftColors != itemAtPage.colorRanges
+
+                            Log.d("DEBUG_BACK", "EDITING -> ¿Cambió texto?: $textHasChanged")
+                            Log.d("DEBUG_BACK", "EDITING -> ¿Cambiaron colores?: $colorsHaveChanged")
+
+                            textHasChanged || colorsHaveChanged
                         }
-                    )
+                    }
+
+                    ScreenMode.VIEWING -> {
+                        Log.d("DEBUG_BACK", "VIEWING -> Retorna false")
+                        false
+                    }
                 }
 
-                val hasChanges = if (questionContentMode == QuestionContentMode.CREATING) {
-                    currentText.isNotEmpty()
-                } else {
-                    currentDraft != null && (
-                            currentDraft.text != itemAtPage.text ||
-                                    currentDraft.colorRanges != itemAtPage.colorRanges
-                            )
-                }
-
-                Log.d("PAGER_DEBUG", "checkHasChanges() -> $hasChanges | Texto draft: '${currentDraft?.text}' vs original: '${itemAtPage.text}'")
-                hasChanges
+                Log.d("DEBUG_BACK", ">>> RESULTADO FINAL: $result")
+                result
             }
 
-            // Interceptor de Swipe con Logs para modo EDICIÓN
-            val nestedScrollConnection = remember(pagerState, textValueState) {
+            val nestedScrollConnection = remember(pagerState, textValueState, state.screenMode) {
                 object : NestedScrollConnection {
-                    override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                        if (source == NestedScrollSource.UserInput && abs(available.x) > 0f) {
-                            Log.d("PAGER_DEBUG", "Gesto Swipe detectado | dx: ${available.x}")
-
-                            if (checkHasChanges()) {
+                    override fun onPreScroll(
+                        available: Offset,
+                        source: NestedScrollSource
+                    ): Offset {
+                        if (source == NestedScrollSource.UserInput && abs(available.x) > 25f) {
+                            if (checkHasChanges(textValueState)) {
                                 val targetPage = if (available.x < 0f) {
                                     (pagerState.currentPage + 1).coerceAtMost(pagerState.pageCount - 1)
                                 } else {
                                     (pagerState.currentPage - 1).coerceAtLeast(0)
                                 }
 
-                                Log.d("PAGER_DEBUG", "Swipe Bloqueado por cambios. currentPage: ${pagerState.currentPage} -> targetPage calculada: $targetPage")
-
                                 if (targetPage != pagerState.currentPage) {
                                     pendingTargetPage = targetPage
-                                    Log.d("PAGER_DEBUG", "Mostrando diálogo de descarte. pendingTargetPage fijada en: $targetPage")
                                     viewModel.onBackFromEditor()
-                                    return Offset(available.x, 0f)
+                                    return available
                                 }
                             }
                         }
@@ -257,18 +276,15 @@ fun CreateTextRoute(
             }
 
             val onBackAction = {
-                Log.d("PAGER_DEBUG", "onBackAction ejecutado en página actual: ${pagerState.currentPage}")
-
-                if (questionContentMode == QuestionContentMode.EDITING) {
+                if (state.screenMode == ScreenMode.EDITING) {
                     viewModel.updatePosContent(pagerState.currentPage)
                 }
 
-                if (checkHasChanges()) {
+                // Usamos textValueState para la verificación global
+                if (checkHasChanges(textValueState)) {
                     pendingTargetPage = null
-                    Log.d("PAGER_DEBUG", "Acción Atrás bloqueada por cambios. Mostrando diálogo.")
                     viewModel.onBackFromEditor()
                 } else {
-                    Log.d("PAGER_DEBUG", "Acción Atrás ejecutada sin cambios. Salida normal a posición ${pagerState.currentPage}.")
                     viewModel.clearTextDraft()
                     onBackNav()
                 }
@@ -276,8 +292,11 @@ fun CreateTextRoute(
 
             BackHandler(onBack = onBackAction)
 
+
             Scaffold(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .imePadding()
             ) { padding ->
                 Box(
                     modifier = Modifier
@@ -290,8 +309,7 @@ fun CreateTextRoute(
                             .fillMaxSize()
                             .nestedScroll(nestedScrollConnection)
                             .then(
-                                // Si está en modo CREATING, interceptamos el arrastre para avisar al usuario
-                                if (questionContentMode == QuestionContentMode.CREATING) {
+                                if (state.screenMode == ScreenMode.CREATING) {
                                     Modifier.pointerInput(Unit) {
                                         detectHorizontalDragGestures { _, dragAmount ->
                                             if (abs(dragAmount) > 10f) {
@@ -307,35 +325,66 @@ fun CreateTextRoute(
                                     }
                                 } else Modifier
                             ),
-                        userScrollEnabled = questionContentMode == QuestionContentMode.EDITING,
+                        userScrollEnabled = state.screenMode != ScreenMode.CREATING,
                         beyondViewportPageCount = 1,
                         key = { page ->
-                            val item = if (questionContentMode == QuestionContentMode.CREATING) {
-                                null
-                            } else {
-                                textList.getOrNull(page)
-                            }
+                            val item = if (state.screenMode == ScreenMode.CREATING) null else textList.getOrNull(page)
                             when (item) {
-                                is QuestionContentUi.Text -> "txt_${item.text.hashCode()}_$page"
+                                is QuestionContentUi.Text -> "txt_${item.id}"
                                 else -> "page_$page"
                             }
                         }
                     ) { page ->
-                        val itemAtPage = remember(textList, page, questionContentMode) {
-                            if (questionContentMode == QuestionContentMode.CREATING) {
+                        val isCurrentPage = page == pagerState.currentPage
+
+                        val itemAtPage = remember(textList, page, state.screenMode) {
+                            if (state.screenMode == ScreenMode.CREATING) {
                                 QuestionContentUi.Text("", emptyList())
                             } else {
                                 textList.getOrNull(page) ?: QuestionContentUi.Text("", emptyList())
                             }
                         }
 
-                        val textValueAtPage = if (page == pagerState.currentPage) {
-                            textValueState ?: remember(itemAtPage) {
-                                TextFieldValue(annotatedString = itemAtPage.toAnnotatedString())
+                        var localTextFieldValue by rememberSaveable(
+                            itemAtPage,
+                            stateSaver = TextFieldValue.Saver
+                        ) {
+                            mutableStateOf(
+                                TextFieldValue(
+                                    annotatedString = itemAtPage.toAnnotatedString()
+                                )
+                            )
+                        }
+
+                        // INTERCEPTOR DEL BOTÓN ATRÁS PARA LA PÁGINA ACTIVA
+                        if (isCurrentPage) {
+                            BackHandler {
+                                Log.d("DEBUG_BACK", "!!! BackHandler presionado en página visible: $page !!!")
+
+                                val hasChanges = checkHasChanges(localTextFieldValue)
+
+                                if (state.screenMode == ScreenMode.EDITING) {
+                                    viewModel.updatePosContent(page)
+                                }
+
+                                if (hasChanges) {
+                                    Log.d("DEBUG_BACK", "Llamando a viewModel.onBackFromEditor() para mostrar el diálogo...")
+                                    pendingTargetPage = null
+                                    viewModel.onBackFromEditor()
+                                } else {
+                                    Log.d("DEBUG_BACK", "Sin cambios, ejecutando onBackNav()...")
+                                    viewModel.clearTextDraft()
+                                    onBackNav()
+                                }
                             }
-                        } else {
-                            remember(itemAtPage) {
-                                TextFieldValue(annotatedString = itemAtPage.toAnnotatedString())
+                        }
+
+                        LaunchedEffect(isCurrentPage) {
+                            if (isCurrentPage) {
+                                if (state.screenMode == ScreenMode.EDITING) {
+                                    viewModel.updatePosContent(page)
+                                }
+                                viewModel.onDraftTextChange(localTextFieldValue)
                             }
                         }
 
@@ -343,15 +392,17 @@ fun CreateTextRoute(
                             guideContext = state.guideContext,
                             colorInitial = colorInitial,
                             selectedColor = selectedColor,
-                            textValue = textValueAtPage,
+                            textValue = localTextFieldValue, // <-- Usa directamente el estado local
                             showDialog = state.showDialogColor,
                             onSaveText = { text, colors ->
-                                Log.d("PAGER_DEBUG", "onSaveText ejecutado en página: ${pagerState.currentPage}")
-                                viewModel.addTextContent(
-                                    textWithLabels = text,
-                                    listSpans = colors,
-                                    questionContentMode = questionContentMode
-                                )
+                                val operationMode = state.screenMode.toContentMode()
+                                if (operationMode != null) {
+                                    viewModel.addTextContent(
+                                        textWithLabels = text,
+                                        listSpans = colors,
+                                        questionContentMode = operationMode
+                                    )
+                                }
                             },
                             onClearColorClick = {
                                 viewModel.clearColorsFromDraft()
@@ -359,7 +410,7 @@ fun CreateTextRoute(
                             onShowColorDialog = viewModel::showDialogSelectColor,
                             onChangeTextValue = { updatedTextFieldValue ->
                                 val newAnnotatedString = updateAnnotatedStringWithSpans(
-                                    oldAnnotatedString = textValueAtPage.annotatedString,
+                                    oldAnnotatedString = localTextFieldValue.annotatedString,
                                     newTextFieldValue = updatedTextFieldValue,
                                     selectedColor = selectedColor,
                                     colorInitial = colorInitial
@@ -367,9 +418,11 @@ fun CreateTextRoute(
 
                                 val finalValue = updatedTextFieldValue.copy(
                                     annotatedString = newAnnotatedString,
-                                    composition = null
+                                    selection = updatedTextFieldValue.selection,
+                                    composition = updatedTextFieldValue.composition
                                 )
 
+                                localTextFieldValue = finalValue
                                 viewModel.onDraftTextChange(newValue = finalValue)
                             },
                             onDissmissDialog = viewModel::onDismissDialogSelectColor,
@@ -381,7 +434,6 @@ fun CreateTextRoute(
                         )
                     }
 
-                    // Componente flotante que muestra el mensaje de aviso en la parte inferior
                     SnackbarHost(
                         hostState = snackbarHostState,
                         modifier = Modifier
@@ -393,7 +445,6 @@ fun CreateTextRoute(
 
             if (state.showDialogDiscardDraft) {
                 Dialog(onDismissRequest = {
-                    Log.d("PAGER_DEBUG", "Diálogo descartado sin confirmar")
                     pendingTargetPage = null
                     viewModel.onDismissDiscardDraft()
                 }) {
@@ -401,19 +452,15 @@ fun CreateTextRoute(
                         title = stringResource(R.string.lblDiscardChangesTitle),
                         message = stringResource(R.string.lblDiscardChangesMessage),
                         onDismissRequest = {
-                            Log.d("PAGER_DEBUG", "Diálogo descartado sin confirmar")
                             pendingTargetPage = null
                             viewModel.onDismissDiscardDraft()
                         },
                         onConfirm = {
-                            Log.d("PAGER_DEBUG", "Diálogo CONFIRMADO. pendingTargetPage: $pendingTargetPage")
                             viewModel.onConfirmDiscardDraft()
 
                             val target = pendingTargetPage
                             if (target != null) {
-                                Log.d("PAGER_DEBUG", "Iniciando scroll animado hacia target: $target")
-                                if (questionContentMode == QuestionContentMode.EDITING) {
-                                    Log.d("PAGER_DEBUG", "Forzando viewModel.updatePosContent($target)")
+                                if (state.screenMode == ScreenMode.EDITING) {
                                     viewModel.updatePosContent(target)
                                 }
                                 coroutineScope.launch {
@@ -421,7 +468,6 @@ fun CreateTextRoute(
                                 }
                                 pendingTargetPage = null
                             } else {
-                                Log.d("PAGER_DEBUG", "Saliendo de la pantalla vía onBackNav()")
                                 onBackNav()
                             }
                         }
@@ -494,8 +540,7 @@ fun TextEditorContent(
     ElevatedCard(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
-            .imePadding(),
+            .padding(16.dp),
         shape = RoundedCornerShape(42.dp),
         colors = CardDefaults.elevatedCardColors(
             containerColor = cardStepBackground
@@ -531,21 +576,7 @@ fun TextEditorContent(
                 hint = textValue.text.isNotEmpty(),
                 readOnly = guideContext is GuideContext.Browsing,
                 selectedColor = selectedColor,
-                onTextValueChange = { actualText ->
-                    val newAnnotatedString = updateAnnotatedStringWithSpans(
-                        oldAnnotatedString = textValue.annotatedString,
-                        newTextFieldValue = actualText,
-                        selectedColor = selectedColor,
-                        colorInitial = colorInitial
-                    )
-
-                    val response = actualText.copy(
-                        annotatedString = newAnnotatedString,
-                        composition = null
-                    )
-
-                    onChangeTextValue(response)
-                }
+                onTextValueChange = onChangeTextValue
             )
         }
 

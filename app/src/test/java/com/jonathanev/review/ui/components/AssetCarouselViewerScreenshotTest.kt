@@ -95,6 +95,7 @@ class AssetCarouselViewerScreenshotTest(
                             currentPosContent = 0,
                             onAddAssetClick = { },
                             onOpenAssetClick = { _, _ -> },
+                            onEditingAssetClick = { _, _ -> },
                             onDeleteItemClick = { _, _ -> },
                             onCurrentPosContent = {},
                         )
