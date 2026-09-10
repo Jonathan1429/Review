@@ -72,6 +72,8 @@ import com.jonathanev.review.ui.theme.ReviewTheme
 import com.jonathanev.review.ui.theme.cardStepBackground
 import kotlinx.coroutines.launch
 import kotlin.math.abs
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 @DevicePreviews
 @Composable
@@ -343,9 +345,12 @@ fun CreateTextRoute(
                             }
                         }
 
-                        var localTextFieldValue by remember(itemAtPage) {
+                        var localTextFieldValue by rememberSaveable(
+                            itemAtPage,
+                            stateSaver = TextFieldValue.Saver
+                        ) {
                             mutableStateOf(
-                                androidx.compose.ui.text.input.TextFieldValue(
+                                TextFieldValue(
                                     annotatedString = itemAtPage.toAnnotatedString()
                                 )
                             )
