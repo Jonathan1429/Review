@@ -323,10 +323,7 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
     }
 
     fun updatePosContent(currentPos: Int, mode: ScreenMode? = null) {
-        if (isSavingContent) {
-            isSavingContent = false
-            return
-        }
+        if (isSavingContent) return
 
         updateSuccessState { state ->
             state.copy(
@@ -349,41 +346,45 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
         listSpans: List<ColorRangeUi>,
         questionContentMode: QuestionContentMode
     ) {
-        isSavingContent = true
-        val newContent = QuestionContentUi.Text(textWithLabels, listSpans)
-
-        updateSuccessState { state ->
-            val currentPosContent = when (questionContentMode) {
-                QuestionContentMode.CREATING -> (state.posContenidoTexto + 1).coerceAtLeast(0)
-                QuestionContentMode.EDITING -> state.posContenidoTexto.coerceAtLeast(0)
-            }
-
-            val isQuestion = state.qAType == QATypeUI.QUESTION
-            val sourceListUi = if (isQuestion) state.preguntas else state.respuestas
-            val sourceListDomain = sourceListUi.map { it.toDomain() }
-
-            val updatedDomainList = setContentUseCase.invoke(
-                newContent = newContent.toDomain(),
-                sourceList = sourceListDomain,
-                contadorPregunta = state.contadorPregunta,
-                contadorContenido = currentPosContent,
-                isEditingMode = questionContentMode == QuestionContentMode.EDITING,
-                filterType = QuestionContentDomain.Text::class.java
-            )
-
-            val updatedList = updatedDomainList.map { it.toUi() }
-
-            state.copy(
-                preguntas = if (isQuestion) updatedList else state.preguntas,
-                respuestas = if (!isQuestion) updatedList else state.respuestas,
-                posContenidoTexto = currentPosContent
-            )
-        }
-
         viewModelScope.launch {
-            _updateItemTrigger.emit(Unit)
+            try {
+                isSavingContent = true
+                val newContent = QuestionContentUi.Text(textWithLabels, listSpans)
+
+                updateSuccessState { state ->
+                    val currentPosContent = when (questionContentMode) {
+                        QuestionContentMode.CREATING -> (state.posContenidoTexto + 1).coerceAtLeast(0)
+                        QuestionContentMode.EDITING -> state.posContenidoTexto.coerceAtLeast(0)
+                    }
+
+                    val isQuestion = state.qAType == QATypeUI.QUESTION
+                    val sourceListUi = if (isQuestion) state.preguntas else state.respuestas
+                    val sourceListDomain = sourceListUi.map { it.toDomain() }
+
+                    val updatedDomainList = setContentUseCase.invoke(
+                        newContent = newContent.toDomain(),
+                        sourceList = sourceListDomain,
+                        contadorPregunta = state.contadorPregunta,
+                        contadorContenido = currentPosContent,
+                        isEditingMode = questionContentMode == QuestionContentMode.EDITING,
+                        filterType = QuestionContentDomain.Text::class.java
+                    )
+
+                    val updatedList = updatedDomainList.map { it.toUi() }
+
+                    state.copy(
+                        preguntas = if (isQuestion) updatedList else state.preguntas,
+                        respuestas = if (!isQuestion) updatedList else state.respuestas,
+                        posContenidoTexto = currentPosContent
+                    )
+                }
+
+                _updateItemTrigger.emit(Unit)
+                clearTextDraft()
+            } finally {
+                isSavingContent = false
+            }
         }
-        clearTextDraft()
     }
 
     fun addImageContent(uri: String) {
@@ -395,46 +396,50 @@ class SharedFragmentCreateFileViewModel @Inject constructor(
 
     fun confirmSaveImage(
         uri: String,
-        currentPage: Int,
         questionContentMode: QuestionContentMode
     ) {
         viewModelScope.launch {
-            val tempUri = saveTempImageUseCase(uri)
-            isSavingContent = true
-            val newContent = QuestionContentUi.Image(uri = tempUri, nameFile = "")
+            try {
+                isSavingContent = true
+                val tempUri = if (uri.isNotEmpty()) saveTempImageUseCase(uri) else uri
+                val newContent = QuestionContentUi.Image(uri = tempUri, nameFile = "")
 
-            updateSuccessState { state ->
-                val targetPosContent = when (questionContentMode) {
-                    QuestionContentMode.CREATING -> currentPage + 1
-                    QuestionContentMode.EDITING -> currentPage
-                }
+                updateSuccessState { state ->
+                    val targetPosContent = when (questionContentMode) {
+                        QuestionContentMode.CREATING -> (state.posContenidoImagen + 1).coerceAtLeast(0)
+                        QuestionContentMode.EDITING -> state.posContenidoImagen.coerceAtLeast(0)
+                    }
 
-                val isQuestion = state.qAType == QATypeUI.QUESTION
-                val sourceListUi = if (isQuestion) state.preguntas else state.respuestas
-                val currentQuestionUi = sourceListUi.getOrNull(state.contadorPregunta)
+                    val isQuestion = state.qAType == QATypeUI.QUESTION
+                    val sourceListUi = if (isQuestion) state.preguntas else state.respuestas
+                    val currentQuestionUi = sourceListUi.getOrNull(state.contadorPregunta)
 
-                val updatedList: List<QuestionItemUi> = if (currentQuestionUi == null) {
-                    sourceListUi + QuestionItemUi(content = listOf(newContent))
-                } else {
-                    val sourceListDomain = sourceListUi.map { it.toDomain() }
+                    val updatedList: List<QuestionItemUi> = if (currentQuestionUi == null) {
+                        sourceListUi + QuestionItemUi(content = listOf(newContent))
+                    } else {
+                        val sourceListDomain = sourceListUi.map { it.toDomain() }
 
-                    val updatedDomainList = setContentUseCase.invoke(
-                        newContent = newContent.toDomain(),
-                        sourceList = sourceListDomain,
-                        contadorPregunta = state.contadorPregunta,
-                        contadorContenido = targetPosContent,
-                        isEditingMode = questionContentMode == QuestionContentMode.EDITING,
-                        filterType = QuestionContentDomain.Image::class.java
+                        val updatedDomainList = setContentUseCase.invoke(
+                            newContent = newContent.toDomain(),
+                            sourceList = sourceListDomain,
+                            contadorPregunta = state.contadorPregunta,
+                            contadorContenido = targetPosContent,
+                            isEditingMode = questionContentMode == QuestionContentMode.EDITING,
+                            filterType = QuestionContentDomain.Image::class.java
+                        )
+
+                        updatedDomainList.map { it.toUi() }
+                    }
+
+                    state.copy(
+                        preguntas = if (isQuestion) updatedList else state.preguntas,
+                        respuestas = if (!isQuestion) updatedList else state.respuestas,
+                        posContenidoImagen = targetPosContent
                     )
-
-                    updatedDomainList.map { it.toUi() }
                 }
-
-                state.copy(
-                    preguntas = if (isQuestion) updatedList else state.preguntas,
-                    respuestas = if (!isQuestion) updatedList else state.respuestas,
-                    posContenidoImagen = targetPosContent
-                )
+            } finally {
+                // Se libera la bandera ÚNICAMENTE cuando la corrutina finaliza
+                isSavingContent = false
             }
         }
     }
