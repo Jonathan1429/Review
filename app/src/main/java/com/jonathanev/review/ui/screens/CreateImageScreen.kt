@@ -213,17 +213,10 @@ fun CreateImageRoute(
                             )
                         },
                         imageUploaded = {
-                            val targetPage = if (state.screenMode == ScreenMode.CREATING) {
-                                state.posContenidoImagen
-                            } else {
-                                pagerState.currentPage
-                            }
-
                             val operationMode = state.screenMode.toContentMode()
                             if (operationMode != null) {
                                 viewModel.confirmSaveImage(
                                     uri = uriImage,
-                                    currentPage = targetPage,
                                     questionContentMode = operationMode
                                 )
                             }
